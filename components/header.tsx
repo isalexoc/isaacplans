@@ -7,7 +7,7 @@ import { Menu, Phone } from "lucide-react"
 import { motion } from "framer-motion"
 import { useLanguage } from "@/hooks/useLanguage"
 import { translations } from "@/lib/translations"
-import { Globe } from "lucide-react"
+import { LanguageToggle } from "@/components/language-toggle"
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false)
@@ -60,10 +60,7 @@ export function Header() {
               <Phone className="w-4 h-4" />
               <span>{t.header.phone}</span>
             </div>
-            <Button variant="ghost" size="sm" onClick={toggleLanguage} className="flex items-center space-x-1">
-              <Globe className="w-4 h-4" />
-              <span className="text-sm font-medium">{language === "es" ? "EN" : "ES"}</span>
-            </Button>
+            <LanguageToggle />
             <Button className="bg-green-600 hover:bg-green-700">{t.header.cta}</Button>
           </div>
 
@@ -92,10 +89,7 @@ export function Header() {
                       <Phone className="w-4 h-4" />
                       <span>{t.header.phone}</span>
                     </div>
-                    <Button variant="ghost" size="sm" onClick={toggleLanguage} className="flex items-center space-x-1">
-                      <Globe className="w-4 h-4" />
-                      <span className="text-sm font-medium">{language === "es" ? "EN" : "ES"}</span>
-                    </Button>
+                    <LanguageToggle />
                   </div>
                   <Button className="w-full bg-green-600 hover:bg-green-700">{t.header.cta}</Button>
                 </div>
