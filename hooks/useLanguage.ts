@@ -13,12 +13,16 @@ interface LanguageContextType {
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined)
 
-export function LanguageProvider({ children }: { children: React.ReactNode }) {
+interface LanguageProviderProps {
+  children: React.ReactNode
+}
+
+export function LanguageProvider({ children }: LanguageProviderProps) {
   const [language, setLanguage] = useState<Language>("es")
 
   useEffect(() => {
-    const savedLanguage = localStorage.getItem("language")
-    if (savedLanguage === "es" || savedLanguage === "en") {
+    const savedLanguage = localStorage.getItem("language") as Language
+    if (savedLanguage && (savedLanguage === "es" || savedLanguage === "en")) {
       setLanguage(savedLanguage)
     }
   }, [])
@@ -29,9 +33,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem("language", newLanguage)
   }
 
-  const value = { language, toggleLanguage }
-
-  return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>
+  return <LanguageContext.Provider value={{ language, toggleLanguage }}>{children}</LanguageContext.Provider>
 }
 
 export function useLanguage() {
