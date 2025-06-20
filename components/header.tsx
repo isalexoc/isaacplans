@@ -5,16 +5,21 @@ import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Menu, Phone } from "lucide-react"
 import { motion } from "framer-motion"
+import { useLanguage } from "@/hooks/useLanguage"
+import { translations } from "@/lib/translations"
+import { Globe } from "lucide-react"
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false)
+  const { language, toggleLanguage } = useLanguage()
+  const t = translations[language]
 
   const navItems = [
-    { name: "Home", href: "#home" },
-    { name: "Services", href: "#services" },
-    { name: "About", href: "#about" },
-    { name: "Coverage Areas", href: "#states" },
-    { name: "Contact", href: "#contact" },
+    { name: t.nav.home, href: "#home" },
+    { name: t.nav.services, href: "#services" },
+    { name: t.nav.about, href: "#about" },
+    { name: t.nav.coverage, href: "#coverage" },
+    { name: t.nav.contact, href: "#contact" },
   ]
 
   return (
@@ -27,10 +32,13 @@ export function Header() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">IA</span>
+            <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-lg">D</span>
             </div>
-            <span className="font-bold text-xl text-gray-900">InsureAdvantage</span>
+            <div className="flex flex-col">
+              <span className="font-bold text-xl text-gray-900">Dorraiz</span>
+              <span className="text-xs text-green-600 font-medium">INSURANCE</span>
+            </div>
           </div>
 
           {/* Desktop Navigation */}
@@ -39,20 +47,24 @@ export function Header() {
               <a
                 key={item.name}
                 href={item.href}
-                className="text-gray-600 hover:text-blue-600 transition-colors font-medium"
+                className="text-gray-600 hover:text-green-600 transition-colors font-medium"
               >
                 {item.name}
               </a>
             ))}
           </nav>
 
-          {/* Contact Info & CTA */}
+          {/* Contact Info, Language Toggle & CTA */}
           <div className="hidden lg:flex items-center space-x-4">
             <div className="flex items-center space-x-2 text-sm text-gray-600">
               <Phone className="w-4 h-4" />
-              <span>(555) 123-4567</span>
+              <span>{t.header.phone}</span>
             </div>
-            <Button className="bg-blue-600 hover:bg-blue-700">Get Free Quote</Button>
+            <Button variant="ghost" size="sm" onClick={toggleLanguage} className="flex items-center space-x-1">
+              <Globe className="w-4 h-4" />
+              <span className="text-sm font-medium">{language === "es" ? "EN" : "ES"}</span>
+            </Button>
+            <Button className="bg-green-600 hover:bg-green-700">{t.header.cta}</Button>
           </div>
 
           {/* Mobile Menu */}
@@ -68,18 +80,24 @@ export function Header() {
                   <a
                     key={item.name}
                     href={item.href}
-                    className="text-gray-600 hover:text-blue-600 transition-colors font-medium py-2"
+                    className="text-gray-600 hover:text-green-600 transition-colors font-medium py-2"
                     onClick={() => setIsOpen(false)}
                   >
                     {item.name}
                   </a>
                 ))}
                 <div className="pt-4 border-t">
-                  <div className="flex items-center space-x-2 text-sm text-gray-600 mb-4">
-                    <Phone className="w-4 h-4" />
-                    <span>(555) 123-4567</span>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center space-x-2 text-sm text-gray-600">
+                      <Phone className="w-4 h-4" />
+                      <span>{t.header.phone}</span>
+                    </div>
+                    <Button variant="ghost" size="sm" onClick={toggleLanguage} className="flex items-center space-x-1">
+                      <Globe className="w-4 h-4" />
+                      <span className="text-sm font-medium">{language === "es" ? "EN" : "ES"}</span>
+                    </Button>
                   </div>
-                  <Button className="w-full bg-blue-600 hover:bg-blue-700">Get Free Quote</Button>
+                  <Button className="w-full bg-green-600 hover:bg-green-700">{t.header.cta}</Button>
                 </div>
               </nav>
             </SheetContent>

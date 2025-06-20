@@ -3,7 +3,7 @@
 import { Hero } from "@/components/hero"
 import { Services } from "@/components/services"
 import { About } from "@/components/about"
-import { States } from "@/components/states"
+import { Coverage } from "@/components/states"
 import { Contact } from "@/components/contact"
 import { Footer } from "@/components/footer"
 import { Header } from "@/components/header"
@@ -15,7 +15,7 @@ export default function HomePage() {
       <Hero />
       <Services />
       <About />
-      <States />
+      <Coverage />
       <Contact />
       <Footer />
     </main>

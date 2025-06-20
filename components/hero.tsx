@@ -5,10 +5,15 @@ import { Card } from "@/components/ui/card"
 import { Shield, Users, Award } from "lucide-react"
 import { motion } from "framer-motion"
 import Image from "next/image"
+import { useLanguage } from "@/hooks/useLanguage"
+import { translations } from "@/lib/translations"
 
 export function Hero() {
+  const { language } = useLanguage()
+  const t = translations[language]
+
   return (
-    <section id="home" className="pt-16 bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen flex items-center">
+    <section id="home" className="pt-16 bg-gradient-to-br from-green-50 to-emerald-100 min-h-screen flex items-center">
       <div className="container mx-auto px-4">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Left Content */}
@@ -23,45 +28,46 @@ export function Hero() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="inline-flex items-center space-x-2 bg-blue-100 text-blue-800 px-4 py-2 rounded-full text-sm font-medium"
+                className="inline-flex items-center space-x-2 bg-green-100 text-green-800 px-4 py-2 rounded-full text-sm font-medium"
               >
                 <Award className="w-4 h-4" />
-                <span>Certified in 35+ States</span>
+                <span>{t.hero.badge}</span>
               </motion.div>
 
               <h1 className="text-4xl lg:text-6xl font-bold text-gray-900 leading-tight">
-                Your Trusted
-                <span className="text-blue-600 block">Insurance Partner</span>
+                {t.hero.title}
+                <span className="text-green-600 block">{t.hero.subtitle}</span>
               </h1>
 
-              <p className="text-xl text-gray-600 leading-relaxed">
-                Specializing in ACA and Medicare insurance solutions. Get personalized coverage that fits your needs and
-                budget with expert guidance every step of the way.
-              </p>
+              <p className="text-xl text-gray-600 leading-relaxed">{t.hero.description}</p>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-lg px-8 py-3">
-                Get Free Quote
+              <Button size="lg" className="bg-green-600 hover:bg-green-700 text-lg px-8 py-3">
+                {t.hero.cta1}
               </Button>
-              <Button size="lg" variant="outline" className="text-lg px-8 py-3">
-                Schedule Consultation
+              <Button
+                size="lg"
+                variant="outline"
+                className="text-lg px-8 py-3 border-green-600 text-green-600 hover:bg-green-50"
+              >
+                {t.hero.cta2}
               </Button>
             </div>
 
             {/* Trust Indicators */}
             <div className="grid grid-cols-3 gap-6 pt-8 border-t border-gray-200">
               <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600">35+</div>
-                <div className="text-sm text-gray-600">States Certified</div>
+                <div className="text-2xl font-bold text-green-600">20+</div>
+                <div className="text-sm text-gray-600">{t.hero.stats.states}</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600">1000+</div>
-                <div className="text-sm text-gray-600">Clients Served</div>
+                <div className="text-2xl font-bold text-green-600">1000+</div>
+                <div className="text-sm text-gray-600">{t.hero.stats.clients}</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600">98%</div>
-                <div className="text-sm text-gray-600">Satisfaction Rate</div>
+                <div className="text-2xl font-bold text-green-600">98%</div>
+                <div className="text-sm text-gray-600">{t.hero.stats.satisfaction}</div>
               </div>
             </div>
           </motion.div>
@@ -75,8 +81,8 @@ export function Hero() {
           >
             <div className="relative">
               <Image
-                src="/placeholder.svg?height=600&width=500"
-                alt="Professional Insurance Agent"
+                src="/images/daniel-orraiz.jfif"
+                alt="Daniel Orraiz - Agente de Seguros Profesional"
                 width={500}
                 height={600}
                 className="rounded-2xl shadow-2xl"
@@ -93,8 +99,8 @@ export function Hero() {
                   <div className="flex items-center space-x-3">
                     <Shield className="w-8 h-8 text-green-600" />
                     <div>
-                      <div className="font-semibold text-sm">ACA Certified</div>
-                      <div className="text-xs text-gray-600">Expert Coverage</div>
+                      <div className="font-semibold text-sm">ACA Certificado</div>
+                      <div className="text-xs text-gray-600">Cobertura Experta</div>
                     </div>
                   </div>
                 </Card>
@@ -108,10 +114,10 @@ export function Hero() {
               >
                 <Card className="p-4 bg-white shadow-lg">
                   <div className="flex items-center space-x-3">
-                    <Users className="w-8 h-8 text-blue-600" />
+                    <Users className="w-8 h-8 text-green-600" />
                     <div>
-                      <div className="font-semibold text-sm">Medicare Specialist</div>
-                      <div className="text-xs text-gray-600">All Plans Available</div>
+                      <div className="font-semibold text-sm">Especialista Medicare</div>
+                      <div className="text-xs text-gray-600">Todos los Planes</div>
                     </div>
                   </div>
                 </Card>

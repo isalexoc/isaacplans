@@ -3,28 +3,32 @@
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { Phone, Mail, MapPin, Facebook, Twitter, Linkedin } from "lucide-react"
+import { useLanguage } from "@/hooks/useLanguage"
+import { translations } from "@/lib/translations"
 
 export function Footer() {
+  const { language } = useLanguage()
+  const t = translations[language]
   const currentYear = new Date().getFullYear()
 
   const footerLinks = {
     services: [
-      { name: "ACA Health Insurance", href: "#services" },
-      { name: "Medicare Plans", href: "#services" },
-      { name: "Family Coverage", href: "#services" },
-      { name: "Plan Comparison", href: "#services" },
+      { name: t.services.items.aca.title, href: "#services" },
+      { name: t.services.items.medicare.title, href: "#services" },
+      { name: t.services.items.family.title, href: "#services" },
+      { name: t.services.items.comparison.title, href: "#services" },
     ],
     resources: [
-      { name: "Insurance Guide", href: "#" },
-      { name: "FAQ", href: "#" },
-      { name: "Blog", href: "#" },
-      { name: "State Regulations", href: "#" },
+      { name: t.footer.links.guide, href: "#" },
+      { name: t.footer.links.faq, href: "#" },
+      { name: t.footer.links.blog, href: "#" },
+      { name: t.footer.links.regulations, href: "#" },
     ],
     company: [
-      { name: "About", href: "#about" },
-      { name: "Coverage Areas", href: "#states" },
-      { name: "Contact", href: "#contact" },
-      { name: "Privacy Policy", href: "#" },
+      { name: t.nav.about, href: "#about" },
+      { name: t.nav.coverage, href: "#coverage" },
+      { name: t.nav.contact, href: "#contact" },
+      { name: t.footer.links.privacy, href: "#" },
     ],
   }
 
@@ -35,34 +39,34 @@ export function Footer() {
           {/* Company Info */}
           <div className="space-y-6">
             <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">IA</span>
+              <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-lg">D</span>
               </div>
-              <span className="font-bold text-xl">InsureAdvantage</span>
+              <div className="flex flex-col">
+                <span className="font-bold text-xl">Dorraiz</span>
+                <span className="text-xs text-green-400 font-medium">INSURANCE</span>
+              </div>
             </div>
-            <p className="text-gray-400 leading-relaxed">
-              Your trusted insurance partner specializing in ACA and Medicare coverage across 35+ states. Professional,
-              personalized service you can count on.
-            </p>
+            <p className="text-gray-400 leading-relaxed">{t.footer.description}</p>
             <div className="space-y-3">
               <div className="flex items-center space-x-3 text-sm">
-                <Phone className="w-4 h-4 text-blue-400" />
-                <span>(555) 123-4567</span>
+                <Phone className="w-4 h-4 text-green-400" />
+                <span>(956) 302-1451 / (407) 785-9073</span>
               </div>
               <div className="flex items-center space-x-3 text-sm">
-                <Mail className="w-4 h-4 text-blue-400" />
-                <span>info@insureadvantage.com</span>
+                <Mail className="w-4 h-4 text-green-400" />
+                <span>dorraizinsurance@gmail.com</span>
               </div>
               <div className="flex items-center space-x-3 text-sm">
-                <MapPin className="w-4 h-4 text-blue-400" />
-                <span>Licensed in 35+ States</span>
+                <MapPin className="w-4 h-4 text-green-400" />
+                <span>{language === "es" ? "Licenciado en 20+ Estados" : "Licensed in 20+ States"}</span>
               </div>
             </div>
           </div>
 
           {/* Services */}
           <div>
-            <h3 className="font-semibold text-lg mb-6">Services</h3>
+            <h3 className="font-semibold text-lg mb-6">{t.footer.services}</h3>
             <ul className="space-y-3">
               {footerLinks.services.map((link) => (
                 <li key={link.name}>
@@ -76,7 +80,7 @@ export function Footer() {
 
           {/* Resources */}
           <div>
-            <h3 className="font-semibold text-lg mb-6">Resources</h3>
+            <h3 className="font-semibold text-lg mb-6">{t.footer.resources}</h3>
             <ul className="space-y-3">
               {footerLinks.resources.map((link) => (
                 <li key={link.name}>
@@ -90,7 +94,7 @@ export function Footer() {
 
           {/* Company */}
           <div>
-            <h3 className="font-semibold text-lg mb-6">Company</h3>
+            <h3 className="font-semibold text-lg mb-6">{t.footer.company}</h3>
             <ul className="space-y-3 mb-6">
               {footerLinks.company.map((link) => (
                 <li key={link.name}>
@@ -103,7 +107,7 @@ export function Footer() {
 
             {/* Social Links */}
             <div>
-              <h4 className="font-medium mb-3">Follow Us</h4>
+              <h4 className="font-medium mb-3">{t.footer.follow}</h4>
               <div className="flex space-x-3">
                 <Button size="icon" variant="ghost" className="text-gray-400 hover:text-white">
                   <Facebook className="w-4 h-4" />
@@ -122,16 +126,18 @@ export function Footer() {
         <Separator className="my-8 bg-gray-800" />
 
         <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-          <div className="text-sm text-gray-400">© {currentYear} InsureAdvantage. All rights reserved.</div>
+          <div className="text-sm text-gray-400">
+            © {currentYear} Dorraiz Insurance. {t.footer.rights}
+          </div>
           <div className="flex space-x-6 text-sm text-gray-400">
             <a href="#" className="hover:text-white transition-colors">
-              Terms of Service
+              {t.footer.links.terms}
             </a>
             <a href="#" className="hover:text-white transition-colors">
-              Privacy Policy
+              {t.footer.links.privacy}
             </a>
             <a href="#" className="hover:text-white transition-colors">
-              Disclaimer
+              {t.footer.links.disclaimer}
             </a>
           </div>
         </div>
