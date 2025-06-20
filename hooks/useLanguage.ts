@@ -28,12 +28,17 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem("language", newLanguage)
   }
 
+  const Provider = LanguageContext.Provider
   const contextData = {
     language: language,
     toggleLanguage: toggleLanguage,
   }
 
-  return <LanguageContext.Provider {...{ value: contextData }}>{children}</LanguageContext.Provider>
+  return (
+    <Provider value={contextData}>
+      {children}
+    </Provider>
+  )
 }
 
 export function useLanguage() {
