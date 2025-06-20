@@ -27,7 +27,8 @@ export function Footer() {
       { name: t.nav.about, href: "#about" },
       { name: t.nav.coverage, href: "#coverage" },
       { name: t.nav.contact, href: "#contact" },
-      { name: t.footer.links.privacy, href: "#" },
+      { name: t.footer.links.privacy, href: "/privacy-policy" },
+      { name: t.footer.links.terms, href: "/terms-of-service" },
     ],
   }
 
@@ -136,10 +137,10 @@ export function Footer() {
             © {currentYear} Dorraiz Insurance. {t.footer.rights}
           </div>
           <div className="flex flex-wrap justify-center sm:justify-end space-x-4 lg:space-x-6 text-sm text-gray-400">
-            <a href="#" className="hover:text-white transition-colors">
+            <a href="/terms-of-service" className="hover:text-white transition-colors">
               {t.footer.links.terms}
             </a>
-            <a href="#" className="hover:text-white transition-colors">
+            <a href="/privacy-policy" className="hover:text-white transition-colors">
               {t.footer.links.privacy}
             </a>
             <a href="#" className="hover:text-white transition-colors">
