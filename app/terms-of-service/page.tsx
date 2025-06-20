@@ -3,6 +3,8 @@
 import { useLanguage } from "@/hooks/useLanguage"
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
+import Link from "next/link"
+import { ArrowLeft } from "lucide-react"
 
 export default function TermsOfServicePage() {
   const { language } = useLanguage()
@@ -11,6 +13,7 @@ export default function TermsOfServicePage() {
     es: {
       title: "Términos y Condiciones",
       lastUpdated: "Última actualización: 20 de junio de 2025",
+      backToHome: "Volver al Inicio",
       sections: {
         introduction: {
           title: "1. Introducción y Aceptación",
@@ -109,6 +112,7 @@ export default function TermsOfServicePage() {
     en: {
       title: "Terms and Conditions",
       lastUpdated: "Last updated: June 20, 2025",
+      backToHome: "Back to Home",
       sections: {
         introduction: {
           title: "1. Introduction and Acceptance",
@@ -213,6 +217,14 @@ export default function TermsOfServicePage() {
       <Header />
       <main className="pt-24 pb-16">
         <div className="container mx-auto px-4 max-w-4xl">
+          {/* Back to Home Link */}
+          <div className="mb-6">
+            <Link href="/" className="inline-flex items-center text-blue-600 hover:text-blue-700 transition-colors">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              {t.backToHome}
+            </Link>
+          </div>
+
           <div className="mb-8">
             <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">{t.title}</h1>
             <p className="text-gray-600">{t.lastUpdated}</p>
