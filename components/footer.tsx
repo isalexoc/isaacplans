@@ -1,8 +1,6 @@
 "use client"
-
-import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
-import { Phone, Mail, MapPin, Facebook, Twitter, Linkedin } from "lucide-react"
+import { Phone, Mail, MapPin, Facebook, Instagram } from "lucide-react"
 import { useLanguage } from "@/hooks/useLanguage"
 import { translations } from "@/lib/translations"
 
@@ -109,15 +107,22 @@ export function Footer() {
             <div>
               <h4 className="font-medium mb-3">{t.footer.follow}</h4>
               <div className="flex space-x-3">
-                <Button size="icon" variant="ghost" className="text-gray-400 hover:text-white">
+                <a
+                  href="https://www.facebook.com/profile.php?id=100090015145006"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-10 h-10 bg-transparent border border-gray-600 hover:border-white rounded-md flex items-center justify-center text-gray-400 hover:text-white transition-colors"
+                >
                   <Facebook className="w-4 h-4" />
-                </Button>
-                <Button size="icon" variant="ghost" className="text-gray-400 hover:text-white">
-                  <Twitter className="w-4 h-4" />
-                </Button>
-                <Button size="icon" variant="ghost" className="text-gray-400 hover:text-white">
-                  <Linkedin className="w-4 h-4" />
-                </Button>
+                </a>
+                <a
+                  href="https://www.instagram.com/dorraiz.insurance"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-10 h-10 bg-transparent border border-gray-600 hover:border-white rounded-md flex items-center justify-center text-gray-400 hover:text-white transition-colors"
+                >
+                  <Instagram className="w-4 h-4" />
+                </a>
               </div>
             </div>
           </div>

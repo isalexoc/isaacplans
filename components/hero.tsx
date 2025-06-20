@@ -60,11 +60,11 @@ export function Hero() {
                 <div className="text-sm text-gray-600">{t.hero.stats.states}</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-green-600">1000+</div>
+                <div className="text-2xl font-bold text-green-600">3000+</div>
                 <div className="text-sm text-gray-600">{t.hero.stats.clients}</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-green-600">98%</div>
+                <div className="text-2xl font-bold text-green-600">100%</div>
                 <div className="text-sm text-gray-600">{t.hero.stats.satisfaction}</div>
               </div>
             </div>

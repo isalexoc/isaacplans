@@ -106,7 +106,7 @@ export const translations = {
           description: "Licenciado para servir clientes en múltiples estados de EE.UU.",
         },
         clients: {
-          title: "1000+ Clientes Satisfechos",
+          title: "3000+ Clientes Satisfechos",
           description: "Ayudando a individuos y familias a encontrar la cobertura correcta",
         },
         experience: {
@@ -295,7 +295,7 @@ export const translations = {
           description: "Licensed to serve clients across multiple US states",
         },
         clients: {
-          title: "1000+ Satisfied Clients",
+          title: "3000+ Satisfied Clients",
           description: "Helping individuals and families find the right coverage",
         },
         experience: {
