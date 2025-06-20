@@ -57,19 +57,19 @@ export function Services() {
   ]
 
   return (
-    <section id="services" className="py-20 bg-white">
+    <section id="services" className="py-16 lg:py-20 bg-white">
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center mb-16"
+          className="text-center mb-12 lg:mb-16"
         >
-          <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">{t.services.title}</h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">{t.services.subtitle}</p>
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4">{t.services.title}</h2>
+          <p className="text-lg lg:text-xl text-gray-600 max-w-3xl mx-auto">{t.services.subtitle}</p>
         </motion.div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
           {services.map((service, index) => (
             <motion.div
               key={service.title}
@@ -79,23 +79,28 @@ export function Services() {
               transition={{ delay: index * 0.1 }}
             >
               <Card className="h-full hover:shadow-lg transition-shadow duration-300">
-                <CardHeader>
-                  <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
-                    <service.icon className="w-6 h-6 text-green-600" />
+                <CardHeader className="pb-4">
+                  <div className="w-10 h-10 lg:w-12 lg:h-12 bg-green-100 rounded-lg flex items-center justify-center mb-3 lg:mb-4">
+                    <service.icon className="w-5 h-5 lg:w-6 lg:h-6 text-green-600" />
                   </div>
-                  <CardTitle className="text-xl">{service.title}</CardTitle>
-                  <CardDescription className="text-gray-600">{service.description}</CardDescription>
+                  <CardTitle className="text-lg lg:text-xl">{service.title}</CardTitle>
+                  <CardDescription className="text-gray-600 text-sm lg:text-base">
+                    {service.description}
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <ul className="space-y-2 mb-6">
+                  <ul className="space-y-2 mb-4 lg:mb-6">
                     {service.features.map((feature) => (
                       <li key={feature} className="flex items-center text-sm text-gray-600">
-                        <div className="w-1.5 h-1.5 bg-green-600 rounded-full mr-3" />
+                        <div className="w-1.5 h-1.5 bg-green-600 rounded-full mr-3 flex-shrink-0" />
                         {feature}
                       </li>
                     ))}
                   </ul>
-                  <Button variant="outline" className="w-full border-green-600 text-green-600 hover:bg-green-50">
+                  <Button
+                    variant="outline"
+                    className="w-full border-green-600 text-green-600 hover:bg-green-50 text-sm lg:text-base"
+                  >
                     {language === "es" ? "Saber Más" : "Learn More"}
                   </Button>
                 </CardContent>

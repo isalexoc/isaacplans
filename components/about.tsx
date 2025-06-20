@@ -36,28 +36,28 @@ export function About() {
   ]
 
   return (
-    <section id="about" className="py-20 bg-gray-50">
+    <section id="about" className="py-16 lg:py-20 bg-gray-50">
       <div className="container mx-auto px-4">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
-          {/* Left Content */}
+        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+          {/* Text Content - First on mobile, First on desktop */}
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            className="space-y-8"
+            className="space-y-6 lg:space-y-8 order-1"
           >
             <div>
-              <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-6">{t.about.title}</h2>
-              <p className="text-lg text-gray-600 leading-relaxed mb-6">{t.about.description1}</p>
-              <p className="text-lg text-gray-600 leading-relaxed">{t.about.description2}</p>
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4 lg:mb-6">{t.about.title}</h2>
+              <p className="text-base lg:text-lg text-gray-600 leading-relaxed mb-4 lg:mb-6">{t.about.description1}</p>
+              <p className="text-base lg:text-lg text-gray-600 leading-relaxed">{t.about.description2}</p>
             </div>
 
             {/* Certifications */}
             <div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">{t.about.certifications}</h3>
+              <h3 className="text-lg lg:text-xl font-semibold text-gray-900 mb-3 lg:mb-4">{t.about.certifications}</h3>
               <div className="flex flex-wrap gap-2">
                 {t.about.certs.map((cert) => (
-                  <Badge key={cert} variant="secondary" className="text-sm bg-green-100 text-green-800">
+                  <Badge key={cert} variant="secondary" className="text-xs lg:text-sm bg-green-100 text-green-800">
                     {cert}
                   </Badge>
                 ))}
@@ -65,24 +65,24 @@ export function About() {
             </div>
           </motion.div>
 
-          {/* Right Content */}
+          {/* Image Content - Second on mobile, Second on desktop */}
           <motion.div
             initial={{ opacity: 0, x: 50 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            className="space-y-6"
+            className="space-y-6 order-2"
           >
-            <div className="relative mb-8">
+            <div className="relative mb-6 lg:mb-8">
               <Image
                 src="/images/daniel-orraiz.jfif"
                 alt="Daniel Orraiz - Profesional de Seguros"
                 width={400}
                 height={400}
-                className="rounded-2xl shadow-lg mx-auto"
+                className="rounded-2xl shadow-lg mx-auto w-full max-w-sm lg:max-w-none h-auto"
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-3 lg:gap-4">
               {achievements.map((achievement, index) => (
                 <motion.div
                   key={achievement.title}
@@ -91,10 +91,10 @@ export function About() {
                   viewport={{ once: true }}
                   transition={{ delay: index * 0.1 }}
                 >
-                  <Card className="p-4 text-center hover:shadow-md transition-shadow">
+                  <Card className="p-3 lg:p-4 text-center hover:shadow-md transition-shadow">
                     <CardContent className="p-0">
-                      <achievement.icon className="w-8 h-8 text-green-600 mx-auto mb-3" />
-                      <h4 className="font-semibold text-sm mb-2">{achievement.title}</h4>
+                      <achievement.icon className="w-6 h-6 lg:w-8 lg:h-8 text-green-600 mx-auto mb-2 lg:mb-3" />
+                      <h4 className="font-semibold text-xs lg:text-sm mb-1 lg:mb-2">{achievement.title}</h4>
                       <p className="text-xs text-gray-600">{achievement.description}</p>
                     </CardContent>
                   </Card>

@@ -1,4 +1,5 @@
 "use client"
+
 import { Separator } from "@/components/ui/separator"
 import { Phone, Mail, MapPin, Facebook, Instagram } from "lucide-react"
 import { useLanguage } from "@/hooks/useLanguage"
@@ -32,10 +33,10 @@ export function Footer() {
 
   return (
     <footer className="bg-gray-900 text-white">
-      <div className="container mx-auto px-4 py-16">
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+      <div className="container mx-auto px-4 py-12 lg:py-16">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Company Info */}
-          <div className="space-y-6">
+          <div className="space-y-4 lg:space-y-6 sm:col-span-2 lg:col-span-1">
             <div className="flex items-center space-x-2">
               <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-lg">D</span>
@@ -45,18 +46,18 @@ export function Footer() {
                 <span className="text-xs text-green-400 font-medium">INSURANCE</span>
               </div>
             </div>
-            <p className="text-gray-400 leading-relaxed">{t.footer.description}</p>
+            <p className="text-gray-400 leading-relaxed text-sm lg:text-base">{t.footer.description}</p>
             <div className="space-y-3">
               <div className="flex items-center space-x-3 text-sm">
-                <Phone className="w-4 h-4 text-green-400" />
-                <span>(956) 302-1451 / (407) 785-9073</span>
+                <Phone className="w-4 h-4 text-green-400 flex-shrink-0" />
+                <span className="break-words">(956) 302-1451 / (407) 785-9073</span>
               </div>
               <div className="flex items-center space-x-3 text-sm">
-                <Mail className="w-4 h-4 text-green-400" />
-                <span>dorraizinsurance@gmail.com</span>
+                <Mail className="w-4 h-4 text-green-400 flex-shrink-0" />
+                <span className="break-words">dorraizinsurance@gmail.com</span>
               </div>
               <div className="flex items-center space-x-3 text-sm">
-                <MapPin className="w-4 h-4 text-green-400" />
+                <MapPin className="w-4 h-4 text-green-400 flex-shrink-0" />
                 <span>{language === "es" ? "Licenciado en 20+ Estados" : "Licensed in 20+ States"}</span>
               </div>
             </div>
@@ -64,8 +65,8 @@ export function Footer() {
 
           {/* Services */}
           <div>
-            <h3 className="font-semibold text-lg mb-6">{t.footer.services}</h3>
-            <ul className="space-y-3">
+            <h3 className="font-semibold text-lg mb-4 lg:mb-6">{t.footer.services}</h3>
+            <ul className="space-y-2 lg:space-y-3">
               {footerLinks.services.map((link) => (
                 <li key={link.name}>
                   <a href={link.href} className="text-gray-400 hover:text-white transition-colors text-sm">
@@ -78,8 +79,8 @@ export function Footer() {
 
           {/* Resources */}
           <div>
-            <h3 className="font-semibold text-lg mb-6">{t.footer.resources}</h3>
-            <ul className="space-y-3">
+            <h3 className="font-semibold text-lg mb-4 lg:mb-6">{t.footer.resources}</h3>
+            <ul className="space-y-2 lg:space-y-3">
               {footerLinks.resources.map((link) => (
                 <li key={link.name}>
                   <a href={link.href} className="text-gray-400 hover:text-white transition-colors text-sm">
@@ -92,8 +93,8 @@ export function Footer() {
 
           {/* Company */}
           <div>
-            <h3 className="font-semibold text-lg mb-6">{t.footer.company}</h3>
-            <ul className="space-y-3 mb-6">
+            <h3 className="font-semibold text-lg mb-4 lg:mb-6">{t.footer.company}</h3>
+            <ul className="space-y-2 lg:space-y-3 mb-6">
               {footerLinks.company.map((link) => (
                 <li key={link.name}>
                   <a href={link.href} className="text-gray-400 hover:text-white transition-colors text-sm">
@@ -128,13 +129,13 @@ export function Footer() {
           </div>
         </div>
 
-        <Separator className="my-8 bg-gray-800" />
+        <Separator className="my-6 lg:my-8 bg-gray-800" />
 
-        <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-          <div className="text-sm text-gray-400">
+        <div className="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
+          <div className="text-sm text-gray-400 text-center sm:text-left">
             © {currentYear} Dorraiz Insurance. {t.footer.rights}
           </div>
-          <div className="flex space-x-6 text-sm text-gray-400">
+          <div className="flex flex-wrap justify-center sm:justify-end space-x-4 lg:space-x-6 text-sm text-gray-400">
             <a href="#" className="hover:text-white transition-colors">
               {t.footer.links.terms}
             </a>

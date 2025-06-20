@@ -15,6 +15,7 @@ export const translations = {
     // Hero
     hero: {
       badge: "Licenciado en 20+ Estados",
+      name: "Daniel Orraiz",
       title: "Su Agente de Seguros",
       subtitle: "de Confianza",
       description:
@@ -217,6 +218,7 @@ export const translations = {
     // Hero
     hero: {
       badge: "Licensed in 20+ States",
+      name: "Daniel Orraiz",
       title: "Your Trusted",
       subtitle: "Insurance Agent",
       description:
