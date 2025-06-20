@@ -279,7 +279,7 @@ export const translations = {
       description1:
         "With over 8 years of experience in the health insurance industry, I specialize in helping individuals and families navigate the complex world of insurance. I am licensed in ACA (Health, Obama Care), Medicare, Life, Dental, and Vision insurance across 20+ states.",
       description2:
-        "Being licensed in more than 35 states allows me to serve clients nationwide, ensuring you receive expert guidance regardless of your location. I stay current with all regulatory changes and new plan offerings to provide you with the most up-to-date information and options.",
+        "Being licensed in multiple states allows me to serve clients nationwide, ensuring you receive expert guidance regardless of your location. I stay current with all regulatory changes and new plan offerings to provide you with the most up-to-date information and options.",
       certifications: "Certifications & Credentials",
       certs: [
         "Licensed Insurance Agent",
