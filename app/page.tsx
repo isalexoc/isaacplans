@@ -7,7 +7,6 @@ import { Coverage } from "@/components/states"
 import { Contact } from "@/components/contact"
 import { Footer } from "@/components/footer"
 import { Header } from "@/components/header"
-import { DebugLanguage } from "@/components/debug-language"
 
 export default function HomePage() {
   return (
@@ -19,7 +18,6 @@ export default function HomePage() {
       <Coverage />
       <Contact />
       <Footer />
-      <DebugLanguage />
     </main>
   )
 }

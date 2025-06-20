@@ -1,8 +1,8 @@
 "use client"
 
-import { useState } from "react"
-import type { FormEvent } from "react"
+import type React from "react"
 
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -26,9 +26,8 @@ export function Contact() {
     message: "",
   })
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    // Handle form submission here
     console.log("Form submitted:", formData)
   }
 
@@ -73,7 +72,6 @@ export function Contact() {
         </motion.div>
 
         <div className="grid lg:grid-cols-2 gap-12">
-          {/* Contact Form */}
           <motion.div initial={{ opacity: 0, x: -50 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}>
             <Card className="shadow-lg">
               <CardHeader>
@@ -152,7 +150,6 @@ export function Contact() {
             </Card>
           </motion.div>
 
-          {/* Contact Information */}
           <motion.div
             initial={{ opacity: 0, x: 50 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -189,7 +186,6 @@ export function Contact() {
               ))}
             </div>
 
-            {/* Call to Action */}
             <Card className="bg-green-600 text-white p-6">
               <CardContent className="p-0">
                 <h4 className="text-xl font-bold mb-2">{t.contact.info.cta.title}</h4>

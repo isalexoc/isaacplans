@@ -16,7 +16,6 @@ export function Hero() {
     <section id="home" className="pt-16 bg-gradient-to-br from-green-50 to-emerald-100 min-h-screen flex items-center">
       <div className="container mx-auto px-4">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
-          {/* Left Content */}
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
@@ -55,7 +54,6 @@ export function Hero() {
               </Button>
             </div>
 
-            {/* Trust Indicators */}
             <div className="grid grid-cols-3 gap-6 pt-8 border-t border-gray-200">
               <div className="text-center">
                 <div className="text-2xl font-bold text-green-600">20+</div>
@@ -72,7 +70,6 @@ export function Hero() {
             </div>
           </motion.div>
 
-          {/* Right Content */}
           <motion.div
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
@@ -88,7 +85,6 @@ export function Hero() {
                 className="rounded-2xl shadow-2xl"
               />
 
-              {/* Floating Cards */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}

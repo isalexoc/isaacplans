@@ -11,7 +11,7 @@ import { LanguageToggle } from "@/components/language-toggle"
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false)
-  const { language, toggleLanguage } = useLanguage()
+  const { language } = useLanguage()
   const t = translations[language]
 
   const navItems = [
@@ -30,7 +30,6 @@ export function Header() {
     >
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          {/* Logo */}
           <div className="flex items-center space-x-2">
             <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-lg">D</span>
@@ -41,7 +40,6 @@ export function Header() {
             </div>
           </div>
 
-          {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
             {navItems.map((item) => (
               <a
@@ -54,7 +52,6 @@ export function Header() {
             ))}
           </nav>
 
-          {/* Contact Info, Language Toggle & CTA */}
           <div className="hidden lg:flex items-center space-x-4">
             <div className="flex items-center space-x-2 text-sm text-gray-600">
               <Phone className="w-4 h-4" />
@@ -64,7 +61,6 @@ export function Header() {
             <Button className="bg-green-600 hover:bg-green-700">{t.header.cta}</Button>
           </div>
 
-          {/* Mobile Menu */}
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
             <SheetTrigger asChild className="md:hidden">
               <Button variant="ghost" size="icon">
