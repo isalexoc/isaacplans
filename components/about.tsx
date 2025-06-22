@@ -84,13 +84,25 @@ export function About() {
             viewport={{ once: true }}
             className="space-y-6 order-2"
           >
-            <div className="relative mb-6 lg:mb-8">
+            <div className="relative mb-6 lg:mb-8 grid grid-cols-1 sm:grid-cols-2 gap-6 place-items-center">
+              {/* Logo Image */}
               <Image
-                src="/images/daniel-orraiz.jfif"
-                alt="Daniel Orraiz - Profesional de Seguros"
-                width={400}
-                height={400}
-                className="rounded-2xl shadow-lg mx-auto w-full max-w-sm h-auto"
+                src="https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_350/logo-title_c0wkke.png"
+                alt="Dorraiz Insurance Logo"
+                width={350}
+                height={350}
+                className="rounded-xl shadow-lg w-full max-w-xs object-contain"
+                priority
+              />
+
+              {/* Health Image */}
+              <Image
+                src="https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_350/health_vq9jgj.png"
+                alt="Health Insurance Concept"
+                width={350}
+                height={350}
+                className="rounded-xl shadow-lg w-full max-w-xs object-cover"
+                priority
               />
             </div>
 

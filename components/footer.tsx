@@ -1,14 +1,15 @@
-"use client"
+"use client";
 
-import { Separator } from "@/components/ui/separator"
-import { Phone, Mail, MapPin, Facebook, Instagram } from "lucide-react"
-import { useLanguage } from "@/hooks/useLanguage"
-import { translations } from "@/lib/translations"
+import { Separator } from "@/components/ui/separator";
+import { Phone, Mail, MapPin, Facebook, Instagram } from "lucide-react";
+import { useLanguage } from "@/hooks/useLanguage";
+import { translations } from "@/lib/translations";
+import Image from "next/image";
 
 export function Footer() {
-  const { language } = useLanguage()
-  const t = translations[language]
-  const currentYear = new Date().getFullYear()
+  const { language } = useLanguage();
+  const t = translations[language];
+  const currentYear = new Date().getFullYear();
 
   const footerLinks = {
     services: [
@@ -30,7 +31,7 @@ export function Footer() {
       { name: t.footer.links.privacy, href: "/privacy-policy" },
       { name: t.footer.links.terms, href: "/terms-of-service" },
     ],
-  }
+  };
 
   return (
     <footer className="bg-gray-900 text-white">
@@ -39,19 +40,32 @@ export function Footer() {
           {/* Company Info */}
           <div className="space-y-4 lg:space-y-6 sm:col-span-2 lg:col-span-1">
             <div className="flex items-center space-x-2">
-              <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">D</span>
+              <div className="w-10 h-10 rounded-lg overflow-hidden flex items-center justify-center">
+                <Image
+                  src="https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_40,h_40,c_fill,g_auto/logo_daniel_wwzhir.png"
+                  alt="Dorraiz Insurance Logo"
+                  width={40}
+                  height={40}
+                  className="object-cover"
+                  priority
+                />
               </div>
               <div className="flex flex-col">
                 <span className="font-bold text-xl">Dorraiz</span>
-                <span className="text-xs text-green-400 font-medium">INSURANCE</span>
+                <span className="text-xs text-green-400 font-medium">
+                  INSURANCE
+                </span>
               </div>
             </div>
-            <p className="text-gray-400 leading-relaxed text-sm lg:text-base">{t.footer.description}</p>
+            <p className="text-gray-400 leading-relaxed text-sm lg:text-base">
+              {t.footer.description}
+            </p>
             <div className="space-y-3">
               <div className="flex items-center space-x-3 text-sm">
                 <Phone className="w-4 h-4 text-green-400 flex-shrink-0" />
-                <span className="break-words">(956) 302-1451 / (407) 785-9073</span>
+                <span className="break-words">
+                  (956) 302-1451 / (407) 785-9073
+                </span>
               </div>
               <div className="flex items-center space-x-3 text-sm">
                 <Mail className="w-4 h-4 text-green-400 flex-shrink-0" />
@@ -59,18 +73,27 @@ export function Footer() {
               </div>
               <div className="flex items-center space-x-3 text-sm">
                 <MapPin className="w-4 h-4 text-green-400 flex-shrink-0" />
-                <span>{language === "es" ? "Licenciado en 20+ Estados" : "Licensed in 20+ States"}</span>
+                <span>
+                  {language === "es"
+                    ? "Licenciado en 20+ Estados"
+                    : "Licensed in 20+ States"}
+                </span>
               </div>
             </div>
           </div>
 
           {/* Services */}
           <div>
-            <h3 className="font-semibold text-lg mb-4 lg:mb-6">{t.footer.services}</h3>
+            <h3 className="font-semibold text-lg mb-4 lg:mb-6">
+              {t.footer.services}
+            </h3>
             <ul className="space-y-2 lg:space-y-3">
               {footerLinks.services.map((link) => (
                 <li key={link.name}>
-                  <a href={link.href} className="text-gray-400 hover:text-white transition-colors text-sm">
+                  <a
+                    href={link.href}
+                    className="text-gray-400 hover:text-white transition-colors text-sm"
+                  >
                     {link.name}
                   </a>
                 </li>
@@ -80,11 +103,16 @@ export function Footer() {
 
           {/* Resources */}
           <div>
-            <h3 className="font-semibold text-lg mb-4 lg:mb-6">{t.footer.resources}</h3>
+            <h3 className="font-semibold text-lg mb-4 lg:mb-6">
+              {t.footer.resources}
+            </h3>
             <ul className="space-y-2 lg:space-y-3">
               {footerLinks.resources.map((link) => (
                 <li key={link.name}>
-                  <a href={link.href} className="text-gray-400 hover:text-white transition-colors text-sm">
+                  <a
+                    href={link.href}
+                    className="text-gray-400 hover:text-white transition-colors text-sm"
+                  >
                     {link.name}
                   </a>
                 </li>
@@ -94,11 +122,16 @@ export function Footer() {
 
           {/* Company */}
           <div>
-            <h3 className="font-semibold text-lg mb-4 lg:mb-6">{t.footer.company}</h3>
+            <h3 className="font-semibold text-lg mb-4 lg:mb-6">
+              {t.footer.company}
+            </h3>
             <ul className="space-y-2 lg:space-y-3 mb-6">
               {footerLinks.company.map((link) => (
                 <li key={link.name}>
-                  <a href={link.href} className="text-gray-400 hover:text-white transition-colors text-sm">
+                  <a
+                    href={link.href}
+                    className="text-gray-400 hover:text-white transition-colors text-sm"
+                  >
                     {link.name}
                   </a>
                 </li>
@@ -137,10 +170,16 @@ export function Footer() {
             © {currentYear} Dorraiz Insurance. {t.footer.rights}
           </div>
           <div className="flex flex-wrap justify-center sm:justify-end space-x-4 lg:space-x-6 text-sm text-gray-400">
-            <a href="/terms-of-service" className="hover:text-white transition-colors">
+            <a
+              href="/terms-of-service"
+              className="hover:text-white transition-colors"
+            >
               {t.footer.links.terms}
             </a>
-            <a href="/privacy-policy" className="hover:text-white transition-colors">
+            <a
+              href="/privacy-policy"
+              className="hover:text-white transition-colors"
+            >
               {t.footer.links.privacy}
             </a>
             <a href="#" className="hover:text-white transition-colors">
@@ -150,5 +189,5 @@ export function Footer() {
         </div>
       </div>
     </footer>
-  )
+  );
 }

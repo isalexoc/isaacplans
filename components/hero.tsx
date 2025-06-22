@@ -19,7 +19,7 @@ export function Hero() {
     >
       <div className="container mx-auto px-4">
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-          {/* Text Content - First on mobile, First on desktop */}
+          {/* Text Content */}
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
@@ -31,13 +31,13 @@ export function Hero() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="inline-flex items-center space-x-2 bg-green-100 text-green-800 px-3 py-2 lg:px-4 lg:py-2 rounded-full text-xs lg:text-sm font-medium"
+                className="inline-flex items-center space-x-2 bg-green-100 text-green-800 px-4 py-2 rounded-full text-sm font-medium"
               >
-                <Award className="w-3 h-3 lg:w-4 lg:h-4" />
+                <Award className="w-4 h-4" />
                 <span>{t.hero.badge}</span>
               </motion.div>
 
-              <h1 className="text-3xl sm:text-4xl lg:text-6xl font-bold text-gray-900 leading-tight">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
                 <span className="text-green-600 block text-2xl sm:text-3xl lg:text-5xl mb-2">
                   {t.hero.name}
                 </span>
@@ -50,78 +50,73 @@ export function Hero() {
               </p>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-3 lg:gap-4">
+            <div className="flex flex-col sm:flex-row gap-4">
               <Button
                 size="lg"
-                className="bg-green-600 hover:bg-green-700 text-base lg:text-lg px-6 lg:px-8 py-3"
+                className="bg-green-600 hover:bg-green-700 text-lg px-8 py-3"
               >
                 {t.hero.cta1}
               </Button>
               <Button
                 size="lg"
                 variant="outline"
-                className="text-base lg:text-lg px-6 lg:px-8 py-3 border-green-600 text-green-600 hover:bg-green-50"
+                className="text-lg px-8 py-3 border-green-600 text-green-600 hover:bg-green-50"
               >
                 {t.hero.cta2}
               </Button>
             </div>
 
-            <div className="grid grid-cols-3 gap-4 lg:gap-6 pt-6 lg:pt-8 border-t border-gray-200">
+            <div className="grid grid-cols-3 gap-4 pt-8 border-t border-gray-200">
               <div className="text-center">
-                <div className="text-xl lg:text-2xl font-bold text-green-600">
-                  20+
-                </div>
-                <div className="text-xs lg:text-sm text-gray-600">
+                <div className="text-2xl font-bold text-green-600">20+</div>
+                <div className="text-sm text-gray-600">
                   {t.hero.stats.states}
                 </div>
               </div>
               <div className="text-center">
-                <div className="text-xl lg:text-2xl font-bold text-green-600">
-                  3000+
-                </div>
-                <div className="text-xs lg:text-sm text-gray-600">
+                <div className="text-2xl font-bold text-green-600">3000+</div>
+                <div className="text-sm text-gray-600">
                   {t.hero.stats.clients}
                 </div>
               </div>
               <div className="text-center">
-                <div className="text-xl lg:text-2xl font-bold text-green-600">
-                  100%
-                </div>
-                <div className="text-xs lg:text-sm text-gray-600">
+                <div className="text-2xl font-bold text-green-600">100%</div>
+                <div className="text-sm text-gray-600">
                   {t.hero.stats.satisfaction}
                 </div>
               </div>
             </div>
           </motion.div>
 
-          {/* Image Content - Second on mobile, Second on desktop */}
+          {/* Image Content */}
           <motion.div
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
             className="relative order-2"
           >
-            <div className="relative max-w-md mx-auto ">
+            <div className="relative max-w-md mx-auto">
               <Image
-                src="/images/daniel-orraiz.jfif"
+                src="https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_500,h_600,c_fill,g_face/daniel_k2t4sy.png"
                 alt="Daniel Orraiz - Agente de Seguros Profesional"
                 width={500}
                 height={600}
-                className="rounded-2xl shadow-2xl w-full h-auto"
+                className="rounded-2xl shadow-2xl w-full h-auto object-cover"
+                priority
               />
 
-              {/* Floating cards - hidden on mobile, visible on desktop */}
+              {/* Floating Cards */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.6 }}
-                className="absolute -left-4 lg:-left-6 top-16 lg:top-20 hidden lg:block"
+                className="absolute -left-6 top-20 hidden lg:block"
               >
-                <Card className="p-3 lg:p-4 bg-white shadow-lg">
-                  <div className="flex items-center space-x-2 lg:space-x-3">
-                    <Shield className="w-6 h-6 lg:w-8 lg:h-8 text-green-600" />
+                <Card className="p-4 bg-white shadow-lg">
+                  <div className="flex items-center space-x-3">
+                    <Shield className="w-8 h-8 text-green-600" />
                     <div>
-                      <div className="font-semibold text-xs lg:text-sm">
+                      <div className="font-semibold text-sm">
                         ACA Certificado
                       </div>
                       <div className="text-xs text-gray-600">
@@ -136,13 +131,13 @@ export function Hero() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.8 }}
-                className="absolute -right-4 lg:-right-6 bottom-16 lg:bottom-20 hidden lg:block"
+                className="absolute -right-6 bottom-20 hidden lg:block"
               >
-                <Card className="p-3 lg:p-4 bg-white shadow-lg">
-                  <div className="flex items-center space-x-2 lg:space-x-3">
-                    <Users className="w-6 h-6 lg:w-8 lg:h-8 text-green-600" />
+                <Card className="p-4 bg-white shadow-lg">
+                  <div className="flex items-center space-x-3">
+                    <Users className="w-8 h-8 text-green-600" />
                     <div>
-                      <div className="font-semibold text-xs lg:text-sm">
+                      <div className="font-semibold text-sm">
                         Especialista Medicare
                       </div>
                       <div className="text-xs text-gray-600">
@@ -153,7 +148,7 @@ export function Hero() {
                 </Card>
               </motion.div>
 
-              {/* Mobile badges - visible only on mobile */}
+              {/* Mobile Badges */}
               <div className="lg:hidden mt-6 grid grid-cols-2 gap-3">
                 <Card className="p-3 bg-white shadow-md">
                   <div className="flex items-center space-x-2">
