@@ -1,16 +1,16 @@
-"use client"
+"use client";
 
-import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Award, GraduationCap, Users, Clock } from "lucide-react"
-import { motion } from "framer-motion"
-import Image from "next/image"
-import { useLanguage } from "@/hooks/useLanguage"
-import { translations } from "@/lib/translations"
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Award, GraduationCap, Users, Clock } from "lucide-react";
+import { motion } from "framer-motion";
+import Image from "next/image";
+import { useLanguage } from "@/hooks/useLanguage";
+import { translations } from "@/lib/translations";
 
 export function About() {
-  const { language } = useLanguage()
-  const t = translations[language]
+  const { language } = useLanguage();
+  const t = translations[language];
 
   const achievements = [
     {
@@ -33,7 +33,7 @@ export function About() {
       title: t.about.achievements.education.title,
       description: t.about.achievements.education.description,
     },
-  ]
+  ];
 
   return (
     <section id="about" className="py-16 lg:py-20 bg-gray-50">
@@ -47,17 +47,29 @@ export function About() {
             className="space-y-6 lg:space-y-8 order-1"
           >
             <div>
-              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4 lg:mb-6">{t.about.title}</h2>
-              <p className="text-base lg:text-lg text-gray-600 leading-relaxed mb-4 lg:mb-6">{t.about.description1}</p>
-              <p className="text-base lg:text-lg text-gray-600 leading-relaxed">{t.about.description2}</p>
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4 lg:mb-6">
+                {t.about.title}
+              </h2>
+              <p className="text-base lg:text-lg text-gray-600 leading-relaxed mb-4 lg:mb-6">
+                {t.about.description1}
+              </p>
+              <p className="text-base lg:text-lg text-gray-600 leading-relaxed">
+                {t.about.description2}
+              </p>
             </div>
 
             {/* Certifications */}
             <div>
-              <h3 className="text-lg lg:text-xl font-semibold text-gray-900 mb-3 lg:mb-4">{t.about.certifications}</h3>
+              <h3 className="text-lg lg:text-xl font-semibold text-gray-900 mb-3 lg:mb-4">
+                {t.about.certifications}
+              </h3>
               <div className="flex flex-wrap gap-2">
                 {t.about.certs.map((cert) => (
-                  <Badge key={cert} variant="secondary" className="text-xs lg:text-sm bg-green-100 text-green-800">
+                  <Badge
+                    key={cert}
+                    variant="secondary"
+                    className="text-xs lg:text-sm bg-green-100 text-green-800"
+                  >
                     {cert}
                   </Badge>
                 ))}
@@ -78,7 +90,7 @@ export function About() {
                 alt="Daniel Orraiz - Profesional de Seguros"
                 width={400}
                 height={400}
-                className="rounded-2xl shadow-lg mx-auto w-full max-w-sm lg:max-w-none h-auto"
+                className="rounded-2xl shadow-lg mx-auto w-full max-w-sm h-auto"
               />
             </div>
 
@@ -94,8 +106,12 @@ export function About() {
                   <Card className="p-3 lg:p-4 text-center hover:shadow-md transition-shadow">
                     <CardContent className="p-0">
                       <achievement.icon className="w-6 h-6 lg:w-8 lg:h-8 text-green-600 mx-auto mb-2 lg:mb-3" />
-                      <h4 className="font-semibold text-xs lg:text-sm mb-1 lg:mb-2">{achievement.title}</h4>
-                      <p className="text-xs text-gray-600">{achievement.description}</p>
+                      <h4 className="font-semibold text-xs lg:text-sm mb-1 lg:mb-2">
+                        {achievement.title}
+                      </h4>
+                      <p className="text-xs text-gray-600">
+                        {achievement.description}
+                      </p>
                     </CardContent>
                   </Card>
                 </motion.div>
@@ -105,5 +121,5 @@ export function About() {
         </div>
       </div>
     </section>
-  )
+  );
 }
