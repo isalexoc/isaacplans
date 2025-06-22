@@ -100,7 +100,7 @@ export default function TermsOfServicePage() {
           content: `Para preguntas sobre estos Términos y Condiciones:`,
           details: [
             "Agente: Daniel Orraiz",
-            "Email: dorraizinsurance@gmail.com",
+            "Email: info@dorraizinsurance.com",
             "Teléfono: (956) 302-1451 / (407) 785-9073",
             "Licenciado en: Más de 20 Estados de EE.UU.",
           ],

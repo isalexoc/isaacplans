@@ -84,7 +84,7 @@ export default function PrivacyPolicyPage() {
           title: "8. Información de Contacto",
           content: `Si tiene preguntas sobre esta Política de Privacidad, puede contactarnos:`,
           details: [
-            "Email: dorraizinsurance@gmail.com",
+            "Email: info@dorraizinsurance.com",
             "Teléfono: (956) 302-1451 / (407) 785-9073",
             "Agente: Daniel Orraiz, Licenciado en 20+ Estados",
           ],
