@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
+import CrispChat from "@/components/crisp-chat";
 import { LanguageProvider } from "@/hooks/useLanguage";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
@@ -30,6 +31,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
           <Header />
           <main className="flex-1 w-full">{children}</main>
           <Toaster />
+          <CrispChat />
           <Footer />
         </LanguageProvider>
       </body>
