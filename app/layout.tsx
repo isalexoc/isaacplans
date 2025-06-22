@@ -2,6 +2,7 @@ import type React from "react";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import { Toaster } from "@/components/ui/toaster";
 import { LanguageProvider } from "@/hooks/useLanguage";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
@@ -28,6 +29,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
         <LanguageProvider>
           <Header />
           <main className="flex-1 w-full">{children}</main>
+          <Toaster />
           <Footer />
         </LanguageProvider>
       </body>
