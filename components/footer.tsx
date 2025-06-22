@@ -18,12 +18,6 @@ export function Footer() {
       { name: t.services.items.family.title, href: "#services" },
       { name: t.services.items.comparison.title, href: "#services" },
     ],
-    resources: [
-      { name: t.footer.links.guide, href: "#" },
-      { name: t.footer.links.faq, href: "#" },
-      { name: t.footer.links.blog, href: "#" },
-      { name: t.footer.links.regulations, href: "#" },
-    ],
     company: [
       { name: t.nav.about, href: "#about" },
       { name: t.nav.coverage, href: "#coverage" },
@@ -36,43 +30,38 @@ export function Footer() {
   return (
     <footer className="bg-gray-900 text-white">
       <div className="container mx-auto px-4 py-12 lg:py-16">
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {/* Company Info */}
-          <div className="space-y-4 lg:space-y-6 sm:col-span-2 lg:col-span-1">
-            <div className="flex items-center space-x-2">
-              <div className="w-10 h-10 rounded-lg overflow-hidden flex items-center justify-center">
-                <Image
-                  src="https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_40,h_40,c_fill,g_auto/logo_daniel_wwzhir.png"
-                  alt="Dorraiz Insurance Logo"
-                  width={40}
-                  height={40}
-                  className="object-cover"
-                  priority
-                />
-              </div>
+        <div className="grid md:grid-cols-3 gap-8">
+          {/* Column 1: Company Info */}
+          <div className="space-y-6">
+            <div className="flex items-center space-x-3">
+              <Image
+                src="https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_40,h_40,c_fill,g_auto/logo_daniel_wwzhir.png"
+                alt="Dorraiz Insurance Logo"
+                width={40}
+                height={40}
+                className="object-cover rounded-md"
+              />
               <div className="flex flex-col">
-                <span className="font-bold text-xl">Dorraiz</span>
-                <span className="text-xs text-green-400 font-medium">
-                  INSURANCE
+                <span className="text-xl font-bold">Dorraiz</span>
+                <span className="text-xs font-medium text-green-400 uppercase">
+                  Insurance
                 </span>
               </div>
             </div>
-            <p className="text-gray-400 leading-relaxed text-sm lg:text-base">
+            <p className="text-gray-400 text-sm leading-relaxed">
               {t.footer.description}
             </p>
-            <div className="space-y-3">
-              <div className="flex items-center space-x-3 text-sm">
-                <Phone className="w-4 h-4 text-green-400 flex-shrink-0" />
-                <span className="break-words">
-                  (956) 302-1451 / (407) 785-9073
-                </span>
+            <div className="space-y-2 text-sm">
+              <div className="flex items-center space-x-2">
+                <Phone className="w-4 h-4 text-green-400" />
+                <span>(956) 302-1451 / (407) 785-9073</span>
               </div>
-              <div className="flex items-center space-x-3 text-sm">
-                <Mail className="w-4 h-4 text-green-400 flex-shrink-0" />
-                <span className="break-words">dorraizinsurance@gmail.com</span>
+              <div className="flex items-center space-x-2">
+                <Mail className="w-4 h-4 text-green-400" />
+                <span>info@dorraizinsurance.com</span>
               </div>
-              <div className="flex items-center space-x-3 text-sm">
-                <MapPin className="w-4 h-4 text-green-400 flex-shrink-0" />
+              <div className="flex items-center space-x-2">
+                <MapPin className="w-4 h-4 text-green-400" />
                 <span>
                   {language === "es"
                     ? "Licenciado en 20+ Estados"
@@ -82,18 +71,13 @@ export function Footer() {
             </div>
           </div>
 
-          {/* Services */}
+          {/* Column 2: Services */}
           <div>
-            <h3 className="font-semibold text-lg mb-4 lg:mb-6">
-              {t.footer.services}
-            </h3>
-            <ul className="space-y-2 lg:space-y-3">
+            <h4 className="text-lg font-semibold mb-4">{t.footer.services}</h4>
+            <ul className="space-y-2 text-sm text-gray-400">
               {footerLinks.services.map((link) => (
                 <li key={link.name}>
-                  <a
-                    href={link.href}
-                    className="text-gray-400 hover:text-white transition-colors text-sm"
-                  >
+                  <a href={link.href} className="hover:text-white">
                     {link.name}
                   </a>
                 </li>
@@ -101,88 +85,54 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Resources */}
+          {/* Column 3: Company and Social */}
           <div>
-            <h3 className="font-semibold text-lg mb-4 lg:mb-6">
-              {t.footer.resources}
-            </h3>
-            <ul className="space-y-2 lg:space-y-3">
-              {footerLinks.resources.map((link) => (
-                <li key={link.name}>
-                  <a
-                    href={link.href}
-                    className="text-gray-400 hover:text-white transition-colors text-sm"
-                  >
-                    {link.name}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Company */}
-          <div>
-            <h3 className="font-semibold text-lg mb-4 lg:mb-6">
-              {t.footer.company}
-            </h3>
-            <ul className="space-y-2 lg:space-y-3 mb-6">
+            <h4 className="text-lg font-semibold mb-4">{t.footer.company}</h4>
+            <ul className="space-y-2 text-sm text-gray-400 mb-6">
               {footerLinks.company.map((link) => (
                 <li key={link.name}>
-                  <a
-                    href={link.href}
-                    className="text-gray-400 hover:text-white transition-colors text-sm"
-                  >
+                  <a href={link.href} className="hover:text-white">
                     {link.name}
                   </a>
                 </li>
               ))}
             </ul>
-
-            {/* Social Links */}
-            <div>
-              <h4 className="font-medium mb-3">{t.footer.follow}</h4>
-              <div className="flex space-x-3">
-                <a
-                  href="https://www.facebook.com/profile.php?id=100090015145006"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-10 h-10 bg-transparent border border-gray-600 hover:border-white rounded-md flex items-center justify-center text-gray-400 hover:text-white transition-colors"
-                >
-                  <Facebook className="w-4 h-4" />
-                </a>
-                <a
-                  href="https://www.instagram.com/dorraiz.insurance"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-10 h-10 bg-transparent border border-gray-600 hover:border-white rounded-md flex items-center justify-center text-gray-400 hover:text-white transition-colors"
-                >
-                  <Instagram className="w-4 h-4" />
-                </a>
-              </div>
+            <h5 className="font-medium mb-3">{t.footer.follow}</h5>
+            <div className="flex space-x-3">
+              <a
+                href="https://www.facebook.com/profile.php?id=100090015145006"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-10 h-10 border border-gray-600 hover:border-white rounded-md flex items-center justify-center text-gray-400 hover:text-white"
+              >
+                <Facebook className="w-4 h-4" />
+              </a>
+              <a
+                href="https://www.instagram.com/dorraiz.insurance"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-10 h-10 border border-gray-600 hover:border-white rounded-md flex items-center justify-center text-gray-400 hover:text-white"
+              >
+                <Instagram className="w-4 h-4" />
+              </a>
             </div>
           </div>
         </div>
 
-        <Separator className="my-6 lg:my-8 bg-gray-800" />
+        <Separator className="my-8 bg-gray-800" />
 
-        <div className="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
-          <div className="text-sm text-gray-400 text-center sm:text-left">
+        <div className="flex flex-col sm:flex-row justify-between items-center text-sm text-gray-400">
+          <div className="text-center sm:text-left">
             © {currentYear} Dorraiz Insurance. {t.footer.rights}
           </div>
-          <div className="flex flex-wrap justify-center sm:justify-end space-x-4 lg:space-x-6 text-sm text-gray-400">
-            <a
-              href="/terms-of-service"
-              className="hover:text-white transition-colors"
-            >
+          <div className="flex space-x-4 mt-4 sm:mt-0">
+            <a href="/terms-of-service" className="hover:text-white">
               {t.footer.links.terms}
             </a>
-            <a
-              href="/privacy-policy"
-              className="hover:text-white transition-colors"
-            >
+            <a href="/privacy-policy" className="hover:text-white">
               {t.footer.links.privacy}
             </a>
-            <a href="#" className="hover:text-white transition-colors">
+            <a href="#" className="hover:text-white">
               {t.footer.links.disclaimer}
             </a>
           </div>

@@ -13,14 +13,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Phone, Mail, MapPin, Clock, Send, Loader2 } from "lucide-react";
+import { Send, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { contactFormSchema } from "@/lib/validation/contactFormSchema";
 import { submitContactForm } from "@/actions/contact/contactAction";
 import { z } from "zod";
+import { useLanguage } from "@/hooks/useLanguage";
+import { translations } from "@/lib/translations";
 
 export function Contact() {
   const { toast } = useToast();
+  const { language } = useLanguage();
+  const t = translations[language].contact.form;
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -102,21 +107,23 @@ export function Contact() {
     <section id="contact" className="py-16 lg:py-20 bg-gray-50">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">Contact Us</h2>
+          <h2 className="text-3xl font-bold text-gray-900 mb-4">
+            {translations[language].contact.title}
+          </h2>
           <p className="text-lg text-gray-600">
-            We'd love to hear from you. Fill out the form below.
+            {translations[language].contact.subtitle}
           </p>
         </div>
 
         <Card className="max-w-3xl mx-auto shadow-lg">
           <CardHeader>
-            <CardTitle className="text-2xl">Send Us a Message</CardTitle>
+            <CardTitle className="text-2xl">{t.title}</CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="name">Name</Label>
+                  <Label htmlFor="name">{t.name}</Label>
                   <Input
                     id="name"
                     value={formData.name}
@@ -128,7 +135,7 @@ export function Contact() {
                   )}
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="email">{t.email}</Label>
                   <Input
                     id="email"
                     type="email"
@@ -144,7 +151,7 @@ export function Contact() {
 
               <div className="grid sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="phone">Phone</Label>
+                  <Label htmlFor="phone">{t.phone}</Label>
                   <Input
                     id="phone"
                     type="tel"
@@ -153,28 +160,35 @@ export function Contact() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="insuranceType">Insurance Type</Label>
-                  <Select onValueChange={handleInsuranceChange}>
+                  <Label htmlFor="insuranceType">{t.insuranceType}</Label>
+                  <Select
+                    onValueChange={handleInsuranceChange}
+                    value={formData.insuranceType}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Select type" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="aca">ACA</SelectItem>
-                      <SelectItem value="medicare">Medicare</SelectItem>
-                      <SelectItem value="family">Family</SelectItem>
-                      <SelectItem value="individual">Individual</SelectItem>
-                      <SelectItem value="other">Other</SelectItem>
+                      <SelectItem value="aca">{t.types.aca}</SelectItem>
+                      <SelectItem value="medicare">
+                        {t.types.medicare}
+                      </SelectItem>
+                      <SelectItem value="family">{t.types.family}</SelectItem>
+                      <SelectItem value="individual">
+                        {t.types.individual}
+                      </SelectItem>
+                      <SelectItem value="other">{t.types.other}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="message">Message</Label>
+                <Label htmlFor="message">{t.message}</Label>
                 <Textarea
                   id="message"
                   rows={4}
-                  placeholder="Write your message here..."
+                  placeholder={t.messagePlaceholder}
                   value={formData.message}
                   onChange={handleChange}
                 />
@@ -183,11 +197,11 @@ export function Contact() {
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? (
                   <>
-                    <Loader2 className="w-4 h-4 animate-spin mr-2" /> Sending...
+                    <Loader2 className="w-4 h-4 animate-spin mr-2" /> {t.submit}
                   </>
                 ) : (
                   <>
-                    <Send className="w-4 h-4 mr-2" /> Send Message
+                    <Send className="w-4 h-4 mr-2" /> {t.submit}
                   </>
                 )}
               </Button>

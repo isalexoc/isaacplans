@@ -54,15 +54,14 @@ export function Hero() {
               <Button
                 size="lg"
                 className="bg-green-600 hover:bg-green-700 text-lg px-8 py-3"
+                onClick={() => {
+                  const el = document.getElementById("contact");
+                  if (el) {
+                    el.scrollIntoView({ behavior: "smooth" });
+                  }
+                }}
               >
                 {t.hero.cta1}
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="text-lg px-8 py-3 border-green-600 text-green-600 hover:bg-green-50"
-              >
-                {t.hero.cta2}
               </Button>
             </div>
 

@@ -115,7 +115,7 @@ export function Coverage() {
                     (956) 302-1451
                   </a>
                   <a
-                    href="mailto:dorraizinsurance@gmail.com"
+                    href="mailto:info@dorraizinsurance.com"
                     className="bg-green-700 hover:bg-green-800 px-6 py-3 rounded-lg font-semibold transition-colors text-center w-full sm:w-auto truncate"
                   >
                     Email Me

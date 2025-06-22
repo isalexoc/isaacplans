@@ -1,13 +1,11 @@
-"use client"
+"use client";
 
-import { useLanguage } from "@/hooks/useLanguage"
-import { Header } from "@/components/header"
-import { Footer } from "@/components/footer"
-import Link from "next/link"
-import { ArrowLeft } from "lucide-react"
+import { useLanguage } from "@/hooks/useLanguage";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 
 export default function PrivacyPolicyPage() {
-  const { language } = useLanguage()
+  const { language } = useLanguage();
 
   const content = {
     es: {
@@ -176,33 +174,41 @@ export default function PrivacyPolicyPage() {
         },
       },
     },
-  }
+  };
 
-  const t = content[language]
+  const t = content[language];
 
   return (
     <div className="min-h-screen bg-white">
-      <Header />
       <main className="pt-24 pb-16">
         <div className="container mx-auto px-4 max-w-4xl">
           {/* Back to Home Link */}
           <div className="mb-6">
-            <Link href="/" className="inline-flex items-center text-green-600 hover:text-green-700 transition-colors">
+            <Link
+              href="/"
+              className="inline-flex items-center text-green-600 hover:text-green-700 transition-colors"
+            >
               <ArrowLeft className="w-4 h-4 mr-2" />
               {t.backToHome}
             </Link>
           </div>
 
           <div className="mb-8">
-            <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">{t.title}</h1>
+            <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
+              {t.title}
+            </h1>
             <p className="text-gray-600">{t.lastUpdated}</p>
           </div>
 
           <div className="prose prose-lg max-w-none">
             {Object.entries(t.sections).map(([key, section]) => (
               <div key={key} className="mb-8">
-                <h2 className="text-xl lg:text-2xl font-semibold text-gray-900 mb-4">{section.title}</h2>
-                <p className="text-gray-700 mb-4 leading-relaxed">{section.content}</p>
+                <h2 className="text-xl lg:text-2xl font-semibold text-gray-900 mb-4">
+                  {section.title}
+                </h2>
+                <p className="text-gray-700 mb-4 leading-relaxed">
+                  {section.content}
+                </p>
 
                 {section.items && (
                   <ul className="list-disc pl-6 space-y-2 mb-4">
@@ -229,7 +235,9 @@ export default function PrivacyPolicyPage() {
 
           <div className="mt-12 p-6 bg-green-50 rounded-lg border border-green-200">
             <h3 className="text-lg font-semibold text-green-800 mb-2">
-              {language === "es" ? "¿Preguntas sobre su Privacidad?" : "Questions About Your Privacy?"}
+              {language === "es"
+                ? "¿Preguntas sobre su Privacidad?"
+                : "Questions About Your Privacy?"}
             </h3>
             <p className="text-green-700 mb-4">
               {language === "es"
@@ -244,7 +252,7 @@ export default function PrivacyPolicyPage() {
                 {language === "es" ? "Llamar Ahora" : "Call Now"}
               </a>
               <a
-                href="mailto:dorraizinsurance@gmail.com"
+                href="mailto:info@dorraizinsurance.com"
                 className="bg-white text-green-600 border border-green-600 px-6 py-2 rounded-lg hover:bg-green-50 transition-colors text-center"
               >
                 {language === "es" ? "Enviar Email" : "Send Email"}
@@ -253,7 +261,6 @@ export default function PrivacyPolicyPage() {
           </div>
         </div>
       </main>
-      <Footer />
     </div>
-  )
+  );
 }
