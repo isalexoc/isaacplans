@@ -21,11 +21,13 @@ interface RootLayoutProps {
 
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
-    <html lang="es">
-      <body className={inter.className}>
+    <html lang="es" className="scroll-smooth">
+      <body
+        className={`${inter.className} flex min-h-screen flex-col bg-white text-gray-900 overflow-x-hidden`}
+      >
         <LanguageProvider>
           <Header />
-          {children}
+          <main className="flex-1 w-full">{children}</main>
           <Footer />
         </LanguageProvider>
       </body>

@@ -8,7 +8,7 @@ import { Contact } from "@/components/contact";
 
 export default function HomePage() {
   return (
-    <main className="min-h-screen">
+    <main className="w-full flex flex-col overflow-x-hidden">
       <Hero />
       <Services />
       <About />
