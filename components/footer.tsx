@@ -132,9 +132,6 @@ export function Footer() {
             <a href="/privacy-policy" className="hover:text-white">
               {t.footer.links.privacy}
             </a>
-            <a href="#" className="hover:text-white">
-              {t.footer.links.disclaimer}
-            </a>
           </div>
         </div>
       </div>
