@@ -57,9 +57,6 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "https://www.dorraizinsurance.com",
   },
-  icons: {
-    icon: "/favicon.ico",
-  },
   other: {
     "theme-color": "#22c55e",
   },
