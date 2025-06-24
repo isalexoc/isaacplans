@@ -4,7 +4,7 @@ import { Hero } from "@/components/hero";
 import { Services } from "@/components/services";
 import { About } from "@/components/about";
 import { Coverage } from "@/components/states";
-import { Contact } from "@/components/contact";
+import Contact from "@/app/contact/page";
 
 export default function HomePage() {
   return (

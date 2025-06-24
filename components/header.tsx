@@ -26,7 +26,7 @@ export function Header() {
     { name: t.nav.services, href: isHomePage ? "#services" : "/#services" },
     { name: t.nav.about, href: isHomePage ? "#about" : "/#about" },
     { name: t.nav.coverage, href: isHomePage ? "#coverage" : "/#coverage" },
-    { name: t.nav.contact, href: isHomePage ? "#contact" : "/#contact" },
+    { name: t.nav.contact, href: isHomePage ? "contact" : "/contact" },
   ];
 
   const handleNavClick = (href: string) => {
@@ -98,7 +98,7 @@ export function Header() {
                     .getElementById("contact")
                     ?.scrollIntoView({ behavior: "smooth" });
                 } else {
-                  window.location.href = "/#contact";
+                  window.location.href = "/contact";
                 }
               }}
             >
@@ -142,7 +142,7 @@ export function Header() {
                           .getElementById("contact")
                           ?.scrollIntoView({ behavior: "smooth" });
                       } else {
-                        window.location.href = "/#contact";
+                        window.location.href = "/contact";
                       }
                     }}
                   >

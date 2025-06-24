@@ -7,22 +7,44 @@ import { ArrowLeft } from "lucide-react";
 export default function TermsOfServicePage() {
   const { language } = useLanguage();
 
+  /** ─────────────  CONTENIDO MULTILENGUAJE  ───────────── */
   const content = {
     es: {
       title: "Términos y Condiciones",
       lastUpdated: "Última actualización: 20 de junio de 2025",
       backToHome: "Volver al Inicio",
       sections: {
-        introduction: {
-          title: "1. Introducción y Aceptación",
-          content: `Bienvenido a Dorraiz Insurance. Estos Términos y Condiciones ("Términos") rigen el uso de nuestros servicios de seguros y sitio web. Al utilizar nuestros servicios, usted acepta estar sujeto a estos términos. Daniel Orraiz, agente de seguros licenciado en más de 20 estados, opera bajo estas condiciones.`,
+        /* 1 */
+        sms: {
+          title: "1. Términos y Condiciones de SMS",
+          content:
+            "Las siguientes políticas regulan todas las comunicaciones por SMS emitidas por Dorraiz Insurance:",
+          items: [
+            "1 – Comunicación de consentimiento de SMS: Los números telefónicos obtenidos para consentimiento SMS no se comparten con terceros para fines de marketing.",
+            "2 – Tipos de comunicaciones SMS: recordatorios de pago, avisos de inscripción y notificaciones de servicio. Ejemplos: «Estimado Cliente: le recordamos que su póliza caerá en inactividad…» o «Hola, este es un recordatorio amistoso de su próxima cita…». Puede responder STOP para dejar de recibir SMS en cualquier momento.",
+            "3 – Frecuencia de mensajes: la frecuencia puede variar según la comunicación; por ejemplo, hasta 3 mensajes SMS por semana relacionados con su póliza o período de inscripción.",
+            "4 – Posibles tarifas: se pueden aplicar cargos estándar de mensajes y datos, los cuales pueden variar si el SMS es nacional o internacional.",
+            "5 – Método de inclusión (Opt-In): marcando la casilla de consentimiento en nuestros formularios en línea.",
+            "6 – Método de exclusión (Opt-Out): puede darse de baja en cualquier momento respondiendo «STOP» o contactándonos directamente para ser eliminado.",
+            "7 – Ayuda: si experimenta problemas, responda «AYUDA» o visite https://www.dorraizinsurance.com/contact.",
+            "8 – Divulgaciones estándar: podrían aplicarse tarifas de mensajes y datos. Para ayuda envíe AYUDA al (956) 302-1451. La frecuencia de mensajes puede variar.",
+          ],
         },
+
+        /* 2 */
+        introduction: {
+          title: "2. Introducción y Aceptación",
+          content:
+            'Bienvenido a Dorraiz Insurance. Estos Términos y Condiciones ("Términos") rigen el uso de nuestros servicios de seguros y sitio web. Al utilizar nuestros servicios, usted acepta estos términos.',
+        },
+
+        /* 3 */
         services: {
-          title: "2. Descripción de Servicios",
-          content: `Dorraiz Insurance proporciona los siguientes servicios:`,
+          title: "3. Descripción de Servicios",
+          content: "Dorraiz Insurance proporciona los siguientes servicios:",
           items: [
             "Consultoría y asesoramiento en seguros ACA (Obamacare)",
-            "Servicios de seguros Medicare (Partes A, B, C, y D)",
+            "Servicios de seguros Medicare (Partes A, B, C y D)",
             "Seguros de vida, dental y visión",
             "Comparación y análisis de planes de seguros",
             "Asistencia con inscripciones y renovaciones",
@@ -30,178 +52,247 @@ export default function TermsOfServicePage() {
             "Optimización de costos y análisis de subsidios",
           ],
         },
+
+        /* 4 */
         eligibility: {
-          title: "3. Elegibilidad y Licencias",
-          content: `Nuestros servicios están disponibles para residentes de los estados donde Daniel Orraiz mantiene licencias activas de seguros. Actualmente estamos licenciados en más de 20 estados de Estados Unidos. La elegibilidad para planes específicos depende de regulaciones estatales y federales.`,
+          title: "4. Elegibilidad y Licencias",
+          content:
+            "Nuestros servicios están disponibles para residentes de los estados donde Daniel Orraiz mantiene licencias activas. Actualmente contamos con licencias en más de 20 estados de EE.UU.",
         },
+
+        /* 5 */
         responsibilities: {
-          title: "4. Responsabilidades del Cliente",
-          content: `Como cliente, usted se compromete a:`,
+          title: "5. Responsabilidades del Cliente",
+          content: "Como cliente, usted se compromete a:",
           items: [
             "Proporcionar información precisa y completa durante el proceso de cotización",
-            "Notificar cambios en su situación personal o financiera que puedan afectar su cobertura",
+            "Notificar cambios en su situación que puedan afectar su cobertura",
             "Revisar cuidadosamente todos los documentos de póliza antes de firmar",
-            "Pagar las primas de seguros directamente a la compañía de seguros según los términos acordados",
-            "Cumplir con todos los términos y condiciones de su póliza de seguro",
-            "Mantener la confidencialidad de su información de cuenta y acceso",
+            "Pagar primas directamente a la aseguradora según los términos acordados",
+            "Cumplir con todos los términos de su póliza",
+            "Mantener la confidencialidad de la información de su cuenta",
           ],
         },
+
+        /* 6 */
         limitations: {
-          title: "5. Limitaciones de Responsabilidad",
-          content: `Dorraiz Insurance actúa como intermediario entre usted y las compañías de seguros. Nuestras responsabilidades incluyen:`,
+          title: "6. Limitaciones de Responsabilidad",
+          content:
+            "Dorraiz Insurance actúa como intermediario entre usted y las compañías de seguros. Nuestras responsabilidades incluyen:",
           items: [
             "Proporcionar información precisa sobre planes disponibles",
-            "Asistir en el proceso de solicitud y inscripción",
-            "Brindar soporte continuo durante la vigencia de su póliza",
-            "Mantener la confidencialidad de su información personal",
+            "Asistir en la solicitud e inscripción",
+            "Brindar soporte durante la vigencia de su póliza",
+            "Mantener la confidencialidad de su información",
           ],
           limitations: [
-            "No somos responsables por decisiones de cobertura tomadas por las compañías de seguros",
-            "No garantizamos la aprobación de solicitudes de seguros",
-            "No somos responsables por cambios en regulaciones o disponibilidad de planes",
-            "Nuestra responsabilidad se limita a los servicios de intermediación y asesoramiento",
+            "No somos responsables por decisiones de cobertura de las aseguradoras",
+            "No garantizamos la aprobación de solicitudes",
+            "No respondemos por cambios regulatorios o disponibilidad de planes",
+            "Nuestra responsabilidad se limita a intermediación y asesoramiento",
           ],
         },
+
+        /* 7 */
         privacy: {
-          title: "6. Privacidad y Confidencialidad",
-          content: `Nos comprometemos a proteger su privacidad según nuestra Política de Privacidad. Específicamente:`,
+          title: "7. Privacidad y Confidencialidad",
+          content:
+            "Nos comprometemos a proteger su privacidad conforme a nuestra Política de Privacidad:",
           items: [
-            "SMS opt-in o números de teléfono para el propósito de SMS no están siendo compartidos con ningún tercero y empresa afiliada para propósitos de marketing",
-            "Su información personal se utiliza exclusivamente para proporcionar servicios de seguros",
-            "Mantenemos estrictos estándares de confidencialidad en todas nuestras comunicaciones",
-            "Cumplimos con todas las regulaciones aplicables de protección de datos",
+            "Los números obtenidos para SMS no se comparten con terceros con fines de marketing",
+            "Su información se usa exclusivamente para brindarle servicios de seguros",
+            "Mantenemos estrictos estándares de confidencialidad",
+            "Cumplimos con las normativas de protección de datos aplicables",
           ],
         },
+
+        /* 8 */
         fees: {
-          title: "7. Honorarios y Compensación",
-          content: `Nuestros servicios de consultoría y asesoramiento son generalmente gratuitos para el consumidor. Recibimos compensación de las compañías de seguros por las pólizas vendidas. Esta compensación no afecta el costo de su prima de seguro.`,
+          title: "8. Honorarios y Compensación",
+          content:
+            "Nuestros servicios suelen ser gratuitos para el consumidor. Recibimos compensación de las aseguradoras, lo cual no afecta el costo de su prima.",
         },
+
+        /* 9 */
         termination: {
-          title: "8. Terminación de Servicios",
-          content: `Cualquiera de las partes puede terminar esta relación de servicios en cualquier momento con notificación por escrito. La terminación no afecta las pólizas de seguro ya en vigor, las cuales continúan según sus propios términos y condiciones.`,
+          title: "9. Terminación de Servicios",
+          content:
+            "Cualquiera de las partes puede terminar esta relación con notificación por escrito. Las pólizas vigentes continúan según sus propios términos.",
         },
+
+        /* 10 */
         compliance: {
-          title: "9. Cumplimiento Legal",
-          content: `Dorraiz Insurance opera en cumplimiento total con:`,
+          title: "10. Cumplimiento Legal",
+          content: "Operamos en cumplimiento total con:",
           items: [
-            "Regulaciones estatales de seguros en todos los estados donde estamos licenciados",
+            "Regulaciones estatales de seguros",
             "Ley de Cuidado de Salud Asequible (ACA)",
             "Regulaciones de Medicare y Medicaid",
-            "Leyes federales y estatales de protección al consumidor",
-            "Requisitos de licencias profesionales de seguros",
+            "Leyes de protección al consumidor",
+            "Requisitos de licencias profesionales",
           ],
         },
+
+        /* 11 */
         modifications: {
-          title: "10. Modificaciones a los Términos",
-          content: `Nos reservamos el derecho de modificar estos términos en cualquier momento. Las modificaciones serán efectivas inmediatamente después de su publicación en nuestro sitio web. El uso continuado de nuestros servicios constituye aceptación de los términos modificados.`,
+          title: "11. Modificaciones",
+          content:
+            "Nos reservamos el derecho de actualizar estos términos en cualquier momento. Las modificaciones serán efectivas tras su publicación.",
         },
+
+        /* 12 */
         contact: {
-          title: "11. Información de Contacto",
-          content: `Para preguntas sobre estos Términos y Condiciones:`,
+          title: "12. Información de Contacto",
+          content: "Para preguntas sobre estos Términos:",
           details: [
             "Agente: Daniel Orraiz",
             "Email: info@dorraizinsurance.com",
-            "Teléfono: (956) 302-1451 / (407) 785-9073",
-            "Licenciado en: Más de 20 Estados de EE.UU.",
+            "Tel: (956) 302-1451 / (407) 785-9073",
           ],
         },
       },
     },
+
+    /* ─────────────  ENGLISH VERSION ───────────── */
     en: {
       title: "Terms and Conditions",
       lastUpdated: "Last updated: June 20, 2025",
       backToHome: "Back to Home",
       sections: {
-        introduction: {
-          title: "1. Introduction and Acceptance",
-          content: `Welcome to Dorraiz Insurance. These Terms and Conditions ("Terms") govern the use of our insurance services and website. By using our services, you agree to be bound by these terms. Daniel Orraiz, licensed insurance agent in over 20 states, operates under these conditions.`,
-        },
-        services: {
-          title: "2. Description of Services",
-          content: `Dorraiz Insurance provides the following services:`,
+        /* 1 */
+        sms: {
+          title: "1. SMS Terms and Conditions",
+          content:
+            "The following policies govern all SMS communications issued by Dorraiz Insurance:",
           items: [
-            "ACA (Obamacare) insurance consulting and advisory services",
-            "Medicare insurance services (Parts A, B, C, and D)",
-            "Life, dental, and vision insurance",
-            "Insurance plan comparison and analysis",
+            "1 – SMS Consent Communication: phone numbers collected for SMS consent are not shared with third parties for marketing purposes.",
+            "2 – Types of SMS: payment reminders, enrollment notices and service notifications. Examples: “Dear Client: we remind you that your policy is about to lapse…” or “Hi, this is a friendly reminder of your upcoming appointment…”. You may reply STOP at any time to opt out.",
+            "3 – Message Frequency: frequency may vary; for example, up to 3 SMS per week related to your policy or enrollment period.",
+            "4 – Possible Charges: standard message and data rates may apply, and may vary for domestic or international SMS.",
+            "5 – Opt-In Method: by checking the SMS-consent box in our online forms.",
+            "6 – Opt-Out Method: you may stop receiving SMS at any time by replying “STOP” or contacting us directly to be removed.",
+            "7 – Help: reply “HELP” or visit https://www.dorraizinsurance.com/contact if you need assistance.",
+            "8 – Standard Disclosure: message/data rates may apply. For help text HELP to (956) 302-1451. Message frequency varies.",
+          ],
+        },
+
+        /* 2 */
+        introduction: {
+          title: "2. Introduction and Acceptance",
+          content:
+            "Welcome to Dorraiz Insurance. These Terms and Conditions (“Terms”) govern the use of our insurance services and website. By using our services, you agree to these terms.",
+        },
+
+        /* 3 */
+        services: {
+          title: "3. Description of Services",
+          content: "Dorraiz Insurance provides the following services:",
+          items: [
+            "ACA (Obamacare) insurance consulting and advisory",
+            "Medicare insurance services (Parts A, B, C and D)",
+            "Life, dental and vision insurance",
+            "Plan comparison and analysis",
             "Enrollment and renewal assistance",
             "Ongoing support and customer service",
-            "Cost optimization and subsidy analysis",
+            "Cost-optimisation and subsidy analysis",
           ],
         },
+
+        /* 4 */
         eligibility: {
-          title: "3. Eligibility and Licenses",
-          content: `Our services are available to residents of states where Daniel Orraiz maintains active insurance licenses. We are currently licensed in over 20 US states. Eligibility for specific plans depends on state and federal regulations.`,
+          title: "4. Eligibility and Licenses",
+          content:
+            "Our services are available in the states where Daniel Orraiz holds active licenses—currently 20+ U.S. states.",
         },
+
+        /* 5 */
         responsibilities: {
-          title: "4. Client Responsibilities",
-          content: `As a client, you agree to:`,
+          title: "5. Client Responsibilities",
+          content: "As a client, you agree to:",
           items: [
             "Provide accurate and complete information during the quote process",
-            "Notify changes in your personal or financial situation that may affect your coverage",
-            "Carefully review all policy documents before signing",
-            "Pay insurance premiums directly to the insurance company according to agreed terms",
-            "Comply with all terms and conditions of your insurance policy",
-            "Maintain confidentiality of your account information and access",
+            "Notify changes that may affect your coverage",
+            "Review all policy documents carefully before signing",
+            "Pay premiums directly to the insurer as agreed",
+            "Comply with all policy terms",
+            "Maintain confidentiality of your account information",
           ],
         },
+
+        /* 6 */
         limitations: {
-          title: "5. Liability Limitations",
-          content: `Dorraiz Insurance acts as an intermediary between you and insurance companies. Our responsibilities include:`,
+          title: "6. Liability Limitations",
+          content:
+            "Dorraiz Insurance acts as an intermediary between you and insurance companies. Our responsibilities include:",
           items: [
             "Providing accurate information about available plans",
-            "Assisting in the application and enrollment process",
-            "Providing ongoing support during your policy term",
-            "Maintaining confidentiality of your personal information",
+            "Assisting with application and enrollment",
+            "Offering support during the policy term",
+            "Keeping your information confidential",
           ],
           limitations: [
-            "We are not responsible for coverage decisions made by insurance companies",
-            "We do not guarantee approval of insurance applications",
-            "We are not responsible for changes in regulations or plan availability",
-            "Our liability is limited to intermediation and advisory services",
+            "Not responsible for coverage decisions by insurers",
+            "No guarantee of application approval",
+            "Not responsible for regulatory changes or plan availability",
+            "Liability limited to intermediation and advisory services",
           ],
         },
+
+        /* 7 */
         privacy: {
-          title: "6. Privacy and Confidentiality",
-          content: `We are committed to protecting your privacy according to our Privacy Policy. Specifically:`,
+          title: "7. Privacy and Confidentiality",
+          content:
+            "We are committed to protecting your privacy according to our Privacy Policy:",
           items: [
-            "SMS opt-in or phone numbers for the purpose of SMS are not being shared with any third party and affiliate company for marketing purposes",
-            "Your personal information is used exclusively to provide insurance services",
-            "We maintain strict confidentiality standards in all our communications",
-            "We comply with all applicable data protection regulations",
+            "Numbers collected for SMS consent are not shared with third parties for marketing",
+            "Your data is used solely to provide insurance services",
+            "We maintain strict confidentiality standards",
+            "We comply with all applicable data-protection regulations",
           ],
         },
+
+        /* 8 */
         fees: {
-          title: "7. Fees and Compensation",
-          content: `Our consulting and advisory services are generally free to the consumer. We receive compensation from insurance companies for policies sold. This compensation does not affect the cost of your insurance premium.`,
+          title: "8. Fees and Compensation",
+          content:
+            "Our consulting services are generally free to consumers. We are compensated by insurers, which does not affect your premium.",
         },
+
+        /* 9 */
         termination: {
-          title: "8. Service Termination",
-          content: `Either party may terminate this service relationship at any time with written notice. Termination does not affect insurance policies already in force, which continue according to their own terms and conditions.`,
+          title: "9. Service Termination",
+          content:
+            "Either party may terminate this relationship with written notice. Policies in force remain subject to their own terms.",
         },
+
+        /* 10 */
         compliance: {
-          title: "9. Legal Compliance",
-          content: `Dorraiz Insurance operates in full compliance with:`,
+          title: "10. Legal Compliance",
+          content: "Dorraiz Insurance operates in full compliance with:",
           items: [
-            "State insurance regulations in all states where we are licensed",
+            "State insurance regulations",
             "Affordable Care Act (ACA)",
             "Medicare and Medicaid regulations",
-            "Federal and state consumer protection laws",
-            "Professional insurance licensing requirements",
+            "Federal and state consumer-protection laws",
+            "Professional licensing requirements",
           ],
         },
+
+        /* 11 */
         modifications: {
-          title: "10. Modifications to Terms",
-          content: `We reserve the right to modify these terms at any time. Modifications will be effective immediately after posting on our website. Continued use of our services constitutes acceptance of the modified terms.`,
+          title: "11. Modifications",
+          content:
+            "We reserve the right to update these terms at any time. Changes take effect once posted on this page.",
         },
+
+        /* 12 */
         contact: {
-          title: "11. Contact Information",
-          content: `For questions about these Terms and Conditions:`,
+          title: "12. Contact Information",
+          content: "For questions about these Terms:",
           details: [
             "Agent: Daniel Orraiz",
-            "Email: dorraizinsurance@gmail.com",
+            "Email: info@dorraizinsurance.com",
             "Phone: (956) 302-1451 / (407) 785-9073",
-            "Licensed in: 20+ US States",
           ],
         },
       },
@@ -210,11 +301,12 @@ export default function TermsOfServicePage() {
 
   const t = content[language];
 
+  /** ─────────────  RENDER  ───────────── */
   return (
     <div className="min-h-screen bg-white">
       <main className="pt-24 pb-16">
         <div className="container mx-auto px-4 max-w-4xl">
-          {/* Back to Home Link */}
+          {/* Back link */}
           <div className="mb-6">
             <Link
               href="/"
@@ -225,55 +317,59 @@ export default function TermsOfServicePage() {
             </Link>
           </div>
 
+          {/* Title */}
           <div className="mb-8">
-            <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
+            <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
               {t.title}
             </h1>
             <p className="text-gray-600">{t.lastUpdated}</p>
           </div>
 
+          {/* Sections */}
           <div className="prose prose-lg max-w-none">
-            {Object.entries(t.sections).map(([key, section]) => (
-              <div key={key} className="mb-8">
+            {Object.values(t.sections).map((section, idx) => (
+              <div key={idx} className="mb-8">
                 <h2 className="text-xl lg:text-2xl font-semibold text-gray-900 mb-4">
                   {section.title}
                 </h2>
+
                 <p className="text-gray-700 mb-4 leading-relaxed">
                   {section.content}
                 </p>
 
-                {section.items && (
+                {"items" in section && Array.isArray(section.items) && (
                   <ul className="list-disc pl-6 space-y-2 mb-4">
-                    {section.items.map((item, index) => (
-                      <li key={index} className="text-gray-700">
+                    {section.items.map((item, i) => (
+                      <li key={i} className="text-gray-700">
                         {item}
                       </li>
                     ))}
                   </ul>
                 )}
 
-                {section.limitations && (
-                  <div className="mt-4">
-                    <p className="text-gray-700 font-medium mb-2">
-                      {language === "es"
-                        ? "Sin embargo, no somos responsables por:"
-                        : "However, we are not responsible for:"}
-                    </p>
-                    <ul className="list-disc pl-6 space-y-2 mb-4">
-                      {section.limitations.map((limitation, index) => (
-                        <li key={index} className="text-gray-700">
-                          {limitation}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
+                {"limitations" in section &&
+                  Array.isArray(section.limitations) && (
+                    <div className="mt-4">
+                      <p className="text-gray-700 font-medium mb-2">
+                        {language === "es"
+                          ? "Sin embargo, no somos responsables por:"
+                          : "However, we are not responsible for:"}
+                      </p>
+                      <ul className="list-disc pl-6 space-y-2 mb-4">
+                        {section.limitations.map((lim, i) => (
+                          <li key={i} className="text-gray-700">
+                            {lim}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
 
-                {section.details && (
+                {"details" in section && Array.isArray(section.details) && (
                   <ul className="list-none space-y-2 mb-4">
-                    {section.details.map((detail, index) => (
-                      <li key={index} className="text-gray-700 font-medium">
-                        {detail}
+                    {section.details.map((det, i) => (
+                      <li key={i} className="text-gray-700 font-medium">
+                        {det}
                       </li>
                     ))}
                   </ul>
@@ -282,6 +378,7 @@ export default function TermsOfServicePage() {
             ))}
           </div>
 
+          {/* CTA */}
           <div className="mt-12 p-6 bg-blue-50 rounded-lg border border-blue-200">
             <h3 className="text-lg font-semibold text-blue-800 mb-2">
               {language === "es"
