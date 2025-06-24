@@ -3,25 +3,41 @@
 import { Separator } from "@/components/ui/separator";
 import { Phone, Mail, MapPin, Facebook, Instagram } from "lucide-react";
 import { useLanguage } from "@/hooks/useLanguage";
+import { usePathname } from "next/navigation";
 import { translations } from "@/lib/translations";
 import Image from "next/image";
+import Link from "next/link";
 
 export function Footer() {
+  const pathname = usePathname();
   const { language } = useLanguage();
   const t = translations[language];
   const currentYear = new Date().getFullYear();
+  const isHomePage = pathname === "/";
 
   const footerLinks = {
     services: [
-      { name: t.services.items.aca.title, href: "#services" },
-      { name: t.services.items.medicare.title, href: "#services" },
-      { name: t.services.items.family.title, href: "#services" },
-      { name: t.services.items.comparison.title, href: "#services" },
+      {
+        name: t.services.items.aca.title,
+        href: isHomePage ? "#services" : "/#services",
+      },
+      {
+        name: t.services.items.medicare.title,
+        href: isHomePage ? "#services" : "/#services",
+      },
+      {
+        name: t.services.items.family.title,
+        href: isHomePage ? "#services" : "/#services",
+      },
+      {
+        name: t.services.items.comparison.title,
+        href: isHomePage ? "#services" : "/#services",
+      },
     ],
     company: [
-      { name: t.nav.about, href: "#about" },
-      { name: t.nav.coverage, href: "#coverage" },
-      { name: t.nav.contact, href: "contact" },
+      { name: t.nav.about, href: isHomePage ? "#about" : "/#about" },
+      { name: t.nav.coverage, href: isHomePage ? "#coverage" : "/#coverage" },
+      { name: t.nav.contact, href: "/contact" },
       { name: t.footer.links.privacy, href: "/privacy-policy" },
       { name: t.footer.links.terms, href: "/terms-of-service" },
     ],
@@ -77,9 +93,9 @@ export function Footer() {
             <ul className="space-y-2 text-sm text-gray-400">
               {footerLinks.services.map((link) => (
                 <li key={link.name}>
-                  <a href={link.href} className="hover:text-white">
+                  <Link href={link.href} className="hover:text-white">
                     {link.name}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -91,9 +107,9 @@ export function Footer() {
             <ul className="space-y-2 text-sm text-gray-400 mb-6">
               {footerLinks.company.map((link) => (
                 <li key={link.name}>
-                  <a href={link.href} className="hover:text-white">
+                  <Link href={link.href} className="hover:text-white">
                     {link.name}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -126,12 +142,12 @@ export function Footer() {
             © {currentYear} Dorraiz Insurance. {t.footer.rights}
           </div>
           <div className="flex space-x-4 mt-4 sm:mt-0">
-            <a href="/terms-of-service" className="hover:text-white">
+            <Link href="/terms-of-service" className="hover:text-white">
               {t.footer.links.terms}
-            </a>
-            <a href="/privacy-policy" className="hover:text-white">
+            </Link>
+            <Link href="/privacy-policy" className="hover:text-white">
               {t.footer.links.privacy}
-            </a>
+            </Link>
           </div>
         </div>
       </div>

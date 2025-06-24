@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Send, Loader2, ArrowLeft } from "lucide-react";
+import { Send, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { contactFormSchema } from "@/lib/validation/contactFormSchema";
 import { submitContactForm } from "@/actions/contact/contactAction";
@@ -132,16 +132,7 @@ export default function Contact() {
 
   return (
     <section id="contact" className="py-16 lg:py-20 bg-gray-50">
-      <div className="container mx-auto px-4">
-        <div className="mb-6">
-          <Link
-            href="/"
-            className="inline-flex items-center text-green-600 hover:text-green-700 transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Volver al inicio
-          </Link>
-        </div>
+      <div className="container mx-auto px-4 mt-3">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold text-gray-900 mb-4">
             {translations[language].contact.title}
@@ -251,18 +242,18 @@ export default function Contact() {
               )}
               <div className="text-sm text-gray-600">
                 <p className="mt-4 flex justify-between">
-                  <a
+                  <Link
                     href="/privacy-policy"
                     className="text-blue-600 underline mr-4"
                   >
                     {translations[language].footer.links.privacy}
-                  </a>
-                  <a
+                  </Link>
+                  <Link
                     href="/terms-of-service"
                     className="text-blue-600 underline"
                   >
                     {translations[language].footer.links.terms}
-                  </a>
+                  </Link>
                 </p>
               </div>
 

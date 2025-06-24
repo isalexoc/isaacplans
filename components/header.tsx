@@ -90,20 +90,11 @@ export function Header() {
               <span>{t.header.phone}</span>
             </div>
             <LanguageToggle />
-            <Button
-              className="bg-green-600 hover:bg-green-700"
-              onClick={() => {
-                if (isHomePage) {
-                  document
-                    .getElementById("contact")
-                    ?.scrollIntoView({ behavior: "smooth" });
-                } else {
-                  window.location.href = "/contact";
-                }
-              }}
-            >
-              {t.header.cta}
-            </Button>
+            <Link href="/contact">
+              <Button className="bg-green-600 hover:bg-green-700">
+                {t.header.cta}
+              </Button>
+            </Link>
           </div>
 
           {/* Mobile Menu */}
@@ -137,13 +128,8 @@ export function Header() {
                     className="w-full bg-green-600 hover:bg-green-700"
                     onClick={() => {
                       setIsOpen(false);
-                      if (isHomePage) {
-                        document
-                          .getElementById("contact")
-                          ?.scrollIntoView({ behavior: "smooth" });
-                      } else {
-                        window.location.href = "/contact";
-                      }
+
+                      window.location.href = "/contact";
                     }}
                   >
                     {t.header.cta}
