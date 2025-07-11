@@ -407,6 +407,102 @@ export default function TermsOfServicePage() {
             </div>
           </div>
         </div>
+        <table
+          cellPadding={0}
+          cellSpacing={0}
+          style={{
+            fontFamily: "Calibri, Arial, sans-serif",
+            fontSize: "14px",
+            lineHeight: "20px",
+            color: "#1a1a1a",
+          }}
+        >
+          <tbody>
+            <tr>
+              {/* Logo */}
+
+              {/* Main info */}
+              <td style={{ verticalAlign: "top" }}>
+                <img
+                  src="https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_40,h_40,c_fill,g_auto/isaacplanslogo_tkraak.png"
+                  alt="Isaac Plans"
+                  style={{ width: "40px", height: "40px", border: "none" }}
+                />
+                {/* Name & role */}
+                <div
+                  style={{
+                    fontWeight: 600,
+                    fontSize: "16px",
+                    color: "#004f64",
+                    marginBottom: "2px",
+                  }}
+                >
+                  Information Center&nbsp;|&nbsp;Isaac Plans
+                </div>
+
+                {/* Contact links */}
+                <table
+                  cellPadding={0}
+                  cellSpacing={0}
+                  style={{ fontSize: "14px", lineHeight: "20px" }}
+                >
+                  <tbody>
+                    <tr>
+                      <td style={{ paddingRight: "6px" }}>
+                        <img
+                          src="https://img.icons8.com/ios-filled/18/004f64/domain.png"
+                          alt="Website"
+                          style={{ display: "block" }}
+                        />
+                      </td>
+                      <td>
+                        <a
+                          href="https://www.isaacplans.com"
+                          style={{ color: "#004f64", textDecoration: "none" }}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          www.isaacplans.com
+                        </a>
+                      </td>
+                    </tr>
+
+                    <tr>
+                      <td style={{ paddingRight: "6px" }}>
+                        <img
+                          src="https://img.icons8.com/ios-filled/18/004f64/new-post.png"
+                          alt="Email"
+                          style={{ display: "block" }}
+                        />
+                      </td>
+                      <td>
+                        <a
+                          href="mailto:info@isaacplans.com"
+                          style={{ color: "#004f64", textDecoration: "none" }}
+                        >
+                          info@isaacplans.com
+                        </a>
+                      </td>
+                    </tr>
+
+                    <tr>
+                      <td style={{ paddingRight: "6px" }}>
+                        <img
+                          src="https://img.icons8.com/ios-filled/18/004f64/phone.png"
+                          alt="Phone"
+                          style={{ display: "block" }}
+                        />
+                      </td>
+                      <td style={{ color: "#004f64", fontWeight: 500 }}>
+                        540-681-3507
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </main>
     </div>
   );
