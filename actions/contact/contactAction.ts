@@ -22,11 +22,11 @@ export const submitContactForm = async (_: any, formData: FormData) => {
     const date = new Date().toLocaleString();
 
     await transporter.sendMail({
-      from: `"Info | Dorraiz Insurance" <${process.env.EMAIL_USER_INFO}>`,
+      from: `"Info | Isaac Plans" <${process.env.EMAIL_USER_INFO}>`,
       to: process.env.EMAIL_USER_INFO,
       subject: `New Contact Form Submission from ${parsed.name}`,
       html: `
-        <h2>Contact Form Submission - Dorraiz Insurance</h2>
+        <h2>Contact Form Submission - Isaac Plans</h2>
         <p><strong>Date:</strong> ${date}</p>
         <p><strong>Name:</strong> ${parsed.name}</p>
         <p><strong>Email:</strong> ${parsed.email}</p>

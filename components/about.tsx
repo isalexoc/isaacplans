@@ -39,7 +39,7 @@ export function About() {
     <section id="about" className="py-16 lg:py-20 bg-gray-50">
       <div className="container mx-auto px-4">
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-          {/* Text Content - First on mobile, First on desktop */}
+          {/* ─────────── Text Content ─────────── */}
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -68,7 +68,7 @@ export function About() {
                   <Badge
                     key={cert}
                     variant="secondary"
-                    className="text-xs lg:text-sm bg-green-100 text-green-800"
+                    className="text-xs lg:text-sm bg-custom/10 text-custom"
                   >
                     {cert}
                   </Badge>
@@ -77,7 +77,7 @@ export function About() {
             </div>
           </motion.div>
 
-          {/* Image Content - Second on mobile, Second on desktop */}
+          {/* ─────────── Image / Achievements ─────────── */}
           <motion.div
             initial={{ opacity: 0, x: 50 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -87,7 +87,7 @@ export function About() {
             <div className="relative mb-6 lg:mb-8 grid grid-cols-1 sm:grid-cols-2 gap-6 place-items-center">
               {/* Logo Image */}
               <Image
-                src="https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_350/logo-title_c0wkke.png"
+                src="https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_350/ChatGPT_Image_Jul_11_2025_12_32_22_AM_ym5ioh.png"
                 alt="Dorraiz Insurance Logo"
                 width={350}
                 height={350}
@@ -117,7 +117,7 @@ export function About() {
                 >
                   <Card className="p-3 lg:p-4 text-center hover:shadow-md transition-shadow">
                     <CardContent className="p-0">
-                      <achievement.icon className="w-6 h-6 lg:w-8 lg:h-8 text-green-600 mx-auto mb-2 lg:mb-3" />
+                      <achievement.icon className="w-6 h-6 lg:w-8 lg:h-8 text-custom mx-auto mb-2 lg:mb-3" />
                       <h4 className="font-semibold text-xs lg:text-sm mb-1 lg:mb-2">
                         {achievement.title}
                       </h4>

@@ -18,7 +18,7 @@ export default function TermsOfServicePage() {
         sms: {
           title: "1. Términos y Condiciones de SMS",
           content:
-            "Las siguientes políticas regulan todas las comunicaciones por SMS emitidas por Dorraiz Insurance:",
+            "Las siguientes políticas regulan todas las comunicaciones por SMS emitidas por Isaac Plans:",
           items: [
             "1 – Comunicación de consentimiento de SMS: Los números telefónicos obtenidos para consentimiento SMS no se comparten con terceros para fines de marketing.",
             "2 – Tipos de comunicaciones SMS: recordatorios de pago, avisos de inscripción y notificaciones de servicio. Ejemplos: «Estimado Cliente: le recordamos que su póliza caerá en inactividad…» o «Hola, este es un recordatorio amistoso de su próxima cita…». Puede responder STOP para dejar de recibir SMS en cualquier momento.",
@@ -26,7 +26,7 @@ export default function TermsOfServicePage() {
             "4 – Posibles tarifas: se pueden aplicar cargos estándar de mensajes y datos, los cuales pueden variar si el SMS es nacional o internacional.",
             "5 – Método de inclusión (Opt-In): marcando la casilla de consentimiento en nuestros formularios en línea.",
             "6 – Método de exclusión (Opt-Out): puede darse de baja en cualquier momento respondiendo «STOP» o contactándonos directamente para ser eliminado.",
-            "7 – Ayuda: si experimenta problemas, responda «AYUDA» o visite https://www.dorraizinsurance.com/contact.",
+            "7 – Ayuda: si experimenta problemas, responda «AYUDA» o visite https://www.isaacplans.com/contact.",
             "8 – Divulgaciones estándar: podrían aplicarse tarifas de mensajes y datos. Para ayuda envíe AYUDA al (956) 302-1451. La frecuencia de mensajes puede variar.",
           ],
         },
@@ -35,13 +35,14 @@ export default function TermsOfServicePage() {
         introduction: {
           title: "2. Introducción y Aceptación",
           content:
-            'Bienvenido a Dorraiz Insurance. Estos Términos y Condiciones ("Términos") rigen el uso de nuestros servicios de seguros y sitio web. Al utilizar nuestros servicios, usted acepta estos términos.',
+            'Bienvenido a Isaac Plans. Estos Términos y Condiciones ("Términos") rigen el uso de nuestros servicios de seguros y sitio web. Al utilizar nuestros servicios, usted acepta estos términos.',
         },
 
         /* 3 */
         services: {
           title: "3. Descripción de Servicios",
-          content: "Dorraiz Insurance proporciona los siguientes servicios:",
+          content:
+            "Isaac Plans Insurance proporciona los siguientes servicios:",
           items: [
             "Consultoría y asesoramiento en seguros ACA (Obamacare)",
             "Servicios de seguros Medicare (Partes A, B, C y D)",
@@ -57,7 +58,7 @@ export default function TermsOfServicePage() {
         eligibility: {
           title: "4. Elegibilidad y Licencias",
           content:
-            "Nuestros servicios están disponibles para residentes de los estados donde Daniel Orraiz mantiene licencias activas. Actualmente contamos con licencias en más de 20 estados de EE.UU.",
+            "Nuestros servicios están disponibles para residentes de los estados donde Isaac Orraiz mantiene licencias activas. Actualmente contamos con licencias en más de 20 estados de EE.UU.",
         },
 
         /* 5 */
@@ -78,7 +79,7 @@ export default function TermsOfServicePage() {
         limitations: {
           title: "6. Limitaciones de Responsabilidad",
           content:
-            "Dorraiz Insurance actúa como intermediario entre usted y las compañías de seguros. Nuestras responsabilidades incluyen:",
+            "Isaac Plans actúa como intermediario entre usted y las compañías de seguros. Nuestras responsabilidades incluyen:",
           items: [
             "Proporcionar información precisa sobre planes disponibles",
             "Asistir en la solicitud e inscripción",
@@ -145,9 +146,9 @@ export default function TermsOfServicePage() {
           title: "12. Información de Contacto",
           content: "Para preguntas sobre estos Términos:",
           details: [
-            "Agente: Daniel Orraiz",
-            "Email: info@dorraizinsurance.com",
-            "Tel: (956) 302-1451 / (407) 785-9073",
+            "Agente: Isaac Orraiz",
+            "Email: info@isaacplans.com",
+            "Tel: (540) 681-3507",
           ],
         },
       },
@@ -163,7 +164,7 @@ export default function TermsOfServicePage() {
         sms: {
           title: "1. SMS Terms and Conditions",
           content:
-            "The following policies govern all SMS communications issued by Dorraiz Insurance:",
+            "The following policies govern all SMS communications issued by Isaac Plans:",
           items: [
             "1 – SMS Consent Communication: phone numbers collected for SMS consent are not shared with third parties for marketing purposes.",
             "2 – Types of SMS: payment reminders, enrollment notices and service notifications. Examples: “Dear Client: we remind you that your policy is about to lapse…” or “Hi, this is a friendly reminder of your upcoming appointment…”. You may reply STOP at any time to opt out.",
@@ -171,7 +172,7 @@ export default function TermsOfServicePage() {
             "4 – Possible Charges: standard message and data rates may apply, and may vary for domestic or international SMS.",
             "5 – Opt-In Method: by checking the SMS-consent box in our online forms.",
             "6 – Opt-Out Method: you may stop receiving SMS at any time by replying “STOP” or contacting us directly to be removed.",
-            "7 – Help: reply “HELP” or visit https://www.dorraizinsurance.com/contact if you need assistance.",
+            "7 – Help: reply “HELP” or visit https://www.isaacplans.com/contact if you need assistance.",
             "8 – Standard Disclosure: message/data rates may apply. For help text HELP to (956) 302-1451. Message frequency varies.",
           ],
         },
@@ -180,13 +181,13 @@ export default function TermsOfServicePage() {
         introduction: {
           title: "2. Introduction and Acceptance",
           content:
-            "Welcome to Dorraiz Insurance. These Terms and Conditions (“Terms”) govern the use of our insurance services and website. By using our services, you agree to these terms.",
+            "Welcome to Isaac Plans. These Terms and Conditions (“Terms”) govern the use of our insurance services and website. By using our services, you agree to these terms.",
         },
 
         /* 3 */
         services: {
           title: "3. Description of Services",
-          content: "Dorraiz Insurance provides the following services:",
+          content: "Isaac Plans provides the following services:",
           items: [
             "ACA (Obamacare) insurance consulting and advisory",
             "Medicare insurance services (Parts A, B, C and D)",
@@ -202,7 +203,7 @@ export default function TermsOfServicePage() {
         eligibility: {
           title: "4. Eligibility and Licenses",
           content:
-            "Our services are available in the states where Daniel Orraiz holds active licenses—currently 20+ U.S. states.",
+            "Our services are available in the states where Isaac Orraiz holds active licenses—currently 9+ U.S. states.",
         },
 
         /* 5 */
@@ -223,7 +224,7 @@ export default function TermsOfServicePage() {
         limitations: {
           title: "6. Liability Limitations",
           content:
-            "Dorraiz Insurance acts as an intermediary between you and insurance companies. Our responsibilities include:",
+            "Isaac Plans acts as an intermediary between you and insurance companies. Our responsibilities include:",
           items: [
             "Providing accurate information about available plans",
             "Assisting with application and enrollment",
@@ -268,7 +269,7 @@ export default function TermsOfServicePage() {
         /* 10 */
         compliance: {
           title: "10. Legal Compliance",
-          content: "Dorraiz Insurance operates in full compliance with:",
+          content: "Isaac Plans operates in full compliance with:",
           items: [
             "State insurance regulations",
             "Affordable Care Act (ACA)",
@@ -290,9 +291,9 @@ export default function TermsOfServicePage() {
           title: "12. Contact Information",
           content: "For questions about these Terms:",
           details: [
-            "Agent: Daniel Orraiz",
-            "Email: info@dorraizinsurance.com",
-            "Phone: (956) 302-1451 / (407) 785-9073",
+            "Agent: Isaac Orraiz",
+            "Email: info@isaacplans.com",
+            "Phone: (540) 681-3507",
           ],
         },
       },
@@ -392,13 +393,13 @@ export default function TermsOfServicePage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-3">
               <a
-                href="tel:9563021451"
+                href="tel:5406813507"
                 className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors text-center"
               >
                 {language === "es" ? "Llamar Ahora" : "Call Now"}
               </a>
               <a
-                href="mailto:info@dorraizinsurance.com"
+                href="mailto:info@isaacplans.com"
                 className="bg-white text-blue-600 border border-blue-600 px-6 py-2 rounded-lg hover:bg-blue-50 transition-colors text-center"
               >
                 {language === "es" ? "Enviar Email" : "Send Email"}

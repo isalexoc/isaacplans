@@ -20,8 +20,8 @@ export const translations = {
           es: "Su información será utilizada para responder a su consulta y brindar servicios relacionados con seguros.",
         },
         sms: {
-          en: "By checking the consent box, you agree to receive SMS messages from Dorraiz Insurance. Message and data rates may apply. You may opt-out at any time by replying STOP.",
-          es: "Al marcar la casilla de consentimiento, acepta recibir mensajes SMS de Dorraiz Insurance. Pueden aplicarse tarifas por mensajes y datos. Puede cancelar en cualquier momento respondiendo STOP.",
+          en: "By checking the consent box, you agree to receive SMS messages from Isaac Plans. Message and data rates may apply. You may opt-out at any time by replying STOP.",
+          es: "Al marcar la casilla de consentimiento, acepta recibir mensajes SMS de Isaac Plans. Pueden aplicarse tarifas por mensajes y datos. Puede cancelar en cualquier momento respondiendo STOP.",
         },
         accuracy: {
           en: "You agree to provide accurate information. False information may result in service denial.",
@@ -37,8 +37,8 @@ export const translations = {
         },
       },
       contact: {
-        en: "If you have questions about these terms, please contact us at info@dorraizinsurance.com.",
-        es: "Si tiene preguntas sobre estos términos, contáctenos en info@dorraizinsurance.com.",
+        en: "If you have questions about these terms, please contact us at info@isaacplans.com.",
+        es: "Si tiene preguntas sobre estos términos, contáctenos en info@isaacplans.com.",
       },
     },
 
@@ -50,17 +50,17 @@ export const translations = {
       contact: "Contacto",
     },
     header: {
-      phone: "(956) 302-1451",
+      phone: "(540) 681-3507",
       cta: "Cotización Gratis",
     },
     // Hero
     hero: {
-      badge: "Licenciado en 20+ Estados",
-      name: "Daniel Orraiz",
+      badge: "Licenciado en 9+ Estados",
+      name: "Isaac Orraiz",
       title: "Su Agente de Seguros",
       subtitle: "de Confianza",
       description:
-        "Especializado en seguros ACA (Obamacare) y Medicare. Obtenga cobertura personalizada que se adapte a sus necesidades y presupuesto con orientación experta en cada paso.",
+        "Especializado en seguros ACA (Obamacare). Obtenga cobertura personalizada que se adapte a sus necesidades y presupuesto con orientación experta en cada paso.",
       cta1: "Cotización Gratis",
       cta2: "Agendar Consulta",
       stats: {
@@ -68,12 +68,20 @@ export const translations = {
         clients: "Clientes Atendidos",
         satisfaction: "Tasa de Satisfacción",
       },
+      onPicUp: {
+        title: "ACA Certificado",
+        des: "Cobertura Experta",
+      },
+      onPicDown: {
+        title: "Especialista en Salud",
+        des: "Todos los planes",
+      },
     },
     // Services
     services: {
       title: "Servicios Integrales de Seguros",
       subtitle:
-        "Desde planes del mercado ACA hasta cobertura Medicare, brindo orientación experta para ayudarle a navegar el complejo mundo de los seguros de salud.",
+        "Especialista en planes del mercado ACA, brindo orientación experta para ayudarle a navegar el complejo mundo de los seguros de salud.",
       items: {
         aca: {
           title: "Seguro de Salud ACA (Obamacare)",
@@ -147,33 +155,31 @@ export const translations = {
     about: {
       title: "Su Profesional de Seguros Dedicado",
       description1:
-        "Con más de 8 años de experiencia en la industria de seguros de salud, me especializo en ayudar a individuos y familias a navegar el complejo mundo de los seguros ACA y Medicare. Tengo licencia en ACA (Salud, Obama Care), Medicare, Vida, Dental y Visión en más de 20 estados.",
+        "Con experiencia en la industria de seguros de salud, me especializo en ayudar a individuos y familias a navegar el complejo mundo de los seguros ACA. Tengo licencia en ACA (Salud, Obama Care), Vida, Dental y Visión en más de 9 estados.",
       description2:
         "Estar licenciado en múltiples estados me permite servir a clientes a nivel nacional, asegurando que reciba orientación experta sin importar su ubicación. Me mantengo actualizado con todos los cambios regulatorios y nuevas ofertas de planes para brindarle la información y opciones más actualizadas.",
       certifications: "Certificaciones y Credenciales",
       certs: [
         "Agente de Seguros Licenciado",
         "Licencia ACA (Salud, Obama Care)",
-        "Especialista en Medicare",
         "Licencia en Seguro de Vida",
         "Licencia en Seguro Dental",
         "Licencia en Seguro de Visión",
       ],
       achievements: {
         states: {
-          title: "20+ Certificaciones Estatales",
+          title: "9+ Certificaciones Estatales",
           description:
             "Licenciado para servir clientes en múltiples estados de EE.UU.",
         },
         clients: {
-          title: "3000+ Clientes Satisfechos",
+          title: "Clientes Satisfechos",
           description:
             "Ayudando a individuos y familias a encontrar la cobertura correcta",
         },
         experience: {
-          title: "8+ Años de Experiencia",
-          description:
-            "Más de una década de experiencia en la industria de seguros de salud",
+          title: "Experiencia",
+          description: "Mucha experiencia en la industria de seguros de salud",
         },
         education: {
           title: "Educación Continua",
@@ -188,7 +194,7 @@ export const translations = {
       subtitle:
         "Licenciado y certificado para servir clientes en más de 20 estados de Estados Unidos. Donde quiera que esté, puedo ayudarle a encontrar la cobertura de seguro adecuada.",
       description:
-        "Con más de 8 años de experiencia y licencias en ACA (Salud, Obama Care), Medicare, Vida, Dental y Visión en múltiples estados, ofrezco servicios profesionales de seguros especializados.",
+        "Experiencia y licencias en ACA (Salud, Obama Care), Vida, Dental y Visión en múltiples estados, ofrezco servicios profesionales de seguros especializados.",
     },
     // Contact
     contact: {
@@ -197,7 +203,7 @@ export const translations = {
         "¿Listo para encontrar la cobertura de seguro perfecta? Contácteme hoy para una consulta personalizada y cotización gratuita adaptada a sus necesidades específicas.",
       form: {
         smsConsent:
-          "Al marcar esta casilla, doy mi consentimiento para recibir mensajes de texto relacionados con mis servicios de seguros de Dorraiz Insurance. Puedes responder “STOP” en cualquier momento para darte de baja. Pueden aplicarse tarifas de mensajes y datos. La frecuencia de los mensajes puede variar. Envía AYUDA al (956) 302-1451 para recibir asistencia. Para más información, visita nuestra Política de Privacidad y Términos de Servicio.",
+          "Al marcar esta casilla, doy mi consentimiento para recibir mensajes de texto relacionados con mis servicios de seguros de Isaac Plans. Puedes responder “STOP” en cualquier momento para darte de baja. Pueden aplicarse tarifas de mensajes y datos. La frecuencia de los mensajes puede variar. Envía AYUDA al (540) 681-3507 para recibir asistencia. Para más información, visita nuestra Política de Privacidad y Términos de Servicio.",
         title: "Solicite Su Cotización",
         name: "Nombre Completo *",
         email: "Correo Electrónico *",
@@ -221,17 +227,17 @@ export const translations = {
           "Estoy aquí para ayudarle a navegar el mercado de seguros y encontrar la cobertura que es adecuada para usted. No dude en comunicarse con cualquier pregunta.",
         phone: {
           title: "Teléfono",
-          details: "(956) 302-1451 / (407) 785-9073",
+          details: "(540) 681-3507",
           description: "Llame para asistencia inmediata",
         },
         email: {
           title: "Correo Electrónico",
-          details: "dorraizinsurance@gmail.com",
+          details: "info@isaacplans.com",
           description: "Envíenos sus preguntas",
         },
         coverage: {
           title: "Área de Servicio",
-          details: "20+ Estados a Nivel Nacional",
+          details: "9+ Estados a Nivel Nacional",
           description: "Licenciado en múltiples estados",
         },
         hours: {
@@ -243,14 +249,14 @@ export const translations = {
           title: "¿Listo para Comenzar?",
           description:
             "Llame ahora para asistencia inmediata o para programar su consulta gratuita.",
-          button: "Llamar (956) 302-1451",
+          button: "Llamar (540) 681-3507",
         },
       },
     },
     // Footer
     footer: {
       description:
-        "Su socio de seguros de confianza especializado en cobertura ACA y Medicare en más de 20 estados. Servicio profesional y personalizado en el que puede confiar.",
+        "Su socio de seguros de confianza especializado en cobertura ACA y Medicare en más de 9 estados. Servicio profesional y personalizado en el que puede confiar.",
       services: "Servicios",
       resources: "Recursos",
       company: "Empresa",
@@ -277,17 +283,17 @@ export const translations = {
       contact: "Contact",
     },
     header: {
-      phone: "(956) 302-1451",
+      phone: "(540) 681-3507",
       cta: "Free Quote",
     },
     // Hero
     hero: {
-      badge: "Licensed in 20+ States",
-      name: "Daniel Orraiz",
+      badge: "Licensed in 9+ States",
+      name: "Isaac Orraiz",
       title: "Your Trusted",
       subtitle: "Insurance Agent",
       description:
-        "Specializing in ACA (Obamacare) and Medicare insurance. Get personalized coverage that fits your needs and budget with expert guidance every step of the way.",
+        "Specializing in ACA (Obamacare) insurance. Get personalized coverage that fits your needs and budget with expert guidance every step of the way.",
       cta1: "Get Free Quote",
       cta2: "Schedule Consultation",
       stats: {
@@ -295,12 +301,20 @@ export const translations = {
         clients: "Clients Served",
         satisfaction: "Satisfaction Rate",
       },
+      onPicUp: {
+        title: "ACA Certified",
+        des: "The Right Plan",
+      },
+      onPicDown: {
+        title: "Health Specialist",
+        des: "All plans",
+      },
     },
     // Services
     services: {
       title: "Comprehensive Insurance Services",
       subtitle:
-        "From ACA marketplace plans to Medicare coverage, I provide expert guidance to help you navigate the complex world of health insurance.",
+        "ACA marketplace plans coverage, I provide expert guidance to help you navigate the complex world of health insurance.",
       items: {
         aca: {
           title: "ACA Health Insurance (Obamacare)",
@@ -390,8 +404,8 @@ export const translations = {
           es: "Su información será utilizada para responder a su consulta y brindar servicios relacionados con seguros.",
         },
         sms: {
-          en: "By checking the consent box, you agree to receive SMS messages from Dorraiz Insurance. Message and data rates may apply. You may opt-out at any time by replying STOP.",
-          es: "Al marcar la casilla de consentimiento, acepta recibir mensajes SMS de Dorraiz Insurance. Pueden aplicarse tarifas por mensajes y datos. Puede cancelar en cualquier momento respondiendo STOP.",
+          en: "By checking the consent box, you agree to receive SMS messages from Isaac Plans. Message and data rates may apply. You may opt-out at any time by replying STOP.",
+          es: "Al marcar la casilla de consentimiento, acepta recibir mensajes SMS de Isaac Plans. Pueden aplicarse tarifas por mensajes y datos. Puede cancelar en cualquier momento respondiendo STOP.",
         },
         accuracy: {
           en: "You agree to provide accurate information. False information may result in service denial.",
@@ -407,37 +421,36 @@ export const translations = {
         },
       },
       contact: {
-        en: "If you have questions about these terms, please contact us at info@dorraizinsurance.com.",
-        es: "Si tiene preguntas sobre estos términos, contáctenos en info@dorraizinsurance.com.",
+        en: "If you have questions about these terms, please contact us at info@isaacplans.com.",
+        es: "Si tiene preguntas sobre estos términos, contáctenos en info@isaacplans.com.",
       },
     },
     about: {
       title: "Your Dedicated Insurance Professional",
       description1:
-        "With over 8 years of experience in the health insurance industry, I specialize in helping individuals and families navigate the complex world of insurance. I am licensed in ACA (Health, Obama Care), Medicare, Life, Dental, and Vision insurance across 20+ states.",
+        "With experience in the health insurance industry, I specialize in helping individuals and families navigate the complex world of insurance. I am licensed in ACA (Health, Obama Care), Life, Dental, and Vision insurance across 9+ states.",
       description2:
         "Being licensed in multiple states allows me to serve clients nationwide, ensuring you receive expert guidance regardless of your location. I stay current with all regulatory changes and new plan offerings to provide you with the most up-to-date information and options.",
       certifications: "Certifications & Credentials",
       certs: [
         "Licensed Insurance Agent",
         "ACA License (Health, Obama Care)",
-        "Medicare Specialist",
         "Life Insurance License",
         "Dental Insurance License",
         "Vision Insurance License",
       ],
       achievements: {
         states: {
-          title: "20+ State Certifications",
+          title: "9+ State Certifications",
           description: "Licensed to serve clients across multiple US states",
         },
         clients: {
-          title: "3000+ Satisfied Clients",
+          title: "Satisfied Clients",
           description:
             "Helping individuals and families find the right coverage",
         },
         experience: {
-          title: "8+ Years Experience",
+          title: "Experience",
           description:
             "Over a decade of expertise in health insurance industry",
         },
@@ -453,7 +466,7 @@ export const translations = {
       subtitle:
         "Licensed and certified to serve clients in over 20 states across the United States. Wherever you are, I can help you find the right insurance coverage.",
       description:
-        "With over 8 years of experience and licenses in ACA (Health, Obama Care), Medicare, Life, Dental, and Vision across multiple states, I offer specialized professional insurance services.",
+        "With experience and licenses in ACA (Health, Obama Care), Life, Dental, and Vision across multiple states, I offer specialized professional insurance services.",
     },
     // Contact
     contact: {
@@ -462,7 +475,7 @@ export const translations = {
         "Ready to find the perfect insurance coverage? Contact me today for a personalized consultation and free quote tailored to your specific needs.",
       form: {
         smsConsent:
-          "By checking this box, I consent to receive text messages related to my insurance services from Dorraiz Insurance. You can reply “STOP” at any time to opt out. Message and data rates may apply. Message frequency may vary. Text HELP to (956) 302-1451 for assistance. For more information, visit our Privacy Policy and Terms of Service.",
+          "By checking this box, I consent to receive text messages related to my insurance services from Isaac Plans. You can reply “STOP” at any time to opt out. Message and data rates may apply. Message frequency may vary. Text HELP to (540) 681-3507 for assistance. For more information, visit our Privacy Policy and Terms of Service.",
         title: "Request Your Quote",
         name: "Full Name *",
         email: "Email Address *",
@@ -486,17 +499,17 @@ export const translations = {
           "I'm here to help you navigate the insurance marketplace and find the coverage that's right for you. Don't hesitate to reach out with any questions.",
         phone: {
           title: "Phone",
-          details: "(956) 302-1451 / (407) 785-9073",
+          details: "(540) 681-3507",
           description: "Call for immediate assistance",
         },
         email: {
           title: "Email",
-          details: "dorraizinsurance@gmail.com",
+          details: "info@isaacplans.com",
           description: "Send us your questions",
         },
         coverage: {
           title: "Service Area",
-          details: "20+ States Nationwide",
+          details: "9+ States Nationwide",
           description: "Licensed across the US",
         },
         hours: {
@@ -508,14 +521,14 @@ export const translations = {
           title: "Ready to Get Started?",
           description:
             "Call now for immediate assistance or to schedule your free consultation.",
-          button: "Call (956) 302-1451",
+          button: "Call (540) 681-3507",
         },
       },
     },
     // Footer
     footer: {
       description:
-        "Your trusted insurance partner specializing in ACA and Medicare coverage across 20+ states. Professional, personalized service you can count on.",
+        "Your trusted insurance partner specializing in ACA and Medicare coverage across 9+ states. Professional, personalized service you can count on.",
       services: "Services",
       resources: "Resources",
       company: "Company",

@@ -51,16 +51,18 @@ export function Footer() {
           <div className="space-y-6">
             <div className="flex items-center space-x-3">
               <Image
-                src="https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_40,h_40,c_fill,g_auto/logo_daniel_wwzhir.png"
-                alt="Dorraiz Insurance Logo"
+                src="https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_40,h_40,c_fill,g_auto/isaacplanslogo_tkraak.png"
+                alt="Isaac Plans Logo"
                 width={40}
                 height={40}
                 className="object-cover rounded-md"
               />
-              <div className="flex flex-col">
-                <span className="text-xl font-bold">Dorraiz</span>
-                <span className="text-xs font-medium text-green-400 uppercase">
-                  Insurance
+              <div className="flex flex-col leading-none">
+                <span className="font-bold text-xl text-white leading-tight">
+                  Isaac
+                </span>
+                <span className="-mt-1 text-xl font-bold text-custom leading-none">
+                  Plans
                 </span>
               </div>
             </div>
@@ -70,18 +72,18 @@ export function Footer() {
             <div className="space-y-2 text-sm">
               <div className="flex items-center space-x-2">
                 <Phone className="w-4 h-4 text-green-400" />
-                <span>(956) 302-1451 / (407) 785-9073</span>
+                <span>(540) 681-3507</span>
               </div>
               <div className="flex items-center space-x-2">
                 <Mail className="w-4 h-4 text-green-400" />
-                <span>info@dorraizinsurance.com</span>
+                <span>info@isaacplans.com</span>
               </div>
               <div className="flex items-center space-x-2">
                 <MapPin className="w-4 h-4 text-green-400" />
                 <span>
                   {language === "es"
-                    ? "Licenciado en 20+ Estados"
-                    : "Licensed in 20+ States"}
+                    ? "Licenciado en 9+ Estados"
+                    : "Licensed in 9+ States"}
                 </span>
               </div>
             </div>
@@ -139,7 +141,7 @@ export function Footer() {
 
         <div className="flex flex-col sm:flex-row justify-between items-center text-sm text-gray-400">
           <div className="text-center sm:text-left">
-            © {currentYear} Dorraiz Insurance. {t.footer.rights}
+            © {currentYear} Isaac Plans. {t.footer.rights}
           </div>
           <div className="flex space-x-4 mt-4 sm:mt-0">
             <Link href="/terms-of-service" className="hover:text-white">

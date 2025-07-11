@@ -18,7 +18,7 @@ export default function PrivacyPolicyPage() {
         introduction: {
           title: "1. Introducción",
           content:
-            "En Dorraiz Insurance, nos comprometemos a proteger su privacidad y la confidencialidad de su información personal. Esta Política de Privacidad describe cómo recopilamos, utilizamos, compartimos y protegemos su información cuando utiliza nuestros servicios de seguros o visita nuestro sitio web.",
+            "En Isaac Plans, nos comprometemos a proteger su privacidad y la confidencialidad de su información personal. Esta Política de Privacidad describe cómo recopilamos, utilizamos, compartimos y protegemos su información cuando utiliza nuestros servicios de seguros o visita nuestro sitio web.",
         },
 
         /* 2 */
@@ -86,7 +86,7 @@ export default function PrivacyPolicyPage() {
             "4 – Posibles tarifas: se pueden aplicar cargos estándar de mensajes y datos según su plan de telefonía, nacionales o internacionales.",
             "5 – Método de inclusión (Opt-In): marcando la casilla de consentimiento en nuestros formularios en línea.",
             "6 – Método de exclusión (Opt-Out): responda «STOP» a cualquier SMS o contáctenos para ser eliminado.",
-            "7 – Ayuda: responda «AYUDA» o visite https://www.dorraizinsurance.com/contact para asistencia.",
+            "7 – Ayuda: responda «AYUDA» o visite https://www.isaacplans.com/contact para asistencia.",
             "8 – Divulgaciones estándar: mensaje y datos pueden costar. Para ayuda envíe AYUDA al (956) 302-1451. La frecuencia de mensajes puede variar.",
           ],
         },
@@ -116,9 +116,9 @@ export default function PrivacyPolicyPage() {
           title: "8. Información de Contacto",
           content: "Si tiene preguntas sobre esta Política de Privacidad:",
           details: [
-            "Email: info@dorraizinsurance.com",
-            "Tel: (956) 302-1451 / (407) 785-9073",
-            "Agente: Daniel Orraiz, Licenciado en 20+ Estados",
+            "Email: info@isaacplans.com",
+            "Tel: (540) 681-3507",
+            "Agente: Isaac Orraiz, Licenciado en 20+ Estados",
           ],
         },
       },
@@ -134,7 +134,7 @@ export default function PrivacyPolicyPage() {
         introduction: {
           title: "1. Introduction",
           content:
-            "At Dorraiz Insurance we are committed to protecting your privacy. This policy explains how we collect, use, share, and safeguard your information when you use our services or visit our website.",
+            "At Isaac Plans we are committed to protecting your privacy. This policy explains how we collect, use, share, and safeguard your information when you use our services or visit our website.",
         },
 
         /* 2 */
@@ -200,7 +200,7 @@ export default function PrivacyPolicyPage() {
             "4 – Possible Charges: standard message/data rates may apply, domestic or international.",
             "5 – Opt-In Method: by checking the SMS-consent box in our online forms.",
             "6 – Opt-Out Method: reply “STOP” to any SMS or contact us to be removed.",
-            "7 – Help: reply “HELP” or visit https://www.dorraizinsurance.com/contact for assistance.",
+            "7 – Help: reply “HELP” or visit https://www.isaacplans.com/contact for assistance.",
             "8 – Standard Disclosure: message/data rates may apply. For help text HELP to (956) 302-1451. Message frequency varies.",
           ],
         },
@@ -230,9 +230,9 @@ export default function PrivacyPolicyPage() {
           title: "8. Contact Information",
           content: "If you have questions about this Privacy Policy:",
           details: [
-            "Email: dorraizinsurance@gmail.com",
-            "Phone: (956) 302-1451 / (407) 785-9073",
-            "Agent: Daniel Orraiz, Licensed in 20+ States",
+            "Email: info@isaacplans.com",
+            "Phone: (540) 681-3507",
+            "Agent: Isaac Orraiz, Licensed in 9+ States",
           ],
         },
       },
@@ -320,7 +320,7 @@ export default function PrivacyPolicyPage() {
                 {language === "es" ? "Llamar Ahora" : "Call Now"}
               </a>
               <a
-                href="mailto:info@dorraizinsurance.com"
+                href="mailto:info@isaacplans.com"
                 className="bg-white text-green-600 border border-green-600 px-6 py-2 rounded-lg hover:bg-green-50 transition-colors text-center"
               >
                 {language === "es" ? "Enviar Email" : "Send Email"}

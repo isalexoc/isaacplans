@@ -110,9 +110,11 @@ export function Services() {
             >
               <Card className="h-full hover:shadow-lg transition-shadow duration-300">
                 <CardHeader className="pb-4">
-                  <div className="w-10 h-10 lg:w-12 lg:h-12 bg-green-100 rounded-lg flex items-center justify-center mb-3 lg:mb-4">
-                    <service.icon className="w-5 h-5 lg:w-6 lg:h-6 text-green-600" />
+                  {/* ── icon badge ── */}
+                  <div className="w-10 h-10 lg:w-12 lg:h-12 bg-custom/10 rounded-lg flex items-center justify-center mb-3 lg:mb-4">
+                    <service.icon className="w-5 h-5 lg:w-6 lg:h-6 text-custom" />
                   </div>
+
                   <CardTitle className="text-lg lg:text-xl">
                     {service.title}
                   </CardTitle>
@@ -120,6 +122,7 @@ export function Services() {
                     {service.description}
                   </CardDescription>
                 </CardHeader>
+
                 <CardContent>
                   <ul className="space-y-2 mb-4 lg:mb-6">
                     {service.features.map((feature) => (
@@ -127,7 +130,7 @@ export function Services() {
                         key={feature}
                         className="flex items-center text-sm text-gray-600"
                       >
-                        <div className="w-1.5 h-1.5 bg-green-600 rounded-full mr-3 flex-shrink-0" />
+                        <div className="w-1.5 h-1.5 bg-custom rounded-full mr-3 flex-shrink-0" />
                         {feature}
                       </li>
                     ))}

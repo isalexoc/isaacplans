@@ -38,7 +38,7 @@ export function Coverage() {
   return (
     <section id="coverage" className="py-20 bg-white overflow-x-hidden">
       <div className="container mx-auto px-4 max-w-full">
-        {/* Section Header */}
+        {/* ───────── Section Header ───────── */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -46,7 +46,7 @@ export function Coverage() {
           className="text-center mb-16 overflow-x-hidden"
         >
           <div className="flex items-center justify-center mb-4">
-            <MapPin className="w-8 h-8 text-green-600 mr-3" />
+            <MapPin className="w-8 h-8 text-custom mr-3" />
             <h2 className="text-3xl lg:text-4xl font-bold text-gray-900">
               {t.coverage.title}
             </h2>
@@ -56,17 +56,25 @@ export function Coverage() {
           </p>
         </motion.div>
 
-        {/* Feature Grid */}
+        {/* ───────── Feature Grid ───────── */}
         <div className="max-w-4xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="bg-gradient-to-br from-green-50 to-emerald-100 rounded-2xl p-6 sm:p-8 mb-12 overflow-x-hidden"
+            className="
+              bg-gradient-to-br
+              from-[hsl(var(--custom)/0.06)]
+              to-[hsl(var(--custom)/0.16)]
+              rounded-2xl
+              p-6 sm:p-8
+              mb-12
+              overflow-x-hidden
+            "
           >
             <div className="text-center mb-8">
               <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                Daniel Orraiz
+                Isaac Orraiz
               </h3>
               <p className="text-lg text-gray-600">{t.coverage.description}</p>
             </div>
@@ -81,7 +89,7 @@ export function Coverage() {
                   transition={{ delay: index * 0.05 }}
                   className="flex items-center bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow"
                 >
-                  <CheckCircle className="w-5 h-5 text-green-600 mr-3 flex-shrink-0" />
+                  <CheckCircle className="w-5 h-5 text-custom mr-3 flex-shrink-0" />
                   <span className="text-sm font-medium text-gray-700 break-words">
                     {feature}
                   </span>
@@ -90,14 +98,14 @@ export function Coverage() {
             </div>
           </motion.div>
 
-          {/* Contact CTA */}
+          {/* ───────── Contact CTA ───────── */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             className="text-center px-2 overflow-x-hidden"
           >
-            <Card className="bg-green-600 text-white p-6 sm:p-8 max-w-full overflow-hidden">
+            <Card className="bg-custom text-custom-foreground p-6 sm:p-8 max-w-full overflow-hidden">
               <CardContent className="p-0">
                 <h4 className="text-2xl font-bold mb-4">
                   {language === "es" ? "¿Necesita Seguro?" : "Need Insurance?"}
@@ -107,16 +115,30 @@ export function Coverage() {
                     ? "¡Está en el lugar correcto! Obtenga una cotización gratuita hoy."
                     : "You're in the right place! Get a free quote today."}
                 </p>
+
                 <div className="flex flex-col sm:flex-row sm:flex-wrap gap-4 justify-center items-center max-w-full">
                   <a
-                    href="tel:9563021451"
-                    className="bg-white text-green-600 hover:bg-gray-100 px-6 py-3 rounded-lg font-semibold transition-colors text-center w-full sm:w-auto truncate"
+                    href="tel:5406813507"
+                    className="
+                      bg-white text-custom
+                      hover:bg-gray-100
+                      px-6 py-3 rounded-lg font-semibold
+                      transition-colors
+                      text-center w-full sm:w-auto truncate
+                    "
                   >
-                    (956) 302-1451
+                    (540) 681-3507
                   </a>
+
                   <a
-                    href="mailto:info@dorraizinsurance.com"
-                    className="bg-green-700 hover:bg-green-800 px-6 py-3 rounded-lg font-semibold transition-colors text-center w-full sm:w-auto truncate"
+                    href="mailto:info@isaacplans.com"
+                    className="
+                      bg-custom/90 hover:bg-custom
+                      text-custom-foreground
+                      px-6 py-3 rounded-lg font-semibold
+                      transition-colors
+                      text-center w-full sm:w-auto truncate
+                    "
                   >
                     Email Me
                   </a>

@@ -50,7 +50,7 @@ export function Header() {
           <Link href="/" className="flex items-center space-x-2">
             <div className="w-10 h-10 rounded-lg overflow-hidden flex items-center justify-center">
               <Image
-                src="https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_40,h_40,c_fill,g_auto/logo_daniel_wwzhir.png"
+                src="https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_40,h_40,c_fill,g_auto/isaacplanslogo_tkraak.png"
                 alt="Dorraiz Insurance Logo"
                 width={40}
                 height={40}
@@ -58,10 +58,12 @@ export function Header() {
                 priority
               />
             </div>
-            <div className="flex flex-col">
-              <span className="font-bold text-xl text-gray-900">Dorraiz</span>
-              <span className="text-xs text-green-600 font-medium">
-                INSURANCE
+            <div className="flex flex-col leading-none">
+              <span className="font-bold text-xl text-gray-900 leading-tight">
+                Isaac
+              </span>
+              <span className="-mt-1 text-xl font-bold text-custom leading-none">
+                Plans
               </span>
             </div>
           </Link>
@@ -74,7 +76,7 @@ export function Header() {
                   key={item.name}
                   href={item.href}
                   onClick={() => handleNavClick(item.href)}
-                  className="text-gray-600 hover:text-green-600 transition-colors font-medium"
+                  className="text-gray-600 hover:text-custom/80 transition-colors font-medium"
                 >
                   {item.name}
                 </Link>
@@ -91,7 +93,7 @@ export function Header() {
             </div>
             <LanguageToggle />
             <Link href="/contact">
-              <Button className="bg-green-600 hover:bg-green-700">
+              <Button className="bg-custom text-custom-foreground hover:bg-custom/90">
                 {t.header.cta}
               </Button>
             </Link>
@@ -110,7 +112,7 @@ export function Header() {
                   <Link
                     key={item.name}
                     href={item.href}
-                    className="text-gray-600 hover:text-green-600 transition-colors font-medium py-2"
+                    className="text-gray-600 hover:text-custom/80 transition-colors font-medium py-2"
                     onClick={() => handleNavClick(item.href)}
                   >
                     {item.name}
@@ -125,10 +127,9 @@ export function Header() {
                     <LanguageToggle />
                   </div>
                   <Button
-                    className="w-full bg-green-600 hover:bg-green-700"
+                    className="w-full bg-custom text-custom-foreground hover:bg-custom/90"
                     onClick={() => {
                       setIsOpen(false);
-
                       window.location.href = "/contact";
                     }}
                   >
