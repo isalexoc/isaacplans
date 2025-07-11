@@ -51,7 +51,7 @@ export function Header() {
             <div className="w-10 h-10 rounded-lg overflow-hidden flex items-center justify-center">
               <Image
                 src="https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_40,h_40,c_fill,g_auto/isaacplanslogo_tkraak.png"
-                alt="Dorraiz Insurance Logo"
+                alt="Isaac Plans Logo"
                 width={40}
                 height={40}
                 className="object-cover"
