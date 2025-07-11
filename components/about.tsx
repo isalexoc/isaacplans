@@ -88,7 +88,7 @@ export function About() {
               {/* Logo Image */}
               <Image
                 src="https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_350/ChatGPT_Image_Jul_11_2025_12_32_22_AM_ym5ioh.png"
-                alt="Dorraiz Insurance Logo"
+                alt="Isaac Plans Logo"
                 width={350}
                 height={350}
                 className="rounded-xl shadow-lg w-full max-w-xs object-contain"
