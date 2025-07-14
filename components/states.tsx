@@ -118,7 +118,7 @@ export function Coverage() {
 
                 <div className="flex flex-col sm:flex-row sm:flex-wrap gap-4 justify-center items-center max-w-full">
                   <a
-                    href="tel:5406813507"
+                    href={`tel:${process.env.NEXT_PUBLIC_PHONE_NUMBER}`}
                     className="
                       bg-white text-custom
                       hover:bg-gray-100
@@ -127,7 +127,7 @@ export function Coverage() {
                       text-center w-full sm:w-auto truncate
                     "
                   >
-                    (540) 681-3507
+                    {process.env.NEXT_PUBLIC_PHONE_NUMBER}
                   </a>
 
                   <a

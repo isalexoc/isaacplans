@@ -50,7 +50,7 @@ export const translations = {
       contact: "Contacto",
     },
     header: {
-      phone: "(540) 681-3507",
+      phone: process.env.NEXT_PUBLIC_PHONE_NUMBER,
       cta: "Cotización Gratis",
     },
     // Hero
@@ -202,8 +202,8 @@ export const translations = {
       subtitle:
         "¿Listo para encontrar la cobertura de seguro perfecta? Contácteme hoy para una consulta personalizada y cotización gratuita adaptada a sus necesidades específicas.",
       form: {
-        smsConsent:
-          "Al marcar esta casilla, doy mi consentimiento para recibir mensajes de texto relacionados con mis servicios de seguros de Isaac Plans. Puedes responder “STOP” en cualquier momento para darte de baja. Pueden aplicarse tarifas de mensajes y datos. La frecuencia de los mensajes puede variar. Envía AYUDA al (540) 681-3507 para recibir asistencia. Para más información, visita nuestra Política de Privacidad y Términos de Servicio.",
+        smsConsent: `Al marcar esta casilla, doy mi consentimiento para recibir mensajes de texto relacionados con mis servicios de seguros de Isaac Plans. Puedes responder “STOP” en cualquier momento para darte de baja. Pueden aplicarse tarifas de mensajes y datos. La frecuencia de los mensajes puede variar. Envía AYUDA al (${process.env.NEXT_PUBLIC_PHONE_NUMBER}) para recibir asistencia. Para más información, visita nuestra Política de Privacidad y Términos de Servicio.`,
+
         title: "Solicite Su Cotización",
         name: "Nombre Completo *",
         email: "Correo Electrónico *",
@@ -227,7 +227,7 @@ export const translations = {
           "Estoy aquí para ayudarle a navegar el mercado de seguros y encontrar la cobertura que es adecuada para usted. No dude en comunicarse con cualquier pregunta.",
         phone: {
           title: "Teléfono",
-          details: "(540) 681-3507",
+          details: process.env.NEXT_PUBLIC_PHONE_NUMBER,
           description: "Llame para asistencia inmediata",
         },
         email: {
@@ -249,7 +249,7 @@ export const translations = {
           title: "¿Listo para Comenzar?",
           description:
             "Llame ahora para asistencia inmediata o para programar su consulta gratuita.",
-          button: "Llamar (540) 681-3507",
+          button: process.env.NEXT_PUBLIC_PHONE_NUMBER,
         },
       },
     },
@@ -283,7 +283,7 @@ export const translations = {
       contact: "Contact",
     },
     header: {
-      phone: "(540) 681-3507",
+      phone: process.env.NEXT_PUBLIC_PHONE_NUMBER,
       cta: "Free Quote",
     },
     // Hero
@@ -474,8 +474,8 @@ export const translations = {
       subtitle:
         "Ready to find the perfect insurance coverage? Contact me today for a personalized consultation and free quote tailored to your specific needs.",
       form: {
-        smsConsent:
-          "By checking this box, I consent to receive text messages related to my insurance services from Isaac Plans. You can reply “STOP” at any time to opt out. Message and data rates may apply. Message frequency may vary. Text HELP to (540) 681-3507 for assistance. For more information, visit our Privacy Policy and Terms of Service.",
+        smsConsent: `By checking this box, I consent to receive text messages related to my insurance services from Isaac Plans. You can reply “STOP” at any time to opt out. Message and data rates may apply. Message frequency may vary. Text HELP to (${process.env.NEXT_PUBLIC_PHONE_NUMBER}) for assistance. For more information, visit our Privacy Policy and Terms of Service.`,
+
         title: "Request Your Quote",
         name: "Full Name *",
         email: "Email Address *",
@@ -499,7 +499,7 @@ export const translations = {
           "I'm here to help you navigate the insurance marketplace and find the coverage that's right for you. Don't hesitate to reach out with any questions.",
         phone: {
           title: "Phone",
-          details: "(540) 681-3507",
+          details: process.env.NEXT_PUBLIC_PHONE_NUMBER,
           description: "Call for immediate assistance",
         },
         email: {
@@ -521,7 +521,7 @@ export const translations = {
           title: "Ready to Get Started?",
           description:
             "Call now for immediate assistance or to schedule your free consultation.",
-          button: "Call (540) 681-3507",
+          button: process.env.NEXT_PUBLIC_PHONE_NUMBER,
         },
       },
     },

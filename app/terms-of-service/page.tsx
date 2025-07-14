@@ -27,7 +27,7 @@ export default function TermsOfServicePage() {
             "5 – Método de inclusión (Opt-In): marcando la casilla de consentimiento en nuestros formularios en línea.",
             "6 – Método de exclusión (Opt-Out): puede darse de baja en cualquier momento respondiendo «STOP» o contactándonos directamente para ser eliminado.",
             "7 – Ayuda: si experimenta problemas, responda «AYUDA» o visite https://www.isaacplans.com/contact.",
-            "8 – Divulgaciones estándar: podrían aplicarse tarifas de mensajes y datos. Para ayuda envíe AYUDA al (956) 302-1451. La frecuencia de mensajes puede variar.",
+            `8 – Divulgaciones estándar: mensaje y datos pueden costar. Para ayuda envíe AYUDA al (${process.env.NEXT_PUBLIC_PHONE_NUMBER}). La frecuencia de mensajes puede variar.`,
           ],
         },
 
@@ -148,7 +148,7 @@ export default function TermsOfServicePage() {
           details: [
             "Agente: Isaac Orraiz",
             "Email: info@isaacplans.com",
-            "Tel: (540) 681-3507",
+            "Phone: " + process.env.NEXT_PUBLIC_PHONE_NUMBER,
           ],
         },
       },
@@ -173,7 +173,7 @@ export default function TermsOfServicePage() {
             "5 – Opt-In Method: by checking the SMS-consent box in our online forms.",
             "6 – Opt-Out Method: you may stop receiving SMS at any time by replying “STOP” or contacting us directly to be removed.",
             "7 – Help: reply “HELP” or visit https://www.isaacplans.com/contact if you need assistance.",
-            "8 – Standard Disclosure: message/data rates may apply. For help text HELP to (956) 302-1451. Message frequency varies.",
+            `8 – Standard Disclosure: message/data rates may apply. For help text HELP to (${process.env.NEXT_PUBLIC_PHONE_NUMBER}). Message frequency varies.`,
           ],
         },
 
@@ -293,7 +293,7 @@ export default function TermsOfServicePage() {
           details: [
             "Agent: Isaac Orraiz",
             "Email: info@isaacplans.com",
-            "Phone: (540) 681-3507",
+            "Phone: " + process.env.NEXT_PUBLIC_PHONE_NUMBER,
           ],
         },
       },
@@ -393,7 +393,7 @@ export default function TermsOfServicePage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-3">
               <a
-                href="tel:5406813507"
+                href={`tel:${process.env.NEXT_PUBLIC_PHONE_NUMBER}`}
                 className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors text-center"
               >
                 {language === "es" ? "Llamar Ahora" : "Call Now"}
@@ -407,102 +407,6 @@ export default function TermsOfServicePage() {
             </div>
           </div>
         </div>
-        <table
-          cellPadding={0}
-          cellSpacing={0}
-          style={{
-            fontFamily: "Calibri, Arial, sans-serif",
-            fontSize: "14px",
-            lineHeight: "20px",
-            color: "#1a1a1a",
-          }}
-        >
-          <tbody>
-            <tr>
-              {/* Logo */}
-
-              {/* Main info */}
-              <td style={{ verticalAlign: "top" }}>
-                <img
-                  src="https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_40,h_40,c_fill,g_auto/isaacplanslogo_tkraak.png"
-                  alt="Isaac Plans"
-                  style={{ width: "40px", height: "40px", border: "none" }}
-                />
-                {/* Name & role */}
-                <div
-                  style={{
-                    fontWeight: 600,
-                    fontSize: "16px",
-                    color: "#004f64",
-                    marginBottom: "2px",
-                  }}
-                >
-                  Information Center&nbsp;|&nbsp;Isaac Plans
-                </div>
-
-                {/* Contact links */}
-                <table
-                  cellPadding={0}
-                  cellSpacing={0}
-                  style={{ fontSize: "14px", lineHeight: "20px" }}
-                >
-                  <tbody>
-                    <tr>
-                      <td style={{ paddingRight: "6px" }}>
-                        <img
-                          src="https://img.icons8.com/ios-filled/18/004f64/domain.png"
-                          alt="Website"
-                          style={{ display: "block" }}
-                        />
-                      </td>
-                      <td>
-                        <a
-                          href="https://www.isaacplans.com"
-                          style={{ color: "#004f64", textDecoration: "none" }}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          www.isaacplans.com
-                        </a>
-                      </td>
-                    </tr>
-
-                    <tr>
-                      <td style={{ paddingRight: "6px" }}>
-                        <img
-                          src="https://img.icons8.com/ios-filled/18/004f64/new-post.png"
-                          alt="Email"
-                          style={{ display: "block" }}
-                        />
-                      </td>
-                      <td>
-                        <a
-                          href="mailto:info@isaacplans.com"
-                          style={{ color: "#004f64", textDecoration: "none" }}
-                        >
-                          info@isaacplans.com
-                        </a>
-                      </td>
-                    </tr>
-
-                    <tr>
-                      <td style={{ paddingRight: "6px" }}>
-                        <img
-                          src="https://img.icons8.com/ios-filled/18/004f64/phone.png"
-                          alt="Phone"
-                          style={{ display: "block" }}
-                        />
-                      </td>
-                      <td style={{ color: "#004f64", fontWeight: 500 }}>
-                        540-681-3507
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </td>
-            </tr>
-          </tbody>
-        </table>
       </main>
     </div>
   );

@@ -87,7 +87,7 @@ export default function PrivacyPolicyPage() {
             "5 – Método de inclusión (Opt-In): marcando la casilla de consentimiento en nuestros formularios en línea.",
             "6 – Método de exclusión (Opt-Out): responda «STOP» a cualquier SMS o contáctenos para ser eliminado.",
             "7 – Ayuda: responda «AYUDA» o visite https://www.isaacplans.com/contact para asistencia.",
-            "8 – Divulgaciones estándar: mensaje y datos pueden costar. Para ayuda envíe AYUDA al (956) 302-1451. La frecuencia de mensajes puede variar.",
+            `8 – Divulgaciones estándar: mensaje y datos pueden costar. Para ayuda envíe AYUDA al (${process.env.NEXT_PUBLIC_PHONE_NUMBER}). La frecuencia de mensajes puede variar.`,
           ],
         },
 
@@ -117,7 +117,7 @@ export default function PrivacyPolicyPage() {
           content: "Si tiene preguntas sobre esta Política de Privacidad:",
           details: [
             "Email: info@isaacplans.com",
-            "Tel: (540) 681-3507",
+            "Tel: " + process.env.NEXT_PUBLIC_PHONE_NUMBER,
             "Agente: Isaac Orraiz, Licenciado en 20+ Estados",
           ],
         },
@@ -201,7 +201,7 @@ export default function PrivacyPolicyPage() {
             "5 – Opt-In Method: by checking the SMS-consent box in our online forms.",
             "6 – Opt-Out Method: reply “STOP” to any SMS or contact us to be removed.",
             "7 – Help: reply “HELP” or visit https://www.isaacplans.com/contact for assistance.",
-            "8 – Standard Disclosure: message/data rates may apply. For help text HELP to (956) 302-1451. Message frequency varies.",
+            `8 – Standard Disclosure: message/data rates may apply. For help text HELP to (${process.env.NEXT_PUBLIC_PHONE_NUMBER}). Message frequency varies.`,
           ],
         },
 
@@ -231,7 +231,7 @@ export default function PrivacyPolicyPage() {
           content: "If you have questions about this Privacy Policy:",
           details: [
             "Email: info@isaacplans.com",
-            "Phone: (540) 681-3507",
+            "Phone: " + process.env.NEXT_PUBLIC_PHONE_NUMBER,
             "Agent: Isaac Orraiz, Licensed in 9+ States",
           ],
         },
@@ -314,7 +314,7 @@ export default function PrivacyPolicyPage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-3">
               <a
-                href="tel:9563021451"
+                href={`tel:${process.env.NEXT_PUBLIC_PHONE_NUMBER}`}
                 className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors text-center"
               >
                 {language === "es" ? "Llamar Ahora" : "Call Now"}
