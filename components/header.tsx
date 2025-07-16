@@ -58,12 +58,12 @@ export function Header() {
                 priority
               />
             </div>
-            <div className="flex flex-col leading-none">
-              <span className="font-bold text-xl text-gray-900 leading-tight">
-                Isaac
+            <div className="flex flex-col items-center text-center leading-tight">
+              <span className="text-xl font-bold bg-gradient-to-r from-teal-600 to-blue-800 bg-clip-text text-transparent">
+                Isaac Plans
               </span>
-              <span className="-mt-1 text-xl font-bold text-custom leading-none">
-                Plans
+              <span className="text-sm font-semibold tracking-widest uppercase bg-gradient-to-r from-teal-600 to-blue-800 bg-clip-text text-transparent">
+                Insurance
               </span>
             </div>
           </Link>

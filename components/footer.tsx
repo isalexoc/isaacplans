@@ -57,12 +57,12 @@ export function Footer() {
                 height={40}
                 className="object-cover rounded-md"
               />
-              <div className="flex flex-col leading-none">
-                <span className="font-bold text-xl text-white leading-tight">
-                  Isaac
+              <div className="flex flex-col items-center text-center leading-none">
+                <span className="text-xl font-bold bg-gradient-to-r from-teal-400 to-blue-500 bg-clip-text text-transparent">
+                  Isaac Plans
                 </span>
-                <span className="-mt-1 text-xl font-bold text-custom leading-none">
-                  Plans
+                <span className="text-sm font-semibold tracking-widest uppercase bg-gradient-to-r from-teal-400 to-blue-500 bg-clip-text text-transparent">
+                  Insurance
                 </span>
               </div>
             </div>
