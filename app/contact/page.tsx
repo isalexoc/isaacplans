@@ -48,12 +48,12 @@ export default function Contact() {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <a
-              href="tel:5406813507"
+              href={`tel:${t.phone}`}
               className="bg-custom text-white py-2 px-4 rounded-lg hover:bg-custom/90"
             >
-              📞 Call
+              📞 {translations[language].contact.info.call}
             </a>
             <a
               href="mailto:info@isaacplans.com"

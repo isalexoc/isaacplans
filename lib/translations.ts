@@ -207,7 +207,7 @@ export const translations = {
         title: "Solicite Su Cotización",
         name: "Nombre Completo *",
         email: "Correo Electrónico *",
-        phone: "Número de Teléfono *",
+        phone: process.env.NEXT_PUBLIC_PHONE_NUMBER,
         insuranceType: "Tipo de Seguro *",
         message: "Mensaje",
         messagePlaceholder:
@@ -226,6 +226,7 @@ export const translations = {
         description:
           "Estoy aquí para ayudarle a navegar el mercado de seguros y encontrar la cobertura que es adecuada para usted. No dude en comunicarse con cualquier pregunta.",
         role: "Agente de Seguros",
+        call: `Llamar: ${process.env.NEXT_PUBLIC_PHONE_NUMBER}`,
         addContact: "Agregar Contacto",
         phone: {
           title: "Teléfono",
@@ -481,7 +482,7 @@ export const translations = {
         title: "Request Your Quote",
         name: "Full Name *",
         email: "Email Address *",
-        phone: "Phone Number *",
+        phone: process.env.NEXT_PUBLIC_PHONE_NUMBER,
         insuranceType: "Insurance Type *",
         message: "Message",
         messagePlaceholder:
@@ -500,6 +501,7 @@ export const translations = {
         description:
           "I'm here to help you navigate the insurance marketplace and find the coverage that's right for you. Don't hesitate to reach out with any questions.",
         role: "Insurance Agent",
+        call: `Call: ${process.env.NEXT_PUBLIC_PHONE_NUMBER}`,
         addContact: "Add Contact",
         phone: {
           title: "Phone",
