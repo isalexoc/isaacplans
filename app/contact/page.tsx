@@ -75,7 +75,7 @@ export default function Contact() {
               <span>WhatsApp: 540-681-3507</span>
             </a>
             <a
-              href="/isaac-orraiz.vcf"
+              href="https://hihello.me/p/db7363ac-cf23-4f18-bced-e04e9ee5a328"
               download
               className="bg-custom text-white py-2 px-4 rounded-lg hover:bg-custom/90"
             >
