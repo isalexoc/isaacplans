@@ -225,6 +225,8 @@ export const translations = {
         title: "Póngase en Contacto",
         description:
           "Estoy aquí para ayudarle a navegar el mercado de seguros y encontrar la cobertura que es adecuada para usted. No dude en comunicarse con cualquier pregunta.",
+        role: "Agente de Seguros",
+        addContact: "Agregar Contacto",
         phone: {
           title: "Teléfono",
           details: process.env.NEXT_PUBLIC_PHONE_NUMBER,
@@ -497,6 +499,8 @@ export const translations = {
         title: "Get In Touch",
         description:
           "I'm here to help you navigate the insurance marketplace and find the coverage that's right for you. Don't hesitate to reach out with any questions.",
+        role: "Insurance Agent",
+        addContact: "Add Contact",
         phone: {
           title: "Phone",
           details: process.env.NEXT_PUBLIC_PHONE_NUMBER,
