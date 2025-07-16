@@ -1,14 +1,19 @@
 BEGIN:VCARD
 VERSION:3.0
 FN:Isaac Orraiz
-ORG:Isaac Plans Insurance
-TITLE:Licensed Health Insurance Agent
-TEL;TYPE=WORK,VOICE:(540) 426-1804
-TEL;TYPE=CELL,VOICE:(540) 681-3507
+UID:c8c315cd-a58f-4837-9246-b06eff3f3897
 EMAIL:info@isaacplans.com
-URL:https://www.isaacplans.com
-ADR;TYPE=WORK:;;Stafford, VA
-NOTE:Specializing in ACA, Dental, Vision, Hospital, Cancer & Stroke plans.
+TEL;TYPE=WORK:+1 540 426 1804
+ORG:Isaac Plans Insurance
+TITLE:Insurance Agent
+URL:https://hihello.me/p/db7363ac-cf23-4f18-bced-e04e9ee5a328
+URL;TYPE=WHATSAPP:https://wa.me/540681370754068137075406813707
+URL;TYPE=WEBSITE:https://www.isaacplans.com
+URL;TYPE=INSTAGRAM:https://www.instagram.com/isalexoc
+URL;TYPE=LINKEDIN:https://www.linkedin.com/in/isaacplans
+URL;TYPE=FACEBOOK:https://www.facebook.com/@isaacagent
+URL;TYPE=YOUTUBE:https://www.youtube.com/@isaacplans
+NOTE:Created with HiHello
 PHOTO;TYPE=JPEG;ENCODING=B:/9j/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQY
  GBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKC
  goKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAEA
@@ -128,4 +133,5 @@ PHOTO;TYPE=JPEG;ENCODING=B:/9j/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQY
  T8TlTfjXSHETSVAuGUyqaPzncv4CqA3AQeSRslGHjPoe4XPv7S3hfTXayVmp7bA1l3omebUOYM
  fioh+bcB+to53dwCD2XQRKo7hHHPTSxTND4pGlj2noWkYI+xSB8zEWQa/sD9L6zvFmfnbSVDmR
  k/qj6sP1aQsfVh/9k=
+N:Orraiz;Isaac;;;;
 END:VCARD
