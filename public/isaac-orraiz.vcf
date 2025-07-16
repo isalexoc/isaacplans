@@ -1,0 +1,12 @@
+BEGIN:VCARD
+VERSION:3.0
+FN:Isaac Orraiz
+ORG:Isaac Plans Insurance
+TITLE:Licensed Health Insurance Agent
+TEL;TYPE=WORK,VOICE:(540) 426-1804
+TEL;TYPE=CELL,VOICE:(540) 681-3507
+EMAIL:info@isaacplans.com
+URL:https://www.isaacplans.com
+ADR;TYPE=WORK:;;Stafford, VA
+NOTE:Specializing in ACA, Dental, Vision, Hospital, Cancer & Stroke plans.
+END:VCARD

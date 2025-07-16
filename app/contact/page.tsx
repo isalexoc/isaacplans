@@ -89,7 +89,7 @@ export default function Contact() {
               🌐 Website
             </a>
             <a
-              href="https://calendly.com/isaacplans"
+              href="https://link.agent-crm.com/widget/bookings/facebookad-b140f360-1a9d-4b4b-9fb1-0359979187d4-4c57e0d9-1b03-4305-935e-1369bd466bc1"
               target="_blank"
               className="bg-custom text-white py-2 px-4 rounded-lg hover:bg-custom/90"
             >
