@@ -27,7 +27,7 @@ export default function Contact() {
             {translations[language].contact.info.title}
           </h2>
           <p className="text-lg text-gray-600">
-            {translations[language].contact.info.description}
+            {translations[language].contact.info.phone.description}
           </p>
         </div>
 
@@ -64,9 +64,15 @@ export default function Contact() {
             <a
               href="https://wa.me/15406813507?text=Hola,%20quiero%20una%20cotización"
               target="_blank"
-              className="bg-custom text-white py-2 px-4 rounded-lg hover:bg-custom/90"
+              rel="noopener noreferrer"
+              className="bg-custom text-white py-2 px-4 rounded-lg hover:bg-custom/90 flex items-center space-x-2 justify-center"
             >
-              💬 WhatsApp
+              <img
+                src="https://res.cloudinary.com/isaacdev/image/upload/w_30,h_30,c_fit,f_auto,q_auto/v1752687249/whatsapphappiness_lezt21_zsxlic.png"
+                alt="WhatsApp"
+                className="w-7 h-7"
+              />
+              <span>WhatsApp: 540-681-3507</span>
             </a>
             <a
               href="/isaac-orraiz.vcf"
