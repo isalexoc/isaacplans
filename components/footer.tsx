@@ -1,7 +1,15 @@
 "use client";
 
 import { Separator } from "@/components/ui/separator";
-import { Phone, Mail, MapPin, Facebook, Instagram } from "lucide-react";
+import {
+  Phone,
+  Mail,
+  MapPin,
+  Facebook,
+  Instagram,
+  Youtube,
+  Linkedin,
+} from "lucide-react";
 import { useLanguage } from "@/hooks/useLanguage";
 import { usePathname } from "next/navigation";
 import { translations } from "@/lib/translations";
@@ -74,6 +82,19 @@ export function Footer() {
                 <Phone className="w-4 h-4 text-green-400" />
                 <span>{process.env.NEXT_PUBLIC_PHONE_NUMBER}</span>
               </div>
+              <a
+                href="https://wa.me/15406813507?text=Hola,%20quiero%20una%20cotización"
+                target="_blank"
+                rel="noopener noreferrer"
+                className=" text-white py-2  flex items-center"
+              >
+                <img
+                  src="https://res.cloudinary.com/isaacdev/image/upload/w_30,h_30,c_fit,f_auto,q_auto/v1752687249/whatsapphappiness_lezt21_zsxlic.png"
+                  alt="WhatsApp"
+                  className="w-7 h-7"
+                />
+                <span> WhatsApp: 540-681-3507</span>
+              </a>
               <div className="flex items-center space-x-2">
                 <Mail className="w-4 h-4 text-green-400" />
                 <span>info@isaacplans.com</span>
@@ -118,7 +139,7 @@ export function Footer() {
             <h5 className="font-medium mb-3">{t.footer.follow}</h5>
             <div className="flex space-x-3">
               <a
-                href="https://www.facebook.com/profile.php?id=100090015145006"
+                href="https://www.facebook.com/@isaacagent"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-10 h-10 border border-gray-600 hover:border-white rounded-md flex items-center justify-center text-gray-400 hover:text-white"
@@ -126,12 +147,28 @@ export function Footer() {
                 <Facebook className="w-4 h-4" />
               </a>
               <a
-                href="https://www.instagram.com/dorraiz.insurance"
+                href="https://www.instagram.com/isalexoc"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-10 h-10 border border-gray-600 hover:border-white rounded-md flex items-center justify-center text-gray-400 hover:text-white"
               >
                 <Instagram className="w-4 h-4" />
+              </a>
+              <a
+                href="https://www.youtube.com/@isaacplans"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-10 h-10 border border-gray-600 hover:border-white rounded-md flex items-center justify-center text-gray-400 hover:text-white"
+              >
+                <Youtube className="w-4 h-4" />
+              </a>
+              <a
+                href="https://www.linkedin.com/in/isaacplans"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-10 h-10 border border-gray-600 hover:border-white rounded-md flex items-center justify-center text-gray-400 hover:text-white"
+              >
+                <Linkedin className="w-4 h-4" />
               </a>
             </div>
           </div>

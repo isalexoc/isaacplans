@@ -52,6 +52,257 @@ export const translations = {
     header: {
       phone: process.env.NEXT_PUBLIC_PHONE_NUMBER,
       cta: "Cotización Gratis",
+      nav: {
+        services: {
+          label: "Servicios",
+          links: [
+            {
+              title: "ACA Obamacare",
+              icon: "Stethoscope",
+              href: "",
+              description:
+                "Cobertura médica asequible bajo el Mercado de Seguros ACA.",
+            },
+            {
+              title: "Dental y Visión",
+              icon: "Eye",
+              href: "",
+              description:
+                "Planes que cubren exámenes dentales y cuidado visual.",
+            },
+            {
+              title: "Indemnización Hospitalaria",
+              icon: "Hospital",
+              href: "",
+              description:
+                "Beneficios diarios en efectivo durante hospitalizaciones.",
+            },
+            {
+              title: "Seguro de Vida",
+              icon: "HeartPulse",
+              href: "",
+              description:
+                "Protección financiera para tus seres queridos tras tu fallecimiento.",
+            },
+            {
+              title: "Planes contra el Cáncer",
+              icon: "Radiation",
+              href: "",
+              description:
+                "Cobertura adicional para gastos relacionados con el cáncer.",
+            },
+            {
+              title: "Planes contra Derrames Cerebrales",
+              icon: "Activity",
+              href: "",
+              description:
+                "Cobertura para recuperación y apoyo financiero tras un derrame cerebral.",
+            },
+          ],
+        },
+
+        resources: {
+          label: "Recursos",
+          links: [
+            {
+              title: "Preguntas Frecuentes",
+              icon: "HelpCircle",
+              href: "",
+              description:
+                "Respuestas a las preguntas más comunes sobre nuestros servicios.",
+            },
+            {
+              title: "Blog de Seguros",
+              icon: "BookOpen",
+              href: "",
+              description:
+                "Artículos educativos sobre salud, seguros y bienestar.",
+            },
+            {
+              title: "Testimonios de Clientes",
+              icon: "MessageCircle",
+              href: "",
+              description:
+                "Historias reales de personas satisfechas con nuestra ayuda.",
+            },
+            {
+              title: "Guías del Consumidor",
+              icon: "FileText",
+              href: "",
+              description:
+                "Material descargable para ayudarte a tomar decisiones informadas.",
+            },
+            {
+              title: "Cobertura y Opciones",
+              icon: "ShieldCheck",
+              href: "",
+              description:
+                "Explora lo que cubren nuestros planes y cómo pueden ayudarte.",
+            },
+            {
+              title: "Glosario de Términos",
+              icon: "Landmark",
+              href: "",
+              description:
+                "Conoce el significado de los términos comunes en seguros.",
+            },
+            {
+              title: "Videos Educativos",
+              icon: "Film",
+              href: "",
+              description:
+                "Material audiovisual para comprender mejor tus opciones.",
+            },
+            {
+              title: "Calculadora de Subsidios",
+              icon: "Calculator",
+              href: "",
+              description:
+                "Herramienta para estimar el apoyo financiero disponible para ti.",
+            },
+            {
+              title: "Asistencia Personalizada",
+              icon: "UserCheck",
+              href: "",
+              description:
+                "Contáctanos para recibir orientación gratuita y personalizada.",
+            },
+            {
+              title: "Documentos Descargables",
+              icon: "Download",
+              href: "",
+              description:
+                "Accede a formularios, guías y folletos informativos.",
+            },
+            {
+              title: "Comparador de Planes",
+              icon: "GitCompareArrows",
+              href: "",
+              description:
+                "Compara beneficios, precios y coberturas entre distintos planes.",
+            },
+            {
+              title: "Boletín Informativo",
+              icon: "Mail",
+              href: "",
+              description:
+                "Suscríbete para recibir noticias sobre salud y seguros.",
+            },
+            {
+              title: "Herramientas de Elegibilidad",
+              icon: "SearchCheck",
+              href: "",
+              description:
+                "Verifica si calificas para subsidios o programas especiales.",
+            },
+            {
+              title: "Historias de Éxito",
+              icon: "Smile",
+              href: "",
+              description:
+                "Descubre cómo nuestros servicios han cambiado vidas.",
+            },
+            {
+              title: "Apoyo en Renovaciones",
+              icon: "Repeat",
+              href: "",
+              description: "Te ayudamos a renovar tu cobertura año tras año.",
+            },
+            {
+              title: "Guías para Nuevos Usuarios",
+              icon: "Compass",
+              href: "",
+              description: "Primeros pasos para elegir tu plan de salud ideal.",
+            },
+            {
+              title: "Consejos para Ahorrar",
+              icon: "PiggyBank",
+              href: "",
+              description: "Recomendaciones para reducir tus gastos médicos.",
+            },
+            {
+              title: "Apoyo para Familias",
+              icon: "Users",
+              href: "",
+              description:
+                "Recursos útiles para el cuidado de tus seres queridos.",
+            },
+            {
+              title: "Cobertura para Estudiantes",
+              icon: "BookUser",
+              href: "",
+              description:
+                "Planes ideales para jóvenes y estudiantes universitarios.",
+            },
+            {
+              title: "Protección Laboral",
+              icon: "Briefcase",
+              href: "",
+              description:
+                "Cobertura para trabajadores independientes o contratistas.",
+            },
+            {
+              title: "Actualizaciones Regulatorias",
+              icon: "Gavel",
+              href: "",
+              description:
+                "Información sobre cambios en leyes de salud y cobertura.",
+            },
+            {
+              title: "Información para Inmigrantes",
+              icon: "Globe2",
+              href: "",
+              description:
+                "Recursos para inmigrantes legales que buscan cobertura.",
+            },
+            {
+              title: "Guía de Reclamaciones",
+              icon: "FileCheck2",
+              href: "",
+              description:
+                "Aprende cómo presentar una reclamación y qué esperar del proceso.",
+            },
+          ],
+        },
+        about: {
+          label: "Nosotros",
+          bio: "Soluciones de seguros personalizadas para proteger tu salud, familia y tranquilidad.",
+          links: [
+            {
+              title: "Nuestra Misión y Visión",
+              icon: "FileCheck2",
+              href: "",
+              description:
+                "Descubre nuestro compromiso con una cobertura de salud accesible y asequible.",
+            },
+            {
+              title: "Por Qué Elegirnos",
+              icon: "ThumbsUp",
+              href: "",
+              description:
+                "Conoce lo que nos diferencia: atención personalizada y opciones de planes integrales.",
+            },
+            {
+              title: "Conoce al Fundador",
+              icon: "UserCheck",
+              href: "",
+              description:
+                "Conoce a Isaac Orraiz, agente de seguros licenciado y comprometido con el bienestar de las familias.",
+            },
+
+            {
+              title: "Contacto y Soporte",
+              icon: "PhoneCall",
+              href: "",
+              description:
+                "Contáctanos para recibir atención personalizada o resolver tus dudas sobre seguros.",
+            },
+          ],
+        },
+        contact: {
+          label: "Contacto",
+        },
+      },
     },
     // Hero
     hero: {
@@ -63,6 +314,12 @@ export const translations = {
         "Especializado en seguros ACA (Obamacare). Obtenga cobertura personalizada que se adapte a sus necesidades y presupuesto con orientación experta en cada paso.",
       cta1: "Cotización Gratis",
       cta2: "Agendar Consulta",
+      ctas: {
+        cta1: {
+          title: "Cotización Gratis",
+          message: "Solo toma 10 segundos",
+        },
+      },
       stats: {
         states: "Estados con Licencia",
         clients: "Clientes Atendidos",
@@ -288,6 +545,249 @@ export const translations = {
     header: {
       phone: process.env.NEXT_PUBLIC_PHONE_NUMBER,
       cta: "Free Quote",
+      nav: {
+        services: {
+          label: "Services",
+          links: [
+            {
+              title: "ACA Obamacare",
+              icon: "Stethoscope",
+              href: "",
+              description:
+                "Affordable health coverage under the ACA Marketplace.",
+            },
+            {
+              title: "Dental & Vision",
+              icon: "Eye",
+              href: "",
+              description:
+                "Plans that help cover dental checkups and vision care.",
+            },
+            {
+              title: "Hospital Indemnity",
+              icon: "Hospital",
+              href: "",
+              description:
+                "Daily cash benefits during hospital stays to offset costs.",
+            },
+            {
+              title: "Life Insurance",
+              icon: "HeartPulse",
+              href: "",
+              description:
+                "Financial protection for your loved ones after you’re gone.",
+            },
+            {
+              title: "Cancer Plans",
+              icon: "Radiation",
+              href: "",
+              description:
+                "Supplemental coverage to support cancer-related expenses.",
+            },
+            {
+              title: "Stroke Plans",
+              icon: "Activity",
+              href: "",
+              description:
+                "Coverage to help with recovery and financial gaps after a stroke.",
+            },
+          ],
+        },
+
+        resources: {
+          label: "Resources",
+          links: [
+            {
+              title: "Frequently Asked Questions",
+              icon: "HelpCircle",
+              href: "",
+              description:
+                "Answers to the most common questions about our services.",
+            },
+            {
+              title: "Insurance Blog",
+              icon: "BookOpen",
+              href: "",
+              description:
+                "Educational articles on health, insurance, and wellness.",
+            },
+            {
+              title: "Client Testimonials",
+              icon: "MessageCircle",
+              href: "",
+              description: "Real stories from people satisfied with our help.",
+            },
+            {
+              title: "Consumer Guides",
+              icon: "FileText",
+              href: "",
+              description:
+                "Downloadable material to help you make informed decisions.",
+            },
+            {
+              title: "Coverage and Options",
+              icon: "ShieldCheck",
+              href: "",
+              description:
+                "Explore what our plans cover and how they can help you.",
+            },
+            {
+              title: "Glossary of Terms",
+              icon: "Landmark",
+              href: "",
+              description:
+                "Learn the meaning of common insurance-related terms.",
+            },
+            {
+              title: "Educational Videos",
+              icon: "Film",
+              href: "",
+              description:
+                "Visual material to better understand your coverage options.",
+            },
+            {
+              title: "Subsidy Calculator",
+              icon: "Calculator",
+              href: "",
+              description:
+                "Tool to estimate the financial support available to you.",
+            },
+            {
+              title: "Personalized Assistance",
+              icon: "UserCheck",
+              href: "",
+              description: "Contact us for free, personalized guidance.",
+            },
+            {
+              title: "Downloadable Documents",
+              icon: "Download",
+              href: "",
+              description: "Access forms, guides, and informational brochures.",
+            },
+            {
+              title: "Plan Comparison Tool",
+              icon: "GitCompareArrows",
+              href: "",
+              description:
+                "Compare benefits, costs, and coverages across plans.",
+            },
+            {
+              title: "Newsletter",
+              icon: "Mail",
+              href: "",
+              description:
+                "Subscribe to receive updates on insurance and health.",
+            },
+            {
+              title: "Eligibility Tools",
+              icon: "SearchCheck",
+              href: "",
+              description:
+                "Check if you qualify for subsidies or special programs.",
+            },
+            {
+              title: "Success Stories",
+              icon: "Smile",
+              href: "",
+              description: "Read how our services have changed lives.",
+            },
+            {
+              title: "Renewal Support",
+              icon: "Repeat",
+              href: "",
+              description: "We help you renew your coverage year after year.",
+            },
+            {
+              title: "Guides for New Users",
+              icon: "Compass",
+              href: "",
+              description: "First steps to choosing your ideal health plan.",
+            },
+            {
+              title: "Money-Saving Tips",
+              icon: "PiggyBank",
+              href: "",
+              description: "Recommendations to reduce medical service costs.",
+            },
+            {
+              title: "Family Support",
+              icon: "Users",
+              href: "",
+              description: "Useful resources to care for your loved ones.",
+            },
+            {
+              title: "Student Coverage",
+              icon: "BookUser",
+              href: "",
+              description: "Ideal plans for youth and college students.",
+            },
+            {
+              title: "Workplace Protection",
+              icon: "Briefcase",
+              href: "",
+              description: "Coverage options for freelancers or contractors.",
+            },
+            {
+              title: "Regulatory Updates",
+              icon: "Gavel",
+              href: "",
+              description:
+                "Information on changes to health and coverage laws.",
+            },
+            {
+              title: "Information for Immigrants",
+              icon: "Globe2",
+              href: "",
+              description: "Resources for legal immigrants seeking coverage.",
+            },
+            {
+              title: "Claims Guide",
+              icon: "FileCheck2",
+              href: "",
+              description:
+                "Learn how to file a claim and what to expect from the process.",
+            },
+          ],
+        },
+        about: {
+          label: "About Us",
+          bio: "Personalized insurance solutions to protect your health, family, and peace of mind.",
+          links: [
+            {
+              title: "Our Mission & Vision",
+              icon: "FileCheck2",
+              href: "",
+              description:
+                "Discover our commitment to accessible, affordable health coverage.",
+            },
+            {
+              title: "Why Choose Us",
+              icon: "ThumbsUp",
+              href: "",
+              description:
+                "Learn what sets us apart — from personalized service to comprehensive plan options.",
+            },
+            {
+              title: "Meet the Founder",
+              icon: "UserCheck",
+              href: "",
+              description:
+                "Get to know Isaac Orraiz, a licensed insurance agent passionate about helping families thrive.",
+            },
+
+            {
+              title: "Contact & Support",
+              icon: "PhoneCall",
+              href: "",
+              description:
+                "Reach out for personalized help or get answers to your insurance questions today.",
+            },
+          ],
+        },
+        contact: {
+          label: "Contact",
+        },
+      },
     },
     // Hero
     hero: {
@@ -299,6 +799,12 @@ export const translations = {
         "Specializing in ACA (Obamacare) insurance. Get personalized coverage that fits your needs and budget with expert guidance every step of the way.",
       cta1: "Get Free Quote",
       cta2: "Schedule Consultation",
+      ctas: {
+        cta1: {
+          title: "Get Free Quote",
+          message: "It only takes 10 seconds",
+        },
+      },
       stats: {
         states: "Licensed States",
         clients: "Clients Served",

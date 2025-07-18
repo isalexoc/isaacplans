@@ -19,6 +19,7 @@ import {
 import { motion } from "framer-motion";
 import { useLanguage } from "@/hooks/useLanguage";
 import { translations } from "@/lib/translations";
+import CTAButton from "./cta-button";
 
 export function Services() {
   const { language } = useLanguage();
@@ -140,6 +141,14 @@ export function Services() {
             </motion.div>
           ))}
         </div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+        >
+          <br />
+          <CTAButton />
+        </motion.div>
       </div>
     </section>
   );

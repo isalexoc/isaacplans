@@ -5,7 +5,7 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import CrispChat from "@/components/crisp-chat";
 import { LanguageProvider } from "@/hooks/useLanguage";
-import { Header } from "@/components/header";
+import Header from "@/components/header";
 import { Footer } from "@/components/footer";
 
 const inter = Inter({ subsets: ["latin"] });
