@@ -141,7 +141,7 @@ const Header = () => {
                   </NavigationMenuItem>
 
                   <NavigationMenuItem>
-                    <Link href="/testimonials" legacyBehavior passHref>
+                    <Link href="/contact#contact-form" legacyBehavior passHref>
                       <NavigationMenuLink
                         className={navigationMenuTriggerStyle()}
                       >
@@ -159,7 +159,7 @@ const Header = () => {
                 <Phone className="w-4 h-4" />
                 <span>{t.header.phone}</span>
               </div>
-              <Link href="/contact">
+              <Link href="/contact#contact-form">
                 <Button className="bg-custom text-custom-foreground hover:bg-custom/90">
                   {t.header.cta}
                 </Button>

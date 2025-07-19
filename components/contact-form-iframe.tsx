@@ -1,9 +1,9 @@
 const ContactFormIFrame = () => {
   return (
-    <div className="w-full rounded-lg overflow-hidden">
+    <div className="w-full max-w-none m-0 p-0 overflow-hidden">
       <iframe
         src="https://link.agent-crm.com/widget/form/R7X4k5dTsAORoIyMq6Kz"
-        className="w-full h-[75vh] sm:h-[805px] border-none rounded-lg"
+        className="w-full h-[75vh] sm:h-[805px] border-none"
         id="inline-R7X4k5dTsAORoIyMq6Kz"
         data-layout='{"id":"INLINE"}'
         data-trigger-type="alwaysShow"

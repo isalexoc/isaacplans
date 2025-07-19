@@ -11,6 +11,9 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        brand: "#0077B6", // Primary blue
+        accent: "#00B4D8", // Light blue for contrast
+        whatsapp: "#25D366", // WhatsApp green
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         card: {
@@ -37,10 +40,7 @@ const config: Config = {
           DEFAULT: "hsl(var(--muted))",
           foreground: "hsl(var(--muted-foreground))",
         },
-        accent: {
-          DEFAULT: "hsl(var(--accent))",
-          foreground: "hsl(var(--accent-foreground))",
-        },
+
         destructive: {
           DEFAULT: "hsl(var(--destructive))",
           foreground: "hsl(var(--destructive-foreground))",
