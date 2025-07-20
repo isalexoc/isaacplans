@@ -10,6 +10,9 @@ import {
 import { Button } from "@/components/ui/button";
 import {
   Heart,
+  BriefcaseMedical,
+  Hospital,
+  TriangleAlert,
   Shield,
   Users,
   FileText,
@@ -20,6 +23,7 @@ import { motion } from "framer-motion";
 import { useLanguage } from "@/hooks/useLanguage";
 import { translations } from "@/lib/translations";
 import CTAButton from "./cta-button";
+import Link from "next/link";
 
 export function Services() {
   const { language } = useLanguage();
@@ -27,59 +31,42 @@ export function Services() {
 
   const services = [
     {
-      icon: Heart,
+      icon: BriefcaseMedical,
       title: t.services.items.aca.title,
       description: t.services.items.aca.description,
       features: t.services.items.aca.features,
+      link: "/aca",
     },
     {
       icon: Shield,
-      title: t.services.items.medicare.title,
-      description: t.services.items.medicare.description,
-      features: t.services.items.medicare.features,
+      title: t.services.items.dentalVision.title,
+      description: t.services.items.dentalVision.description,
+      features: t.services.items.dentalVision.features,
+    },
+    {
+      icon: Hospital,
+      title: t.services.items.hospitalIndemnity.title,
+      description: t.services.items.hospitalIndemnity.description,
+      features: t.services.items.hospitalIndemnity.features,
     },
     {
       icon: Users,
-      title: t.services.items.family.title,
-      description: t.services.items.family.description,
-      features: t.services.items.family.features,
+      title: t.services.items.lifeInsurance.title,
+      description: t.services.items.lifeInsurance.description,
+      features: t.services.items.lifeInsurance.features,
+    },
+
+    {
+      icon: TriangleAlert,
+      title: t.services.items.cancerPlans.title,
+      description: t.services.items.cancerPlans.description,
+      features: t.services.items.cancerPlans.features,
     },
     {
-      icon: FileText,
-      title:
-        language === "es"
-          ? "Seguro de Vida, Dental y Visión"
-          : "Life, Dental & Vision Insurance",
-      description:
-        language === "es"
-          ? "Cobertura completa para proteger su salud y bienestar con seguros de vida, dental y visión."
-          : "Complete coverage to protect your health and wellbeing with life, dental, and vision insurance.",
-      features:
-        language === "es"
-          ? [
-              "Seguro de Vida",
-              "Cobertura Dental Completa",
-              "Planes de Visión",
-              "Opciones Familiares",
-            ]
-          : [
-              "Life Insurance",
-              "Complete Dental Coverage",
-              "Vision Plans",
-              "Family Options",
-            ],
-    },
-    {
-      icon: Phone,
-      title: t.services.items.support.title,
-      description: t.services.items.support.description,
-      features: t.services.items.support.features,
-    },
-    {
-      icon: Calculator,
-      title: t.services.items.optimization.title,
-      description: t.services.items.optimization.description,
-      features: t.services.items.optimization.features,
+      icon: Heart,
+      title: t.services.items.heartStrokePlans.title,
+      description: t.services.items.heartStrokePlans.description,
+      features: t.services.items.heartStrokePlans.features,
     },
   ];
 
@@ -109,13 +96,11 @@ export function Services() {
               viewport={{ once: true }}
               transition={{ delay: index * 0.1 }}
             >
-              <Card className="h-full hover:shadow-lg transition-shadow duration-300">
+              <Card className="h-full flex flex-col justify-between hover:shadow-lg transition-shadow duration-300">
                 <CardHeader className="pb-4">
-                  {/* ── icon badge ── */}
                   <div className="w-10 h-10 lg:w-12 lg:h-12 bg-custom/10 rounded-lg flex items-center justify-center mb-3 lg:mb-4">
                     <service.icon className="w-5 h-5 lg:w-6 lg:h-6 text-custom" />
                   </div>
-
                   <CardTitle className="text-lg lg:text-xl">
                     {service.title}
                   </CardTitle>
@@ -124,18 +109,28 @@ export function Services() {
                   </CardDescription>
                 </CardHeader>
 
-                <CardContent>
-                  <ul className="space-y-2 mb-4 lg:mb-6">
-                    {service.features.map((feature) => (
-                      <li
-                        key={feature}
-                        className="flex items-center text-sm text-gray-600"
-                      >
-                        <div className="w-1.5 h-1.5 bg-custom rounded-full mr-3 flex-shrink-0" />
-                        {feature}
-                      </li>
-                    ))}
-                  </ul>
+                <CardContent className="flex flex-col flex-1 justify-between">
+                  <div>
+                    <ul className="space-y-2 mb-4 lg:mb-6">
+                      {service.features.map((feature) => (
+                        <li
+                          key={feature}
+                          className="flex items-center text-sm text-gray-600"
+                        >
+                          <div className="w-1.5 h-1.5 bg-custom rounded-full mr-3 flex-shrink-0" />
+                          {feature}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div className="mt-auto pt-4">
+                    <Link href={service.link || ""}>
+                      <Button variant="outline" className="w-full">
+                        {language === "es" ? "Más Información" : "Learn More"}
+                      </Button>
+                    </Link>
+                  </div>
                 </CardContent>
               </Card>
             </motion.div>

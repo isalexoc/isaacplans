@@ -97,7 +97,7 @@ export function About() {
 
               {/* Health Image */}
               <Image
-                src="https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_350/health_vq9jgj.png"
+                src="https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_350,h_350,c_crop/pexels-pavel-danilyuk-8112186_epgbrd.png"
                 alt="Health Insurance Concept"
                 width={350}
                 height={350}

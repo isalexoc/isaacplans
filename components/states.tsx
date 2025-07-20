@@ -12,19 +12,17 @@ export function Coverage() {
 
   const features = [
     language === "es"
-      ? "Licenciado en más de 20 estados"
-      : "Licensed in 20+ states",
+      ? `Licenciado en más de ${process.env.NEXT_PUBLIC_STATES} estados`
+      : `Licensed in ${process.env.NEXT_PUBLIC_STATES}+ states`,
     language === "es"
-      ? "Licencia ACA (Salud, Obama Care)"
-      : "ACA License (Health, Obama Care)",
-    language === "es" ? "Especialista en Medicare" : "Medicare Specialist",
-    language === "es" ? "Licencia en Seguro de Vida" : "Life Insurance License",
+      ? "ACA (Salud, ObamaCare)"
+      : "ACA (Health, Affordable Care Act)",
     language === "es"
-      ? "Licencia en Seguro Dental"
-      : "Dental Insurance License",
-    language === "es"
-      ? "Licencia en Seguro de Visión"
-      : "Vision Insurance License",
+      ? "Especialista en Seguros de Salud"
+      : "Health Insurance Specialist",
+    language === "es" ? "Seguros de Vida" : "Life Insurance",
+    language === "es" ? "Seguro Dental" : "Dental Insurance",
+    language === "es" ? "Seguro de Visión" : "Vision Insurance",
     language === "es"
       ? "Más de 8 años de experiencia"
       : "Over 8 years of experience",

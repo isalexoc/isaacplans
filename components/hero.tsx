@@ -10,7 +10,7 @@ import { QuoteModal } from "@/components/form-modal";
 import { useState } from "react";
 import CTAButton from "@/components/cta-button";
 
-export function Hero() {
+export default function Hero() {
   const { language } = useLanguage();
   const t = translations[language];
   const [openModal, setOpenModal] = useState(false);
@@ -73,9 +73,11 @@ export function Hero() {
                 <div className="flex items-center space-x-2">
                   <Shield className="w-5 h-5 text-custom" />
                   <div>
-                    <div className="font-semibold text-xs">ACA Certificado</div>
+                    <div className="font-semibold text-xs">
+                      {t.hero.onPicUp.title}
+                    </div>
                     <div className="text-xs text-gray-600">
-                      Cobertura Experta
+                      {t.hero.onPicUp.des}
                     </div>
                   </div>
                 </div>
@@ -85,10 +87,10 @@ export function Hero() {
                   <Users className="w-5 h-5 text-custom" />
                   <div>
                     <div className="font-semibold text-xs">
-                      Especialista Medicare
+                      {t.hero.onPicDown.title}
                     </div>
                     <div className="text-xs text-gray-600">
-                      Todos los Planes
+                      {t.hero.onPicDown.des}
                     </div>
                   </div>
                 </div>
@@ -103,7 +105,7 @@ export function Hero() {
             >
               <div className="text-center">
                 <div className="text-xl sm:text-2xl font-bold text-custom">
-                  9+
+                  {process.env.NEXT_PUBLIC_STATES}+
                 </div>
                 <div className="text-xs sm:text-sm text-gray-600">
                   {t.hero.stats.states}

@@ -30,11 +30,11 @@ export function Footer() {
         href: isHomePage ? "#services" : "/#services",
       },
       {
-        name: t.services.items.medicare.title,
+        name: t.services.items.dentalVision.title,
         href: isHomePage ? "#services" : "/#services",
       },
       {
-        name: t.services.items.family.title,
+        name: t.services.items.hospitalIndemnity.title,
         href: isHomePage ? "#services" : "/#services",
       },
       {

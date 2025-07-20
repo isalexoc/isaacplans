@@ -68,7 +68,7 @@ interface RootLayoutProps {
 
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
-    <html lang="es" className="scroll-smooth">
+    <html lang="en" className="scroll-smooth">
       <body
         className={`${inter.className} flex min-h-screen flex-col bg-white text-gray-900 overflow-x-hidden`}
       >

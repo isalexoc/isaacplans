@@ -306,12 +306,12 @@ export const translations = {
     },
     // Hero
     hero: {
-      badge: "Licenciado en 9+ Estados",
+      badge: `Licenciado en ${process.env.NEXT_PUBLIC_STATES}+ Estados`,
       name: "Isaac Orraiz",
       title: "Su Agente de Seguros",
       subtitle: "de Confianza",
       description:
-        "Especializado en seguros ACA (Obamacare). Obtenga cobertura personalizada que se adapte a sus necesidades y presupuesto con orientación experta en cada paso.",
+        "Seguros ACA (Affordable Care Act) Obamacare, dental y visión, indemnización Hospitalaria, seguro de vida, planes contra el Cáncer y mucho mas...",
       cta1: "Cotización Gratis",
       cta2: "Agendar Consulta",
       ctas: {
@@ -338,7 +338,7 @@ export const translations = {
     services: {
       title: "Servicios Integrales de Seguros",
       subtitle:
-        "Especialista en planes del mercado ACA, brindo orientación experta para ayudarle a navegar el complejo mundo de los seguros de salud.",
+        "Brindo orientación experta para ayudarle a navegar el complejo mundo de los seguros de salud.",
       items: {
         aca: {
           title: "Seguro de Salud ACA (Obamacare)",
@@ -351,28 +351,54 @@ export const translations = {
             "Condiciones Preexistentes Cubiertas",
           ],
         },
-        medicare: {
-          title: "Planes Medicare",
+        dentalVision: {
+          title: "Planes Dentales y de Visión",
           description:
-            "Soluciones completas de Medicare incluyendo Partes A, B, C y D con selección personalizada de planes.",
+            "Seguros dentales y de visión accesibles para cubrir exámenes, limpiezas, gafas y más — con o sin un plan de salud.",
           features: [
-            "Medicare Advantage",
-            "Suplementos Medicare",
-            "Parte D Medicamentos",
-            "Inscripción Anual",
+            "Exámenes y limpiezas dentales",
+            "Cobertura para empastes y extracciones",
+            "Exámenes de visión y gafas",
+            "Planes flexibles individuales o familiares",
           ],
         },
-        family: {
-          title: "Cobertura Familiar",
+
+        hospitalIndemnity: {
+          title: "Indemnización Hospitalaria",
           description:
-            "Soluciones de seguro personalizadas para familias con niños, asegurando protección integral.",
+            "Planes que brindan pagos en efectivo por hospitalización para ayudar a cubrir gastos médicos y no médicos durante tu recuperación.",
           features: [
-            "Cuidado Pediátrico",
-            "Cobertura de Maternidad",
-            "Deducibles Familiares",
-            "Cuidado Preventivo",
+            "Pagos diarios por hospitalización",
+            "Beneficios por cuidados intensivos",
+            "Ayuda con deducibles y copagos",
+            "Uso libre del dinero recibido",
           ],
         },
+
+        lifeInsurance: {
+          title: "Seguro de Vida",
+          description:
+            "Protege a tus seres queridos con planes de seguro de vida accesibles que brindan apoyo financiero cuando más lo necesitan.",
+          features: [
+            "Opciones de vida a término y vida entera",
+            "Montos de cobertura flexibles",
+            "Primas mensuales asequibles",
+            "Tranquilidad para tu familia",
+          ],
+        },
+
+        cancerPlans: {
+          title: "Planes contra el Cáncer",
+          description:
+            "Cobertura adicional diseñada para ayudarte a afrontar los gastos relacionados con el diagnóstico y tratamiento del cáncer.",
+          features: [
+            "Pagos en efectivo tras el diagnóstico",
+            "Apoyo financiero durante el tratamiento",
+            "Uso libre del beneficio recibido",
+            "Compatible con otros seguros de salud",
+          ],
+        },
+
         comparison: {
           title: "Comparación de Planes",
           description:
@@ -384,17 +410,18 @@ export const translations = {
             "Recomendaciones Personalizadas",
           ],
         },
-        support: {
-          title: "Soporte Continuo",
+        heartStrokePlans: {
+          title: "Planes contra Ataques Cardíacos y Derrames Cerebrales",
           description:
-            "Asistencia durante todo el año con reclamos, renovaciones y cualquier pregunta relacionada con seguros.",
+            "Cobertura especializada que brinda protección financiera en caso de un ataque cardíaco o derrame cerebral, ayudándole a enfocarse en su recuperación.",
           features: [
-            "Asistencia con Reclamos",
-            "Guía de Renovación",
-            "Soporte 24/7",
-            "Actualizaciones de Póliza",
+            "Pago único tras el diagnóstico",
+            "Ayuda con gastos de recuperación y rehabilitación",
+            "Uso libre del dinero recibido",
+            "Complementa su seguro de salud existente",
           ],
         },
+
         optimization: {
           title: "Optimización de Costos",
           description:
@@ -411,32 +438,36 @@ export const translations = {
     // About
     about: {
       title: "Su Profesional de Seguros Dedicado",
-      description1:
-        "Con experiencia en la industria de seguros de salud, me especializo en ayudar a individuos y familias a navegar el complejo mundo de los seguros ACA. Tengo licencia en ACA (Salud, Obama Care), Vida, Dental y Visión en más de 9 estados.",
+      description1: `Con experiencia en la industria de seguros de salud, me especializo en ayudar a individuos y familias a navegar el complejo mundo de los seguros. Estoy licenciado en seguros ACA (Affordable Care Act) Obamacare, Vida, Dental y Visión en más de ${process.env.NEXT_PUBLIC_STATES} estados.`,
       description2:
-        "Estar licenciado en múltiples estados me permite servir a clientes a nivel nacional, asegurando que reciba orientación experta sin importar su ubicación. Me mantengo actualizado con todos los cambios regulatorios y nuevas ofertas de planes para brindarle la información y opciones más actualizadas.",
-      certifications: "Certificaciones y Credenciales",
+        "Estar licenciado en múltiples estados me permite atender a clientes a nivel nacional, asegurando que reciba orientación experta sin importar su ubicación. Me mantengo al día con todos los cambios regulatorios y nuevas ofertas de planes para brindarle la información y opciones más actualizadas.",
+      certifications: "Estados donde poseo licencia válida",
       certs: [
-        "Agente de Seguros Licenciado",
-        "Licencia ACA (Salud, Obama Care)",
-        "Licencia en Seguro de Vida",
-        "Licencia en Seguro Dental",
-        "Licencia en Seguro de Visión",
+        "Arizona",
+        "Colorado",
+        "Florida",
+        "Maryland",
+        "Nuevo México",
+        "Carolina del Norte",
+        "Ohio",
+        "Texas",
+        "Virginia",
       ],
       achievements: {
         states: {
-          title: "9+ Certificaciones Estatales",
+          title: `Licencia en más de ${process.env.NEXT_PUBLIC_STATES} estados`,
           description:
-            "Licenciado para servir clientes en múltiples estados de EE.UU.",
+            "Autorizado para atender clientes en múltiples estados de EE. UU.",
         },
         clients: {
           title: "Clientes Satisfechos",
           description:
-            "Ayudando a individuos y familias a encontrar la cobertura correcta",
+            "Ayudando a individuos y familias a encontrar la cobertura adecuada",
         },
         experience: {
           title: "Experiencia",
-          description: "Mucha experiencia en la industria de seguros de salud",
+          description:
+            "Más de una década de experiencia en la industria de seguros de salud",
         },
         education: {
           title: "Educación Continua",
@@ -445,11 +476,11 @@ export const translations = {
         },
       },
     },
+
     // Coverage
     coverage: {
       title: "Cobertura Nacional",
-      subtitle:
-        "Licenciado y certificado para servir clientes en más de 20 estados de Estados Unidos. Donde quiera que esté, puedo ayudarle a encontrar la cobertura de seguro adecuada.",
+      subtitle: `Licenciado y certificado para servir clientes en más de ${process.env.NEXT_PUBLIC_STATES} estados de Estados Unidos. Donde quiera que esté, puedo ayudarle a encontrar la cobertura de seguro adecuada.`,
       description:
         "Experiencia y licencias en ACA (Salud, Obama Care), Vida, Dental y Visión en múltiples estados, ofrezco servicios profesionales de seguros especializados.",
     },
@@ -791,12 +822,12 @@ export const translations = {
     },
     // Hero
     hero: {
-      badge: "Licensed in 9+ States",
+      badge: `Licensed in ${process.env.NEXT_PUBLIC_STATES}+ States`,
       name: "Isaac Orraiz",
       title: "Your Trusted",
       subtitle: "Insurance Agent",
       description:
-        "Specializing in ACA (Obamacare) insurance. Get personalized coverage that fits your needs and budget with expert guidance every step of the way.",
+        "ACA (Affordable Care Act) insurance, dental and vision, hospital indemnity, life insurance, cancer plans and more ...",
       cta1: "Get Free Quote",
       cta2: "Schedule Consultation",
       ctas: {
@@ -823,10 +854,10 @@ export const translations = {
     services: {
       title: "Comprehensive Insurance Services",
       subtitle:
-        "ACA marketplace plans coverage, I provide expert guidance to help you navigate the complex world of health insurance.",
+        "I provide expert guidance to help you navigate the complex world of health insurance.",
       items: {
         aca: {
-          title: "ACA Health Insurance (Obamacare)",
+          title: "ACA Health Insurance (Affordable Care Act)",
           description:
             "Comprehensive health insurance plans under the Affordable Care Act with subsidies and tax credits.",
           features: [
@@ -836,28 +867,54 @@ export const translations = {
             "Pre-existing Conditions Covered",
           ],
         },
-        medicare: {
-          title: "Medicare Plans",
+        dentalVision: {
+          title: "Dental & Vision Plans",
           description:
-            "Complete Medicare solutions including Parts A, B, C, and D with personalized plan selection.",
+            "Affordable dental and vision insurance to help cover exams, cleanings, eyewear, and more — with or without a health plan.",
           features: [
-            "Medicare Advantage",
-            "Medicare Supplements",
-            "Part D Prescription",
-            "Annual Enrollment",
+            "Dental exams and cleanings",
+            "Coverage for fillings and extractions",
+            "Vision exams and glasses",
+            "Flexible individual or family plans",
           ],
         },
-        family: {
-          title: "Family Coverage",
+
+        hospitalIndemnity: {
+          title: "Hospital Indemnity",
           description:
-            "Tailored insurance solutions for families with children, ensuring comprehensive protection.",
+            "Plans that provide cash benefits during hospital stays to help cover medical and non-medical expenses while you recover.",
           features: [
-            "Pediatric Care",
-            "Maternity Coverage",
-            "Family Deductibles",
-            "Preventive Care",
+            "Daily hospitalization payments",
+            "Intensive care benefits",
+            "Helps with deductibles and copays",
+            "Freedom to use the money as needed",
           ],
         },
+
+        lifeInsurance: {
+          title: "Life Insurance",
+          description:
+            "Protect your loved ones with affordable life insurance plans that provide financial support when it matters most.",
+          features: [
+            "Term and whole life options",
+            "Flexible coverage amounts",
+            "Affordable monthly premiums",
+            "Peace of mind for your family",
+          ],
+        },
+
+        cancerPlans: {
+          title: "Cancer Plans",
+          description:
+            "Supplemental coverage designed to help you manage expenses related to a cancer diagnosis and treatment.",
+          features: [
+            "Lump-sum payments upon diagnosis",
+            "Financial support during treatment",
+            "Freedom to use the benefit as needed",
+            "Can be combined with other health plans",
+          ],
+        },
+
         comparison: {
           title: "Plan Comparison",
           description:
@@ -869,17 +926,18 @@ export const translations = {
             "Personalized Recommendations",
           ],
         },
-        support: {
-          title: "Ongoing Support",
+        heartStrokePlans: {
+          title: "Heart Attack & Stroke Plans",
           description:
-            "Year-round assistance with claims, renewals, and any insurance-related questions.",
+            "Specialized coverage that provides financial protection in the event of a heart attack or stroke, helping you focus on recovery.",
           features: [
-            "Claims Assistance",
-            "Renewal Guidance",
-            "24/7 Support",
-            "Policy Updates",
+            "Lump-sum payments upon diagnosis",
+            "Helps cover recovery and rehab expenses",
+            "Use funds for bills, travel, or treatment",
+            "Works alongside your health insurance",
           ],
         },
+
         optimization: {
           title: "Cost Optimization",
           description:
@@ -936,22 +994,25 @@ export const translations = {
     },
     about: {
       title: "Your Dedicated Insurance Professional",
-      description1:
-        "With experience in the health insurance industry, I specialize in helping individuals and families navigate the complex world of insurance. I am licensed in ACA (Health, Obama Care), Life, Dental, and Vision insurance across 9+ states.",
+      description1: `With experience in the health insurance industry, I specialize in helping individuals and families navigate the complex world of insurance. I am licensed in ACA (Affordable Care Act), Life, Dental, and Vision insurance across ${process.env.NEXT_PUBLIC_STATES}+ states.`,
       description2:
-        "Being licensed in multiple states allows me to serve clients nationwide, ensuring you receive expert guidance regardless of your location. I stay current with all regulatory changes and new plan offerings to provide you with the most up-to-date information and options.",
-      certifications: "Certifications & Credentials",
+        "Being licensed in multiple states allows me to serve clients nationwide, ensuring you receive expert guidance regardless of your location. I stay up to date with all regulatory changes and new plan offerings to provide you with the most current information and options.",
+      certifications: "States I Hold a Valid License",
       certs: [
-        "Licensed Insurance Agent",
-        "ACA License (Health, Obama Care)",
-        "Life Insurance License",
-        "Dental Insurance License",
-        "Vision Insurance License",
+        "Arizona",
+        "Colorado",
+        "Florida",
+        "Maryland",
+        "New Mexico",
+        "North Carolina",
+        "Ohio",
+        "Texas",
+        "Virginia",
       ],
       achievements: {
         states: {
-          title: "9+ State Certifications",
-          description: "Licensed to serve clients across multiple US states",
+          title: `${process.env.NEXT_PUBLIC_STATES}+ State Licensed`,
+          description: "Licensed to serve clients across multiple U.S. states",
         },
         clients: {
           title: "Satisfied Clients",
@@ -961,21 +1022,21 @@ export const translations = {
         experience: {
           title: "Experience",
           description:
-            "Over a decade of expertise in health insurance industry",
+            "Over a decade of expertise in the health insurance industry",
         },
         education: {
           title: "Continuous Education",
-          description: "Staying current with latest regulations and plans",
+          description: "Staying current with the latest regulations and plans",
         },
       },
     },
+
     // Coverage
     coverage: {
       title: "Nationwide Coverage",
-      subtitle:
-        "Licensed and certified to serve clients in over 20 states across the United States. Wherever you are, I can help you find the right insurance coverage.",
+      subtitle: `Licensed and certified to serve clients in over ${process.env.NEXT_PUBLIC_STATES} states across the United States. Wherever you are, I can help you find the right insurance coverage.`,
       description:
-        "With experience and licenses in ACA (Health, Obama Care), Life, Dental, and Vision across multiple states, I offer specialized professional insurance services.",
+        "With experience and licenses in ACA (Affordable Care Act), Life, Dental, and Vision across multiple states, I offer specialized professional insurance services.",
     },
     // Contact
     contact: {

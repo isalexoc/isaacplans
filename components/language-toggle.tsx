@@ -1,11 +1,11 @@
-"use client"
+"use client";
 
-import { Button } from "@/components/ui/button"
-import { Globe } from "lucide-react"
-import { useLanguage } from "@/hooks/useLanguage"
+import { Button } from "@/components/ui/button";
+import { Globe } from "lucide-react";
+import { useLanguage } from "@/hooks/useLanguage";
 
 export function LanguageToggle() {
-  const { language, toggleLanguage } = useLanguage()
+  const { language, toggleLanguage } = useLanguage();
 
   return (
     <Button
@@ -15,7 +15,9 @@ export function LanguageToggle() {
       className="flex items-center space-x-1 hover:bg-green-50"
     >
       <Globe className="w-4 h-4" />
-      <span className="text-sm font-medium">{language === "es" ? "EN" : "ES"}</span>
+      <span className="text-sm font-medium">
+        {language === "es" ? "ES" : "EN"}
+      </span>
     </Button>
-  )
+  );
 }
