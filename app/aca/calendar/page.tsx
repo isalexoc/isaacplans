@@ -5,6 +5,8 @@ import { Suspense, useMemo } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Script from "next/script";
 import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/hooks/useLanguage";
+import { translations } from "@/lib/translations-aca";
 
 /* ─── Calendar widget isolated for Suspense ─── */
 function CalendarWidget() {
@@ -46,17 +48,19 @@ function CalendarWidget() {
 /* ─── Page component ─── */
 export default function ACACalendarPage() {
   const router = useRouter();
+  const { language } = useLanguage();
+  const t = translations[language];
 
   return (
     <main className="min-h-screen flex flex-col items-center gap-6 p-4">
       {/* Header row: Back button + title */}
       <div className="w-full max-w-4xl flex items-center justify-between">
         <Button variant="secondary" onClick={() => router.back()}>
-          ← Go&nbsp;Back
+          {t.calendar.backButton}
         </Button>
 
         <h1 className="text-2xl sm:text-3xl font-bold text-center flex-1">
-          Book Your ACA Phone Appointment
+          {t.calendar.title}
         </h1>
 
         {/* Spacer to keep the title centered */}

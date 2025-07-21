@@ -176,6 +176,10 @@ export const translations = {
       title: "Obtén ayuda experta ACA",
       subtitle: "Agente autorizado, sin compromiso",
     },
+    calendar: {
+      title: "Agende su cita ACA por teléfono",
+      backButton: "← Volver",
+    },
   },
 
   en: {
@@ -352,6 +356,10 @@ export const translations = {
     ctaButton: {
       title: "Get Expert ACA Help",
       subtitle: "Licensed agent—no obligation",
+    },
+    calendar: {
+      title: "Book Your ACA Phone Appointment",
+      backButton: "← Go Back",
     },
   },
 } as const;
