@@ -38,7 +38,6 @@ function CalendarWidget() {
         src={iframeSrc}
         title="ACA Appointment Calendar"
         className="w-full max-w-4xl h-[80vh] md:rounded-lg border-none shadow-lg"
-        scrolling="no"
       />
     </>
   );
