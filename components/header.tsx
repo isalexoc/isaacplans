@@ -52,6 +52,10 @@ const Header = () => {
           <div className="flex items-center justify-between h-16">
             <Logo />
 
+            <div className="block md:hidden items-center space-x-4">
+              <LanguageToggle />
+            </div>
+
             {/* Desktop Navigation with Submenus */}
             <nav className="hidden md:flex items-center space-x-4">
               <NavigationMenu>

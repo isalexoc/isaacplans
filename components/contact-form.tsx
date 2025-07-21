@@ -1,7 +1,6 @@
-import Script from "next/script";
 import { useLanguage } from "@/hooks/useLanguage";
 import { translations } from "@/lib/translations";
-import ContactFormIFrame from "@/components/contact-form-iframe";
+import ContactFormIFrameGeneral from "@/components/contact-form-iframe-general";
 
 function ContactForm() {
   const { language } = useLanguage();
@@ -18,12 +17,7 @@ function ContactForm() {
           </p>
         </div>
       </div>
-      <ContactFormIFrame />
-
-      <Script
-        src="https://link.agent-crm.com/js/form_embed.js"
-        strategy="lazyOnload"
-      />
+      <ContactFormIFrameGeneral />
     </section>
   );
 }

@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import { useLanguage } from "@/hooks/useLanguage";
 import { translations } from "@/lib/translations";
-import { QuoteModal } from "@/components/form-modal";
+import { QuoteModalGeneral } from "@/components/form-modal-general";
 import { useState } from "react";
 import CTAButton from "@/components/cta-button";
 
@@ -193,7 +193,7 @@ export default function Hero() {
           </motion.div>
         </div>
       </div>
-      <QuoteModal open={openModal} setOpen={setOpenModal} />
+      <QuoteModalGeneral open={openModal} setOpen={setOpenModal} />
     </section>
   );
 }

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "./ui/button";
-import { QuoteModal } from "@/components/form-modal";
+import { QuoteModalGeneral } from "@/components/form-modal-general";
 import { useLanguage } from "@/hooks/useLanguage";
 import { translations } from "@/lib/translations";
 import { Sparkles } from "lucide-react";
@@ -47,7 +47,7 @@ const CTAButton = () => {
           </span>
         </Button>
 
-        <QuoteModal open={openModal} setOpen={setOpenModal} />
+        <QuoteModalGeneral open={openModal} setOpen={setOpenModal} />
       </motion.div>
     </motion.div>
   );
