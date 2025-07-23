@@ -180,6 +180,14 @@ export const translations = {
       title: "Agende su cita ACA por teléfono",
       backButton: "← Volver",
     },
+    selfEnroll: {
+      title: "¿Prefiere inscribirse usted mismo?",
+      subtitle:
+        "Utilice nuestro portal seguro de HealthSherpa para comparar planes e inscribirse en minutos.",
+      cta: "Comenzar Auto-Inscripción",
+      disclaimer:
+        "Disponible en la mayoría de los estados. En los mercados estatales puede ser redirigido al sitio oficial.",
+    },
   },
 
   en: {
@@ -360,6 +368,14 @@ export const translations = {
     calendar: {
       title: "Book Your ACA Phone Appointment",
       backButton: "← Go Back",
+    },
+    selfEnroll: {
+      title: "Prefer to self-enroll?",
+      subtitle:
+        "Use our secure HealthSherpa portal to compare plans and enroll in minutes.",
+      cta: "Start Self-Enrollment",
+      disclaimer:
+        "Available in most states. In state-based marketplaces you may be redirected to the official state site.",
     },
   },
 } as const;

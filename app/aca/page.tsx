@@ -10,6 +10,7 @@ import PlanTiersSection from "@/components/plan-tiers-section";
 import PlanOptionsSection from "@/components/plan-options-section";
 import FaqSection from "@/components/FaqSection";
 import CTABanner from "@/components/CTABanner";
+import PlanEnrollCard from "@/components/SelfEnrollSection";
 
 const page = () => {
   const { language } = useLanguage();
@@ -46,6 +47,17 @@ const page = () => {
         credential={content.about.credential}
         /* default CTA uses t.about.cta automatically 
          if you pass your own button, supply <Button>t.cta</Button> */
+      />
+      {/* ACA self-enroll via HealthSherpa */}
+      <PlanEnrollCard
+        title={content.selfEnroll.title}
+        subtitle={content.selfEnroll.subtitle}
+        cta={content.selfEnroll.cta}
+        link="https://www.healthsherpa.com/?_agent_id=isaacplans"
+        imageUrl="https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_96,dpr_auto/self_sherpa_yaamv0.png
+"
+        disclaimer={content.selfEnroll.disclaimer}
+        className="max-w-3xl mx-auto mt-24"
       />
       <HeroWithTestimonials
         badge=""

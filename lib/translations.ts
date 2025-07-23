@@ -59,14 +59,14 @@ export const translations = {
             {
               title: "ACA Obamacare",
               icon: "Stethoscope",
-              href: "",
+              href: "/aca",
               description:
                 "Cobertura médica asequible bajo el Mercado de Seguros ACA.",
             },
             {
               title: "Dental y Visión",
               icon: "Eye",
-              href: "",
+              href: "/dental-vision",
               description:
                 "Planes que cubren exámenes dentales y cuidado visual.",
             },
@@ -583,14 +583,14 @@ export const translations = {
             {
               title: "ACA Obamacare",
               icon: "Stethoscope",
-              href: "",
+              href: "/aca",
               description:
                 "Affordable health coverage under the ACA Marketplace.",
             },
             {
               title: "Dental & Vision",
               icon: "Eye",
-              href: "",
+              href: "/dental-vision",
               description:
                 "Plans that help cover dental checkups and vision care.",
             },

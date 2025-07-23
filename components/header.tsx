@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -32,6 +33,7 @@ import {
 import Logo from "@/components/logo";
 
 const Header = () => {
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const { language } = useLanguage();
   const t = translations[language];
@@ -41,7 +43,9 @@ const Header = () => {
   const handleNavClick = (href: string) => {
     setIsOpen(false);
     if (!isHomePage && href.startsWith("#")) {
-      window.location.href = "/" + href;
+      router.push("/" + href); // client-side navigation
+    } else {
+      router.push(href); // works for “/contact” too
     }
   };
 
@@ -288,7 +292,7 @@ const Header = () => {
                       className="w-full bg-custom text-custom-foreground hover:bg-custom/90"
                       onClick={() => {
                         setIsOpen(false);
-                        window.location.href = "/contact";
+                        router.push("/contact");
                       }}
                     >
                       {t.header.cta}
@@ -308,8 +312,14 @@ export default Header;
 
 const ListItem = React.forwardRef<
   React.ElementRef<"a">,
-  React.ComponentPropsWithoutRef<"a"> & { icon?: string }
->(({ className, title, icon, children, ...props }, ref) => {
+  {
+    title: string;
+    icon?: string;
+    href: string;
+    className?: string;
+    children?: React.ReactNode;
+  }
+>(({ title, icon, href, className, children }, ref) => {
   const IconComponent =
     icon && icon in LucideIcons
       ? (LucideIcons[icon as keyof typeof LucideIcons] as React.ComponentType<{
@@ -317,28 +327,34 @@ const ListItem = React.forwardRef<
         }>)
       : null;
 
+  console.log("ListItem rendered", { title, href, icon });
+
   return (
     <li>
-      <NavigationMenuLink asChild>
-        <a
-          ref={ref}
-          className={cn(
-            "flex items-start space-x-3 select-none rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
-            className
-          )}
-          {...props}
-        >
-          {IconComponent && (
-            <IconComponent className="w-5 h-5 mt-1 text-custom/70 shrink-0" />
-          )}
-          <div className="space-y-1">
-            <div className="text-sm font-medium leading-none">{title}</div>
-            <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-              {children}
-            </p>
-          </div>
-        </a>
-      </NavigationMenuLink>
+      {/* Next.js handles routing, NavigationMenu handles focus/roving-tabindex */}
+      <Link href={href} legacyBehavior passHref>
+        <NavigationMenuLink asChild>
+          <a
+            ref={ref}
+            className={cn(
+              "flex items-start space-x-3 select-none rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
+              className
+            )}
+          >
+            {IconComponent && (
+              <IconComponent className="w-5 h-5 mt-1 text-custom/70 shrink-0" />
+            )}
+            <div className="space-y-1">
+              <div className="text-sm font-medium leading-none">{title}</div>
+              {children && (
+                <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                  {children}
+                </p>
+              )}
+            </div>
+          </a>
+        </NavigationMenuLink>
+      </Link>
     </li>
   );
 });
