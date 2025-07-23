@@ -5,7 +5,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { ScanEye } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { QuoteModal } from "@/components/form-modal";
+import { QuoteModal } from "@/components/form-modal-dental";
 import { useLanguage } from "@/hooks/useLanguage";
 import { translations as t } from "@/lib/translations-dentalVision";
 
