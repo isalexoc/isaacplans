@@ -14,10 +14,10 @@ interface EnrollmentSectionProps {
   bullets: string[];
   note?: string;
   imagePublicId: string;
-  /** `"left"` puts the image on the left side of desktop */
   imagePosition?: "left" | "right";
-  /** Pass any JSX here (button, link, etc.) */
   cta: React.ReactNode;
+  /** Call-to-action link (e.g. HealthSherpa URL) */
+  href: string;
 }
 
 export default function EnrollmentSectionGeneric({
@@ -30,6 +30,7 @@ export default function EnrollmentSectionGeneric({
   imagePublicId,
   imagePosition = "right",
   cta,
+  href,
 }: EnrollmentSectionProps) {
   const imgUrl = `https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_600,c_fill,g_auto/${imagePublicId}.png`;
   const isLeft = imagePosition === "left";
@@ -42,14 +43,12 @@ export default function EnrollmentSectionGeneric({
           { "lg:flex-row-reverse": isLeft }
         )}
       >
-        {/* ─── text (≈ 2⁄3) ─── */}
+        {/* Text Section */}
         <div className="w-full lg:w-2/3 max-w-2xl mx-auto">
           <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 dark:text-white">
             {title}
           </h2>
-
           <div className="h-1 w-24 bg-custom my-4" />
-
           <p className="text-gray-700 dark:text-gray-300 text-lg mb-6">
             {intro}
           </p>
@@ -83,18 +82,14 @@ export default function EnrollmentSectionGeneric({
               size="lg"
               className="mt-5 w-full md:w-fit bg-brand hover:bg-brand-dark dark:bg-brand-light dark:hover:bg-brand"
             >
-              <a
-                href="https://www.healthsherpa.com/?_agent_id=isaacplans"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
+              <a href={href} target="_blank" rel="noopener noreferrer">
                 {cta}
               </a>
             </Button>
           </div>
         </div>
 
-        {/* ─── image (≈ 1⁄3) ─── */}
+        {/* Image Section */}
         <div className="w-full lg:w-1/3 flex justify-center">
           <div className="relative w-full max-w-sm aspect-[3/4]">
             <Image

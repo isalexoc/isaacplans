@@ -57,7 +57,7 @@ export const translations = {
       intro:
         "Ameritas individual dental & vision plans are open to nearly everyone—whether you’re self-employed, retired, or simply need benefits outside an employer plan. Getting started is easy:",
       bullets: [
-        "Be a U.S. resident (plans available in almost every state)",
+        "Be located in USA (plans available in almost every state)",
         "Must be 18 + to purchase; cover dependents from birth",
         "Enroll online in minutes—no health questions or waiting periods on most plans*",
         "Pick your start date and pay the first month’s premium (rates are based on ZIP code, not age)",
@@ -83,6 +83,46 @@ export const translations = {
       ],
       note: "No enrollment fees, no health questions, and no waiting periods on preventive services. A 30-day customer satisfaction guarantee gives you extra peace of mind.",
       image: "enrollment_family_dentist", // replace with your Cloudinary ID
+    },
+    faqDental: {
+      label: "Ameritas Dental & Vision",
+      titleBeforeBold: "Questions About",
+      titleBold: "Ameritas Plans",
+      image: "faq_ameritas_dental_vision",
+      items: [
+        {
+          q: "What do Ameritas dental plans cover?",
+          a: "Ameritas covers 100% of preventive care like cleanings and exams. Restorative procedures like fillings, crowns, or extractions are partially covered depending on the plan type.",
+        },
+        {
+          q: "Are there waiting periods for major services?",
+          a: "Some plans do not have strict waiting periods, but coverage for major services typically starts at a lower percentage in the first year (e.g., 20%) and increases to 50% or more after the first year. This allows limited access initially with greater benefits over time.",
+        },
+        {
+          q: "Can I continue treatment if I change plans?",
+          a: "Yes. Ameritas coordinates benefits across plans. If you're in active treatment and switch plans, coverage can continue up to the allowed lifetime maximum.",
+        },
+        {
+          q: "How much can I save with in-network providers?",
+          a: "Ameritas has one of the largest dental networks in the U.S. Using in-network dentists can save you between 25% and 50% compared to regular fees.",
+        },
+        {
+          q: "How do I access my benefits and claims?",
+          a: "You can view your member ID, coverage details, claims status, and more through the Ameritas website or the Ameritas Benefits mobile app.",
+        },
+        {
+          q: "Do vision plans include eyewear and exams?",
+          a: "Yes. Plans typically include one annual eye exam and a set allowance for glasses or contacts. Some plans are partnered with networks like VSP or EyeMed.",
+        },
+        {
+          q: "Are additional services like LASIK or hearing care available?",
+          a: "Yes. Ameritas offers optional benefits like LASIK discounts, hearing aid coverage, and hearing exams as part of expanded package options.",
+        },
+      ],
+    },
+    ctaBanner: {
+      message: "Looking for a First-Class Dental & Vision Consultant?",
+      button: "Schedule A Consultation",
     },
   },
 
@@ -144,7 +184,7 @@ export const translations = {
       intro:
         "Los planes dentales y de visión individuales de Ameritas están disponibles para casi cualquier persona—ya sea trabajador independiente, jubilado o quien necesite cobertura fuera de un plan empresarial. Comenzar es sencillo:",
       bullets: [
-        "Residir en Estados Unidos (planes disponibles en casi todos los estados)",
+        "Vivir en Estados Unidos (planes disponibles en casi todos los estados)",
         "Ser mayor de 18 años para contratar; puede incluir dependientes desde el nacimiento",
         "Inscribirse en línea en minutos—sin preguntas médicas ni periodos de espera en la mayoría de los planes*",
         "Elegir la fecha de inicio y pagar la primera prima (las tarifas se basan en el código postal, no en la edad)",
@@ -170,6 +210,46 @@ export const translations = {
       ],
       note: "Sin cuotas de inscripción, sin preguntas médicas y sin periodos de espera en servicios preventivos. Una garantía de satisfacción de 30 días te brinda tranquilidad adicional.",
       image: "enrollment_family_dentist", // usa el mismo ID en Cloudinary
+    },
+    faqDental: {
+      label: "Ameritas Dental y Visión",
+      titleBeforeBold: "Preguntas sobre",
+      titleBold: "Planes Ameritas",
+      image: "faq_ameritas_dental_vision",
+      items: [
+        {
+          q: "¿Qué cubren los planes dentales Ameritas?",
+          a: "Los planes cubren el 100 % de limpiezas y exámenes preventivos. También incluyen cobertura parcial para tratamientos como empastes, coronas o extracciones, dependiendo del tipo de plan.",
+        },
+        {
+          q: "¿Hay periodos de espera para algunos tratamientos?",
+          a: "Algunos planes no tienen un periodo de espera estricto, pero la cobertura para tratamientos mayores comienza con un porcentaje reducido el primer año (por ejemplo, 20 %) y aumenta al 50 % o más después del primer año. Esto permite acceso limitado desde el inicio con mayores beneficios a largo plazo.",
+        },
+        {
+          q: "¿Puedo continuar un tratamiento si cambio de plan?",
+          a: "Sí. Ameritas coordina beneficios entre planes. Si estás en tratamiento y cambias de plan, tu cobertura puede continuar hasta alcanzar el monto máximo vitalicio permitido.",
+        },
+        {
+          q: "¿Cuánto ahorro al usar dentistas dentro de la red?",
+          a: "Ameritas cuenta con una de las redes dentales más grandes del país. Usar dentistas dentro de la red puede ahorrarte entre un 25 % y un 50 % comparado con tarifas estándar.",
+        },
+        {
+          q: "¿Cómo consulto mis beneficios o reclamaciones?",
+          a: "Puedes acceder fácilmente a toda la información de tu plan a través del sitio web de Ameritas o desde la aplicación móvil Ameritas Benefits.",
+        },
+        {
+          q: "¿Los planes de visión cubren gafas y exámenes?",
+          a: "Sí. Los planes incluyen un examen de la vista anual y un monto fijo o porcentaje para cubrir anteojos o lentes de contacto. Algunos planes trabajan con redes como VSP o EyeMed.",
+        },
+        {
+          q: "¿Puedo añadir beneficios como audición o cirugía LASIK?",
+          a: "Sí. Ameritas ofrece opciones que incluyen descuentos en audífonos, consultas auditivas y beneficios para cirugía LASIK como parte de paquetes combinados.",
+        },
+      ],
+    },
+    ctaBanner: {
+      message: "¿Busca un asesor Dental & Visión de primera clase?",
+      button: "Programar una consulta",
     },
   },
 } as const;

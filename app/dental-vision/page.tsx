@@ -8,6 +8,8 @@ import AboutSection from "@/components/about-section-template";
 import PlanEnrollCard from "@/components/SelfEnrollSection";
 import EligibilitySection from "@/components/eligibility-section";
 import EnrollmentSection from "@/components/enrollment-section-template";
+import FaqSection from "@/components/FaqSection";
+import CTABanner from "@/components/CTABanner-template";
 
 const page = () => {
   const { language } = useLanguage();
@@ -85,6 +87,26 @@ const page = () => {
         imagePublicId="tmph9wnbhil_wts4sf"
         imagePosition="right"
         cta={content.selfEnroll.cta}
+        href="https://myplan.ameritas.com/id/010A1380"
+      />
+      <FaqSection
+        label={content.faqDental.label}
+        title={
+          <>
+            {content.faqDental.titleBeforeBold}{" "}
+            <span className="text-custom">{content.faqDental.titleBold}</span>
+          </>
+        }
+        faqs={content.faqDental.items.map((item) => ({
+          question: item.q,
+          answer: item.a,
+        }))}
+        imagePublicId="tmpft70mt0j_1_hppsqh"
+      />
+      <CTABanner
+        message={content.ctaBanner.message}
+        className="bg-blue-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200"
+        cta={<DentalButton />}
       />
     </>
   );
