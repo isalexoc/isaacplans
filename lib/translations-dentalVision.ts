@@ -65,6 +65,25 @@ export const translations = {
       note: "*Day-one preventive coverage, a nationwide PPO network, optional out-of-network freedom, and zero enrollment fees make Ameritas a top choice for dental & vision protection.",
       image: "eligibility_smile_family", // Cloudinary public-id placeholder
     },
+    enroll: {
+      headlineBeforeBold: "How to Enroll in an",
+      headlineBold: "Ameritas Dental & Vision Plan",
+      intro:
+        "Ameritas lets you apply online year-round—no open-enrollment window required. Coverage can even begin as soon as tomorrow:",
+      step1:
+        "<strong>Get an instant quote</strong> by clicking the button below and entering your Information.",
+      step2:
+        "<strong>Check out in minutes</strong>, choose your start date, and download your e-ID card right away.",
+      subHeading: "During enrollment, you can:",
+      bullets: [
+        "Pick any effective date up to 30 days out",
+        "Add dependents of any age (children, spouse, partner)",
+        "Select dental only, vision only, or a money-saving bundle",
+        "Pay monthly or annually with a credit/debit card or EFT",
+      ],
+      note: "No enrollment fees, no health questions, and no waiting periods on preventive services. A 30-day customer satisfaction guarantee gives you extra peace of mind.",
+      image: "enrollment_family_dentist", // replace with your Cloudinary ID
+    },
   },
 
   es: {
@@ -132,6 +151,25 @@ export const translations = {
       ],
       note: "*Cobertura preventiva desde el primer día, una red PPO nacional, libertad para atenderse fuera de la red y cero cuotas de inscripción convierten a Ameritas en una excelente opción para proteger tu salud dental y visual.",
       image: "eligibility_smile_family", // mismo Cloudinary id
+    },
+    enroll: {
+      headlineBeforeBold: "Cómo Inscribirse en un",
+      headlineBold: "Plan Dental y de Visión de Ameritas",
+      intro:
+        "Ameritas permite solicitar en línea durante todo el año—no hay un periodo de inscripción abierto. ¡La cobertura puede comenzar tan pronto como mañana!",
+      step1:
+        "<strong>Obtén una cotización instantánea</strong> haciendo clic en el botón abajo e ingresando tu información.",
+      step2:
+        "<strong>Completa la compra en minutos</strong>, elige tu fecha de inicio y descarga tu tarjeta digital de identificación al instante.",
+      subHeading: "Durante la inscripción puedes:",
+      bullets: [
+        "Escoger cualquier fecha de vigencia hasta con 30 días de anticipación",
+        "Agregar dependientes de cualquier edad (hijos, cónyuge, pareja)",
+        "Seleccionar dental solo, visión solo o un paquete con ahorro",
+        "Pagar mensual o anualmente con tarjeta o débito automático",
+      ],
+      note: "Sin cuotas de inscripción, sin preguntas médicas y sin periodos de espera en servicios preventivos. Una garantía de satisfacción de 30 días te brinda tranquilidad adicional.",
+      image: "enrollment_family_dentist", // usa el mismo ID en Cloudinary
     },
   },
 } as const;

@@ -7,6 +7,7 @@ import DentalButton from "@/components/DentalButton";
 import AboutSection from "@/components/about-section-template";
 import PlanEnrollCard from "@/components/SelfEnrollSection";
 import EligibilitySection from "@/components/eligibility-section";
+import EnrollmentSection from "@/components/enrollment-section-template";
 
 const page = () => {
   const { language } = useLanguage();
@@ -48,7 +49,7 @@ const page = () => {
         title={content.selfEnroll.title}
         subtitle={content.selfEnroll.subtitle}
         cta={content.selfEnroll.cta}
-        link="https://www.healthsherpa.com/?_agent_id=isaacplans"
+        link="https://myplan.ameritas.com/id/010A1380"
         imageUrl="https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_96,dpr_auto/ameritas-transparent_1_bbjb2f.png
       "
         disclaimer={content.selfEnroll.disclaimer}
@@ -68,6 +69,22 @@ const page = () => {
         note={content.eligibility.note}
         imagePublicId="pexels-shvetsa-3845653_v1r87k" /* same id for both langs */
         imagePosition="left"
+      />
+      <EnrollmentSection
+        title={
+          <>
+            {content.enroll.headlineBeforeBold}{" "}
+            <span className="font-bold">{content.enroll.headlineBold}</span>
+          </>
+        }
+        intro={content.enroll.intro}
+        steps={[content.enroll.step1, content.enroll.step2]}
+        subHeading={content.enroll.subHeading}
+        bullets={[...content.enroll.bullets]}
+        note={content.enroll.note}
+        imagePublicId="tmph9wnbhil_wts4sf"
+        imagePosition="right"
+        cta={content.selfEnroll.cta}
       />
     </>
   );

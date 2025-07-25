@@ -248,7 +248,7 @@ export const translations = {
       intro:
         "Enrollment in a Health Insurance Marketplace plan can be done during the annual open enrollment period or a special enrollment period triggered by life events like moving or having a baby. Here’s how to get started:",
       step1:
-        "<strong>Schedule a free consultation</strong> with me to identify the Marketplace options in your state.",
+        "Schedule a free consultation with me to identify the Marketplace options in your state.",
       step2:
         "<strong>Let me complete the enrollment process</strong> and paperwork for you, step by step.",
       subHeading: "During the enrollment period, you can:",

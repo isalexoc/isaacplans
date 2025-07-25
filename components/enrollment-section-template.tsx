@@ -1,0 +1,113 @@
+/* components/enrollment-section-generic.tsx */
+"use client";
+
+import Image from "next/image";
+import clsx from "clsx";
+import { CheckCircle } from "lucide-react";
+import { Button } from "./ui/button";
+
+interface EnrollmentSectionProps {
+  title: React.ReactNode;
+  intro: string;
+  steps: [string, string];
+  subHeading: string;
+  bullets: string[];
+  note?: string;
+  imagePublicId: string;
+  /** `"left"` puts the image on the left side of desktop */
+  imagePosition?: "left" | "right";
+  /** Pass any JSX here (button, link, etc.) */
+  cta: React.ReactNode;
+}
+
+export default function EnrollmentSectionGeneric({
+  title,
+  intro,
+  steps,
+  subHeading,
+  bullets,
+  note,
+  imagePublicId,
+  imagePosition = "right",
+  cta,
+}: EnrollmentSectionProps) {
+  const imgUrl = `https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_600,c_fill,g_auto/${imagePublicId}.png`;
+  const isLeft = imagePosition === "left";
+
+  return (
+    <section className="py-24 bg-white dark:bg-gray-950 px-4">
+      <div
+        className={clsx(
+          "container mx-auto flex flex-col lg:flex-row items-center justify-center gap-16",
+          { "lg:flex-row-reverse": isLeft }
+        )}
+      >
+        {/* ─── text (≈ 2⁄3) ─── */}
+        <div className="w-full lg:w-2/3 max-w-2xl mx-auto">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 dark:text-white">
+            {title}
+          </h2>
+
+          <div className="h-1 w-24 bg-custom my-4" />
+
+          <p className="text-gray-700 dark:text-gray-300 text-lg mb-6">
+            {intro}
+          </p>
+
+          <ol className="list-decimal list-inside space-y-2 mb-8 text-gray-800 dark:text-gray-200">
+            <li dangerouslySetInnerHTML={{ __html: steps[0] }} />
+            <li dangerouslySetInnerHTML={{ __html: steps[1] }} />
+          </ol>
+
+          <p className="font-semibold mb-4 text-gray-900 dark:text-white">
+            {subHeading}
+          </p>
+          <ul className="space-y-3 mb-6">
+            {bullets.map((item) => (
+              <li key={item} className="flex items-start gap-3">
+                <CheckCircle className="w-5 h-5 text-custom mt-0.5" />
+                <span className="text-gray-800 dark:text-gray-200">{item}</span>
+              </li>
+            ))}
+          </ul>
+
+          {note && (
+            <p className="italic text-gray-700 dark:text-gray-300 mb-10">
+              {note}
+            </p>
+          )}
+
+          <div className="flex justify-center lg:justify-start">
+            <Button
+              asChild
+              size="lg"
+              className="mt-5 w-full md:w-fit bg-brand hover:bg-brand-dark dark:bg-brand-light dark:hover:bg-brand"
+            >
+              <a
+                href="https://www.healthsherpa.com/?_agent_id=isaacplans"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {cta}
+              </a>
+            </Button>
+          </div>
+        </div>
+
+        {/* ─── image (≈ 1⁄3) ─── */}
+        <div className="w-full lg:w-1/3 flex justify-center">
+          <div className="relative w-full max-w-sm aspect-[3/4]">
+            <Image
+              src={imgUrl}
+              alt="Enrollment visual"
+              fill
+              sizes="(max-width: 1024px) 100vw, 33vw"
+              className="rounded-xl object-cover shadow-2xl"
+              priority
+            />
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
