@@ -1,19 +1,12 @@
-"use client";
-
-import { Card } from "@/components/ui/card";
-import { Shield, Users, Award } from "lucide-react";
-import { motion } from "framer-motion";
+// components/hero/Hero.tsx
 import Image from "next/image";
-import { useLanguage } from "@/hooks/useLanguage";
-import { translations } from "@/lib/translations";
-import { QuoteModalGeneral } from "@/components/form-modal-general";
-import { useState } from "react";
-import CTAButton from "@/components/cta-button";
+import { Shield, Users, Award } from "lucide-react";
+import { getTranslations } from "next-intl/server";
+import { Card } from "@/components/ui/card";
+import CTAButton from "@/components/cta-button"; // already client
 
-export default function Hero() {
-  const { language } = useLanguage();
-  const t = translations[language];
-  const [openModal, setOpenModal] = useState(false);
+export default async function Hero() {
+  const t = await getTranslations("HomePage");
 
   return (
     <section
@@ -22,43 +15,45 @@ export default function Hero() {
     >
       <div className="container mx-auto px-4">
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-          <motion.div
-            initial={{ opacity: 0, x: -50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8 }}
-            className="space-y-6 lg:space-y-8 order-2 lg:order-1"
-          >
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="inline-flex items-center space-x-2 bg-custom/10 text-custom px-4 py-2 rounded-full text-sm font-medium"
+          {/* ── Left column ───────────────────────────────────────────── */}
+          <div className="space-y-6 lg:space-y-8 order-2 lg:order-1">
+            {/* badge */}
+            <div
+              className="inline-flex items-center space-x-2 bg-custom/10 text-custom
+                            px-4 py-2 rounded-full text-sm font-medium
+                            animate-fadeUp"
             >
               <Award className="w-4 h-4" />
-              <span>{t.hero.badge}</span>
-            </motion.div>
+              <span>{t("hero.badge")}</span>
+            </div>
 
-            <h1 className="text-3xl sm:text-4xl lg:text-6xl font-bold text-gray-900 leading-tight">
+            {/* headline */}
+            <h1
+              className="text-3xl sm:text-4xl lg:text-6xl font-bold text-gray-900 leading-tight
+                           animate-fadeLeft"
+            >
               <span className="text-custom block text-xl sm:text-2xl lg:text-5xl mb-2">
-                {t.hero.name}
+                {t("hero.name")}
               </span>
-              {t.hero.title}
-              <span className="text-custom block">{t.hero.subtitle}</span>
+              {t("hero.title")}
+              <span className="text-custom block">{t("hero.subtitle")}</span>
             </h1>
 
-            <p className="text-base sm:text-lg lg:text-xl text-gray-600 leading-relaxed">
-              {t.hero.description}
+            {/* description */}
+            <p
+              className="text-base sm:text-lg lg:text-xl text-gray-600 leading-relaxed
+                          animate-fadeLeft-d2"
+            >
+              {t("hero.description")}
             </p>
 
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-            >
+            {/* CTA island (client) */}
+            <div className="animate-fadeLeft-d4">
               <CTAButton />
-            </motion.div>
+            </div>
 
-            <div className="lg:hidden flex justify-center">
+            {/* mobile portrait & feature cards */}
+            <div className="lg:hidden flex justify-center animate-fadeLeft-d4">
               <Image
                 src="https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_150,h_150,c_thumb,g_face,r_max/isaacpic_c8kca5.jpg"
                 alt="Isaac Orraiz"
@@ -68,79 +63,40 @@ export default function Hero() {
               />
             </div>
 
-            <div className="lg:hidden mt-6 grid grid-cols-2 gap-3">
-              <Card className="p-3 bg-white shadow-md">
-                <div className="flex items-center space-x-2">
-                  <Shield className="w-5 h-5 text-custom" />
-                  <div>
-                    <div className="font-semibold text-xs">
-                      {t.hero.onPicUp.title}
-                    </div>
-                    <div className="text-xs text-gray-600">
-                      {t.hero.onPicUp.des}
-                    </div>
-                  </div>
-                </div>
-              </Card>
-              <Card className="p-3 bg-white shadow-md">
-                <div className="flex items-center space-x-2">
-                  <Users className="w-5 h-5 text-custom" />
-                  <div>
-                    <div className="font-semibold text-xs">
-                      {t.hero.onPicDown.title}
-                    </div>
-                    <div className="text-xs text-gray-600">
-                      {t.hero.onPicDown.des}
-                    </div>
-                  </div>
-                </div>
-              </Card>
+            <div className="lg:hidden mt-6 grid grid-cols-2 gap-3 animate-fadeLeft-d4">
+              <FeatureCard
+                icon={Shield}
+                title={t("hero.onPicUp.title")}
+                desc={t("hero.onPicUp.des")}
+              />
+              <FeatureCard
+                icon={Users}
+                title={t("hero.onPicDown.title")}
+                desc={t("hero.onPicDown.des")}
+              />
             </div>
 
-            <motion.div
-              className="grid grid-cols-3 gap-4 py-8 border-t border-gray-200"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.5 }}
+            {/* stats */}
+            <div
+              className="grid grid-cols-3 gap-4 py-8 border-t border-gray-200
+                            animate-fadeLeft-d4"
             >
-              <div className="text-center">
-                <div className="text-xl sm:text-2xl font-bold text-custom">
-                  {process.env.NEXT_PUBLIC_STATES}+
-                </div>
-                <div className="text-xs sm:text-sm text-gray-600">
-                  {t.hero.stats.states}
-                </div>
-              </div>
-              <div className="text-center">
-                <div className="text-xl sm:text-2xl font-bold text-custom">
-                  100%
-                </div>
-                <div className="text-xs sm:text-sm text-gray-600">
-                  {t.hero.stats.clients}
-                </div>
-              </div>
-              <div className="text-center">
-                <div className="text-xl sm:text-2xl font-bold text-custom">
-                  100%
-                </div>
-                <div className="text-xs sm:text-sm text-gray-600">
-                  {t.hero.stats.satisfaction}
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
+              <Stat value="9+" label={t("hero.stats.states")} />
+              <Stat value="100%" label={t("hero.stats.clients")} />
+              <Stat value="100%" label={t("hero.stats.satisfaction")} />
+            </div>
+          </div>
 
-          <motion.div
-            initial={{ opacity: 0, x: 50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="relative order-1 lg:order-2"
+          {/* ── Right column ─────────────────────────────────────────── */}
+          <div
+            className="relative order-1 lg:order-2
+                          animate-fadeRight"
           >
             <div className="relative max-w-md mx-auto">
               <div className="hidden lg:block">
                 <Image
                   src="https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_500,h_600,c_fill,g_face/isaacpic_c8kca5.png"
-                  alt="Isaac Orraiz - Agente de Seguros Profesional"
+                  alt="Isaac Orraiz – Insurance Agent"
                   width={500}
                   height={600}
                   className="rounded-2xl shadow-2xl w-full h-auto object-cover"
@@ -148,52 +104,91 @@ export default function Hero() {
                 />
               </div>
 
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6 }}
-                className="absolute -left-6 top-20 hidden lg:block"
-              >
-                <Card className="p-4 bg-white shadow-lg">
-                  <div className="flex items-center space-x-3">
-                    <Shield className="w-8 h-8 text-custom" />
-                    <div>
-                      <div className="font-semibold text-sm">
-                        {t.hero.onPicUp.title}
-                      </div>
-                      <div className="text-xs text-gray-600">
-                        {t.hero.onPicUp.des}
-                      </div>
-                    </div>
-                  </div>
-                </Card>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.8 }}
-                className="absolute -right-6 bottom-20 hidden lg:block"
-              >
-                <Card className="p-4 bg-white shadow-lg">
-                  <div className="flex items-center space-x-3">
-                    <Users className="w-8 h-8 text-custom" />
-                    <div>
-                      <div className="font-semibold text-sm">
-                        {t.hero.onPicDown.title}
-                      </div>
-                      <div className="text-xs text-gray-600">
-                        {t.hero.onPicDown.des}
-                      </div>
-                    </div>
-                  </div>
-                </Card>
-              </motion.div>
+              {/* floating cards (no JS, same styles) */}
+              <FloatingCard
+                side="left"
+                top="top-20"
+                icon={Shield}
+                title={t("hero.onPicUp.title")}
+                desc={t("hero.onPicUp.des")}
+                delay="animate-fadeUp-d2"
+              />
+              <FloatingCard
+                side="right"
+                top="bottom-20"
+                icon={Users}
+                title={t("hero.onPicDown.title")}
+                desc={t("hero.onPicDown.des")}
+                delay="animate-fadeUp-d4"
+              />
             </div>
-          </motion.div>
+          </div>
         </div>
       </div>
-      <QuoteModalGeneral open={openModal} setOpen={setOpenModal} />
     </section>
+  );
+}
+
+/* ---------- little helpers (server) ---------- */
+function Stat({ value, label }: { value: string; label: string }) {
+  return (
+    <div className="text-center">
+      <div className="text-xl sm:text-2xl font-bold text-custom">{value}</div>
+      <div className="text-xs sm:text-sm text-gray-600">{label}</div>
+    </div>
+  );
+}
+function FeatureCard({
+  icon: Icon,
+  title,
+  desc,
+}: {
+  icon: any;
+  title: string;
+  desc: string;
+}) {
+  return (
+    <Card className="p-3 bg-white shadow-md">
+      <div className="flex items-center space-x-2">
+        <Icon className="w-5 h-5 text-custom" />
+        <div>
+          <div className="font-semibold text-xs">{title}</div>
+          <div className="text-xs text-gray-600">{desc}</div>
+        </div>
+      </div>
+    </Card>
+  );
+}
+function FloatingCard({
+  side,
+  top,
+  icon: Icon,
+  title,
+  desc,
+  delay,
+}: {
+  side: "left" | "right";
+  top: string;
+  icon: any;
+  title: string;
+  desc: string;
+  delay: string;
+}) {
+  const pos =
+    side === "left"
+      ? `hidden lg:block absolute -left-6 ${top}`
+      : `hidden lg:block absolute -right-6 ${top}`;
+  return (
+    <div className={`${pos} ${delay}`}>
+      <Card className="p-4 bg-white shadow-lg">
+        <div className="flex items-center space-x-3">
+          <Icon className="w-8 h-8 text-custom" />
+          <div>
+            <div className="font-semibold text-sm">{title}</div>
+            <div className="text-xs text-gray-600">{desc}</div>
+          </div>
+        </div>
+      </Card>
+    </div>
   );
 }

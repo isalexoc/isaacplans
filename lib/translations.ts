@@ -73,7 +73,7 @@ export const translations = {
             {
               title: "Indemnización Hospitalaria",
               icon: "Hospital",
-              href: "",
+              href: "/hospital-indemnity",
               description:
                 "Beneficios diarios en efectivo durante hospitalizaciones.",
             },
@@ -581,7 +581,7 @@ export const translations = {
           label: "Services",
           links: [
             {
-              title: "ACA Obamacare",
+              title: "ACA - Affordable Care Act",
               icon: "Stethoscope",
               href: "/aca",
               description:
@@ -597,7 +597,7 @@ export const translations = {
             {
               title: "Hospital Indemnity",
               icon: "Hospital",
-              href: "",
+              href: "/hospital-indemnity",
               description:
                 "Daily cash benefits during hospital stays to offset costs.",
             },

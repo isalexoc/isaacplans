@@ -14,7 +14,6 @@ const ContactFormIFrameGeneral = () => (
       src="https://link.agent-crm.com/widget/form/R7X4k5dTsAORoIyMq6Kz"
       id="inline-R7X4k5dTsAORoIyMq6Kz"
       title="A2P General Optin"
-      /* fills the 90 vh dialog; 603 px min keeps small screens happy */
       className="w-full h-full min-h-[603px] border-none"
       data-layout='{"id":"INLINE"}'
       data-trigger-type="alwaysShow"

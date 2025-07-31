@@ -82,6 +82,7 @@ const config: Config = {
       },
 
       keyframes: {
+        /* accordion + existing fade-up already defined */
         "accordion-down": {
           from: { height: "0" },
           to: { height: "var(--radix-accordion-content-height)" },
@@ -90,16 +91,44 @@ const config: Config = {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
-        /* fade-up utility for IntersectionObserver reveal */
         "fade-up": {
           "0%": { opacity: "0", transform: "translateY(24px)" },
           "100%": { opacity: "1", transform: "translateY(0)" },
         },
+
+        /* NEW — used in Hero */
+        fadeInUp: {
+          "0%": { opacity: "0", transform: "translateY(20px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
+        fadeInLeft: {
+          "0%": { opacity: "0", transform: "translateX(-40px)" },
+          "100%": { opacity: "1", transform: "translateX(0)" },
+        },
+        fadeInRight: {
+          "0%": { opacity: "0", transform: "translateX(40px)" },
+          "100%": { opacity: "1", transform: "translateX(0)" },
+        },
       },
       animation: {
+        /* existing */
         "accordion-down": "accordion-down 0.2s ease-out",
-        "accordion-up": "accordion-up 0.2s ease-out",
-        "fade-up": "fade-up 0.7s ease-out forwards",
+        "accordion-up": "accordion-up   0.2s ease-out",
+        "fade-up": "fade-up        0.7s ease-out forwards",
+
+        /* NEW — Hero utilities */
+        /** basic entrance */
+        fadeUp: "fadeInUp    0.6s ease-out both",
+        fadeLeft: "fadeInLeft  0.6s ease-out both",
+        fadeRight: "fadeInRight 0.6s ease-out both",
+
+        /** 0.2 s stagger */
+        "fadeUp-d2": "fadeInUp    0.6s 0.2s ease-out both",
+        "fadeLeft-d2": "fadeInLeft  0.6s 0.2s ease-out both",
+        "fadeUp-d4": "fadeInUp    0.6s 0.4s ease-out both",
+        "fadeLeft-d4": "fadeInLeft  0.6s 0.4s ease-out both",
+        /* Right column didn’t need stagger variants,
+           add if you want: 'fadeRight-d2', etc. */
       },
     },
   },

@@ -1,19 +1,19 @@
 "use client";
 
-import React from "react";
-import { useRouter } from "next/navigation";
-import { cn } from "@/lib/utils";
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, Phone } from "lucide-react";
-import { useLanguage } from "@/hooks/useLanguage";
-import { translations } from "@/lib/translations";
-import { LanguageToggle } from "@/components/language-toggle";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import React, { useState } from "react";
 import Image from "next/image";
 import Headroom from "react-headroom";
+import { useTranslations } from "next-intl";
+import * as Lucide from "lucide-react";
+
+import { Link } from "@/i18n/navigation"; // ✅ typed Link / AppHref
+import type { AppHref } from "@/i18n/navigation";
+
+import { usePathname, useRouter } from "@/i18n/navigation";
+
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import {
   NavigationMenu,
   NavigationMenuItem,
@@ -23,29 +23,95 @@ import {
   NavigationMenuLink,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
-import * as LucideIcons from "lucide-react";
 import {
   Accordion,
   AccordionItem,
   AccordionTrigger,
   AccordionContent,
 } from "@/components/ui/accordion";
+
 import Logo from "@/components/logo";
+import LocaleSwitcher from "./LocaleSwitcher";
+
+/* ────────────────────────────────────────────────────────────
+   Link tables (single source of truth)
+────────────────────────────────────────────────────────────── */
+
+const serviceLinks = [
+  { key: "aca", href: "/aca", icon: "Stethoscope" },
+  { key: "dentalVision", href: "/dental-vision", icon: "Eye" },
+  { key: "hospitalIndemnity", href: "/hospital-indemnity", icon: "Hospital" },
+  { key: "life", href: "", icon: "HeartPulse" },
+  { key: "cancer", href: "", icon: "Radiation" },
+  { key: "stroke", href: "", icon: "Activity" },
+] as const satisfies ReadonlyArray<{
+  key: string;
+  href: AppHref | "";
+  icon: string;
+}>;
+
+const resourceLinks = [
+  { key: "faq", href: "", icon: "HelpCircle" },
+  { key: "blog", href: "", icon: "BookOpen" },
+  { key: "testimonials", href: "", icon: "MessageCircle" },
+  { key: "consumerGuides", href: "", icon: "FileText" },
+  { key: "coverageOptions", href: "", icon: "ShieldCheck" },
+  { key: "glossary", href: "", icon: "Landmark" },
+  { key: "videos", href: "", icon: "Film" },
+  { key: "subsidyCalculator", href: "", icon: "Calculator" },
+  { key: "personalizedAssistance", href: "", icon: "UserCheck" },
+  { key: "downloads", href: "", icon: "Download" },
+  { key: "planComparison", href: "", icon: "GitCompareArrows" },
+  { key: "newsletter", href: "", icon: "Mail" },
+  { key: "eligibilityTools", href: "", icon: "SearchCheck" },
+  { key: "successStories", href: "", icon: "Smile" },
+  { key: "renewalSupport", href: "", icon: "Repeat" },
+  { key: "newUserGuides", href: "", icon: "Compass" },
+  { key: "savingTips", href: "", icon: "PiggyBank" },
+  { key: "familySupport", href: "", icon: "Users" },
+  { key: "studentCoverage", href: "", icon: "BookUser" },
+  { key: "workplaceProtection", href: "", icon: "Briefcase" },
+  { key: "regulatoryUpdates", href: "", icon: "Gavel" },
+  { key: "immigrantInfo", href: "", icon: "Globe2" },
+  { key: "claimsGuide", href: "", icon: "FileCheck2" },
+] as const satisfies ReadonlyArray<{
+  key: string;
+  href: AppHref | "";
+  icon: string;
+}>;
+
+const aboutLinks = [
+  { key: "missionVision", href: "", icon: "FileCheck2" },
+  { key: "whyChooseUs", href: "", icon: "ThumbsUp" },
+  { key: "meetFounder", href: "", icon: "UserCheck" },
+  { key: "contactSupport", href: "", icon: "PhoneCall" },
+] as const satisfies ReadonlyArray<{
+  key: string;
+  href: AppHref | "";
+  icon: string;
+}>;
+
+/* helper – lets us pass '' to disabled anchors while keeping types happy */
+const asHref = (href: AppHref) => href;
+
+/* ────────────────────────────────────────────────────────────
+   Header component
+────────────────────────────────────────────────────────────── */
 
 const Header = () => {
   const router = useRouter();
-  const [isOpen, setIsOpen] = useState(false);
-  const { language } = useLanguage();
-  const t = translations[language];
   const pathname = usePathname();
   const isHomePage = pathname === "/";
+  const [isOpen, setIsOpen] = useState(false);
+  const nav = useTranslations("header.nav");
 
   const handleNavClick = (href: string) => {
     setIsOpen(false);
     if (!isHomePage && href.startsWith("#")) {
-      router.push("/" + href); // client-side navigation
+      // internal section on a different page ⇒ jump to “/#section”
+      router.push(("/" + href) as AppHref);
     } else {
-      router.push(href); // works for “/contact” too
+      router.push(href as AppHref);
     }
   };
 
@@ -55,252 +121,144 @@ const Header = () => {
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
             <Logo />
-
-            <div className="block md:hidden items-center space-x-4">
-              <LanguageToggle />
+            <div className="block md:hidden">
+              <LocaleSwitcher />
             </div>
 
-            {/* Desktop Navigation with Submenus */}
+            {/* Desktop navigation */}
             <nav className="hidden md:flex items-center space-x-4">
               <NavigationMenu>
                 <NavigationMenuList>
+                  {/* SERVICES ▸ */}
                   <NavigationMenuItem>
                     <NavigationMenuTrigger>
-                      {t.header.nav.services.label}
+                      {nav("services.label")}
                     </NavigationMenuTrigger>
                     <NavigationMenuContent>
-                      <ul className="grid w-[400px] gap-1 p-1 md:w-[500px] md:grid-cols-2 lg:w-[600px] ">
-                        {t.header.nav.services.links.map((component) => (
+                      <ul className="grid gap-1 p-1 w-[400px] md:w-[500px] md:grid-cols-2 lg:w-[600px]">
+                        {serviceLinks.map(({ key, href, icon }) => (
                           <ListItem
-                            key={component.title}
-                            title={component.title}
-                            href={component.href}
-                            icon={component.icon}
-                            className="p-2"
+                            key={key}
+                            href={href as AppHref}
+                            icon={icon}
+                            title={nav(`services.links.${key}.title`)}
+                            ariaDisabled={!href}
                           >
-                            {component.description}
+                            {nav(`services.links.${key}.description`)}
                           </ListItem>
                         ))}
                       </ul>
                     </NavigationMenuContent>
                   </NavigationMenuItem>
+
+                  {/* RESOURCES ▸ */}
                   <NavigationMenuItem>
                     <NavigationMenuTrigger>
-                      {t.header.nav.resources.label}
+                      {nav("resources.label")}
                     </NavigationMenuTrigger>
                     <NavigationMenuContent>
-                      <ul className="grid w-[400px] gap-1 p-1 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
-                        {t.header.nav.resources.links.map((resource) => (
+                      <ul className="grid gap-1 p-1 w-[400px] md:w-[500px] md:grid-cols-2 lg:w-[600px]">
+                        {resourceLinks.map(({ key, href, icon }) => (
                           <ListItem
-                            key={resource.title}
-                            title={resource.title}
-                            href={resource.href}
-                            icon={resource.icon}
-                            className="p-2"
+                            key={key}
+                            href={href as AppHref}
+                            icon={icon}
+                            title={nav(`resources.links.${key}.title`)}
+                            ariaDisabled={!href}
                           >
-                            {resource.description}
+                            {nav(`resources.links.${key}.description`)}
                           </ListItem>
                         ))}
                       </ul>
                     </NavigationMenuContent>
                   </NavigationMenuItem>
+
+                  {/* ABOUT ▸ */}
                   <NavigationMenuItem>
                     <NavigationMenuTrigger>
-                      {t.header.nav.about.label}
+                      {nav("about.label")}
                     </NavigationMenuTrigger>
                     <NavigationMenuContent>
                       <ul className="grid gap-1 p-6 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
+                        {/* promo tile */}
                         <li className="row-span-3">
                           <NavigationMenuLink asChild>
                             <Link
-                              className="relative flex h-full w-full select-none flex-col justify-end rounded-md no-underline outline-none focus:shadow-md overflow-hidden group"
                               href="/about"
+                              className="relative group flex h-full w-full flex-col justify-end overflow-hidden rounded-md select-none"
                             >
                               <Image
                                 src="https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_400/v1752843172/pexels-shkrabaanthony-5816299_1_zbd4hi.jpg"
-                                alt="Isaac Plans Insurance"
-                                layout="fill"
-                                objectFit="cover"
-                                className="absolute inset-0 z-0 transition-transform duration-300 group-hover:scale-105"
+                                alt=""
+                                fill
+                                className="object-cover transition-transform duration-300 group-hover:scale-105"
                               />
-                              <div className="relative z-10 bg-black bg-opacity-50 p-6 w-full h-full flex flex-col justify-end">
-                                <div className="mb-2 text-lg font-medium text-white">
+                              <div className="relative z-10 bg-black/60 p-6 flex flex-col justify-end h-full">
+                                <div className="text-lg font-medium text-white mb-2">
                                   Isaac Plans Insurance
                                 </div>
-                                <p className="text-sm leading-tight text-gray-200">
-                                  {t.header.nav.about.bio}
+                                <p className="text-sm text-gray-200 leading-tight">
+                                  {nav("about.bio")}
                                 </p>
                               </div>
                             </Link>
                           </NavigationMenuLink>
                         </li>
-                        {t.header.nav.about.links.map((item) => (
+
+                        {aboutLinks.map(({ key, href, icon }) => (
                           <ListItem
-                            key={item.title}
-                            href={item.href}
-                            title={item.title}
-                            icon={item.icon}
+                            key={key}
+                            href={href as AppHref}
+                            icon={icon}
+                            title={nav(`about.links.${key}.title`)}
+                            ariaDisabled={!href}
                           >
-                            {item.description}
+                            {nav(`about.links.${key}.description`)}
                           </ListItem>
                         ))}
                       </ul>
                     </NavigationMenuContent>
                   </NavigationMenuItem>
 
+                  {/* CONTACT */}
                   <NavigationMenuItem>
-                    <Link href="/contact#contact-form" legacyBehavior passHref>
+                    <Link href="/contact" legacyBehavior passHref>
                       <NavigationMenuLink
                         className={navigationMenuTriggerStyle()}
                       >
-                        {t.header.nav.contact.label}
+                        {nav("contact.label")}
                       </NavigationMenuLink>
                     </Link>
                   </NavigationMenuItem>
                 </NavigationMenuList>
               </NavigationMenu>
-              <LanguageToggle />
+
+              <LocaleSwitcher />
             </nav>
 
+            {/* phone & CTA (desktop) */}
             <div className="hidden lg:flex items-center space-x-4">
-              <div className="flex items-center space-x-2 text-sm text-gray-600">
-                <Phone className="w-4 h-4" />
-                <span>{t.header.phone}</span>
-              </div>
-              <Link href="/contact#contact-form">
+              <a
+                href={`tel:${nav("phone")}`}
+                className="flex items-center text-sm text-gray-600 space-x-2"
+              >
+                <Lucide.Phone className="w-4 h-4" />
+                <span>{nav("phone")}</span>
+              </a>
+              <Link href="/contact">
                 <Button className="bg-custom text-custom-foreground hover:bg-custom/90">
-                  {t.header.cta}
+                  {nav("cta")}
                 </Button>
               </Link>
             </div>
 
-            <Sheet open={isOpen} onOpenChange={setIsOpen}>
-              <SheetTrigger asChild className="md:hidden">
-                <Button variant="ghost" size="icon">
-                  <Menu className="w-6 h-6" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent className="p-0">
-                <div className="h-full flex flex-col">
-                  {/* Scrollable content container */}
-                  <div className="flex-1 overflow-y-auto px-4 pt-8">
-                    <Accordion type="multiple" className="w-full space-y-2">
-                      <Logo />
-
-                      {/* Home */}
-                      <Link
-                        href="/"
-                        onClick={() => {
-                          handleNavClick("/");
-                          setIsOpen(false);
-                        }}
-                        className="block pt-5 pb-3 py-1 hover:text-custom border-b"
-                      >
-                        {t.nav.home}
-                      </Link>
-
-                      {/* Services */}
-                      <AccordionItem value="services">
-                        <AccordionTrigger className="text-gray-700 font-medium">
-                          {t.header.nav.services.label}
-                        </AccordionTrigger>
-                        <AccordionContent className="pl-4">
-                          {t.header.nav.services.links.map((item) => (
-                            <Link
-                              key={item.title}
-                              href={item.href}
-                              onClick={() => {
-                                handleNavClick(item.href);
-                                setIsOpen(false);
-                              }}
-                              className="block py-1 text-sm text-muted-foreground hover:text-custom"
-                            >
-                              {item.title}
-                            </Link>
-                          ))}
-                        </AccordionContent>
-                      </AccordionItem>
-
-                      {/* Resources */}
-                      <AccordionItem value="resources">
-                        <AccordionTrigger className="text-gray-700 font-medium">
-                          {t.header.nav.resources.label}
-                        </AccordionTrigger>
-                        <AccordionContent className="pl-4">
-                          {t.header.nav.resources.links.map((item) => (
-                            <Link
-                              key={item.title}
-                              href={item.href}
-                              onClick={() => {
-                                handleNavClick(item.href);
-                                setIsOpen(false);
-                              }}
-                              className="block py-1 text-sm text-muted-foreground hover:text-custom"
-                            >
-                              {item.title}
-                            </Link>
-                          ))}
-                        </AccordionContent>
-                      </AccordionItem>
-
-                      {/* About */}
-                      <AccordionItem value="about">
-                        <AccordionTrigger className="text-gray-700 font-medium">
-                          {t.header.nav.about.label}
-                        </AccordionTrigger>
-                        <AccordionContent className="pl-4">
-                          {t.header.nav.about.links.map((item) => (
-                            <Link
-                              key={item.title}
-                              href={item.href}
-                              onClick={() => {
-                                handleNavClick(item.href);
-                                setIsOpen(false);
-                              }}
-                              className="block py-1 text-sm text-muted-foreground hover:text-custom"
-                            >
-                              {item.title}
-                            </Link>
-                          ))}
-                        </AccordionContent>
-                      </AccordionItem>
-
-                      {/* Contact */}
-                      <Link
-                        href="/contact"
-                        onClick={() => {
-                          handleNavClick("/contact");
-                          setIsOpen(false);
-                        }}
-                        className="block pt-4 pb-0 hover:text-custom"
-                      >
-                        {t.nav.contact}
-                      </Link>
-                    </Accordion>
-                  </div>
-
-                  {/* Sticky bottom contact info and CTA */}
-                  <div className="border-t px-4 pt-4 pb-6 bg-white">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center space-x-2 text-sm text-gray-600">
-                        <Phone className="w-4 h-4" />
-                        <span>{t.header.phone}</span>
-                      </div>
-                      <LanguageToggle />
-                    </div>
-                    <Button
-                      className="w-full bg-custom text-custom-foreground hover:bg-custom/90"
-                      onClick={() => {
-                        setIsOpen(false);
-                        router.push("/contact");
-                      }}
-                    >
-                      {t.header.cta}
-                    </Button>
-                  </div>
-                </div>
-              </SheetContent>
-            </Sheet>
+            {/* Mobile sheet */}
+            <MobileSheet
+              isOpen={isOpen}
+              setIsOpen={setIsOpen}
+              handleNavClick={handleNavClick}
+              nav={nav}
+            />
           </div>
         </div>
       </header>
@@ -310,52 +268,227 @@ const Header = () => {
 
 export default Header;
 
-const ListItem = React.forwardRef<
-  React.ElementRef<"a">,
-  {
-    title: string;
-    icon?: string;
-    href: string;
-    className?: string;
-    children?: React.ReactNode;
-  }
->(({ title, icon, href, className, children }, ref) => {
-  const IconComponent =
-    icon && icon in LucideIcons
-      ? (LucideIcons[icon as keyof typeof LucideIcons] as React.ComponentType<{
-          className?: string;
-        }>)
-      : null;
+/* ───────────────────────── Mobile sheet ───────────────────────── */
 
-  console.log("ListItem rendered", { title, href, icon });
+type MobileSheetProps = {
+  isOpen: boolean;
+  setIsOpen: (o: boolean) => void;
+  handleNavClick: (href: string) => void;
+  nav: ReturnType<typeof useTranslations>;
+};
 
-  return (
-    <li>
-      {/* Next.js handles routing, NavigationMenu handles focus/roving-tabindex */}
-      <Link href={href} legacyBehavior passHref>
-        <NavigationMenuLink asChild>
-          <a
-            ref={ref}
+const MobileSheet = ({
+  isOpen,
+  setIsOpen,
+  handleNavClick,
+  nav,
+}: MobileSheetProps) => (
+  <Sheet open={isOpen} onOpenChange={setIsOpen}>
+    <SheetTrigger asChild className="md:hidden">
+      <Button variant="ghost" size="icon">
+        <Lucide.Menu className="w-6 h-6" />
+      </Button>
+    </SheetTrigger>
+
+    <SheetContent className="p-0">
+      <div className="flex flex-col h-full">
+        <div className="flex-1 overflow-y-auto px-4 pt-8">
+          <Accordion type="multiple" className="space-y-2 w-full">
+            <Logo />
+
+            <MobileLink
+              label={nav("home")}
+              href="/"
+              handleNavClick={handleNavClick}
+              setIsOpen={setIsOpen}
+              className="pt-5 pb-3 border-b"
+            />
+
+            {/* Services */}
+            <AccordionItem value="services">
+              <AccordionTrigger>{nav("services.label")}</AccordionTrigger>
+              <AccordionContent className="pl-4">
+                {serviceLinks.map(({ key, href }) => (
+                  <MobileLink
+                    key={key}
+                    label={nav(`services.links.${key}.title`)}
+                    href={href}
+                    handleNavClick={handleNavClick}
+                    setIsOpen={setIsOpen}
+                  />
+                ))}
+              </AccordionContent>
+            </AccordionItem>
+
+            {/* Resources */}
+            <AccordionItem value="resources">
+              <AccordionTrigger>{nav("resources.label")}</AccordionTrigger>
+              <AccordionContent className="pl-4">
+                {resourceLinks.map(({ key, href }) => (
+                  <MobileLink
+                    key={key}
+                    label={nav(`resources.links.${key}.title`)}
+                    href={href}
+                    handleNavClick={handleNavClick}
+                    setIsOpen={setIsOpen}
+                  />
+                ))}
+              </AccordionContent>
+            </AccordionItem>
+
+            {/* About */}
+            <AccordionItem value="about">
+              <AccordionTrigger>{nav("about.label")}</AccordionTrigger>
+              <AccordionContent className="pl-4">
+                {aboutLinks.map(({ key, href }) => (
+                  <MobileLink
+                    key={key}
+                    label={nav(`about.links.${key}.title`)}
+                    href={href}
+                    handleNavClick={handleNavClick}
+                    setIsOpen={setIsOpen}
+                  />
+                ))}
+              </AccordionContent>
+            </AccordionItem>
+
+            <MobileLink
+              label={nav("contact.label")}
+              href="/contact"
+              handleNavClick={handleNavClick}
+              setIsOpen={setIsOpen}
+              className="pt-4"
+            />
+          </Accordion>
+        </div>
+
+        {/* sticky bottom */}
+        <div className="border-t bg-white px-4 pt-4 pb-6">
+          <div className="flex justify-between items-center mb-4">
+            <a
+              href={`tel:${nav("phone")}`}
+              className="flex items-center text-sm text-gray-600 space-x-2"
+            >
+              <Lucide.Phone className="w-4 h-4" />
+              <span>{nav("phone")}</span>
+            </a>
+            <LocaleSwitcher />
+          </div>
+          <Button
+            className="w-full bg-custom text-custom-foreground hover:bg-custom/90"
+            onClick={() => handleNavClick("/contact")}
+          >
+            {nav("cta")}
+          </Button>
+        </div>
+      </div>
+    </SheetContent>
+  </Sheet>
+);
+
+/* ───────────────────────── helpers ───────────────────────── */
+
+type MobileLinkProps = {
+  label: string;
+  href: AppHref | "";
+  handleNavClick: (h: string) => void;
+  setIsOpen: (o: boolean) => void;
+  className?: string;
+};
+
+const MobileLink = ({
+  label,
+  href,
+  handleNavClick,
+  setIsOpen,
+  className = "",
+}: MobileLinkProps) =>
+  href ? (
+    <Link
+      href={href as AppHref}
+      onClick={() => {
+        handleNavClick(href);
+        setIsOpen(false);
+      }}
+      className={cn("block py-1 ...", className)}
+    >
+      {label}
+    </Link>
+  ) : (
+    <span className="block py-1 text-muted-foreground cursor-not-allowed opacity-50">
+      {label}
+    </span>
+  );
+
+type ListItemProps = {
+  title: string;
+  icon?: string;
+  href: AppHref | "";
+  ariaDisabled?: boolean;
+  className?: string;
+  children?: React.ReactNode;
+};
+
+const ListItem = React.forwardRef<React.ElementRef<"a">, ListItemProps>(
+  ({ title, icon, href, ariaDisabled, className, children }, ref) => {
+    const Icon =
+      icon && icon in Lucide
+        ? (Lucide[icon as keyof typeof Lucide] as React.FC<{
+            className?: string;
+          }>)
+        : null;
+
+    return (
+      <li>
+        {/* if the item has a real URL render a typed Link, otherwise show a disabled tile */}
+        {href ? (
+          <Link href={href as AppHref} legacyBehavior passHref>
+            <NavigationMenuLink
+              asChild
+              ref={ref}
+              className={cn(
+                "flex items-start space-x-3 rounded-md p-3 select-none leading-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
+                className
+              )}
+            >
+              <a>
+                {Icon && (
+                  <Icon className="w-5 h-5 mt-1 text-custom/70 shrink-0" />
+                )}
+                <div className="space-y-1">
+                  <div className="text-sm font-medium leading-none">
+                    {title}
+                  </div>
+                  {children && (
+                    <p className="line-clamp-2 text-sm text-muted-foreground leading-snug">
+                      {children}
+                    </p>
+                  )}
+                </div>
+              </a>
+            </NavigationMenuLink>
+          </Link>
+        ) : (
+          <div
+            aria-disabled
             className={cn(
-              "flex items-start space-x-3 select-none rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
+              "flex items-start space-x-3 rounded-md p-3 select-none leading-none cursor-not-allowed opacity-50",
               className
             )}
           >
-            {IconComponent && (
-              <IconComponent className="w-5 h-5 mt-1 text-custom/70 shrink-0" />
-            )}
+            {Icon && <Icon className="w-5 h-5 mt-1 text-custom/70 shrink-0" />}
             <div className="space-y-1">
               <div className="text-sm font-medium leading-none">{title}</div>
               {children && (
-                <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                <p className="line-clamp-2 text-sm text-muted-foreground leading-snug">
                   {children}
                 </p>
               )}
             </div>
-          </a>
-        </NavigationMenuLink>
-      </Link>
-    </li>
-  );
-});
+          </div>
+        )}
+      </li>
+    );
+  }
+);
 ListItem.displayName = "ListItem";

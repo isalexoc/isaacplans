@@ -1,12 +1,13 @@
-import type React from "react";
+import { NextIntlClientProvider, hasLocale } from "next-intl";
+import { notFound } from "next/navigation";
+import { routing } from "@/i18n/routing";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import CrispChat from "@/components/crisp-chat";
-import { LanguageProvider } from "@/hooks/useLanguage";
 import Header from "@/components/header";
-import { Footer } from "@/components/footer";
+import Footer from "@/components/footer";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -62,23 +63,31 @@ export const metadata: Metadata = {
   },
 };
 
-interface RootLayoutProps {
+export default async function LocaleLayout({
+  children,
+  params,
+}: {
   children: React.ReactNode;
-}
+  params: Promise<{ locale: string }>;
+}) {
+  // Ensure that the incoming `locale` is valid
+  const { locale } = await params;
+  if (!hasLocale(routing.locales, locale)) {
+    notFound();
+  }
 
-export default function RootLayout({ children }: RootLayoutProps) {
   return (
-    <html lang="en" className="scroll-smooth">
+    <html lang={locale} className="scroll-smooth">
       <body
         className={`${inter.className} flex min-h-screen flex-col bg-white text-gray-900 overflow-x-hidden`}
       >
-        <LanguageProvider>
+        <NextIntlClientProvider>
           <Header />
           <main className="flex-1 w-full">{children}</main>
           <Toaster />
           <CrispChat />
           <Footer />
-        </LanguageProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

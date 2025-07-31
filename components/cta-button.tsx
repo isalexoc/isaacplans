@@ -3,15 +3,13 @@
 import { useState } from "react";
 import { Button } from "./ui/button";
 import { QuoteModalGeneral } from "@/components/form-modal-general";
-import { useLanguage } from "@/hooks/useLanguage";
-import { translations } from "@/lib/translations";
 import { Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
+import { useTranslations } from "next-intl";
 
 const CTAButton = () => {
   const [openModal, setOpenModal] = useState(false);
-  const { language } = useLanguage();
-  const t = translations[language];
+  const trans = useTranslations("HomePage");
 
   return (
     <motion.div
@@ -40,10 +38,10 @@ const CTAButton = () => {
         >
           <div className="flex items-center gap-2">
             <Sparkles className="w-6 h-6 animate-pulse" />
-            <span>{t.hero.ctas.cta1.title}</span>
+            <span>{trans(`ctaHome.title`)}</span>
           </div>
           <span className="text-xs sm:text-sm font-normal text-white opacity-90 sm:ml-2">
-            {t.hero.ctas.cta1.message}
+            {trans(`ctaHome.message`)}
           </span>
         </Button>
 

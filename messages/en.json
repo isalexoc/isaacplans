@@ -1,0 +1,604 @@
+{
+  "HomePage": {
+    "title": "Hello world!",
+    "about": "Go to the about page",
+    "hero": {
+      "badge": "Licensed in 9+ States",
+      "name": "Isaac Orraiz",
+      "title": "Your Trusted",
+      "subtitle": "Insurance Agent",
+      "description": "ACA (Affordable Care Act) insurance, dental and vision, hospital indemnity, life insurance, cancer plans and more ...",
+      "cta1": "Get Free Quote",
+      "cta2": "Schedule Consultation",
+      "ctas": {
+        "cta1": {
+          "title": "Get Free Quote",
+          "message": "It only takes 10 seconds"
+        }
+      },
+      "stats": {
+        "states": "Licensed States",
+        "clients": "Clients Served",
+        "satisfaction": "Satisfaction Rate"
+      },
+      "onPicUp": {
+        "title": "ACA Certified",
+        "des": "The Right Plan"
+      },
+      "onPicDown": {
+        "title": "Health Specialist",
+        "des": "All plans"
+      }
+    },
+    "ctaHome": {
+      "title": "Request Information",
+      "message": "It only takes 10 seconds"
+    },
+    "services": {
+      "title": "Comprehensive Insurance Services",
+      "subtitle": "I provide expert guidance to help you navigate the complex world of health insurance.",
+      "ctaLearnMore": "Learn More",
+      "items": {
+        "aca": {
+          "title": "ACA Health Insurance (Affordable Care Act)",
+          "description": "Comprehensive health-insurance plans under the Affordable Care Act with subsidies and tax credits.",
+          "features": [
+            "Premium Tax Credits",
+            "Cost-Sharing Reductions",
+            "Essential Health Benefits",
+            "Pre-existing Conditions Covered"
+          ],
+          "link": "/aca"
+        },
+        "dentalVision": {
+          "title": "Dental & Vision Plans",
+          "description": "Affordable dental and vision insurance to cover exams, cleanings, eyewear and more.",
+          "features": [
+            "Dental exams and cleanings",
+            "Coverage for fillings and extractions",
+            "Vision exams and glasses",
+            "Flexible individual or family plans"
+          ]
+        },
+        "hospitalIndemnity": {
+          "title": "Hospital Indemnity",
+          "description": "Cash benefits during hospital stays to help cover medical and non-medical expenses.",
+          "features": [
+            "Daily hospitalization payments",
+            "Intensive-care benefits",
+            "Helps with deductibles and copays",
+            "Freedom to use the money as needed"
+          ]
+        },
+        "lifeInsurance": {
+          "title": "Life Insurance",
+          "description": "Protect your loved ones with affordable life-insurance plans that provide financial support.",
+          "features": [
+            "Term and whole-life options",
+            "Flexible coverage amounts",
+            "Affordable monthly premiums",
+            "Peace of mind for your family"
+          ]
+        },
+        "cancerPlans": {
+          "title": "Cancer Plans",
+          "description": "Supplemental coverage that helps you manage expenses related to cancer diagnosis and treatment.",
+          "features": [
+            "Lump-sum payments upon diagnosis",
+            "Financial support during treatment",
+            "Freedom to use the benefit as needed",
+            "Works alongside other health plans"
+          ]
+        },
+        "heartStrokePlans": {
+          "title": "Heart Attack & Stroke Plans",
+          "description": "Specialized coverage that provides financial protection in the event of a heart attack or stroke.",
+          "features": [
+            "Lump-sum payments upon diagnosis",
+            "Helps cover recovery and rehab expenses",
+            "Use funds for bills, travel or treatment",
+            "Complements your health insurance"
+          ]
+        }
+      }
+    },
+    "profile": {
+      "title": "Your Dedicated Insurance Professional",
+      "description1": "With experience in the health-insurance industry, I specialise in helping individuals and families navigate the complex world of insurance. I am licensed in ACA, Life, Dental and Vision insurance across 9+ states.",
+      "description2": "Being licensed in multiple states allows me to serve clients nationwide, ensuring you receive expert guidance wherever you are. I stay up to date with regulatory changes and new plan offerings to provide the most current options.",
+      "certifications": "States I Hold a Valid Licence",
+      "certs": [
+        "Arizona",
+        "Colorado",
+        "Florida",
+        "Maryland",
+        "New Mexico",
+        "North Carolina",
+        "Ohio",
+        "Texas",
+        "Virginia"
+      ],
+      "achievements": {
+        "states": {
+          "title": "9+ State Licensed",
+          "description": "Authorised to serve clients across the U.S."
+        },
+        "clients": {
+          "title": "Satisfied Clients",
+          "description": "Helping individuals and families find the right coverage"
+        },
+        "experience": {
+          "title": "Experience",
+          "description": "Over a decade of expertise in health-insurance"
+        },
+        "education": {
+          "title": "Continuous Education",
+          "description": "Staying current with the latest regulations & plans"
+        }
+      }
+    },
+    "coverage": {
+      "title": "Nation-wide Coverage",
+      "subtitle": "Licensed and certified to serve clients in 9+ U.S. states.",
+      "description": "With licences in ACA, Life, Dental and Vision across multiple states, I offer specialised professional insurance services.",
+      "features": [
+        "Licensed in 9+ states",
+        "ACA (Health, Affordable Care Act)",
+        "Health-insurance specialist",
+        "Life-insurance plans",
+        "Dental insurance",
+        "Vision insurance",
+        "Over 8 years’ experience",
+        "Personalised service in Spanish",
+        "Free consultations",
+        "Ongoing support"
+      ],
+      "cta": {
+        "heading": "Need Insurance?",
+        "text": "You’re in the right place – get a free quote today.",
+        "email": "Email Me"
+      }
+    }
+  },
+
+  "header": {
+    "nav": {
+      "home": "Home",
+      "phone": "540-426-1804",
+      "cta": "Free Quote",
+      "services": {
+        "label": "Services",
+        "links": {
+          "aca": {
+            "title": "ACA – Affordable Care Act",
+            "description": "Affordable health coverage under the ACA Marketplace."
+          },
+          "dentalVision": {
+            "title": "Dental & Vision",
+            "description": "Plans that help cover dental checkups and vision care."
+          },
+          "hospitalIndemnity": {
+            "title": "Hospital Indemnity",
+            "description": "Daily cash benefits during hospital stays to offset costs."
+          },
+          "life": {
+            "title": "Life Insurance",
+            "description": "Financial protection for your loved ones after you’re gone."
+          },
+          "cancer": {
+            "title": "Cancer Plans",
+            "description": "Supplemental coverage to support cancer-related expenses."
+          },
+          "stroke": {
+            "title": "Stroke Plans",
+            "description": "Coverage to help with recovery and financial gaps after a stroke."
+          }
+        }
+      },
+      "resources": {
+        "label": "Resources",
+        "links": {
+          "faq": {
+            "title": "Frequently Asked Questions",
+            "description": "Answers to the most common questions about our services."
+          },
+          "blog": {
+            "title": "Insurance Blog",
+            "description": "Educational articles on health, insurance, and wellness."
+          },
+          "testimonials": {
+            "title": "Client Testimonials",
+            "description": "Real stories from people satisfied with our help."
+          },
+          "consumerGuides": {
+            "title": "Consumer Guides",
+            "description": "Downloadable material to help you make informed decisions."
+          },
+          "coverageOptions": {
+            "title": "Coverage and Options",
+            "description": "Explore what our plans cover and how they can help you."
+          },
+          "glossary": {
+            "title": "Glossary of Terms",
+            "description": "Learn the meaning of common insurance-related terms."
+          },
+          "videos": {
+            "title": "Educational Videos",
+            "description": "Visual material to better understand your coverage options."
+          },
+          "subsidyCalculator": {
+            "title": "Subsidy Calculator",
+            "description": "Tool to estimate the financial support available to you."
+          },
+          "personalizedAssistance": {
+            "title": "Personalized Assistance",
+            "description": "Contact us for free, personalized guidance."
+          },
+          "downloads": {
+            "title": "Downloadable Documents",
+            "description": "Access forms, guides, and informational brochures."
+          },
+          "planComparison": {
+            "title": "Plan Comparison Tool",
+            "description": "Compare benefits, costs, and coverages across plans."
+          },
+          "newsletter": {
+            "title": "Newsletter",
+            "description": "Subscribe to receive updates on insurance and health."
+          },
+          "eligibilityTools": {
+            "title": "Eligibility Tools",
+            "description": "Check if you qualify for subsidies or special programs."
+          },
+          "successStories": {
+            "title": "Success Stories",
+            "description": "Read how our services have changed lives."
+          },
+          "renewalSupport": {
+            "title": "Renewal Support",
+            "description": "We help you renew your coverage year after year."
+          },
+          "newUserGuides": {
+            "title": "Guides for New Users",
+            "description": "First steps to choosing your ideal health plan."
+          },
+          "savingTips": {
+            "title": "Money-Saving Tips",
+            "description": "Recommendations to reduce medical service costs."
+          },
+          "familySupport": {
+            "title": "Family Support",
+            "description": "Useful resources to care for your loved ones."
+          },
+          "studentCoverage": {
+            "title": "Student Coverage",
+            "description": "Ideal plans for youth and college students."
+          },
+          "workplaceProtection": {
+            "title": "Workplace Protection",
+            "description": "Coverage options for freelancers or contractors."
+          },
+          "regulatoryUpdates": {
+            "title": "Regulatory Updates",
+            "description": "Information on changes to health and coverage laws."
+          },
+          "immigrantInfo": {
+            "title": "Information for Immigrants",
+            "description": "Resources for legal immigrants seeking coverage."
+          },
+          "claimsGuide": {
+            "title": "Claims Guide",
+            "description": "Learn how to file a claim and what to expect from the process."
+          }
+        }
+      },
+      "about": {
+        "label": "About Us",
+        "bio": "Personalized insurance solutions to protect your health, family, and peace of mind.",
+        "links": {
+          "missionVision": {
+            "title": "Our Mission & Vision",
+            "description": "Discover our commitment to accessible, affordable health coverage."
+          },
+          "whyChooseUs": {
+            "title": "Why Choose Us",
+            "description": "Learn what sets us apart — from personalized service to comprehensive plan options."
+          },
+          "meetFounder": {
+            "title": "Meet the Founder",
+            "description": "Get to know Isaac Orraiz, a licensed insurance agent passionate about helping families thrive."
+          },
+          "contactSupport": {
+            "title": "Contact & Support",
+            "description": "Reach out for personalized help or get answers to your insurance questions today."
+          }
+        }
+      },
+      "contact": {
+        "label": "Contact"
+      }
+    }
+  },
+  "footer": {
+    "description": "Your trusted insurance partner specializing in ACA and Medicare coverage across 9+ states. Professional, personalised service you can count on.",
+    "services": "Services",
+    "resources": "Resources",
+    "company": "Company",
+    "follow": "Follow Us",
+    "rights": "All rights reserved.",
+    "contact": {
+      "phoneLabel": "Phone",
+      "whatsappLabel": "WhatsApp",
+      "emailLabel": "Email",
+      "licensedStates": "Licensed in 9+ States"
+    },
+    "links": {
+      "guide": "Insurance Guide",
+      "faq": "FAQ",
+      "blog": "Blog",
+      "regulations": "State Regulations",
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Service",
+      "disclaimer": "Disclaimer"
+    }
+  },
+  "contactPage": {
+    "info": {
+      "title": "Get In Touch",
+      "description": "I'm here to help you navigate the insurance marketplace and find the coverage that's right for you. Don't hesitate to reach out with any questions.",
+      "role": "Insurance Agent",
+      "callLabel": "Call",
+      "addContact": "Add Contact",
+      "buttons": {
+        "email": "Email",
+        "website": "Website",
+        "schedule": "Schedule",
+        "whatsapp": "WhatsApp: 540-681-3507"
+      },
+      "form": {
+        "heading": "Get Your Free Insurance Quote",
+        "sub": "Ready to find the perfect insurance coverage? Fill out the form below or call anytime."
+      }
+    }
+  },
+  "privacyPolicy": {
+    "title": "Privacy Policy",
+    "lastUpdated": "Last updated: June 20, 2025",
+    "back": "Back to Home",
+
+    "cta": {
+      "headline": "Questions About Your Privacy?",
+      "body": "If you have any concerns about how we handle your personal information, feel free to reach out.",
+      "call": "Call now",
+      "email": "Send email"
+    },
+
+    "sections": {
+      "introduction": {
+        "title": "1. Introduction",
+        "content": "At Isaac Plans we are committed to protecting your privacy. This policy explains how we collect, use, share, and safeguard your information when you use our services or visit our website."
+      },
+      "informationCollected": {
+        "title": "2. Types of Personal Information Collected",
+        "content": "We collect the following types of personal information:",
+        "items": [
+          "Personal identification: Full name, date of birth, SSN",
+          "Contact: Mailing address, email, phone numbers",
+          "Demographics: Age, gender, marital status, dependents",
+          "Financial: Income, employment details, credit history (if applicable)",
+          "Health: Medical history, pre-existing conditions (for health insurance)",
+          "Browser data: IP address, pages visited, time spent",
+          "Location data: Geographic location to determine plan eligibility",
+          "Communication logs: Calls, texts, emails",
+          "Preferences: Communication preferences, coverage interests"
+        ]
+      },
+      "howWeUse": {
+        "title": "3. How We Use Your Information",
+        "content": "We use your personal information to:",
+        "items": [
+          "Provide accurate insurance quotes",
+          "Process policy applications and manage coverage",
+          "Communicate about policies, renewals, and changes",
+          "Offer customer service and technical support",
+          "Meet legal and regulatory obligations",
+          "Improve our services and develop new products",
+          "Conduct market analysis and research",
+          "Prevent fraud and ensure security",
+          "Personalize your website experience",
+          "Send marketing communications (with consent)"
+        ]
+      },
+      "sharingPractices": {
+        "title": "4. Information Sharing Practices",
+        "content": "We may share your personal information under these circumstances:",
+        "items": [
+          "With insurers to obtain quotes and issue policies",
+          "With service providers (payment processing, IT)",
+          "With regulators when required by law",
+          "With legal and accounting professionals",
+          "In a business transfer or sale",
+          "To protect legal rights",
+          "With your explicit consent"
+        ]
+      },
+      "smsPolicy": {
+        "title": "5. SMS and Phone Number Policy",
+        "content": "Our use of your phone number and SMS communications follows The Campaign Registry (TCR) guidelines:",
+        "items": [
+          "1 – SMS Consent Communication: phone numbers collected for SMS consent are not shared with third parties for marketing purposes.",
+          "2 – Types of SMS: payment reminders, enrollment notices, and service notifications. Examples: “Dear Client: your policy may lapse…”, or “Hi, this is a reminder of your next appointment…”. Reply STOP at any time to opt-out.",
+          "3 – Message Frequency: may vary; e.g., up to 3 SMS per week related to your policy or enrollment period.",
+          "4 – Possible Charges: standard message/data rates may apply, domestic or international.",
+          "5 – Opt-In Method: by checking the SMS-consent box in our online forms.",
+          "6 – Opt-Out Method: reply “STOP” to any SMS or contact us to be removed.",
+          "7 – Help: reply “HELP” or visit https://www.isaacplans.com/contact for assistance.",
+          "8 – Standard Disclosure: message/data rates may apply. For help text HELP to ({{PHONE_NUMBER}}). Message frequency varies."
+        ]
+      },
+      "dataSecurity": {
+        "title": "6. Data Security",
+        "content": "We use technical, administrative, and physical safeguards to protect your information against unauthorized access, alteration, disclosure, or destruction."
+      },
+      "yourRights": {
+        "title": "7. Your Rights",
+        "content": "You have the right to:",
+        "items": [
+          "Access the personal information we hold",
+          "Request corrections to inaccurate data",
+          "Request deletion (subject to legal obligations)",
+          "Opt-out of marketing communications",
+          "Request a copy of this privacy policy"
+        ]
+      },
+      "contact": {
+        "title": "8. Contact Information",
+        "content": "If you have questions about this Privacy Policy:",
+        "details": [
+          "Email: info@isaacplans.com",
+          "Phone: {{PHONE_NUMBER}}",
+          "Agent: Isaac Orraiz, Licensed in 9+ States"
+        ]
+      }
+    }
+  },
+  "termsPage": {
+    "title": "Terms and Conditions",
+    "lastUpdated": "Last updated: June 20, 2025",
+    "back": "Back to Home",
+
+    "cta": {
+      "headline": "Questions About the Terms?",
+      "body": "If you have any questions about these terms and conditions, we're here to help.",
+      "call": "Call now",
+      "email": "Send email"
+    },
+
+    "limitationsLabel": "However, we are not responsible for:",
+
+    "sections": {
+      "sms": {
+        "title": "1. SMS Terms and Conditions",
+        "content": "The following policies govern all SMS communications issued by Isaac Plans:",
+        "items": [
+          "1 – SMS Consent Communication: phone numbers collected for SMS consent are not shared with third parties for marketing purposes.",
+          "2 – Types of SMS: payment reminders, enrollment notices and service notifications. Examples: “Dear Client: we remind you that your policy is about to lapse…” or “Hi, this is a friendly reminder of your upcoming appointment…”. You may reply STOP at any time to opt out.",
+          "3 – Message Frequency: frequency may vary; for example, up to 3 SMS per week related to your policy or enrollment period.",
+          "4 – Possible Charges: standard message and data rates may apply, and may vary for domestic or international SMS.",
+          "5 – Opt-In Method: by checking the SMS-consent box in our online forms.",
+          "6 – Opt-Out Method: you may stop receiving SMS at any time by replying “STOP” or contacting us directly to be removed.",
+          "7 – Help: reply “HELP” or visit https://www.isaacplans.com/contact if you need assistance.",
+          "8 – Standard Disclosure: message/data rates may apply. For help text HELP to ({{PHONE_NUMBER}}). Message frequency varies."
+        ]
+      },
+
+      "introduction": {
+        "title": "2. Introduction and Acceptance",
+        "content": "Welcome to Isaac Plans. These Terms and Conditions (“Terms”) govern the use of our insurance services and website. By using our services, you agree to these terms."
+      },
+
+      "services": {
+        "title": "3. Description of Services",
+        "content": "Isaac Plans provides the following services:",
+        "items": [
+          "ACA (Obamacare) insurance consulting and advisory",
+          "Medicare insurance services (Parts A, B, C and D)",
+          "Life, dental and vision insurance",
+          "Plan comparison and analysis",
+          "Enrollment and renewal assistance",
+          "Ongoing support and customer service",
+          "Cost-optimisation and subsidy analysis"
+        ]
+      },
+
+      "eligibility": {
+        "title": "4. Eligibility and Licenses",
+        "content": "Our services are available in the states where Isaac Orraiz holds active licenses—currently 9+ U.S. states."
+      },
+
+      "responsibilities": {
+        "title": "5. Client Responsibilities",
+        "content": "As a client, you agree to:",
+        "items": [
+          "Provide accurate and complete information during the quote process",
+          "Notify changes that may affect your coverage",
+          "Review all policy documents carefully before signing",
+          "Pay premiums directly to the insurer as agreed",
+          "Comply with all policy terms",
+          "Maintain confidentiality of your account information"
+        ]
+      },
+
+      "limitations": {
+        "title": "6. Liability Limitations",
+        "content": "Isaac Plans acts as an intermediary between you and insurance companies. Our responsibilities include:",
+        "items": [
+          "Providing accurate information about available plans",
+          "Assisting with application and enrollment",
+          "Offering support during the policy term",
+          "Keeping your information confidential"
+        ],
+        "limitations": [
+          "Not responsible for coverage decisions by insurers",
+          "No guarantee of application approval",
+          "Not responsible for regulatory changes or plan availability",
+          "Liability limited to intermediation and advisory services"
+        ]
+      },
+
+      "privacy": {
+        "title": "7. Privacy and Confidentiality",
+        "content": "We are committed to protecting your privacy according to our Privacy Policy:",
+        "items": [
+          "Numbers collected for SMS consent are not shared with third parties for marketing",
+          "Your data is used solely to provide insurance services",
+          "We maintain strict confidentiality standards",
+          "We comply with all applicable data-protection regulations"
+        ]
+      },
+
+      "fees": {
+        "title": "8. Fees and Compensation",
+        "content": "Our consulting services are generally free to consumers. We are compensated by insurers, which does not affect your premium."
+      },
+
+      "termination": {
+        "title": "9. Service Termination",
+        "content": "Either party may terminate this relationship with written notice. Policies in force remain subject to their own terms."
+      },
+
+      "compliance": {
+        "title": "10. Legal Compliance",
+        "content": "Isaac Plans operates in full compliance with:",
+        "items": [
+          "State insurance regulations",
+          "Affordable Care Act (ACA)",
+          "Medicare and Medicaid regulations",
+          "Federal and state consumer-protection laws",
+          "Professional licensing requirements"
+        ]
+      },
+
+      "modifications": {
+        "title": "11. Modifications",
+        "content": "We reserve the right to update these terms at any time. Changes take effect once posted on this page."
+      },
+
+      "contact": {
+        "title": "12. Contact Information",
+        "content": "For questions about these Terms:",
+        "details": [
+          "Agent: Isaac Orraiz",
+          "Email: info@isaacplans.com",
+          "Phone: {{PHONE_NUMBER}}"
+        ]
+      }
+    }
+  },
+  "acaPage": {
+    "calendar": {
+      "title": "Schedule Your ACA Appointment",
+      "backButton": "Back"
+    }
+  }
+}

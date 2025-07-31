@@ -1,70 +1,55 @@
-"use client";
+// components/About.tsx  – server component
+import Image from "next/image";
+import { Award, Users, Clock, GraduationCap } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Award, GraduationCap, Users, Clock } from "lucide-react";
-import { motion } from "framer-motion";
-import Image from "next/image";
-import { useLanguage } from "@/hooks/useLanguage";
-import { translations } from "@/lib/translations";
+import { getTranslations } from "next-intl/server";
 
-export function About() {
-  const { language } = useLanguage();
-  const t = translations[language];
+/* Achievements + icons map --------------------------------------------- */
+const ACHIEVEMENTS = [
+  { slug: "states", Icon: Award },
+  { slug: "clients", Icon: Users },
+  { slug: "experience", Icon: Clock },
+  { slug: "education", Icon: GraduationCap },
+] as const;
 
-  const achievements = [
-    {
-      icon: Award,
-      title: t.about.achievements.states.title,
-      description: t.about.achievements.states.description,
-    },
-    {
-      icon: Users,
-      title: t.about.achievements.clients.title,
-      description: t.about.achievements.clients.description,
-    },
-    {
-      icon: Clock,
-      title: t.about.achievements.experience.title,
-      description: t.about.achievements.experience.description,
-    },
-    {
-      icon: GraduationCap,
-      title: t.about.achievements.education.title,
-      description: t.about.achievements.education.description,
-    },
-  ];
+/* ---------------------------------------------------------------------- */
+export default async function About() {
+  const t = await getTranslations("HomePage.profile");
+  const states = process.env.NEXT_PUBLIC_STATES ?? "9";
+
+  const certs: string[] = t.raw("certs");
+  const subtitle1 = t("description1", { states });
+  const subtitle2 = t("description2");
 
   return (
     <section id="about" className="py-16 lg:py-20 bg-gray-50">
       <div className="container mx-auto px-4">
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-          {/* ─────────── Text Content ─────────── */}
-          <motion.div
-            initial={{ opacity: 0, x: -50 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            className="space-y-6 lg:space-y-8 order-1"
-          >
+          {/* ── Text column ───────────────────────────────────────────── */}
+          <div className="space-y-6 lg:space-y-8 order-1 animate-fadeUp">
             <div>
               <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4 lg:mb-6">
-                {t.about.title}
+                {t("title")}
               </h2>
+
               <p className="text-base lg:text-lg text-gray-600 leading-relaxed mb-4 lg:mb-6">
-                {t.about.description1}
+                {subtitle1}
               </p>
               <p className="text-base lg:text-lg text-gray-600 leading-relaxed">
-                {t.about.description2}
+                {subtitle2}
               </p>
             </div>
 
             {/* Certifications */}
             <div>
               <h3 className="text-lg lg:text-xl font-semibold text-gray-900 mb-3 lg:mb-4">
-                {t.about.certifications}
+                {t("certifications")}
               </h3>
+
               <div className="flex flex-wrap gap-2">
-                {t.about.certs.map((cert) => (
+                {certs.map((cert) => (
                   <Badge
                     key={cert}
                     variant="secondary"
@@ -75,30 +60,26 @@ export function About() {
                 ))}
               </div>
             </div>
-          </motion.div>
+          </div>
 
-          {/* ─────────── Image / Achievements ─────────── */}
-          <motion.div
-            initial={{ opacity: 0, x: 50 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            className="space-y-6 order-2"
+          {/* ── Images & achievements ────────────────────────────────── */}
+          <div
+            className="space-y-6 order-2 animate-fadeUp"
+            style={{ animationDelay: "0.15s" }}
           >
             <div className="relative mb-6 lg:mb-8 grid grid-cols-1 sm:grid-cols-2 gap-6 place-items-center">
-              {/* Logo Image */}
               <Image
                 src="https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_350/ChatGPT_Image_Jul_11_2025_12_32_22_AM_ym5ioh.png"
-                alt="Isaac Plans Logo"
+                alt="Isaac Plans logo"
                 width={350}
                 height={350}
                 className="rounded-xl shadow-lg w-full max-w-xs object-contain"
                 priority
               />
 
-              {/* Health Image */}
               <Image
                 src="https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_350,h_350,c_crop/pexels-pavel-danilyuk-8112186_epgbrd.png"
-                alt="Health Insurance Concept"
+                alt="Healthcare concept"
                 width={350}
                 height={350}
                 className="rounded-xl shadow-lg w-full max-w-xs object-cover"
@@ -106,30 +87,29 @@ export function About() {
               />
             </div>
 
+            {/* Achievement cards */}
             <div className="grid grid-cols-2 gap-3 lg:gap-4">
-              {achievements.map((achievement, index) => (
-                <motion.div
-                  key={achievement.title}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.1 }}
+              {ACHIEVEMENTS.map(({ slug, Icon }, idx) => (
+                <div
+                  key={slug}
+                  className="animate-fadeUp"
+                  style={{ animationDelay: `${0.2 + idx * 0.1}s` }}
                 >
                   <Card className="p-3 lg:p-4 text-center hover:shadow-md transition-shadow">
                     <CardContent className="p-0">
-                      <achievement.icon className="w-6 h-6 lg:w-8 lg:h-8 text-custom mx-auto mb-2 lg:mb-3" />
+                      <Icon className="w-6 h-6 lg:w-8 lg:h-8 text-custom mx-auto mb-2 lg:mb-3" />
                       <h4 className="font-semibold text-xs lg:text-sm mb-1 lg:mb-2">
-                        {achievement.title}
+                        {t(`achievements.${slug}.title`, { states })}
                       </h4>
                       <p className="text-xs text-gray-600">
-                        {achievement.description}
+                        {t(`achievements.${slug}.description`)}
                       </p>
                     </CardContent>
                   </Card>
-                </motion.div>
+                </div>
               ))}
             </div>
-          </motion.div>
+          </div>
         </div>
       </div>
     </section>

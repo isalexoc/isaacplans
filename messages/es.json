@@ -1,0 +1,603 @@
+{
+  "HomePage": {
+    "title": "Hola Mundo!",
+    "about": "Volver a la página de principal",
+    "hero": {
+      "badge": "Licenciado en 9+ Estados",
+      "name": "Isaac Orraiz",
+      "title": "Su Agente de Seguros",
+      "subtitle": "de Confianza",
+      "description": "Seguros ACA (Affordable Care Act) Obamacare, dental y visión, indemnización Hospitalaria, seguro de vida, planes contra el Cáncer y mucho más...",
+      "cta1": "Cotización Gratis",
+      "cta2": "Agendar Consulta",
+      "ctas": {
+        "cta1": {
+          "title": "Solicitar Información",
+          "message": "Solo toma 10 segundos"
+        }
+      },
+      "stats": {
+        "states": "Estados con Licencia",
+        "clients": "Clientes Atendidos",
+        "satisfaction": "Tasa de Satisfacción"
+      },
+      "onPicUp": {
+        "title": "ACA Certificado",
+        "des": "Cobertura Experta"
+      },
+      "onPicDown": {
+        "title": "Especialista en Salud",
+        "des": "Todos los planes"
+      }
+    },
+    "ctaHome": {
+      "title": "Solicitar Información",
+      "message": "Solo toma 10 segundos"
+    },
+    "services": {
+      "title": "Servicios Integrales de Seguros",
+      "subtitle": "Brindo orientación experta para ayudarle a navegar el complejo mundo de los seguros de salud.",
+      "ctaLearnMore": "Más Información",
+      "items": {
+        "aca": {
+          "title": "Seguro de Salud ACA (Obamacare)",
+          "description": "Planes de seguro de salud integrales bajo la Ley de Cuidado de Salud Asequible con subsidios y créditos fiscales.",
+          "features": [
+            "Créditos Fiscales Premium",
+            "Reducciones de Costos Compartidos",
+            "Beneficios Esenciales de Salud",
+            "Condiciones Preexistentes Cubiertas"
+          ],
+          "link": "/aca"
+        },
+        "dentalVision": {
+          "title": "Planes Dentales y de Visión",
+          "description": "Seguros dentales y de visión accesibles para cubrir exámenes, limpiezas, gafas y más.",
+          "features": [
+            "Exámenes y limpiezas dentales",
+            "Cobertura para empastes y extracciones",
+            "Exámenes de visión y gafas",
+            "Planes flexibles individuales o familiares"
+          ]
+        },
+        "hospitalIndemnity": {
+          "title": "Indemnización Hospitalaria",
+          "description": "Pagos en efectivo durante hospitalizaciones para ayudar a cubrir gastos médicos y no médicos.",
+          "features": [
+            "Pagos diarios por hospitalización",
+            "Beneficios por cuidados intensivos",
+            "Ayuda con deducibles y copagos",
+            "Uso libre del dinero recibido"
+          ]
+        },
+        "lifeInsurance": {
+          "title": "Seguro de Vida",
+          "description": "Protege a tus seres queridos con planes de seguro de vida accesibles que brindan apoyo financiero.",
+          "features": [
+            "Opciones de vida a término y vida entera",
+            "Montos de cobertura flexibles",
+            "Primas mensuales asequibles",
+            "Tranquilidad para tu familia"
+          ]
+        },
+        "cancerPlans": {
+          "title": "Planes contra el Cáncer",
+          "description": "Cobertura adicional diseñada para ayudarte a afrontar los gastos relacionados con el cáncer.",
+          "features": [
+            "Pago único tras el diagnóstico",
+            "Apoyo financiero durante el tratamiento",
+            "Uso libre del beneficio recibido",
+            "Compatible con otros seguros de salud"
+          ]
+        },
+        "heartStrokePlans": {
+          "title": "Planes contra Ataques Cardíacos y Derrames Cerebrales",
+          "description": "Cobertura especializada que brinda protección financiera en caso de un ataque cardíaco o derrame cerebral.",
+          "features": [
+            "Pago único tras el diagnóstico",
+            "Ayuda con gastos de recuperación y rehabilitación",
+            "Uso libre del dinero recibido",
+            "Complementa su seguro de salud existente"
+          ]
+        }
+      }
+    },
+    "profile": {
+      "title": "Su Profesional de Seguros Dedicado",
+      "description1": "Con experiencia en la industria de seguros de salud, me especializo en ayudar a individuos y familias a navegar el complejo mundo de los seguros. Estoy licenciado en seguros ACA, Vida, Dental y Visión en más de 9 estados.",
+      "description2": "Estar licenciado en múltiples estados me permite atender clientes a nivel nacional y brindarle orientación experta sin importar su ubicación. Me mantengo actualizado con los cambios regulatorios y nuevas opciones de planes.",
+      "certifications": "Estados donde poseo licencia válida",
+      "certs": [
+        "Arizona",
+        "Colorado",
+        "Florida",
+        "Maryland",
+        "Nuevo México",
+        "Carolina del Norte",
+        "Ohio",
+        "Texas",
+        "Virginia"
+      ],
+      "achievements": {
+        "states": {
+          "title": "Licencia en 9+ estados",
+          "description": "Autorizado para atender clientes en todo EE. UU."
+        },
+        "clients": {
+          "title": "Clientes Satisfechos",
+          "description": "Ayudando a personas y familias a encontrar la cobertura adecuada"
+        },
+        "experience": {
+          "title": "Experiencia",
+          "description": "Más de una década de experiencia en seguros de salud"
+        },
+        "education": {
+          "title": "Educación Continua",
+          "description": "Siempre actualizado con las últimas regulaciones y planes"
+        }
+      }
+    },
+    "coverage": {
+      "title": "Cobertura Nacional",
+      "subtitle": "Licenciado y certificado para servir clientes en 9+ estados de EE. UU.",
+      "description": "Con licencias en ACA, Vida, Dental y Visión en múltiples estados, ofrezco servicios profesionales de seguros especializados.",
+      "features": [
+        "Licenciado en más de 9 estados",
+        "ACA (Salud, Obama Care)",
+        "Especialista en seguros de salud",
+        "Seguros de vida",
+        "Seguro dental",
+        "Seguro de visión",
+        "Más de 8 años de experiencia",
+        "Servicio personalizado en español",
+        "Consultas gratuitas",
+        "Soporte continuo"
+      ],
+      "cta": {
+        "heading": "¿Necesita Seguro?",
+        "text": "¡Está en el lugar correcto! Obtenga una cotización gratuita hoy.",
+        "email": "Enviarme un correo"
+      }
+    }
+  },
+  "header": {
+    "nav": {
+      "home": "Inicio",
+      "phone": "540-426-1804",
+      "cta": "Cotización Gratis",
+      "services": {
+        "label": "Servicios",
+        "links": {
+          "aca": {
+            "title": "ACA Obamacare",
+            "description": "Cobertura médica asequible bajo el Mercado de Seguros ACA."
+          },
+          "dentalVision": {
+            "title": "Dental y Visión",
+            "description": "Planes que cubren exámenes dentales y cuidado visual."
+          },
+          "hospitalIndemnity": {
+            "title": "Indemnización Hospitalaria",
+            "description": "Beneficios diarios en efectivo durante hospitalizaciones."
+          },
+          "life": {
+            "title": "Seguro de Vida",
+            "description": "Protección financiera para tus seres queridos tras tu fallecimiento."
+          },
+          "cancer": {
+            "title": "Planes contra el Cáncer",
+            "description": "Cobertura adicional para gastos relacionados con el cáncer."
+          },
+          "stroke": {
+            "title": "Planes contra Derrames Cerebrales",
+            "description": "Cobertura para recuperación y apoyo financiero tras un derrame cerebral."
+          }
+        }
+      },
+      "resources": {
+        "label": "Recursos",
+        "links": {
+          "faq": {
+            "title": "Preguntas Frecuentes",
+            "description": "Respuestas a las preguntas más comunes sobre nuestros servicios."
+          },
+          "blog": {
+            "title": "Blog de Seguros",
+            "description": "Artículos educativos sobre salud, seguros y bienestar."
+          },
+          "testimonials": {
+            "title": "Testimonios de Clientes",
+            "description": "Historias reales de personas satisfechas con nuestra ayuda."
+          },
+          "consumerGuides": {
+            "title": "Guías del Consumidor",
+            "description": "Material descargable para ayudarte a tomar decisiones informadas."
+          },
+          "coverageOptions": {
+            "title": "Cobertura y Opciones",
+            "description": "Explora lo que cubren nuestros planes y cómo pueden ayudarte."
+          },
+          "glossary": {
+            "title": "Glosario de Términos",
+            "description": "Conoce el significado de los términos comunes en seguros."
+          },
+          "videos": {
+            "title": "Videos Educativos",
+            "description": "Material audiovisual para comprender mejor tus opciones."
+          },
+          "subsidyCalculator": {
+            "title": "Calculadora de Subsidios",
+            "description": "Herramienta para estimar el apoyo financiero disponible para ti."
+          },
+          "personalizedAssistance": {
+            "title": "Asistencia Personalizada",
+            "description": "Contáctanos para recibir orientación gratuita y personalizada."
+          },
+          "downloads": {
+            "title": "Documentos Descargables",
+            "description": "Accede a formularios, guías y folletos informativos."
+          },
+          "planComparison": {
+            "title": "Comparador de Planes",
+            "description": "Compara beneficios, precios y coberturas entre distintos planes."
+          },
+          "newsletter": {
+            "title": "Boletín Informativo",
+            "description": "Suscríbete para recibir noticias sobre salud y seguros."
+          },
+          "eligibilityTools": {
+            "title": "Herramientas de Elegibilidad",
+            "description": "Verifica si calificas para subsidios o programas especiales."
+          },
+          "successStories": {
+            "title": "Historias de Éxito",
+            "description": "Descubre cómo nuestros servicios han cambiado vidas."
+          },
+          "renewalSupport": {
+            "title": "Apoyo en Renovaciones",
+            "description": "Te ayudamos a renovar tu cobertura año tras año."
+          },
+          "newUserGuides": {
+            "title": "Guías para Nuevos Usuarios",
+            "description": "Primeros pasos para elegir tu plan de salud ideal."
+          },
+          "savingTips": {
+            "title": "Consejos para Ahorrar",
+            "description": "Recomendaciones para reducir tus gastos médicos."
+          },
+          "familySupport": {
+            "title": "Apoyo para Familias",
+            "description": "Recursos útiles para el cuidado de tus seres queridos."
+          },
+          "studentCoverage": {
+            "title": "Cobertura para Estudiantes",
+            "description": "Planes ideales para jóvenes y estudiantes universitarios."
+          },
+          "workplaceProtection": {
+            "title": "Protección Laboral",
+            "description": "Cobertura para trabajadores independientes o contratistas."
+          },
+          "regulatoryUpdates": {
+            "title": "Actualizaciones Regulatorias",
+            "description": "Información sobre cambios en leyes de salud y cobertura."
+          },
+          "immigrantInfo": {
+            "title": "Información para Inmigrantes",
+            "description": "Recursos para inmigrantes legales que buscan cobertura."
+          },
+          "claimsGuide": {
+            "title": "Guía de Reclamaciones",
+            "description": "Aprende cómo presentar una reclamación y qué esperar del proceso."
+          }
+        }
+      },
+      "about": {
+        "label": "Nosotros",
+        "bio": "Soluciones de seguros personalizadas para proteger tu salud, familia y tranquilidad.",
+        "links": {
+          "missionVision": {
+            "title": "Nuestra Misión y Visión",
+            "description": "Descubre nuestro compromiso con una cobertura de salud accesible y asequible."
+          },
+          "whyChooseUs": {
+            "title": "Por Qué Elegirnos",
+            "description": "Conoce lo que nos diferencia: atención personalizada y opciones de planes integrales."
+          },
+          "meetFounder": {
+            "title": "Conoce al Fundador",
+            "description": "Conoce a Isaac Orraiz, agente de seguros licenciado y comprometido con el bienestar de las familias."
+          },
+          "contactSupport": {
+            "title": "Contacto y Soporte",
+            "description": "Contáctanos para recibir atención personalizada o resolver tus dudas sobre seguros."
+          }
+        }
+      },
+      "contact": {
+        "label": "Contacto"
+      }
+    }
+  },
+  "footer": {
+    "description": "Su socio de seguros de confianza especializado en cobertura ACA y Medicare en más de 9 estados. Servicio profesional y personalizado en el que puede confiar.",
+    "services": "Servicios",
+    "resources": "Recursos",
+    "company": "Empresa",
+    "follow": "Síguenos",
+    "rights": "Todos los derechos reservados.",
+    "contact": {
+      "phoneLabel": "Teléfono",
+      "whatsappLabel": "WhatsApp",
+      "emailLabel": "Correo electrónico",
+      "licensedStates": "Licenciado en 9+ Estados"
+    },
+    "links": {
+      "guide": "Guía de Seguros",
+      "faq": "Preguntas Frecuentes",
+      "blog": "Blog",
+      "regulations": "Regulaciones Estatales",
+      "privacy": "Política de Privacidad",
+      "terms": "Términos de Servicio",
+      "disclaimer": "Descargo de Responsabilidad"
+    }
+  },
+  "contactPage": {
+    "info": {
+      "title": "Póngase en Contacto",
+      "description": "Estoy aquí para ayudarle a navegar el mercado de seguros y encontrar la cobertura adecuada. No dude en comunicarse con cualquier pregunta.",
+      "role": "Agente de Seguros",
+      "callLabel": "Llamar",
+      "addContact": "Agregar Contacto",
+      "buttons": {
+        "email": "Correo",
+        "website": "Sitio Web",
+        "schedule": "Agendar",
+        "whatsapp": "WhatsApp: 540-681-3507"
+      },
+      "form": {
+        "heading": "Obtenga Su Cotización Gratuita",
+        "sub": "¿Listo para encontrar la cobertura perfecta? Complete el formulario o llame cuando guste."
+      }
+    }
+  },
+  "privacyPolicy": {
+    "title": "Política de Privacidad",
+    "lastUpdated": "Última actualización: 20 de junio de 2025",
+    "back": "Volver al Inicio",
+
+    "cta": {
+      "headline": "¿Preguntas sobre su privacidad?",
+      "body": "Si tiene alguna inquietud sobre cómo manejamos su información personal, comuníquese con nosotros.",
+      "call": "Llamar ahora",
+      "email": "Enviar email"
+    },
+
+    "sections": {
+      "introduction": {
+        "title": "1. Introducción",
+        "content": "En Isaac Plans, nos comprometemos a proteger su privacidad y la confidencialidad de su información personal. Esta Política de Privacidad describe cómo recopilamos, utilizamos, compartimos y protegemos su información cuando utiliza nuestros servicios de seguros o visita nuestro sitio web."
+      },
+      "informationCollected": {
+        "title": "2. Tipos de Información Personal Recopilada",
+        "content": "Recopilamos los siguientes tipos de información personal:",
+        "items": [
+          "Información de identificación personal: Nombre completo, fecha de nacimiento, número de seguro social",
+          "Información de contacto: Dirección postal, correo electrónico, números de teléfono",
+          "Información demográfica: Edad, género, estado civil, dependientes",
+          "Información financiera: Ingresos, empleo, historial crediticio (cuando aplique)",
+          "Información de salud: Historial médico y condiciones preexistentes (para seguros de salud)",
+          "Información del navegador: Dirección IP, tipo de navegador, páginas visitadas, tiempo de permanencia",
+          "Datos de ubicación: Ubicación geográfica para determinar elegibilidad de planes",
+          "Registros de comunicación: Llamadas, SMS y correos electrónicos",
+          "Preferencias: Preferencias de comunicación y coberturas de interés"
+        ]
+      },
+      "howWeUse": {
+        "title": "3. Cómo Utilizamos Su Información",
+        "content": "Utilizamos su información personal para los siguientes fines:",
+        "items": [
+          "Proporcionar cotizaciones de seguros personalizadas y precisas",
+          "Procesar solicitudes y administrar su cobertura",
+          "Comunicarnos sobre pólizas, renovaciones y cambios",
+          "Brindar atención al cliente y soporte técnico",
+          "Cumplir con obligaciones legales y regulatorias",
+          "Mejorar nuestros servicios y desarrollar nuevos productos",
+          "Realizar análisis de mercado e investigación",
+          "Prevenir fraudes y garantizar la seguridad",
+          "Personalizar su experiencia en el sitio web",
+          "Enviar comunicaciones de marketing (solo con su consentimiento)"
+        ]
+      },
+      "sharingPractices": {
+        "title": "4. Prácticas de Compartir Información",
+        "content": "Podemos compartir su información personal en las siguientes circunstancias:",
+        "items": [
+          "Con aseguradoras: Para obtener cotizaciones y procesar pólizas",
+          "Con proveedores de servicios: Procesamiento de pagos, servicios de TI, etc.",
+          "Con autoridades regulatorias: Cuando lo exija la ley",
+          "Con asesores legales y contables",
+          "En caso de transferencia empresarial",
+          "Para proteger derechos legales",
+          "Con su consentimiento explícito"
+        ]
+      },
+      "smsPolicy": {
+        "title": "5. Política de SMS y Números de Teléfono",
+        "content": "Regulamos el uso de su número telefónico y las comunicaciones por SMS conforme a las directrices del Registro de Campañas (TCR).",
+        "items": [
+          "1 – Comunicación de consentimiento de SMS: Los números obtenidos para consentimiento SMS no se comparten con terceros para fines de marketing.",
+          "2 – Tipos de comunicaciones SMS: recordatorios de pago, avisos de inscripción y notificaciones de servicio. Ejemplos: «Estimado Cliente: su póliza caerá en inactividad…» o «Hola, este es un recordatorio de su próxima cita…». Puede responder STOP para cancelar en cualquier momento.",
+          "3 – Frecuencia de mensajes: la frecuencia puede variar; por ejemplo, hasta 3 SMS por semana relacionados con su póliza o período de inscripción.",
+          "4 – Posibles tarifas: se pueden aplicar cargos estándar de mensajes y datos según su plan de telefonía, nacionales o internacionales.",
+          "5 – Método de inclusión (Opt-In): marcando la casilla de consentimiento en nuestros formularios en línea.",
+          "6 – Método de exclusión (Opt-Out): responda «STOP» a cualquier SMS o contáctenos para ser eliminado.",
+          "7 – Ayuda: responda «AYUDA» o visite https://www.isaacplans.com/contact para asistencia.",
+          "8 – Divulgaciones estándar: mensaje y datos pueden costar. Para ayuda envíe AYUDA al ({{PHONE_NUMBER}}). La frecuencia de mensajes puede variar."
+        ]
+      },
+      "dataSecurity": {
+        "title": "6. Seguridad de Datos",
+        "content": "Implementamos medidas técnicas, administrativas y físicas para proteger su información contra acceso no autorizado, alteración o divulgación."
+      },
+      "yourRights": {
+        "title": "7. Sus Derechos",
+        "content": "Usted tiene derecho a:",
+        "items": [
+          "Acceder a su información personal",
+          "Solicitar correcciones",
+          "Solicitar eliminación (sujeto a obligaciones legales)",
+          "Optar por no recibir marketing",
+          "Solicitar una copia de esta política"
+        ]
+      },
+      "contact": {
+        "title": "8. Información de Contacto",
+        "content": "Si tiene preguntas sobre esta Política de Privacidad:",
+        "details": [
+          "Email: info@isaacplans.com",
+          "Tel: {{PHONE_NUMBER}}",
+          "Agente: Isaac Orraiz, Licenciado en 20+ Estados"
+        ]
+      }
+    }
+  },
+  "termsPage": {
+    "title": "Términos y Condiciones",
+    "lastUpdated": "Última actualización: 20 de junio de 2025",
+    "back": "Volver al Inicio",
+
+    "cta": {
+      "headline": "¿Preguntas sobre los Términos?",
+      "body": "Si tiene alguna pregunta sobre estos términos y condiciones, estamos aquí para ayudarle.",
+      "call": "Llamar ahora",
+      "email": "Enviar email"
+    },
+
+    "limitationsLabel": "Sin embargo, no somos responsables por:",
+
+    "sections": {
+      "sms": {
+        "title": "1. Términos y Condiciones de SMS",
+        "content": "Las siguientes políticas regulan todas las comunicaciones por SMS emitidas por Isaac Plans:",
+        "items": [
+          "1 – Comunicación de consentimiento de SMS: Los números telefónicos obtenidos para consentimiento SMS no se comparten con terceros para fines de marketing.",
+          "2 – Tipos de comunicaciones SMS: recordatorios de pago, avisos de inscripción y notificaciones de servicio. Ejemplos: «Estimado Cliente: le recordamos que su póliza caerá en inactividad…» o «Hola, este es un recordatorio amistoso de su próxima cita…». Puede responder STOP para dejar de recibir SMS en cualquier momento.",
+          "3 – Frecuencia de mensajes: la frecuencia puede variar; por ejemplo, hasta 3 mensajes SMS por semana relacionados con su póliza o período de inscripción.",
+          "4 – Posibles tarifas: se pueden aplicar cargos estándar de mensajes y datos, los cuales pueden variar si el SMS es nacional o internacional.",
+          "5 – Método de inclusión (Opt-In): marcando la casilla de consentimiento en nuestros formularios en línea.",
+          "6 – Método de exclusión (Opt-Out): puede darse de baja en cualquier momento respondiendo «STOP» o contactándonos directamente para ser eliminado.",
+          "7 – Ayuda: si experimenta problemas, responda «AYUDA» o visite https://www.isaacplans.com/contact.",
+          "8 – Divulgaciones estándar: mensaje y datos pueden costar. Para ayuda envíe AYUDA al ({{PHONE_NUMBER}}). La frecuencia de mensajes puede variar."
+        ]
+      },
+
+      "introduction": {
+        "title": "2. Introducción y Aceptación",
+        "content": "Bienvenido a Isaac Plans. Estos Términos y Condiciones (\"Términos\") gobiernan el uso de nuestros servicios de seguros y sitio web. Al utilizar nuestros servicios, usted acepta estos términos."
+      },
+
+      "services": {
+        "title": "3. Descripción de Servicios",
+        "content": "Isaac Plans Insurance proporciona los siguientes servicios:",
+        "items": [
+          "Consultoría y asesoramiento en seguros ACA (Obamacare)",
+          "Servicios de seguros Medicare (Partes A, B, C y D)",
+          "Seguros de vida, dental y visión",
+          "Comparación y análisis de planes de seguros",
+          "Asistencia con inscripciones y renovaciones",
+          "Soporte continuo y servicio al cliente",
+          "Optimización de costos y análisis de subsidios"
+        ]
+      },
+
+      "eligibility": {
+        "title": "4. Elegibilidad y Licencias",
+        "content": "Nuestros servicios están disponibles para residentes de los estados donde Isaac Orraiz mantiene licencias activas. Actualmente contamos con licencias en más de 20 estados de EE.UU."
+      },
+
+      "responsibilities": {
+        "title": "5. Responsabilidades del Cliente",
+        "content": "Como cliente, usted se compromete a:",
+        "items": [
+          "Proporcionar información precisa y completa durante el proceso de cotización",
+          "Notificar cambios en su situación que puedan afectar su cobertura",
+          "Revisar cuidadosamente todos los documentos de póliza antes de firmar",
+          "Pagar primas directamente a la aseguradora según los términos acordados",
+          "Cumplir con todos los términos de su póliza",
+          "Mantener la confidencialidad de la información de su cuenta"
+        ]
+      },
+
+      "limitations": {
+        "title": "6. Limitaciones de Responsabilidad",
+        "content": "Isaac Plans actúa como intermediario entre usted y las compañías de seguros. Nuestras responsabilidades incluyen:",
+        "items": [
+          "Proporcionar información precisa sobre planes disponibles",
+          "Asistir en la solicitud e inscripción",
+          "Brindar soporte durante la vigencia de su póliza",
+          "Mantener la confidencialidad de su información"
+        ],
+        "limitations": [
+          "No somos responsables por decisiones de cobertura de las aseguradoras",
+          "No garantizamos la aprobación de solicitudes",
+          "No respondemos por cambios regulatorios o disponibilidad de planes",
+          "Nuestra responsabilidad se limita a intermediación y asesoramiento"
+        ]
+      },
+
+      "privacy": {
+        "title": "7. Privacidad y Confidencialidad",
+        "content": "Nos comprometemos a proteger su privacidad conforme a nuestra Política de Privacidad:",
+        "items": [
+          "Los números obtenidos para SMS no se comparten con terceros con fines de marketing",
+          "Su información se usa exclusivamente para brindarle servicios de seguros",
+          "Mantenemos estrictos estándares de confidencialidad",
+          "Cumplimos con las normativas de protección de datos aplicables"
+        ]
+      },
+
+      "fees": {
+        "title": "8. Honorarios y Compensación",
+        "content": "Nuestros servicios suelen ser gratuitos para el consumidor. Recibimos compensación de las aseguradoras, lo cual no afecta el costo de su prima."
+      },
+
+      "termination": {
+        "title": "9. Terminación de Servicios",
+        "content": "Cualquiera de las partes puede terminar esta relación con notificación por escrito. Las pólizas vigentes continúan según sus propios términos."
+      },
+
+      "compliance": {
+        "title": "10. Cumplimiento Legal",
+        "content": "Operamos en cumplimiento total con:",
+        "items": [
+          "Regulaciones estatales de seguros",
+          "Ley de Cuidado de Salud Asequible (ACA)",
+          "Regulaciones de Medicare y Medicaid",
+          "Leyes de protección al consumidor",
+          "Requisitos de licencias profesionales"
+        ]
+      },
+
+      "modifications": {
+        "title": "11. Modificaciones",
+        "content": "Nos reservamos el derecho de actualizar estos términos en cualquier momento. Las modificaciones serán efectivas tras su publicación."
+      },
+
+      "contact": {
+        "title": "12. Información de Contacto",
+        "content": "Para preguntas sobre estos Términos:",
+        "details": [
+          "Agente: Isaac Orraiz",
+          "Email: info@isaacplans.com",
+          "Tel: {{PHONE_NUMBER}}"
+        ]
+      }
+    }
+  },
+  "acaPage": {
+    "calendar": {
+      "title": "Programar su cita ACA",
+      "backButton": "Volver"
+    }
+  }
+}
