@@ -1,8 +1,5 @@
-"use client";
-
+import { getTranslations, getLocale } from "next-intl/server";
 import HeroWithTestimonials from "@/components/hero-template";
-import { useLanguage } from "@/hooks/useLanguage";
-import { translations as t } from "@/lib/translations-dentalVision";
 import DentalButton from "@/components/DentalButton";
 import AboutSection from "@/components/about-section-template";
 import PlanEnrollCard from "@/components/SelfEnrollSection";
@@ -11,105 +8,147 @@ import EnrollmentSection from "@/components/enrollment-section-template";
 import FaqSection from "@/components/FaqSection";
 import CTABanner from "@/components/CTABanner-template";
 
-const page = () => {
-  const { language } = useLanguage();
-  const content = t[language];
+/* Helper to pull an indexed testimonial as an object */
+const testimonial = (t: (k: string) => string, idx: number) => ({
+  name: t(`hero.testimonials.${idx}.name`),
+  text: t(`hero.testimonials.${idx}.text`),
+});
+
+export default async function DentalVisionPage() {
+  /* locale + translations */
+  const locale = await getLocale(); // e.g. 'en', 'es'
+  const trans = await getTranslations({
+    locale,
+    namespace: "dentalVisionPage",
+  });
+
+  /* Shortcuts */
+  const t = trans;
+  const tr = trans.rich;
+  const strong = (chunks: React.ReactNode) => (
+    <strong className="font-semibold text-blue-600 dark:text-blue-400">
+      {chunks}
+    </strong>
+  );
+
   return (
     <>
+      {/* HERO */}
       <HeroWithTestimonials
-        badge={content.hero.badge}
-        name={content.hero.name}
-        title={content.hero.title}
-        description={content.hero.description}
+        badge={t("hero.badge")}
+        name={t("hero.name")}
+        title={t("hero.title")}
+        description={t("hero.description")}
         imagePublicId="tmp48ylol1v_1_ig0hto"
         imagePosition="left"
         cta={<DentalButton />}
-        testimonials={[content.hero.testimonials[0]]}
-        happyClient={content.hero.happyClient}
+        testimonials={[testimonial(t, 0)]}
+        happyClient={{
+          title: t("hero.happyClient.title"),
+          subtitle: t("hero.happyClient.subtitle"),
+        }}
       />
+
+      {/* ABOUT */}
       <AboutSection
-        badge={content.about.badge}
-        headline={content.about.headline}
-        description={content.about.description}
+        badge={t("about.badge")}
+        headline={t("about.headline")}
+        description={t("about.description")}
         imagePublicId="isaacpic_c8kca5"
-        name={content.about.name}
-        role={content.about.role}
-        credential={content.about.credential}
+        name={t("about.name")}
+        role={t("about.role")}
+        credential={t("about.credential")}
         cta={<DentalButton />}
       />
 
+      {/* WHAT IS AMERITAS */}
       <HeroWithTestimonials
         badge=""
         name=""
-        title={content.definition.title}
-        description={content.definition.description}
+        title={t("definition.title")}
+        description={t("definition.description")}
         imagePublicId="download_1_kgrurq"
         imagePosition="left"
         cta={<DentalButton />}
       />
+
+      {/* SELF-ENROLL CARD */}
       <PlanEnrollCard
-        title={content.selfEnroll.title}
-        subtitle={content.selfEnroll.subtitle}
-        cta={content.selfEnroll.cta}
+        title={t("selfEnroll.title")}
+        subtitle={t("selfEnroll.subtitle")}
+        cta={t("selfEnroll.cta")}
         link="https://myplan.ameritas.com/id/010A1380"
-        imageUrl="https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_96,dpr_auto/ameritas-transparent_1_bbjb2f.png
-      "
-        disclaimer={content.selfEnroll.disclaimer}
+        imageUrl="https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_96,dpr_auto/ameritas-transparent_1_bbjb2f.png"
+        disclaimer={t("selfEnroll.disclaimer")}
         className="max-w-3xl mx-auto mt-24"
       />
+
+      {/* ELIGIBILITY */}
       <EligibilitySection
         title={
           <>
-            {content.eligibility.headlineBeforeBold}{" "}
-            <span className="font-bold">
-              {content.eligibility.headlineBold}
-            </span>
+            {t("eligibility.headlineBeforeBold")}{" "}
+            <span className="font-bold">{t("eligibility.headlineBold")}</span>
           </>
         }
-        intro={content.eligibility.intro}
-        bullets={[...content.eligibility.bullets]}
-        note={content.eligibility.note}
-        imagePublicId="pexels-shvetsa-3845653_v1r87k" /* same id for both langs */
+        intro={t("eligibility.intro")}
+        bullets={[
+          t("eligibility.bullets.0"),
+          t("eligibility.bullets.1"),
+          t("eligibility.bullets.2"),
+          t("eligibility.bullets.3"),
+        ]}
+        note={t("eligibility.note")}
+        imagePublicId="pexels-shvetsa-3845653_v1r87k"
         imagePosition="left"
       />
+
+      {/* ENROLLMENT STEPS */}
       <EnrollmentSection
         title={
           <>
-            {content.enroll.headlineBeforeBold}{" "}
-            <span className="font-bold">{content.enroll.headlineBold}</span>
+            {t("enroll.headlineBeforeBold")}{" "}
+            <span className="font-bold">{t("enroll.headlineBold")}</span>
           </>
         }
-        intro={content.enroll.intro}
-        steps={[content.enroll.step1, content.enroll.step2]}
-        subHeading={content.enroll.subHeading}
-        bullets={[...content.enroll.bullets]}
-        note={content.enroll.note}
+        intro={t("enroll.intro")}
+        steps={[t("enroll.intro"), t("enroll.intro")]}
+        subHeading={t("enroll.subHeading")}
+        bullets={[
+          t("enroll.bullets.0"),
+          t("enroll.bullets.1"),
+          t("enroll.bullets.2"),
+          t("enroll.bullets.3"),
+        ]}
+        note={t("enroll.note")}
         imagePublicId="tmph9wnbhil_wts4sf"
         imagePosition="right"
-        cta={content.selfEnroll.cta}
+        cta={t("selfEnroll.cta")}
         href="https://myplan.ameritas.com/id/010A1380"
       />
+
+      {/* FAQ */}
       <FaqSection
-        label={content.faqDental.label}
+        label={t("faqDental.label")}
         title={
           <>
-            {content.faqDental.titleBeforeBold}{" "}
-            <span className="text-custom">{content.faqDental.titleBold}</span>
+            {t("faqDental.titleBeforeBold")}{" "}
+            <span className="text-custom">{t("faqDental.titleBold")}</span>
           </>
         }
-        faqs={content.faqDental.items.map((item) => ({
-          question: item.q,
-          answer: item.a,
+        faqs={Array.from({ length: 7 }).map((_, i) => ({
+          question: t(`faqDental.items.${i}.q`),
+          answer: t(`faqDental.items.${i}.a`),
         }))}
         imagePublicId="tmpft70mt0j_1_hppsqh"
       />
+
+      {/* CTA BANNER */}
       <CTABanner
-        message={content.ctaBanner.message}
+        message={t("ctaBanner.message")}
         className="bg-blue-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200"
         cta={<DentalButton />}
       />
     </>
   );
-};
-
-export default page;
+}

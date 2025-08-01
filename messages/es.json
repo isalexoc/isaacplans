@@ -358,6 +358,17 @@
         "heading": "Obtenga Su Cotización Gratuita",
         "sub": "¿Listo para encontrar la cobertura perfecta? Complete el formulario o llame cuando guste."
       }
+    },
+    "contactMetadata": {
+      "title": "Contacto Isaac Plans Insurance | Consulta Bilingüe Gratis",
+      "description": "Llama, envía correo o WhatsApp a Isaac Plans Insurance para planes ACA, Medicare y vida. Cotización gratuita en español e inglés.",
+      "image": "https://isaacplans.com/images/contact_isaacplans_es.png",
+      "imageAlt": "Isaac Orraiz – Tarjeta de contacto de Isaac Plans Insurance",
+      "keywords": "contacto seguros, Isaac Plans, agente de seguros, consulta gratuita, seguros ACA, Medicare, seguros de vida, asesoría bilingüe",
+      "breadcrumbs": {
+        "home": "Inicio",
+        "contact": "Contacto"
+      }
     }
   },
   "privacyPolicy": {
@@ -595,9 +606,328 @@
     }
   },
   "acaPage": {
+    "hero": {
+      "badge": "Obamacare, The Affordable Care Act",
+      "name": "Isaac Orraiz - Agente de Seguros",
+      "title": "Seguro de Salud al Alcance de Todos",
+      "description": "¿Le resulta confuso la Ley de Atención Médica Asequible y sus requisitos? le ofrezco asistencia personalizada para que explore sus opciones sin problemas y obtenga la cobertura más asequible y completa.",
+      "testimonials": [
+        {
+          "name": "James Rodriguez",
+          "text": "No tenía idea de por dónde empezar con el seguro de salud, pero Isaac hizo que todo el proceso fuera sencillo. Respondió todas mis preguntas y se aseguró de que obtuviera la cobertura que necesitaba. ¡Muy recomendable!"
+        },
+        {
+          "name": "Jessica Thompson",
+          "text": "Gracias a Isaac, me inscribí en un excelente plan ACA que cubre a mis doctores y medicamentos. Incluso me recordó cuándo era momento de renovarlo. ¡Un servicio verdaderamente profesional y atento!"
+        }
+      ],
+      "happyClient": {
+        "title": "Cliente feliz",
+        "subtitle": "¡Más de 3000 clientes atendidos!"
+      }
+    },
+    "definition": {
+      "description": "La Ley de Cuidado de Salud a Bajo Precio (ACA, por sus siglas en inglés), también conocida como Obamacare, es una amplia reforma sanitaria promulgada en marzo de 2010. Su objetivo es poner un seguro de salud asequible al alcance de más personas, ampliar el programa Medicaid y fomentar métodos innovadores de prestación de atención médica para reducir los costos. Gracias a la ACA, millones de personas que antes no tenían cobertura ahora tienen acceso a servicios de salud de calidad.",
+      "title": "Que es the Affordable Care Act (Obamacare)?"
+    },
+    "about": {
+      "badge": "Sobre Nosotros",
+      "headline": "¡Ayudándole a Gestionar sus Necesidades de ACA!",
+      "description": "Soy Isaac Orraiz, un agente de seguros de salud licenciado especializado en planes ACA (Obamacare). Ayudo a individuos y familias a obtener cobertura asequible adaptada a sus necesidades, incluyendo dental, visión, indemnización hospitalaria, planes contra cáncer, planes contra derrames y más. Proporciono orientación experta en cada paso.",
+      "name": "Isaac Orraiz",
+      "role": "Agente de Seguros",
+      "credentialLabel": "NPN",
+      "credential": "21592068",
+      "cta": "Solicitar Información"
+    },
+    "eligibility": {
+      "headlineBeforeBold": "¿Quiénes",
+      "headlineBold": "Califican?",
+      "intro": "Para ser elegible e inscribirse en cobertura de salud a través del Mercado de Seguros Médicos, usted debe:",
+      "bullets": [
+        "Vivir en Estados Unidos",
+        "Ser ciudadano o nacional estadounidense (o estar legalmente presente)",
+        "No estar encarcelado"
+      ],
+      "note": "No hay un límite de ingresos para usar el Mercado de Seguros Médicos. Las protecciones para el paciente bajo la ACA garantizan que las aseguradoras no puedan negar cobertura por género o por una condición preexistente; no existen límites vitalicios ni anuales en los beneficios esenciales de salud, y los adultos jóvenes pueden permanecer en el plan de sus padres hasta los 26 años.",
+      "image": "eligibility_family_flag"
+    },
+    "enroll": {
+      "headlineBeforeBold": "Cómo Inscribirse en un",
+      "headlineBold": "Plan del Mercado de Seguros Médicos",
+      "intro": "La inscripción en un plan del Mercado de Seguros Médicos puede realizarse durante el periodo anual de inscripción abierta o un periodo especial de inscripción provocado por eventos de vida como mudarse o tener un bebé. Así es como puede empezar:",
+      "step1": "<strong>Programe una consulta gratuita</strong> conmigo para identificar las opciones del Mercado en su estado.",
+      "step2": "<strong>Permítame completar el proceso de inscripción</strong> y el papeleo por usted, paso a paso.",
+      "subHeading": "Durante el periodo de inscripción, usted puede:",
+      "bullets": [
+        "Elegir un plan por primera vez",
+        "Continuar con su plan actual",
+        "Hacer cambios a su plan actual",
+        "Elegir un nuevo plan para reemplazar su plan actual"
+      ],
+      "note": "Nota: Si experimenta un evento de vida o los ingresos de su hogar están por debajo de cierta cantidad, podría calificar para un periodo especial de inscripción.",
+      "image": "enrollment_couple_consult"
+    },
+    "tiers": {
+      "titleBeforeBold": "Tipos",
+      "titleBold": "de Planes",
+      "intro": "El Mercado de Seguros Médicos ofrece una gama de planes categorizados en cuatro niveles metálicos: Bronce, Plata, Oro y Platino. Cada nivel representa un grado distinto de costos compartidos:",
+      "plans": [
+        {
+          "name": "Planes Bronce",
+          "color": "#cd7f32",
+          "bullets": [
+            "Primas más bajas",
+            "Costos de bolsillo más altos",
+            "Adecuado si desea pagar primas bajas pero costos más altos cuando necesite atención"
+          ]
+        },
+        {
+          "name": "Planes Plata",
+          "color": "#c0c0c0",
+          "bullets": [
+            "Primas y costos de bolsillo moderados",
+            "Elegible para ahorros adicionales si califica para reducciones de costos compartidos",
+            "Elija este plan si quiere un equilibrio entre primas y costos de atención"
+          ]
+        },
+        {
+          "name": "Planes Oro",
+          "color": "#ffd700",
+          "bullets": [
+            "Primas altas",
+            "Bajos costos de bolsillo",
+            "Ideal si espera necesitar atención con frecuencia"
+          ]
+        },
+        {
+          "name": "Planes Platino",
+          "color": "#e5e4e2",
+          "bullets": [
+            "Primas más altas",
+            "Costos de bolsillo más bajos",
+            "Mejor si necesita mucha atención y puede pagar primas mensuales más altas"
+          ]
+        }
+      ]
+    },
+    "otherPlans": {
+      "title": "Más Opciones…",
+      "options": [
+        {
+          "name": "Planes de Organización de Proveedores Preferidos (PPO)",
+          "description": "Los planes PPO ofrecen flexibilidad para elegir proveedores de atención médica. Puede consultar cualquier proveedor dentro de la red sin remisión, pero la atención fuera de la red costará más."
+        },
+        {
+          "name": "Planes de Punto de Servicio (POS)",
+          "description": "Los planes POS combinan características de los planes HMO y PPO. Necesita una remisión de su médico de atención primaria para ver especialistas, pero puede recibir atención fuera de la red a un costo mayor."
+        },
+        {
+          "name": "Planes de Organización para el Mantenimiento de la Salud (HMO)",
+          "description": "Los planes HMO le exigen usar proveedores dentro de la red y obtener remisiones de un médico de atención primaria. Suelen tener primas y costos de bolsillo más bajos."
+        },
+        {
+          "name": "Planes de Organización de Proveedores Exclusivos (EPO)",
+          "description": "Los planes EPO solo cubren atención dentro de la red excepto en emergencias. No necesita remisiones para ver especialistas; son más flexibles que los HMO pero sin beneficios fuera de la red."
+        }
+      ]
+    },
+    "faq": {
+      "label": "Más Información",
+      "titleBeforeBold": "Preguntas",
+      "titleBold": "Importantes",
+      "image": "faq_clipboard_consult",
+      "items": [
+        {
+          "q": "¿Qué Presupuesto Debo Destinar al Seguro de Salud?",
+          "a": "Debe elegir los planes Bronce o Plata si necesita ahorrar dinero, o los planes Oro o Platino si cuenta con un mayor presupuesto y espera necesitar atención médica con frecuencia."
+        },
+        {
+          "q": "¿Puedo Seguir Atendiéndome con Mi Médico Preferido?",
+          "a": "Sí, por supuesto. Solo asegúrese de que sus médicos y hospitales preferidos estén dentro de la red para evitar altos costos de bolsillo."
+        },
+        {
+          "q": "Necesidades de Medicamentos Recetados",
+          "a": "Elija un plan que cubra eficazmente sus medicamentos. Si no está seguro de qué plan elegir, puede programar una consulta gratuita con uno de nuestros expertos."
+        },
+        {
+          "q": "Necesito Ayuda para Pagar el Seguro de Salud",
+          "a": "Existen subsidios a las primas para ingresos entre el 100 % y el 400 % del nivel federal de pobreza; puede verificar su elegibilidad en el Mercado de Seguros Médicos."
+        },
+        {
+          "q": "¿Cómo Me Inscribo?",
+          "a": "Para obtener información detallada y asistencia personalizada, programe una cita conmigo hoy mismo. Le guiaré durante el proceso y le ayudaré a encontrar un plan que se adapte a sus necesidades y presupuesto."
+        }
+      ]
+    },
+    "ctaBanner": {
+      "message": "¿Busca un asesor ACA de primera clase?",
+      "button": "Programar una consulta"
+    },
+    "ctaButton": {
+      "title": "Obtén ayuda experta ACA",
+      "subtitle": "Agente autorizado, sin compromiso"
+    },
     "calendar": {
-      "title": "Programar su cita ACA",
+      "title": "Agende su cita ACA por teléfono",
+      "backButton": "← Volver"
+    },
+    "selfEnroll": {
+      "title": "¿Prefiere inscribirse usted mismo?",
+      "subtitle": "Utilice nuestro portal seguro de HealthSherpa para comparar planes e inscribirse en minutos.",
+      "cta": "Comenzar Auto-Inscripción",
+      "disclaimer": "Disponible en la mayoría de los estados. En los mercados estatales puede ser redirigido al sitio oficial."
+    }
+  },
+  "dentalVisionPage": {
+    "calendar": {
+      "title": "Agendar su cita de consulta de seguros dentales y de visión",
       "backButton": "Volver"
+    },
+    "hero": {
+      "badge": "Planes Dentales y de Visión",
+      "name": "Isaac Orraiz – Agente de Seguros",
+      "title": "Sonríe con Confianza y Ve con Claridad",
+      "description": "Cobertura dental y de visión independiente para todos los presupuestos. Incluye limpiezas preventivas, servicios mayores, exámenes de la vista, gafas y más, todo en un solo plan.",
+      "testimonials": [
+        {
+          "name": "Laura Morales",
+          "text": "Contraté un paquete dental-visión con Isaac y ahorré más de $300 al año en comparación con mi plan anterior. ¡La cobertura comenzó de inmediato!"
+        },
+        {
+          "name": "Michael Chen",
+          "text": "Como trabajador independiente necesitaba limpiezas dentales ..."
+        }
+      ],
+      "happyClient": {
+        "title": "Clientes Felices",
+        "subtitle": "Más de 2,500 sonrisas y miradas saludables"
+      }
+    },
+
+    "ctaButton": {
+      "title": "Solicitar Información",
+      "subtitle": "Rápido y sin compromiso"
+    },
+
+    "about": {
+      "badge": "Sobre Mí",
+      "headline": "Comprometido con tu Salud Dental y Visual",
+      "description": "Soy Isaac Orraiz, un agente de seguros licenciado que se especializa en planes dentales y de visión independientes. ...",
+      "name": "Isaac Orraiz",
+      "role": "Agente de Seguros",
+      "credential": "21592068"
+    },
+
+    "selfEnroll": {
+      "title": "¿Prefiere inscribirse usted mismo?",
+      "subtitle": "Utilice nuestro portal seguro para comparar planes dentales y de visión e inscribirse en minutos.",
+      "cta": "Comenzar Auto-Inscripción",
+      "disclaimer": "Solo 5 minutos—sin papeleo, confirmación instantánea."
+    },
+
+    "definition": {
+      "title": "¿Por Qué Elegir Ameritas para Dental y Visión?",
+      "description": "Ameritas se ubica constantemente entre los mejores proveedores de seguros dentales y de visión en Estados Unidos. Con amplias redes de dentistas y optómetras, máximos anuales generosos y cobertura al día siguiente para servicios preventivos, Ameritas facilita mantener tu sonrisa sana y tu vista nítida sin gastar de más.  Me enorgullece trabajar con Ameritas para ofrecerte planes que combinan economía, flexibilidad y un servicio al cliente galardonado."
+    },
+
+    "eligibility": {
+      "headlineBeforeBold": "¿Quiénes",
+      "headlineBold": "Pueden Inscribirse?",
+      "intro": "Los planes dentales y de visión individuales de Ameritas están disponibles ...",
+      "bullets": [
+        "Vivir en Estados Unidos (planes disponibles en casi todos los estados)",
+        "Ser mayor de 18 años para contratar; puede incluir dependientes desde el nacimiento",
+        "Inscribirse en línea en minutos—sin preguntas médicas ni periodos de espera en la mayoría de los planes*",
+        "Elegir la fecha de inicio y pagar la primera prima (las tarifas se basan en el código postal, no en la edad)"
+      ],
+      "note": "*CCobertura preventiva desde el primer día, una red PPO nacional, libertad para atenderse fuera de la red y cero cuotas de inscripción convierten a Ameritas en una excelente opción para proteger tu salud dental y visual."
+    },
+
+    "enroll": {
+      "headlineBeforeBold": "Cómo Inscribirse en un",
+      "headlineBold": "Plan Dental y de Visión de Ameritas",
+      "intro": "Ameritas permite solicitar en línea durante todo el año—no hay un periodo de inscripción abierto. ¡La cobertura puede comenzar tan pronto como mañana!",
+      "step1": "<strong>Obtén una cotización instantánea</strong> haciendo clic en el botón abajo e ingresando tu información.",
+      "step2": "<strong>Completa la compra en minutos</strong>, elige tu fecha de inicio y descarga tu tarjeta digital de identificación al instante.",
+      "subHeading": "Durante la inscripción puedes:",
+      "bullets": [
+        "Escoger cualquier fecha de vigencia hasta con 30 días de anticipación",
+        "Agregar dependientes de cualquier edad (hijos, cónyuge, pareja)",
+        "Seleccionar dental solo, visión solo o un paquete con ahorro",
+        "Pagar mensual o anualmente con tarjeta o débito automático"
+      ],
+      "note": "Sin cuotas de inscripción, sin preguntas médicas y sin periodos de espera en servicios preventivos. Una garantía de satisfacción de 30 días te brinda tranquilidad adicional."
+    },
+
+    "faqDental": {
+      "label": "Ameritas Dental y Visión",
+      "titleBeforeBold": "Preguntas sobre",
+      "titleBold": "Planes Ameritas",
+      "items": [
+        {
+          "q": "¿Qué cubren los planes dentales Ameritas?",
+          "a": "Los planes cubren el 100 % de limpiezas y exámenes preventivos. También incluyen cobertura parcial para tratamientos como empastes, coronas o extracciones, dependiendo del tipo de plan."
+        },
+        {
+          "q": "¿Hay periodos de espera para algunos tratamientos?",
+          "a": "Algunos planes no tienen un periodo de espera estricto, pero la cobertura para tratamientos mayores comienza con un porcentaje reducido el primer año (por ejemplo, 20 %) y aumenta al 50 % o más después del primer año. Esto permite acceso limitado desde el inicio con mayores beneficios a largo plazo."
+        },
+        {
+          "q": "¿Puedo continuar un tratamiento si cambio de plan?",
+          "a": "Sí. Ameritas coordina beneficios entre planes. Si estás en tratamiento y cambias de plan, tu cobertura puede continuar hasta alcanzar el monto máximo vitalicio permitido."
+        },
+        {
+          "q": "¿Cuánto ahorro al usar dentistas dentro de la red?",
+          "a": "Ameritas cuenta con una de las redes dentales más grandes del país. Usar dentistas dentro de la red puede ahorrarte entre un 25 % y un 50 % comparado con tarifas estándar."
+        },
+        {
+          "q": "¿Cómo consulto mis beneficios o reclamaciones?",
+          "a": "Puedes acceder fácilmente a toda la información de tu plan a través del sitio web de Ameritas o desde la aplicación móvil Ameritas Benefits."
+        },
+        {
+          "q": "¿Los planes de visión cubren gafas y exámenes?",
+          "a": "Sí. Los planes incluyen un examen de la vista anual y un monto fijo o porcentaje para cubrir anteojos o lentes de contacto. Algunos planes trabajan con redes como VSP o EyeMed."
+        },
+        {
+          "q": "¿Puedo añadir beneficios como audición o cirugía LASIK?",
+          "a": "Sí. Ameritas ofrece opciones que incluyen descuentos en audífonos, consultas auditivas y beneficios para cirugía LASIK como parte de paquetes combinados."
+        }
+      ]
+    },
+
+    "ctaBanner": {
+      "message": "¿Busca un asesor Dental & Visión de primera clase?",
+      "button": "Programar una consulta"
+    }
+  },
+  "layoutMetadata": {
+    "title": "Isaac Plans Insurance | Seguros ACA, Medicare, Vida, Dental, Salud y Más",
+    "description": "Agencia de seguros bilingüe que compara planes del Mercado ACA, Medicare, vida, dental y visión en estados de EE.UU. Cotización gratis con experto.",
+    "image": "https://www.isaacplans.com/images/og_isaac.png",
+    "imageAlt": "Logo de Isaac Plans Insurance sobre un fondo degradado azul",
+    "keywords": "Seguros ACA, corredor de Medicare, agencia bilingüe de seguros, seguros de vida, planes dentales y de visión, agente de seguros"
+  },
+  "HIpage": {
+    "hero": {
+      "badge": "Indemnización Hospitalaria",
+      "name": "Isaac Orraiz – Agente de Seguros",
+      "title": "Beneficios en Efectivo Cuando Más los Necesita",
+      "description": "Incluso con un buen seguro médico, una hospitalización puede dejarle deducibles, coseguro y facturas diarias. Un plan de indemnización hospitalaria le paga una suma fija en efectivo directamente, para que usted decida si cubre gastos médicos, renta, cuidado de niños o lo que necesite.",
+      "testimonials": [
+        {
+          "name": "María Gonzales",
+          "text": "Cuando mi hijo se fracturó el brazo, la factura del hospital fue un impacto. Nuestra póliza de indemnización de Isaac nos envió un cheque en pocos días y lo usamos para cubrir el deducible y la despensa mientras yo faltaba al trabajo."
+        },
+        {
+          "name": "Roberto Lee",
+          "text": "Pensé que mi seguro regular era suficiente. Después de tres días en el hospital, debía miles. El beneficio en efectivo de mi plan de indemnización protegió mis ahorros—la mejor decisión que he tomado."
+        }
+      ],
+      "happyClient": {
+        "title": "Cliente feliz",
+        "subtitle": "¡Más de 3,000 pólizas emitidas!"
+      }
     }
   }
 }

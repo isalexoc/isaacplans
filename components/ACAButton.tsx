@@ -6,13 +6,11 @@ import { motion } from "framer-motion";
 import { LifeBuoy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { QuoteModal } from "@/components/form-modal";
-import { useLanguage } from "@/hooks/useLanguage";
-import { translations as t } from "@/lib/translations-aca"; // <-- uses ACA page strings
+import { useTranslations } from "next-intl";
 
 export default function ACAButton() {
   const [openModal, setOpenModal] = useState(false);
-  const { language } = useLanguage();
-  const copy = t[language].ctaButton; // new block (see below)
+  const trans = useTranslations("acaPage.ctaButton");
 
   return (
     <motion.div
@@ -40,10 +38,10 @@ export default function ACAButton() {
         >
           <div className="flex items-center gap-2">
             <LifeBuoy className="w-6 h-6 animate-pulse" />
-            <span>{copy.title}</span>
+            <span> {trans(`title`)}</span>
           </div>
           <span className="text-xs sm:text-sm font-normal text-white/90 sm:ml-2">
-            {copy.subtitle}
+            {trans(`subtitle`)}
           </span>
         </Button>
 

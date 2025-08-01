@@ -5,11 +5,91 @@ import { Card, CardContent } from "@/components/ui/card";
 import { getTranslations } from "next-intl/server";
 import ContactForm from "@/components/contact-form"; // client-island
 import { Link } from "@/i18n/routing";
+import type { Metadata } from "next";
+import { getLocale } from "next-intl/server";
+import { WithContext, WebPage, BreadcrumbList } from "schema-dts";
 
 const PHONE = process.env.NEXT_PUBLIC_PHONE_NUMBER ?? "540-426-1804";
 
+export async function generateMetadata(): Promise<Metadata> {
+  /* locale & i18n strings */
+  const locale = await getLocale();
+  const t = await getTranslations({
+    locale,
+    namespace: "contactPage.contactMetadata",
+  });
+
+  const title = t("title");
+  const description = t("description");
+  const image = t("image"); // 1200×630 URL
+  const alt = t("imageAlt"); // alt-text for social previews
+
+  return {
+    title,
+    description,
+    keywords: t("keywords", { default: "" }), // optional; provide fallback
+
+    alternates: {
+      canonical: `https://isaacplans.com/${locale}/contact`,
+      languages: {
+        en: "https://isaacplans.com/en/contact",
+        es: "https://isaacplans.com/es/contact",
+      },
+    },
+
+    openGraph: {
+      title,
+      description,
+      url: `https://isaacplans.com/${locale}/contact`,
+      siteName: "Isaac Plans Insurance",
+      locale,
+      images: [{ url: image, width: 1200, height: 630, alt }],
+    },
+
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [{ url: image, alt }],
+    },
+  };
+}
+
 export default async function Contact() {
-  const t = await getTranslations("contactPage.info");
+  const t = await getTranslations("contactPage");
+
+  /* ---- page-specific JSON-LD objects ---- */
+  const locale = await getLocale();
+  const pageLd: WithContext<WebPage> = {
+    "@context": "https://schema.org",
+    "@type": "ContactPage",
+    "@id": `https://isaacplans.com/${locale}/contact#webpage`,
+    url: `https://isaacplans.com/${locale}/contact`,
+    name: t("info.title"),
+    description: t("info.description"),
+    inLanguage: locale,
+    about: { "@id": "https://isaacplans.com/#organization" },
+  };
+
+  const breadcrumbLd: WithContext<BreadcrumbList> = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: t("contactMetadata.breadcrumbs.home"),
+        item: `https://isaacplans.com/${locale}`,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: t("contactMetadata.breadcrumbs.contact"),
+        item: `https://isaacplans.com/${locale}/contact`,
+      },
+    ],
+  };
+  /* --------------------------------------- */
 
   return (
     <>
@@ -17,13 +97,13 @@ export default async function Contact() {
         <div className="max-w-3xl mx-auto text-center">
           {/* ▸ Heading */}
           <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2 animate-fadeUp">
-            {t("title")}
+            {t("info.title")}
           </h2>
           <p
             className="text-gray-600 dark:text-gray-300 mb-8 animate-fadeUp"
             style={{ animationDelay: "0.1s" }}
           >
-            {t("description")}
+            {t("info.description")}
           </p>
 
           {/* ▸ Card */}
@@ -46,7 +126,7 @@ export default async function Contact() {
                   Isaac Orraiz
                 </h3>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  {t("role")}
+                  {t("info.role")}
                 </p>
               </div>
 
@@ -56,14 +136,14 @@ export default async function Contact() {
                   href={`tel:${PHONE.replace(/[^0-9]/g, "")}`}
                   className="flex items-center justify-center gap-2 bg-brand hover:bg-brand/90 rounded-lg py-3"
                 >
-                  📞 {t("callLabel")}: {PHONE}
+                  📞 {t("info.callLabel")}: {PHONE}
                 </a>
 
                 <a
                   href="mailto:info@isaacplans.com"
                   className="flex items-center justify-center gap-2 bg-brand hover:bg-brand/90 rounded-lg py-3"
                 >
-                  ✉️ {t("buttons.email")}
+                  ✉️ {t("info.buttons.email")}
                 </a>
 
                 <a
@@ -72,7 +152,7 @@ export default async function Contact() {
                   rel="noopener noreferrer"
                   className="flex items-center justify-center gap-2 bg-whatsapp hover:bg-whatsapp/90 rounded-lg py-3"
                 >
-                  🟢 {t("buttons.whatsapp")}
+                  🟢 {t("info.buttons.whatsapp")}
                 </a>
 
                 <a
@@ -80,14 +160,14 @@ export default async function Contact() {
                   download
                   className="flex items-center justify-center gap-2 bg-accent hover:bg-accent/90 rounded-lg py-3"
                 >
-                  📲 {t("addContact")}
+                  📲 {t("info.addContact")}
                 </a>
 
                 <Link
                   href="/"
                   className="flex items-center justify-center gap-2 bg-accent hover:bg-accent/90 rounded-lg py-3"
                 >
-                  🌐 {t("buttons.website")}
+                  🌐 {t("info.buttons.website")}
                 </Link>
 
                 <a
@@ -95,7 +175,7 @@ export default async function Contact() {
                   target="_blank"
                   className="flex items-center justify-center gap-2 bg-brand hover:bg-brand/90 rounded-lg py-3"
                 >
-                  📅 {t("buttons.schedule")}
+                  📅 {t("info.buttons.schedule")}
                 </a>
               </div>
 
@@ -137,6 +217,15 @@ export default async function Contact() {
 
       {/* client island – form stays interactive */}
       <ContactForm />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify([pageLd, breadcrumbLd]).replace(
+            /</g,
+            "\\u003c"
+          ),
+        }}
+      />
     </>
   );
 }

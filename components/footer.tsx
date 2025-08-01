@@ -108,33 +108,6 @@ export default async function Footer() {
           privacyLabel={tFooter("links.privacy")}
         />
       </div>
-
-      {/* JSON‑LD structured data */}
-      <script
-        type="application/ld+json"
-        // eslint-disable-next-line react/no-danger
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "InsuranceAgency",
-            name: SITE_NAME,
-            url: "https://isaacplans.com/",
-            logo: LOGO_URL,
-            telephone: `+1${PHONE_RAW.replace(/[^0-9]/g, "")}`,
-            sameAs: [
-              "https://www.facebook.com/@isaacagent",
-              "https://www.instagram.com/isalexoc",
-              "https://www.linkedin.com/in/isaacplans",
-              "https://www.youtube.com/@isaacplans",
-            ],
-            address: {
-              "@type": "PostalAddress",
-              addressRegion: "VA",
-              addressCountry: "US",
-            },
-          }),
-        }}
-      />
     </footer>
   );
 }

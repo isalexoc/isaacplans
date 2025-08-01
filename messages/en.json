@@ -359,6 +359,17 @@
         "heading": "Get Your Free Insurance Quote",
         "sub": "Ready to find the perfect insurance coverage? Fill out the form below or call anytime."
       }
+    },
+    "contactMetadata": {
+      "title": "Contact Isaac Plans Insurance | Free Bilingual Consultation",
+      "description": "Call, email or WhatsApp Isaac Plans Insurance for ACA, Medicare and life coverage. Free expert quote—English & Spanish.",
+      "image": "https://isaacplans.com/images/contact_isaacplans_en.png",
+      "imageAlt": "Isaac Orraiz – Isaac Plans Insurance contact card preview",
+      "keywords": "contact Isaac Plans, ACA insurance contact, Medicare broker contact, bilingual insurance agent, free insurance quote, insurance agent",
+      "breadcrumbs": {
+        "home": "Home",
+        "contact": "Contact"
+      }
     }
   },
   "privacyPolicy": {
@@ -596,9 +607,328 @@
     }
   },
   "acaPage": {
+    "hero": {
+      "badge": "The Affordable Care Act",
+      "name": "Isaac Orraiz - Insurance Agent",
+      "title": "Health Insurance Within Everyone’s Reach",
+      "description": "Is the Affordable Care Act and its requirements confusing? I offer personalized assistance to help you explore your options with ease and get the most affordable and comprehensive coverage.",
+      "testimonials": [
+        {
+          "name": "James Rodriguez",
+          "text": "I had no idea where to start with health insurance, but Isaac made the whole process simple. He answered all my questions and made sure I got the coverage I needed. Highly recommended!"
+        },
+        {
+          "name": "Jessica Thompson",
+          "text": "Thanks to Isaac, I enrolled in a great ACA plan that covers my doctors and prescriptions. He even reminded me when it was time to renew. Truly professional and attentive service!"
+        }
+      ],
+      "happyClient": {
+        "title": "Happy Client",
+        "subtitle": "Over 3,000 clients served!"
+      }
+    },
+    "definition": {
+      "title": "What is the Affordable Care Act (Obamacare)?",
+      "description": "The Affordable Care Act (ACA), also known as Obamacare, is a comprehensive health-care reform law enacted in March 2010. Its goal is to put affordable health insurance within reach of more people, expand the Medicaid program, and foster innovative methods of delivering medical care to reduce costs. Thanks to the ACA, millions of previously uninsured individuals now have access to quality health care."
+    },
+    "about": {
+      "badge": "About Me",
+      "headline": "Helping You To Manage Your ACA Needs!",
+      "description": "I am Isaac Orraiz, a licensed health-insurance agent specializing in ACA (The Affordable Care Act) plans. I help individuals and families get affordable coverage tailored to their needs, including dental, vision, hospital indemnity, cancer plans, stroke plans and more. I provide expert guidance every step of the way.",
+      "name": "Isaac Orraiz",
+      "role": "Insurance Agent",
+      "credentialLabel": "NPN",
+      "credential": "21592068",
+      "cta": "Request Information"
+    },
+    "eligibility": {
+      "headlineBeforeBold": "Who",
+      "headlineBold": "Qualifies?",
+      "intro": "To be eligible to enroll in health coverage through the Health Insurance Marketplace, you must:",
+      "bullets": [
+        "Live in the United States",
+        "Be a U.S. citizen or national (or be lawfully present)",
+        "Not be incarcerated"
+      ],
+      "note": "There is no income limit to use the Health Insurance Marketplace. Special patient protections under the ACA ensure that insurers cannot refuse coverage based on gender or a pre-existing condition, there are no lifetime or annual limits on essential health benefits, and young adults can stay on their family's insurance plan until age 26.",
+      "image": "eligibility_family_flag"
+    },
+    "enroll": {
+      "headlineBeforeBold": "How to Enroll in a",
+      "headlineBold": "Health Insurance Marketplace Plan",
+      "intro": "Enrollment in a Health Insurance Marketplace plan can be done during the annual open enrollment period or a special enrollment period triggered by life events like moving or having a baby. Here’s how to get started:",
+      "step1": "Schedule a free consultation with me to identify the Marketplace options in your state.",
+      "step2": "<strong>Let me complete the enrollment process</strong> and paperwork for you, step by step.",
+      "subHeading": "During the enrollment period, you can:",
+      "bullets": [
+        "Choose a plan for the first time",
+        "Continue with your current plan",
+        "Make changes to your current plan",
+        "Choose a new plan to replace your current one"
+      ],
+      "note": "Note: If you experience a life event or your household income is below a certain amount, you may qualify for a special enrollment period.",
+      "image": "enrollment_couple_consult"
+    },
+    "tiers": {
+      "titleBeforeBold": "Types",
+      "titleBold": "of Plans",
+      "intro": "The Health Insurance Marketplace offers a range of plans categorized into four metal tiers: Bronze, Silver, Gold, and Platinum. Each tier represents a different level of cost-sharing:",
+      "plans": [
+        {
+          "name": "Bronze Plans",
+          "color": "#cd7f32",
+          "bullets": [
+            "Lowest premiums",
+            "Highest out-of-pocket costs",
+            "Suitable if you want to pay lower premiums but higher costs when you need care"
+          ]
+        },
+        {
+          "name": "Silver Plans",
+          "color": "#c0c0c0",
+          "bullets": [
+            "Moderate premiums and out-of-pocket costs",
+            "Eligible for extra savings if you qualify for cost-sharing reductions",
+            "Good balance between monthly premium and out-of-pocket costs"
+          ]
+        },
+        {
+          "name": "Gold Plans",
+          "color": "#ffd700",
+          "bullets": [
+            "High premiums",
+            "Low out-of-pocket costs",
+            "Ideal if you expect to need frequent care"
+          ]
+        },
+        {
+          "name": "Platinum Plans",
+          "color": "#e5e4e2",
+          "bullets": [
+            "Highest premiums",
+            "Lowest out-of-pocket costs",
+            "Best if you need a lot of care and can afford higher monthly premiums"
+          ]
+        }
+      ]
+    },
+    "otherPlans": {
+      "title": "More Options…",
+      "options": [
+        {
+          "name": "Preferred Provider Organization (PPO) Plans",
+          "description": "PPO plans offer flexibility in choosing healthcare providers. You can see any in-network provider without a referral, but out-of-network care will cost more."
+        },
+        {
+          "name": "Point-of-Service (POS) Plans",
+          "description": "POS plans combine features of HMO and PPO plans. You need a referral from a primary-care physician to see specialists, but you can receive care out-of-network at higher costs."
+        },
+        {
+          "name": "Health Maintenance Organization (HMO) Plans",
+          "description": "HMO plans require you to use in-network providers and get referrals from a primary-care physician. These plans typically have lower premiums and out-of-pocket costs."
+        },
+        {
+          "name": "Exclusive Provider Organization (EPO) Plans",
+          "description": "EPO plans only cover in-network care except in emergencies. No referrals are needed to see specialists, making them more flexible than HMOs but without out-of-network benefits."
+        }
+      ]
+    },
+    "faq": {
+      "label": "More Info",
+      "titleBeforeBold": "Important",
+      "titleBold": "Questions",
+      "image": "faq_clipboard_consult",
+      "items": [
+        {
+          "q": "What Should I Budget for Health Insurance?",
+          "a": "You should choose the Bronze or Silver plans if you need to save money, or the Gold or Platinum plans if you have a larger budget and expect to need frequent healthcare services."
+        },
+        {
+          "q": "Can I Work with My Preferred Doctor?",
+          "a": "Yes, absolutely. Please ensure that your preferred doctors and hospitals are in-network to avoid high out-of-pocket costs."
+        },
+        {
+          "q": "Prescription Drug Needs",
+          "a": "Choose a plan that effectively covers your medication requirements. If you are unsure which plan to choose, you can schedule a free consultation call with one of our experts below."
+        },
+        {
+          "q": "I Need Help Paying for Health Insurance",
+          "a": "Premium subsidies are available for incomes between 100% and 400% of the federal poverty level; you can check your eligibility on the Health Insurance Marketplace."
+        },
+        {
+          "q": "How do I Sign Up?",
+          "a": "For detailed information and personalized assistance, schedule an appointment with me today. I can guide you through the process and ensure you find a plan that fits your needs and budget."
+        }
+      ]
+    },
+    "ctaBanner": {
+      "message": "Looking for a First-Class ACA Consultant?",
+      "button": "Schedule A Consultation"
+    },
+    "ctaButton": {
+      "title": "Get Expert ACA Help",
+      "subtitle": "Licensed agent—no obligation"
+    },
     "calendar": {
-      "title": "Schedule Your ACA Appointment",
+      "title": "Book Your ACA Phone Appointment",
+      "backButton": "← Go Back"
+    },
+    "selfEnroll": {
+      "title": "Prefer to self-enroll?",
+      "subtitle": "Use our secure HealthSherpa portal to compare plans and enroll in minutes.",
+      "cta": "Start Self-Enrollment",
+      "disclaimer": "Available in most states. In state-based marketplaces you may be redirected to the official state site."
+    }
+  },
+  "dentalVisionPage": {
+    "calendar": {
+      "title": "Schedule Your Dental and Vision Insurance Consultation Appointment",
       "backButton": "Back"
+    },
+    "hero": {
+      "badge": "Dental & Vision Plans",
+      "name": "Isaac Orraiz – Insurance Agent",
+      "title": "Keep Your Smile Bright & Your Vision Clear",
+      "description": "Standalone dental and vision coverage that fits any budget. Get preventive cleanings, major services, eye exams, glasses, and more—all in one easy plan.",
+      "testimonials": [
+        {
+          "name": "Laura Morales",
+          "text": "I signed up for a dental-vision bundle through Isaac and saved over $300 a year compared to my old plan. Appointments were easy to book and the coverage kicked in right away!"
+        },
+        {
+          "name": "Michael Chen",
+          "text": "As a freelancer I needed affordable dental cleanings and new lenses. Isaac walked me through the options and found a perfect plan. Highly recommend!"
+        }
+      ],
+      "happyClient": {
+        "title": "Happy Smiles",
+        "subtitle": "2,500+ members with healthier teeth & eyes"
+      }
+    },
+
+    "ctaButton": {
+      "title": "Request Information",
+      "subtitle": "Fast, no-obligation estimates"
+    },
+
+    "about": {
+      "badge": "About Me",
+      "headline": "Committed to Your Dental & Vision Health",
+      "description": "I’m Isaac Orraiz, a licensed insurance agent who specializes in standalone dental and vision plans. I help individuals and families secure affordable coverage for preventive cleanings, major dental work, eye exams, glasses, and more—tailored to your unique needs.",
+      "name": "Isaac Orraiz",
+      "role": "Insurance Agent",
+      "credential": "21592068"
+    },
+
+    "selfEnroll": {
+      "title": "Prefer to self-enroll?",
+      "subtitle": "Use our secure portal to compare dental & vision plans and enroll in minutes.",
+      "cta": "Start Self-Enrollment",
+      "disclaimer": "Takes just 5 minutes—no paperwork, instant confirmation."
+    },
+
+    "definition": {
+      "title": "Why Choose Ameritas for Dental & Vision?",
+      "description": "Ameritas is consistently ranked among the nation’s top carriers for stand-alone dental and vision insurance. With broad provider networks, generous annual maximums, and next-day coverage on preventive services, Ameritas makes it easy to keep your smile bright and your vision clear—without breaking the bank.  I’m proud to partner with Ameritas to bring you plans that combine affordability, flexibility, and award-winning customer service."
+    },
+
+    "eligibility": {
+      "headlineBeforeBold": "Who",
+      "headlineBold": "Can Enroll?",
+      "intro": "Ameritas individual dental & vision plans are open to nearly everyone—whether you’re self-employed, retired, or simply need benefits outside an employer plan. Getting started is easy:",
+      "bullets": [
+        "Be located in USA (plans available in almost every state)",
+        "Must be 18 + to purchase; cover dependents from birth",
+        "Enroll online in minutes—no health questions or waiting periods on most plans*",
+        "Pick your start date and pay the first month’s premium (rates are based on ZIP code, not age)"
+      ],
+      "note": "*Day-one preventive coverage, a nationwide PPO network, optional out-of-network freedom, and zero enrollment fees make Ameritas a top choice for dental & vision protection."
+    },
+
+    "enroll": {
+      "headlineBeforeBold": "How to Enroll in an",
+      "headlineBold": "Ameritas Dental & Vision Plan",
+      "intro": "Ameritas lets you apply online year-round—no open-enrollment window required. Coverage can even begin as soon as tomorrow:",
+      "step1": "<strong>Get an instant quote</strong> by clicking the button below and entering your Information.",
+      "step2": "<strong>Check out in minutes</strong>, choose your start date, and download your e-ID card right away.",
+      "subHeading": "During enrollment, you can:",
+      "bullets": [
+        "Pick any effective date up to 30 days out",
+        "Add dependents of any age (children, spouse, partner)",
+        "Select dental only, vision only, or a money-saving bundle",
+        "Pay monthly or annually with a credit/debit card or EFT"
+      ],
+      "note": "No enrollment fees, no health questions, and no waiting periods on preventive services. A 30-day customer satisfaction guarantee gives you extra peace of mind."
+    },
+
+    "faqDental": {
+      "label": "Ameritas Dental & Vision",
+      "titleBeforeBold": "Questions About",
+      "titleBold": "Ameritas Plans",
+      "items": [
+        {
+          "q": "What do Ameritas dental plans cover?",
+          "a": "Ameritas covers 100% of preventive care like cleanings and exams. Restorative procedures like fillings, crowns, or extractions are partially covered depending on the plan type."
+        },
+        {
+          "q": "Are there waiting periods for major services?",
+          "a": "Some plans do not have strict waiting periods, but coverage for major services typically starts at a lower percentage in the first year (e.g., 20%) and increases to 50% or more after the first year. This allows limited access initially with greater benefits over time."
+        },
+        {
+          "q": "Can I continue treatment if I change plans?",
+          "a": "Yes. Ameritas coordinates benefits across plans. If you're in active treatment and switch plans, coverage can continue up to the allowed lifetime maximum."
+        },
+        {
+          "q": "How much can I save with in-network providers?",
+          "a": "Ameritas has one of the largest dental networks in the U.S. Using in-network dentists can save you between 25% and 50% compared to regular fees."
+        },
+        {
+          "q": "How do I access my benefits and claims?",
+          "a": "You can view your member ID, coverage details, claims status, and more through the Ameritas website or the Ameritas Benefits mobile app."
+        },
+        {
+          "q": "Do vision plans include eyewear and exams?",
+          "a": "Yes. Plans typically include one annual eye exam and a set allowance for glasses or contacts. Some plans are partnered with networks like VSP or EyeMed."
+        },
+        {
+          "q": "Are additional services like LASIK or hearing care available?",
+          "a": "Yes. Ameritas offers optional benefits like LASIK discounts, hearing aid coverage, and hearing exams as part of expanded package options."
+        }
+      ]
+    },
+
+    "ctaBanner": {
+      "message": "Looking for a First-Class Dental & Vision Consultant?",
+      "button": "Schedule A Consultation"
+    }
+  },
+  "layoutMetadata": {
+    "title": "Isaac Plans Insurance | ACA, Medicare & Life Coverage",
+    "description": "Bilingual insurance agency helping families compare ACA Marketplace, Medicare, life, dental & vision plans in 20+ U.S. states. Free expert enrollment.",
+    "image": "https://www.isaacplans.com/images/og_isaac.png",
+    "imageAlt": "Isaac Plans Insurance logo on a blue gradient background",
+    "keywords": "ACA health insurance, Medicare broker, bilingual insurance agency, life insurance, vision dental plans, Virginia insurance agent"
+  },
+  "HIpage": {
+    "hero": {
+      "badge": "Hospital Indemnity",
+      "name": "Isaac Orraiz – Insurance Agent",
+      "title": "Cash Benefits When You Need Them Most",
+      "description": "Even with good health insurance, a hospital stay can leave you owing deductibles, coinsurance, and everyday bills. A hospital-indemnity plan pays you a lump-sum cash benefit directly, so you decide whether to cover medical costs, rent, child-care, or anything else.",
+      "testimonials": [
+        {
+          "name": "Maria Gonzales",
+          "text": "When my son broke his arm, the hospital bill was a shock. Our indemnity policy from Isaac sent us a check in days, and we used it to cover our deductible and groceries while I took time off work."
+        },
+        {
+          "name": "Robert Lee",
+          "text": "I thought my regular insurance was enough. After three days in the hospital, I owed thousands. The cash benefit from my indemnity plan kept my savings intact—best decision I’ve made."
+        }
+      ],
+      "happyClient": {
+        "title": "Happy Client",
+        "subtitle": "Over 3,000 policies issued!"
+      }
     }
   }
 }
