@@ -23,13 +23,25 @@ export const routing = defineRouting({
       en: "/dental-vision",
       es: "/dental-vision",
     },
+    "/dental-vision/calendar": {
+      en: "/dental-vision/calendar",
+      es: "/dental-vision/calendario",
+    },
     "/hospital-indemnity": {
       en: "/hospital-indemnity",
       es: "/indemnizacion-hospitalaria",
     },
+    "/hospital-indemnity/calendar": {
+      en: "/hospital-indemnity/calendar",
+      es: "/indemnizacion-hospitalaria/calendario",
+    },
     "/aca": {
       en: "/aca",
       es: "/aca",
+    },
+    "/aca/calendar": {
+      en: "/aca/calendar",
+      es: "/aca/calendario",
     },
     "/about": {
       en: "/about",

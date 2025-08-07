@@ -928,6 +928,110 @@
         "title": "Cliente feliz",
         "subtitle": "¡Más de 3,000 pólizas emitidas!"
       }
+    },
+    "ctaButton": {
+      "title": "Solicitar Información",
+      "subtitle": "Rápido y sin compromiso"
+    },
+    "calendar": {
+      "backButton": "← Volver",
+      "title": "Programa tu Consulta de Indemnización Hospitalaria"
+    },
+    "about": {
+      "badge": "Acerca de Isaac",
+      "headline": "Su aliado de confianza en seguros de salud",
+      "description": "Con licencias en múltiples estados y experiencia en planes suplementarios, Isaac asegura que no quede ningún vacío en su cobertura.",
+      "name": "Isaac Orraiz",
+      "role": "Agente de Seguros Licenciado",
+      "credential": "21592068"
+    },
+
+    "definition": {
+      "title": "¿Qué es un Seguro de Indemnización Hospitalaria?",
+      "description": "Es un plan suplementario que le paga a USTED directamente—un monto por día o por evento—para cubrir deducibles, copagos y pérdida de ingresos durante su hospitalización."
+    },
+
+    "selfEnroll": {
+      "cta": "Comenzar en línea",
+      "disclaimer": "Pólizas emitidas por la aseguradora. Sujeto a aprobación.",
+      "allstate": {
+        "title": "Beneficios en Efectivo Allstate",
+        "subtitle": "Pagos diarios de hasta $500"
+      },
+      "heartland": {
+        "title": "Plan Heartland National",
+        "subtitle": "Cobertura accesible para cualquier presupuesto"
+      }
+    },
+
+    "eligibility": {
+      "headlineBeforeBold": "La mayoría de los adultos",
+      "headlineBold": "ya califican",
+      "intro": "Los planes de indemnización hospitalaria son sorprendentemente fáciles de obtener:",
+      "bullets": {
+        "0": "Edades de 18 a 85 aceptadas",
+        "1": "Sin restricciones de red",
+        "2": "Conserve sus médicos actuales",
+        "3": "Beneficios en efectivo pagados directamente"
+      },
+      "note": "Algunas condiciones preexistentes pueden afectar los pagos."
+    },
+
+    "enroll": {
+      "headlineBeforeBold": "Tres pasos sencillos para",
+      "headlineBold": "estar cubierto",
+      "intro": "Todo el proceso toma alrededor de 10 minutos.",
+      "steps": {
+        "0": "Complete un breve cuestionario de salud",
+        "1": "Elija su monto de beneficio diario"
+      },
+      "subHeading": "Lo que necesitará",
+      "bullets": {
+        "0": "Información personal básica",
+        "1": "Detalles de su seguro de salud actual",
+        "2": "Método de pago preferido",
+        "3": "Unos minutos de su tiempo"
+      },
+      "note": "¡La aprobación suele ser instantánea!"
+    },
+
+    "faq": {
+      "label": "Preguntas frecuentes",
+      "titleBeforeBold": "Preguntas comunes sobre",
+      "titleBold": "Indemnización Hospitalaria",
+      "items": {
+        "0": {
+          "q": "¿Cubre todos los gastos hospitalarios?",
+          "a": "Le paga dinero en efectivo directamente; usted decide cómo usarlo."
+        },
+        "1": {
+          "q": "¿Cómo se pagan los beneficios?",
+          "a": "La aseguradora le envía el beneficio en efectivo directamente (cheque o depósito) normalmente en pocos días después de recibir su reclamación."
+        },
+        "2": {
+          "q": "¿Puedo conservar la póliza si cambio de trabajo o pierdo mi seguro principal?",
+          "a": "Sí. Las pólizas de indemnización hospitalaria son contratos individuales; puede mantenerlas mientras pague la prima, aunque cambie de empleo o de plan de salud."
+        },
+        "3": {
+          "q": "¿Existe un período de espera antes de que comiencen los beneficios?",
+          "a": "Los beneficios por accidente normalmente comienzan desde el Día 1; los beneficios por enfermedad pueden tener un período de espera de 30 días, según la aseguradora."
+        },
+        "4": {
+          "q": "¿Interfiere esto con mi seguro médico regular?",
+          "a": "No. Los beneficios de indemnización se pagan además de cualquier otro seguro que tenga y no se reducen por otros reembolsos."
+        },
+        "5": {
+          "q": "¿Las condiciones preexistentes están cubiertas?",
+          "a": "Muchos planes las cubren después de un período de 6 o 12 meses, pero las reglas varían según la aseguradora. Isaac le explicará los detalles antes de inscribirse."
+        },
+        "6": {
+          "q": "¿Cuánto cuesta la cobertura?",
+          "a": "Las primas dependen de su edad, monto del beneficio y estado de residencia; muchos planes cuestan menos de $1 al día."
+        }
+      }
+    },
+    "ctaBanner": {
+      "message": "¿Listo para resguardar sus ahorros? Programe una consulta gratuita de 20 minutos con Isaac hoy mismo."
     }
   }
 }

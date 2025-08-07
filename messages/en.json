@@ -929,6 +929,111 @@
         "title": "Happy Client",
         "subtitle": "Over 3,000 policies issued!"
       }
+    },
+    "ctaButton": {
+      "title": "Request Information",
+      "subtitle": "Fast, no-obligation estimates"
+    },
+    "calendar": {
+      "backButton": "← Go Back",
+      "title": "Schedule Your Hospital Indemnity Consultation"
+    },
+    "about": {
+      "badge": "About Isaac",
+      "headline": "Your trusted health-insurance partner",
+      "description": "With licenses in multiple states and expert knowledge of supplemental plans, Isaac makes sure no gap is left unprotected.",
+      "name": "Isaac Orraiz",
+      "role": "Licensed Health Insurance Agent",
+      "credential": "21592068"
+    },
+
+    "definition": {
+      "title": "What is Hospital Indemnity Insurance?",
+      "description": "It’s a supplemental plan that pays YOU directly—cash per day or per event—to offset deductibles, copays and lost income while you’re hospitalized."
+    },
+
+    "selfEnroll": {
+      "cta": "Start Online",
+      "disclaimer": "Policies issued by the carrier. Subject to underwriting approval.",
+      "allstate": {
+        "title": "Allstate Cash Benefits",
+        "subtitle": "Daily payments up to $500"
+      },
+      "heartland": {
+        "title": "Heartland National Plan",
+        "subtitle": "Affordable coverage for any budget"
+      }
+    },
+
+    "eligibility": {
+      "headlineBeforeBold": "Most adults are",
+      "headlineBold": "already eligible",
+      "intro": "Hospital indemnity plans are surprisingly easy to qualify for:",
+      "bullets": {
+        "0": "Ages 18–85 accepted",
+        "1": "No network restrictions",
+        "2": "Keep your current doctors",
+        "3": "Cash benefits paid directly to you"
+      },
+      "note": "Some pre-existing conditions may affect benefit payouts."
+    },
+
+    "enroll": {
+      "headlineBeforeBold": "Three simple steps to",
+      "headlineBold": "get covered",
+      "intro": "The entire process takes about 10 minutes.",
+      "steps": {
+        "0": "Complete a short health questionnaire",
+        "1": "Choose your daily benefit amount"
+      },
+      "subHeading": "What you’ll need",
+      "bullets": {
+        "0": "Basic personal information",
+        "1": "Current health-insurance details",
+        "2": "Preferred payment method",
+        "3": "A few minutes of your time"
+      },
+      "note": "Approval is usually instant!"
+    },
+
+    "faq": {
+      "label": "FAQs",
+      "titleBeforeBold": "Common questions about",
+      "titleBold": "Hospital Indemnity",
+      "items": {
+        "0": {
+          "q": "Does it cover all hospital expenses?",
+          "a": "It pays cash to you; you decide how to use it."
+        },
+        "1": {
+          "q": "How are benefits paid out?",
+          "a": "The carrier sends the cash benefit directly to you (check or direct deposit) usually within a few days of receiving your claim."
+        },
+        "2": {
+          "q": "Is the policy portable if I change jobs or lose my major-medical coverage?",
+          "a": "Yes. Hospital indemnity policies are individual contracts, so you can keep them as long as you pay the premiums—even if your employment or health plan changes."
+        },
+        "3": {
+          "q": "Is there a waiting period before benefits begin?",
+          "a": "Accident benefits typically start on Day 1; sickness benefits may have a 30-day waiting period, depending on the carrier."
+        },
+        "4": {
+          "q": "Will this interfere with my regular health insurance?",
+          "a": "No. Indemnity benefits are paid in addition to any other insurance you have and are not reduced by other reimbursements."
+        },
+        "5": {
+          "q": "Are pre-existing conditions covered?",
+          "a": "Many plans do cover them after a 6- or 12-month look-back period, but rules vary by carrier. Isaac will explain the specifics before you enroll."
+        },
+        "6": {
+          "q": "How much does coverage cost?",
+          "a": "Premiums depend on your age, benefit amount, and state of residence—many plans start under $1 a day."
+        }
+      }
+    },
+
+    "ctaBanner": {
+      "message": "Ready to guard your savings? Book a free 20-minute consultation with Isaac today."
     }
   }
 }
