@@ -85,7 +85,7 @@ export default function HospitalIndemnityPage() {
           t("eligibility.bullets.3"),
         ]}
         note={t("eligibility.note")}
-        imagePublicId="pexels-shvetsa-3845653_v1r87k"
+        imagePublicId="pexels-jibarofoto-2014773_wxjikn"
         imagePosition="left"
       />
 
