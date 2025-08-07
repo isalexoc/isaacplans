@@ -7,6 +7,54 @@ import EligibilitySection from "@/components/eligibility-section";
 import EnrollmentSection from "@/components/enrollment-section-template";
 import FaqSection from "@/components/FaqSection";
 import CTABanner from "@/components/CTABanner-template";
+import type { Metadata } from "next";
+import {
+  getDentalVisionPageLd,
+  getDentalVisionBreadcrumbLd,
+} from "@/lib/seo/jsonld";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
+  const t = await getTranslations({
+    locale,
+    namespace: "dentalVisionPage.dentalVisionMetadata",
+  });
+
+  const title = t("title");
+  const description = t("description");
+  const image = t("image", {
+    default:
+      "https://isaacplans.com/images/dental_vision_og_placeholder_en.png",
+  }) as string;
+  const alt = t("imageAlt", { default: "Dental & Vision plans preview" });
+
+  return {
+    title,
+    description,
+    keywords: t("keywords", { default: "" }),
+    alternates: {
+      canonical: `https://isaacplans.com/${locale}/dental-vision`,
+      languages: {
+        en: "https://isaacplans.com/en/dental-vision",
+        es: "https://isaacplans.com/es/dental-vision",
+      },
+    },
+    openGraph: {
+      title,
+      description,
+      url: `https://isaacplans.com/${locale}/dental-vision`,
+      siteName: "Isaac Plans Insurance",
+      locale,
+      images: [{ url: image, width: 1200, height: 630, alt }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [{ url: image, alt }],
+    },
+  };
+}
 
 /* Helper to pull an indexed testimonial as an object */
 const testimonial = (t: (k: string) => string, idx: number) => ({
@@ -29,6 +77,18 @@ export default async function DentalVisionPage() {
     <strong className="font-semibold text-blue-600 dark:text-blue-400">
       {chunks}
     </strong>
+  );
+
+  const pageLd = getDentalVisionPageLd(
+    locale,
+    t("hero.title"),
+    t("hero.description")
+  );
+
+  const breadcrumbLd = getDentalVisionBreadcrumbLd(
+    locale,
+    t("dentalVisionMetadata.breadcrumbs.home"),
+    t("dentalVisionMetadata.breadcrumbs.dentalVision")
   );
 
   return (
@@ -148,6 +208,16 @@ export default async function DentalVisionPage() {
         message={t("ctaBanner.message")}
         className="bg-blue-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200"
         cta={<DentalButton />}
+      />
+
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify([pageLd, breadcrumbLd]).replace(
+            /</g,
+            "\\u003c"
+          ),
+        }}
       />
     </>
   );

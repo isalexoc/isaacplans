@@ -910,8 +910,20 @@
     "ctaBanner": {
       "message": "¿Busca un asesor Dental & Visión de primera clase?",
       "button": "Programar una consulta"
+    },
+    "dentalVisionMetadata": {
+      "title": "Planes de Seguro Dental y de Visión | Isaac Plans Insurance",
+      "description": "Protege tu sonrisa y tu vista con cobertura dental y de visión a precios accesibles. Obtén una cotización gratis con el agente bilingüe Isaac Orraiz.",
+      "image": "https://isaacplans.com/images/dental_es.png",
+      "imageAlt": "Tarjeta de vista previa: planes dentales y de visión de Isaac Plans Insurance",
+      "keywords": "seguro dental, seguro de visión, planes dentales y de visión, cobertura accesible, cotización de seguro gratis, agente de seguros bilingüe, Isaac Plans Insurance",
+      "breadcrumbs": {
+        "home": "Inicio",
+        "dentalVision": "Dental y Visión"
+      }
     }
   },
+
   "layoutMetadata": {
     "title": "Isaac Plans Insurance | Seguros ACA, Medicare, Vida, Dental, Salud y Más",
     "description": "Agencia de seguros bilingüe que compara planes del Mercado ACA, Medicare, vida, dental y visión en estados de EE.UU. Cotización gratis con experto.",

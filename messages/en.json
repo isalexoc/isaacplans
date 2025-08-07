@@ -911,6 +911,17 @@
     "ctaBanner": {
       "message": "Looking for a First-Class Dental & Vision Consultant?",
       "button": "Schedule A Consultation"
+    },
+    "dentalVisionMetadata": {
+      "title": "Dental & Vision Insurance Plans | Isaac Plans Insurance",
+      "description": "Protect your smile and eyesight with affordable dental and vision coverage. Get a free bilingual quote from agent Isaac Orraiz today.",
+      "image": "https://isaacplans.com/images/dental.png",
+      "imageAlt": "Preview card: dental and vision plans by Isaac Plans Insurance",
+      "keywords": "dental insurance, vision insurance, dental and vision plans, affordable coverage, free insurance quote, bilingual insurance agent, Isaac Plans Insurance",
+      "breadcrumbs": {
+        "home": "Home",
+        "dentalVision": "Dental & Vision"
+      }
     }
   },
   "layoutMetadata": {
