@@ -215,25 +215,33 @@ const FooterColumn = ({ title, links }: FooterColumnProps) => (
 );
 
 /* Social icons */
-const SocialRow = () => {
+const SocialRow = async () => {
+  const social = await getTranslations("social");
+  const sm = {
+    facebook: social("facebook"),
+    instagram: social("instagram"),
+    youtube: social("youtube"),
+    linkedin: social("linkedin"),
+  };
+
   const socials = [
     {
-      href: "https://www.facebook.com/@isaacagent",
+      href: sm.facebook,
       Icon: FacebookIcon,
       label: "Facebook",
     },
     {
-      href: "https://www.instagram.com/isalexoc",
+      href: sm.instagram,
       Icon: InstagramIcon,
       label: "Instagram",
     },
     {
-      href: "https://www.youtube.com/@isaacplans",
+      href: sm.youtube,
       Icon: YoutubeIcon,
       label: "YouTube",
     },
     {
-      href: "https://www.linkedin.com/in/isaacplans",
+      href: sm.linkedin,
       Icon: LinkedinIcon,
       label: "LinkedIn",
     },

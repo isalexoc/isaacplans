@@ -344,6 +344,7 @@
   },
   "contactPage": {
     "info": {
+      "whatsappText": "Hi, I’d like a quote",
       "title": "Get In Touch",
       "description": "I'm here to help you navigate the insurance marketplace and find the coverage that's right for you. Don't hesitate to reach out with any questions.",
       "role": "Insurance Agent",
@@ -1068,5 +1069,11 @@
         "hi": "Hospital Indemnity"
       }
     }
+  },
+  "social": {
+    "facebook": "https://www.facebook.com/@isaacagent",
+    "instagram": "https://www.instagram.com/isalexoc",
+    "youtube": "https://www.youtube.com/@isaacplans",
+    "linkedin": "https://www.linkedin.com/in/isaacplans"
   }
 }

@@ -57,9 +57,18 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function Contact() {
   const t = await getTranslations("contactPage");
+  const social = await getTranslations("social");
+  const sm = {
+    facebook: social("facebook"),
+    instagram: social("instagram"),
+    youtube: social("youtube"),
+    linkedin: social("linkedin"),
+  };
 
   /* ---- page-specific JSON-LD objects ---- */
   const locale = await getLocale();
+  const waMessage = encodeURIComponent(t("info.whatsappText"));
+  const waLink = `https://wa.me/15406813507?text=${waMessage}`;
   const pageLd: WithContext<WebPage> = {
     "@context": "https://schema.org",
     "@type": "ContactPage",
@@ -136,38 +145,38 @@ export default async function Contact() {
                   href={`tel:${PHONE.replace(/[^0-9]/g, "")}`}
                   className="flex items-center justify-center gap-2 bg-brand hover:bg-brand/90 rounded-lg py-3"
                 >
-                  📞 {t("info.callLabel")}: {PHONE}
+                  {t("info.callLabel")}: {PHONE}
                 </a>
 
                 <a
                   href="mailto:info@isaacplans.com"
                   className="flex items-center justify-center gap-2 bg-brand hover:bg-brand/90 rounded-lg py-3"
                 >
-                  ✉️ {t("info.buttons.email")}
+                  {t("info.buttons.email")}
                 </a>
 
                 <a
-                  href="https://wa.me/15406813507?text=Hola,%20quiero%20una%20cotización"
+                  href={waLink}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 bg-whatsapp hover:bg-whatsapp/90 rounded-lg py-3"
+                  className="flex items-center justify-center gap-2 bg-brand hover:bg-brand/90 rounded-lg py-3"
                 >
-                  🟢 {t("info.buttons.whatsapp")}
+                  {t("info.buttons.whatsapp")}
                 </a>
 
                 <a
                   href="/isaac-orraiz.vcf"
                   download
-                  className="flex items-center justify-center gap-2 bg-accent hover:bg-accent/90 rounded-lg py-3"
+                  className="flex items-center justify-center gap-2 bg-brand hover:bg-brand/90 rounded-lg py-3"
                 >
-                  📲 {t("info.addContact")}
+                  {t("info.addContact")}
                 </a>
 
                 <Link
                   href="/"
-                  className="flex items-center justify-center gap-2 bg-accent hover:bg-accent/90 rounded-lg py-3"
+                  className="flex items-center justify-center gap-2 bg-brand hover:bg-brand/90 rounded-lg py-3"
                 >
-                  🌐 {t("info.buttons.website")}
+                  {t("info.buttons.website")}
                 </Link>
 
                 <a
@@ -175,38 +184,22 @@ export default async function Contact() {
                   target="_blank"
                   className="flex items-center justify-center gap-2 bg-brand hover:bg-brand/90 rounded-lg py-3"
                 >
-                  📅 {t("info.buttons.schedule")}
+                  {t("info.buttons.schedule")}
                 </a>
               </div>
 
               {/* Social row */}
               <div className="flex justify-center gap-6 mt-2 text-brand dark:text-accent">
-                <a
-                  href="https://www.facebook.com/@isaacagent"
-                  target="_blank"
-                  aria-label="Facebook"
-                >
+                <a href={sm.facebook} target="_blank" aria-label="Facebook">
                   <Facebook className="w-6 h-6 hover:scale-110 transition" />
                 </a>
-                <a
-                  href="https://www.instagram.com/isalexoc"
-                  target="_blank"
-                  aria-label="Instagram"
-                >
+                <a href={sm.instagram} target="_blank" aria-label="Instagram">
                   <Instagram className="w-6 h-6 hover:scale-110 transition" />
                 </a>
-                <a
-                  href="https://www.youtube.com/@isaacplans"
-                  target="_blank"
-                  aria-label="YouTube"
-                >
+                <a href={sm.youtube} target="_blank" aria-label="YouTube">
                   <Youtube className="w-6 h-6 hover:scale-110 transition" />
                 </a>
-                <a
-                  href="https://www.linkedin.com/in/isaacplans"
-                  target="_blank"
-                  aria-label="LinkedIn"
-                >
+                <a href={sm.linkedin} target="_blank" aria-label="LinkedIn">
                   <Linkedin className="w-6 h-6 hover:scale-110 transition" />
                 </a>
               </div>

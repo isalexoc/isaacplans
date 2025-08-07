@@ -343,6 +343,7 @@
   },
   "contactPage": {
     "info": {
+      "whatsappText": "Hola, quiero una cotización",
       "title": "Póngase en Contacto",
       "description": "Estoy aquí para ayudarle a navegar el mercado de seguros y encontrar la cobertura adecuada. No dude en comunicarse con cualquier pregunta.",
       "role": "Agente de Seguros",
@@ -1067,5 +1068,11 @@
         "hi": "Indemnización Hospitalaria"
       }
     }
+  },
+  "social": {
+    "facebook": "https://www.facebook.com/@isaacagent",
+    "instagram": "https://www.instagram.com/isalexoc",
+    "youtube": "https://www.youtube.com/@isaacplans",
+    "linkedin": "https://www.linkedin.com/in/isaacplans"
   }
 }
