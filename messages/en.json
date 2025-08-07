@@ -778,6 +778,17 @@
       "subtitle": "Use our secure HealthSherpa portal to compare plans and enroll in minutes.",
       "cta": "Start Self-Enrollment",
       "disclaimer": "Available in most states. In state-based marketplaces you may be redirected to the official state site."
+    },
+    "acaMetadata": {
+      "title": "Affordable Care Act (ACA) Health Plans | Isaac Plans Insurance",
+      "description": "Compare ACA metal tiers, see if you qualify for subsidies, and get a free quote from bilingual agent Isaac Orraiz.",
+      "image": "https://isaacplans.com/images/aca.png",
+      "imageAlt": "Preview card: ACA health plans explained by Isaac Plans Insurance",
+      "keywords": "ACA health insurance, Obamacare plans, ACA subsidies, health plan quote, bilingual insurance agent, Isaac Plans Insurance",
+      "breadcrumbs": {
+        "home": "Home",
+        "aca": "ACA Plans"
+      }
     }
   },
   "dentalVisionPage": {

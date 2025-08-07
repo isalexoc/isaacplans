@@ -777,6 +777,17 @@
       "subtitle": "Utilice nuestro portal seguro de HealthSherpa para comparar planes e inscribirse en minutos.",
       "cta": "Comenzar Auto-Inscripción",
       "disclaimer": "Disponible en la mayoría de los estados. En los mercados estatales puede ser redirigido al sitio oficial."
+    },
+    "acaMetadata": {
+      "title": "Planes de Salud ACA (Obamacare) | Isaac Plans Insurance",
+      "description": "Compara los niveles de metal del ACA, verifica si calificas para subsidios y obtén una cotización gratis con el agente bilingüe Isaac Orraiz.",
+      "image": "https://isaacplans.com/images/aca_es.png",
+      "imageAlt": "Tarjeta de vista previa: planes de salud ACA explicados por Isaac Plans Insurance",
+      "keywords": "seguro médico ACA, planes Obamacare, subsidios ACA, cotización de seguro, agente de seguros bilingüe, Isaac Plans Insurance",
+      "breadcrumbs": {
+        "home": "Inicio",
+        "aca": "Planes ACA"
+      }
     }
   },
   "dentalVisionPage": {

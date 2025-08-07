@@ -11,6 +11,56 @@ import FaqSection from "@/components/FaqSection";
 import CTABanner from "@/components/CTABanner-template";
 import PlanEnrollCard from "@/components/SelfEnrollSection";
 import ACAButton from "@/components/ACAButton";
+import { getAcaPageLd, getAcaBreadcrumbLd } from "@/lib/seo/jsonld";
+import type { Metadata } from "next";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
+  const t = await getTranslations({
+    locale,
+    namespace: "acaPage.acaMetadata",
+  });
+
+  /* ― dynamic copy */
+  const title = t("title");
+  const description = t("description");
+  const image = t("image", {
+    // fallback while you pick the final OG cover
+    default:
+      "https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_1200,h_630,c_fill,g_auto/og_isaacplans.png",
+  }) as string;
+  const alt = t("imageAlt", { default: "ACA illustration" });
+
+  return {
+    title,
+    description,
+    keywords: t("keywords", { default: "" }),
+
+    alternates: {
+      canonical: `https://isaacplans.com/${locale}/aca`,
+      languages: {
+        en: "https://isaacplans.com/en/aca",
+        es: "https://isaacplans.com/es/aca",
+      },
+    },
+
+    openGraph: {
+      title,
+      description,
+      url: `https://isaacplans.com/${locale}/aca`,
+      siteName: "Isaac Plans Insurance",
+      locale,
+      images: [{ url: image, width: 1200, height: 630, alt }],
+    },
+
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [{ url: image, alt }],
+    },
+  };
+}
 
 export default async function AcaPage() {
   /* locale-aware messages */
@@ -49,6 +99,15 @@ export default async function AcaPage() {
     question: t(`faq.items.${i}.q`),
     answer: t(`faq.items.${i}.a`),
   }));
+
+  /* ---------- JSON-LD objects ------------------------------------- */
+  const pageLd = getAcaPageLd(locale, t("hero.title"), t("hero.description"));
+
+  const breadcrumbLd = getAcaBreadcrumbLd(
+    locale,
+    t("acaMetadata.breadcrumbs.home"),
+    t("acaMetadata.breadcrumbs.aca")
+  );
 
   return (
     <>
@@ -182,6 +241,15 @@ export default async function AcaPage() {
         message={t("ctaBanner.message")}
         className="bg-blue-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200"
         cta={<ACAButton />}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify([pageLd, breadcrumbLd]).replace(
+            /</g,
+            "\\u003c"
+          ),
+        }}
       />
     </>
   );

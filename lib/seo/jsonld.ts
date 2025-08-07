@@ -11,6 +11,7 @@ import {
 const BASE_URL = "https://isaacplans.com";
 const PHONE = "+15404261804";
 const LOGO_URL = `${BASE_URL}/images/logo_ip.png`;
+import type { WebPage } from "schema-dts";
 
 /* Opening hours (7 days, 08-20) */
 const weekdayHours: OpeningHoursSpecification = {
@@ -178,3 +179,47 @@ export const isaacPersonLd: WithContext<Person> = {
     name: "Certified Health Care Reform Specialist",
   },
 };
+
+/**
+ * WebPage object for /[locale]/aca
+ */
+export const getAcaPageLd = (
+  locale: string,
+  title: string,
+  description: string
+): WithContext<WebPage> => ({
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": `${BASE_URL}/${locale}/aca#webpage`,
+  url: `${BASE_URL}/${locale}/aca`,
+  name: title,
+  description,
+  inLanguage: locale,
+  about: { "@id": `${BASE_URL}/#organization` },
+});
+
+/**
+ * BreadcrumbList for /[locale]/aca
+ */
+export const getAcaBreadcrumbLd = (
+  locale: string,
+  homeLabel: string,
+  acaLabel: string
+): WithContext<BreadcrumbList> => ({
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    {
+      "@type": "ListItem",
+      position: 1,
+      name: homeLabel,
+      item: `${BASE_URL}/${locale}`,
+    },
+    {
+      "@type": "ListItem",
+      position: 2,
+      name: acaLabel,
+      item: `${BASE_URL}/${locale}/aca`,
+    },
+  ],
+});
