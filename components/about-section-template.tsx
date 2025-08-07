@@ -1,6 +1,3 @@
-/* components/about-section-generic.tsx */
-"use client";
-
 import Image from "next/image";
 import clsx from "clsx";
 

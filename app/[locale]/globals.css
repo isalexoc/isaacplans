@@ -114,4 +114,10 @@ body {
   .social svg {
     @apply w-6 h-6 hover:text-brand dark:hover:text-brand hover:scale-110 transition-transform;
   }
+  .section-heading {
+    @apply text-3xl font-bold text-gray-900 dark:text-white mb-4;
+  }
+  .section-paragraph {
+    @apply text-gray-600 dark:text-gray-300 leading-relaxed;
+  }
 }

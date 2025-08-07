@@ -81,10 +81,10 @@ const resourceLinks = [
 }>;
 
 const aboutLinks = [
-  { key: "missionVision", href: "", icon: "FileCheck2" },
-  { key: "whyChooseUs", href: "", icon: "ThumbsUp" },
-  { key: "meetFounder", href: "", icon: "UserCheck" },
-  { key: "contactSupport", href: "", icon: "PhoneCall" },
+  { key: "missionVision", href: "/about#missionVision", icon: "FileCheck2" },
+  { key: "whyChooseUs", href: "/about#whyChooseUs", icon: "ThumbsUp" },
+  { key: "meetFounder", href: "/about#meetFounder", icon: "UserCheck" },
+  { key: "contactSupport", href: "/about#contactSupport", icon: "PhoneCall" },
 ] as const satisfies ReadonlyArray<{
   key: string;
   href: AppHref | "";
@@ -109,9 +109,9 @@ const Header = () => {
     setIsOpen(false);
     if (!isHomePage && href.startsWith("#")) {
       // internal section on a different page ⇒ jump to “/#section”
-      router.push(("/" + href) as AppHref);
+      router.push(("/" + href) as any);
     } else {
-      router.push(href as AppHref);
+      router.push(href as any);
     }
   };
 
@@ -405,7 +405,7 @@ const MobileLink = ({
 }: MobileLinkProps) =>
   href ? (
     <Link
-      href={href as AppHref}
+      href={href as any}
       onClick={() => {
         handleNavClick(href);
         setIsOpen(false);
@@ -442,7 +442,7 @@ const ListItem = React.forwardRef<React.ElementRef<"a">, ListItemProps>(
       <li>
         {/* if the item has a real URL render a typed Link, otherwise show a disabled tile */}
         {href ? (
-          <Link href={href as AppHref} legacyBehavior passHref>
+          <Link href={href as any} legacyBehavior passHref>
             <NavigationMenuLink
               asChild
               ref={ref}

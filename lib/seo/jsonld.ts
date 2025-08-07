@@ -299,3 +299,46 @@ export const getHiBreadcrumbLd = (
     },
   ],
 });
+
+export const getAboutPageLd = (
+  locale: string,
+  title: string,
+  description: string,
+  slug = "about" // <- pass "sobre-mi" when you call it for ES
+): WithContext<WebPage> => ({
+  "@context": "https://schema.org",
+  "@type": "AboutPage",
+  "@id": `${BASE_URL}/${locale}/${slug}#webpage`,
+  url: `${BASE_URL}/${locale}/${slug}`,
+  name: title,
+  description,
+  inLanguage: locale,
+  about: { "@id": `${BASE_URL}/#organization` },
+});
+
+/**
+ * BreadcrumbList for /[locale]/about   (ES can pass "sobre-mi" slug)
+ */
+export const getAboutBreadcrumbLd = (
+  locale: string,
+  homeLabel: string,
+  aboutLabel: string,
+  slug = "about" // <- pass "sobre-mi" when you call it for ES
+): WithContext<BreadcrumbList> => ({
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    {
+      "@type": "ListItem",
+      position: 1,
+      name: homeLabel,
+      item: `${BASE_URL}/${locale}`,
+    },
+    {
+      "@type": "ListItem",
+      position: 2,
+      name: aboutLabel,
+      item: `${BASE_URL}/${locale}/${slug}`,
+    },
+  ],
+});

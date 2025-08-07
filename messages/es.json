@@ -1074,5 +1074,67 @@
     "instagram": "https://www.instagram.com/isalexoc",
     "youtube": "https://www.youtube.com/@isaacplans",
     "linkedin": "https://www.linkedin.com/in/isaacplans"
+  },
+  "aboutPage": {
+    "meta": {
+      "title": "Acerca de Isaac Plans Insurance",
+      "description": "Soluciones de seguro personalizadas que protegen tu salud y tranquilidad.",
+      "image": "https://isaacplans.com/images/about_es.png",
+      "imageAlt": "Isaac Orraiz, agente de seguros de salud, sonríe frente a un fondo azul",
+      "keywords": "acerca de Isaac Plans, seguros personalizados, agente de seguros de salud, cobertura accesible, servicio bilingüe",
+      "breadcrumbs": {
+        "home": "Inicio",
+        "about": "Acerca de"
+      }
+    },
+    "hero": {
+      "heading": "Seguros diseñados para ti",
+      "subheading": "Cobertura personalizada, servicio bilingüe, tranquilidad total."
+    },
+    "about": {
+      "links": {
+        "missionVision": {
+          "title": "Nuestra Misión y Visión",
+          "description": "Conoce nuestro compromiso con una cobertura de salud accesible y asequible."
+        },
+        "whyChooseUs": {
+          "title": "Por Qué Elegirnos",
+          "description": "Descubre lo que nos hace diferentes: servicio personalizado y variedad de planes."
+        },
+        "meetFounder": {
+          "title": "Conoce al Fundador",
+          "description": "Descubre quién es Isaac Orraiz y su pasión por ayudar a las familias."
+        },
+        "contactSupport": {
+          "title": "Contacto y Soporte",
+          "description": "Comunícate para recibir ayuda personalizada o resolver tus dudas de seguros."
+        }
+      }
+    },
+    "mission": {
+      "heading": "Nuestra Misión",
+      "body": "Hacer que la cobertura de salud de calidad sea sencilla y asequible para cada familia que atendemos."
+    },
+    "vision": {
+      "heading": "Nuestra Visión",
+      "body": "Un futuro donde ninguna familia tenga que elegir entre su atención médica y su estabilidad financiera."
+    },
+    "why": {
+      "heading": "¿Por Qué Elegir Isaac Plans?",
+      "points": {
+        "0": "Servicio bilingüe (English & Español).",
+        "1": "100 % independiente—acceso a decenas de aseguradoras.",
+        "2": "Acompañamiento tipo concierge antes y después de la inscripción.",
+        "3": "Herramientas digitales para solicitudes rápidas y sin papel."
+      }
+    },
+    "founder": {
+      "heading": "Conoce a Isaac Orraiz",
+      "bio": "Isaac es un agente de seguros de salud con licencia y Especialista Certificado en Reforma de Atención Médica. Su pasión es guiar a las familias hacia planes que realmente se ajusten a sus necesidades, sin jerga complicada."
+    },
+    "support": {
+      "heading": "¿Necesitas ayuda ahora?",
+      "body": "Agenda una consulta gratuita o envíanos tus preguntas; responderemos en un día hábil."
+    }
   }
 }

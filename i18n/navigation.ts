@@ -12,4 +12,8 @@ export type AppHref =
   | "/aca"
   | "/dental-vision"
   | "/hospital-indemnity"
-  | "/about";
+  | "/about"
+  | "/about#missionVision"
+  | "/about#whyChooseUs"
+  | "/about#meetFounder"
+  | "/about#contactSupport";

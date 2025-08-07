@@ -1075,5 +1075,67 @@
     "instagram": "https://www.instagram.com/isalexoc",
     "youtube": "https://www.youtube.com/@isaacplans",
     "linkedin": "https://www.linkedin.com/in/isaacplans"
+  },
+  "aboutPage": {
+    "meta": {
+      "title": "About Isaac Plans Insurance",
+      "description": "Personalized insurance solutions that protect your health and peace of mind.",
+      "image": "https://isaacplans.com/images/about.png",
+      "imageAlt": "Isaac Plans Insurance team photo",
+      "keywords": "about Isaac Plans, insurance agency, health coverage, personalized service, bilingual insurance agent",
+      "breadcrumbs": {
+        "home": "Home",
+        "about": "About Us"
+      }
+    },
+    "hero": {
+      "heading": "Insurance built around you",
+      "subheading": "Personalized coverage, bilingual service, peace of mind."
+    },
+    "about": {
+      "links": {
+        "missionVision": {
+          "title": "Our Mission & Vision",
+          "description": "Discover our commitment to accessible, affordable health coverage."
+        },
+        "whyChooseUs": {
+          "title": "Why Choose Us",
+          "description": "Personalized service & comprehensive plan options."
+        },
+        "meetFounder": {
+          "title": "Meet the Founder",
+          "description": "Get to know Isaac Orraiz."
+        },
+        "contactSupport": {
+          "title": "Contact & Support",
+          "description": "Reach out for personalized help today."
+        }
+      }
+    },
+    "mission": {
+      "heading": "Our Mission",
+      "body": "To make quality health coverage simple and affordable for every family we serve."
+    },
+    "vision": {
+      "heading": "Our Vision",
+      "body": "A future where no family has to choose between health care and financial stability."
+    },
+    "why": {
+      "heading": "Why Choose Isaac Plans?",
+      "points": {
+        "0": "Bilingual service (English & Español).",
+        "1": "100 % independent—access to dozens of carriers.",
+        "2": "Concierge-style support before and after enrollment.",
+        "3": "Digital tools for quick, paperless applications."
+      }
+    },
+    "founder": {
+      "heading": "Meet Isaac Orraiz",
+      "bio": "Isaac is a licensed health-insurance agent and Certified Health-Care Reform Specialist. His passion is guiding families toward plans that truly fit their needs—without the jargon."
+    },
+    "support": {
+      "heading": "Need help right now?",
+      "body": "Book a free consultation or send us your questions—we’ll get back within one business day."
+    }
   }
 }
