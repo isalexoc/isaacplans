@@ -1055,6 +1055,17 @@
     },
     "ctaBanner": {
       "message": "¿Listo para resguardar sus ahorros? Programe una consulta gratuita de 20 minutos con Isaac hoy mismo."
+    },
+    "hiMetadata": {
+      "title": "Seguro de Indemnización Hospitalaria | Isaac Plans Insurance",
+      "description": "Beneficios en efectivo pagados directamente a ti durante una hospitalización—úsalos como necesites. Obtén una cotización gratis con el agente bilingüe Isaac Orraiz.",
+      "image": "https://isaacplans.com/images/hi_es.png",
+      "imageAlt": "Tarjeta de vista previa: planes de indemnización hospitalaria de Isaac Plans Insurance",
+      "keywords": "seguro de indemnización hospitalaria, beneficio en efectivo diario, seguro complementario, cotización de seguro gratis, agente de seguros bilingüe, Isaac Plans Insurance",
+      "breadcrumbs": {
+        "home": "Inicio",
+        "hi": "Indemnización Hospitalaria"
+      }
     }
   }
 }

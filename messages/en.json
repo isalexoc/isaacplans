@@ -1056,6 +1056,17 @@
 
     "ctaBanner": {
       "message": "Ready to guard your savings? Book a free 20-minute consultation with Isaac today."
+    },
+    "hiMetadata": {
+      "title": "Hospital Indemnity Insurance | Isaac Plans Insurance",
+      "description": "Cash benefits paid directly to you during a hospital stay—use the money however you need. Get a free bilingual quote from agent Isaac Orraiz.",
+      "image": "https://isaacplans.com/images/hi.png",
+      "imageAlt": "Preview card: Hospital Indemnity plans by Isaac Plans Insurance",
+      "keywords": "hospital indemnity insurance, daily cash benefit, supplemental insurance, free insurance quote, bilingual insurance agent, Isaac Plans Insurance",
+      "breadcrumbs": {
+        "home": "Home",
+        "hi": "Hospital Indemnity"
+      }
     }
   }
 }

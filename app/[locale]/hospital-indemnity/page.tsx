@@ -1,7 +1,5 @@
 /* app/[locale]/hospital-indemnity/page.tsx – client component */
-"use client";
 
-import { useTranslations } from "next-intl";
 import HeroWithTestimonials from "@/components/hero-template";
 import HIButton from "@/components/HIButton";
 import CTABanner from "@/components/CTABanner-template";
@@ -10,9 +8,62 @@ import EnrollmentSectionGeneric from "@/components/enrollment-section-template";
 import EligibilitySection from "@/components/eligibility-section";
 import PlanEnrollCard from "@/components/SelfEnrollSection";
 import AboutSectionGeneric from "@/components/about-section-template";
+import type { Metadata } from "next";
+import { getLocale, getTranslations } from "next-intl/server";
+import { getHiPageLd, getHiBreadcrumbLd } from "@/lib/seo/jsonld"; // new
 
-export default function HospitalIndemnityPage() {
-  const t = useTranslations("HIpage"); // namespace path
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
+  const t = await getTranslations({
+    locale,
+    namespace: "HIpage.hiMetadata",
+  });
+
+  const title = t("title");
+  const description = t("description");
+  const image = t("image", {
+    default:
+      "https://isaacplans.com/images/hospital_indemnity_og_placeholder_en.png",
+  }) as string;
+  const alt = t("imageAlt", { default: "Hospital Indemnity plans preview" });
+
+  return {
+    title,
+    description,
+    keywords: t("keywords", { default: "" }),
+    alternates: {
+      canonical: `https://isaacplans.com/${locale}/hospital-indemnity`,
+      languages: {
+        en: "https://isaacplans.com/en/hospital-indemnity",
+        es: "https://isaacplans.com/es/hospital-indemnity",
+      },
+    },
+    openGraph: {
+      title,
+      description,
+      url: `https://isaacplans.com/${locale}/hospital-indemnity`,
+      siteName: "Isaac Plans Insurance",
+      locale,
+      images: [{ url: image, width: 1200, height: 630, alt }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [{ url: image, alt }],
+    },
+  };
+}
+
+export default async function HospitalIndemnityPage() {
+  const locale = await getLocale();
+  const t = await getTranslations({ locale, namespace: "HIpage" });
+  const pageLd = getHiPageLd(locale, t("hero.title"), t("hero.description"));
+  const crumbLd = getHiBreadcrumbLd(
+    locale,
+    t("hiMetadata.breadcrumbs.home"),
+    t("hiMetadata.breadcrumbs.hi")
+  );
 
   return (
     <>
@@ -134,6 +185,12 @@ export default function HospitalIndemnityPage() {
         message={t("ctaBanner.message")}
         className="bg-blue-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200"
         cta={<HIButton />}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify([pageLd, crumbLd]).replace(/</g, "\\u003c"),
+        }}
       />
     </>
   );

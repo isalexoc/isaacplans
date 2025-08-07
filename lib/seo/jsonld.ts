@@ -261,3 +261,41 @@ export const getDentalVisionBreadcrumbLd = (
     },
   ],
 });
+
+export const getHiPageLd = (
+  locale: string,
+  title: string,
+  description: string
+): WithContext<WebPage> => ({
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": `${BASE_URL}/${locale}/hospital-indemnity#webpage`,
+  url: `${BASE_URL}/${locale}/hospital-indemnity`,
+  name: title,
+  description,
+  inLanguage: locale,
+  about: { "@id": `${BASE_URL}/#organization` },
+});
+
+export const getHiBreadcrumbLd = (
+  locale: string,
+  homeLabel: string,
+  hiLabel: string
+): WithContext<BreadcrumbList> => ({
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    {
+      "@type": "ListItem",
+      position: 1,
+      name: homeLabel,
+      item: `${BASE_URL}/${locale}`,
+    },
+    {
+      "@type": "ListItem",
+      position: 2,
+      name: hiLabel,
+      item: `${BASE_URL}/${locale}/hospital-indemnity`,
+    },
+  ],
+});
