@@ -34,7 +34,7 @@ export default async function About() {
                 {t("title")}
               </h2>
 
-              <p className="text-base lg:text-lg text-gray-700 leading-relaxed mb-4 lg:mb-6">
+              <p className="text-base lg:text-lg text-gray-700 leading-relaxed">
                 {subtitle1}
               </p>
               <p className="text-base lg:text-lg text-gray-700 leading-relaxed">
@@ -53,7 +53,7 @@ export default async function About() {
                   <Badge
                     key={cert}
                     variant="secondary"
-                    className="text-xs lg:text-sm bg-custom-light text-custom"
+                    className="bg-custom-light text-custom-dark"
                   >
                     {cert}
                   </Badge>

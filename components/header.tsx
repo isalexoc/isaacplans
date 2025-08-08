@@ -246,7 +246,7 @@ const Header = () => {
                 <span>{nav("phone")}</span>
               </a>
               <Link href="/contact">
-                <Button className="bg-custom text-custom-foreground hover:bg-custom/90">
+                <Button className="bg-custom text-white hover:bg-custom/90">
                   {nav("cta")}
                 </Button>
               </Link>
@@ -375,7 +375,7 @@ const MobileSheet = ({
             <LocaleSwitcher />
           </div>
           <Button
-            className="w-full bg-custom text-custom-foreground hover:bg-custom/90"
+            className="bg-custom text-white hover:bg-custom/90"
             onClick={() => handleNavClick("/contact")}
           >
             {nav("cta")}

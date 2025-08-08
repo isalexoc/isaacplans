@@ -72,15 +72,17 @@ export default async function Coverage() {
           >
             <Card className="bg-custom text-custom-foreground p-6 sm:p-8">
               <CardContent className="p-0">
-                <h4 className="text-2xl font-bold mb-4">{t("cta.heading")}</h4>
-                <p className="text-lg mb-6 opacity-90">{t("cta.text")}</p>
+                <h4 className="text-2xl font-bold mb-4 text-custom-foreground">
+                  {t("cta.heading")}
+                </h4>
+                <p className="text-lg mb-6 text-custom-foreground">
+                  {t("cta.text")}
+                </p>
 
                 <div className="flex flex-col sm:flex-row flex-wrap gap-4 justify-center">
                   <a
                     href={`tel:${PHONE}`}
-                    className="bg-white text-custom hover:bg-gray-100
-                               px-6 py-3 rounded-lg font-semibold
-                               transition-colors w-full sm:w-auto truncate"
+                    className="bg-custom text-white px-6 py-3 rounded-lg font-semibold hover:bg-custom/90"
                   >
                     {PHONE}
                   </a>
