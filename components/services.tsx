@@ -92,11 +92,12 @@ export default async function Services() {
 
                     {link && (
                       <div className="mt-auto pt-4">
-                        <Link href={link}>
-                          <Button variant="outline" className="w-full">
-                            {t("ctaLearnMore", { defaultValue: "Learn More" })}
-                          </Button>
-                        </Link>
+                        <Button asChild variant="outline" className="w-full">
+                          <Link href={link} aria-label={t(`${base}.title`)}>
+                            {t("ctaLearnMore", { defaultValue: "Learn More" })}{" "}
+                            {t(`${base}.title`)}
+                          </Link>
+                        </Button>
                       </div>
                     )}
                   </CardContent>
