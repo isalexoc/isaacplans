@@ -109,7 +109,7 @@ export default async function Contact() {
             {t("info.title")}
           </h2>
           <p
-            className="text-gray-600 dark:text-gray-300 mb-8 animate-fadeUp"
+            className="text-gray-700 dark:text-gray-300 mb-8 animate-fadeUp"
             style={{ animationDelay: "0.1s" }}
           >
             {t("info.description")}

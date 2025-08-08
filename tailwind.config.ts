@@ -13,12 +13,21 @@ const config: Config = {
     extend: {
       /* ───────── Brand palette ───────── */
       colors: {
+        /* Brand */
+        custom: {
+          DEFAULT: "hsl(var(--custom) / <alpha-value>)",
+          foreground: "hsl(var(--custom-foreground) / <alpha-value>)",
+          light: "hsl(var(--custom-light) / <alpha-value>)",
+          dark: "hsl(var(--custom-dark) / <alpha-value>)",
+        },
+
+        /* Neutral UI tokens (already in your file) … */
+        background: "hsl(var(--background) / <alpha-value>)",
+        /* … etc. */
         brand: "#0077B6",
         accent: "#00B4D8",
         whatsapp: "#25D366",
 
-        /* Most tokens need opacity modifiers → add  / <alpha-value> */
-        background: "hsl(var(--background) / <alpha-value>)",
         foreground: "hsl(var(--foreground) / <alpha-value>)",
 
         card: {
@@ -37,10 +46,7 @@ const config: Config = {
           DEFAULT: "hsl(var(--secondary) / <alpha-value>)",
           foreground: "hsl(var(--secondary-foreground) / <alpha-value>)",
         },
-        custom: {
-          DEFAULT: "hsl(var(--custom) / <alpha-value>)",
-          foreground: "hsl(var(--custom-foreground) / <alpha-value>)",
-        },
+
         muted: {
           DEFAULT: "hsl(var(--muted) / <alpha-value>)",
           foreground: "hsl(var(--muted-foreground) / <alpha-value>)",

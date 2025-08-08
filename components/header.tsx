@@ -240,7 +240,7 @@ const Header = () => {
             <div className="hidden lg:flex items-center space-x-4">
               <a
                 href={`tel:${nav("phone")}`}
-                className="flex items-center text-sm text-gray-600 space-x-2"
+                className="flex items-center text-sm text-gray-700 space-x-2"
               >
                 <Lucide.Phone className="w-4 h-4" />
                 <span>{nav("phone")}</span>
@@ -367,7 +367,7 @@ const MobileSheet = ({
           <div className="flex justify-between items-center mb-4">
             <a
               href={`tel:${nav("phone")}`}
-              className="flex items-center text-sm text-gray-600 space-x-2"
+              className="flex items-center text-sm text-gray-700 space-x-2"
             >
               <Lucide.Phone className="w-4 h-4" />
               <span>{nav("phone")}</span>
@@ -452,9 +452,7 @@ const ListItem = React.forwardRef<React.ElementRef<"a">, ListItemProps>(
               )}
             >
               <a>
-                {Icon && (
-                  <Icon className="w-5 h-5 mt-1 text-custom/70 shrink-0" />
-                )}
+                {Icon && <Icon className="w-5 h-5 mt-1 text-custom shrink-0" />}
                 <div className="space-y-1">
                   <div className="text-sm font-medium leading-none">
                     {title}
@@ -476,7 +474,7 @@ const ListItem = React.forwardRef<React.ElementRef<"a">, ListItemProps>(
               className
             )}
           >
-            {Icon && <Icon className="w-5 h-5 mt-1 text-custom/70 shrink-0" />}
+            {Icon && <Icon className="w-5 h-5 mt-1 text-custom shrink-0" />}
             <div className="space-y-1">
               <div className="text-sm font-medium leading-none">{title}</div>
               {children && (

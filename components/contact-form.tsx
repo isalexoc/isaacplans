@@ -21,7 +21,7 @@ export default async function ContactForm() {
         <h2 className="text-3xl font-bold text-gray-900 mb-4">
           {t("heading")}
         </h2>
-        <p className="text-lg  text-gray-600">{t("sub")}</p>
+        <p className="text-lg  text-gray-700">{t("sub")}</p>
       </div>
 
       {/* client-only iframe embed */}

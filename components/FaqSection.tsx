@@ -58,7 +58,7 @@ export default function FaqSection({
         {/* ▸ FAQ block */}
         <div className="w-full lg:w-1/2 max-w-xl mx-auto">
           {label && (
-            <p className="text-sm uppercase tracking-wide text-gray-600 dark:text-gray-400 mb-4">
+            <p className="text-sm uppercase tracking-wide text-gray-700 dark:text-gray-400 mb-4">
               {label}
             </p>
           )}

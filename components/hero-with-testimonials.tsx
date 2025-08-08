@@ -92,7 +92,7 @@ const HeroWithTestimonials: React.FC<HeroWithTestimonialsProps> = ({
               <p className="font-semibold text-sm text-gray-800 dark:text-gray-200">
                 ⭐⭐⭐⭐⭐ {testimonials[0].name}
               </p>
-              <p className="text-xs text-gray-600 dark:text-gray-300 mt-1">
+              <p className="text-xs text-gray-700 dark:text-gray-300 mt-1">
                 {testimonials[0].text}
               </p>
             </div>

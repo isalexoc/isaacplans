@@ -42,7 +42,7 @@ export default async function Services() {
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
             {t("title")}
           </h2>
-          <p className="text-lg lg:text-xl text-gray-600 max-w-3xl mx-auto">
+          <p className="text-lg lg:text-xl text-gray-700 max-w-3xl mx-auto">
             {t("subtitle")}
           </p>
         </div>
@@ -63,7 +63,7 @@ export default async function Services() {
               >
                 <Card className="h-full flex flex-col justify-between hover:shadow-lg transition-shadow duration-300">
                   <CardHeader className="pb-4">
-                    <div className="w-10 h-10 lg:w-12 lg:h-12 bg-custom/10 rounded-lg flex items-center justify-center mb-3 lg:mb-4">
+                    <div className="w-10 h-10 lg:w-12 lg:h-12 bg-custom-light rounded-lg flex items-center justify-center mb-3 lg:mb-4">
                       <Icon
                         className="w-5 h-5 lg:w-6 lg:h-6 text-custom"
                         aria-hidden
@@ -72,7 +72,7 @@ export default async function Services() {
                     <CardTitle className="text-lg lg:text-xl">
                       {t(`${base}.title`)}
                     </CardTitle>
-                    <CardDescription className="text-gray-600 text-sm lg:text-base">
+                    <CardDescription className="text-gray-700 text-sm lg:text-base">
                       {t(`${base}.description`)}
                     </CardDescription>
                   </CardHeader>
@@ -82,7 +82,7 @@ export default async function Services() {
                       {features.map((feature: string) => (
                         <li
                           key={feature}
-                          className="flex items-center text-sm text-gray-600"
+                          className="flex items-center text-sm text-gray-700"
                         >
                           <span className="w-1.5 h-1.5 bg-custom rounded-full mr-3 shrink-0" />
                           {feature}
@@ -93,9 +93,20 @@ export default async function Services() {
                     {link && (
                       <div className="mt-auto pt-4">
                         <Button asChild variant="outline" className="w-full">
-                          <Link href={link} aria-label={t(`${base}.title`)}>
-                            {t("ctaLearnMore", { defaultValue: "Learn More" })}{" "}
-                            {t(`${base}.title`)}
+                          <Link
+                            href={link}
+                            // backup for crawlers that parse attributes
+                            title={t(`${base}.title`)}
+                          >
+                            {/* Visible part */}
+                            {t("ctaLearnMore", { defaultValue: "Learn More" })}
+
+                            {/* Screen-reader / crawler context */}
+                            <span className="sr-only">
+                              {" "}
+                              {t(`${base}.title`)}{" "}
+                              {/* “Hospital Indemnity”, etc. */}
+                            </span>
                           </Link>
                         </Button>
                       </div>

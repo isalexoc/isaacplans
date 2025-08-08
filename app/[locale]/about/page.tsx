@@ -72,7 +72,7 @@ export default async function AboutPage() {
           <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-gray-900 dark:text-white mb-4">
             {t("hero.heading")}
           </h1>
-          <p className="mx-auto max-w-2xl text-lg text-gray-600 dark:text-gray-300">
+          <p className="mx-auto max-w-2xl text-lg text-gray-700 dark:text-gray-300">
             {t("hero.subheading")}
           </p>
         </div>
@@ -96,7 +96,7 @@ export default async function AboutPage() {
               <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
                 {t(`about.links.${key}.title`)}
               </h3>
-              <p className="text-gray-600 dark:text-gray-400">
+              <p className="text-gray-700 dark:text-gray-400">
                 {t(`about.links.${key}.description`)}
               </p>
               <ArrowRight className="mt-4 w-5 h-5 text-brand opacity-0 group-hover:opacity-100 transition" />
@@ -144,7 +144,7 @@ export default async function AboutPage() {
 
           <div>
             <h2 className="section-heading">{t("why.heading")}</h2>
-            <ul className="space-y-4 leading-relaxed text-gray-600 dark:text-gray-300">
+            <ul className="space-y-4 leading-relaxed text-gray-700 dark:text-gray-300">
               {[0, 1, 2, 3].map((i) => (
                 <li key={i} className="flex gap-3 items-start">
                   <span className="mt-1 inline-block size-2 rounded-full bg-brand" />
@@ -172,7 +172,7 @@ export default async function AboutPage() {
           <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
             {t("founder.heading")}
           </h2>
-          <p className="mx-auto max-w-2xl text-gray-600 dark:text-gray-300 leading-relaxed">
+          <p className="mx-auto max-w-2xl text-gray-700 dark:text-gray-300 leading-relaxed">
             {t("founder.bio")}
           </p>
         </div>

@@ -34,10 +34,10 @@ export default async function About() {
                 {t("title")}
               </h2>
 
-              <p className="text-base lg:text-lg text-gray-600 leading-relaxed mb-4 lg:mb-6">
+              <p className="text-base lg:text-lg text-gray-700 leading-relaxed mb-4 lg:mb-6">
                 {subtitle1}
               </p>
-              <p className="text-base lg:text-lg text-gray-600 leading-relaxed">
+              <p className="text-base lg:text-lg text-gray-700 leading-relaxed">
                 {subtitle2}
               </p>
             </div>
@@ -53,7 +53,7 @@ export default async function About() {
                   <Badge
                     key={cert}
                     variant="secondary"
-                    className="text-xs lg:text-sm bg-custom/10 text-custom"
+                    className="text-xs lg:text-sm bg-custom-light text-custom"
                   >
                     {cert}
                   </Badge>
@@ -101,7 +101,7 @@ export default async function About() {
                       <h4 className="font-semibold text-xs lg:text-sm mb-1 lg:mb-2">
                         {t(`achievements.${slug}.title`, { states })}
                       </h4>
-                      <p className="text-xs text-gray-600">
+                      <p className="text-xs text-gray-700">
                         {t(`achievements.${slug}.description`)}
                       </p>
                     </CardContent>

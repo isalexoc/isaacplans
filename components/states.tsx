@@ -27,7 +27,7 @@ export default async function Coverage() {
               {t("title")}
             </h2>
           </div>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">{subtitle}</p>
+          <p className="text-xl text-gray-700 max-w-3xl mx-auto">{subtitle}</p>
         </div>
 
         {/* Feature grid ------------------------------------------------ */}
@@ -46,7 +46,7 @@ export default async function Coverage() {
               <h3 className="text-2xl font-bold text-gray-900 mb-4">
                 Isaac Orraiz
               </h3>
-              <p className="text-lg text-gray-600">{description}</p>
+              <p className="text-lg text-gray-700">{description}</p>
             </div>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">

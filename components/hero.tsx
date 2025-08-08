@@ -19,7 +19,7 @@ export default async function Hero() {
           <div className="space-y-6 lg:space-y-8 order-2 lg:order-1">
             {/* badge */}
             <div
-              className="inline-flex items-center space-x-2 bg-custom/10 text-custom
+              className="inline-flex items-center space-x-2 bg-custom-light text-custom
                             px-4 py-2 rounded-full text-sm font-medium
                             animate-fadeUp"
             >
@@ -41,7 +41,7 @@ export default async function Hero() {
 
             {/* description */}
             <p
-              className="text-base sm:text-lg lg:text-xl text-gray-600 leading-relaxed
+              className="text-base sm:text-lg lg:text-xl text-gray-700 leading-relaxed
                           animate-fadeLeft-d2"
             >
               {t("hero.description")}
@@ -134,7 +134,7 @@ function Stat({ value, label }: { value: string; label: string }) {
   return (
     <div className="text-center">
       <div className="text-xl sm:text-2xl font-bold text-custom">{value}</div>
-      <div className="text-xs sm:text-sm text-gray-600">{label}</div>
+      <div className="text-xs sm:text-sm text-gray-700">{label}</div>
     </div>
   );
 }
@@ -153,7 +153,7 @@ function FeatureCard({
         <Icon className="w-5 h-5 text-custom" />
         <div>
           <div className="font-semibold text-xs">{title}</div>
-          <div className="text-xs text-gray-600">{desc}</div>
+          <div className="text-xs text-gray-700">{desc}</div>
         </div>
       </div>
     </Card>
@@ -185,7 +185,7 @@ function FloatingCard({
           <Icon className="w-8 h-8 text-custom" />
           <div>
             <div className="font-semibold text-sm">{title}</div>
-            <div className="text-xs text-gray-600">{desc}</div>
+            <div className="text-xs text-gray-700">{desc}</div>
           </div>
         </div>
       </Card>
