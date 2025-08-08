@@ -246,7 +246,15 @@ const Header = () => {
                 <span>{nav("phone")}</span>
               </a>
               <Link href="/contact">
-                <Button className="bg-custom text-white hover:bg-custom/90">
+                <Button
+                  className=" bg-gradient-to-r from-[#0ea5e9] to-[#2563eb]
+            hover:from-[#3b82f6] hover:to-[#1d4ed8]
+            text-white text-lg sm:text-xl font-semibold
+            w-full sm:w-auto h-full
+            flex flex-col sm:flex-row items-center justify-center
+            gap-1 sm:gap-2 text-center
+            rounded-md shadow-xl transition-all duration-300"
+                >
                   {nav("cta")}
                 </Button>
               </Link>
@@ -285,8 +293,13 @@ const MobileSheet = ({
 }: MobileSheetProps) => (
   <Sheet open={isOpen} onOpenChange={setIsOpen}>
     <SheetTrigger asChild className="md:hidden">
-      <Button variant="ghost" size="icon">
-        <Lucide.Menu className="w-6 h-6" />
+      <Button
+        variant="ghost"
+        size="icon"
+        aria-label="Open main menu" // ① screen-reader label
+      >
+        <Lucide.Menu className="w-6 h-6" aria-hidden="true" />{" "}
+        {/* ② hide icon name */}
       </Button>
     </SheetTrigger>
 
@@ -375,7 +388,13 @@ const MobileSheet = ({
             <LocaleSwitcher />
           </div>
           <Button
-            className="bg-custom text-white hover:bg-custom/90"
+            className="bg-gradient-to-r from-[#0ea5e9] to-[#2563eb]
+            hover:from-[#3b82f6] hover:to-[#1d4ed8]
+            text-white text-lg sm:text-xl font-semibold
+            
+            flex flex-col items-center justify-center
+            gap-1 sm:gap-2 text-center
+            rounded-md shadow-xl transition-all duration-300"
             onClick={() => handleNavClick("/contact")}
           >
             {nav("cta")}

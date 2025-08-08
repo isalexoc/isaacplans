@@ -70,14 +70,12 @@ export default async function Coverage() {
             className="text-center px-2 animate-fadeUp"
             style={{ animationDelay: "0.7s" }}
           >
-            <Card className="bg-custom text-custom-foreground p-6 sm:p-8">
+            <Card className="bg-custom text-white p-6 sm:p-8">
               <CardContent className="p-0">
-                <h4 className="text-2xl font-bold mb-4 text-custom-foreground">
+                <h4 className="text-2xl font-bold mb-4 text-white">
                   {t("cta.heading")}
                 </h4>
-                <p className="text-lg mb-6 text-custom-foreground">
-                  {t("cta.text")}
-                </p>
+                <p className="text-lg mb-6 text-white">{t("cta.text")}</p>
 
                 <div className="flex flex-col sm:flex-row flex-wrap gap-4 justify-center">
                   <a
@@ -89,7 +87,7 @@ export default async function Coverage() {
 
                   <a
                     href="mailto:info@isaacplans.com"
-                    className="bg-white text-custom hover:bg-gray-100
+                    className="bg-white text-black hover:bg-gray-100
                                px-6 py-3 rounded-lg font-semibold
                                transition-colors w-full sm:w-auto truncate"
                   >
