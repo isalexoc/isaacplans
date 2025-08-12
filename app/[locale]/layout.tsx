@@ -17,53 +17,40 @@ import {
 } from "@/lib/seo/jsonld";
 import { getLocale } from "next-intl/server";
 
+export const metadata = {
+  metadataBase: new URL("https://www.isaacplans.com"), // keep this host everywhere
+} satisfies Metadata;
+
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
 
-  /* i18n */
   const t = await getTranslations({ locale, namespace: "layoutMetadata" });
   const title = t("title");
   const description = t("description");
-  const image = t("image"); // 1200×630 URL
+  const image = t("image");
   const alt = t("imageAlt", {
-    // new key (fallback provided)
     default: "Isaac Plans Insurance logo on a blue gradient background",
   });
 
+  // Map to OG-friendly locale
+  const ogLocale = locale === "es" ? "es_ES" : "en_US";
+
   return {
-    /* --- basic --- */
     title,
     description,
     keywords: t("keywords"),
-
-    /* --- Open Graph --- */
     openGraph: {
-      url: "https://isaacplans.com/",
       siteName: "Isaac Plans Insurance",
-      locale,
+      locale: ogLocale,
       title,
       description,
-      images: [
-        {
-          url: image,
-          width: 1200,
-          height: 630,
-          alt, // -> og:image:alt
-        },
-      ],
+      images: [{ url: image, width: 1200, height: 630, alt }],
     },
-
-    /* --- Twitter --- */
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: [
-        {
-          url: image,
-          alt, // -> twitter:image:alt
-        },
-      ],
+      images: [{ url: image, alt }],
     },
   };
 }
@@ -75,10 +62,10 @@ export default async function LocaleLayout({
   params,
 }: {
   children: React.ReactNode;
-  params: Promise<{ locale: string }>;
+  params: { locale: string };
 }) {
   // Ensure that the incoming `locale` is valid
-  const { locale } = await params;
+  const { locale } = params;
   if (!hasLocale(routing.locales, locale)) {
     notFound();
   }
@@ -88,7 +75,7 @@ export default async function LocaleLayout({
       <body
         className={`${inter.className} flex min-h-screen flex-col bg-white text-gray-900 overflow-x-hidden`}
       >
-        <NextIntlClientProvider>
+        <NextIntlClientProvider locale={locale}>
           <Header />
           <main className="flex-1 w-full">{children}</main>
           <Toaster />

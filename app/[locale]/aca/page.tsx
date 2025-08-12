@@ -16,43 +16,39 @@ import type { Metadata } from "next";
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
-  const t = await getTranslations({
-    locale,
-    namespace: "acaPage.acaMetadata",
-  });
+  const t = await getTranslations({ locale, namespace: "acaPage.acaMetadata" });
 
-  /* ― dynamic copy */
   const title = t("title");
   const description = t("description");
-  const image = t("image", {
-    // fallback while you pick the final OG cover
-    default:
-      "https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_1200,h_630,c_fill,g_auto/og_isaacplans.png",
-  }) as string;
+  const image =
+    (t("image", {
+      default:
+        "https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_1200,h_630,c_fill,g_auto/og_isaacplans.png",
+    }) as string) ?? "";
   const alt = t("imageAlt", { default: "ACA illustration" });
+
+  const path = `/${locale}/aca`; // ✅ always prefixed
+  const ogLocale = locale === "es" ? "es_ES" : "en_US";
 
   return {
     title,
     description,
     keywords: t("keywords", { default: "" }),
-
     alternates: {
-      canonical: `https://isaacplans.com/${locale}/aca`,
+      canonical: path, // resolved absolute via metadataBase
       languages: {
-        en: "https://isaacplans.com/en/aca",
-        es: "https://isaacplans.com/es/aca",
+        "en-US": "/en/aca",
+        "es-ES": "/es/aca",
       },
     },
-
     openGraph: {
       title,
       description,
-      url: `https://isaacplans.com/${locale}/aca`,
+      url: path, // resolved via metadataBase
       siteName: "Isaac Plans Insurance",
-      locale,
+      locale: ogLocale,
       images: [{ url: image, width: 1200, height: 630, alt }],
     },
-
     twitter: {
       card: "summary_large_image",
       title,
