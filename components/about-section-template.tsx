@@ -53,7 +53,7 @@ const AboutSectionGeneric: React.FC<AboutSectionProps> = ({
 
         {/* ─── text block (≈ 2/3) ─── */}
         <div className="w-full lg:w-2/3 max-w-2xl text-center">
-          <p className="mb-2 text-sm font-semibold uppercase tracking-wider text-custom">
+          <p className="mb-2 text-sm font-semibold uppercase tracking-wider text-black">
             {badge}
           </p>
 
