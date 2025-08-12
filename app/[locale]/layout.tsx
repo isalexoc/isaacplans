@@ -17,10 +17,6 @@ import {
 } from "@/lib/seo/jsonld";
 import { getLocale } from "next-intl/server";
 
-export const metadata = {
-  metadataBase: new URL("https://www.isaacplans.com"), // keep this host everywhere
-} satisfies Metadata;
-
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
 
@@ -36,6 +32,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const ogLocale = locale === "es" ? "es_ES" : "en_US";
 
   return {
+    metadataBase: new URL("https://www.isaacplans.com"),
     title,
     description,
     keywords: t("keywords"),
