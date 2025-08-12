@@ -1,5 +1,5 @@
 // components/Coverage.tsx  (server – no "use client")
-import { MapPin, CheckCircle } from "lucide-react";
+import { MapPin, CheckCircle, Phone, Mail } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { getTranslations } from "next-intl/server";
 
@@ -67,33 +67,83 @@ export default async function Coverage() {
 
           {/* CTA card -------------------------------------------------- */}
           <div
+            role="region"
+            aria-labelledby="cta-heading"
             className="text-center px-2 animate-fadeUp"
             style={{ animationDelay: "0.7s" }}
           >
-            <Card className="bg-custom text-white p-6 sm:p-8">
-              <CardContent className="p-0">
-                <h4 className="text-2xl font-bold mb-4 text-white">
+            <Card
+              className="
+      border-0 shadow-xl overflow-hidden
+      bg-white/95 backdrop-blur
+      dark:bg-gray-900/95
+    "
+            >
+              {/* Brand top bar for visual anchor */}
+              <div className="h-2 w-full bg-[hsl(var(--custom))]" />
+
+              <CardContent className="p-6 sm:p-10">
+                <h4
+                  id="cta-heading"
+                  className="text-2xl sm:text-3xl font-extrabold tracking-tight
+                   text-gray-900 dark:text-white mb-3"
+                >
                   {t("cta.heading")}
                 </h4>
-                <p className="text-lg mb-6 text-white">{t("cta.text")}</p>
 
-                <div className="flex flex-col sm:flex-row flex-wrap gap-4 justify-center">
+                <p className="text-base sm:text-lg text-gray-700 dark:text-gray-200 mb-8 max-w-2xl mx-auto">
+                  {t("cta.text")}
+                </p>
+
+                <div className="flex flex-col sm:flex-row flex-wrap gap-4 justify-center items-stretch">
+                  {/* Primary: Call button (brand background, WCAG AA contrast on white text) */}
                   <a
                     href={`tel:${PHONE}`}
-                    className="bg-custom text-white px-6 py-3 rounded-lg font-semibold hover:bg-custom/90"
+                    aria-label={`Call ${PHONE}`}
+                    className="
+            inline-flex items-center justify-center gap-2
+            px-6 py-3 rounded-lg font-semibold
+            text-white
+            bg-[hsl(var(--custom))]
+            hover:brightness-110
+            focus:outline-none focus-visible:ring-4
+            focus-visible:ring-[hsl(var(--custom)/0.35)]
+            focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-gray-900
+            transition
+            shadow-md
+          "
                   >
-                    {PHONE}
+                    <Phone className="h-5 w-5" aria-hidden="true" />
+                    <span className="tabular-nums">{PHONE}</span>
                   </a>
 
+                  {/* Secondary: Email button (high-contrast on both light/dark) */}
                   <a
                     href="mailto:info@isaacplans.com"
-                    className="bg-white text-black hover:bg-gray-100
-                               px-6 py-3 rounded-lg font-semibold
-                               transition-colors w-full sm:w-auto truncate"
+                    aria-label="Email info@isaacplans.com"
+                    className="
+            inline-flex items-center justify-center gap-2
+            px-6 py-3 rounded-lg font-semibold
+            text-gray-900 dark:text-white
+            bg-white dark:bg-gray-800
+            border border-gray-300 dark:border-gray-700
+            hover:bg-gray-100 dark:hover:bg-gray-700
+            focus:outline-none focus-visible:ring-4
+            focus-visible:ring-[hsl(var(--custom)/0.35)]
+            focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-gray-900
+            transition
+            shadow-sm w-full sm:w-auto
+          "
                   >
-                    {t("cta.email")}
+                    <Mail className="h-5 w-5" aria-hidden="true" />
+                    <span className="truncate">{t("cta.email")}</span>
                   </a>
                 </div>
+
+                {/* Small reassurance line to boost conversions */}
+                <p className="mt-6 text-xs text-gray-600 dark:text-gray-300">
+                  Response within business hours · Se habla Español
+                </p>
               </CardContent>
             </Card>
           </div>
