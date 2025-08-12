@@ -112,9 +112,7 @@ export default async function Coverage() {
     transition shadow-sm
   "
                   >
-                    <span className="tabular-nums text-[hsl(var(--custom))]">
-                      {PHONE}
-                    </span>
+                    <span className="tabular-nums text-black">{PHONE}</span>
                   </a>
 
                   {/* Secondary: Email button (high-contrast on both light/dark) */}
