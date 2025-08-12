@@ -2,11 +2,17 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { ArrowLeft } from "lucide-react";
 import type { Metadata } from "next";
+import {
+  ogLocaleOf,
+  localizedPath,
+  languageAlternates,
+  type SupportedLocale,
+} from "@/lib/seo/i18n";
 
 const PHONE = process.env.NEXT_PUBLIC_PHONE_NUMBER ?? "540-426-1804";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const locale = await getLocale();
+  const locale = (await getLocale()) as SupportedLocale;
   const t = await getTranslations({
     locale,
     namespace: "privacyPolicy.metadata",
@@ -14,12 +20,14 @@ export async function generateMetadata(): Promise<Metadata> {
 
   const title = t("title");
   const description = t("description");
-  const keywords = t("keywords");
+  const keywords = t("keywords", { default: "" });
   const image = t("image");
   const alt = t("imageAlt");
 
-  const path = `/${locale}/privacy-policy`;
-  const ogLocale = locale === "es" ? "es_ES" : "en_US";
+  const routeKey = "/privacy-policy";
+  const path = localizedPath(routeKey, locale); // /en/privacy-policy or /es/politica-de-privacidad
+  const languages = languageAlternates(routeKey); // {"en-US": "/en/privacy-policy", "es-ES": "/es/politica-de-privacidad"}
+  const ogLocale = ogLocaleOf(locale); // en_US / es_ES
 
   return {
     title,
@@ -27,15 +35,12 @@ export async function generateMetadata(): Promise<Metadata> {
     keywords,
     alternates: {
       canonical: path,
-      languages: {
-        "en-US": "/en/privacy-policy",
-        "es-ES": "/es/privacy-policy",
-      },
+      languages,
     },
     openGraph: {
       title,
       description,
-      url: path,
+      url: path, // resolved absolute via metadataBase in layout
       siteName: "Isaac Plans Insurance",
       locale: ogLocale,
       alternateLocale: ogLocale === "en_US" ? ["es_ES"] : ["en_US"],
