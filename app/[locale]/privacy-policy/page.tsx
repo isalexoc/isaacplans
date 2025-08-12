@@ -1,8 +1,56 @@
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { ArrowLeft } from "lucide-react";
+import type { Metadata } from "next";
 
 const PHONE = process.env.NEXT_PUBLIC_PHONE_NUMBER ?? "540-426-1804";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
+  const t = await getTranslations({
+    locale,
+    namespace: "privacyPolicy.metadata",
+  });
+
+  const title = t("title");
+  const description = t("description");
+  const keywords = t("keywords");
+  const image = t("image");
+  const alt = t("imageAlt");
+
+  const path = `/${locale}/privacy-policy`;
+  const ogLocale = locale === "es" ? "es_ES" : "en_US";
+
+  return {
+    title,
+    description,
+    keywords,
+    alternates: {
+      canonical: path,
+      languages: {
+        "en-US": "/en/privacy-policy",
+        "es-ES": "/es/privacy-policy",
+      },
+    },
+    openGraph: {
+      title,
+      description,
+      url: path,
+      siteName: "Isaac Plans Insurance",
+      locale: ogLocale,
+      alternateLocale: ogLocale === "en_US" ? ["es_ES"] : ["en_US"],
+      type: "article",
+      images: [{ url: image, width: 1200, height: 630, alt }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [{ url: image, alt }],
+    },
+    robots: { index: true, follow: true },
+  };
+}
 
 /* ────────────────────────────────────────────── */
 export default async function PrivacyPolicyPage() {

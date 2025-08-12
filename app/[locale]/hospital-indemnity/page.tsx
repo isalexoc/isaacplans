@@ -11,13 +11,15 @@ import AboutSectionGeneric from "@/components/about-section-template";
 import type { Metadata } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
 import { getHiPageLd, getHiBreadcrumbLd } from "@/lib/seo/jsonld"; // new
+import { routing } from "@/i18n/routing";
+
+/* helpers */
+const ogLocaleOf = (l: string) => (l === "es" ? "es_ES" : "en_US");
+const routeKey = "/hospital-indemnity" as const;
 
 export async function generateMetadata(): Promise<Metadata> {
-  const locale = await getLocale();
-  const t = await getTranslations({
-    locale,
-    namespace: "HIpage.hiMetadata",
-  });
+  const locale = (await getLocale()) as "en" | "es";
+  const t = await getTranslations({ locale, namespace: "HIpage.hiMetadata" });
 
   const title = t("title");
   const description = t("description");
@@ -28,19 +30,23 @@ export async function generateMetadata(): Promise<Metadata> {
     }) as string) ?? "";
   const alt = t("imageAlt", { default: "Hospital Indemnity plans preview" });
 
-  const path = `/${locale}/hospital-indemnity`;
-  const ogLocale = locale === "es" ? "es_ES" : "en_US";
+  // build localized paths from your routing map
+  const entry = routing.pathnames[routeKey] as { en: string; es: string };
+  const path = `/${locale}${entry[locale]}`; // /en/hospital-indemnity or /es/indemnizacion-hospitalaria
+  const languages = {
+    "en-US": `/en${entry.en}`,
+    "es-ES": `/es${entry.es}`,
+  };
+
+  const ogLocale = ogLocaleOf(locale);
 
   return {
     title,
     description,
     keywords: t("keywords", { default: "" }),
     alternates: {
-      canonical: path, // -> https://www.isaacplans.com/{locale}/hospital-indemnity
-      languages: {
-        "en-US": "/en/hospital-indemnity",
-        "es-ES": "/es/hospital-indemnity",
-      },
+      canonical: path,
+      languages,
     },
     openGraph: {
       title,
@@ -57,7 +63,7 @@ export async function generateMetadata(): Promise<Metadata> {
       description,
       images: [{ url: image, alt }],
     },
-    robots: { index: true, follow: true }, // optional but explicit
+    robots: { index: true, follow: true },
   };
 }
 
