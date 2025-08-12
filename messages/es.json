@@ -473,14 +473,12 @@
       }
     },
 
-    "privacyPolicy": {
-      "metadata": {
-        "title": "Política de Privacidad | Isaac Plans Insurance",
-        "description": "Conozca cómo Isaac Plans Insurance recopila, utiliza y protege su información. Lea nuestras prácticas de privacidad, sus derechos y cómo contactarnos.",
-        "keywords": "política de privacidad, protección de datos, datos personales, cookies, seguridad, HIPAA, contacto",
-        "image": "https://www.isaacplans.com/images/pp_es.png",
-        "imageAlt": "Portada de la política de privacidad"
-      }
+    "metadata": {
+      "title": "Política de Privacidad | Isaac Plans Insurance",
+      "description": "Conozca cómo Isaac Plans Insurance recopila, utiliza y protege su información. Lea nuestras prácticas de privacidad, sus derechos y cómo contactarnos.",
+      "keywords": "política de privacidad, protección de datos, datos personales, cookies, seguridad, HIPAA, contacto",
+      "image": "https://www.isaacplans.com/images/pp_es.png",
+      "imageAlt": "Portada de la política de privacidad"
     }
   },
   "termsPage": {
