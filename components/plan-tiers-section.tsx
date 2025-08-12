@@ -43,7 +43,7 @@ export default function PlanTiersSection({
               )}
               style={{ borderColor: tier.color }}
             >
-              <h3 className="text-xl font-bold mb-6 text-center text-custom">
+              <h3 className="text-xl font-bold mb-6 text-center text-Black">
                 {tier.name}
               </h3>
 

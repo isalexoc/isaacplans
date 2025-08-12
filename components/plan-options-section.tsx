@@ -31,7 +31,7 @@ export default function PlanOptionsSection({
                 "border border-gray-200 dark:border-gray-700"
               )}
             >
-              <h3 className="text-lg font-bold mb-4 text-custom">{opt.name}</h3>
+              <h3 className="text-lg font-bold mb-4 text-Black">{opt.name}</h3>
               <p className="text-gray-800 dark:text-gray-300 leading-relaxed">
                 {opt.description}
               </p>
