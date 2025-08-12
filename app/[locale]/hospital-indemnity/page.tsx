@@ -21,29 +21,34 @@ export async function generateMetadata(): Promise<Metadata> {
 
   const title = t("title");
   const description = t("description");
-  const image = t("image", {
-    default:
-      "https://isaacplans.com/images/hospital_indemnity_og_placeholder_en.png",
-  }) as string;
+  const image =
+    (t("image", {
+      default:
+        "https://www.isaacplans.com/images/hospital_indemnity_og_placeholder_en.png",
+    }) as string) ?? "";
   const alt = t("imageAlt", { default: "Hospital Indemnity plans preview" });
+
+  const path = `/${locale}/hospital-indemnity`;
+  const ogLocale = locale === "es" ? "es_ES" : "en_US";
 
   return {
     title,
     description,
     keywords: t("keywords", { default: "" }),
     alternates: {
-      canonical: `https://isaacplans.com/${locale}/hospital-indemnity`,
+      canonical: path, // -> https://www.isaacplans.com/{locale}/hospital-indemnity
       languages: {
-        en: "https://isaacplans.com/en/hospital-indemnity",
-        es: "https://isaacplans.com/es/hospital-indemnity",
+        "en-US": "/en/hospital-indemnity",
+        "es-ES": "/es/hospital-indemnity",
       },
     },
     openGraph: {
       title,
       description,
-      url: `https://isaacplans.com/${locale}/hospital-indemnity`,
+      url: path,
       siteName: "Isaac Plans Insurance",
-      locale,
+      locale: ogLocale,
+      alternateLocale: ogLocale === "en_US" ? ["es_ES"] : ["en_US"],
       images: [{ url: image, width: 1200, height: 630, alt }],
     },
     twitter: {
@@ -52,6 +57,7 @@ export async function generateMetadata(): Promise<Metadata> {
       description,
       images: [{ url: image, alt }],
     },
+    robots: { index: true, follow: true }, // optional but explicit
   };
 }
 

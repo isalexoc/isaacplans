@@ -22,29 +22,34 @@ export async function generateMetadata(): Promise<Metadata> {
 
   const title = t("title");
   const description = t("description");
-  const image = t("image", {
-    default:
-      "https://isaacplans.com/images/dental_vision_og_placeholder_en.png",
-  }) as string;
+  const image =
+    (t("image", {
+      default:
+        "https://www.isaacplans.com/images/dental_vision_og_placeholder_en.png",
+    }) as string) ?? "";
   const alt = t("imageAlt", { default: "Dental & Vision plans preview" });
+
+  const path = `/${locale}/dental-vision`;
+  const ogLocale = locale === "es" ? "es_ES" : "en_US";
 
   return {
     title,
     description,
     keywords: t("keywords", { default: "" }),
     alternates: {
-      canonical: `https://isaacplans.com/${locale}/dental-vision`,
+      canonical: path, // -> https://www.isaacplans.com/{locale}/dental-vision
       languages: {
-        en: "https://isaacplans.com/en/dental-vision",
-        es: "https://isaacplans.com/es/dental-vision",
+        "en-US": "/en/dental-vision",
+        "es-ES": "/es/dental-vision",
       },
     },
     openGraph: {
       title,
       description,
-      url: `https://isaacplans.com/${locale}/dental-vision`,
+      url: path,
       siteName: "Isaac Plans Insurance",
-      locale,
+      locale: ogLocale,
+      alternateLocale: ogLocale === "en_US" ? ["es_ES"] : ["en_US"],
       images: [{ url: image, width: 1200, height: 630, alt }],
     },
     twitter: {
@@ -53,6 +58,7 @@ export async function generateMetadata(): Promise<Metadata> {
       description,
       images: [{ url: image, alt }],
     },
+    robots: { index: true, follow: true }, // optional but explicit
   };
 }
 
