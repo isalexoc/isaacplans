@@ -1,6 +1,6 @@
 import { getLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Mail } from "lucide-react";
 import type { Metadata } from "next";
 import {
   ogLocaleOf,
@@ -8,6 +8,7 @@ import {
   languageAlternates,
   type SupportedLocale,
 } from "@/lib/seo/i18n";
+import { Card, CardContent } from "@/components/ui/card";
 
 const PHONE = process.env.NEXT_PUBLIC_PHONE_NUMBER ?? "540-426-1804";
 
@@ -153,23 +154,86 @@ export default async function PrivacyPolicyPage() {
             );
           })}
 
-          {/* CTA */}
-          <aside className="mt-8 rounded-xl bg-primary/5 border border-primary/20 py-8 px-4 w-72 md:w-full text-center mx-auto">
-            <h3 className="text-xl font-semibold mb-2">{t("cta.headline")}</h3>
-            <p className="mb-6 text-muted-foreground">{t("cta.body")}</p>
+          {/* CTA card -------------------------------------------------- */}
+          <div
+            role="region"
+            aria-labelledby="privacy-cta-heading"
+            className="text-center px-2"
+          >
+            <Card
+              className="
+      border-0 shadow-xl overflow-hidden
+      bg-white/95 backdrop-blur
+      dark:bg-gray-900/95
+    "
+            >
+              {/* Brand top bar for visual anchor */}
+              <div className="h-2 w-full bg-[hsl(var(--custom))]" />
 
-            <div className="flex flex-col sm:inline-flex sm:flex-row gap-3 justify-center">
-              <a href={`tel:${PHONE}`} className="btn btn-primary">
-                {t("cta.call")}
-              </a>
-              <a
-                href="mailto:info@isaacplans.com"
-                className="btn btn-outline sm:ml-2"
-              >
-                {t("cta.email")}
-              </a>
-            </div>
-          </aside>
+              <CardContent className="p-6 sm:p-10">
+                <h3
+                  id="privacy-cta-heading"
+                  className="text-2xl sm:text-3xl font-extrabold tracking-tight
+                   text-gray-900 dark:text-white mb-3"
+                >
+                  {t("cta.headline")}
+                </h3>
+
+                <p className="text-base sm:text-lg text-gray-700 dark:text-gray-200 mb-8 max-w-2xl mx-auto">
+                  {t("cta.body")}
+                </p>
+
+                <div className="flex flex-col sm:flex-row flex-wrap gap-4 justify-center items-stretch">
+                  {/* Primary: Call button (high contrast, strong focus affordance) */}
+                  <a
+                    href={`tel:${PHONE}`}
+                    aria-label={`Call ${PHONE}`}
+                    className="
+            inline-flex items-center justify-center gap-2
+            px-6 py-3 rounded-lg font-semibold text-lg
+            bg-white text-gray-900
+            border border-[hsl(var(--custom))]
+            hover:bg-gray-50
+            focus:outline-none focus-visible:ring-4
+            focus-visible:ring-[hsl(var(--custom)/0.35)]
+            focus-visible:ring-offset-2
+            focus-visible:ring-offset-white dark:focus-visible:ring-offset-gray-900
+            transition shadow-sm
+          "
+                  >
+                    <span className="tabular-nums">{PHONE}</span>
+                  </a>
+
+                  {/* Secondary: Email button (AA on light & dark) */}
+                  <a
+                    href="mailto:info@isaacplans.com"
+                    aria-label="Email info@isaacplans.com"
+                    className="
+            inline-flex items-center justify-center gap-2
+            px-6 py-3 rounded-lg font-semibold
+            text-gray-900 dark:text-white
+            bg-white dark:bg-gray-800
+            border border-gray-300 dark:border-gray-700
+            hover:bg-gray-100 dark:hover:bg-gray-700
+            focus:outline-none focus-visible:ring-4
+            focus-visible:ring-[hsl(var(--custom)/0.35)]
+            focus-visible:ring-offset-2
+            focus-visible:ring-offset-white dark:focus-visible:ring-offset-gray-900
+            transition shadow-sm w-full sm:w-auto
+          "
+                  >
+                    <Mail className="h-5 w-5" aria-hidden="true" />
+                    <span className="truncate">{t("cta.email")}</span>
+                  </a>
+                </div>
+
+                {/* Reassurance line */}
+                <p className="mt-6 text-xs text-gray-600 dark:text-gray-300">
+                  Response within business hours · Se habla Español
+                </p>
+              </CardContent>
+            </Card>
+          </div>
         </article>
       </main>
     </div>
