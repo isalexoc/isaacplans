@@ -87,7 +87,7 @@ export default async function TermsOfServicePage() {
     <div className="min-h-screen bg-background">
       {/* Hero */}
       <header className="bg-gradient-to-r from-primary/90 to-secondary/90 text-white relative">
-        <div className="absolute inset-0 mix-blend-overlay bg-[url('/grid.svg')] opacity-10" />
+        <div className="absolute inset-0 mix-blend-overlay bg-[url('/images/grid.svg')] opacity-10" />
         <div className="container  mx-auto px-4  py-24 relative z-10">
           <Link
             href="/"
