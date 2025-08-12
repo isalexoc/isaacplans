@@ -176,7 +176,7 @@ export default async function HospitalIndemnityPage() {
         title={
           <>
             {t("faq.titleBeforeBold")}{" "}
-            <span className="text-custom">{t("faq.titleBold")}</span>
+            <span className="text-blue-800">{t("faq.titleBold")}</span>
           </>
         }
         faqs={Array.from({ length: 7 }).map((_, i) => ({

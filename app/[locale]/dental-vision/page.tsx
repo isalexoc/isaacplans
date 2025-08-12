@@ -199,7 +199,7 @@ export default async function DentalVisionPage() {
         title={
           <>
             {t("faqDental.titleBeforeBold")}{" "}
-            <span className="text-custom">{t("faqDental.titleBold")}</span>
+            <span className="text-blue-800">{t("faqDental.titleBold")}</span>
           </>
         }
         faqs={Array.from({ length: 7 }).map((_, i) => ({
