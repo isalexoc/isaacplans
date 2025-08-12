@@ -101,20 +101,20 @@ export default async function Coverage() {
                     href={`tel:${PHONE}`}
                     aria-label={`Call ${PHONE}`}
                     className="
-            inline-flex items-center justify-center gap-2
-            px-6 py-3 rounded-lg font-semibold
-            text-white
-            bg-[hsl(var(--custom))]
-            hover:brightness-110
-            focus:outline-none focus-visible:ring-4
-            focus-visible:ring-[hsl(var(--custom)/0.35)]
-            focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-gray-900
-            transition
-            shadow-md
-          "
+    inline-flex items-center justify-center gap-2
+    px-6 py-3 rounded-lg font-semibold text-lg
+    bg-white text-gray-900
+    border border-[hsl(var(--custom))]
+    hover:bg-gray-50
+    focus:outline-none focus-visible:ring-4
+    focus-visible:ring-[hsl(var(--custom)/0.35)]
+    focus-visible:ring-offset-2 focus-visible:ring-offset-white
+    transition shadow-sm
+  "
                   >
-                    <Phone className="h-5 w-5" aria-hidden="true" />
-                    <span className="tabular-nums">{PHONE}</span>
+                    <span className="tabular-nums text-[hsl(var(--custom))]">
+                      {PHONE}
+                    </span>
                   </a>
 
                   {/* Secondary: Email button (high-contrast on both light/dark) */}
