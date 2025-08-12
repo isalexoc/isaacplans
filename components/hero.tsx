@@ -55,10 +55,10 @@ export default async function Hero() {
             {/* mobile portrait & feature cards */}
             <div className="lg:hidden flex justify-center animate-fadeLeft-d4">
               <Image
-                src="https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_150,h_150,c_thumb,g_face,r_max/isaacpic_c8kca5.jpg"
+                src="https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_250,h_250,c_thumb,g_face,r_max/isaacpic_c8kca5.jpg"
                 alt="Isaac Orraiz"
-                width={150}
-                height={150}
+                width={250}
+                height={250}
                 className="rounded-full border-4 mt-6"
               />
             </div>
