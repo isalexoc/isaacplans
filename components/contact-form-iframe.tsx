@@ -22,9 +22,10 @@ const ContactFormIFrame = () => {
           src="https://link.agent-crm.com/widget/form/z3BuLLWvo2JRqrtkElq8"
           id="inline-z3BuLLWvo2JRqrtkElq8"
           title="ACA - Lead Intake - Isaac Plans"
-          className="w-full h-full min-h-[603px] border-none block"
+          className="w-full h-full min-h-[603px] border-none"
           loading="lazy"
-          sandbox="allow-forms allow-scripts allow-same-origin"
+          // ▼ allow top navigation only when user clicked submit inside the iframe
+          sandbox="allow-forms allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation"
           referrerPolicy="strict-origin-when-cross-origin"
           allow="clipboard-write *"
         />
