@@ -94,7 +94,12 @@ export default async function AboutPage() {
       </section>
 
       {/* —————————————————— LINKS GRID —————————————————— */}
-      <section className="px-4 py-16">
+      <section className="px-4 py-16" aria-labelledby="about-links">
+        {/* Add an H2 BEFORE the cards */}
+        <h2 id="about-links" className="section-heading sr-only">
+          {t("about.links.heading")} {/* e.g., "Explore this page" */}
+        </h2>
+
         <div className="mx-auto grid max-w-5xl gap-8 sm:grid-cols-2">
           {[
             "missionVision",
@@ -106,9 +111,14 @@ export default async function AboutPage() {
               key={key}
               href={`#${key}`}
               className="group rounded-2xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm hover:shadow-md hover:border-brand transition relative overflow-hidden"
+              aria-labelledby={`card-${key}-title`}
             >
               <span className="absolute inset-x-0 h-1 bg-brand scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300" />
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+              {/* Now these H3s are valid because an H2 precedes them */}
+              <h3
+                id={`card-${key}-title`}
+                className="text-xl font-semibold text-gray-900 dark:text-white mb-2"
+              >
                 {t(`about.links.${key}.title`)}
               </h3>
               <p className="text-gray-700 dark:text-gray-400">
