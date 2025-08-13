@@ -1108,6 +1108,7 @@
     },
     "about": {
       "links": {
+        "heading": "Conoce más sobre nosotros",
         "missionVision": {
           "title": "Nuestra Misión y Visión",
           "description": "Conoce nuestro compromiso con una cobertura de salud accesible y asequible."

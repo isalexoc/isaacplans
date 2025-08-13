@@ -1108,6 +1108,7 @@
     },
     "about": {
       "links": {
+        "heading": "Explore More About Us",
         "missionVision": {
           "title": "Our Mission & Vision",
           "description": "Discover our commitment to accessible, affordable health coverage."
