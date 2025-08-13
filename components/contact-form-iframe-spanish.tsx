@@ -1,30 +1,31 @@
+// components/contact-form-iframe-spanish.tsx  (ES)
 "use client";
 
-import Script from "next/script";
+import { useEffect } from "react";
+import { loadAgentCrmOnce } from "@/lib/agentCrmLoader";
 
-const ContactFormIFrameGeneral = () => (
-  <>
-    <Script
-      id="agent-crm-embed"
-      src="https://link.agent-crm.com/js/form_embed.js"
-      strategy="afterInteractive"
-    />
+export default function ContactFormIFrameSpanish() {
+  useEffect(() => {
+    const id = requestAnimationFrame(() => {
+      loadAgentCrmOnce().catch(() => {});
+    });
+    return () => cancelAnimationFrame(id);
+  }, []);
 
-    <iframe
-      src="https://link.agent-crm.com/widget/form/mPN7YcIHFwUOipERfwfH"
-      id="inline-mPN7YcIHFwUOipERfwfH"
-      title="ACA - Lead Intake - Isaac Plans - Spanish"
-      className="w-full h-full min-h-[603px] border-none"
-      data-layout='{"id":"INLINE"}'
-      data-trigger-type="alwaysShow"
-      data-activation-type="alwaysActivated"
-      data-deactivation-type="neverDeactivate"
-      data-form-name="ACA - Lead Intake - Isaac Plans - Spanish"
-      data-height="603"
-      data-layout-iframe-id="inline-mPN7YcIHFwUOipERfwfH"
-      data-form-id="mPN7YcIHFwUOipERfwfH"
-    />
-  </>
-);
-
-export default ContactFormIFrameGeneral;
+  return (
+    <div className="w-full">
+      <div className="min-h-[603px]">
+        <iframe
+          src="https://link.agent-crm.com/widget/form/mPN7YcIHFwUOipERfwfH"
+          id="inline-mPN7YcIHFwUOipERfwfH"
+          title="ACA - Lead Intake - Isaac Plans - Spanish"
+          className="w-full h-full min-h-[603px] border-none block"
+          loading="lazy"
+          sandbox="allow-forms allow-scripts allow-same-origin"
+          referrerPolicy="strict-origin-when-cross-origin"
+          allow="clipboard-write *"
+        />
+      </div>
+    </div>
+  );
+}

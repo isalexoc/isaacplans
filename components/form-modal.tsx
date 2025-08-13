@@ -19,6 +19,7 @@ export const QuoteModal = ({ open, setOpen }: QuoteModalProps) => {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent
         /* ✔ modal can scroll; capped to 90 vh */
+        forceMount
         className="max-w-[95vw] sm:max-w-2xl w-full p-0 overflow-y-auto"
         style={{ maxHeight: "90vh", borderRadius: "1rem" }}
       >
