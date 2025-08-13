@@ -1,32 +1,30 @@
-// components/contact-form-iframe-spanish.tsx  (ES)
 "use client";
 
-import { useEffect } from "react";
-import { loadAgentCrmOnce } from "@/lib/agentCrmLoader";
+import Script from "next/script";
 
-export default function ContactFormIFrameSpanish() {
-  useEffect(() => {
-    const id = requestAnimationFrame(() => {
-      loadAgentCrmOnce().catch(() => {});
-    });
-    return () => cancelAnimationFrame(id);
-  }, []);
+const ContactFormIFrameGeneral = () => (
+  <>
+    <Script
+      id="agent-crm-embed"
+      src="https://link.agent-crm.com/js/form_embed.js"
+      strategy="afterInteractive"
+    />
 
-  return (
-    <div className="w-full">
-      <div className="min-h-[603px]">
-        <iframe
-          src="https://link.agent-crm.com/widget/form/mPN7YcIHFwUOipERfwfH"
-          id="inline-mPN7YcIHFwUOipERfwfH"
-          title="ACA - Lead Intake - Isaac Plans - Spanish"
-          className="w-full h-full min-h-[623px] border-none block"
-          loading="lazy"
-          // allow redirect to top window only after user activation (submit)
-          sandbox="allow-forms allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation"
-          referrerPolicy="strict-origin-when-cross-origin"
-          allow="clipboard-write *"
-        />
-      </div>
-    </div>
-  );
-}
+    <iframe
+      src="https://link.agent-crm.com/widget/form/mPN7YcIHFwUOipERfwfH"
+      id="inline-mPN7YcIHFwUOipERfwfH"
+      title="ACA - Lead Intake - Isaac Plans - Spanish"
+      className="w-full h-full min-h-[603px] border-none"
+      data-layout='{"id":"INLINE"}'
+      data-trigger-type="alwaysShow"
+      data-activation-type="alwaysActivated"
+      data-deactivation-type="neverDeactivate"
+      data-form-name="ACA - Lead Intake - Isaac Plans - Spanish"
+      data-height="603"
+      data-layout-iframe-id="inline-mPN7YcIHFwUOipERfwfH"
+      data-form-id="mPN7YcIHFwUOipERfwfH"
+    />
+  </>
+);
+
+export default ContactFormIFrameGeneral;
