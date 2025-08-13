@@ -6,35 +6,46 @@ import CTAButton from "@/components/cta-button";
 import ContactForm from "@/components/contact-form"; // optional isle
 import type { Metadata } from "next";
 import { getAboutPageLd, getAboutBreadcrumbLd } from "@/lib/seo/jsonld";
+import {
+  ogLocaleOf,
+  localizedPath,
+  languageAlternates,
+  type SupportedLocale,
+} from "@/lib/seo/i18n";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const locale = await getLocale();
+  const locale = (await getLocale()) as SupportedLocale;
   const t = await getTranslations({ locale, namespace: "aboutPage.meta" });
 
   const title = t("title");
   const description = t("description");
+  const keywords = t("keywords", { default: "" });
   const image = t("image", {
     default: "https://isaacplans.com/images/about.png",
   }) as string;
   const alt = t("imageAlt", { default: "Isaac Plans Insurance team photo" });
 
+  const routeKey = "/about";
+  const path = localizedPath(routeKey, locale); // e.g. /en/about or /es/sobre-mi
+  const languages = languageAlternates(routeKey); // e.g. {"en-US": "/en/about","es-ES":"/es/sobre-mi"}
+  const ogLocale = ogLocaleOf(locale); // en_US / es_ES
+
   return {
     title,
     description,
-    keywords: t("keywords", { default: "" }),
+    keywords,
     alternates: {
-      canonical: `https://isaacplans.com/${locale}/about`,
-      languages: {
-        en: "https://isaacplans.com/en/about",
-        es: "https://isaacplans.com/es/sobre-mi",
-      },
+      canonical: path,
+      languages,
     },
     openGraph: {
       title,
       description,
-      url: `https://isaacplans.com/${locale}/about`,
+      url: path, // resolved absolute via metadataBase in root layout
       siteName: "Isaac Plans Insurance",
-      locale,
+      locale: ogLocale,
+      alternateLocale: ogLocale === "en_US" ? ["es_ES"] : ["en_US"],
+      type: "article",
       images: [{ url: image, width: 1200, height: 630, alt }],
     },
     twitter: {
@@ -43,25 +54,29 @@ export async function generateMetadata(): Promise<Metadata> {
       description,
       images: [{ url: image, alt }],
     },
+    robots: { index: true, follow: true },
   };
 }
 
 export default async function AboutPage() {
-  const locale = await getLocale();
+  const locale = (await getLocale()) as SupportedLocale;
   const t = await getTranslations({ locale, namespace: "aboutPage" });
+
+  // If your JSON-LD helpers want a slug, keep your current convention:
+  const aboutSlug = locale === "es" ? "sobre-mi" : "about";
 
   const pageLd = getAboutPageLd(
     locale,
     t("hero.heading"),
     t("meta.description"),
-    locale === "es" ? "sobre-mi" : "about" // pass custom slug if needed
+    aboutSlug
   );
 
   const crumbLd = getAboutBreadcrumbLd(
     locale,
     t("meta.breadcrumbs.home"),
-    t("about.links.missionVision.title"), // label shown in breadcrumb
-    locale === "es" ? "sobre-mi" : "about"
+    t("about.links.missionVision.title"),
+    aboutSlug
   );
 
   return (
@@ -120,7 +135,6 @@ export default async function AboutPage() {
             <p className="section-paragraph">{t("vision.body")}</p>
           </div>
 
-          {/* Placeholder image */}
           <Image
             src="https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_600,h_400,c_fill,g_auto/v1754584948/og_isaacplans_1_zthxlb.png"
             alt="Mission & Vision"
@@ -188,8 +202,6 @@ export default async function AboutPage() {
 
         {/* Form island */}
         <ContactForm />
-
-        {/* Text + CTA */}
       </section>
 
       <script
