@@ -1,19 +1,24 @@
-// components/Contact.tsx   (server – no "use client")
+// app/[locale]/contact/page.tsx  (server – no "use client")
 import Image from "next/image";
+import type { Metadata } from "next";
 import { Facebook, Instagram, Linkedin, Youtube } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { getTranslations } from "next-intl/server";
-import ContactForm from "@/components/contact-form"; // client-island
-import { Link } from "@/i18n/routing";
-import type { Metadata } from "next";
-import { getLocale } from "next-intl/server";
-import { WithContext, WebPage, BreadcrumbList } from "schema-dts";
+import ContactForm from "@/components/contact-form"; // client island
+import { getLocale, getTranslations } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
+import {
+  ogLocaleOf,
+  localizedPath,
+  languageAlternates,
+  type SupportedLocale,
+} from "@/lib/seo/i18n";
+import type { WithContext, WebPage, BreadcrumbList } from "schema-dts";
 
 const PHONE = process.env.NEXT_PUBLIC_PHONE_NUMBER ?? "540-426-1804";
 
+/* ───────────────────────────────────────────── */
 export async function generateMetadata(): Promise<Metadata> {
-  /* locale & i18n strings */
-  const locale = await getLocale();
+  const locale = (await getLocale()) as SupportedLocale;
   const t = await getTranslations({
     locale,
     namespace: "contactPage.contactMetadata",
@@ -21,43 +26,49 @@ export async function generateMetadata(): Promise<Metadata> {
 
   const title = t("title");
   const description = t("description");
-  const image = t("image"); // 1200×630 URL
-  const alt = t("imageAlt"); // alt-text for social previews
+  const keywords = t("keywords", { default: "" });
+  const image = t("image");
+  const alt = t("imageAlt");
+
+  const routeKey = "/contact";
+  const path = localizedPath(routeKey, locale); // /en/contact or /es/contacto (if you map it)
+  const languages = languageAlternates(routeKey); // {"en-US": "/en/contact", "es-ES": "/es/contacto"}
+  const ogLocale = ogLocaleOf(locale); // en_US / es_ES
 
   return {
     title,
     description,
-    keywords: t("keywords", { default: "" }), // optional; provide fallback
-
+    keywords,
     alternates: {
-      canonical: `https://isaacplans.com/${locale}/contact`,
-      languages: {
-        en: "https://isaacplans.com/en/contact",
-        es: "https://isaacplans.com/es/contact",
-      },
+      canonical: path,
+      languages,
     },
-
     openGraph: {
       title,
       description,
-      url: `https://isaacplans.com/${locale}/contact`,
+      url: path, // resolved absolute via metadataBase in root layout
       siteName: "Isaac Plans Insurance",
-      locale,
+      locale: ogLocale,
+      alternateLocale: ogLocale === "en_US" ? ["es_ES"] : ["en_US"],
+      type: "website",
       images: [{ url: image, width: 1200, height: 630, alt }],
     },
-
     twitter: {
       card: "summary_large_image",
       title,
       description,
       images: [{ url: image, alt }],
     },
+    robots: { index: true, follow: true },
   };
 }
 
-export default async function Contact() {
+/* ───────────────────────────────────────────── */
+export default async function ContactPage() {
   const t = await getTranslations("contactPage");
   const social = await getTranslations("social");
+  const locale = (await getLocale()) as SupportedLocale;
+
   const sm = {
     facebook: social("facebook"),
     instagram: social("instagram"),
@@ -65,15 +76,16 @@ export default async function Contact() {
     linkedin: social("linkedin"),
   };
 
-  /* ---- page-specific JSON-LD objects ---- */
-  const locale = await getLocale();
+  // Prefilled WhatsApp message (localized)
   const waMessage = encodeURIComponent(t("info.whatsappText"));
   const waLink = `https://wa.me/15406813507?text=${waMessage}`;
+
+  // JSON‑LD (localized)
   const pageLd: WithContext<WebPage> = {
     "@context": "https://schema.org",
     "@type": "ContactPage",
-    "@id": `https://isaacplans.com/${locale}/contact#webpage`,
-    url: `https://isaacplans.com/${locale}/contact`,
+    "@id": `${localizedPath("/contact", locale)}#webpage`,
+    url: localizedPath("/contact", locale),
     name: t("info.title"),
     description: t("info.description"),
     inLanguage: locale,
@@ -88,17 +100,16 @@ export default async function Contact() {
         "@type": "ListItem",
         position: 1,
         name: t("contactMetadata.breadcrumbs.home"),
-        item: `https://isaacplans.com/${locale}`,
+        item: localizedPath("/", locale),
       },
       {
         "@type": "ListItem",
         position: 2,
         name: t("contactMetadata.breadcrumbs.contact"),
-        item: `https://isaacplans.com/${locale}/contact`,
+        item: localizedPath("/contact", locale),
       },
     ],
   };
-  /* --------------------------------------- */
 
   return (
     <>
@@ -172,6 +183,7 @@ export default async function Contact() {
                   {t("info.addContact")}
                 </a>
 
+                {/* Locale-aware internal link */}
                 <Link
                   href="/"
                   className="flex items-center justify-center gap-2 bg-brand hover:bg-brand/90 rounded-lg py-3"
@@ -182,6 +194,7 @@ export default async function Contact() {
                 <a
                   href="https://link.agent-crm.com/widget/bookings/facebookad-b140f360-1a9d-4b4b-9fb1-0359979187d4-4c57e0d9-1b03-4305-935e-1369bd466bc1"
                   target="_blank"
+                  rel="noopener noreferrer"
                   className="flex items-center justify-center gap-2 bg-brand hover:bg-brand/90 rounded-lg py-3"
                 >
                   {t("info.buttons.schedule")}
@@ -190,16 +203,36 @@ export default async function Contact() {
 
               {/* Social row */}
               <div className="flex justify-center gap-6 mt-2 text-brand dark:text-accent">
-                <a href={sm.facebook} target="_blank" aria-label="Facebook">
+                <a
+                  href={sm.facebook}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Facebook"
+                >
                   <Facebook className="w-6 h-6 hover:scale-110 transition" />
                 </a>
-                <a href={sm.instagram} target="_blank" aria-label="Instagram">
+                <a
+                  href={sm.instagram}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Instagram"
+                >
                   <Instagram className="w-6 h-6 hover:scale-110 transition" />
                 </a>
-                <a href={sm.youtube} target="_blank" aria-label="YouTube">
+                <a
+                  href={sm.youtube}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="YouTube"
+                >
                   <Youtube className="w-6 h-6 hover:scale-110 transition" />
                 </a>
-                <a href={sm.linkedin} target="_blank" aria-label="LinkedIn">
+                <a
+                  href={sm.linkedin}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="LinkedIn"
+                >
                   <Linkedin className="w-6 h-6 hover:scale-110 transition" />
                 </a>
               </div>
@@ -210,6 +243,8 @@ export default async function Contact() {
 
       {/* client island – form stays interactive */}
       <ContactForm />
+
+      {/* JSON-LD (escaped) */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
