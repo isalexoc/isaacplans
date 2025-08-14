@@ -1152,5 +1152,13 @@
       "heading": "¿Necesitas ayuda ahora?",
       "body": "Agenda una consulta gratuita o envíanos tus preguntas; responderemos en un día hábil."
     }
+  },
+  "notFound": {
+    "badge": "¡Ups!",
+    "title": "Página no encontrada",
+    "description": "La página que buscas no existe, fue movida o el enlace es incorrecto.",
+    "backHome": "Volver al inicio",
+    "contact": "Contactar soporte",
+    "hint": "Consejo: Verifica la URL o usa la navegación de arriba."
   }
 }

@@ -1152,5 +1152,14 @@
       "heading": "Need help right now?",
       "body": "Book a free consultation or send us your questions—we’ll get back within one business day."
     }
+  },
+
+  "notFound": {
+    "badge": "Oops!",
+    "title": "Page not found",
+    "description": "The page you’re looking for doesn’t exist, was moved, or the link is incorrect.",
+    "backHome": "Back to Home",
+    "contact": "Contact Support",
+    "hint": "Tip: Check the URL or try the navigation above."
   }
 }
