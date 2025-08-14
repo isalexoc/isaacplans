@@ -31,7 +31,7 @@ export const QuoteModal = ({ open, setOpen }: QuoteModalProps) => {
         <div className="w-[min(95vw,720px)] max-h-[90svh] overflow-hidden rounded-xl bg-background shadow-xl">
           {/* Header */}
           <div className="sticky top-0 z-10 flex items-center justify-between border-b px-4 py-3 bg-background/95 backdrop-blur">
-            <div className="font-semibold">
+            <div className="font-semibold flex-1 text-center">
               {isES ? "Cotiza Dental y Visión" : "Dental & Vision Quote"}
             </div>
             <button
