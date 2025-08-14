@@ -49,6 +49,9 @@ export async function generateMetadata(): Promise<Metadata> {
       description,
       images: [{ url: image, alt }],
     },
+    other: {
+      google: "notranslate",
+    },
   };
 }
 
@@ -68,7 +71,12 @@ export default async function LocaleLayout({
   }
 
   return (
-    <html lang={locale} className="scroll-smooth">
+    <html
+      lang={locale}
+      translate="no"
+      className="notranslate scroll-smooth"
+      suppressHydrationWarning
+    >
       <body
         className={`${inter.className} flex min-h-screen flex-col bg-white text-gray-900 overflow-x-hidden`}
       >
