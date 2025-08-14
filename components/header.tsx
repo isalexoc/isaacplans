@@ -395,7 +395,7 @@ const MobileSheet = ({
             flex flex-col items-center justify-center
             gap-1 sm:gap-2 text-center
             rounded-md shadow-xl transition-all duration-300"
-            onClick={() => handleNavClick("/contact")}
+            onClick={() => handleNavClick("/contact#contact-form")}
           >
             {nav("cta")}
           </Button>
