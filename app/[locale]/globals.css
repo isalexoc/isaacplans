@@ -10,6 +10,14 @@ body {
   .text-balance {
     text-wrap: balance;
   }
+  /* Hide scrollbars but keep scrollability */
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  } /* Chrome/Safari */
+  .scrollbar-none {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  } /* Firefox/IE/Edge */
 }
 
 @layer base {
