@@ -46,24 +46,6 @@ export const QuoteModal = ({ open, setOpen }: QuoteModalProps) => {
           {/* Body (scrolls; hide scrollbars visually) */}
           <div className="max-h-[calc(90svh-52px)] overflow-y-auto overflow-x-hidden scrollbar-none">
             <Form heightPx={IFRAME_HEIGHT} />
-
-            <div className="px-4 py-3 text-center text-sm text-muted-foreground">
-              {isES ? "¿Problemas para ver el formulario?" : "Having trouble?"}{" "}
-              <a
-                href={
-                  isES
-                    ? "https://link.agent-crm.com/widget/form/MwmNPpL00pP6SzDz58Eu"
-                    : "https://link.agent-crm.com/widget/form/0YWpgL7LJqEK7sp84O3z"
-                }
-                target="_blank"
-                rel="noopener noreferrer"
-                className="underline"
-              >
-                {isES
-                  ? "Ábrelo en una nueva pestaña"
-                  : "Open the form in a new tab"}
-              </a>
-            </div>
           </div>
         </div>
       </DialogContent>
