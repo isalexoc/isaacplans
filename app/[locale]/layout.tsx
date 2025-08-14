@@ -52,6 +52,10 @@ export async function generateMetadata(): Promise<Metadata> {
     other: {
       google: "notranslate",
     },
+    verification: {
+      google:
+        "google-site-verification=bHyg2vwWXgsYAG8Ue4uwYs8QPDDiu56H0BrecWVNGaQ",
+    },
   };
 }
 
