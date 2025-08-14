@@ -5,6 +5,7 @@ import Image from "next/image";
 import Headroom from "react-headroom";
 import { useTranslations } from "next-intl";
 import * as Lucide from "lucide-react";
+import CTAButtonMain from "@/components/cta-button-main";
 
 import { Link } from "@/i18n/navigation"; // ✅ typed Link / AppHref
 import type { AppHref } from "@/i18n/navigation";
@@ -240,24 +241,15 @@ const Header = () => {
             <div className="hidden lg:flex items-center space-x-4">
               <a
                 href={`tel:${nav("phone")}`}
-                className="flex items-center text-sm text-gray-700 space-x-2"
+                className="hidden xl:flex items-center text-sm text-gray-700 space-x-2"
               >
                 <Lucide.Phone className="w-4 h-4" />
                 <span>{nav("phone")}</span>
               </a>
-              <Link href="/contact">
-                <Button
-                  className=" bg-gradient-to-r from-[#0ea5e9] to-[#2563eb]
-            hover:from-[#3b82f6] hover:to-[#1d4ed8]
-            text-white text-lg sm:text-xl font-semibold
-            w-full sm:w-auto h-full
-            flex flex-col sm:flex-row items-center justify-center
-            gap-1 sm:gap-2 text-center
-            rounded-md shadow-xl transition-all duration-300"
-                >
-                  {nav("cta")}
-                </Button>
-              </Link>
+              {/* CTA island (client) */}
+              <div className="animate-fadeLeft-d4">
+                <CTAButtonMain />
+              </div>
             </div>
 
             {/* Mobile sheet */}
@@ -387,18 +379,10 @@ const MobileSheet = ({
             </a>
             <LocaleSwitcher />
           </div>
-          <Button
-            className="bg-gradient-to-r from-[#0ea5e9] to-[#2563eb]
-            hover:from-[#3b82f6] hover:to-[#1d4ed8]
-            text-white text-lg sm:text-xl font-semibold
-            
-            flex flex-col items-center justify-center
-            gap-1 sm:gap-2 text-center
-            rounded-md shadow-xl transition-all duration-300"
-            onClick={() => handleNavClick("/contact#contact-form")}
-          >
-            {nav("cta")}
-          </Button>
+          {/* CTA island (client) */}
+          <div className="animate-fadeLeft-d4">
+            <CTAButtonMain />
+          </div>
         </div>
       </div>
     </SheetContent>

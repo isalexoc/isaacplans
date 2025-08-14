@@ -9,6 +9,7 @@ export const { Link, redirect, usePathname, useRouter, getPathname } =
 export type AppHref =
   | "/" // home
   | "/contact" // internal path (en)
+  | "/contact#contact-form" // contact form
   | "/aca"
   | "/dental-vision"
   | "/hospital-indemnity"
