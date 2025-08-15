@@ -10,6 +10,14 @@ body {
   .text-balance {
     text-wrap: balance;
   }
+  /* Hide scrollbars but keep scrollability */
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  } /* Chrome/Safari */
+  .scrollbar-none {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  } /* Firefox/IE/Edge */
 }
 
 @layer base {
@@ -47,10 +55,8 @@ body {
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
-    --custom: 206 86% 40%;
-    --custom-foreground: 0 0% 100%;
-    --custom-light: 206 100% 96%;
-    --custom-dark: 206 86% 32%;
+    --custom: 195 82% 45%; /* vibrant cyan-blue */
+    --custom-foreground: 0 0% 100%; /* white text on that cyan */
   }
   .dark {
     --background: 0 0% 3.9%;
@@ -85,8 +91,8 @@ body {
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
-    --custom: 206 86% 62%; /* lighter in dark UI */
-    --custom-foreground: 0 0% 10%;
+    --custom: 195 82% 62%; /* lift the lightness for dark UIs */
+    --custom-foreground: 195 82% 15%;
   }
 }
 
@@ -96,5 +102,30 @@ body {
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply flex items-center justify-center gap-2 rounded-lg bg-brand px-4 py-3
+           hover:bg-brand/90 active:bg-brand/80 transition;
+  }
+  .btn-whatsapp {
+    @apply flex items-center justify-center gap-2 rounded-lg bg-[#25D366] px-4 py-3
+           hover:bg-[#20b45a] active:bg-[#1ca64f] transition;
+  }
+  .btn-secondary {
+    @apply flex items-center justify-center gap-2 rounded-lg bg-gray-200 dark:bg-gray-700
+           text-gray-800 dark:text-gray-100 px-4 py-3 hover:bg-gray-300
+           dark:hover:bg-gray-600 transition;
+  }
+  .social svg {
+    @apply w-6 h-6 hover:text-brand dark:hover:text-brand hover:scale-110 transition-transform;
+  }
+  .section-heading {
+    @apply text-3xl font-bold text-gray-900 dark:text-white mb-4;
+  }
+  .section-paragraph {
+    @apply text-gray-700 dark:text-gray-300 leading-relaxed;
   }
 }

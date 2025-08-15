@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import "./globals.css";
+import "@/app/globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import CrispChat from "@/components/crisp-chat";
 import Header from "@/components/header";
