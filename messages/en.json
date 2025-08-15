@@ -1154,12 +1154,15 @@
     }
   },
 
-  "notFound": {
-    "badge": "Oops!",
+  "NotFoundPage": {
     "title": "Page not found",
-    "description": "The page you’re looking for doesn’t exist, was moved, or the link is incorrect.",
+    "description": "Oops! The page you're looking for doesn't exist or has been moved.",
     "backHome": "Back to Home",
-    "contact": "Contact Support",
-    "hint": "Tip: Check the URL or try the navigation above."
+    "contact": "Contact us"
+  },
+  "Error": {
+    "title": "Something went wrong",
+    "description": "An unexpected error occurred. You can try again.",
+    "retry": "Try again"
   }
 }

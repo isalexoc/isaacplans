@@ -1153,12 +1153,15 @@
       "body": "Agenda una consulta gratuita o envíanos tus preguntas; responderemos en un día hábil."
     }
   },
-  "notFound": {
-    "badge": "¡Ups!",
+  "NotFoundPage": {
     "title": "Página no encontrada",
-    "description": "La página que buscas no existe, fue movida o el enlace es incorrecto.",
+    "description": "¡Ups! La página que buscas no existe o fue movida.",
     "backHome": "Volver al inicio",
-    "contact": "Contactar soporte",
-    "hint": "Consejo: Verifica la URL o usa la navegación de arriba."
+    "contact": "Contáctanos"
+  },
+  "Error": {
+    "title": "Algo salió mal",
+    "description": "Ocurrió un error inesperado. Puedes intentarlo de nuevo.",
+    "retry": "Reintentar"
   }
 }
