@@ -5,12 +5,13 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "@/app/globals.css";
 import { Toaster } from "@/components/ui/toaster";
-import CrispChat from "@/components/crisp-chat";
+/* import CrispChat from "@/components/crisp-chat"; */
 import Header from "@/components/header";
 import Footer from "@/components/footer";
 import { getTranslations } from "next-intl/server";
 import { agencyLd, siteLd, isaacPersonLd } from "@/lib/seo/jsonld";
 import { getLocale } from "next-intl/server";
+import Script from "next/script";
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
@@ -83,7 +84,7 @@ export default async function LocaleLayout({
           <Header />
           <main className="flex-1 w-full">{children}</main>
           <Toaster />
-          <CrispChat />
+          {/* <CrispChat /> */}
           <Footer />
         </NextIntlClientProvider>
         <script
@@ -95,6 +96,14 @@ export default async function LocaleLayout({
               isaacPersonLd, // ← moved here
             ]).replace(/</g, "\\u003c"),
           }}
+        />
+        {/* Agent CRM (LeadConnector) chat – loads after page is interactive */}
+        <Script
+          id="agentcrm-chat"
+          src="https://widgets.leadconnectorhq.com/loader.js"
+          strategy="afterInteractive"
+          data-resources-url="https://widgets.leadconnectorhq.com/chat-widget/loader.js"
+          data-widget-id="687794d4afd5323330f86826"
         />
       </body>
     </html>
