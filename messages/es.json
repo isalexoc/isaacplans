@@ -786,7 +786,14 @@
     },
     "calendar": {
       "title": "Agende su cita ACA por teléfono",
-      "backButton": "← Volver"
+      "backButton": "← Volver",
+      "meta": {
+        "title": "Calendario de Citas de la ACA | Isaac Plans Insurance",
+        "description": "Programa tu consulta para la inscripción de la ACA con Isaac Plans Insurance. Recibe asesoría bilingüe y ayuda personalizada para elegir la cobertura adecuada.",
+        "keywords": "ACA, Obamacare, cita, seguro de salud, inscripción, Virginia, bilingüe",
+        "image": "https://www.isaacplans.com/images/aca_es.png",
+        "imageAlt": "Calendario de citas de la ACA"
+      }
     },
     "selfEnroll": {
       "title": "¿Prefiere inscribirse usted mismo?",
@@ -809,7 +816,14 @@
   "dentalVisionPage": {
     "calendar": {
       "title": "Agendar su cita de consulta de seguros dentales y de visión",
-      "backButton": "Volver"
+      "backButton": "Volver",
+      "meta": {
+        "title": "Calendario de Citas de Dental y Visión | Isaac Plans Insurance",
+        "description": "Programa tu consulta para planes dentales y de visión con Isaac Plans Insurance. Recibe ayuda para elegir la cobertura adecuada.",
+        "keywords": "dental, visión, cita, seguro, agendar, Virginia, bilingüe",
+        "image": "https://www.isaacplans.com/images/dental_es.png",
+        "imageAlt": "Calendario de citas de Dental y Visión"
+      }
     },
     "hero": {
       "badge": "Planes Dentales y de Visión",
@@ -974,7 +988,14 @@
     },
     "calendar": {
       "backButton": "← Volver",
-      "title": "Programa tu Consulta de Indemnización Hospitalaria"
+      "title": "Programa tu Consulta de Indemnización Hospitalaria",
+      "meta": {
+        "title": "Calendario de Citas de Indemnización Hospitalaria | Isaac Plans Insurance",
+        "description": "Programa tu consulta sobre indemnización hospitalaria con Isaac Plans Insurance. Obtén asesoría bilingüe y opciones personalizadas que complementen tu cobertura médica.",
+        "keywords": "indemnización hospitalaria, cita, seguro complementario, agendar, Virginia, bilingüe",
+        "image": "https://www.isaacplans.com/images/hi_es.png",
+        "imageAlt": "Calendario de citas de indemnización hospitalaria"
+      }
     },
     "about": {
       "badge": "Acerca de Isaac",

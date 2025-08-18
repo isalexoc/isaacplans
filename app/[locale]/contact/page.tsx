@@ -1,4 +1,3 @@
-// app/[locale]/contact/page.tsx  (server – no "use client")
 import Image from "next/image";
 import type { Metadata } from "next";
 import { Facebook, Instagram, Linkedin, Youtube } from "lucide-react";
@@ -6,15 +5,19 @@ import { Card, CardContent } from "@/components/ui/card";
 import ContactForm from "@/components/contact-form"; // client island
 import { getLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import {
-  ogLocaleOf,
-  localizedPath,
-  languageAlternates,
-  type SupportedLocale,
-} from "@/lib/seo/i18n";
 import type { WithContext, WebPage, BreadcrumbList } from "schema-dts";
 
+import {
+  ogLocaleOf,
+  localizedSlug,
+  withLocalePrefix,
+  languageAlternatesPrefixed,
+  type SupportedLocale,
+} from "@/lib/seo/i18n";
+
 const PHONE = process.env.NEXT_PUBLIC_PHONE_NUMBER ?? "540-426-1804";
+const SITE_URL = "https://www.isaacplans.com"; // for absolute JSON-LD URLs
+const abs = (p: string) => (p.startsWith("http") ? p : `${SITE_URL}${p}`);
 
 /* ───────────────────────────────────────────── */
 export async function generateMetadata(): Promise<Metadata> {
@@ -26,27 +29,29 @@ export async function generateMetadata(): Promise<Metadata> {
 
   const title = t("title");
   const description = t("description");
-  const keywords = t("keywords", { default: "" });
+  const keywords = t("keywords");
   const image = t("image");
   const alt = t("imageAlt");
 
   const routeKey = "/contact";
-  const path = localizedPath(routeKey, locale); // /en/contact or /es/contacto (if you map it)
-  const languages = languageAlternates(routeKey); // {"en-US": "/en/contact", "es-ES": "/es/contacto"}
-  const ogLocale = ogLocaleOf(locale); // en_US / es_ES
+  const slug = localizedSlug(routeKey, locale); // "/contact-me" or "/contacto"
+  const canonical = withLocalePrefix(locale, slug); // "/en/contact-me" or "/es/contacto"
+  const languages = languageAlternatesPrefixed(routeKey); // { "en-US": "/en/...", "es-ES": "/es/..." }
+  const ogLocale = ogLocaleOf(locale);
+  const xDefault = withLocalePrefix("en", localizedSlug(routeKey, "en")); // ✅ English page
 
   return {
     title,
     description,
     keywords,
     alternates: {
-      canonical: path,
-      languages,
+      canonical,
+      languages: { ...languages, "x-default": xDefault }, // x-default => "/en"
     },
     openGraph: {
       title,
       description,
-      url: path, // resolved absolute via metadataBase in root layout
+      url: canonical, // resolved absolute via metadataBase in root layout
       siteName: "Isaac Plans Insurance",
       locale: ogLocale,
       alternateLocale: ogLocale === "en_US" ? ["es_ES"] : ["en_US"],
@@ -59,7 +64,7 @@ export async function generateMetadata(): Promise<Metadata> {
       description,
       images: [{ url: image, alt }],
     },
-    robots: { index: true, follow: true },
+    // robots omitted → defaults to index, follow
   };
 }
 
@@ -80,16 +85,22 @@ export default async function ContactPage() {
   const waMessage = encodeURIComponent(t("info.whatsappText"));
   const waLink = `https://wa.me/15406813507?text=${waMessage}`;
 
+  const contactHref = withLocalePrefix(
+    locale,
+    localizedSlug("/contact", locale)
+  ); // "/en/contact-me" or "/es/contacto"
+  const homeHref = withLocalePrefix(locale, localizedSlug("/", locale)); // "/en" or "/es"
+
   // JSON‑LD (localized)
   const pageLd: WithContext<WebPage> = {
     "@context": "https://schema.org",
     "@type": "ContactPage",
-    "@id": `${localizedPath("/contact", locale)}#webpage`,
-    url: localizedPath("/contact", locale),
+    "@id": `${abs(contactHref)}#webpage`,
+    url: abs(contactHref),
     name: t("info.title"),
     description: t("info.description"),
     inLanguage: locale,
-    about: { "@id": "https://isaacplans.com/#organization" },
+    about: { "@id": `${SITE_URL}#organization` },
   };
 
   const breadcrumbLd: WithContext<BreadcrumbList> = {
@@ -100,13 +111,13 @@ export default async function ContactPage() {
         "@type": "ListItem",
         position: 1,
         name: t("contactMetadata.breadcrumbs.home"),
-        item: localizedPath("/", locale),
+        item: abs(homeHref),
       },
       {
         "@type": "ListItem",
         position: 2,
         name: t("contactMetadata.breadcrumbs.contact"),
-        item: localizedPath("/contact", locale),
+        item: abs(contactHref),
       },
     ],
   };

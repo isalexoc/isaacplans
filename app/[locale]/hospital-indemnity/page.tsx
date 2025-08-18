@@ -1,5 +1,3 @@
-/* app/[locale]/hospital-indemnity/page.tsx – client component */
-
 import HeroWithTestimonials from "@/components/hero-template";
 import HIButton from "@/components/HIButton";
 import CTABanner from "@/components/CTABanner-template";
@@ -10,51 +8,53 @@ import PlanEnrollCard from "@/components/SelfEnrollSection";
 import AboutSectionGeneric from "@/components/about-section-template";
 import type { Metadata } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
-import { getHiPageLd, getHiBreadcrumbLd } from "@/lib/seo/jsonld"; // new
-import { routing } from "@/i18n/routing";
+import { getHiPageLd, getHiBreadcrumbLd } from "@/lib/seo/jsonld";
 
-/* helpers */
-const ogLocaleOf = (l: string) => (l === "es" ? "es_ES" : "en_US");
-const routeKey = "/hospital-indemnity" as const;
+import {
+  ogLocaleOf,
+  localizedSlug,
+  withLocalePrefix,
+  languageAlternatesPrefixed,
+  type SupportedLocale,
+} from "@/lib/seo/i18n";
 
+/* ───────── SEO ───────── */
 export async function generateMetadata(): Promise<Metadata> {
-  const locale = (await getLocale()) as "en" | "es";
+  const locale = (await getLocale()) as SupportedLocale;
   const t = await getTranslations({ locale, namespace: "HIpage.hiMetadata" });
 
   const title = t("title");
   const description = t("description");
-  const image =
-    (t("image", {
-      default:
-        "https://www.isaacplans.com/images/hospital_indemnity_og_placeholder_en.png",
-    }) as string) ?? "";
+  const keywords = t("keywords", { default: "" });
+  const image = t("image", {
+    default:
+      "https://www.isaacplans.com/images/hospital_indemnity_og_placeholder_en.png",
+  }) as string;
   const alt = t("imageAlt", { default: "Hospital Indemnity plans preview" });
 
-  // build localized paths from your routing map
-  const entry = routing.pathnames[routeKey] as { en: string; es: string };
-  const path = `/${locale}${entry[locale]}`; // /en/hospital-indemnity or /es/indemnizacion-hospitalaria
-  const languages = {
-    "en-US": `/en${entry.en}`,
-    "es-ES": `/es${entry.es}`,
-  };
-
-  const ogLocale = ogLocaleOf(locale);
+  const routeKey = "/hospital-indemnity";
+  const slug = localizedSlug(routeKey, locale); // "/hospital-indemnity" or "/indemnizacion-hospitalaria"
+  const canonical = withLocalePrefix(locale, slug); // "/en/..." or "/es/..."
+  const languages = languageAlternatesPrefixed(routeKey); // {"en-US": "...", "es-ES": "..."}
+  const xDefault = withLocalePrefix("en", localizedSlug(routeKey, "en")); // ✅ English page
+  const ogLocale = ogLocaleOf(locale); // "en_US" | "es_ES"
 
   return {
     title,
     description,
-    keywords: t("keywords", { default: "" }),
+    keywords,
     alternates: {
-      canonical: path,
-      languages,
+      canonical,
+      languages: { ...languages, "x-default": xDefault },
     },
     openGraph: {
       title,
       description,
-      url: path,
+      url: canonical, // resolved absolute via metadataBase in your root layout
       siteName: "Isaac Plans Insurance",
       locale: ogLocale,
       alternateLocale: ogLocale === "en_US" ? ["es_ES"] : ["en_US"],
+      type: "website",
       images: [{ url: image, width: 1200, height: 630, alt }],
     },
     twitter: {
@@ -63,7 +63,7 @@ export async function generateMetadata(): Promise<Metadata> {
       description,
       images: [{ url: image, alt }],
     },
-    robots: { index: true, follow: true },
+    // robots omitted → defaults to index, follow
   };
 }
 

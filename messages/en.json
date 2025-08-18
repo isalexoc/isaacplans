@@ -786,7 +786,15 @@
     },
     "calendar": {
       "title": "Book Your ACA Phone Appointment",
-      "backButton": "← Go Back"
+      "backButton": "← Go Back",
+
+      "meta": {
+        "title": "ACA Appointment Calendar | Isaac Plans Insurance",
+        "description": "Schedule your ACA enrollment consultation with Isaac Plans Insurance. Get guidance and personalized help choosing the right coverage.",
+        "keywords": "ACA, Obamacare, appointment, health insurance, enrollment, Virginia, bilingual",
+        "image": "https://www.isaacplans.com/images/aca.png",
+        "imageAlt": "ACA appointment calendar"
+      }
     },
     "selfEnroll": {
       "title": "Prefer to self-enroll?",
@@ -809,7 +817,14 @@
   "dentalVisionPage": {
     "calendar": {
       "title": "Schedule Your Dental and Vision Insurance Consultation Appointment",
-      "backButton": "Back"
+      "backButton": "Back",
+      "meta": {
+        "title": "Dental & Vision Appointment Calendar | Isaac Plans Insurance",
+        "description": "Schedule your dental and vision plan consultation with Isaac Plans Insurance. Get help choosing the right coverage.",
+        "keywords": "dental, vision, appointment, insurance, schedule, Virginia, bilingual",
+        "image": "https://www.isaacplans.com/images/dental.png",
+        "imageAlt": "Dental & Vision appointment calendar"
+      }
     },
     "hero": {
       "badge": "Dental & Vision Plans",
@@ -973,7 +988,14 @@
     },
     "calendar": {
       "backButton": "← Go Back",
-      "title": "Schedule Your Hospital Indemnity Consultation"
+      "title": "Schedule Your Hospital Indemnity Consultation",
+      "meta": {
+        "title": "Hospital Indemnity Appointment Calendar | Isaac Plans Insurance",
+        "description": "Schedule your hospital indemnity consultation with Isaac Plans Insurance. Get bilingual guidance and personalized options to complement your health coverage.",
+        "keywords": "hospital indemnity, appointment, supplemental insurance, schedule, Virginia, bilingual",
+        "image": "https://www.isaacplans.com/images/hi.png",
+        "imageAlt": "Hospital indemnity appointment calendar"
+      }
     },
     "about": {
       "badge": "About Isaac",

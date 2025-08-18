@@ -5,15 +5,15 @@ import {
   BreadcrumbList,
   OpeningHoursSpecification,
   Person,
+  WebPage,
 } from "schema-dts";
 
 /* ─────────────────────────  shared constants ─────────────────────── */
-const BASE_URL = "https://isaacplans.com";
+const BASE_URL = "https://www.isaacplans.com";
 const PHONE = "+15404261804";
 const LOGO_URL = `${BASE_URL}/images/logo_ip.png`;
-import type { WebPage } from "schema-dts";
 
-/* Opening hours (7 days, 08-20) */
+/* Opening hours (7 days, 08–20) */
 const weekdayHours: OpeningHoursSpecification = {
   "@type": "OpeningHoursSpecification",
   dayOfWeek: [
@@ -72,20 +72,20 @@ export const agencyLd: WithContext<InsuranceAgency> = {
       telephone: PHONE,
       contactType: "customer service",
       areaServed: "US",
-      availableLanguage: ["English", "Spanish", "French"],
+      availableLanguage: ["English", "Spanish"], // aligned to supported locales
     },
   ],
 
   /* Social links */
   sameAs: [
-    "https://www.facebook.com/@isaacagent",
+    "https://www.facebook.com/isaacagent",
     "https://www.instagram.com/isalexoc",
     "https://www.linkedin.com/in/isaacplans",
     "https://www.youtube.com/@isaacplans",
   ],
 
   /* Reference to person (no duplication) */
-  employee: { "@id": "https://isaacplans.com/#isaacOrraiz" },
+  employee: { "@id": `${BASE_URL}/#isaacOrraiz` },
 
   /* Offer catalog */
   hasOfferCatalog: {
@@ -124,22 +124,28 @@ export const agencyLd: WithContext<InsuranceAgency> = {
   },
 };
 
-/* ───────────── WebSite (+ SearchAction) ───────────── */
+/* ───────────── WebSite (+ optional SearchAction) ───────────── */
 export const siteLd: WithContext<WebSite> = {
   "@context": "https://schema.org",
   "@type": "WebSite",
-
+  "@id": `${BASE_URL}/#website`,
   url: BASE_URL,
   name: "Isaac Plans Insurance",
   alternateName: "IsaacPlans.com",
   description:
     "Bilingual insurance agency specializing in ACA, Medicare, life, dental and vision plans across the United States.",
-  inLanguage: ["en", "es", "fr"],
-
-  publisher: { "@id": "https://isaacplans.com/#organization" },
+  inLanguage: ["en", "es"],
+  publisher: { "@id": `${BASE_URL}/#organization` },
+  // If you add an on-site search, uncomment this:
+  // potentialAction: {
+  //   "@type": "SearchAction",
+  //   target: `${BASE_URL}/search?q={search_term_string}`,
+  //   "query-input": "required name=search_term_string"
+  // }
 };
 
-/* ───────────── Root breadcrumb (Home) ───────────── */
+/* ───────────── Root breadcrumb (optional) ─────────────
+   Prefer page-level breadcrumbs; keep this only if you really need a global one. */
 export const rootBreadcrumbLd: WithContext<BreadcrumbList> = {
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
@@ -148,16 +154,33 @@ export const rootBreadcrumbLd: WithContext<BreadcrumbList> = {
   ],
 };
 
+/* Optional localized root breadcrumb helper (if you want locale-aware “Home”) */
+export const getRootBreadcrumbLd = (
+  locale: string,
+  homeLabel: string
+): WithContext<BreadcrumbList> => ({
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    {
+      "@type": "ListItem",
+      position: 1,
+      name: homeLabel,
+      item: `${BASE_URL}/${locale}`,
+    },
+  ],
+});
+
 /* ───────────── Person (global) ───────────── */
 export const isaacPersonLd: WithContext<Person> = {
   "@context": "https://schema.org",
   "@type": "Person",
-  "@id": "https://isaacplans.com/#isaacOrraiz",
+  "@id": `${BASE_URL}/#isaacOrraiz`,
 
   name: "Isaac Orraiz",
   jobTitle:
     "Certified Health Care Reform Specialist – Licensed Insurance Agent",
-  worksFor: { "@id": "https://isaacplans.com/#organization" },
+  worksFor: { "@id": `${BASE_URL}/#organization` },
 
   image:
     "https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_300/isaacpic_c8kca5.jpg",
@@ -165,13 +188,13 @@ export const isaacPersonLd: WithContext<Person> = {
   telephone: PHONE,
 
   sameAs: [
-    "https://www.facebook.com/@isaacagent",
+    "https://www.facebook.com/isaacagent",
     "https://www.instagram.com/isalexoc",
     "https://www.linkedin.com/in/isaacplans",
     "https://www.youtube.com/@isaacplans",
   ],
 
-  knowsLanguage: ["English", "Spanish", "French"],
+  knowsLanguage: ["English", "Spanish"],
 
   hasCredential: {
     "@type": "EducationalOccupationalCredential",
@@ -180,9 +203,8 @@ export const isaacPersonLd: WithContext<Person> = {
   },
 };
 
-/**
- * WebPage object for /[locale]/aca
- */
+/* ───────────── Page-specific helpers ───────────── */
+
 export const getAcaPageLd = (
   locale: string,
   title: string,
@@ -198,9 +220,6 @@ export const getAcaPageLd = (
   about: { "@id": `${BASE_URL}/#organization` },
 });
 
-/**
- * BreadcrumbList for /[locale]/aca
- */
 export const getAcaBreadcrumbLd = (
   locale: string,
   homeLabel: string,
@@ -304,7 +323,7 @@ export const getAboutPageLd = (
   locale: string,
   title: string,
   description: string,
-  slug = "about" // <- pass "sobre-mi" when you call it for ES
+  slug = "about" // pass "sobre-mi" for ES
 ): WithContext<WebPage> => ({
   "@context": "https://schema.org",
   "@type": "AboutPage",
@@ -316,14 +335,11 @@ export const getAboutPageLd = (
   about: { "@id": `${BASE_URL}/#organization` },
 });
 
-/**
- * BreadcrumbList for /[locale]/about   (ES can pass "sobre-mi" slug)
- */
 export const getAboutBreadcrumbLd = (
   locale: string,
   homeLabel: string,
   aboutLabel: string,
-  slug = "about" // <- pass "sobre-mi" when you call it for ES
+  slug = "about" // pass "sobre-mi" for ES
 ): WithContext<BreadcrumbList> => ({
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",

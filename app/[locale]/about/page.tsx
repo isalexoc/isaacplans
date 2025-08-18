@@ -8,8 +8,9 @@ import type { Metadata } from "next";
 import { getAboutPageLd, getAboutBreadcrumbLd } from "@/lib/seo/jsonld";
 import {
   ogLocaleOf,
-  localizedPath,
-  languageAlternates,
+  localizedSlug,
+  withLocalePrefix,
+  languageAlternatesPrefixed,
   type SupportedLocale,
 } from "@/lib/seo/i18n";
 
@@ -21,27 +22,29 @@ export async function generateMetadata(): Promise<Metadata> {
   const description = t("description");
   const keywords = t("keywords", { default: "" });
   const image = t("image", {
-    default: "https://isaacplans.com/images/about.png",
+    default: "https://www.isaacplans.com/images/about.png",
   }) as string;
   const alt = t("imageAlt", { default: "Isaac Plans Insurance team photo" });
 
   const routeKey = "/about";
-  const path = localizedPath(routeKey, locale); // e.g. /en/about or /es/sobre-mi
-  const languages = languageAlternates(routeKey); // e.g. {"en-US": "/en/about","es-ES":"/es/sobre-mi"}
+  const slug = localizedSlug(routeKey, locale); // "/about" or "/sobre-mi"
+  const canonical = withLocalePrefix(locale, slug); // "/en/about" or "/es/sobre-mi"
+  const languages = languageAlternatesPrefixed(routeKey); // { "en-US": "/en/about", "es-ES": "/es/sobre-mi" }
   const ogLocale = ogLocaleOf(locale); // en_US / es_ES
+  const xDefault = withLocalePrefix("en", localizedSlug(routeKey, "en")); // ✅ English page
 
   return {
     title,
     description,
     keywords,
     alternates: {
-      canonical: path,
-      languages,
+      canonical,
+      languages: { ...languages, "x-default": xDefault }, // x-default => "/en"
     },
     openGraph: {
       title,
       description,
-      url: path, // resolved absolute via metadataBase in root layout
+      url: canonical, // resolved absolute via metadataBase in root layout
       siteName: "Isaac Plans Insurance",
       locale: ogLocale,
       alternateLocale: ogLocale === "en_US" ? ["es_ES"] : ["en_US"],
@@ -54,7 +57,7 @@ export async function generateMetadata(): Promise<Metadata> {
       description,
       images: [{ url: image, alt }],
     },
-    robots: { index: true, follow: true },
+    // robots optional; omit for defaults (index, follow)
   };
 }
 
@@ -62,8 +65,8 @@ export default async function AboutPage() {
   const locale = (await getLocale()) as SupportedLocale;
   const t = await getTranslations({ locale, namespace: "aboutPage" });
 
-  // If your JSON-LD helpers want a slug, keep your current convention:
-  const aboutSlug = locale === "es" ? "sobre-mi" : "about";
+  // Use routing-derived slug (no leading "/") for your JSON-LD helpers
+  const aboutSlug = localizedSlug("/about", locale).replace(/^\//, "");
 
   const pageLd = getAboutPageLd(
     locale,
@@ -97,7 +100,7 @@ export default async function AboutPage() {
       <section className="px-4 py-16" aria-labelledby="about-links">
         {/* Add an H2 BEFORE the cards */}
         <h2 id="about-links" className="section-heading sr-only">
-          {t("about.links.heading")} {/* e.g., "Explore this page" */}
+          {t("about.links.heading")}
         </h2>
 
         <div className="mx-auto grid max-w-5xl gap-8 sm:grid-cols-2">
@@ -114,7 +117,6 @@ export default async function AboutPage() {
               aria-labelledby={`card-${key}-title`}
             >
               <span className="absolute inset-x-0 h-1 bg-brand scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300" />
-              {/* Now these H3s are valid because an H2 precedes them */}
               <h3
                 id={`card-${key}-title`}
                 className="text-xl font-semibold text-gray-900 dark:text-white mb-2"

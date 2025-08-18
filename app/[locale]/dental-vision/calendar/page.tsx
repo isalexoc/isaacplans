@@ -1,13 +1,72 @@
-/* app/dental-vision/calendar/page.tsx – server component */
+/* app/[locale]/dental-vision/calendar/page.tsx – server component */
 import { getTranslations, getLocale } from "next-intl/server";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation"; // ✅ locale-aware Link
 import Script from "next/script";
+import type { Metadata } from "next";
 import { Button } from "@/components/ui/button";
+
+import {
+  ogLocaleOf,
+  type SupportedLocale,
+  localizedSlug,
+  withLocalePrefix,
+  languageAlternatesPrefixed,
+} from "@/lib/seo/i18n"; // ⬅️ removed xDefaultHref
 
 /* Little helper to coerce SearchParams */
 const param = (p: string | string[] | undefined) =>
   Array.isArray(p) ? p[0] ?? "" : p ?? "";
 
+/* ───────── SEO ───────── */
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = (await getLocale()) as SupportedLocale;
+  const t = await getTranslations({
+    locale,
+    namespace: "dentalVisionPage.calendar.meta",
+  });
+
+  const title = t("title");
+  const description = t("description");
+  const keywords = t("keywords");
+  const image = t("image");
+  const alt = t("imageAlt");
+
+  const routeKey = "/dental-vision/calendar";
+  const slug = localizedSlug(routeKey, locale); // "/dental-vision/calendar" or "/dental-vision/calendario"
+  const canonical = withLocalePrefix(locale, slug); // "/en/..." or "/es/..."
+  const languages = languageAlternatesPrefixed(routeKey); // { "en-US": "...", "es-ES": "..." }
+  const xDefault = withLocalePrefix("en", localizedSlug(routeKey, "en")); // ✅ English page
+  const ogLocale = ogLocaleOf(locale);
+
+  return {
+    title,
+    description,
+    keywords,
+    alternates: {
+      canonical,
+      languages: { ...languages, "x-default": xDefault },
+    },
+    openGraph: {
+      title,
+      description,
+      url: canonical,
+      siteName: "Isaac Plans Insurance",
+      locale: ogLocale,
+      alternateLocale: ogLocale === "en_US" ? ["es_ES"] : ["en_US"],
+      type: "website",
+      images: [{ url: image, width: 1200, height: 630, alt }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [{ url: image, alt }],
+    },
+    // robots omitted → defaults to index, follow
+  };
+}
+
+/* ───────── Page ───────── */
 interface PageProps {
   searchParams: Record<string, string | string[] | undefined>;
 }
@@ -15,14 +74,16 @@ interface PageProps {
 export default async function DentalVisionCalendarPage({
   searchParams,
 }: PageProps) {
-  /* locale + translations */
-  const locale = await getLocale(); // "en", "es", …
-  const t = await getTranslations("dentalVisionPage.calendar");
+  const locale = (await getLocale()) as SupportedLocale; // "en" | "es"
+  const t = await getTranslations({
+    locale,
+    namespace: "dentalVisionPage.calendar",
+  });
 
   /* Choose the booking URL by language */
   const base =
     locale === "es"
-      ? "https://link.agent-crm.com/widget/booking/rRdoJtrmAvJ0FsgZwQqs" // 👈 add when you get it
+      ? "https://link.agent-crm.com/widget/booking/rRdoJtrmAvJ0FsgZwQqs" // 👈 replace when you get the final ES link
       : "https://link.agent-crm.com/widget/booking/62geCc4o9uF3lhsfcJ14"; // English (default)
 
   /* Build query string if any pre-filled fields arrive */
@@ -35,13 +96,12 @@ export default async function DentalVisionCalendarPage({
 
   const iframeSrc = qs.toString() ? `${base}?${qs}` : base;
 
-  /* Render */
   return (
     <main className="min-h-screen flex flex-col items-center gap-6 p-4">
       {/* Header row */}
-      <div className="w-full max-w-4xl flex items-center justify-between">
+      <div className="w-full max-w-4xl flex flex-col items-center justify-center">
         <Button asChild variant="secondary">
-          {/* Change /dental-vision to whatever route is your listing page */}
+          {/* Locale-aware back link → /en/dental-vision or /es/dental-vision */}
           <Link href="/dental-vision">{t("backButton")}</Link>
         </Button>
 

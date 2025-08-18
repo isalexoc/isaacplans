@@ -4,8 +4,9 @@ import { ArrowLeft, Mail } from "lucide-react";
 import type { Metadata } from "next";
 import {
   ogLocaleOf,
-  localizedPath,
-  languageAlternates,
+  localizedSlug,
+  withLocalePrefix,
+  languageAlternatesPrefixed,
   type SupportedLocale,
 } from "@/lib/seo/i18n";
 import { Card, CardContent } from "@/components/ui/card";
@@ -26,22 +27,24 @@ export async function generateMetadata(): Promise<Metadata> {
   const alt = t("imageAlt");
 
   const routeKey = "/privacy-policy";
-  const path = localizedPath(routeKey, locale); // /en/privacy-policy or /es/politica-de-privacidad
-  const languages = languageAlternates(routeKey); // {"en-US": "/en/privacy-policy", "es-ES": "/es/politica-de-privacidad"}
-  const ogLocale = ogLocaleOf(locale); // en_US / es_ES
+  const slug = localizedSlug(routeKey, locale); // e.g. "/privacy-policy"
+  const canonical = withLocalePrefix(locale, slug); // "/en/privacy-policy" or "/es/politica-de-privacidad"
+  const languages = languageAlternatesPrefixed(routeKey); // { "en-US": "/en/...", "es-ES": "/es/..." }
+  const ogLocale = ogLocaleOf(locale);
+  const xDefault = withLocalePrefix("en", localizedSlug(routeKey, "en")); // ✅ English page
 
   return {
     title,
     description,
     keywords,
     alternates: {
-      canonical: path,
-      languages,
+      canonical,
+      languages: { ...languages, "x-default": xDefault }, // x-default => "/en"
     },
     openGraph: {
       title,
       description,
-      url: path, // resolved absolute via metadataBase in layout
+      url: canonical, // resolved absolute via metadataBase in layout
       siteName: "Isaac Plans Insurance",
       locale: ogLocale,
       alternateLocale: ogLocale === "en_US" ? ["es_ES"] : ["en_US"],
@@ -54,7 +57,7 @@ export async function generateMetadata(): Promise<Metadata> {
       description,
       images: [{ url: image, alt }],
     },
-    robots: { index: true, follow: true },
+    // robots optional; omit for defaults (index, follow)
   };
 }
 

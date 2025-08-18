@@ -13,8 +13,17 @@ import {
   getDentalVisionBreadcrumbLd,
 } from "@/lib/seo/jsonld";
 
+import {
+  ogLocaleOf,
+  localizedSlug,
+  withLocalePrefix,
+  languageAlternatesPrefixed,
+  type SupportedLocale,
+} from "@/lib/seo/i18n";
+
+/* ───────────────────────────────────────────── */
 export async function generateMetadata(): Promise<Metadata> {
-  const locale = await getLocale();
+  const locale = (await getLocale()) as SupportedLocale;
   const t = await getTranslations({
     locale,
     namespace: "dentalVisionPage.dentalVisionMetadata",
@@ -22,34 +31,33 @@ export async function generateMetadata(): Promise<Metadata> {
 
   const title = t("title");
   const description = t("description");
-  const image =
-    (t("image", {
-      default:
-        "https://www.isaacplans.com/images/dental_vision_og_placeholder_en.png",
-    }) as string) ?? "";
-  const alt = t("imageAlt", { default: "Dental & Vision plans preview" });
+  const keywords = t("keywords");
+  const image = t("image");
+  const alt = t("imageAlt");
 
-  const path = `/${locale}/dental-vision`;
-  const ogLocale = locale === "es" ? "es_ES" : "en_US";
+  const routeKey = "/dental-vision";
+  const slug = localizedSlug(routeKey, locale); // "/dental-vision" (both locales)
+  const canonical = withLocalePrefix(locale, slug); // "/en/dental-vision" or "/es/dental-vision"
+  const languages = languageAlternatesPrefixed(routeKey); // { "en-US": "/en/dental-vision", "es-ES": "/es/dental-vision" }
+  const xDefault = withLocalePrefix("en", localizedSlug(routeKey, "en")); // ✅ English page
+  const ogLocale = ogLocaleOf(locale);
 
   return {
     title,
     description,
-    keywords: t("keywords", { default: "" }),
+    keywords,
     alternates: {
-      canonical: path, // -> https://www.isaacplans.com/{locale}/dental-vision
-      languages: {
-        "en-US": "/en/dental-vision",
-        "es-ES": "/es/dental-vision",
-      },
+      canonical,
+      languages: { ...languages, "x-default": xDefault },
     },
     openGraph: {
       title,
       description,
-      url: path,
+      url: canonical, // resolved absolute via metadataBase in your root layout
       siteName: "Isaac Plans Insurance",
       locale: ogLocale,
       alternateLocale: ogLocale === "en_US" ? ["es_ES"] : ["en_US"],
+      type: "website",
       images: [{ url: image, width: 1200, height: 630, alt }],
     },
     twitter: {
@@ -58,7 +66,7 @@ export async function generateMetadata(): Promise<Metadata> {
       description,
       images: [{ url: image, alt }],
     },
-    robots: { index: true, follow: true }, // optional but explicit
+    // robots omitted → defaults to index, follow
   };
 }
 

@@ -1,13 +1,72 @@
-/* app/hospital-indemnity/calendar/page.tsx – server component */
+/* app/[locale]/hospital-indemnity/calendar/page.tsx – server component */
 import { getTranslations, getLocale } from "next-intl/server";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation"; // ✅ locale-aware Link
 import Script from "next/script";
+import type { Metadata } from "next";
 import { Button } from "@/components/ui/button";
 
-/* Little helper to coerce SearchParams */
+import {
+  ogLocaleOf,
+  type SupportedLocale,
+  localizedSlug,
+  withLocalePrefix,
+  languageAlternatesPrefixed,
+} from "@/lib/seo/i18n";
+
+/* helper to coerce SearchParams */
 const param = (p: string | string[] | undefined) =>
   Array.isArray(p) ? p[0] ?? "" : p ?? "";
 
+/* ───────── SEO ───────── */
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = (await getLocale()) as SupportedLocale;
+  const t = await getTranslations({
+    locale,
+    namespace: "HIpage.calendar.meta",
+  });
+
+  const title = t("title");
+  const description = t("description");
+  const keywords = t("keywords");
+  const image = t("image");
+  const alt = t("imageAlt");
+
+  const routeKey = "/hospital-indemnity/calendar";
+  const slug = localizedSlug(routeKey, locale); // "/hospital-indemnity/calendar" or "/indemnizacion-hospitalaria/calendario"
+  const canonical = withLocalePrefix(locale, slug); // "/en/..." or "/es/..."
+  const languages = languageAlternatesPrefixed(routeKey); // {"en-US": "...", "es-ES": "..."}
+  const xDefault = withLocalePrefix("en", localizedSlug(routeKey, "en")); // ✅ English page
+  const ogLocale = ogLocaleOf(locale);
+
+  return {
+    title,
+    description,
+    keywords,
+    alternates: {
+      canonical,
+      languages: { ...languages, "x-default": xDefault },
+    },
+    openGraph: {
+      title,
+      description,
+      url: canonical, // resolved absolute via metadataBase in your root layout
+      siteName: "Isaac Plans Insurance",
+      locale: ogLocale,
+      alternateLocale: ogLocale === "en_US" ? ["es_ES"] : ["en_US"],
+      type: "website",
+      images: [{ url: image, width: 1200, height: 630, alt }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [{ url: image, alt }],
+    },
+    // robots omitted → defaults to index, follow
+  };
+}
+
+/* ───────── Page ───────── */
 interface PageProps {
   searchParams: Record<string, string | string[] | undefined>;
 }
@@ -15,9 +74,8 @@ interface PageProps {
 export default async function HospitalIndemnityCalendarPage({
   searchParams,
 }: PageProps) {
-  /* locale + translations */
-  const locale = await getLocale(); // "en", "es", …
-  const t = await getTranslations("HIpage.calendar");
+  const locale = (await getLocale()) as SupportedLocale; // "en" | "es"
+  const t = await getTranslations({ locale, namespace: "HIpage.calendar" });
 
   /* Choose the booking URL by language */
   const base =
@@ -35,12 +93,12 @@ export default async function HospitalIndemnityCalendarPage({
 
   const iframeSrc = qs.toString() ? `${base}?${qs}` : base;
 
-  /* Render */
   return (
     <main className="min-h-screen flex flex-col items-center gap-6 p-4">
       {/* Header row */}
-      <div className="w-full max-w-4xl flex items-center justify-between">
+      <div className="w-full max-w-4xl flex flex-col items-center justify-center">
         <Button asChild variant="secondary">
+          {/* Locale-aware back link → /en/hospital-indemnity or /es/indemnizacion-hospitalaria */}
           <Link href="/hospital-indemnity">{t("backButton")}</Link>
         </Button>
 
@@ -52,7 +110,7 @@ export default async function HospitalIndemnityCalendarPage({
         <div className="w-[110px] sm:w-[120px]" />
       </div>
 
-      {/* Agent-CRM helper script (loads once after hydration) */}
+      {/* Agent-CRM helper script */}
       <Script
         id="agent-crm-embed"
         src="https://link.agent-crm.com/js/form_embed.js"

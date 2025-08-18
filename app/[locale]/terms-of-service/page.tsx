@@ -1,11 +1,11 @@
-/* Terms & Conditions – server component (no "use client") */
 import { getTranslations, getLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { ArrowLeft, Mail } from "lucide-react";
 import {
   ogLocaleOf,
-  localizedPath,
-  languageAlternates,
+  localizedSlug,
+  withLocalePrefix,
+  languageAlternatesPrefixed,
   type SupportedLocale,
 } from "@/lib/seo/i18n";
 import type { Metadata } from "next";
@@ -29,9 +29,12 @@ export async function generateMetadata(): Promise<Metadata> {
       locale === "es" ? "Portada de Términos y Condiciones" : "Terms cover",
   });
 
+  // /en/terms-of-service or /es/terminos-y-condiciones
   const routeKey = "/terms-of-service";
-  const path = localizedPath(routeKey, locale); // /en/terms-of-service or /es/terminos-y-condiciones
-  const languages = languageAlternates(routeKey);
+  const slug = localizedSlug(routeKey, locale);
+  const canonical = withLocalePrefix(locale, slug);
+  const languages = languageAlternatesPrefixed(routeKey); // { "en-US": "/en/terms-of-service", "es-ES": "/es/terminos-y-condiciones" }
+  const xDefault = withLocalePrefix("en", localizedSlug(routeKey, "en"));
   const ogLocale = ogLocaleOf(locale);
 
   return {
@@ -39,13 +42,13 @@ export async function generateMetadata(): Promise<Metadata> {
     description,
     keywords,
     alternates: {
-      canonical: path,
-      languages,
+      canonical,
+      languages: { ...languages, "x-default": xDefault },
     },
     openGraph: {
       title,
       description,
-      url: path,
+      url: canonical, // resolved absolute via metadataBase in your root layout
       siteName: "Isaac Plans Insurance",
       locale: ogLocale,
       alternateLocale: ogLocale === "en_US" ? ["es_ES"] : ["en_US"],

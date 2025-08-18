@@ -9,12 +9,7 @@ import CrispChat from "@/components/crisp-chat";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
 import { getTranslations } from "next-intl/server";
-import {
-  agencyLd,
-  siteLd,
-  rootBreadcrumbLd,
-  isaacPersonLd,
-} from "@/lib/seo/jsonld";
+import { agencyLd, siteLd, isaacPersonLd } from "@/lib/seo/jsonld";
 import { getLocale } from "next-intl/server";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -97,7 +92,6 @@ export default async function LocaleLayout({
             __html: JSON.stringify([
               agencyLd,
               siteLd,
-              rootBreadcrumbLd,
               isaacPersonLd, // ← moved here
             ]).replace(/</g, "\\u003c"),
           }}
