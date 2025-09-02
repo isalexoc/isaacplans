@@ -5,7 +5,6 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "@/app/globals.css";
 import { Toaster } from "@/components/ui/toaster";
-/* import CrispChat from "@/components/crisp-chat"; */
 import Header from "@/components/header";
 import Footer from "@/components/footer";
 import { getTranslations } from "next-intl/server";
@@ -57,6 +56,22 @@ export async function generateMetadata(): Promise<Metadata> {
 
 const inter = Inter({ subsets: ["latin"] });
 
+const CHAT_CONFIG: Record<
+  string,
+  { src: string; resourcesUrl: string; widgetId: string }
+> = {
+  en: {
+    src: "https://widgets.leadconnectorhq.com/loader.js",
+    resourcesUrl: "https://widgets.leadconnectorhq.com/chat-widget/loader.js",
+    widgetId: "687794d4afd5323330f86826",
+  },
+  es: {
+    src: "https://beta.leadconnectorhq.com/loader.js",
+    resourcesUrl: "https://beta.leadconnectorhq.com/chat-widget/loader.js",
+    widgetId: "68b65604b832ccbc42830f29",
+  },
+};
+
 export default async function LocaleLayout({
   children,
   params,
@@ -69,6 +84,8 @@ export default async function LocaleLayout({
   if (!hasLocale(routing.locales, locale)) {
     notFound();
   }
+
+  const chat = CHAT_CONFIG[locale] ?? CHAT_CONFIG.en;
 
   return (
     <html
@@ -99,11 +116,11 @@ export default async function LocaleLayout({
         />
         {/* Agent CRM (LeadConnector) chat – loads after page is interactive */}
         <Script
-          id="agentcrm-chat"
-          src="https://widgets.leadconnectorhq.com/loader.js"
+          id={`agentcrm-chat-${locale}`} // unique per-locale to avoid dedupe
+          src={chat.src}
           strategy="afterInteractive"
-          data-resources-url="https://widgets.leadconnectorhq.com/chat-widget/loader.js"
-          data-widget-id="687794d4afd5323330f86826"
+          data-resources-url={chat.resourcesUrl}
+          data-widget-id={chat.widgetId}
         />
       </body>
     </html>
