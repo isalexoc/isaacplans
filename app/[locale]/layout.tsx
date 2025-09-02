@@ -103,6 +103,14 @@ export default async function LocaleLayout({
           <Toaster />
           {/* <CrispChat /> */}
           <Footer />
+          {/* Agent CRM (LeadConnector) chat – loads after page is interactive */}
+          <Script
+            id={`agentcrm-chat-${locale}`} // unique per-locale to avoid dedupe
+            src={chat.src}
+            strategy="afterInteractive"
+            data-resources-url={chat.resourcesUrl}
+            data-widget-id={chat.widgetId}
+          />
         </NextIntlClientProvider>
         <script
           type="application/ld+json"
@@ -113,14 +121,6 @@ export default async function LocaleLayout({
               isaacPersonLd, // ← moved here
             ]).replace(/</g, "\\u003c"),
           }}
-        />
-        {/* Agent CRM (LeadConnector) chat – loads after page is interactive */}
-        <Script
-          id={`agentcrm-chat-${locale}`} // unique per-locale to avoid dedupe
-          src={chat.src}
-          strategy="afterInteractive"
-          data-resources-url={chat.resourcesUrl}
-          data-widget-id={chat.widgetId}
         />
       </body>
     </html>
