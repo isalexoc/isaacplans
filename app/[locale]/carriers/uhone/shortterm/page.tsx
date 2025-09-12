@@ -29,8 +29,6 @@ export async function generateMetadata(): Promise<Metadata> {
     default: "Short Term Medical overview preview",
   });
 
-  // Add this route key to your `routing.pathnames` map:
-  // "/carriers/uhone/shortterm": { en: "/carriers/uhone/shortterm", es: "/carriers/uhone/shortterm" }
   const routeKey = "/carriers/uhone/shortterm";
   const slug = localizedSlug(routeKey as any, locale);
   const canonical = withLocalePrefix(locale, slug);
@@ -75,29 +73,43 @@ export default async function ShortTermMedicalPage() {
       <section className="relative overflow-hidden bg-gradient-to-b from-primary/10 via-background to-background">
         <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
           <div className="flex flex-col gap-6">
-            <span className="inline-flex w-fit items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-medium text-primary">
-              <Shield className="h-3.5 w-3.5" />
+            <span
+              className="inline-flex w-fit items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-medium text-primary"
+              aria-label={t("hero.badge")}
+            >
+              {/* a11y: hide decorative icon from AT */}
+              <Shield className="h-3.5 w-3.5" aria-hidden="true" />
               {t("hero.badge")}
             </span>
+
             <h1 className="text-3xl font-bold leading-tight tracking-tight sm:text-4xl">
               {t("hero.title")}
             </h1>
+
             <p className="max-w-3xl text-muted-foreground">
               {t("hero.description.before")}{" "}
               <strong>{t("hero.description.bold")}</strong>{" "}
               {t("hero.description.after")}
             </p>
 
-            {/* CTA: exact UHOne snippet + label */}
+            {/* CTA: exact UHOne snippet + accessible name via aria-labelledby */}
             <div className="mt-4">
-              <p className="mb-2 text-sm text-muted-foreground">
+              {/* a11y: give the link a programmatic name without changing the image or URL */}
+              <p
+                id="uhone-apply-label"
+                className="mb-2 text-sm text-muted-foreground"
+              >
                 <strong>{t("cta.label")}</strong>
               </p>
-              {/* Do not alter the snippet below to comply with UHOne rules */}
-              <a href="https://shop.uhone.com/en/quote/census/shortterm?brokerid=AA5607941">
+
+              {/* Do not alter the snippet below (URL/img). We only add aria-labelledby on <a>. */}
+              <a
+                href="https://shop.uhone.com/en/quote/census/shortterm?brokerid=AA5607941"
+                aria-labelledby="uhone-apply-label"
+              >
                 <img
                   src="https://www.uhone.com/ContentManagement/FileAttachment.ashx?FilePath=/Short_Term_Banner_Btn.jpg"
-                  alt=""
+                  alt="" /* decorative; name comes from aria-labelledby */
                 />
               </a>
             </div>
@@ -106,25 +118,27 @@ export default async function ShortTermMedicalPage() {
             <div className="mt-6 grid gap-4 sm:grid-cols-3">
               <div className="rounded-2xl border bg-card p-4 shadow-sm">
                 <div className="mb-2 flex items-center gap-2 text-card-foreground">
-                  <Clock className="h-4 w-4" />
+                  <Clock className="h-4 w-4" aria-hidden="true" />
                   <p className="font-semibold">{t("cards.temp.title")}</p>
                 </div>
                 <p className="text-sm text-muted-foreground">
                   {t("cards.temp.body")}
                 </p>
               </div>
+
               <div className="rounded-2xl border bg-card p-4 shadow-sm">
                 <div className="mb-2 flex items-center gap-2 text-card-foreground">
-                  <Info className="h-4 w-4" />
+                  <Info className="h-4 w-4" aria-hidden="true" />
                   <p className="font-semibold">{t("cards.notAca.title")}</p>
                 </div>
                 <p className="text-sm text-muted-foreground">
                   {t("cards.notAca.body")}
                 </p>
               </div>
+
               <div className="rounded-2xl border bg-card p-4 shadow-sm">
                 <div className="mb-2 flex items-center gap-2 text-card-foreground">
-                  <ExternalLink className="h-4 w-4" />
+                  <ExternalLink className="h-4 w-4" aria-hidden="true" />
                   <p className="font-semibold">{t("cards.quote.title")}</p>
                 </div>
                 <p className="text-sm text-muted-foreground">
@@ -136,10 +150,11 @@ export default async function ShortTermMedicalPage() {
         </div>
       </section>
 
-      {/* Federal STLDI notice (neutral & general) */}
+      {/* Federal STLDI notice (high-contrast, neutral) */}
       <section className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
-        <div className="rounded-2xl border border-destructive/20 bg-destructive/5 p-5">
-          <p className="text-sm leading-relaxed text-muted-foreground">
+        {/* a11y: increase contrast; avoid muted foreground here */}
+        <div className="rounded-2xl border border-amber-300 bg-amber-50 p-5 text-amber-950 dark:border-amber-600 dark:bg-amber-900/30 dark:text-amber-50">
+          <p className="text-sm leading-relaxed">
             <strong>{t("notice.title")}</strong> {t("notice.body.part1")}{" "}
             <strong>{t("notice.body.bold1")}</strong> {t("notice.body.part2")}{" "}
             <strong>{t("notice.body.bold2")}</strong> {t("notice.body.part3")}
@@ -201,6 +216,31 @@ export default async function ShortTermMedicalPage() {
           <p>{t("disclosures.footer")}</p>
         </div>
       </section>
+
+      {/* a11y patch for 3rd-party chat close button (labels the button if present) */}
+      <script
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{
+          __html: `
+            (function () {
+              function labelChatClose(){
+                var el = document.querySelector('button.lc_text-widget_prompt--prompt-close');
+                if (el && !el.getAttribute('aria-label')) {
+                  var lang = (document.documentElement.getAttribute('lang') || '').toLowerCase();
+                  var label = lang.startsWith('es') ? 'Cerrar' : 'Close';
+                  el.setAttribute('aria-label', label);
+                  el.setAttribute('title', label);
+                }
+              }
+              if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', labelChatClose);
+              } else {
+                labelChatClose();
+              }
+            })();
+          `,
+        }}
+      />
     </main>
   );
 }
