@@ -1184,5 +1184,93 @@
     "title": "Algo salió mal",
     "description": "Ocurrió un error inesperado. Puedes intentarlo de nuevo.",
     "retry": "Reintentar"
+  },
+  "uhone": {
+    "shortterm": {
+      "hero": {
+        "badge": "UnitedHealthOne® Seguro Médico de Corto Plazo",
+        "title": "Cobertura médica temporal — rápida, flexible y clara",
+        "description": {
+          "before": "Diseñada para cubrir un período temporal sin cobertura. Esto",
+          "bold": "no es Cobertura Esencial Mínima (ACA)",
+          "after": ", no cubre condiciones preexistentes y tiene limitaciones importantes. La disponibilidad y los términos varían según el estado y el plan."
+        }
+      },
+      "cta": {
+        "label": "Puede solicitar cobertura usando el enlace seguro a continuación:"
+      },
+      "cards": {
+        "temp": {
+          "title": "Cobertura temporal",
+          "body": "Pensada para brechas cortas—por ejemplo, entre empleos o mientras espera que inicie otra cobertura."
+        },
+        "notAca": {
+          "title": "No es ACA/MEC",
+          "body": "No cumple con los requisitos de la ACA. Las condiciones preexistentes están excluidas y los beneficios son limitados según la póliza."
+        },
+        "quote": {
+          "title": "Cotice en línea",
+          "body": "Use el enlace seguro de UHOne arriba para ver planes y precios en su estado."
+        }
+      },
+      "notice": {
+        "title": "Actualización importante sobre la duración:",
+        "body": {
+          "part1": "Para pólizas vendidas o emitidas a partir del 1 de septiembre de 2024, las reglas federales limitan el Seguro Médico de Duración Corta (STLDI) a un plazo inicial de",
+          "bold1": "no más de 3 meses",
+          "part2": "y a un",
+          "bold2": "máximo total de 4 meses",
+          "part3": "incluyendo renovaciones o extensiones. Históricamente algunos planes temporales ofrecían periodos más largos; la disponibilidad actual depende de las reglas estatales y de las presentaciones del asegurador. Revise siempre los detalles en la cotización antes de solicitar."
+        }
+      },
+      "guidance": {
+        "useCases": {
+          "title": "Cuándo suele usarse",
+          "items": [
+            "Entre trabajos o periodos de espera de nuevo empleo",
+            "Perdió la Inscripción Abierta y no califica para un Período Especial",
+            "Recién graduados o pre-jubilados puenteando a otra cobertura"
+          ]
+        },
+        "notInclude": {
+          "title": "Lo que generalmente no incluye",
+          "items": [
+            "Cobertura para condiciones preexistentes",
+            "Beneficios preventivos/maternidad integrales como los planes ACA",
+            "Renovación garantizada o continuidad a largo plazo"
+          ]
+        },
+        "beforeApply": {
+          "title": "Antes de solicitar",
+          "items": [
+            "Confirme sus médicos y hospitales durante la cotización",
+            "Elija un deducible que realmente pueda pagar",
+            "Considere agregar cobertura suplementaria si es necesario"
+          ]
+        }
+      },
+      "disclosures": {
+        "underwriter": {
+          "label": "Aseguradora:",
+          "text": "La mayoría de los planes UnitedHealthOne® son emitidos por Golden Rule Insurance Company (una compañía de UnitedHealthcare). La disponibilidad varía por estado y formulario; no disponible en todos los estados."
+        },
+        "notMEC": {
+          "label": "No es Cobertura Esencial Mínima:",
+          "text": "El seguro de corto plazo no es cobertura ACA y puede tener límites, exclusiones y periodos de espera. Las condiciones preexistentes normalmente no están cubiertas."
+        },
+        "linkUse": {
+          "label": "Uso del enlace de cotización:",
+          "text": "Los residentes de Carolina del Sur no pueden usar el enlace E-Store. El uso del enlace está sujeto a los términos del asegurador."
+        },
+        "footer": "Esta página es solo informativa y no describe todas las limitaciones o términos. Revise siempre el folleto, avisos y póliza/certificado en su estado antes de solicitar."
+      },
+      "stmMetadata": {
+        "title": "Seguro Médico de Corto Plazo (UnitedHealthOne) | Isaac Plans",
+        "description": "Resumen y cotización segura de cobertura temporal. La disponibilidad y la duración varían por estado.",
+        "keywords": "seguro médico temporal, corto plazo, no ACA, UHOne, Golden Rule",
+        "image": "https://www.isaacplans.com/images/stm_es.png",
+        "imageAlt": "Vista previa de planes de corto plazo"
+      }
+    }
   }
 }

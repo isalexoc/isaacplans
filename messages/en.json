@@ -1186,5 +1186,93 @@
     "title": "Something went wrong",
     "description": "An unexpected error occurred. You can try again.",
     "retry": "Try again"
+  },
+  "uhone": {
+    "shortterm": {
+      "hero": {
+        "badge": "UnitedHealthOne® Short Term Medical",
+        "title": "Short Term Medical coverage — fast, flexible, and clearly explained",
+        "description": {
+          "before": "Designed to help bridge a gap in coverage for a limited time. This is",
+          "bold": "not Minimum Essential Coverage (ACA)",
+          "after": ", doesn’t cover preexisting conditions, and has other important limitations. Availability and terms vary by state and by plan."
+        }
+      },
+      "cta": {
+        "label": "You can apply for coverage using the secure link below:"
+      },
+      "cards": {
+        "temp": {
+          "title": "Temporary coverage",
+          "body": "Intended for short gaps—like between jobs or while waiting for other coverage to begin."
+        },
+        "notAca": {
+          "title": "Not ACA/MEC",
+          "body": "Does not meet ACA requirements. Preexisting conditions are excluded and benefits are limited by the policy."
+        },
+        "quote": {
+          "title": "Quote online",
+          "body": "Use the secure UHOne link above to see plans and pricing for your state."
+        }
+      },
+      "notice": {
+        "title": "Important duration update:",
+        "body": {
+          "part1": "For policies sold or issued on or after Sept 1, 2024, federal rules limit Short-Term Limited-Duration Insurance (STLDI) to an initial term of",
+          "bold1": "no more than 3 months",
+          "part2": "and a",
+          "bold2": "maximum total duration of 4 months",
+          "part3": "including any renewals or extensions. Historically, some short-term offerings were available for longer periods; current availability and term lengths depend on state rules and carrier filings. Always review the details shown in the quote flow before applying."
+        }
+      },
+      "guidance": {
+        "useCases": {
+          "title": "Common use cases",
+          "items": [
+            "Between jobs or new-hire waiting periods",
+            "Missed Open Enrollment and no Special Enrollment Period",
+            "Recent graduates or early retirees bridging to other coverage"
+          ]
+        },
+        "notInclude": {
+          "title": "What it generally doesn’t include",
+          "items": [
+            "Coverage for preexisting conditions",
+            "Comprehensive preventive/maternity benefits like ACA plans",
+            "Guaranteed renewability or long-term continuation"
+          ]
+        },
+        "beforeApply": {
+          "title": "Before you apply",
+          "items": [
+            "Confirm your doctors and facilities in the quote flow",
+            "Choose a deductible you can actually afford",
+            "Consider pairing with supplemental coverage if needed"
+          ]
+        }
+      },
+      "disclosures": {
+        "underwriter": {
+          "label": "Underwriter:",
+          "text": "Most UnitedHealthOne® plans are underwritten by Golden Rule Insurance Company (a UnitedHealthcare company). Product availability varies by state and form; not available in all states."
+        },
+        "notMEC": {
+          "label": "Not Minimum Essential Coverage:",
+          "text": "Short Term Medical is not ACA coverage and may have limits, exclusions, and waiting periods. Preexisting conditions are typically not covered."
+        },
+        "linkUse": {
+          "label": "Quoting link use:",
+          "text": "Residents of South Carolina cannot use the E-Store link. Use of the E-Store link is subject to carrier terms."
+        },
+        "footer": "This page is for general information only and does not describe all limitations or terms. Always review the brochure, notices, and policy/certificate in your state before applying."
+      },
+      "stmMetadata": {
+        "title": "Short Term Medical (UnitedHealthOne) | Isaac Plans",
+        "description": "Short Term Medical overview and secure quoting. Temporary coverage with clear limitations. Product availability and term lengths vary by state.",
+        "keywords": "short term medical, temporary coverage, non-ACA, UHOne, Golden Rule, short-term health insurance",
+        "image": "https://www.isaacplans.com/images/stm.png",
+        "imageAlt": "Short Term Medical plans preview"
+      }
+    }
   }
 }
