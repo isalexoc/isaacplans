@@ -59,6 +59,10 @@ export const routing = defineRouting({
       en: "/carriers/uhone/shortterm",
       es: "/carriers/uhone/shortterm",
     },
+    "/short-term-medical": {
+      en: "/short-term-medical",
+      es: "/cobertura-a-corto-plazo",
+    },
   },
 });
 

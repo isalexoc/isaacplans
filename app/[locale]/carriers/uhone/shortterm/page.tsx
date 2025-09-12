@@ -68,7 +68,7 @@ export default async function ShortTermMedicalPage() {
   const t = await getTranslations({ locale, namespace: "uhone.shortterm" });
 
   return (
-    <main className="min-h-screen">
+    <div className="min-h-screen">
       {/* Hero */}
       <section className="relative overflow-hidden bg-gradient-to-b from-primary/10 via-background to-background">
         <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
@@ -241,6 +241,6 @@ export default async function ShortTermMedicalPage() {
           `,
         }}
       />
-    </main>
+    </div>
   );
 }

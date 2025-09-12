@@ -1189,6 +1189,154 @@
   },
   "uhone": {
     "shortterm": {
+      "templateContent": {
+        "uhone": {
+          "shortterm": {
+            "shorttermMain": {
+              "stmMetadata": {
+                "title": "Short Term Medical (STLDI) | Isaac Plans Insurance",
+                "description": "Learn about short-term medical coverage (STLDI). Temporary health insurance for gaps in coverage. Not ACA-compliant, excludes preexisting conditions, and availability varies by state.",
+                "keywords": "short term medical, STLDI, temporary health insurance, gap coverage, non-ACA, health plans",
+                "image": "https://www.isaacplans.com/images/stm_main.png",
+                "imageAlt": "Short Term Medical coverage overview"
+              }
+            },
+            "hero": {
+              "badge": "Short Term Medical (STLDI)",
+              "name": "Isaac Orraiz – Insurance Agent",
+              "title": "Bridge a gap in coverage—fast, flexible, and clearly explained",
+              "description": "Designed to help during short gaps—like between jobs or while waiting for other coverage to begin. This is not Minimum Essential Coverage (ACA), excludes preexisting conditions, and has important limitations that vary by state.",
+              "testimonials": [
+                {
+                  "name": "Adriana M.",
+                  "text": "Needed coverage between jobs. The process was quick and clear—exactly what I needed for a short period."
+                }
+              ],
+              "happyClient": {
+                "title": "Happy Client",
+                "subtitle": "3,000+ policies assisted"
+              }
+            },
+            "cta": {
+              "label": "You can apply for coverage at the following link:"
+            },
+
+            "definition": {
+              "title": "What is Short Term Medical?",
+              "description": "Short-Term Limited-Duration Insurance (STLDI) is temporary medical coverage meant to last months—not years. It can help with unexpected illness or injury during a gap, but it is not ACA coverage and typically doesn’t cover preexisting conditions, preventive care requirements, or certain benefits such as maternity or mental health. Always review details in the quote flow and policy documents for your state."
+            },
+
+            "notice": {
+              "title": "Important duration update:",
+              "body": {
+                "part1": "For policies sold or issued on or after Sept 1, 2024, federal rules limit STLDI to an initial term of",
+                "bold1": "no more than 3 months",
+                "part2": "and a",
+                "bold2": "maximum total duration of 4 months",
+                "part3": "including any renewals or extensions. State rules and carrier filings vary; review the quote details before applying."
+              }
+            },
+
+            "about": {
+              "badge": "About Isaac",
+              "headline": "Your trusted advisor for gap coverage",
+              "description": "I help you understand when short-term coverage may make sense and when an ACA plan or other option may be a better fit.",
+              "name": "Isaac Orraiz",
+              "role": "Licensed Health-Insurance Agent",
+              "credential": "21592068"
+            },
+
+            "eligibility": {
+              "headlineBeforeBold": "Who",
+              "headlineBold": "might qualify?",
+              "intro": "Eligibility and terms vary by state and underwriting. Generally, STM is designed for:",
+              "bullets": [
+                "People between jobs or waiting for other coverage to start",
+                "Healthy applicants who don’t need ongoing care for preexisting conditions",
+                "Individuals who want fast effective dates (where available)",
+                "Those comfortable with benefit limits and potential exclusions"
+              ],
+              "note": "Short term medical is not a substitute for comprehensive ACA coverage. Read all notices and policy terms carefully."
+            },
+
+            "enroll": {
+              "headlineBeforeBold": "How to",
+              "headlineBold": "enroll",
+              "intro": "Applying typically takes a few minutes.",
+              "steps": [
+                "<strong>Use the official quoting button</strong> to see plans and pricing for your state.",
+                "<strong>Review disclosures and submit</strong> your application online."
+              ],
+              "subHeading": "What you’ll need",
+              "bullets": [
+                "Basic personal information",
+                "Your home address and contact details",
+                "Preferred start date (subject to state rules and availability)",
+                "A payment method"
+              ],
+              "note": "Availability, waiting periods, and effective dates vary by state."
+            },
+
+            "faq": {
+              "label": "More Info",
+              "titleBeforeBold": "Common",
+              "titleBold": "Questions",
+              "items": [
+                {
+                  "q": "Is Short Term Medical ACA-compliant?",
+                  "a": "No. STM is not Minimum Essential Coverage and does not include ACA protections or essential health benefits."
+                },
+                {
+                  "q": "Are preexisting conditions covered?",
+                  "a": "Typically no. STM usually excludes preexisting conditions and may include other limitations. Read the specific policy documents."
+                },
+                {
+                  "q": "How long can it last?",
+                  "a": "Federal rules limit STM sold on or after Sept 1, 2024 to an initial term of up to 3 months and a maximum total duration of 4 months including renewals. States may have additional limits."
+                },
+                {
+                  "q": "Can I keep my current doctor?",
+                  "a": "Provider access and discounts vary by plan and state. Review network and reimbursement information in the quote flow."
+                },
+                {
+                  "q": "Does it include benefits like maternity or mental health?",
+                  "a": "Often limited or excluded. Check the quote flow and policy for details."
+                },
+                {
+                  "q": "Can I cancel early?",
+                  "a": "Cancellation and refund rules vary by state and policy. Review the disclosures shown during the online application."
+                },
+                {
+                  "q": "What happens when it ends?",
+                  "a": "STM is meant for short gaps. Before it ends, consider enrolling in an ACA plan, employer coverage, or another qualifying option."
+                }
+              ]
+            },
+
+            "selfEnroll": { "cta": "Start Online" },
+
+            "ctaBanner": {
+              "message": "Not sure if short-term is right for you? Get quick, unbiased guidance."
+            },
+
+            "disclosures": {
+              "underwriter": {
+                "label": "Underwriter:",
+                "text": "Most UnitedHealthOne® plans are underwritten by Golden Rule Insurance Company (a UnitedHealthcare company). Product availability varies by state and form; not available in all states."
+              },
+              "notMEC": {
+                "label": "Not Minimum Essential Coverage:",
+                "text": "Short Term Medical is not ACA coverage and may have limits, exclusions, and waiting periods. Preexisting conditions are typically not covered."
+              },
+              "linkUse": {
+                "label": "Quoting link use:",
+                "text": "Residents of South Carolina cannot use the E-Store link. Use of the E-Store link is subject to carrier terms."
+              },
+              "footer": "This page is for general information only. Always review the notices and policy/certificate for your state before applying."
+            }
+          }
+        }
+      },
       "hero": {
         "badge": "UnitedHealthOne® Short Term Medical",
         "title": "Short Term Medical coverage — fast, flexible, and clearly explained",

@@ -1187,6 +1187,154 @@
   },
   "uhone": {
     "shortterm": {
+      "templateContent": {
+        "uhone": {
+          "shortterm": {
+            "shorttermMain": {
+              "stmMetadata": {
+                "title": "Seguro Médico de Corto Plazo (STLDI) | Isaac Plans Insurance",
+                "description": "Conozca el Seguro Médico de Corto Plazo (STLDI). Cobertura temporal para periodos sin seguro. No cumple con ACA, excluye condiciones preexistentes y su disponibilidad varía por estado.",
+                "keywords": "seguro corto plazo, STLDI, seguro temporal, cobertura puente, no ACA, planes médicos",
+                "image": "https://www.isaacplans.com/images/stm_main_es.png",
+                "imageAlt": "Vista general del Seguro Médico de Corto Plazo"
+              }
+            },
+            "hero": {
+              "badge": "Seguro Médico de Corto Plazo (STLDI)",
+              "name": "Isaac Orraiz – Agente de Seguros",
+              "title": "Cobertura temporal para ‘puentes’—rápida, flexible y clara",
+              "description": "Diseñada para periodos cortos—por ejemplo, entre empleos o mientras espera otra cobertura. No es Cobertura Esencial Mínima (ACA), excluye condiciones preexistentes y tiene limitaciones importantes que varían por estado.",
+              "testimonials": [
+                {
+                  "name": "Adriana M.",
+                  "text": "Necesitaba cobertura entre trabajos. El proceso fue rápido y claro—exactamente lo que necesitaba por un periodo corto."
+                }
+              ],
+              "happyClient": {
+                "title": "Cliente feliz",
+                "subtitle": "¡Más de 3,000 pólizas asistidas!"
+              }
+            },
+            "cta": {
+              "label": "Puede solicitar cobertura en el siguiente enlace:"
+            },
+
+            "definition": {
+              "title": "¿Qué es el Seguro Médico de Corto Plazo?",
+              "description": "El STLDI es cobertura médica temporal que dura meses, no años. Puede ayudar con enfermedad o lesión inesperada durante un ‘hueco’ de cobertura, pero no es ACA y normalmente no cubre condiciones preexistentes, requisitos preventivos ni ciertos beneficios como maternidad o salud mental. Revise siempre los detalles en la cotización y en los documentos de su estado."
+            },
+
+            "notice": {
+              "title": "Actualización importante sobre duración:",
+              "body": {
+                "part1": "Para pólizas vendidas o emitidas a partir del 1 de septiembre de 2024, las reglas federales limitan el STLDI a un periodo inicial de",
+                "bold1": "no más de 3 meses",
+                "part2": "y a un",
+                "bold2": "máximo total de 4 meses",
+                "part3": "incluyendo renovaciones o extensiones. Las reglas estatales y presentaciones del asegurador varían; revise los detalles en la cotización antes de aplicar."
+              }
+            },
+
+            "about": {
+              "badge": "Acerca de Isaac",
+              "headline": "Su asesor de confianza para coberturas temporales",
+              "description": "Le ayudo a entender cuándo un plan de corto plazo puede tener sentido y cuándo un plan ACA u otra opción sería mejor.",
+              "name": "Isaac Orraiz",
+              "role": "Agente de Seguros Licenciado",
+              "credential": "21592068"
+            },
+
+            "eligibility": {
+              "headlineBeforeBold": "¿Quiénes",
+              "headlineBold": "pueden calificar?",
+              "intro": "La elegibilidad y los términos varían por estado y suscripción. En general, este seguro está pensado para:",
+              "bullets": [
+                "Personas entre empleos o a la espera de otra cobertura",
+                "Solicitantes sanos sin necesidad de atención continua por condiciones preexistentes",
+                "Quienes desean fechas de inicio rápidas (donde esté disponible)",
+                "Personas cómodas con límites de beneficios y posibles exclusiones"
+              ],
+              "note": "El corto plazo no reemplaza la cobertura integral ACA. Lea cuidadosamente los avisos y términos de la póliza."
+            },
+
+            "enroll": {
+              "headlineBeforeBold": "Cómo",
+              "headlineBold": "inscribirse",
+              "intro": "La solicitud suele tomar pocos minutos.",
+              "steps": [
+                "<strong>Use el botón oficial de cotización</strong> para ver planes y precios en su estado.",
+                "<strong>Revise los avisos y envíe</strong> su solicitud en línea."
+              ],
+              "subHeading": "Lo que necesitará",
+              "bullets": [
+                "Información personal básica",
+                "Su dirección y datos de contacto",
+                "Fecha de inicio preferida (sujeta a reglas estatales y disponibilidad)",
+                "Un método de pago"
+              ],
+              "note": "La disponibilidad, periodos de espera y fechas de vigencia varían por estado."
+            },
+
+            "faq": {
+              "label": "Más información",
+              "titleBeforeBold": "Preguntas",
+              "titleBold": "comunes",
+              "items": [
+                {
+                  "q": "¿Cumple con la ACA?",
+                  "a": "No. El seguro de corto plazo no es Cobertura Esencial Mínima y no incluye protecciones ni beneficios esenciales de la ACA."
+                },
+                {
+                  "q": "¿Se cubren condiciones preexistentes?",
+                  "a": "Generalmente no. Usualmente están excluidas y pueden aplicarse otras limitaciones. Revise los documentos de la póliza."
+                },
+                {
+                  "q": "¿Cuánto tiempo puede durar?",
+                  "a": "Las reglas federales limitan el STLDI vendido desde el 1 de septiembre de 2024 a un periodo inicial de hasta 3 meses y un máximo total de 4 meses incluyendo renovaciones. Los estados pueden imponer límites adicionales."
+                },
+                {
+                  "q": "¿Puedo seguir con mi médico?",
+                  "a": "El acceso a proveedores y los descuentos varían según el plan y el estado. Revise la información de red y reembolsos en la cotización."
+                },
+                {
+                  "q": "¿Incluye beneficios como maternidad o salud mental?",
+                  "a": "A menudo son limitados o excluidos. Verifique la cotización y la póliza."
+                },
+                {
+                  "q": "¿Puedo cancelar antes?",
+                  "a": "Las reglas de cancelación y reembolsos varían por estado y póliza. Revise los avisos durante la solicitud en línea."
+                },
+                {
+                  "q": "¿Qué pasa cuando termina?",
+                  "a": "El corto plazo es para periodos breves. Antes de que finalice, considere inscribirse en un plan ACA, cobertura del empleador u otra opción."
+                }
+              ]
+            },
+
+            "selfEnroll": { "cta": "Comenzar en línea" },
+
+            "ctaBanner": {
+              "message": "¿No está seguro si le conviene el corto plazo? Obtenga asesoría rápida y objetiva."
+            },
+
+            "disclosures": {
+              "underwriter": {
+                "label": "Aseguradora:",
+                "text": "La mayoría de los planes UnitedHealthOne® están suscritos por Golden Rule Insurance Company (una compañía de UnitedHealthcare). La disponibilidad de productos varía por estado y formulario; no disponible en todos los estados."
+              },
+              "notMEC": {
+                "label": "No es Cobertura Esencial Mínima (ACA):",
+                "text": "El seguro de corto plazo no es cobertura ACA y puede tener límites, exclusiones y periodos de espera. Normalmente no cubre condiciones preexistentes."
+              },
+              "linkUse": {
+                "label": "Uso del enlace de cotización:",
+                "text": "Los residentes de Carolina del Sur no pueden usar el enlace E-Store. El uso del enlace está sujeto a los términos del asegurador."
+              },
+              "footer": "Esta página es solo informativa. Siempre revise los avisos y la póliza/certificado de su estado antes de aplicar."
+            }
+          }
+        }
+      },
       "hero": {
         "badge": "UnitedHealthOne® Seguro Médico de Corto Plazo",
         "title": "Cobertura médica temporal — rápida, flexible y clara",
