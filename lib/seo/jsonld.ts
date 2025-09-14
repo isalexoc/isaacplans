@@ -399,3 +399,95 @@ export const getIulBreadcrumbLd = (
     },
   ],
 });
+
+/** UHOne Short Term Medical — page JSON-LD */
+export const getUhoneShortTermPageLd = (
+  locale: string,
+  title: string,
+  description: string
+): WithContext<WebPage> => ({
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": `${BASE_URL}/${locale}/carriers/uhone/shortterm#webpage`,
+  url: `${BASE_URL}/${locale}/carriers/uhone/shortterm`,
+  name: title,
+  description,
+  inLanguage: locale,
+  about: { "@id": `${BASE_URL}/#organization` },
+});
+
+/** UHOne Short Term Medical — breadcrumb JSON-LD (Home → Page) */
+export const getUhoneShortTermBreadcrumbLd = (
+  locale: string,
+  homeLabel: string,
+  pageLabel: string
+): WithContext<BreadcrumbList> => ({
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    {
+      "@type": "ListItem",
+      position: 1,
+      name: homeLabel,
+      item: `${BASE_URL}/${locale}`,
+    },
+    {
+      "@type": "ListItem",
+      position: 2,
+      name: pageLabel,
+      item: `${BASE_URL}/${locale}/carriers/uhone/shortterm`,
+    },
+  ],
+});
+
+/** Short-Term Medical (main page) — locale-aware path helper */
+const shortTermPathFor = (locale: string) =>
+  locale?.toLowerCase().startsWith("es")
+    ? "cobertura-a-corto-plazo"
+    : "short-term-medical";
+
+/** WebPage JSON-LD for STM main page */
+export const getShortTermMainPageLd = (
+  locale: string,
+  title: string,
+  description: string
+): WithContext<WebPage> => {
+  const path = shortTermPathFor(locale);
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "@id": `${BASE_URL}/${locale}/${path}#webpage`,
+    url: `${BASE_URL}/${locale}/${path}`,
+    name: title,
+    description,
+    inLanguage: locale,
+    about: { "@id": `${BASE_URL}/#organization` },
+  };
+};
+
+/** BreadcrumbList JSON-LD for STM main page (Home → STM) */
+export const getShortTermMainBreadcrumbLd = (
+  locale: string,
+  homeLabel: string,
+  pageLabel: string
+): WithContext<BreadcrumbList> => {
+  const path = shortTermPathFor(locale);
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: homeLabel,
+        item: `${BASE_URL}/${locale}`,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: pageLabel,
+        item: `${BASE_URL}/${locale}/${path}`,
+      },
+    ],
+  };
+};

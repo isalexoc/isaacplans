@@ -14,6 +14,10 @@ import HeroWithTestimonialsGeneric from "@/components/hero-template";
 import AboutSectionGeneric from "@/components/about-section-template";
 import EligibilitySection from "@/components/eligibility-section";
 import FaqSection from "@/components/FaqSection";
+import {
+  getShortTermMainPageLd,
+  getShortTermMainBreadcrumbLd,
+} from "@/lib/seo/jsonld";
 
 /* ───────── SEO ───────── */
 export async function generateMetadata(): Promise<Metadata> {
@@ -74,6 +78,24 @@ export default async function ShortTermMedicalPage() {
     locale,
     namespace: "uhone.shortterm.templateContent.uhone.shortterm",
   });
+
+  const tMeta = await getTranslations({
+    locale,
+    namespace:
+      "uhone.shortterm.templateContent.uhone.shortterm.shorttermMain.stmMetadata",
+  });
+
+  const pageLd = getShortTermMainPageLd(
+    locale,
+    tMeta("title"),
+    tMeta("description")
+  );
+
+  const crumbLd = getShortTermMainBreadcrumbLd(
+    locale,
+    locale.startsWith("es") ? "Inicio" : "Home",
+    tMeta("title")
+  );
 
   return (
     <div className="min-h-screen">
@@ -192,6 +214,12 @@ export default async function ShortTermMedicalPage() {
           answer: tem(`faq.items.${i}.a`),
         }))}
         imagePublicId="tmph9wnbhil_wts4sf"
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify([pageLd, crumbLd]).replace(/</g, "\\u003c"),
+        }}
       />
     </div>
   );

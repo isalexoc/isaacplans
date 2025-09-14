@@ -2,6 +2,10 @@ import type { Metadata } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
 import { Shield, Clock, Info, ExternalLink } from "lucide-react";
 import HIButton from "@/components/HIButton";
+import {
+  getUhoneShortTermPageLd,
+  getUhoneShortTermBreadcrumbLd,
+} from "@/lib/seo/jsonld";
 
 import {
   ogLocaleOf,
@@ -66,6 +70,22 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function ShortTermMedicalPage() {
   const locale = (await getLocale()) as SupportedLocale;
   const t = await getTranslations({ locale, namespace: "uhone.shortterm" });
+
+  const tMeta = await getTranslations({
+    locale,
+    namespace: "uhone.shortterm.stmMetadata",
+  });
+
+  const pageLd = getUhoneShortTermPageLd(
+    locale,
+    tMeta("title"),
+    tMeta("description")
+  );
+  const crumbLd = getUhoneShortTermBreadcrumbLd(
+    locale,
+    locale.startsWith("es") ? "Inicio" : "Home",
+    tMeta("title")
+  );
 
   return (
     <div className="min-h-screen">
@@ -216,6 +236,14 @@ export default async function ShortTermMedicalPage() {
           <p>{t("disclosures.footer")}</p>
         </div>
       </section>
+
+      <script
+        type="application/ld+json"
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify([pageLd, crumbLd]).replace(/</g, "\\u003c"),
+        }}
+      />
 
       {/* a11y patch for 3rd-party chat close button (labels the button if present) */}
       <script
