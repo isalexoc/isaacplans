@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
 import HIButton from "@/components/HIButton";
+import ShortTermCarriersSection from "@/components/shortterm-carriers-section";
 
 import {
   ogLocaleOf,
@@ -82,7 +83,7 @@ export default async function ShortTermMedicalPage() {
         name={tem("hero.name")}
         title={tem("hero.title")}
         description={tem("hero.description")}
-        imagePublicId="stmd_hero_mo5c1p" /* your Cloudinary ID */
+        imagePublicId="pexels-chokniti-khongchum-1197604-3938022_bujifm" /* your Cloudinary ID */
         imagePosition="left"
         /* CTA area: keep your CTA button AND the exact UHOne snippet with an accessible name */
         cta={<HIButton />}
@@ -116,7 +117,7 @@ export default async function ShortTermMedicalPage() {
         name=""
         title={tem("definition.title")}
         description={tem("definition.description")}
-        imagePublicId="stmd_define_cw0d0p" /* your Cloudinary ID */
+        imagePublicId="pexels-thirdman-5327584_cfiman" /* your Cloudinary ID */
         imagePosition="right"
         cta={<HIButton />}
       />
@@ -137,8 +138,42 @@ export default async function ShortTermMedicalPage() {
           tem("eligibility.bullets.3"),
         ]}
         note={tem("eligibility.note")}
-        imagePublicId="stmd_elig_b3v9s7"
+        imagePublicId="pexels-emma-bauso-1183828-2253879_1_1_udmuz2"
         imagePosition="left"
+      />
+
+      {/* CARRIERS ------------------------------------------------------ */}
+      <ShortTermCarriersSection
+        label={tem("carriersSection.label")}
+        title={tem("carriersSection.title")}
+        subtitle={tem("carriersSection.subtitle")}
+        ctaLabel={tem("carriersSection.cta")}
+        carriers={[
+          {
+            id: "uhone",
+            name: tem("carriersSection.cards.uhone.name"),
+            blurb: tem("carriersSection.cards.uhone.blurb"),
+            href: tem("carriersSection.cards.uhone.href"),
+          },
+          {
+            id: "pivot",
+            name: tem("carriersSection.cards.pivot.name"),
+            blurb: tem("carriersSection.cards.pivot.blurb"),
+            href: tem("carriersSection.cards.pivot.href"),
+          },
+          {
+            id: "manhattan",
+            name: tem("carriersSection.cards.manhattan.name"),
+            blurb: tem("carriersSection.cards.manhattan.blurb"),
+            href: tem("carriersSection.cards.manhattan.href"),
+          },
+          {
+            id: "allstate",
+            name: tem("carriersSection.cards.allstate.name"),
+            blurb: tem("carriersSection.cards.allstate.blurb"),
+            href: tem("carriersSection.cards.allstate.href"),
+          },
+        ]}
       />
 
       {/* FAQ ----------------------------------------------------------- */}
@@ -156,7 +191,7 @@ export default async function ShortTermMedicalPage() {
           question: tem(`faq.items.${i}.q`),
           answer: tem(`faq.items.${i}.a`),
         }))}
-        imagePublicId="stmd_faq_93l1fb"
+        imagePublicId="tmph9wnbhil_wts4sf"
       />
     </div>
   );

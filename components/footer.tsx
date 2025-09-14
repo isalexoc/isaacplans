@@ -42,12 +42,17 @@ export default async function Footer() {
   const footerLinks = {
     services: [
       { name: tServices("aca.title"), href: "/aca" },
+      {
+        name: tServices("shortTermMedical.title"),
+        href: "/short-term-medical",
+      },
       { name: tServices("dentalVision.title"), href: "/dental-vision" },
       {
         name: tServices("hospitalIndemnity.title"),
         href: "/hospital-indemnity",
       },
-      { name: tServices("life.title"), href: "" },
+      { name: tServices("life.title"), href: "/iul" },
+
       { name: tServices("cancer.title"), href: "" },
       { name: tServices("stroke.title"), href: "" },
     ],

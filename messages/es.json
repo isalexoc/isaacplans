@@ -172,6 +172,10 @@
             "title": "ACA Obamacare",
             "description": "Cobertura médica asequible bajo el Mercado de Seguros ACA."
           },
+          "shortTermMedical": {
+            "title": "Seguro Médico a Corto Plazo",
+            "description": "Seguro médico temporal para cubrir brechas inesperadas en la cobertura."
+          },
           "dentalVision": {
             "title": "Dental y Visión",
             "description": "Planes que cubren exámenes dentales y cuidado visual."
@@ -1331,6 +1335,34 @@
                 "text": "Los residentes de Carolina del Sur no pueden usar el enlace E-Store. El uso del enlace está sujeto a los términos del asegurador."
               },
               "footer": "Esta página es solo informativa. Siempre revise los avisos y la póliza/certificado de su estado antes de aplicar."
+            },
+            "carriersSection": {
+              "label": "Inscríbete tú mismo",
+              "title": "Compañías de seguro médico a corto plazo",
+              "subtitle": "¿Prefieres inscribirte por tu cuenta? Elige una compañía abajo. Si necesitas ayuda en cualquier paso, con gusto te apoyo.",
+              "cta": "Ver planes",
+              "cards": {
+                "uhone": {
+                  "name": "UnitedHealthcare (UHOne)",
+                  "blurb": "Cobertura temporal flexible con redes amplias e inscripción rápida.",
+                  "href": "/es/carriers/uhone/shortterm"
+                },
+                "pivot": {
+                  "name": "Pivot Health",
+                  "blurb": "Opciones económicas y varios periodos para cubrir brechas de cobertura.",
+                  "href": "/es/carriers/pivot/shortterm"
+                },
+                "manhattan": {
+                  "name": "ManhattanLife",
+                  "blurb": "Planes a corto plazo sencillos que puedes complementar con beneficios adicionales.",
+                  "href": "/es/carriers/manhattan/shortterm"
+                },
+                "allstate": {
+                  "name": "Allstate Health Solutions",
+                  "blurb": "Opciones de corto plazo con complementos para personalizar tu protección.",
+                  "href": "/es/carriers/allstate/shortterm"
+                }
+              }
             }
           }
         }

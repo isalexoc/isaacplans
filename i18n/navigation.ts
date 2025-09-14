@@ -18,4 +18,5 @@ export type AppHref =
   | "/about#whyChooseUs"
   | "/about#meetFounder"
   | "/about#contactSupport"
-  | "/iul";
+  | "/iul"
+  | "/short-term-medical";

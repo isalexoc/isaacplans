@@ -173,6 +173,10 @@
             "title": "ACA – Affordable Care Act",
             "description": "Affordable health coverage under the ACA Marketplace."
           },
+          "shortTermMedical": {
+            "title": "Short Term Medical",
+            "description": "Temporary health insurance for unexpected gaps in coverage."
+          },
           "dentalVision": {
             "title": "Dental & Vision",
             "description": "Plans that help cover dental checkups and vision care."
@@ -1333,6 +1337,34 @@
                 "text": "Residents of South Carolina cannot use the E-Store link. Use of the E-Store link is subject to carrier terms."
               },
               "footer": "This page is for general information only. Always review the notices and policy/certificate for your state before applying."
+            },
+            "carriersSection": {
+              "label": "Apply yourself",
+              "title": "Short-term medical carriers",
+              "subtitle": "Prefer to self-enroll? Choose a carrier below. If you want guidance at any step, I’m here to help.",
+              "cta": "View plans",
+              "cards": {
+                "uhone": {
+                  "name": "UnitedHealthcare (UHOne)",
+                  "blurb": "Flexible short-term coverage with broad networks and fast enrollment.",
+                  "href": "/en/carriers/uhone/shortterm"
+                },
+                "pivot": {
+                  "name": "Pivot Health",
+                  "blurb": "Budget-friendly options and multiple term lengths to bridge coverage gaps.",
+                  "href": "/en/carriers/pivot/shortterm"
+                },
+                "manhattan": {
+                  "name": "ManhattanLife",
+                  "blurb": "Straightforward short-term plans that can pair with supplemental benefits.",
+                  "href": "/en/carriers/manhattan/shortterm"
+                },
+                "allstate": {
+                  "name": "Allstate Health Solutions",
+                  "blurb": "Short-term medical choices with add-ons to customize your protection.",
+                  "href": "/en/carriers/allstate/shortterm"
+                }
+              }
             }
           }
         }
