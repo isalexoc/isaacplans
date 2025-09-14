@@ -182,8 +182,8 @@
             "description": "Daily cash benefits during hospital stays to offset costs."
           },
           "life": {
-            "title": "Life Insurance",
-            "description": "Financial protection for your loved ones after you’re gone."
+            "title": "IUL - Indexed Universal Life",
+            "description": "Flexible life insurance with cash value growth potential."
           },
           "cancer": {
             "title": "Cancer Plans",
@@ -1420,6 +1420,137 @@
         "keywords": "short term medical, temporary coverage, non-ACA, UHOne, Golden Rule, short-term health insurance",
         "image": "https://www.isaacplans.com/images/stm.png",
         "imageAlt": "Short Term Medical plans preview"
+      }
+    }
+  },
+  "iulPage": {
+    "hero": {
+      "badge": "Indexed Universal Life (IUL)",
+      "name": "Isaac Orraiz – Insurance Agent",
+      "title": "Flexible Protection with Growth Potential",
+      "description": "IUL is permanent life insurance with flexible premiums and an adjustable death benefit. Cash value can earn interest linked to a market index (not invested directly), subject to caps, participation rates, and policy charges.",
+      "testimonials": [
+        {
+          "name": "Angela M.",
+          "text": "Isaac explained IUL in plain English and built an illustration around my goals. I love the flexibility as my income changes."
+        },
+        {
+          "name": "Derrick S.",
+          "text": "We wanted lifetime coverage plus a way to build policy value. The custom IUL design gave us both—without market downside in the index crediting."
+        }
+      ],
+      "happyClient": {
+        "title": "Families Protected",
+        "subtitle": "3,000+ policies guided"
+      }
+    },
+
+    "ctaButton": {
+      "title": "Request Information",
+      "subtitle": "Personalized, no obligation"
+    },
+
+    "about": {
+      "badge": "About Isaac",
+      "headline": "Tailored life-insurance strategies—built around your goals",
+      "description": "I help families design IUL policies with the right blend of protection and flexibility. We’ll review funding strategies, riders, and how loans/withdrawals can impact your coverage and long-term goals.",
+      "name": "Isaac Orraiz",
+      "role": "Licensed Insurance Agent",
+      "credential": "21592068"
+    },
+
+    "definition": {
+      "title": "What is Indexed Universal Life?",
+      "description": "IUL is a type of universal life policy that credits interest to cash value based on an index (e.g., S&P 500®) using a policy’s crediting method. It typically includes a floor (e.g., 0%) that limits downside to the credited interest, and may include caps and participation rates that limit upside. Policy charges and the cost of insurance apply."
+    },
+
+    "eligibility": {
+      "headlineBeforeBold": "Who",
+      "headlineBold": "is it for?",
+      "intro": "IUL can fit people who want permanent coverage and cash-value flexibility:",
+      "bullets": [
+        "Need lifetime death-benefit protection",
+        "Want potential, tax-advantaged cash-value accumulation",
+        "Prefer flexible premiums and adjustable benefits",
+        "Are comfortable with index caps/participation limits and policy charges"
+      ],
+      "note": "Loans and withdrawals reduce cash value and death benefit and may cause a policy to lapse. Tax treatment can vary—consult a tax professional."
+    },
+
+    "enroll": {
+      "headlineBeforeBold": "How we design your",
+      "headlineBold": "custom IUL",
+      "intro": "We’ll build an illustration around your budget and goals:",
+      "steps": {
+        "0": "Identify coverage needs, riders, and time horizon",
+        "1": "Choose funding strategy and index crediting options"
+      },
+      "subHeading": "We’ll review:",
+      "bullets": [
+        "Coverage amount and funding levels",
+        "Cap, floor, and participation rate mechanics",
+        "Riders (e.g., accelerated benefits) and policy charges",
+        "Loan/withdrawal strategies and risks"
+      ],
+      "note": "Illustrations are hypothetical and not guarantees of future performance."
+    },
+
+    "faq": {
+      "label": "IUL Basics",
+      "titleBeforeBold": "Common",
+      "titleBold": "Questions",
+      "items": [
+        {
+          "q": "Is my money invested in the stock market?",
+          "a": "No. Indexes are used as a benchmark for crediting interest. Cash value is not directly invested in the market."
+        },
+        {
+          "q": "What are caps, floors, and participation rates?",
+          "a": "They are policy settings that limit upside (cap), set a minimum credited rate (floor, often 0%), and determine how much of the index change is credited (participation rate)."
+        },
+        {
+          "q": "Can my premiums change?",
+          "a": "Yes. Universal life allows flexible premiums, but underfunding can reduce cash value and may lead to policy lapse if charges exceed value."
+        },
+        {
+          "q": "What happens if I take a loan or withdrawal?",
+          "a": "Loans/withdrawals reduce cash value and death benefit and may create tax consequences if the policy lapses or is a MEC. Ask your tax advisor."
+        },
+        {
+          "q": "Are returns guaranteed?",
+          "a": "No. Credited interest is based on the policy’s crediting method and index performance, subject to caps/participation. Many policies include a 0% floor for the credited rate, but charges still apply."
+        },
+        {
+          "q": "Who might consider IUL?",
+          "a": "People seeking permanent coverage, flexible funding, and potential cash-value growth for long-term goals like protection, supplemental income strategies, or legacy planning."
+        }
+      ]
+    },
+
+    "ctaBanner": {
+      "message": "Ready to see a personalized IUL illustration? Book a 20-minute call."
+    },
+
+    "iulMetadata": {
+      "title": "Indexed Universal Life (IUL) Insurance | Isaac Plans Insurance",
+      "description": "Permanent protection with flexible premiums and index-linked cash value. Learn how caps, floors, charges, and loans work—and get a tailored illustration.",
+      "image": "https://www.isaacplans.com/images/iul.png",
+      "imageAlt": "Indexed Universal Life overview",
+      "keywords": "indexed universal life, IUL, permanent life insurance, cash value, life insurance illustration, flexible premiums",
+      "breadcrumbs": {
+        "home": "Home",
+        "iul": "Indexed Universal Life"
+      }
+    },
+    "calendar": {
+      "title": "Book Your IUL Phone Appointment",
+      "backButton": "Go Back",
+      "meta": {
+        "title": "IUL Appointment Calendar | Isaac Plans Insurance",
+        "description": "Schedule your Indexed Universal Life (IUL) consultation with Isaac Plans Insurance. Get personalized guidance on cash value, flexibility, and indexed growth.",
+        "keywords": "IUL appointment, indexed universal life calendar, life insurance consultation, cash value life insurance, bilingual agent",
+        "image": "https://www.isaacplans.com/images/iul_en.png",
+        "imageAlt": "IUL appointment calendar"
       }
     }
   }

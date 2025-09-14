@@ -42,7 +42,7 @@ const serviceLinks = [
   { key: "aca", href: "/aca", icon: "Stethoscope" },
   { key: "dentalVision", href: "/dental-vision", icon: "Eye" },
   { key: "hospitalIndemnity", href: "/hospital-indemnity", icon: "Hospital" },
-  { key: "life", href: "", icon: "HeartPulse" },
+  { key: "life", href: "/iul", icon: "HeartPulse" },
   { key: "cancer", href: "", icon: "Radiation" },
   { key: "stroke", href: "", icon: "Activity" },
 ] as const satisfies ReadonlyArray<{

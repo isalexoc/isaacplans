@@ -17,4 +17,5 @@ export type AppHref =
   | "/about#missionVision"
   | "/about#whyChooseUs"
   | "/about#meetFounder"
-  | "/about#contactSupport";
+  | "/about#contactSupport"
+  | "/iul";

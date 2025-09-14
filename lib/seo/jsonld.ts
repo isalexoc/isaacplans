@@ -358,3 +358,42 @@ export const getAboutBreadcrumbLd = (
     },
   ],
 });
+
+/* IUL page (Indexed Universal Life) */
+export const getIulPageLd = (
+  locale: string,
+  title: string,
+  description: string
+): WithContext<WebPage> => ({
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": `https://www.isaacplans.com/${locale}/indexed-universal-life#webpage`,
+  url: `https://www.isaacplans.com/${locale}/indexed-universal-life`,
+  name: title,
+  description,
+  inLanguage: locale,
+  about: { "@id": "https://www.isaacplans.com/#organization" },
+});
+
+export const getIulBreadcrumbLd = (
+  locale: string,
+  homeLabel: string,
+  iulLabel: string
+): WithContext<BreadcrumbList> => ({
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    {
+      "@type": "ListItem",
+      position: 1,
+      name: homeLabel,
+      item: `https://www.isaacplans.com/${locale}`,
+    },
+    {
+      "@type": "ListItem",
+      position: 2,
+      name: iulLabel,
+      item: `https://www.isaacplans.com/${locale}/indexed-universal-life`,
+    },
+  ],
+});

@@ -181,8 +181,8 @@
             "description": "Beneficios diarios en efectivo durante hospitalizaciones."
           },
           "life": {
-            "title": "Seguro de Vida",
-            "description": "Protección financiera para tus seres queridos tras tu fallecimiento."
+            "title": "IUL - Vida Universal Indexada",
+            "description": "Seguro de vida flexible con potencial de crecimiento del valor en efectivo."
           },
           "cancer": {
             "title": "Planes contra el Cáncer",
@@ -1418,6 +1418,137 @@
         "keywords": "seguro médico temporal, corto plazo, no ACA, UHOne, Golden Rule",
         "image": "https://www.isaacplans.com/images/stm_es.png",
         "imageAlt": "Vista previa de planes de corto plazo"
+      }
+    }
+  },
+  "iulPage": {
+    "hero": {
+      "badge": "Vida Universal Indexada (IUL)",
+      "name": "Isaac Orraiz – Agente de Seguros",
+      "title": "Protección flexible con potencial de crecimiento",
+      "description": "IUL es un seguro de vida permanente con primas flexibles y un beneficio por fallecimiento ajustable. El valor en efectivo puede ganar intereses vinculados a un índice (no invertido directamente), sujeto a topes, tasas de participación y cargos de la póliza.",
+      "testimonials": [
+        {
+          "name": "Ángela M.",
+          "text": "Isaac me explicó IUL sin tecnicismos y armó una ilustración según mis metas. La flexibilidad me ayuda cuando varían mis ingresos."
+        },
+        {
+          "name": "Derek S.",
+          "text": "Buscábamos cobertura de por vida y crecimiento de valor en la póliza. El diseño IUL nos dio ambas, sin caída en el crédito del índice."
+        }
+      ],
+      "happyClient": {
+        "title": "Familias protegidas",
+        "subtitle": "Más de 3,000 pólizas asesoradas"
+      }
+    },
+
+    "ctaButton": {
+      "title": "Solicitar Información",
+      "subtitle": "Personalizado y sin compromiso"
+    },
+
+    "about": {
+      "badge": "Sobre Isaac",
+      "headline": "Estrategias de vida a tu medida—según tus objetivos",
+      "description": "Ayudo a las familias a diseñar pólizas IUL con el equilibrio adecuado entre protección y flexibilidad. Revisamos cómo financiar, los ‘riders’, y cómo los préstamos/retiros impactan tu cobertura y metas a largo plazo.",
+      "name": "Isaac Orraiz",
+      "role": "Agente de Seguros Licenciado",
+      "credential": "21592068"
+    },
+
+    "definition": {
+      "title": "¿Qué es la Vida Universal Indexada?",
+      "description": "IUL es un tipo de vida universal que acredita intereses al valor en efectivo según un índice (p. ej., S&P 500®) usando el método de acreditación de la póliza. Suele incluir un piso (p. ej., 0 %) que limita el interés acreditado a la baja y puede incluir topes y tasas de participación que limitan el alza. Aplican cargos y costo del seguro."
+    },
+
+    "eligibility": {
+      "headlineBeforeBold": "¿Para",
+      "headlineBold": "quién es?",
+      "intro": "IUL puede ajustarse a quienes buscan cobertura permanente y flexibilidad en el valor en efectivo:",
+      "bullets": [
+        "Necesitan beneficio por fallecimiento de por vida",
+        "Buscan posible acumulación con ventajas fiscales",
+        "Prefieren primas flexibles y beneficios ajustables",
+        "Aceptan topes/participación y cargos de la póliza"
+      ],
+      "note": "Los préstamos y retiros reducen el valor en efectivo y el beneficio por fallecimiento y pueden causar caducidad. Los impuestos varían—consulte a un profesional tributario."
+    },
+
+    "enroll": {
+      "headlineBeforeBold": "Cómo diseñamos tu",
+      "headlineBold": "IUL a medida",
+      "intro": "Construimos una ilustración según tu presupuesto y metas:",
+      "steps": {
+        "0": "Definir necesidades de cobertura, riders y horizonte",
+        "1": "Elegir estrategia de fondos y opciones de acreditación"
+      },
+      "subHeading": "Revisaremos:",
+      "bullets": [
+        "Monto de cobertura y niveles de aportes",
+        "Mecánica de tope, piso y participación",
+        "Riders (p. ej., beneficios acelerados) y cargos",
+        "Estrategias de préstamo/retiro y sus riesgos"
+      ],
+      "note": "Las ilustraciones son hipotéticas y no garantizan resultados futuros."
+    },
+
+    "faq": {
+      "label": "Conceptos de IUL",
+      "titleBeforeBold": "Preguntas",
+      "titleBold": "frecuentes",
+      "items": [
+        {
+          "q": "¿Mi dinero está en la bolsa?",
+          "a": "No. Los índices se usan como referencia para acreditar intereses. El valor en efectivo no se invierte directamente en el mercado."
+        },
+        {
+          "q": "¿Qué son los topes, pisos y la tasa de participación?",
+          "a": "Ajustes de la póliza que limitan el alza (tope), fijan un mínimo acreditado (piso, a menudo 0 %) y definen qué parte del cambio del índice se acredita (participación)."
+        },
+        {
+          "q": "¿Mis primas pueden cambiar?",
+          "a": "Sí. La vida universal permite primas flexibles, pero aportar poco reduce el valor en efectivo y puede causar caducidad si los cargos superan el valor."
+        },
+        {
+          "q": "¿Qué pasa si pido un préstamo o retiro?",
+          "a": "Los préstamos/retiros reducen valor en efectivo y beneficio por fallecimiento y pueden generar impuestos si la póliza caduca o es MEC. Consulte a su asesor fiscal."
+        },
+        {
+          "q": "¿Los rendimientos están garantizados?",
+          "a": "No. El interés acreditado depende del método de la póliza y del índice, sujeto a topes/participación. Muchas pólizas incluyen un piso de 0 %, pero los cargos aplican."
+        },
+        {
+          "q": "¿Quién podría considerar IUL?",
+          "a": "Quienes buscan cobertura permanente, aportes flexibles y posible acumulación para metas de largo plazo como protección, ingresos complementarios o legado."
+        }
+      ]
+    },
+
+    "ctaBanner": {
+      "message": "¿Quieres ver una ilustración IUL personalizada? Agenda una llamada de 20 minutos."
+    },
+
+    "iulMetadata": {
+      "title": "Seguro de Vida Universal Indexada (IUL) | Isaac Plans Insurance",
+      "description": "Protección permanente con primas flexibles y valor en efectivo vinculado a un índice. Conoce topes, pisos, cargos y préstamos—y solicita una ilustración a tu medida.",
+      "image": "https://www.isaacplans.com/images/iul_es.png",
+      "imageAlt": "Vista general de Vida Universal Indexada",
+      "keywords": "vida universal indexada, IUL, seguro de vida permanente, valor en efectivo, ilustración, primas flexibles",
+      "breadcrumbs": {
+        "home": "Inicio",
+        "iul": "Vida Universal Indexada"
+      }
+    },
+    "calendar": {
+      "title": "Agenda tu Cita Telefónica de IUL",
+      "backButton": "Volver",
+      "meta": {
+        "title": "Calendario de Citas IUL | Isaac Plans Insurance",
+        "description": "Programa tu consulta sobre Vida Universal Indexada (IUL) con Isaac Plans Insurance. Asesoría personalizada sobre valor en efectivo, flexibilidad y crecimiento indexado.",
+        "keywords": "cita IUL, calendario IUL, seguro de vida indexado, consulta de vida universal indexada, agente bilingüe",
+        "image": "https://www.isaacplans.com/images/iul_es.png",
+        "imageAlt": "Calendario de citas para IUL"
       }
     }
   }
