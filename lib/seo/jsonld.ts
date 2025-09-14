@@ -363,22 +363,24 @@ export const getAboutBreadcrumbLd = (
 export const getIulPageLd = (
   locale: string,
   title: string,
-  description: string
+  description: string,
+  slug = "iul" // "/en/iul" or "/es/iul"
 ): WithContext<WebPage> => ({
   "@context": "https://schema.org",
   "@type": "WebPage",
-  "@id": `https://www.isaacplans.com/${locale}/indexed-universal-life#webpage`,
-  url: `https://www.isaacplans.com/${locale}/indexed-universal-life`,
+  "@id": `${BASE_URL}/${locale}/${slug}#webpage`,
+  url: `${BASE_URL}/${locale}/${slug}`,
   name: title,
   description,
   inLanguage: locale,
-  about: { "@id": "https://www.isaacplans.com/#organization" },
+  about: { "@id": `${BASE_URL}/#organization` },
 });
 
 export const getIulBreadcrumbLd = (
   locale: string,
   homeLabel: string,
-  iulLabel: string
+  iulLabel: string,
+  slug = "iul" // "/en/iul" or "/es/iul"
 ): WithContext<BreadcrumbList> => ({
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
@@ -387,13 +389,13 @@ export const getIulBreadcrumbLd = (
       "@type": "ListItem",
       position: 1,
       name: homeLabel,
-      item: `https://www.isaacplans.com/${locale}`,
+      item: `${BASE_URL}/${locale}`,
     },
     {
       "@type": "ListItem",
       position: 2,
       name: iulLabel,
-      item: `https://www.isaacplans.com/${locale}/indexed-universal-life`,
+      item: `${BASE_URL}/${locale}/${slug}`,
     },
   ],
 });
