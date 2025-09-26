@@ -3,7 +3,7 @@
     "title": "Hello world!",
     "about": "Go to the about page",
     "hero": {
-      "badge": "Licensed in 9+ States",
+      "badge": "Licensed in 11+ States",
       "name": "Isaac Orraiz",
       "title": "Your Trusted",
       "subtitle": "Insurance Agent",
@@ -104,7 +104,7 @@
     },
     "profile": {
       "title": "Your Dedicated Insurance Professional",
-      "description1": "With experience in the health-insurance industry, I specialise in helping individuals and families navigate the complex world of insurance. I am licensed in ACA, Life, Dental and Vision insurance across 9+ states.",
+      "description1": "With experience in the health-insurance industry, I specialise in helping individuals and families navigate the complex world of insurance. I am licensed in ACA, Life, Dental and Vision insurance across 11+ states.",
       "description2": "Being licensed in multiple states allows me to serve clients nationwide, ensuring you receive expert guidance wherever you are. I stay up to date with regulatory changes and new plan offerings to provide the most current options.",
       "certifications": "States I Hold a Valid Licence",
       "certs": [
@@ -120,7 +120,7 @@
       ],
       "achievements": {
         "states": {
-          "title": "9+ State Licensed",
+          "title": "11+ State Licensed",
           "description": "Authorised to serve clients across the U.S."
         },
         "clients": {
@@ -139,10 +139,10 @@
     },
     "coverage": {
       "title": "Nation-wide Coverage",
-      "subtitle": "Licensed and certified to serve clients in 9+ U.S. states.",
+      "subtitle": "Licensed and certified to serve clients in 11+ U.S. states.",
       "description": "With licences in ACA, Life, Dental and Vision across multiple states, I offer specialised professional insurance services.",
       "features": [
-        "Licensed in 9+ states",
+        "Licensed in 11+ states",
         "ACA (Health, Affordable Care Act)",
         "Health-insurance specialist",
         "Life-insurance plans",
@@ -188,6 +188,10 @@
           "life": {
             "title": "IUL - Indexed Universal Life",
             "description": "Flexible life insurance with cash value growth potential."
+          },
+          "finalExpense": {
+            "title": "Final Expense (Burial)",
+            "description": "Affordable, permanent coverage to help with funeral and final bills."
           },
           "cancer": {
             "title": "Cancer Plans",
@@ -324,7 +328,7 @@
     }
   },
   "footer": {
-    "description": "Your trusted insurance partner specializing in ACA and Medicare coverage across 9+ states. Professional, personalized service you can count on.",
+    "description": "Your trusted insurance partner specializing in ACA and Medicare coverage across 11+ states. Professional, personalized service you can count on.",
     "services": "Services",
     "resources": "Resources",
     "company": "Company",
@@ -334,7 +338,7 @@
       "phoneLabel": "Phone",
       "whatsappLabel": "WhatsApp",
       "emailLabel": "Email",
-      "licensedStates": "Licensed in 9+ States"
+      "licensedStates": "Licensed in 11+ States"
     },
     "links": {
       "guide": "Insurance Guide",
@@ -473,7 +477,7 @@
         "details": [
           "Email: info@isaacplans.com",
           "Phone: {{PHONE_NUMBER}}",
-          "Agent: Isaac Orraiz, Licensed in 9+ States"
+          "Agent: Isaac Orraiz, Licensed in 11+ States"
         ]
       }
     },
@@ -536,7 +540,7 @@
 
       "eligibility": {
         "title": "4. Eligibility and Licenses",
-        "content": "Our services are available in the states where Isaac Orraiz holds active licenses—currently 9+ U.S. states."
+        "content": "Our services are available in the states where Isaac Orraiz holds active licenses—currently 11+ U.S. states."
       },
 
       "responsibilities": {

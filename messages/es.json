@@ -3,7 +3,7 @@
     "title": "Hola Mundo!",
     "about": "Volver a la página de principal",
     "hero": {
-      "badge": "Licenciado en 9+ Estados",
+      "badge": "Licenciado en 11+ Estados",
       "name": "Isaac Orraiz",
       "title": "Su Agente de Seguros",
       "subtitle": "de Confianza",
@@ -120,7 +120,7 @@
       ],
       "achievements": {
         "states": {
-          "title": "Licencia en 9+ estados",
+          "title": "Licencia en 11+ estados",
           "description": "Autorizado para atender clientes en todo EE. UU."
         },
         "clients": {
@@ -139,7 +139,7 @@
     },
     "coverage": {
       "title": "Cobertura Nacional",
-      "subtitle": "Licenciado y certificado para servir clientes en 9+ estados de EE. UU.",
+      "subtitle": "Licenciado y certificado para servir clientes en 11+ estados de EE. UU.",
       "description": "Con licencias en ACA, Vida, Dental y Visión en múltiples estados, ofrezco servicios profesionales de seguros especializados.",
       "features": [
         "Licenciado en más de 9 estados",
@@ -187,6 +187,10 @@
           "life": {
             "title": "IUL - Vida Universal Indexada",
             "description": "Seguro de vida flexible con potencial de crecimiento del valor en efectivo."
+          },
+          "finalExpense": {
+            "title": "Gastos Finales",
+            "description": "Cobertura permanente y asequible para ayudar con gastos funerarios y finales."
           },
           "cancer": {
             "title": "Planes contra el Cáncer",
@@ -333,7 +337,7 @@
       "phoneLabel": "Teléfono",
       "whatsappLabel": "WhatsApp",
       "emailLabel": "Correo electrónico",
-      "licensedStates": "Licenciado en 9+ Estados"
+      "licensedStates": "Licenciado en 11+ Estados"
     },
     "links": {
       "guide": "Guía de Seguros",

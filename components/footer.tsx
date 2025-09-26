@@ -52,6 +52,7 @@ export default async function Footer() {
         href: "/hospital-indemnity",
       },
       { name: tServices("life.title"), href: "/iul" },
+      { name: tServices("finalExpense.title"), href: "/final-expense" },
 
       { name: tServices("cancer.title"), href: "" },
       { name: tServices("stroke.title"), href: "" },

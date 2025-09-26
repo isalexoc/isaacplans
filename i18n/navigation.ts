@@ -19,4 +19,5 @@ export type AppHref =
   | "/about#meetFounder"
   | "/about#contactSupport"
   | "/iul"
-  | "/short-term-medical";
+  | "/short-term-medical"
+  | "/gastos-finales";
