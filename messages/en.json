@@ -1585,5 +1585,127 @@
         "imageAlt": "IUL appointment calendar"
       }
     }
+  },
+
+  "FEpage": {
+    "hero": {
+      "badge": "Final Expense (Burial Insurance)",
+      "name": "Isaac Orraiz – Insurance Agent",
+      "title": "Simple, Guaranteed Coverage for Life’s Final Costs",
+      "description": "Final expense insurance (whole life) is designed to help loved ones pay for funeral, burial/cremation, medical bills, and small debts. Level premiums, fixed benefits, and fast, paper-light applications.",
+      "testimonials": [
+        {
+          "name": "Evelyn Carter",
+          "text": "We wanted something affordable that wouldn’t expire at 80. Isaac found a plan that fits our budget with day-one coverage. Huge relief."
+        },
+        {
+          "name": "Miguel Alvarez",
+          "text": "The process took minutes. Isaac explained graded vs. immediate benefits clearly and we chose what made sense for our health."
+        }
+      ],
+      "happyClient": {
+        "title": "Families Protected",
+        "subtitle": "3,000+ policies guided"
+      }
+    },
+    "ctaButton": {
+      "title": "Request Information",
+      "subtitle": "Fast, no-obligation estimate"
+    },
+    "about": {
+      "badge": "About Isaac",
+      "headline": "Your trusted guide for simple, permanent protection",
+      "description": "I help you compare final expense carriers, build a realistic benefit amount, and apply online—often with instant decisions.",
+      "name": "Isaac Orraiz",
+      "role": "Licensed Insurance Agent",
+      "credential": "21592068"
+    },
+    "definition": {
+      "title": "What Is Final Expense Insurance?",
+      "description": "A small whole-life policy (typically $5,000–$40,000) that never expires as long as premiums are paid. Benefits can be used for funeral costs, cremation/burial, medical bills, or any need."
+    },
+    "selfEnroll": {
+      "cta": "Start Online",
+      "disclaimer": "Policies issued by the carrier. Subject to underwriting.",
+      "generic": {
+        "title": "Prefer to start online?",
+        "subtitle": "Request a quick quote and we’ll match carriers to your health profile."
+      }
+    },
+    "eligibility": {
+      "headlineBeforeBold": "Many adults",
+      "headlineBold": "already qualify",
+      "intro": "Options exist for a wide range of health histories:",
+      "bullets": [
+        "Issue ages commonly 45–85 (varies by carrier)",
+        "Immediate or graded benefits depending on health",
+        "No medical exam—simple health questions",
+        "Fixed premiums and lifetime coverage"
+      ],
+      "note": "Approved benefit amounts and waiting periods vary by carrier and health history."
+    },
+    "enroll": {
+      "headlineBeforeBold": "Three simple steps to",
+      "headlineBold": "get covered",
+      "intro": "Most applications take about 10 minutes.",
+      "steps": {
+        "0": "Answer a few health questions to determine level vs. graded benefits",
+        "1": "Choose a benefit amount that fits your budget"
+      },
+      "subHeading": "What you’ll need",
+      "bullets": [
+        "Basic personal information and beneficiary",
+        "Health history (yes/no questions)",
+        "Preferred payment method (bank or card)",
+        "A few minutes of your time"
+      ],
+      "note": "Many decisions are instant."
+    },
+    "faq": {
+      "label": "FAQs",
+      "titleBeforeBold": "Common questions about",
+      "titleBold": "Final Expense",
+      "items": {
+        "0": {
+          "q": "Is this term or whole life?",
+          "a": "Final expense is usually whole life—premiums and coverage are designed to remain level for life."
+        },
+        "1": {
+          "q": "What’s the difference between level and graded benefits?",
+          "a": "Level benefit pays full coverage day one for eligible applicants; graded may pay a reduced amount for natural causes during the first 24 months, then full thereafter."
+        },
+        "2": {
+          "q": "Do I need a medical exam?",
+          "a": "Typically no exam—just health questions and database checks."
+        },
+        "3": {
+          "q": "Can I choose any funeral home?",
+          "a": "Yes. The beneficiary receives the tax-free death benefit and can pay any provider."
+        },
+        "4": {
+          "q": "Will rates increase?",
+          "a": "Whole-life final expense policies are designed with level premiums that do not increase with age."
+        },
+        "5": {
+          "q": "How much coverage should I buy?",
+          "a": "Many families choose $10,000–$20,000 to cover funeral/cremation and small debts. We’ll tailor it to your needs."
+        },
+        "6": {
+          "q": "How fast are claims paid?",
+          "a": "Carriers often pay approved claims within days of receiving required documents."
+        }
+      }
+    },
+    "ctaBanner": {
+      "message": "Want a quick quote matched to your health and budget? Book a free 15-minute call."
+    },
+    "feMetadata": {
+      "title": "Final Expense (Burial) Insurance | Isaac Plans Insurance",
+      "description": "Affordable, permanent coverage to help with funeral and final bills. Compare level vs. graded benefits with bilingual agent Isaac Orraiz.",
+      "image": "https://www.isaacplans.com/images/fe.png",
+      "imageAlt": "Preview card: Final Expense insurance by Isaac Plans Insurance",
+      "keywords": "final expense insurance, burial insurance, whole life, level benefit, graded benefit, small whole life policy",
+      "breadcrumbs": { "home": "Home", "fe": "Final Expense" }
+    }
   }
 }

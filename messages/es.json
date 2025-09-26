@@ -1583,5 +1583,127 @@
         "imageAlt": "Calendario de citas para IUL"
       }
     }
+  },
+
+  "FEpage": {
+    "hero": {
+      "badge": "Gastos Finales (Seguro Funerario)",
+      "name": "Isaac Orraiz – Agente de Seguros",
+      "title": "Cobertura simple y permanente para los gastos del final de la vida",
+      "description": "El seguro de gastos finales (vida entera) ayuda a la familia a pagar funeral, entierro/cremación, cuentas médicas y deudas pequeñas. Primas niveladas, beneficio fijo y solicitud rápida.",
+      "testimonials": [
+        {
+          "name": "Evelyn Carter",
+          "text": "Buscábamos algo económico que no venciera a los 80. Isaac nos encontró un plan con cobertura desde el primer día dentro de nuestro presupuesto."
+        },
+        {
+          "name": "Miguel Álvarez",
+          "text": "La solicitud tomó minutos. Isaac explicó la diferencia entre beneficio inmediato y gradual y elegimos según nuestra salud."
+        }
+      ],
+      "happyClient": {
+        "title": "Familias Protegidas",
+        "subtitle": "Más de 3,000 pólizas asesoradas"
+      }
+    },
+    "ctaButton": {
+      "title": "Solicitar Información",
+      "subtitle": "Estimado rápido y sin compromiso"
+    },
+    "about": {
+      "badge": "Acerca de Isaac",
+      "headline": "Su guía de confianza para una protección simple y permanente",
+      "description": "Le ayudo a comparar aseguradoras de gastos finales, definir un monto realista y aplicar en línea—a menudo con decisión instantánea.",
+      "name": "Isaac Orraiz",
+      "role": "Agente de Seguros Licenciado",
+      "credential": "21592068"
+    },
+    "definition": {
+      "title": "¿Qué es el Seguro de Gastos Finales?",
+      "description": "Es una póliza de vida entera pequeña (típicamente $5,000–$40,000) que no vence mientras pague la prima. El beneficio puede usarse para funeral, cremación/entierro, cuentas médicas o cualquier necesidad."
+    },
+    "selfEnroll": {
+      "cta": "Comenzar en línea",
+      "disclaimer": "Pólizas emitidas por la aseguradora. Sujeto a suscripción.",
+      "generic": {
+        "title": "¿Prefiere iniciar en línea?",
+        "subtitle": "Solicite una cotización y encontraremos aseguradoras acorde a su perfil de salud."
+      }
+    },
+    "eligibility": {
+      "headlineBeforeBold": "Muchos adultos",
+      "headlineBold": "ya califican",
+      "intro": "Hay opciones para distintos historiales de salud:",
+      "bullets": [
+        "Edades de emisión comunes 45–85 (según aseguradora)",
+        "Beneficio inmediato o gradual según salud",
+        "Sin examen médico—solo preguntas de salud",
+        "Primas fijas y cobertura de por vida"
+      ],
+      "note": "Los montos aprobados y periodos de espera dependen de la aseguradora y la salud del solicitante."
+    },
+    "enroll": {
+      "headlineBeforeBold": "Tres pasos sencillos para",
+      "headlineBold": "estar cubierto",
+      "intro": "La mayoría de solicitudes toma unos 10 minutos.",
+      "steps": {
+        "0": "Responda breves preguntas de salud para determinar beneficio inmediato vs. gradual",
+        "1": "Elija un monto que se ajuste a su presupuesto"
+      },
+      "subHeading": "Lo que necesitará",
+      "bullets": [
+        "Datos personales básicos y beneficiario",
+        "Historial de salud (preguntas sí/no)",
+        "Método de pago (banco o tarjeta)",
+        "Unos minutos de su tiempo"
+      ],
+      "note": "Muchas decisiones son instantáneas."
+    },
+    "faq": {
+      "label": "Preguntas frecuentes",
+      "titleBeforeBold": "Preguntas comunes sobre",
+      "titleBold": "Gastos Finales",
+      "items": {
+        "0": {
+          "q": "¿Es seguro a término o vida entera?",
+          "a": "Gastos finales suele ser vida entera—primas y cobertura diseñadas para mantenerse niveladas de por vida."
+        },
+        "1": {
+          "q": "¿Qué diferencia hay entre beneficio inmediato y gradual?",
+          "a": "El beneficio inmediato paga el total desde el día uno si califica; el gradual puede pagar una cantidad reducida por causas naturales durante los primeros 24 meses y luego el total."
+        },
+        "2": {
+          "q": "¿Necesito examen médico?",
+          "a": "Normalmente no—solo preguntas de salud y verificaciones en bases de datos."
+        },
+        "3": {
+          "q": "¿Puedo elegir cualquier funeraria?",
+          "a": "Sí. El beneficiario recibe el beneficio libre de impuestos y puede pagar a cualquier proveedor."
+        },
+        "4": {
+          "q": "¿Subirán las primas?",
+          "a": "Las pólizas de vida entera para gastos finales se diseñan con primas niveladas que no aumentan con la edad."
+        },
+        "5": {
+          "q": "¿Cuánto monto debería comprar?",
+          "a": "Muchas familias eligen $10,000–$20,000 para cubrir funeral/cremación y deudas pequeñas. Lo ajustaremos a su necesidad."
+        },
+        "6": {
+          "q": "¿Qué tan rápido pagan los reclamos?",
+          "a": "Las aseguradoras suelen pagar reclamos aprobados en pocos días de recibir la documentación requerida."
+        }
+      }
+    },
+    "ctaBanner": {
+      "message": "¿Quiere una cotización rápida acorde a su salud y presupuesto? Agende una llamada gratuita de 15 minutos."
+    },
+    "feMetadata": {
+      "title": "Seguro de Gastos Finales (Funerario) | Isaac Plans Insurance",
+      "description": "Cobertura permanente y accesible para funeral y cuentas finales. Compare beneficio inmediato vs. gradual con el agente bilingüe Isaac Orraiz.",
+      "image": "https://www.isaacplans.com/images/fe_es.png",
+      "imageAlt": "Tarjeta de vista previa: gastos finales de Isaac Plans Insurance",
+      "keywords": "gastos finales, seguro funerario, vida entera, beneficio inmediato, beneficio gradual",
+      "breadcrumbs": { "home": "Inicio", "fe": "Gastos Finales" }
+    }
   }
 }

@@ -71,6 +71,14 @@ export const routing = defineRouting({
       en: "/iul/calendar",
       es: "/iul/calendario",
     },
+    "/final-expense": {
+      en: "/final-expense",
+      es: "/gastos-finales",
+    },
+    "/final-expense/calendar": {
+      en: "/final-expense/calendar",
+      es: "/gastos-finales/calendario",
+    },
   },
 });
 

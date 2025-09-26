@@ -491,3 +491,53 @@ export const getShortTermMainBreadcrumbLd = (
     ],
   };
 };
+
+/** Final Expense — locale-aware path helper */
+const finalExpensePathFor = (locale: string) =>
+  locale?.toLowerCase().startsWith("es") ? "gastos-finales" : "final-expense";
+
+/** Final Expense — WebPage JSON-LD */
+export const getFePageLd = (
+  locale: string,
+  title: string,
+  description: string
+): WithContext<WebPage> => {
+  const path = finalExpensePathFor(locale);
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "@id": `${BASE_URL}/${locale}/${path}#webpage`,
+    url: `${BASE_URL}/${locale}/${path}`,
+    name: title,
+    description,
+    inLanguage: locale,
+    about: { "@id": `${BASE_URL}/#organization` },
+  };
+};
+
+/** Final Expense — BreadcrumbList JSON-LD (Home → Final Expense) */
+export const getFeBreadcrumbLd = (
+  locale: string,
+  homeLabel: string,
+  feLabel: string
+): WithContext<BreadcrumbList> => {
+  const path = finalExpensePathFor(locale);
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: homeLabel,
+        item: `${BASE_URL}/${locale}`,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: feLabel,
+        item: `${BASE_URL}/${locale}/${path}`,
+      },
+    ],
+  };
+};
