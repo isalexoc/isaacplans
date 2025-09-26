@@ -1710,6 +1710,16 @@
       "imageAlt": "Preview card: Final Expense insurance by Isaac Plans Insurance",
       "keywords": "final expense insurance, burial insurance, whole life, level benefit, graded benefit, small whole life policy",
       "breadcrumbs": { "home": "Home", "fe": "Final Expense" }
+    },
+    "calendar": {
+      "meta": {
+        "title": "Final Expense Appointment Calendar | Isaac Plans Insurance",
+        "description": "Schedule your Final Expense (burial insurance) consultation with Isaac Plans Insurance. Get bilingual guidance and a personalized quote that fits your health and budget.",
+        "keywords": "final expense calendar, burial insurance appointment, final expense consultation, schedule final expense, life insurance appointment, bilingual agent",
+        "image": "https://www.isaacplans.com/images/fe.png",
+        "imageAlt": "Final Expense appointment calendar",
+        "backButton": "← Go Back"
+      }
     }
   }
 }

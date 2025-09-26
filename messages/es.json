@@ -1708,6 +1708,16 @@
       "imageAlt": "Tarjeta de vista previa: gastos finales de Isaac Plans Insurance",
       "keywords": "gastos finales, seguro funerario, vida entera, beneficio inmediato, beneficio gradual",
       "breadcrumbs": { "home": "Inicio", "fe": "Gastos Finales" }
+    },
+    "calendar": {
+      "meta": {
+        "title": "Calendario de Citas de Gastos Finales | Isaac Plans Insurance",
+        "description": "Agenda tu consulta de Gastos Finales (seguro funerario) con Isaac Plans Insurance. Recibe asesoría bilingüe y una cotización personalizada acorde a tu salud y presupuesto.",
+        "keywords": "calendario gastos finales, cita seguro funerario, consulta gastos finales, agendar gastos finales, cita seguro de vida, agente bilingüe",
+        "image": "https://www.isaacplans.com/images/fe_es.png",
+        "imageAlt": "Calendario de citas de Gastos Finales",
+        "backButton": "← Volver"
+      }
     }
   }
 }
