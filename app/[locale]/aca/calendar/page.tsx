@@ -69,12 +69,15 @@ export async function generateMetadata(): Promise<Metadata> {
 
 /* ───────── Page ───────── */
 interface PageProps {
-  searchParams: Record<string, string | string[] | undefined>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
 export default async function ACACalendarPage({ searchParams }: PageProps) {
   const locale = (await getLocale()) as SupportedLocale; // "en" | "es"
   const t = await getTranslations({ locale, namespace: "acaPage.calendar" });
+
+  // Await searchParams (Next.js 15+ requires this)
+  const params = await searchParams;
 
   const base =
     locale === "es"
@@ -82,10 +85,10 @@ export default async function ACACalendarPage({ searchParams }: PageProps) {
       : "https://link.agent-crm.com/widget/booking/HR7iDiMN8k01DUkGl8z0"; // English
 
   const qs = new URLSearchParams({
-    first_name: param(searchParams.first_name),
-    last_name: param(searchParams.last_name),
-    email: param(searchParams.email),
-    phone: param(searchParams.phone),
+    first_name: param(params.first_name),
+    last_name: param(params.last_name),
+    email: param(params.email),
+    phone: param(params.phone),
   });
 
   const iframeSrc = qs.toString().length > 0 ? `${base}?${qs}` : base;

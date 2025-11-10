@@ -68,7 +68,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 /* ───────── Page ───────── */
 interface PageProps {
-  searchParams: Record<string, string | string[] | undefined>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
 export default async function HospitalIndemnityCalendarPage({
@@ -76,6 +76,9 @@ export default async function HospitalIndemnityCalendarPage({
 }: PageProps) {
   const locale = (await getLocale()) as SupportedLocale; // "en" | "es"
   const t = await getTranslations({ locale, namespace: "HIpage.calendar" });
+
+  // Await searchParams (Next.js 15+ requires this)
+  const params = await searchParams;
 
   /* Choose the booking URL by language */
   const base =
@@ -85,10 +88,10 @@ export default async function HospitalIndemnityCalendarPage({
 
   /* Build query string if any pre-filled fields arrive */
   const qs = new URLSearchParams({
-    first_name: param(searchParams.first_name),
-    last_name: param(searchParams.last_name),
-    email: param(searchParams.email),
-    phone: param(searchParams.phone),
+    first_name: param(params.first_name),
+    last_name: param(params.last_name),
+    email: param(params.email),
+    phone: param(params.phone),
   });
 
   const iframeSrc = qs.toString() ? `${base}?${qs}` : base;
