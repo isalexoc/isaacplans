@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import CTAButton from "@/components/cta-button"; // already client
 
 export default async function Hero() {
+  const states = process.env.NEXT_PUBLIC_STATES ?? "12";
   const t = await getTranslations("HomePage");
 
   return (
@@ -24,7 +25,7 @@ export default async function Hero() {
                             animate-fadeUp"
             >
               <Award className="w-4 h-4" />
-              <span>{t("hero.badge")}</span>
+              <span>{t("hero.badge", { states })}</span>
             </div>
 
             {/* headline */}

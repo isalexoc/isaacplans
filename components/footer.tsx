@@ -35,6 +35,7 @@ export default async function Footer() {
   const tServices = await getTranslations("header.nav.services.links");
   const tRes = await getTranslations("header.nav.resources.links");
   const tContact = await getTranslations("footer.contact");
+  const states = process.env.NEXT_PUBLIC_STATES ?? "12";
 
   /* Root‑relative hash links let next‑intl inject the locale prefix */
   const toSection = (hash: string) => `/#${hash}`;
@@ -79,10 +80,10 @@ export default async function Footer() {
             </h2>
             <LogoMark />
             <p className="text-gray-400 text-sm leading-relaxed">
-              {tFooter("description")}
+              {tFooter("description", { states })}
             </p>
             <ContactLines
-              licensedStates={tContact("licensedStates")}
+              licensedStates={tContact("licensedStates", { states })}
               whatsappLabel={tContact("whatsappLabel")}
             />
           </section>

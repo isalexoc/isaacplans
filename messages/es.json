@@ -3,7 +3,7 @@
     "title": "Hola Mundo!",
     "about": "Volver a la página de principal",
     "hero": {
-      "badge": "Licenciado en 12+ Estados",
+      "badge": "Licenciado en {states}+ Estados",
       "name": "Isaac Orraiz",
       "title": "Su Agente de Seguros",
       "subtitle": "de Confianza",
@@ -120,7 +120,7 @@
       ],
       "achievements": {
         "states": {
-          "title": "Licencia en 12+ estados",
+          "title": "Licencia en {states}+ estados",
           "description": "Autorizado para atender clientes en todo EE. UU."
         },
         "clients": {
@@ -139,7 +139,7 @@
     },
     "coverage": {
       "title": "Cobertura Nacional",
-      "subtitle": "Licenciado y certificado para servir clientes en 12+ estados de EE. UU.",
+      "subtitle": "Licenciado y certificado para servir clientes en {states}+ estados de EE. UU.",
       "description": "Con licencias en ACA, Vida, Dental y Visión en múltiples estados, ofrezco servicios profesionales de seguros especializados.",
       "features": [
         "Licenciado en más de 12 estados",
@@ -337,7 +337,7 @@
       "phoneLabel": "Teléfono",
       "whatsappLabel": "WhatsApp",
       "emailLabel": "Correo electrónico",
-      "licensedStates": "Licenciado en 12+ Estados"
+      "licensedStates": "Licenciado en {states}+ Estados"
     },
     "links": {
       "guide": "Guía de Seguros",
