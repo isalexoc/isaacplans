@@ -213,6 +213,7 @@ export default async function AboutPage() {
         </div>
 
         {/* Form island */}
+        {/* @ts-expect-error - Next.js async server components are valid JSX */}
         <ContactForm />
       </section>
 

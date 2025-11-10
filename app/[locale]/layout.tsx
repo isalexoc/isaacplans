@@ -102,6 +102,7 @@ export default async function LocaleLayout({
           <main className="flex-1 w-full">{children}</main>
           <Toaster />
           {/* <CrispChat /> */}
+          {/* @ts-expect-error - Next.js async server components are valid JSX */}
           <Footer />
           {/* Agent CRM (LeadConnector) chat – loads after page is interactive */}
           <Script

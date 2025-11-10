@@ -342,6 +342,7 @@ export default async function ContactPage() {
       </section>
 
       {/* client island – form stays interactive */}
+      {/* @ts-expect-error - Next.js async server components are valid JSX */}
       <ContactForm />
 
       {/* JSON-LD (escaped) */}

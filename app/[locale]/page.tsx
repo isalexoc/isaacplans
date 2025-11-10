@@ -69,9 +69,13 @@ export async function generateMetadata(): Promise<Metadata> {
 export default function HomePage() {
   return (
     <main className="w-full flex flex-col overflow-x-hidden">
+      {/* @ts-expect-error - Next.js async server components are valid JSX */}
       <Hero />
+      {/* @ts-expect-error - Next.js async server components are valid JSX */}
       <Services />
+      {/* @ts-expect-error - Next.js async server components are valid JSX */}
       <About />
+      {/* @ts-expect-error - Next.js async server components are valid JSX */}
       <Coverage />
     </main>
   );

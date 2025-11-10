@@ -114,7 +114,7 @@ export default async function Footer() {
             <h3 id="footer-links" className="font-semibold text-lg mb-4 mt-8">
               {tFooter("follow")}
             </h3>
-            <SocialRow />
+            {await SocialRow()}
           </section>
         </div>
 
