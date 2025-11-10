@@ -3,7 +3,7 @@
     "title": "Hola Mundo!",
     "about": "Volver a la página de principal",
     "hero": {
-      "badge": "Licenciado en 11+ Estados",
+      "badge": "Licenciado en 12+ Estados",
       "name": "Isaac Orraiz",
       "title": "Su Agente de Seguros",
       "subtitle": "de Confianza",
@@ -104,7 +104,7 @@
     },
     "profile": {
       "title": "Su Profesional de Seguros Dedicado",
-      "description1": "Con experiencia en la industria de seguros de salud, me especializo en ayudar a individuos y familias a navegar el complejo mundo de los seguros. Estoy licenciado en seguros ACA, Vida, Dental y Visión en más de 9 estados.",
+      "description1": "Con experiencia en la industria de seguros de salud, me especializo en ayudar a individuos y familias a navegar el complejo mundo de los seguros. Estoy licenciado en seguros ACA, Vida, Dental y Visión en más de 12 estados.",
       "description2": "Estar licenciado en múltiples estados me permite atender clientes a nivel nacional y brindarle orientación experta sin importar su ubicación. Me mantengo actualizado con los cambios regulatorios y nuevas opciones de planes.",
       "certifications": "Estados donde poseo licencia válida",
       "certs": [
@@ -120,7 +120,7 @@
       ],
       "achievements": {
         "states": {
-          "title": "Licencia en 11+ estados",
+          "title": "Licencia en 12+ estados",
           "description": "Autorizado para atender clientes en todo EE. UU."
         },
         "clients": {
@@ -139,10 +139,10 @@
     },
     "coverage": {
       "title": "Cobertura Nacional",
-      "subtitle": "Licenciado y certificado para servir clientes en 11+ estados de EE. UU.",
+      "subtitle": "Licenciado y certificado para servir clientes en 12+ estados de EE. UU.",
       "description": "Con licencias en ACA, Vida, Dental y Visión en múltiples estados, ofrezco servicios profesionales de seguros especializados.",
       "features": [
-        "Licenciado en más de 9 estados",
+        "Licenciado en más de 12 estados",
         "ACA (Salud, Obama Care)",
         "Especialista en seguros de salud",
         "Seguros de vida",
@@ -327,7 +327,7 @@
     }
   },
   "footer": {
-    "description": "Su socio de seguros de confianza especializado en cobertura ACA y Medicare en más de 9 estados. Servicio profesional y personalizado en el que puede confiar.",
+    "description": "Su socio de seguros de confianza especializado en cobertura ACA y Medicare en más de 12 estados. Servicio profesional y personalizado en el que puede confiar.",
     "services": "Servicios",
     "resources": "Recursos",
     "company": "Empresa",
@@ -337,7 +337,7 @@
       "phoneLabel": "Teléfono",
       "whatsappLabel": "WhatsApp",
       "emailLabel": "Correo electrónico",
-      "licensedStates": "Licenciado en 11+ Estados"
+      "licensedStates": "Licenciado en 12+ Estados"
     },
     "links": {
       "guide": "Guía de Seguros",

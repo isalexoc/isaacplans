@@ -81,7 +81,7 @@ export default async function Hero() {
               className="grid grid-cols-3 gap-4 py-8 border-t border-gray-200
                             animate-fadeLeft-d4"
             >
-              <Stat value="11+" label={t("hero.stats.states")} />
+              <Stat value="12+" label={t("hero.stats.states")} />
               <Stat value="100%" label={t("hero.stats.clients")} />
               <Stat value="100%" label={t("hero.stats.satisfaction")} />
             </div>
