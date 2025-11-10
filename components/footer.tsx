@@ -55,8 +55,7 @@ export default async function Footer() {
       { name: tServices("life.title"), href: "/iul" },
       { name: tServices("finalExpense.title"), href: "/final-expense" },
 
-      { name: tServices("cancer.title"), href: "" },
-      { name: tServices("stroke.title"), href: "" },
+      
     ],
     company: [
       { name: tNav("about.label"), href: "/about" },
@@ -70,16 +69,28 @@ export default async function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="bg-gray-900 text-white" aria-label="Footer">
-      <div className="container mx-auto px-4 py-12 lg:py-16">
-        <div className="grid md:grid-cols-3 gap-8">
+    <footer
+      className="relative bg-gradient-to-b from-gray-900 via-gray-900 to-gray-950 text-white overflow-hidden"
+      aria-label="Footer"
+    >
+      {/* Decorative background elements */}
+      <div
+        className="absolute inset-0 opacity-10 pointer-events-none"
+        aria-hidden="true"
+      >
+        <div className="absolute top-0 left-0 w-96 h-96 bg-[hsl(var(--custom)/0.1)] rounded-full blur-3xl" />
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-[hsl(var(--custom)/0.1)] rounded-full blur-3xl" />
+      </div>
+
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16 relative z-10">
+        <div className="grid md:grid-cols-3 gap-8 lg:gap-12">
           {/* Brand & contact */}
           <section aria-labelledby="footer-company" className="space-y-6">
             <h2 id="footer-company" className="sr-only">
               {SITE_NAME} {tFooter("company")}
             </h2>
             <LogoMark />
-            <p className="text-gray-400 text-sm leading-relaxed">
+            <p className="text-gray-300 text-sm lg:text-base leading-relaxed">
               {tFooter("description", { states })}
             </p>
             <ContactLines
@@ -100,14 +111,14 @@ export default async function Footer() {
               title={tFooter("company")}
               links={footerLinks.company}
             />
-            <h3 id="footer-links" className="font-medium mb-3 mt-3">
+            <h3 id="footer-links" className="font-semibold text-lg mb-4 mt-8">
               {tFooter("follow")}
             </h3>
             <SocialRow />
           </section>
         </div>
 
-        <Separator className="my-8 bg-gray-800" />
+        <Separator className="my-8 lg:my-12 bg-gray-800/60" />
         <BottomBar
           year={year}
           rights={tFooter("rights")}
@@ -123,20 +134,32 @@ export default async function Footer() {
    Stateless sub‑components
 ────────────────────────────────────────────── */
 const LogoMark = () => (
-  <Link href={"/"} className="flex items-center space-x-3">
-    <Image
-      src={LOGO_URL}
-      alt="Isaac Plans Logo"
-      width={40}
-      height={40}
-      className="object-cover rounded-md"
-      loading="lazy"
-    />
+  <Link
+    href={"/"}
+    className="flex items-center space-x-3 group hover:opacity-90 transition-opacity duration-300"
+    aria-label="Go to homepage"
+  >
+    <div className="relative">
+      <div
+        className="absolute inset-0 bg-gradient-to-br from-[hsl(var(--custom)/0.3)] to-transparent 
+                   rounded-md blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10"
+        aria-hidden="true"
+      />
+      <Image
+        src={LOGO_URL}
+        alt="Isaac Plans Logo"
+        width={48}
+        height={48}
+        className="object-cover rounded-lg shadow-lg group-hover:shadow-xl transition-all duration-300"
+        loading="lazy"
+        fetchPriority="low"
+      />
+    </div>
     <div className="flex flex-col items-center leading-none text-center">
-      <span className="text-xl font-bold bg-gradient-to-r from-teal-400 to-blue-500 bg-clip-text text-transparent">
+      <span className="text-xl lg:text-2xl font-bold bg-gradient-to-r from-[hsl(var(--custom))] to-[hsl(var(--custom)/0.8)] bg-clip-text text-transparent">
         {SITE_NAME}
       </span>
-      <span className="text-sm font-semibold tracking-widest uppercase bg-gradient-to-r from-teal-400 to-blue-500 bg-clip-text text-transparent">
+      <span className="text-sm font-semibold tracking-widest uppercase bg-gradient-to-r from-[hsl(var(--custom))] to-[hsl(var(--custom)/0.8)] bg-clip-text text-transparent">
         Insurance
       </span>
     </div>
@@ -170,15 +193,22 @@ const Line = ({ icon: Icon, text, href }: LineProps) =>
     <a
       href={href}
       target="_blank"
-      className="flex items-center space-x-2 hover:text-white"
+      rel="noopener noreferrer"
+      className="flex items-center space-x-3 text-gray-300 hover:text-white 
+                 transition-colors duration-200 group"
+      aria-label={text}
     >
-      <Icon className="w-4 h-4 text-teal-400" aria-hidden />
-      <span>{text}</span>
+      <div className="p-1.5 rounded-md bg-[hsl(var(--custom)/0.15)] group-hover:bg-[hsl(var(--custom)/0.25)] transition-colors duration-200">
+        <Icon className="w-4 h-4 text-[hsl(var(--custom))]" aria-hidden />
+      </div>
+      <span className="text-sm lg:text-base">{text}</span>
     </a>
   ) : (
-    <div className="flex items-center space-x-2">
-      <Icon className="w-4 h-4 text-teal-400" aria-hidden />
-      <span>{text}</span>
+    <div className="flex items-center space-x-3 text-gray-300">
+      <div className="p-1.5 rounded-md bg-[hsl(var(--custom)/0.15)]">
+        <Icon className="w-4 h-4 text-[hsl(var(--custom))]" aria-hidden />
+      </div>
+      <span className="text-sm lg:text-base">{text}</span>
     </div>
   );
 
@@ -187,16 +217,21 @@ const WhatsAppLine = ({ label }: { label: string }) => (
     href={`https://wa.me/${WHATSAPP_E164}?text=Hola,%20quiero%20una%20cotización`}
     target="_blank"
     rel="noopener noreferrer"
-    className="flex items-center space-x-2 hover:text-white"
+    className="flex items-center space-x-3 text-gray-300 hover:text-white 
+               transition-colors duration-200 group"
+    aria-label={`${label}: ${PHONE_RAW} (opens in new tab)`}
   >
-    <Image
-      src="https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_24,h_24,c_fit/v1752687249/whatsapphappiness_lezt21_zsxlic.png"
-      alt="WhatsApp"
-      width={24}
-      height={24}
-      loading="lazy"
-    />
-    <span>
+    <div className="p-1.5 rounded-md bg-[hsl(var(--custom)/0.15)] group-hover:bg-[hsl(var(--custom)/0.25)] transition-colors duration-200">
+      <Image
+        src="https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_24,h_24,c_fit/v1752687249/whatsapphappiness_lezt21_zsxlic.png"
+        alt="WhatsApp"
+        width={20}
+        height={20}
+        loading="lazy"
+        className="object-contain"
+      />
+    </div>
+    <span className="text-sm lg:text-base">
       {label}: {PHONE_RAW}
     </span>
   </a>
@@ -208,11 +243,15 @@ interface FooterColumnProps {
 }
 const FooterColumn = ({ title, links }: FooterColumnProps) => (
   <nav aria-label={title} className="mt-8 md:mt-0">
-    <h3 className="text-lg font-semibold mb-4">{title}</h3>
-    <ul className="space-y-2 text-sm text-gray-400">
+    <h3 className="text-lg lg:text-xl font-semibold mb-6 text-white">{title}</h3>
+    <ul className="space-y-3 text-sm lg:text-base" role="list">
       {links.map(({ name, href }) => (
-        <li key={name}>
-          <Link href={href as any} className="hover:text-white">
+        <li key={name} role="listitem">
+          <Link
+            href={href as any}
+            className="text-gray-300 hover:text-white hover:translate-x-1 
+                       inline-block transition-all duration-200"
+          >
             {name}
           </Link>
         </li>
@@ -254,17 +293,22 @@ const SocialRow = async () => {
     },
   ];
   return (
-    <div className="flex space-x-3">
+    <div className="flex space-x-3" role="list" aria-label="Social media links">
       {socials.map(({ href, Icon, label }) => (
         <Link
           key={href}
           href={href as any}
-          aria-label={label}
+          aria-label={`${label} (opens in new tab)`}
           target="_blank"
           rel="noopener noreferrer"
-          className="w-10 h-10 border border-gray-600 hover:border-white rounded-md flex items-center justify-center text-gray-400 hover:text-white transition-transform hover:-translate-y-1"
+          className="w-11 h-11 border-2 border-gray-700 hover:border-[hsl(var(--custom))] 
+                     rounded-lg flex items-center justify-center 
+                     text-gray-400 hover:text-white bg-gray-800/50 hover:bg-[hsl(var(--custom))/0.2]
+                     transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-[hsl(var(--custom))/0.3]
+                     focus-visible:ring-2 focus-visible:ring-[hsl(var(--custom))] focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900"
+          role="listitem"
         >
-          <Icon className="w-4 h-4" aria-hidden />
+          <Icon className="w-5 h-5" aria-hidden />
         </Link>
       ))}
     </div>
@@ -283,17 +327,29 @@ const BottomBar = ({
   termsLabel,
   privacyLabel,
 }: BottomBarProps) => (
-  <div className="flex flex-col sm:flex-row justify-between items-center text-sm text-gray-400">
+  <div className="flex flex-col sm:flex-row justify-between items-center text-sm lg:text-base text-gray-400">
     <div className="text-center sm:text-left">
       © {year} {SITE_NAME}. {rights}
     </div>
-    <div className="flex space-x-4 mt-4 sm:mt-0">
-      <Link href={`/terms-of-service` as any} className="hover:text-white">
+    <nav
+      className="flex space-x-6 mt-4 sm:mt-0"
+      aria-label="Legal links"
+      role="list"
+    >
+      <Link
+        href={`/terms-of-service` as any}
+        className="text-gray-400 hover:text-white transition-colors duration-200"
+        role="listitem"
+      >
         {termsLabel}
       </Link>
-      <Link href={`/privacy-policy` as any} className="hover:text-white">
+      <Link
+        href={`/privacy-policy` as any}
+        className="text-gray-400 hover:text-white transition-colors duration-200"
+        role="listitem"
+      >
         {privacyLabel}
       </Link>
-    </div>
+    </nav>
   </div>
 );

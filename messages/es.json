@@ -17,6 +17,7 @@
         }
       },
       "stats": {
+        "label": "Estadísticas",
         "states": "Estados con Licencia",
         "clients": "Clientes Atendidos",
         "satisfaction": "Tasa de Satisfacción"
@@ -90,14 +91,31 @@
             "Compatible con otros seguros de salud"
           ]
         },
-        "heartStrokePlans": {
-          "title": "Planes contra Ataques Cardíacos y Derrames Cerebrales",
-          "description": "Cobertura especializada que brinda protección financiera en caso de un ataque cardíaco o derrame cerebral.",
+        "shortTermMedical": {
+          "title": "Seguro Médico a Corto Plazo",
+          "description": "Seguro médico temporal diseñado para cubrir brechas en la cobertura—ideal para períodos entre trabajos o espera.",
           "features": [
-            "Pago único tras el diagnóstico",
-            "Ayuda con gastos de recuperación y rehabilitación",
-            "Uso libre del dinero recibido",
-            "Complementa su seguro de salud existente"
+            "Cobertura temporal para brechas en la cobertura",
+            "Inscripción rápida y fechas de vigencia inmediatas",
+            "Plazos flexibles (varía por estado)"
+          ]
+        },
+        "finalExpense": {
+          "title": "Gastos Finales",
+          "description": "Seguro de vida entera permanente y simple para ayudar a los seres queridos a cubrir gastos funerarios, entierro y finales.",
+          "features": [
+            "Cobertura permanente que nunca expira",
+            "Primas niveladas que se mantienen iguales",
+            "No se requiere examen médico"
+          ]
+        },
+        "iul": {
+          "title": "Vida Universal Indexada",
+          "description": "Seguro de vida permanente con primas flexibles y crecimiento del valor en efectivo vinculado a índices del mercado.",
+          "features": [
+            "Protección de beneficio por fallecimiento de por vida",
+            "Potencial de crecimiento del valor en efectivo",
+            "Pagos de primas flexibles"
           ]
         }
       }
@@ -110,12 +128,15 @@
       "certs": [
         "Arizona",
         "Colorado",
+        "Distrito de Columbia",
         "Florida",
+        "Georgia",
         "Maryland",
         "Nuevo México",
         "Carolina del Norte",
         "Ohio",
         "Texas",
+        "Utah",
         "Virginia"
       ],
       "achievements": {
@@ -141,8 +162,9 @@
       "title": "Cobertura Nacional",
       "subtitle": "Licenciado y certificado para servir clientes en {states}+ estados de EE. UU.",
       "description": "Con licencias en ACA, Vida, Dental y Visión en múltiples estados, ofrezco servicios profesionales de seguros especializados.",
+      "name": "Isaac Orraiz",
       "features": [
-        "Licenciado en más de 12 estados",
+        "Licenciado en {{states}}+ estados",
         "ACA (Salud, Obama Care)",
         "Especialista en seguros de salud",
         "Seguros de vida",
@@ -156,7 +178,8 @@
       "cta": {
         "heading": "¿Necesita Seguro?",
         "text": "¡Está en el lugar correcto! Obtenga una cotización gratuita hoy.",
-        "email": "Enviarme un correo"
+        "email": "Enviarme un correo",
+        "reassurance": "Respuesta en horario comercial · Se habla Español"
       }
     }
   },

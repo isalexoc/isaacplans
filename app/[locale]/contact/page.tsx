@@ -1,6 +1,6 @@
 import Image from "next/image";
 import type { Metadata } from "next";
-import { Facebook, Instagram, Linkedin, Youtube } from "lucide-react";
+import { Facebook, Instagram, Linkedin, Youtube, Phone, Mail, MessageCircle, UserPlus, Globe, Calendar } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import ContactForm from "@/components/contact-form"; // client island
 import { getLocale, getTranslations } from "next-intl/server";
@@ -124,14 +124,27 @@ export default async function ContactPage() {
 
   return (
     <>
-      <section className="py-20 px-4 bg-gray-50 dark:bg-gray-900">
-        <div className="max-w-3xl mx-auto text-center">
+      <section
+        className="relative py-16 lg:py-24 px-4 sm:px-6 lg:px-8 
+                   bg-gradient-to-br from-[hsl(var(--custom)/0.06)] via-white to-[hsl(var(--custom)/0.04)] 
+                   dark:bg-gray-950 overflow-hidden"
+      >
+        {/* Decorative background elements */}
+        <div
+          className="absolute inset-0 opacity-25 pointer-events-none"
+          aria-hidden="true"
+        >
+          <div className="absolute top-20 left-10 w-96 h-96 bg-[hsl(var(--custom)/0.08)] rounded-full blur-3xl" />
+          <div className="absolute bottom-20 right-10 w-96 h-96 bg-[hsl(var(--custom)/0.08)] rounded-full blur-3xl" />
+        </div>
+
+        <div className="max-w-3xl mx-auto text-center relative z-10">
           {/* ▸ Heading */}
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2 animate-fadeUp">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-gray-900 dark:text-white mb-4 leading-tight animate-fadeUp">
             {t("info.title")}
           </h2>
           <p
-            className="text-gray-700 dark:text-gray-300 mb-8 animate-fadeUp"
+            className="text-lg lg:text-xl text-gray-700 dark:text-gray-300 mb-12 leading-relaxed animate-fadeUp"
             style={{ animationDelay: "0.1s" }}
           >
             {t("info.description")}
@@ -139,112 +152,188 @@ export default async function ContactPage() {
 
           {/* ▸ Card */}
           <Card
-            className="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6 space-y-6 animate-fadeUp"
+            className="bg-white/95 backdrop-blur-sm dark:bg-gray-900/95 rounded-2xl shadow-2xl border-2 border-gray-200/60 dark:border-gray-700/60 p-6 lg:p-8 space-y-6 animate-fadeUp"
             style={{ animationDelay: "0.2s" }}
           >
-            <CardContent className="p-0 space-y-6">
+            <CardContent className="p-0 space-y-8">
               {/* Avatar & role */}
               <div className="flex flex-col items-center">
-                <Image
-                  src="https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_150,h_150,c_thumb,g_face,r_max/isaacpic_c8kca5.jpg"
-                  alt="Isaac Orraiz"
-                  width={120}
-                  height={120}
-                  className="rounded-full shadow-md"
-                  priority
-                />
-                <h3 className="text-xl font-semibold mt-3 text-gray-800 dark:text-white">
+                <div className="relative group">
+                  <div
+                    className="absolute inset-0 bg-gradient-to-br from-[hsl(var(--custom)/0.3)] to-transparent 
+                               rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10"
+                    aria-hidden="true"
+                  />
+                  <Image
+                    src="https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_150,h_150,c_thumb,g_face,r_max/isaacpic_c8kca5.jpg"
+                    alt="Isaac Orraiz"
+                    width={140}
+                    height={140}
+                    className="rounded-full shadow-2xl border-4 border-white/50 group-hover:shadow-3xl transition-all duration-300"
+                    priority
+                    fetchPriority="high"
+                  />
+                </div>
+                <h3 className="text-2xl lg:text-3xl font-bold mt-4 text-gray-900 dark:text-white">
                   Isaac Orraiz
                 </h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
+                <p className="text-base lg:text-lg text-gray-600 dark:text-gray-400 mt-1">
                   {t("info.role")}
                 </p>
               </div>
 
               {/* Action buttons */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-white font-medium">
+              <div
+                className="grid grid-cols-1 sm:grid-cols-2 gap-4"
+                role="list"
+                aria-label="Contact methods"
+              >
                 <a
                   href={`tel:${PHONE.replace(/[^0-9]/g, "")}`}
-                  className="flex items-center justify-center gap-2 bg-brand hover:bg-brand/90 rounded-lg py-3"
+                  className="flex items-center justify-center gap-3 bg-[hsl(var(--custom))] hover:bg-[hsl(var(--custom)/0.9)] 
+                             text-white font-semibold rounded-xl py-4 px-6 shadow-lg hover:shadow-xl
+                             transition-all duration-300 hover:-translate-y-0.5
+                             focus-visible:ring-2 focus-visible:ring-[hsl(var(--custom))] focus-visible:ring-offset-2"
+                  aria-label={`Call ${PHONE}`}
+                  role="listitem"
                 >
-                  {t("info.callLabel")}: {PHONE}
+                  <Phone className="w-5 h-5" aria-hidden="true" />
+                  <span className="text-sm sm:text-base">{t("info.callLabel")}: {PHONE}</span>
                 </a>
 
                 <a
                   href="mailto:info@isaacplans.com"
-                  className="flex items-center justify-center gap-2 bg-brand hover:bg-brand/90 rounded-lg py-3"
+                  className="flex items-center justify-center gap-3 bg-[hsl(var(--custom))] hover:bg-[hsl(var(--custom)/0.9)] 
+                             text-white font-semibold rounded-xl py-4 px-6 shadow-lg hover:shadow-xl
+                             transition-all duration-300 hover:-translate-y-0.5
+                             focus-visible:ring-2 focus-visible:ring-[hsl(var(--custom))] focus-visible:ring-offset-2"
+                  aria-label="Send email to info@isaacplans.com"
+                  role="listitem"
                 >
-                  {t("info.buttons.email")}
+                  <Mail className="w-5 h-5" aria-hidden="true" />
+                  <span className="text-sm sm:text-base">{t("info.buttons.email")}</span>
                 </a>
 
                 <a
                   href={waLink}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 bg-brand hover:bg-brand/90 rounded-lg py-3"
+                  className="flex items-center justify-center gap-3 bg-[hsl(var(--custom))] hover:bg-[hsl(var(--custom)/0.9)] 
+                             text-white font-semibold rounded-xl py-4 px-6 shadow-lg hover:shadow-xl
+                             transition-all duration-300 hover:-translate-y-0.5
+                             focus-visible:ring-2 focus-visible:ring-[hsl(var(--custom))] focus-visible:ring-offset-2"
+                  aria-label={`${t("info.buttons.whatsapp")} (opens in new tab)`}
+                  role="listitem"
                 >
-                  {t("info.buttons.whatsapp")}
+                  <MessageCircle className="w-5 h-5" aria-hidden="true" />
+                  <span className="text-sm sm:text-base">{t("info.buttons.whatsapp")}</span>
                 </a>
 
                 <a
                   href="/isaac-orraiz.vcf"
                   download
-                  className="flex items-center justify-center gap-2 bg-brand hover:bg-brand/90 rounded-lg py-3"
+                  className="flex items-center justify-center gap-3 bg-[hsl(var(--custom))] hover:bg-[hsl(var(--custom)/0.9)] 
+                             text-white font-semibold rounded-xl py-4 px-6 shadow-lg hover:shadow-xl
+                             transition-all duration-300 hover:-translate-y-0.5
+                             focus-visible:ring-2 focus-visible:ring-[hsl(var(--custom))] focus-visible:ring-offset-2"
+                  aria-label={t("info.addContact")}
+                  role="listitem"
                 >
-                  {t("info.addContact")}
+                  <UserPlus className="w-5 h-5" aria-hidden="true" />
+                  <span className="text-sm sm:text-base">{t("info.addContact")}</span>
                 </a>
 
                 {/* Locale-aware internal link */}
                 <Link
                   href="/"
-                  className="flex items-center justify-center gap-2 bg-brand hover:bg-brand/90 rounded-lg py-3"
+                  className="flex items-center justify-center gap-3 bg-[hsl(var(--custom))] hover:bg-[hsl(var(--custom)/0.9)] 
+                             text-white font-semibold rounded-xl py-4 px-6 shadow-lg hover:shadow-xl
+                             transition-all duration-300 hover:-translate-y-0.5
+                             focus-visible:ring-2 focus-visible:ring-[hsl(var(--custom))] focus-visible:ring-offset-2"
+                  aria-label={t("info.buttons.website")}
+                  role="listitem"
                 >
-                  {t("info.buttons.website")}
+                  <Globe className="w-5 h-5" aria-hidden="true" />
+                  <span className="text-sm sm:text-base">{t("info.buttons.website")}</span>
                 </Link>
 
                 <a
                   href="https://link.agent-crm.com/widget/bookings/facebookad-b140f360-1a9d-4b4b-9fb1-0359979187d4-4c57e0d9-1b03-4305-935e-1369bd466bc1"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 bg-brand hover:bg-brand/90 rounded-lg py-3"
+                  className="flex items-center justify-center gap-3 bg-[hsl(var(--custom))] hover:bg-[hsl(var(--custom)/0.9)] 
+                             text-white font-semibold rounded-xl py-4 px-6 shadow-lg hover:shadow-xl
+                             transition-all duration-300 hover:-translate-y-0.5
+                             focus-visible:ring-2 focus-visible:ring-[hsl(var(--custom))] focus-visible:ring-offset-2"
+                  aria-label={`${t("info.buttons.schedule")} (opens in new tab)`}
+                  role="listitem"
                 >
-                  {t("info.buttons.schedule")}
+                  <Calendar className="w-5 h-5" aria-hidden="true" />
+                  <span className="text-sm sm:text-base">{t("info.buttons.schedule")}</span>
                 </a>
               </div>
 
               {/* Social row */}
-              <div className="flex justify-center gap-6 mt-2 text-brand dark:text-accent">
+              <div
+                className="flex justify-center gap-6 pt-4 border-t border-gray-200/60 dark:border-gray-700/60"
+                role="list"
+                aria-label="Social media links"
+              >
                 <a
                   href={sm.facebook}
                   target="_blank"
                   rel="noopener noreferrer"
-                  aria-label="Facebook"
+                  aria-label="Facebook (opens in new tab)"
+                  className="p-3 rounded-full bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm
+                             text-[hsl(var(--custom))] hover:text-white
+                             hover:bg-[hsl(var(--custom))] shadow-md hover:shadow-lg
+                             transition-all duration-300 hover:-translate-y-0.5
+                             focus-visible:ring-2 focus-visible:ring-[hsl(var(--custom))] focus-visible:ring-offset-2"
+                  role="listitem"
                 >
-                  <Facebook className="w-6 h-6 hover:scale-110 transition" />
+                  <Facebook className="w-6 h-6" aria-hidden="true" />
                 </a>
                 <a
                   href={sm.instagram}
                   target="_blank"
                   rel="noopener noreferrer"
-                  aria-label="Instagram"
+                  aria-label="Instagram (opens in new tab)"
+                  className="p-3 rounded-full bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm
+                             text-[hsl(var(--custom))] hover:text-white
+                             hover:bg-[hsl(var(--custom))] shadow-md hover:shadow-lg
+                             transition-all duration-300 hover:-translate-y-0.5
+                             focus-visible:ring-2 focus-visible:ring-[hsl(var(--custom))] focus-visible:ring-offset-2"
+                  role="listitem"
                 >
-                  <Instagram className="w-6 h-6 hover:scale-110 transition" />
+                  <Instagram className="w-6 h-6" aria-hidden="true" />
                 </a>
                 <a
                   href={sm.youtube}
                   target="_blank"
                   rel="noopener noreferrer"
-                  aria-label="YouTube"
+                  aria-label="YouTube (opens in new tab)"
+                  className="p-3 rounded-full bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm
+                             text-[hsl(var(--custom))] hover:text-white
+                             hover:bg-[hsl(var(--custom))] shadow-md hover:shadow-lg
+                             transition-all duration-300 hover:-translate-y-0.5
+                             focus-visible:ring-2 focus-visible:ring-[hsl(var(--custom))] focus-visible:ring-offset-2"
+                  role="listitem"
                 >
-                  <Youtube className="w-6 h-6 hover:scale-110 transition" />
+                  <Youtube className="w-6 h-6" aria-hidden="true" />
                 </a>
                 <a
                   href={sm.linkedin}
                   target="_blank"
                   rel="noopener noreferrer"
-                  aria-label="LinkedIn"
+                  aria-label="LinkedIn (opens in new tab)"
+                  className="p-3 rounded-full bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm
+                             text-[hsl(var(--custom))] hover:text-white
+                             hover:bg-[hsl(var(--custom))] shadow-md hover:shadow-lg
+                             transition-all duration-300 hover:-translate-y-0.5
+                             focus-visible:ring-2 focus-visible:ring-[hsl(var(--custom))] focus-visible:ring-offset-2"
+                  role="listitem"
                 >
-                  <Linkedin className="w-6 h-6 hover:scale-110 transition" />
+                  <Linkedin className="w-6 h-6" aria-hidden="true" />
                 </a>
               </div>
             </CardContent>

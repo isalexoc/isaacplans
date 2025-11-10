@@ -17,6 +17,7 @@
         }
       },
       "stats": {
+        "label": "Statistics",
         "states": "Licensed States",
         "clients": "Clients Served",
         "satisfaction": "Satisfaction Rate"
@@ -99,6 +100,33 @@
             "Use funds for bills, travel or treatment",
             "Complements your health insurance"
           ]
+        },
+        "shortTermMedical": {
+          "title": "Short Term Medical",
+          "description": "Temporary health insurance designed to bridge gaps in coverage—ideal for between jobs or waiting periods.",
+          "features": [
+            "Temporary coverage for gaps in coverage",
+            "Fast enrollment and quick effective dates",
+            "Flexible term lengths (varies by state)"
+          ]
+        },
+        "finalExpense": {
+          "title": "Final Expense",
+          "description": "Simple, permanent whole-life insurance to help loved ones cover funeral, burial, and final expenses.",
+          "features": [
+            "Permanent coverage that never expires",
+            "Level premiums that stay the same",
+            "No medical exam required"
+          ]
+        },
+        "iul": {
+          "title": "Indexed Universal Life",
+          "description": "Permanent life insurance with flexible premiums and cash value growth linked to market indexes.",
+          "features": [
+            "Lifetime death benefit protection",
+            "Cash value growth potential",
+            "Flexible premium payments"
+          ]
         }
       }
     },
@@ -110,12 +138,15 @@
       "certs": [
         "Arizona",
         "Colorado",
+        "District of Columbia",
         "Florida",
+        "Georgia",
         "Maryland",
         "New Mexico",
         "North Carolina",
         "Ohio",
         "Texas",
+        "Utah",
         "Virginia"
       ],
       "achievements": {
@@ -141,22 +172,24 @@
       "title": "Nation-wide Coverage",
       "subtitle": "Licensed and certified to serve clients in {states}+ U.S. states.",
       "description": "With licences in ACA, Life, Dental and Vision across multiple states, I offer specialised professional insurance services.",
+      "name": "Isaac Orraiz",
       "features": [
-        "Licensed in {states}+ states",
+        "Licensed in {{states}}+ states",
         "ACA (Health, Affordable Care Act)",
         "Health-insurance specialist",
         "Life-insurance plans",
         "Dental insurance",
         "Vision insurance",
-        "Over 8 years’ experience",
+        "Over 8 years' experience",
         "Personalised service in Spanish",
         "Free consultations",
         "Ongoing support"
       ],
       "cta": {
         "heading": "Need Insurance?",
-        "text": "You’re in the right place – get a free quote today.",
-        "email": "Email Me"
+        "text": "You're in the right place – get a free quote today.",
+        "email": "Email Me",
+        "reassurance": "Response within business hours · Se habla Español"
       }
     }
   },
