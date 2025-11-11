@@ -1,0 +1,755 @@
+{
+  "iulPresentation": {
+    "labels": {
+      "contributionLimit": "Límite de Contribución 2025",
+      "catchUp": "Recuperación (50+):",
+      "advantages": "Ventajas",
+      "disadvantages": "Desventajas",
+      "situation": "La Situación",
+      "problem": "El Problema",
+      "impact": "El Impacto Devastador",
+      "scenario": "El Escenario",
+      "loanDetails": "Detalles del Préstamo",
+      "loanAmount": "Monto del Préstamo:",
+      "interestRate": "Tasa de Interés:",
+      "term": "Plazo:",
+      "monthlyPayment": "Pago Mensual:",
+      "trueCost": "El Verdadero Costo",
+      "totalYoullPay": "Total que Pagarás",
+      "interestPaidToBank": "Intereses Pagados al Banco",
+      "moneyNeverSeeAgain": "Dinero que Nunca Volverás a Ver",
+      "lifetimeInterestPaid": "Intereses Pagados Durante Toda la Vida",
+      "toBanksAndInstitutions": "A Bancos e Instituciones Financieras",
+      "solutionExists": "La Solución Existe"
+    },
+    "meta": {
+      "title": "Modo de Presentación IUL | Isaac Plans",
+      "description": "Presentación interactiva y flujo de trabajo de ventas IUL",
+      "keywords": "IUL, presentación, flujo de ventas",
+      "image": "https://www.isaacplans.com/images/iul_es.png",
+      "imageAlt": "Presentación IUL"
+    },
+    "title": "Modo de Presentación IUL",
+    "description": "Bienvenido al flujo de trabajo de presentación IUL",
+    "backButton": "Volver a IUL",
+    "stepper": {
+      "presentation": "Presentación",
+      "dataEntry": "Entrada de Datos",
+      "referrals": "Referidos"
+    },
+    "presentation": {
+      "title": "Presentación IUL",
+      "subtitle": "Explica IUL a tu cliente",
+      "placeholder": "El contenido de la presentación aparecerá aquí",
+      "placeholderSubtext": "La navegación de diapositivas y el contenido se implementarán a continuación"
+    },
+    "fullscreen": {
+      "enter": "Pantalla Completa",
+      "exit": "Salir de Pantalla Completa"
+    },
+    "slides": {
+      "slide1": {
+        "type": "agent",
+        "title": "Conozca a Su Agente de Seguros de Confianza",
+        "subtitle": "Construyendo Confianza a Través de la Transparencia",
+        "role": "Agente de Seguros Licenciado",
+        "introduction": "Estoy comprometido a brindarle orientación de seguros honesta, transparente y personalizada. Con años de experiencia y licencias en múltiples estados, estoy aquí para ayudarle a encontrar la mejor cobertura que se ajuste a sus necesidades y presupuesto.",
+        "contact": {
+          "name": "Isaac Orraiz",
+          "phone": "540-426-1804",
+          "email": "info@isaacplans.com",
+          "website": "www.isaacplans.com"
+        },
+        "credentials": {
+          "title": "Credenciales Profesionales",
+          "list": [
+            "Licenciado en múltiples estados",
+            "Especialista en Seguros de Vida",
+            "Experto en Estrategias IUL",
+            "Especialista en Estrategias de Financiación Máxima",
+            "Experto en Construcción de Riqueza con Ventajas Fiscales",
+            "Años de experiencia en la industria"
+          ]
+        },
+        "states": [
+          { "code": "AZ", "name": "Arizona" },
+          { "code": "CO", "name": "Colorado" },
+          { "code": "DC", "name": "Distrito de Columbia" },
+          { "code": "FL", "name": "Florida" },
+          { "code": "GA", "name": "Georgia" },
+          { "code": "MD", "name": "Maryland" },
+          { "code": "NM", "name": "Nuevo México" },
+          { "code": "NC", "name": "Carolina del Norte" },
+          { "code": "OH", "name": "Ohio" },
+          { "code": "TX", "name": "Texas" },
+          { "code": "UT", "name": "Utah" },
+          { "code": "VA", "name": "Virginia" }
+        ],
+        "licenses": {
+          "driversLicense": {
+            "imagePublicId": "license_py9vgu"
+          },
+          "AZ": {
+            "imagePublicId": "arizona_seh3e1"
+          },
+          "CO": {
+            "imagePublicId": "colorado_ieaqys"
+          },
+          "DC": {
+            "imagePublicId": "dc_dlypyq"
+          },
+          "FL": {
+            "imagePublicId": "florida_fkx9g8"
+          },
+          "GA": {
+            "imagePublicId": "georgia_v2jqcl"
+          },
+          "MD": {
+            "imagePublicId": "maryland_fhwufq"
+          },
+          "NM": {
+            "imagePublicId": "new_mexico_ulco2i"
+          },
+          "NC": {
+            "imagePublicId": "north_carolina_myol58"
+          },
+          "OH": {
+            "imagePublicId": "ohio_s958a4"
+          },
+          "TX": {
+            "imagePublicId": "texas_ycnpwx"
+          },
+          "UT": {
+            "imagePublicId": "utah_mgw2tw"
+          },
+          "VA": {
+            "imagePublicId": "virginia_woehci"
+          }
+        },
+        "stateLicense": {
+          "title": "Licencia de Seguros del Estado",
+          "selectLabel": "Seleccione Su Estado",
+          "placeholder": "Seleccione un estado para ver la licencia"
+        },
+        "driversLicense": {
+          "title": "Licencia de Conducir",
+          "placeholder": "La imagen de la licencia de conducir aparecerá aquí"
+        },
+        "download": {
+          "asImage": "Descargar como Imagen",
+          "asPDF": "Descargar como PDF",
+          "downloading": "Descargando..."
+        },
+        "unlock": {
+          "title": "Revelar Licencias",
+          "description": "Ingrese la contraseña para ver las imágenes de licencias durante la presentación",
+          "button": "Revelar Licencias",
+          "unlocked": "Desbloqueado",
+          "lockedMessage": "Las licencias están bloqueadas",
+          "lockedSubmessage": "Haga clic en 'Revelar Licencias' para ver",
+          "modalTitle": "Desbloquear Imágenes de Licencias",
+          "modalDescription": "Ingrese su contraseña para revelar las imágenes de licencias para esta sesión de presentación.",
+          "passwordLabel": "Contraseña",
+          "passwordPlaceholder": "Ingrese la contraseña",
+          "passwordRequired": "La contraseña es requerida",
+          "invalidPassword": "Contraseña inválida. Por favor intente de nuevo.",
+          "error": "Ocurrió un error. Por favor intente de nuevo.",
+          "unlockButton": "Desbloquear",
+          "unlocking": "Desbloqueando...",
+          "cancel": "Cancelar"
+        }
+      },
+      "slide2": {
+        "type": "discovery",
+        "title": "Conociéndote",
+        "subtitle": "Entendiendo Tus Objetivos Financieros",
+        "description": "Antes de explorar las opciones de planificación para el retiro, entendamos tu situación única y objetivos.",
+        "questions": [
+          "¿Cuáles son tus principales objetivos financieros para el retiro?",
+          "¿Por qué estás pensando en planificación para el retiro ahora?",
+          "¿Qué ahorros o planes para el retiro tienes actualmente?",
+          "¿Cómo visualizas tu estilo de vida durante el retiro?",
+          "¿Qué preocupaciones tienes sobre tu planificación para el retiro?",
+          "¿Has pensado en qué pasaría si te enfermaras gravemente?",
+          "¿Qué tan importante es para ti dejar un legado para tu familia?",
+          "¿Cuál es tu enfoque actual para ahorrar para el futuro?"
+        ]
+      },
+      "slide3": {
+        "type": "retirementProduct",
+        "title": "Opciones Tradicionales de Ahorro para el Retiro",
+        "subtitle": "Planes 401(k)",
+        "product": {
+          "name": "Planes 401(k)",
+          "description": "Planes de ahorro para el retiro patrocinados por el empleador que permiten a los empleados contribuir una parte de su salario antes de impuestos.",
+          "contributionLimit": "$23,000",
+          "catchUp": "$7,500 (50 años o más)"
+        },
+        "advantages": [
+          "Límites de contribución más altos comparados con IRAs ($23,000 en 2025)",
+          "Posibles contribuciones de igualación del empleador (dinero gratis)",
+          "Las contribuciones reducen el ingreso gravable en el año realizado",
+          "Crecimiento con impuestos diferidos en inversiones",
+          "Las deducciones automáticas de nómina facilitan el ahorro"
+        ],
+        "disadvantages": [
+          "Opciones de inversión limitadas basadas en el plan del empleador",
+          "Los retiros anticipados antes de los 59½ años incurren en penalización del 10% más impuestos",
+          "Las Distribuciones Mínimas Requeridas (RMDs) comienzan a los 73 años",
+          "Las RMDs aumentan el ingreso gravable, potencialmente empujándote a un tramo impositivo más alto",
+          "No hay acceso a fondos sin penalización hasta los 59½ años (excepto retiros por dificultades)",
+          "Si dejas tu trabajo, puedes necesitar transferir o enfrentar tarifas",
+          "Riesgo de mercado - tu cuenta puede perder 20-50% en caídas"
+        ]
+      },
+      "slide4": {
+        "type": "retirementProduct",
+        "title": "Opciones Tradicionales de Ahorro para el Retiro",
+        "subtitle": "IRAs Tradicionales",
+        "product": {
+          "name": "IRAs Tradicionales",
+          "description": "Cuentas de retiro individuales que permiten contribuciones deducibles de impuestos y crecimiento con impuestos diferidos hasta el retiro.",
+          "contributionLimit": "$7,000",
+          "catchUp": "$1,000 (50 años o más)"
+        },
+        "advantages": [
+          "Las contribuciones pueden ser deducibles de impuestos, reduciendo el ingreso gravable actual",
+          "Amplia gama de opciones de inversión (acciones, bonos, fondos mutuos, ETFs)",
+          "Crecimiento con impuestos diferidos hasta el retiro",
+          "Tú controlas tus opciones de inversión",
+          "Puede abrirse independientemente del empleador"
+        ],
+        "disadvantages": [
+          "Límites de contribución más bajos comparados con 401(k)s ($7,000 en 2025)",
+          "Los retiros anticipados antes de los 59½ años incurren en penalización del 10% más impuestos",
+          "Las Distribuciones Mínimas Requeridas (RMDs) comienzan a los 73 años",
+          "Las RMDs fuerzan retiros incluso si no necesitas el dinero",
+          "Los retiros se gravan como ingreso ordinario (potencialmente a tasas más altas)",
+          "La deducción de impuestos puede estar limitada o eliminada según el ingreso y participación en planes del empleador",
+          "Riesgo de mercado - tu cuenta puede perder 20-50% en caídas"
+        ]
+      },
+      "slide5": {
+        "type": "retirementProduct",
+        "title": "Opciones Tradicionales de Ahorro para el Retiro",
+        "subtitle": "Roth IRAs",
+        "product": {
+          "name": "Roth IRAs",
+          "description": "Cuentas de retiro individuales financiadas con dólares después de impuestos, permitiendo retiros libres de impuestos en el retiro.",
+          "contributionLimit": "$7,000",
+          "catchUp": "$1,000 (50 años o más)"
+        },
+        "advantages": [
+          "Los retiros calificados son completamente libres de impuestos, incluyendo ganancias",
+          "No hay Distribuciones Mínimas Requeridas (RMDs) durante tu vida",
+          "Las contribuciones pueden retirarse en cualquier momento sin impuestos ni penalizaciones",
+          "Amplia gama de opciones de inversión",
+          "Puede abrirse independientemente del empleador"
+        ],
+        "disadvantages": [
+          "Las contribuciones se hacen con dólares después de impuestos (sin deducción fiscal inmediata)",
+          "Los límites de ingreso restringen la elegibilidad para personas con altos ingresos (se elimina gradualmente entre $161,000-$176,000 para declarantes solteros en 2025)",
+          "Límites de contribución más bajos comparados con 401(k)s ($7,000 en 2025)",
+          "El retiro anticipado de ganancias antes de los 59½ años incurre en penalización del 10% más impuestos",
+          "Debes esperar 5 años después de abrir la cuenta para retirar ganancias libres de impuestos",
+          "Riesgo de mercado - tu cuenta puede perder 20-50% en caídas",
+          "No hay acceso a fondos para emergencias sin penalización (porción de ganancias)"
+        ]
+      },
+      "slide6": {
+        "type": "retirementProduct",
+        "title": "Opciones Tradicionales de Ahorro para el Retiro",
+        "subtitle": "Planes Roth 401(k)",
+        "product": {
+          "name": "Planes Roth 401(k)",
+          "description": "Planes patrocinados por el empleador que combinan características de 401(k)s y Roth IRAs, ofreciendo contribuciones después de impuestos y retiros libres de impuestos.",
+          "contributionLimit": "$23,000",
+          "catchUp": "$7,500 (50 años o más)"
+        },
+        "advantages": [
+          "Límites de contribución más altos que Roth IRAs ($23,000 en 2025)",
+          "No hay límites de ingreso para contribuciones (a diferencia de Roth IRAs)",
+          "Retiros libres de impuestos en el retiro, incluyendo ganancias",
+          "Posibles contribuciones de igualación del empleador",
+          "Deducciones automáticas de nómina"
+        ],
+        "disadvantages": [
+          "Las contribuciones se hacen con dólares después de impuestos (sin deducción fiscal inmediata)",
+          "Opciones de inversión limitadas basadas en el plan del empleador",
+          "Las Distribuciones Mínimas Requeridas (RMDs) comienzan a los 73 años (a menos que se transfiera a Roth IRA)",
+          "Los retiros anticipados antes de los 59½ años incurren en penalización del 10% más impuestos sobre ganancias",
+          "Riesgo de mercado - tu cuenta puede perder 20-50% en caídas",
+          "Las RMDs pueden forzar distribuciones gravables si no se transfieren"
+        ]
+      },
+      "slide7": {
+        "type": "retirementProduct",
+        "title": "Opciones Tradicionales de Ahorro para el Retiro",
+        "subtitle": "Otras Cuentas de Retiro",
+        "product": {
+          "name": "403(b) y SEP IRAs",
+          "description": "Opciones adicionales de ahorro para el retiro para grupos específicos: 403(b) para educadores/organizaciones sin fines de lucro, SEP IRAs para personas trabajando por cuenta propia."
+        },
+        "advantages": [
+          "403(b): Similar a 401(k) pero para educadores y empleados de organizaciones sin fines de lucro",
+          "SEP IRA: Límites de contribución más altos para trabajadores por cuenta propia (hasta $69,000 o 25% de compensación en 2025)",
+          "Crecimiento con impuestos diferidos",
+          "Contribuciones del empleador posibles (SEP IRA)"
+        ],
+        "disadvantages": [
+          "403(b): Mismas limitaciones que 401(k) - RMDs, penalizaciones por retiro anticipado, riesgo de mercado",
+          "SEP IRA: Límites de contribución más bajos que 401(k) para empleados ($7,000 en 2025)",
+          "Penalizaciones por retiro anticipado antes de los 59½ años",
+          "Las RMDs comienzan a los 73 años",
+          "Riesgo de mercado - las cuentas pueden perder 20-50% en caídas",
+          "Acceso limitado a fondos sin penalización"
+        ]
+      },
+      "slide8": {
+        "type": "scenario",
+        "title": "Escenarios del Mundo Real",
+        "subtitle": "Penalización por Retiro Anticipado",
+        "warning": "Las cuentas tradicionales de retiro NO ofrecen protección para estos escenarios",
+        "scenario": {
+          "title": "El Retiro de Emergencia",
+          "situation": "Juan, de 52 años, tiene $200,000 en su 401(k). Enfrenta una emergencia médica y necesita $50,000 para cubrir gastos. Decide retirar de su 401(k).",
+          "problem": "Juan debe pagar una penalización del 10% por retiro anticipado ($5,000) más impuestos sobre la renta ordinarios sobre los $50,000 completos. Si está en el tramo impositivo del 22%, pagará $11,000 en impuestos. Costo total: $16,000 en impuestos y penalizaciones.",
+          "impact": "Juan recibe solo $34,000 de su retiro de $50,000. Sus ahorros para el retiro se reducen permanentemente, y pierde el crecimiento futuro de esos $50,000. Las cuentas tradicionales de retiro no ofrecen flexibilidad para emergencias sin penalizaciones severas.",
+          "keyNumbers": [
+            { "value": "$50,000", "label": "Necesita", "type": "need" },
+            { "value": "$5,000", "label": "Penalización (10%)", "type": "loss" },
+            { "value": "$11,000", "label": "Impuestos (22%)", "type": "loss" },
+            { "value": "$34,000", "label": "Realmente Recibe", "type": "result" }
+          ]
+        }
+      },
+      "slide9": {
+        "type": "scenario",
+        "title": "Escenarios del Mundo Real",
+        "subtitle": "Distribuciones Mínimas Requeridas (RMDs)",
+        "warning": "Las cuentas tradicionales de retiro NO ofrecen protección para estos escenarios",
+        "scenario": {
+          "title": "El Problema del Retiro Forzado",
+          "situation": "María, de 73 años, tiene $1.5 millones en su IRA Tradicional. No necesita el dinero todavía y quiere dejarlo seguir creciendo. Sin embargo, debe tomar Distribuciones Mínimas Requeridas (RMDs).",
+          "problem": "A los 73 años, María debe retirar aproximadamente $54,745 (alrededor del 3.65% de su cuenta). Este retiro se grava como ingreso ordinario, potencialmente empujándola a un tramo impositivo más alto. Debe continuar tomando RMDs más grandes cada año, incluso si no necesita el dinero.",
+          "impact": "María pierde control sobre cuándo acceder a su dinero. Los retiros forzados aumentan su ingreso gravable, potencialmente afectando la tributación del Seguro Social, las primas de Medicare y su situación fiscal general. No puede preservar el dinero para sus herederos sin pagar impuestos primero.",
+          "keyNumbers": [
+            { "value": "$1,500,000", "label": "Saldo de Cuenta", "type": "balance" },
+            { "value": "$54,745", "label": "RMD Forzado (73 años)", "type": "forced" },
+            { "value": "3.65%", "label": "De la Cuenta", "type": "percentage" },
+            { "value": "Cada Año", "label": "Debe Continuar", "type": "ongoing" }
+          ]
+        }
+      },
+      "slide10": {
+        "type": "scenario",
+        "title": "Escenarios del Mundo Real",
+        "subtitle": "Impacto de la Caída del Mercado",
+        "warning": "Las cuentas tradicionales de retiro NO ofrecen protección para estos escenarios",
+        "scenario": {
+          "title": "El Colapso del Mercado",
+          "situation": "Roberto, de 60 años, ha estado ahorrando diligentemente en su 401(k) durante 30 años. Su cuenta ha crecido a $800,000. Ocurre una importante caída del mercado y el mercado cae un 35%.",
+          "problem": "El 401(k) de Roberto pierde $280,000, cayendo a $520,000. Está planeando retirarse en 5 años, pero ahora su retiro está en peligro. No tiene protección contra pérdidas del mercado - todo su retiro está en riesgo.",
+          "impact": "Roberto puede necesitar retrasar su retiro, trabajar más tiempo o reducir su estilo de vida de retiro. Las cuentas tradicionales de retiro no ofrecen protección a la baja. Si el mercado no se recupera antes de que necesite el dinero, sus planes de retiro están permanentemente dañados.",
+          "keyNumbers": [
+            { "value": "$800,000", "label": "Antes del Colapso", "type": "before" },
+            { "value": "$280,000", "label": "Perdido (35%)", "type": "loss" },
+            { "value": "$520,000", "label": "Después del Colapso", "type": "after" },
+            { "value": "5 Años", "label": "Hasta el Retiro", "type": "timeline" }
+          ]
+        }
+      },
+      "slide11": {
+        "type": "scenario",
+        "title": "Escenarios del Mundo Real",
+        "subtitle": "Impacto de Enfermedad Grave",
+        "warning": "Las cuentas tradicionales de retiro NO ofrecen protección para estos escenarios",
+        "scenario": {
+          "title": "La Enfermedad Crítica",
+          "situation": "Sarah, de 58 años, es diagnosticada con una enfermedad crítica. Necesita $100,000 para gastos médicos y para cubrir sus costos de vida mientras no puede trabajar. Tiene $300,000 en su 401(k) y $50,000 en ahorros.",
+          "problem": "Si Sarah retira de su 401(k), pagará una penalización del 10% ($10,000) más impuestos. Sus ahorros no cubrirán todo. Las cuentas tradicionales de retiro no ofrecen beneficios en vida para enfermedad crítica - debe elegir entre penalizaciones financieras o no tener suficiente dinero para el tratamiento.",
+          "impact": "Sarah enfrenta una elección devastadora: pagar penalizaciones para acceder a su dinero de retiro cuando más lo necesita, o luchar financieramente durante una crisis de salud. Las cuentas tradicionales de retiro no proporcionan protección para enfermedades críticas, crónicas o terminales.",
+          "keyNumbers": [
+            { "value": "$100,000", "label": "Necesita para Tratamiento", "type": "need" },
+            { "value": "$50,000", "label": "Ahorros Disponibles", "type": "available" },
+            { "value": "$10,000", "label": "Penalización (10%)", "type": "loss" },
+            { "value": "$0", "label": "Beneficios en Vida", "type": "missing" }
+          ]
+        }
+      },
+      "slide12": {
+        "type": "bank",
+        "title": "Una Perspectiva Diferente",
+        "subtitle": "Convertirse en Tu Propio Banco",
+        "questions": [
+          "¿Actualmente eres dueño de un banco?",
+          "¿Puedes retirar dinero de tu propio banco ahora mismo?",
+          "Si necesitas comprar un auto, ¿qué haces?",
+          "Si quieres comprar una casa, ¿qué haces?",
+          "¿A quién le pagas intereses?"
+        ],
+        "description": "La mayoría de las personas dependen de bancos tradicionales e instituciones financieras para cada compra importante. Pero, ¿y si hubiera una mejor manera?"
+      },
+      "slide13": {
+        "type": "bankExample",
+        "title": "El Enfoque Tradicional",
+        "subtitle": "Comprar un Auto",
+        "example": {
+          "scenario": "Necesitas un auto de $35,000. Vas a un banco o concesionario para financiamiento.",
+          "loanAmount": "$35,000",
+          "interestRate": "7.5%",
+          "loanTerm": "5 años",
+          "monthlyPayment": "$701",
+          "totalPaid": "$42,060",
+          "interestPaid": "$7,060",
+          "problem": "Pagas $7,060 en intereses al banco. Ese es dinero que nunca volverás a ver. Además, estás atado a pagos mensuales durante 5 años, independientemente de tu situación financiera."
+        }
+      },
+      "slide14": {
+        "type": "bankExample",
+        "title": "El Enfoque Tradicional",
+        "subtitle": "Comprar una Casa",
+        "example": {
+          "scenario": "Quieres comprar una casa de $400,000. Obtienes una hipoteca de 30 años de un banco.",
+          "loanAmount": "$400,000",
+          "interestRate": "7.0%",
+          "loanTerm": "30 años",
+          "monthlyPayment": "$2,663",
+          "totalPaid": "$958,680",
+          "interestPaid": "$558,680",
+          "problem": "Pagas $558,680 en intereses durante 30 años - ¡más de lo que costó la casa! Ese es dinero que va al banco, no construyendo tu riqueza. Estás pagando las ganancias del banco, no tu futuro."
+        }
+      },
+      "slide15": {
+        "type": "bankCosts",
+        "title": "El Verdadero Costo de la Banca Tradicional",
+        "subtitle": "Lo Que Realmente Estás Pagando",
+        "costs": [
+          {
+            "item": "Intereses de Préstamo de Auto",
+            "amount": "$7,060",
+            "description": "Préstamo de auto promedio de 5 años al 7.5%"
+          },
+          {
+            "item": "Intereses de Hipoteca",
+            "amount": "$558,680",
+            "description": "Hipoteca de 30 años al 7.0%"
+          },
+          {
+            "item": "Intereses de Tarjeta de Crédito",
+            "amount": "$2,400+",
+            "description": "Intereses de deuda promedio de tarjeta de crédito por hogar por año"
+          },
+          {
+            "item": "Intereses de Préstamo Personal",
+            "amount": "$3,000+",
+            "description": "Intereses típicos de préstamo personal durante 3 años"
+          }
+        ],
+        "total": "$571,140+",
+        "summary": "Durante toda la vida, el estadounidense promedio paga cientos de miles de dólares en intereses a bancos e instituciones financieras. Este dinero podría estar trabajando para TI en su lugar."
+      },
+      "slide16": {
+        "type": "bankTeaser",
+        "title": "¿Qué Pasaría Si Pudieras Ser Tu Propio Banco?",
+        "subtitle": "Imagina las Posibilidades",
+        "questions": [
+          "¿Qué pasaría si pudieras pedir prestado de ti mismo en lugar de un banco?",
+          "¿Qué pasaría si pudieras pagar intereses a ti mismo en lugar de un banco?",
+          "¿Qué pasaría si pudieras acceder a tu dinero cuando lo necesites, sin penalizaciones?",
+          "¿Qué pasaría si pudieras protegerte de las caídas del mercado?",
+          "¿Qué pasaría si pudieras acceder a fondos para enfermedades críticas sin penalizaciones?",
+          "¿Qué pasaría si pudieras resolver TODOS los problemas que hemos discutido?"
+        ],
+        "description": "HAY una manera de convertirte en tu propio banco. Una manera de mantener tu dinero trabajando para ti, no para instituciones financieras. Una manera de resolver los problemas de retiro, los problemas bancarios y los problemas de protección - todo en una solución."
+      },
+      "slide17": {
+        "type": "iulHero",
+        "title": "La Solución que Has Estado Esperando",
+        "subtitle": "Seguro de Vida Universal Indexado (IUL)",
+        "description": "Finalmente, una estrategia financiera que resuelve TODOS los problemas que hemos discutido. Una manera de convertirte en tu propio banco, proteger tu retiro y asegurar tu futuro - todo en una solución poderosa.",
+        "highlights": [
+          "Conviértete en Tu Propio Banco",
+          "Protege Tu Retiro",
+          "Accede a Fondos Sin Penalizaciones",
+          "Protección del Mercado",
+          "Beneficios en Vida para Enfermedades Críticas",
+          "Crecimiento y Retiros Libres de Impuestos"
+        ],
+        "imagePlaceholder": "https://res.cloudinary.com/isaacdev/image/upload/v1762891236/iul_img_issqjj.png",
+        "cta": "Una Solución. Todos los Problemas Resueltos."
+      },
+      "slide18": {
+        "type": "iulWho",
+        "title": "¿Para Quién es Bueno el IUL?",
+        "subtitle": "El Ajuste Perfecto",
+        "description": "IUL es una estrategia financiera ideal para personas que quieren protección integral, ventajas fiscales y la capacidad de convertirse en su propio banco. Aquí está quién se beneficia más:",
+        "characteristics": [
+          {
+            "title": "Queriendo un Beneficio por Fallecimiento PERMANENTE / Dejar un Legado",
+            "description": "IUL proporciona cobertura de seguro de vida permanente que nunca expira, asegurando que tus seres queridos estén protegidos y tu legado sea preservado.",
+            "icon": "legacy"
+          },
+          {
+            "title": "Personas con Ingresos Medios a Altos Buscando Retiro Libre de Impuestos",
+            "description": "Perfecto para aquellos que buscan crecimiento y retiros libres de impuestos en el retiro. Contribución recomendada: 10x tu edad en base mensual (ej., 40 años = $400/mes mínimo).",
+            "icon": "income"
+          },
+          {
+            "title": "Convertirse en Tu Propio Banco",
+            "description": "Ideal para aquellos que quieren pedir prestado de sí mismos, pagar intereses a sí mismos y tener acceso flexible a su dinero sin penalizaciones.",
+            "icon": "bank"
+          },
+          {
+            "title": "Portafolio Bien Balanceado",
+            "description": "Mejor para individuos que ya tienen otras inversiones y quieren IUL como parte de una estrategia financiera diversificada.",
+            "icon": "portfolio"
+          },
+          {
+            "title": "Maximizando la Igualación del 401(k) o Roth IRA",
+            "description": "Perfecto para aquellos que ya están maximizando la igualación del 401(k) del empleador o las contribuciones Roth IRA y quieren crecimiento adicional con ventajas fiscales.",
+            "icon": "retirement"
+          }
+        ],
+        "cta": "Si esto te suena, IUL podría ser tu solución financiera perfecta."
+      },
+      "slide19": {
+        "type": "iulComparison",
+        "title": "¿Dónde Encaja un IUL en un Plan de Retiro?",
+        "subtitle": "Comparación de Riesgo vs. Recompensa",
+        "description": "Ve cómo IUL se compara con las opciones de inversión tradicionales en términos de riesgo y recompensa potencial.",
+        "investments": [
+          {
+            "name": "Bancos",
+            "risk": 5,
+            "reward": 8,
+            "color": "green"
+          },
+          {
+            "name": "Bonos del Tesoro",
+            "risk": 6,
+            "reward": 10,
+            "color": "green"
+          },
+          {
+            "name": "Seguro de Vida Entera",
+            "risk": 7,
+            "reward": 12,
+            "color": "green"
+          },
+          {
+            "name": "Acciones",
+            "risk": 65,
+            "reward": 70,
+            "color": "green"
+          },
+          {
+            "name": "Cripto",
+            "risk": 95,
+            "reward": 95,
+            "color": "green"
+          },
+          {
+            "name": "IUL",
+            "risk": 15,
+            "reward": 55,
+            "color": "blue"
+          }
+        ],
+        "legend": {
+          "traditional": "Inversiones Tradicionales",
+          "iul": "IUL (Seguro de Vida Universal Indexado)",
+          "typicalLine": "Línea Típica de Riesgo/Recompensa"
+        },
+        "axis": {
+          "risk": "Riesgo",
+          "reward": "Recompensa"
+        },
+        "insight": "IUL ofrece una recompensa superior para su nivel de riesgo en comparación con las inversiones tradicionales"
+      },
+      "slide20": {
+        "type": "iulStructure",
+        "title": "Estructuración Adecuada de un IUL",
+        "subtitle": "Entendiendo los Dos Cubos",
+        "description": "Su prima mensual se divide en dos componentes esenciales que trabajan juntos para construir su riqueza.",
+        "twoComponents": {
+          "title": "DOS COMPONENTES",
+          "deathBenefit": {
+            "name": "BENEFICIO POR FALLECIMIENTO",
+            "description": "Protección para sus seres queridos"
+          },
+          "cashValue": {
+            "name": "VALOR EN EFECTIVO",
+            "description": "Su cubo de acumulación de riqueza"
+          }
+        },
+        "relationship": {
+          "title": "El Equilibrio",
+          "explanation": "Asumiendo la misma contribución mensual:",
+          "points": [
+            "Mayor Beneficio por Fallecimiento = Menor Valor en Efectivo",
+            "Menor Beneficio por Fallecimiento = Mayor Valor en Efectivo"
+          ]
+        },
+        "cashValueFeatures": {
+          "title": "Beneficios del Valor en Efectivo",
+          "points": [
+            "Típicamente crece 6-8% anual",
+            "Indexado al rendimiento del mercado (S&P 500)",
+            "Protección de piso: mínimo 0% (nunca pierde cuando el mercado cae)",
+            "Crecimiento con impuestos diferidos",
+            "Accesible a través de préstamos de póliza"
+          ]
+        },
+        "whyStructureMatters": {
+          "title": "Por Qué la Estructura Adecuada es Esencial",
+          "points": [
+            "Maximiza la acumulación de valor en efectivo para sus objetivos",
+            "Equilibra la protección con el potencial de crecimiento",
+            "Optimiza las ventajas fiscales",
+            "Asegura que pueda acceder a los fondos cuando los necesite",
+            "Crea su propio sistema bancario"
+          ]
+        },
+        "cta": "Estructura adecuada = Acumulación máxima para sus objetivos financieros"
+      },
+      "slide21": {
+        "type": "iulIndexing",
+        "title": "¿Qué es la Estrategia de Indexación?",
+        "subtitle": "Cómo Crece Su Dinero",
+        "description": "Su valor en efectivo está vinculado al rendimiento del mercado, pero protegido de las pérdidas del mercado.",
+        "keyPoints": [
+          {
+            "icon": "chart",
+            "title": "Sigue el Índice del Mercado",
+            "description": "Su crecimiento está vinculado al rendimiento del S&P 500"
+          },
+          {
+            "icon": "shield",
+            "title": "Protegido de Pérdidas",
+            "description": "Nunca pierde dinero cuando el mercado baja"
+          },
+          {
+            "icon": "growth",
+            "title": "Participa en las Ganancias",
+            "description": "Se beneficia cuando el mercado sube"
+          }
+        ],
+        "visualNote": "Su dinero NO está invertido en acciones - sigue un índice",
+        "visualLabels": {
+          "yourMoney": "Su Dinero",
+          "inIULPolicy": "En Póliza IUL",
+          "follows": "Sigue",
+          "marketIndex": "Índice del Mercado",
+          "performance": "Rendimiento",
+          "yourGrowth": "Su Crecimiento",
+          "protectedParticipating": "Protegido y Participando"
+        }
+      },
+      "slide22": {
+        "type": "iulTerms",
+        "title": "Entendiendo Términos Clave",
+        "subtitle": "Piso y Tope Explicados",
+        "floor": {
+          "title": "Piso del 0%",
+          "description": "Su garantía de rendimiento mínimo",
+          "explanation": "Incluso si el mercado cae 20%, 30% o 50%, su cuenta nunca baja del 0%",
+          "icon": "shield"
+        },
+        "cap": {
+          "title": "Tope del 10% (Ejemplo)",
+          "description": "Su límite de rendimiento máximo",
+          "explanation": "Si el mercado gana 15%, usted obtiene hasta 10% (el tope). Esto protege a la compañía de seguros.",
+          "icon": "trending"
+        },
+        "note": "Los topes reales varían según la compañía y la póliza",
+        "visualLabels": {
+          "marketDrops": "El Mercado Cae:",
+          "yourAccount": "Su Cuenta:",
+          "protected": "¡Protegido!",
+          "marketGains": "El Mercado Gana:",
+          "cappedAt": "Limitado al 10%"
+        }
+      },
+      "slide23": {
+        "type": "iulNotInvested",
+        "title": "Importante: Su Dinero NO Está Invertido",
+        "subtitle": "Cómo Funciona la Indexación",
+        "comparison": {
+          "directInvestment": {
+            "title": "Inversión Directa en Acciones",
+            "points": [
+              "Su dinero compra acciones reales",
+              "Usted posee acciones de empresas",
+              "Riesgo total del mercado - puede perder todo",
+              "Sin protección contra pérdidas"
+            ],
+            "icon": "chart"
+          },
+          "indexing": {
+            "title": "Estrategia de Indexación (IUL)",
+            "points": [
+              "Su dinero permanece en la póliza",
+              "El crecimiento se calcula según el rendimiento del índice",
+              "Protegido por piso del 0% - nunca pierde",
+              "Participa en ganancias hasta el tope"
+            ],
+            "icon": "shield"
+          }
+        },
+        "keyMessage": "Su dinero sigue el índice, pero no está directamente invertido en él",
+        "visualLabels": {
+          "yourMoneyStocks": "Su Dinero = Acciones",
+          "yourMoneyPolicy": "Su Dinero = Póliza (Sigue el Índice)"
+        }
+      },
+      "slide24": {
+        "type": "iulHowItWorks",
+        "title": "Cómo Funciona la Indexación - Ejemplo Simple",
+        "subtitle": "Vea la Diferencia",
+        "scenarios": [
+          {
+            "year": "Año 1",
+            "marketReturn": "+12%",
+            "yourReturn": "+10%",
+            "explanation": "Mercado sube 12%, usted obtiene 10% (límite del tope)"
+          },
+          {
+            "year": "Año 2",
+            "marketReturn": "-15%",
+            "yourReturn": "0%",
+            "explanation": "Mercado baja 15%, usted obtiene 0% (protección del piso)"
+          },
+          {
+            "year": "Año 3",
+            "marketReturn": "+8%",
+            "yourReturn": "+8%",
+            "explanation": "Mercado sube 8%, usted obtiene el 8% completo (bajo el tope)"
+          }
+        ],
+        "summary": "Usted participa en las ganancias, protegido de las pérdidas",
+        "visualLabels": {
+          "marketReturn": "Rendimiento del Mercado",
+          "yourReturn": "Su Rendimiento"
+        }
+      },
+      "slide25": {
+        "type": "iulIllustrationCTA",
+        "title": "¿Listo para Ver Sus Números?",
+        "subtitle": "Ejecutemos Su Ilustración Personal",
+        "description": "Ahora crearé una ilustración personalizada basada en su situación específica, objetivos e información financiera.",
+        "whatYoullSee": [
+          "Proyección de crecimiento del valor en efectivo a lo largo del tiempo",
+          "Cantidad de ingresos para el retiro y proyecciones",
+          "Protección de beneficio por fallecimiento para sus seres queridos",
+          "Protección contra enfermedades críticas y crónicas",
+          "Capacidades de préstamo y acceso a fondos",
+          "Ventajas fiscales y crecimiento libre de impuestos",
+          "Su estrategia personalizada basada en sus objetivos"
+        ],
+        "cta": "Construyamos Su Ilustración IUL Personalizada",
+        "whatYoullSeeTitle": "Lo Que Verá en Su Ilustración:"
+      }
+    }
+  }
+}

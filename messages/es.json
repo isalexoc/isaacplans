@@ -1507,6 +1507,10 @@
       "subtitle": "Personalizado y sin compromiso"
     },
 
+    "presentationButton": {
+      "title": "Ir al Modo de Presentación"
+    },
+
     "about": {
       "badge": "Sobre Isaac",
       "headline": "Estrategias de vida a tu medida—según tus objetivos",

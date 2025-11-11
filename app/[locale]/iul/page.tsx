@@ -1,5 +1,6 @@
 import HeroWithTestimonials from "@/components/hero-template";
 import IULButton from "@/components/IULButton";
+import IULPresentationButton from "@/components/IULPresentationButton";
 import CTABanner from "@/components/CTABanner-template";
 import FaqSection from "@/components/FaqSection";
 import EnrollmentSectionGeneric from "@/components/enrollment-section-template";
@@ -79,6 +80,8 @@ export default async function IndexedUniversalLifePage() {
 
   return (
     <>
+     
+
       {/* HERO ----------------------------------------------------------- */}
       <HeroWithTestimonials
         badge={t("hero.badge")}
@@ -103,6 +106,11 @@ export default async function IndexedUniversalLifePage() {
           subtitle: t("hero.happyClient.subtitle"),
         }}
       />
+
+       {/* PRESENTATION MODE BUTTON ----------------------------------------- */}
+       <div className="container mx-auto px-4 pt-8 pb-4">
+        <IULPresentationButton />
+      </div>
 
       {/* ABOUT ISAAC ---------------------------------------------------- */}
       <AboutSectionGeneric

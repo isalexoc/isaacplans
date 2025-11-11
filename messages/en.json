@@ -1519,6 +1519,10 @@
       "subtitle": "Personalized, no obligation"
     },
 
+    "presentationButton": {
+      "title": "Go to Presentation Mode"
+    },
+
     "about": {
       "badge": "About Isaac",
       "headline": "Tailored life-insurance strategies—built around your goals",

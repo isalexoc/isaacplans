@@ -1,0 +1,755 @@
+{
+  "iulPresentation": {
+    "labels": {
+      "contributionLimit": "2025 Contribution Limit",
+      "catchUp": "Catch-up (50+):",
+      "advantages": "Advantages",
+      "disadvantages": "Disadvantages",
+      "situation": "The Situation",
+      "problem": "The Problem",
+      "impact": "The Devastating Impact",
+      "scenario": "The Scenario",
+      "loanDetails": "Loan Details",
+      "loanAmount": "Loan Amount:",
+      "interestRate": "Interest Rate:",
+      "term": "Term:",
+      "monthlyPayment": "Monthly Payment:",
+      "trueCost": "The True Cost",
+      "totalYoullPay": "Total You'll Pay",
+      "interestPaidToBank": "Interest Paid to Bank",
+      "moneyNeverSeeAgain": "Money You'll Never See Again",
+      "lifetimeInterestPaid": "Lifetime Interest Paid",
+      "toBanksAndInstitutions": "To Banks and Financial Institutions",
+      "solutionExists": "The Solution Exists"
+    },
+    "meta": {
+      "title": "IUL Presentation Mode | Isaac Plans",
+      "description": "Interactive IUL presentation and sales workflow",
+      "keywords": "IUL, presentation, sales workflow",
+      "image": "https://www.isaacplans.com/images/iul_en.png",
+      "imageAlt": "IUL Presentation"
+    },
+    "title": "IUL Presentation Mode",
+    "description": "Welcome to the IUL presentation workflow",
+    "backButton": "Back to IUL",
+    "stepper": {
+      "presentation": "Presentation",
+      "dataEntry": "Data Entry",
+      "referrals": "Referrals"
+    },
+    "presentation": {
+      "title": "IUL Presentation",
+      "subtitle": "Explain IUL to your client",
+      "placeholder": "Presentation content will go here",
+      "placeholderSubtext": "Slide navigation and content will be implemented next"
+    },
+    "fullscreen": {
+      "enter": "Enter Fullscreen",
+      "exit": "Exit Fullscreen"
+    },
+    "slides": {
+      "slide1": {
+        "type": "agent",
+        "title": "Meet Your Trusted Insurance Agent",
+        "subtitle": "Building Trust Through Transparency",
+        "role": "Licensed Insurance Agent",
+        "introduction": "I'm committed to providing you with honest, transparent, and personalized insurance guidance. With years of experience and licenses in multiple states, I'm here to help you find the best coverage that fits your needs and budget.",
+        "contact": {
+          "name": "Isaac Orraiz",
+          "phone": "540-426-1804",
+          "email": "info@isaacplans.com",
+          "website": "www.isaacplans.com"
+        },
+        "credentials": {
+          "title": "Professional Credentials",
+          "list": [
+            "Licensed in multiple states",
+            "Life Insurance Specialist",
+            "IUL Strategy Expert",
+            "Maximum-Funded Strategy Specialist",
+            "Tax-Advantaged Wealth Building Expert",
+            "Years of industry experience"
+          ]
+        },
+        "states": [
+          { "code": "AZ", "name": "Arizona" },
+          { "code": "CO", "name": "Colorado" },
+          { "code": "DC", "name": "District of Columbia" },
+          { "code": "FL", "name": "Florida" },
+          { "code": "GA", "name": "Georgia" },
+          { "code": "MD", "name": "Maryland" },
+          { "code": "NM", "name": "New Mexico" },
+          { "code": "NC", "name": "North Carolina" },
+          { "code": "OH", "name": "Ohio" },
+          { "code": "TX", "name": "Texas" },
+          { "code": "UT", "name": "Utah" },
+          { "code": "VA", "name": "Virginia" }
+        ],
+        "licenses": {
+          "driversLicense": {
+            "imagePublicId": "license_py9vgu"
+          },
+          "AZ": {
+            "imagePublicId": "arizona_seh3e1"
+          },
+          "CO": {
+            "imagePublicId": "colorado_ieaqys"
+          },
+          "DC": {
+            "imagePublicId": "dc_dlypyq"
+          },
+          "FL": {
+            "imagePublicId": "florida_fkx9g8"
+          },
+          "GA": {
+            "imagePublicId": "georgia_v2jqcl"
+          },
+          "MD": {
+            "imagePublicId": "maryland_fhwufq"
+          },
+          "NM": {
+            "imagePublicId": "new_mexico_ulco2i"
+          },
+          "NC": {
+            "imagePublicId": "north_carolina_myol58"
+          },
+          "OH": {
+            "imagePublicId": "ohio_s958a4"
+          },
+          "TX": {
+            "imagePublicId": "texas_ycnpwx"
+          },
+          "UT": {
+            "imagePublicId": "utah_mgw2tw"
+          },
+          "VA": {
+            "imagePublicId": "virginia_woehci"
+          }
+        },
+        "stateLicense": {
+          "title": "State Insurance License",
+          "selectLabel": "Select Your State",
+          "placeholder": "Select a state to view license"
+        },
+        "driversLicense": {
+          "title": "Driver's License",
+          "placeholder": "Driver's license image will appear here"
+        },
+        "download": {
+          "asImage": "Download as Image",
+          "asPDF": "Download as PDF",
+          "downloading": "Downloading..."
+        },
+        "unlock": {
+          "title": "Reveal Licenses",
+          "description": "Enter password to view license images during presentation",
+          "button": "Reveal Licenses",
+          "unlocked": "Unlocked",
+          "lockedMessage": "Licenses are locked",
+          "lockedSubmessage": "Click 'Reveal Licenses' to view",
+          "modalTitle": "Unlock License Images",
+          "modalDescription": "Enter your password to reveal license images for this presentation session.",
+          "passwordLabel": "Password",
+          "passwordPlaceholder": "Enter password",
+          "passwordRequired": "Password is required",
+          "invalidPassword": "Invalid password. Please try again.",
+          "error": "An error occurred. Please try again.",
+          "unlockButton": "Unlock",
+          "unlocking": "Unlocking...",
+          "cancel": "Cancel"
+        }
+      },
+      "slide2": {
+        "type": "discovery",
+        "title": "Getting to Know You",
+        "subtitle": "Understanding Your Financial Goals",
+        "description": "Before we explore retirement planning options, let's understand your unique situation and goals.",
+        "questions": [
+          "What are your primary financial goals for retirement?",
+          "Why are you thinking about retirement planning now?",
+          "What retirement savings or plans do you currently have in place?",
+          "How do you envision your lifestyle during retirement?",
+          "What concerns do you have about your retirement planning?",
+          "Have you thought about what would happen if you became seriously ill?",
+          "How important is it to you to leave a legacy for your family?",
+          "What is your current approach to saving for the future?"
+        ]
+      },
+      "slide3": {
+        "type": "retirementProduct",
+        "title": "Traditional Retirement Savings Options",
+        "subtitle": "401(k) Plans",
+        "product": {
+          "name": "401(k) Plans",
+          "description": "Employer-sponsored retirement savings plans that allow employees to contribute a portion of their salary on a pre-tax basis.",
+          "contributionLimit": "$23,000",
+          "catchUp": "$7,500 (age 50+)"
+        },
+        "advantages": [
+          "Higher contribution limits compared to IRAs ($23,000 in 2025)",
+          "Potential employer matching contributions (free money)",
+          "Contributions reduce taxable income in the year made",
+          "Tax-deferred growth on investments",
+          "Automatic payroll deductions make saving easy"
+        ],
+        "disadvantages": [
+          "Limited investment options based on employer's plan",
+          "Early withdrawals before age 59½ incur 10% penalty plus taxes",
+          "Required Minimum Distributions (RMDs) begin at age 73",
+          "RMDs increase taxable income, potentially pushing you into higher tax bracket",
+          "No access to funds without penalty until age 59½ (except hardship withdrawals)",
+          "If you leave your job, you may need to roll over or face fees",
+          "Market risk - your account can lose 20-50% in downturns"
+        ]
+      },
+      "slide4": {
+        "type": "retirementProduct",
+        "title": "Traditional Retirement Savings Options",
+        "subtitle": "Traditional IRAs",
+        "product": {
+          "name": "Traditional IRAs",
+          "description": "Individual retirement accounts that allow tax-deductible contributions and tax-deferred growth until withdrawal.",
+          "contributionLimit": "$7,000",
+          "catchUp": "$1,000 (age 50+)"
+        },
+        "advantages": [
+          "Contributions may be tax-deductible, reducing current taxable income",
+          "Wide range of investment options (stocks, bonds, mutual funds, ETFs)",
+          "Tax-deferred growth until withdrawal",
+          "You control your investment choices",
+          "Can be opened independently of employer"
+        ],
+        "disadvantages": [
+          "Lower contribution limits compared to 401(k)s ($7,000 in 2025)",
+          "Early withdrawals before age 59½ incur 10% penalty plus taxes",
+          "Required Minimum Distributions (RMDs) begin at age 73",
+          "RMDs force withdrawals even if you don't need the money",
+          "Withdrawals are taxed as ordinary income (potentially at higher rates)",
+          "Tax deduction may be limited or eliminated based on income and employer plan participation",
+          "Market risk - your account can lose 20-50% in downturns"
+        ]
+      },
+      "slide5": {
+        "type": "retirementProduct",
+        "title": "Traditional Retirement Savings Options",
+        "subtitle": "Roth IRAs",
+        "product": {
+          "name": "Roth IRAs",
+          "description": "Individual retirement accounts funded with after-tax dollars, allowing tax-free withdrawals in retirement.",
+          "contributionLimit": "$7,000",
+          "catchUp": "$1,000 (age 50+)"
+        },
+        "advantages": [
+          "Qualified withdrawals are completely tax-free, including earnings",
+          "No Required Minimum Distributions (RMDs) during your lifetime",
+          "Contributions can be withdrawn at any time without taxes or penalties",
+          "Wide range of investment options",
+          "Can be opened independently of employer"
+        ],
+        "disadvantages": [
+          "Contributions are made with after-tax dollars (no immediate tax deduction)",
+          "Income limits restrict eligibility for high earners (phases out at $161,000-$176,000 for single filers in 2025)",
+          "Lower contribution limits compared to 401(k)s ($7,000 in 2025)",
+          "Early withdrawal of earnings before age 59½ incurs 10% penalty plus taxes",
+          "Must wait 5 years after opening account to withdraw earnings tax-free",
+          "Market risk - your account can lose 20-50% in downturns",
+          "No access to funds for emergencies without penalty (earnings portion)"
+        ]
+      },
+      "slide6": {
+        "type": "retirementProduct",
+        "title": "Traditional Retirement Savings Options",
+        "subtitle": "Roth 401(k) Plans",
+        "product": {
+          "name": "Roth 401(k) Plans",
+          "description": "Employer-sponsored plans combining features of 401(k)s and Roth IRAs, offering after-tax contributions and tax-free withdrawals.",
+          "contributionLimit": "$23,000",
+          "catchUp": "$7,500 (age 50+)"
+        },
+        "advantages": [
+          "Higher contribution limits than Roth IRAs ($23,000 in 2025)",
+          "No income limits for contributions (unlike Roth IRAs)",
+          "Tax-free withdrawals in retirement, including earnings",
+          "Potential employer matching contributions",
+          "Automatic payroll deductions"
+        ],
+        "disadvantages": [
+          "Contributions are made with after-tax dollars (no immediate tax deduction)",
+          "Limited investment options based on employer's plan",
+          "Required Minimum Distributions (RMDs) begin at age 73 (unless rolled over to Roth IRA)",
+          "Early withdrawals before age 59½ incur 10% penalty plus taxes on earnings",
+          "Market risk - your account can lose 20-50% in downturns",
+          "RMDs can force taxable distributions if not rolled over"
+        ]
+      },
+      "slide7": {
+        "type": "retirementProduct",
+        "title": "Traditional Retirement Savings Options",
+        "subtitle": "Other Retirement Accounts",
+        "product": {
+          "name": "403(b) & SEP IRAs",
+          "description": "Additional retirement savings options for specific groups: 403(b) for educators/non-profits, SEP IRAs for self-employed individuals."
+        },
+        "advantages": [
+          "403(b): Similar to 401(k) but for educators and non-profit employees",
+          "SEP IRA: Higher contribution limits for self-employed (up to $69,000 or 25% of compensation in 2025)",
+          "Tax-deferred growth",
+          "Employer contributions possible (SEP IRA)"
+        ],
+        "disadvantages": [
+          "403(b): Same limitations as 401(k) - RMDs, early withdrawal penalties, market risk",
+          "SEP IRA: Lower contribution limits than 401(k) for employees ($7,000 in 2025)",
+          "Early withdrawal penalties before age 59½",
+          "RMDs begin at age 73",
+          "Market risk - accounts can lose 20-50% in downturns",
+          "Limited access to funds without penalty"
+        ]
+      },
+      "slide8": {
+        "type": "scenario",
+        "title": "Real-World Scenarios",
+        "subtitle": "Early Withdrawal Penalty",
+        "warning": "Traditional retirement accounts offer NO protection for these scenarios",
+        "scenario": {
+          "title": "The Emergency Withdrawal",
+          "situation": "John, age 52, has $200,000 in his 401(k). He faces a medical emergency and needs $50,000 to cover expenses. He decides to withdraw from his 401(k).",
+          "problem": "John must pay a 10% early withdrawal penalty ($5,000) plus ordinary income taxes on the full $50,000. If he's in the 22% tax bracket, he'll pay $11,000 in taxes. Total cost: $16,000 in taxes and penalties.",
+          "impact": "John receives only $34,000 from his $50,000 withdrawal. His retirement savings are permanently reduced, and he loses the future growth on that $50,000. Traditional retirement accounts offer no flexibility for emergencies without severe penalties.",
+          "keyNumbers": [
+            { "value": "$50,000", "label": "Needed", "type": "need" },
+            { "value": "$5,000", "label": "Penalty (10%)", "type": "loss" },
+            { "value": "$11,000", "label": "Taxes (22%)", "type": "loss" },
+            { "value": "$34,000", "label": "Actually Receives", "type": "result" }
+          ]
+        }
+      },
+      "slide9": {
+        "type": "scenario",
+        "title": "Real-World Scenarios",
+        "subtitle": "Required Minimum Distributions (RMDs)",
+        "warning": "Traditional retirement accounts offer NO protection for these scenarios",
+        "scenario": {
+          "title": "The Forced Withdrawal Problem",
+          "situation": "Maria, age 73, has $1.5 million in her Traditional IRA. She doesn't need the money yet and wants to let it continue growing. However, she must take Required Minimum Distributions (RMDs).",
+          "problem": "At age 73, Maria must withdraw approximately $54,745 (about 3.65% of her account). This withdrawal is taxed as ordinary income, potentially pushing her into a higher tax bracket. She must continue taking larger RMDs each year, even if she doesn't need the money.",
+          "impact": "Maria loses control over when to access her money. The forced withdrawals increase her taxable income, potentially affecting Social Security taxation, Medicare premiums, and her overall tax situation. She can't preserve the money for her heirs without paying taxes first.",
+          "keyNumbers": [
+            { "value": "$1,500,000", "label": "Account Balance", "type": "balance" },
+            { "value": "$54,745", "label": "Forced RMD (Age 73)", "type": "forced" },
+            { "value": "3.65%", "label": "Of Account", "type": "percentage" },
+            { "value": "Every Year", "label": "Must Continue", "type": "ongoing" }
+          ]
+        }
+      },
+      "slide10": {
+        "type": "scenario",
+        "title": "Real-World Scenarios",
+        "subtitle": "Market Downturn Impact",
+        "warning": "Traditional retirement accounts offer NO protection for these scenarios",
+        "scenario": {
+          "title": "The Market Crash",
+          "situation": "Robert, age 60, has been saving diligently in his 401(k) for 30 years. His account has grown to $800,000. A major market downturn occurs, and the market drops 35%.",
+          "problem": "Robert's 401(k) loses $280,000, dropping to $520,000. He's planning to retire in 5 years, but now his retirement is in jeopardy. He has no protection from market losses - his entire retirement is at risk.",
+          "impact": "Robert may need to delay retirement, work longer, or reduce his retirement lifestyle. Traditional retirement accounts offer no downside protection. If the market doesn't recover before he needs the money, his retirement plans are permanently damaged.",
+          "keyNumbers": [
+            { "value": "$800,000", "label": "Before Crash", "type": "before" },
+            { "value": "$280,000", "label": "Lost (35%)", "type": "loss" },
+            { "value": "$520,000", "label": "After Crash", "type": "after" },
+            { "value": "5 Years", "label": "Until Retirement", "type": "timeline" }
+          ]
+        }
+      },
+      "slide11": {
+        "type": "scenario",
+        "title": "Real-World Scenarios",
+        "subtitle": "Serious Illness Impact",
+        "warning": "Traditional retirement accounts offer NO protection for these scenarios",
+        "scenario": {
+          "title": "The Critical Illness",
+          "situation": "Sarah, age 58, is diagnosed with a critical illness. She needs $100,000 for medical expenses and to cover her living costs while she can't work. She has $300,000 in her 401(k) and $50,000 in savings.",
+          "problem": "If Sarah withdraws from her 401(k), she'll pay 10% penalty ($10,000) plus taxes. Her savings won't cover everything. Traditional retirement accounts offer no living benefits for critical illness - she must choose between financial penalties or not having enough money for treatment.",
+          "impact": "Sarah faces a devastating choice: pay penalties to access her retirement money when she needs it most, or struggle financially during a health crisis. Traditional retirement accounts don't provide protection for critical, chronic, or terminal illnesses.",
+          "keyNumbers": [
+            { "value": "$100,000", "label": "Needed for Treatment", "type": "need" },
+            { "value": "$50,000", "label": "Available Savings", "type": "available" },
+            { "value": "$10,000", "label": "Penalty (10%)", "type": "loss" },
+            { "value": "$0", "label": "Living Benefits", "type": "missing" }
+          ]
+        }
+      },
+      "slide12": {
+        "type": "bank",
+        "title": "A Different Perspective",
+        "subtitle": "Becoming Your Own Bank",
+        "questions": [
+          "Do you currently own a bank?",
+          "Can you take money out of your own bank right now?",
+          "If you need to buy a car, what do you do?",
+          "If you want to buy a house, what do you do?",
+          "Who do you pay interest to?"
+        ],
+        "description": "Most people rely on traditional banks and financial institutions for every major purchase. But what if there was a better way?"
+      },
+      "slide13": {
+        "type": "bankExample",
+        "title": "The Traditional Approach",
+        "subtitle": "Buying a Car",
+        "example": {
+          "scenario": "You need a $35,000 car. You go to a bank or dealership for financing.",
+          "loanAmount": "$35,000",
+          "interestRate": "7.5%",
+          "loanTerm": "5 years",
+          "monthlyPayment": "$701",
+          "totalPaid": "$42,060",
+          "interestPaid": "$7,060",
+          "problem": "You pay $7,060 in interest to the bank. That's money you'll never see again. Plus, you're locked into monthly payments for 5 years, regardless of your financial situation."
+        }
+      },
+      "slide14": {
+        "type": "bankExample",
+        "title": "The Traditional Approach",
+        "subtitle": "Buying a House",
+        "example": {
+          "scenario": "You want to buy a $400,000 home. You get a 30-year mortgage from a bank.",
+          "loanAmount": "$400,000",
+          "interestRate": "7.0%",
+          "loanTerm": "30 years",
+          "monthlyPayment": "$2,663",
+          "totalPaid": "$958,680",
+          "interestPaid": "$558,680",
+          "problem": "You pay $558,680 in interest over 30 years - more than the house itself cost! That's money going to the bank, not building your wealth. You're paying for the bank's profits, not your future."
+        }
+      },
+      "slide15": {
+        "type": "bankCosts",
+        "title": "The True Cost of Traditional Banking",
+        "subtitle": "What You're Really Paying",
+        "costs": [
+          {
+            "item": "Car Loan Interest",
+            "amount": "$7,060",
+            "description": "Average 5-year auto loan at 7.5%"
+          },
+          {
+            "item": "Mortgage Interest",
+            "amount": "$558,680",
+            "description": "30-year mortgage at 7.0%"
+          },
+          {
+            "item": "Credit Card Interest",
+            "amount": "$2,400+",
+            "description": "Average household credit card debt interest per year"
+          },
+          {
+            "item": "Personal Loan Interest",
+            "amount": "$3,000+",
+            "description": "Typical personal loan interest over 3 years"
+          }
+        ],
+        "total": "$571,140+",
+        "summary": "Over a lifetime, the average American pays hundreds of thousands of dollars in interest to banks and financial institutions. This money could be working for YOU instead."
+      },
+      "slide16": {
+        "type": "bankTeaser",
+        "title": "What If You Could Be Your Own Bank?",
+        "subtitle": "Imagine the Possibilities",
+        "questions": [
+          "What if you could borrow from yourself instead of a bank?",
+          "What if you could pay interest to yourself instead of a bank?",
+          "What if you could access your money when you need it, without penalties?",
+          "What if you could protect yourself from market downturns?",
+          "What if you could access funds for critical illness without penalties?",
+          "What if you could solve ALL the problems we've discussed?"
+        ],
+        "description": "There IS a way to become your own bank. A way to keep your money working for you, not for financial institutions. A way to solve the retirement problems, the banking problems, and the protection problems - all in one solution."
+      },
+      "slide17": {
+        "type": "iulHero",
+        "title": "The Solution You've Been Waiting For",
+        "subtitle": "Indexed Universal Life (IUL)",
+        "description": "Finally, a financial strategy that solves ALL the problems we've discussed. A way to become your own bank, protect your retirement, and secure your future - all in one powerful solution.",
+        "highlights": [
+          "Become Your Own Bank",
+          "Protect Your Retirement",
+          "Access Funds Without Penalties",
+          "Market Protection",
+          "Living Benefits for Critical Illness",
+          "Tax-Free Growth & Withdrawals"
+        ],
+        "imagePlaceholder": "https://res.cloudinary.com/isaacdev/image/upload/v1762891236/iul_img_issqjj.png",
+        "cta": "One Solution. All Problems Solved."
+      },
+      "slide18": {
+        "type": "iulWho",
+        "title": "Who is IUL Good For?",
+        "subtitle": "The Perfect Fit",
+        "description": "IUL is an ideal financial strategy for individuals who want comprehensive protection, tax advantages, and the ability to become their own bank. Here's who benefits most:",
+        "characteristics": [
+          {
+            "title": "Wanting a PERMANENT Death Benefit / Leaving a Legacy",
+            "description": "IUL provides permanent life insurance coverage that never expires, ensuring your loved ones are protected and your legacy is preserved.",
+            "icon": "legacy"
+          },
+          {
+            "title": "Middle to High-Income Earners Looking for Tax-Free Retirement",
+            "description": "Perfect for those seeking tax-free growth and withdrawals in retirement. Recommended contribution: 10x your age on a monthly basis (e.g., age 40 = $400/month minimum).",
+            "icon": "income"
+          },
+          {
+            "title": "Become Your Own Bank",
+            "description": "Ideal for those who want to borrow from themselves, pay interest to themselves, and have flexible access to their money without penalties.",
+            "icon": "bank"
+          },
+          {
+            "title": "Well-Rounded Portfolio",
+            "description": "Best for individuals who already have other investments and want IUL as part of a diversified financial strategy.",
+            "icon": "portfolio"
+          },
+          {
+            "title": "Maxing Out 401(k) Match or Roth IRA",
+            "description": "Perfect for those who are already maximizing their employer 401(k) match or Roth IRA contributions and want additional tax-advantaged growth.",
+            "icon": "retirement"
+          }
+        ],
+        "cta": "If this sounds like you, IUL could be your perfect financial solution."
+      },
+      "slide19": {
+        "type": "iulComparison",
+        "title": "Where Does an IUL Fit in a Retirement Plan?",
+        "subtitle": "Risk vs. Reward Comparison",
+        "description": "See how IUL compares to traditional investment options in terms of risk and potential reward.",
+        "investments": [
+          {
+            "name": "Banks",
+            "risk": 5,
+            "reward": 8,
+            "color": "green"
+          },
+          {
+            "name": "Treasury Bonds",
+            "risk": 6,
+            "reward": 10,
+            "color": "green"
+          },
+          {
+            "name": "Whole Life",
+            "risk": 7,
+            "reward": 12,
+            "color": "green"
+          },
+          {
+            "name": "Stocks",
+            "risk": 65,
+            "reward": 70,
+            "color": "green"
+          },
+          {
+            "name": "Crypto",
+            "risk": 95,
+            "reward": 95,
+            "color": "green"
+          },
+          {
+            "name": "IUL",
+            "risk": 15,
+            "reward": 55,
+            "color": "blue"
+          }
+        ],
+        "legend": {
+          "traditional": "Traditional Investments",
+          "iul": "IUL (Indexed Universal Life)",
+          "typicalLine": "Typical Risk/Reward Line"
+        },
+        "axis": {
+          "risk": "Risk",
+          "reward": "Reward"
+        },
+        "insight": "IUL offers superior reward for its risk level compared to traditional investments"
+      },
+      "slide20": {
+        "type": "iulStructure",
+        "title": "Properly Structuring an IUL",
+        "subtitle": "Understanding the Two Buckets",
+        "description": "Your monthly premium is divided into two essential components that work together to build your wealth.",
+        "twoComponents": {
+          "title": "TWO COMPONENTS",
+          "deathBenefit": {
+            "name": "DEATH BENEFIT",
+            "description": "Protection for your loved ones"
+          },
+          "cashValue": {
+            "name": "CASH VALUE",
+            "description": "Your wealth accumulation bucket"
+          }
+        },
+        "relationship": {
+          "title": "The Balance",
+          "explanation": "Assuming same monthly contribution:",
+          "points": [
+            "Higher Death Benefit = Lower Cash Value",
+            "Lower Death Benefit = Higher Cash Value"
+          ]
+        },
+        "cashValueFeatures": {
+          "title": "Cash Value Benefits",
+          "points": [
+            "Typically grows 6-8% annually",
+            "Indexed to market performance (S&P 500)",
+            "Floor protection: 0% minimum (never lose when market drops)",
+            "Tax-deferred growth",
+            "Accessible through policy loans"
+          ]
+        },
+        "whyStructureMatters": {
+          "title": "Why Proper Structure is Essential",
+          "points": [
+            "Maximizes cash value accumulation for your goals",
+            "Balances protection with growth potential",
+            "Optimizes tax advantages",
+            "Ensures you can access funds when needed",
+            "Creates your own banking system"
+          ]
+        },
+        "cta": "Proper structure = Maximum accumulation for your financial goals"
+      },
+      "slide21": {
+        "type": "iulIndexing",
+        "title": "What is Indexing Strategy?",
+        "subtitle": "How Your Money Grows",
+        "description": "Your cash value is linked to market performance, but protected from market losses.",
+        "keyPoints": [
+          {
+            "icon": "chart",
+            "title": "Follows Market Index",
+            "description": "Your growth is tied to S&P 500 performance"
+          },
+          {
+            "icon": "shield",
+            "title": "Protected from Losses",
+            "description": "You never lose money when the market goes down"
+          },
+          {
+            "icon": "growth",
+            "title": "Participates in Gains",
+            "description": "You benefit when the market goes up"
+          }
+        ],
+        "visualNote": "Your money is NOT invested in stocks - it follows an index",
+        "visualLabels": {
+          "yourMoney": "Your Money",
+          "inIULPolicy": "In IUL Policy",
+          "follows": "Follows",
+          "marketIndex": "Market Index",
+          "performance": "Performance",
+          "yourGrowth": "Your Growth",
+          "protectedParticipating": "Protected & Participating"
+        }
+      },
+      "slide22": {
+        "type": "iulTerms",
+        "title": "Understanding Key Terms",
+        "subtitle": "Floor & Cap Explained",
+        "floor": {
+          "title": "0% Floor",
+          "description": "Your minimum return guarantee",
+          "explanation": "Even if the market drops 20%, 30%, or 50%, your account never goes below 0%",
+          "icon": "shield"
+        },
+        "cap": {
+          "title": "10% Cap (Example)",
+          "description": "Your maximum return limit",
+          "explanation": "If the market gains 15%, you get up to 10% (the cap). This protects the insurance company.",
+          "icon": "trending"
+        },
+        "note": "Actual caps vary by company and policy",
+        "visualLabels": {
+          "marketDrops": "Market Drops:",
+          "yourAccount": "Your Account:",
+          "protected": "Protected!",
+          "marketGains": "Market Gains:",
+          "cappedAt": "Capped at 10%"
+        }
+      },
+      "slide23": {
+        "type": "iulNotInvested",
+        "title": "Important: Your Money is NOT Invested",
+        "subtitle": "How Indexing Works",
+        "comparison": {
+          "directInvestment": {
+            "title": "Direct Stock Investment",
+            "points": [
+              "Your money buys actual stocks",
+              "You own shares of companies",
+              "Full market risk - can lose everything",
+              "No protection from losses"
+            ],
+            "icon": "chart"
+          },
+          "indexing": {
+            "title": "Indexing Strategy (IUL)",
+            "points": [
+              "Your money stays in the policy",
+              "Growth is calculated based on index performance",
+              "Protected by 0% floor - never lose",
+              "Participates in gains up to cap"
+            ],
+            "icon": "shield"
+          }
+        },
+        "keyMessage": "Your money follows the index, but is not directly invested in it",
+        "visualLabels": {
+          "yourMoneyStocks": "Your Money = Stocks",
+          "yourMoneyPolicy": "Your Money = Policy (Follows Index)"
+        }
+      },
+      "slide24": {
+        "type": "iulHowItWorks",
+        "title": "How Indexing Works - Simple Example",
+        "subtitle": "See the Difference",
+        "scenarios": [
+          {
+            "year": "Year 1",
+            "marketReturn": "+12%",
+            "yourReturn": "+10%",
+            "explanation": "Market up 12%, you get 10% (cap limit)"
+          },
+          {
+            "year": "Year 2",
+            "marketReturn": "-15%",
+            "yourReturn": "0%",
+            "explanation": "Market down 15%, you get 0% (floor protection)"
+          },
+          {
+            "year": "Year 3",
+            "marketReturn": "+8%",
+            "yourReturn": "+8%",
+            "explanation": "Market up 8%, you get full 8% (under cap)"
+          }
+        ],
+        "summary": "You participate in gains, protected from losses",
+        "visualLabels": {
+          "marketReturn": "Market Return",
+          "yourReturn": "Your Return"
+        }
+      },
+      "slide25": {
+        "type": "iulIllustrationCTA",
+        "title": "Ready to See Your Numbers?",
+        "subtitle": "Let's Run Your Personal Illustration",
+        "description": "Now I'll create a customized illustration based on your specific situation, goals, and financial information.",
+        "whatYoullSee": [
+          "Projected cash value growth over time",
+          "Retirement income amount and projections",
+          "Death benefit protection for your loved ones",
+          "Protection against critical and chronic illnesses",
+          "Loan capabilities and access to funds",
+          "Tax advantages and tax-free growth",
+          "Your personalized strategy based on your goals"
+        ],
+        "cta": "Let's Build Your Custom IUL Illustration",
+        "whatYoullSeeTitle": "What You'll See in Your Illustration:"
+      }
+    }
+  }
+}
