@@ -4,7 +4,7 @@ import { getTranslations, getLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import type { Metadata } from "next";
 import { Button } from "@/components/ui/button";
-import IULWorkflowStepper from "@/components/iul-workflow-stepper";
+import IULWorkflowStepperWrapper from "@/components/iul-workflow-stepper-wrapper";
 import FullscreenButton from "@/components/fullscreen-button";
 import IULPresentationSlides from "@/components/iul-presentation-slides";
 import IULSlideContent from "@/components/iul-slide-content";
@@ -76,8 +76,8 @@ export default async function IULPresentationPage() {
       label: t("stepper.presentation"),
     },
     {
-      id: "dataEntry",
-      label: t("stepper.dataEntry"),
+      id: "application",
+      label: t("stepper.application"),
     },
     {
       id: "referrals",
@@ -107,7 +107,7 @@ export default async function IULPresentationPage() {
 
         {/* Stepper */}
         <div className="mb-8 bg-white rounded-lg shadow-md p-6">
-          <IULWorkflowStepper steps={steps} currentStep={0} />
+          <IULWorkflowStepperWrapper steps={steps} currentStep={0} />
         </div>
 
         {/* Presentation Content Area */}
@@ -142,6 +142,7 @@ export default async function IULPresentationPage() {
               { id: 23, content: <IULSlideContent slideKey="slide23" /> },
               { id: 24, content: <IULSlideContent slideKey="slide24" /> },
               { id: 25, content: <IULSlideContent slideKey="slide25" /> },
+              { id: 26, content: <IULSlideContent slideKey="slide26" /> },
             ]}
             className="h-full w-full"
           />

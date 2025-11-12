@@ -34,7 +34,7 @@
     "backButton": "Back to IUL",
     "stepper": {
       "presentation": "Presentation",
-      "dataEntry": "Data Entry",
+      "application": "Application",
       "referrals": "Referrals"
     },
     "presentation": {
@@ -749,6 +749,91 @@
         ],
         "cta": "Let's Build Your Custom IUL Illustration",
         "whatYoullSeeTitle": "What You'll See in Your Illustration:"
+      },
+      "slide26": {
+        "type": "company",
+        "title": "National Life Group",
+        "subtitle": "Our Cause Is Our Story",
+        "description": "A mission-driven and purpose-filled business. For over 175 years, we've kept our promises to provide families stability in good times and in bad.",
+        "companyName": "National Life Group",
+        "logoUrl": "https://res.cloudinary.com/isaacdev/image/upload/v1762909967/NLG_White_Logo_2x_Green_v1f7j5.png",
+        "videoUrl": "https://www.youtube.com/embed/yJnhpIn6WF4?si=r5GV5nIXc0CbleSp",
+        "valuesTitle": "Our Core Values",
+        "values": [
+          {
+            "title": "Do Good",
+            "description": "Actively contribute to the well-being of our communities through charitable activities, volunteer programs, and supporting nonprofits."
+          },
+          {
+            "title": "Be Good",
+            "description": "Uphold the highest standards of integrity, honesty, and ethical behavior in all our professional and personal interactions."
+          },
+          {
+            "title": "Make Good",
+            "description": "Deliver on our promises and commitments, ensuring reliability and trustworthiness in every endeavor for over 175 years."
+          }
+        ],
+        "statistics": {
+          "assets": "Assets Under Management",
+          "years": "Years of Service",
+          "rating": "Superior Financial Strength"
+        },
+        "highlights": [
+          {
+            "title": "Financial Strength",
+            "description": "With $57.4 billion in assets and $507 million in core earnings, National Life Group demonstrates exceptional financial stability and consistent performance, earning recognition on the Ward's 50 list."
+          },
+          {
+            "title": "Community Impact",
+            "description": "Through our $2.3 million Foundation budget, employee volunteer programs, and initiatives like Do Good Fest and LifeChanger of the Year, we make a meaningful difference in communities nationwide."
+          },
+          {
+            "title": "Proven Track Record",
+            "description": "National Life has paid dividends on participating life insurance policies every year since 1855, delivering on promises through wars, depressions, and economic challenges."
+          },
+          {
+            "title": "Innovative Solutions",
+            "description": "We offer innovative living benefits riders including Accelerated Benefits Alzheimer's Disease rider and Fertility Journey rider, addressing diverse client needs with cutting-edge solutions."
+          }
+        ],
+        "ownership": {
+          "title": "You're Not Just a Customer - You're an Owner",
+          "description": "National Life Group is a <strong>mutual company</strong>, which means our policyholders are the owners. This unique structure ensures that our interests are aligned with yours - not external shareholders.",
+          "whyTitle": "Why This Matters:",
+          "benefits": [
+            {
+              "label": "Dividends",
+              "text": "As an owner, you may be eligible to receive dividends. National Life has paid dividends every year since 1855 - over $25 million approved for 2025 alone."
+            },
+            {
+              "label": "Long-term Focus",
+              "text": "Decisions are made with policyholders' best interests in mind, not short-term shareholder profits."
+            },
+            {
+              "label": "Stability",
+              "text": "Mutual companies prioritize financial strength and long-term stability over quarterly earnings reports."
+            },
+            {
+              "label": "Alignment",
+              "text": "When the company succeeds, you succeed. Your interests and our interests are one and the same."
+            }
+          ]
+        },
+        "missionTitle": "Our Mission",
+        "missionText": "To Do good in our communities and with the individual families we serve. We make promises and deliver on those commitments 10, 20, or 50 years down the road, providing peace of mind in times of need.",
+        "videoTitle": "Our Story",
+        "videoDescription": "Learn more about National Life Group's mission and values",
+        "productsTitle": "Our Products & Services",
+        "productFeatures": [
+          "Life Insurance",
+          "Annuities",
+          "Retirement Plans",
+          "Living Benefits Riders",
+          "Indexed Universal Life (IUL)",
+          "Mutual Funds",
+          "IRA Solutions",
+          "Business Continuation Plans"
+        ]
       }
     }
   }

@@ -1,0 +1,25 @@
+{
+  "iulReferrals": {
+    "meta": {
+      "title": "Referidos IUL | Isaac Plans",
+      "description": "Complete su proceso de referidos",
+      "keywords": "IUL, referidos, leads",
+      "image": "https://www.isaacplans.com/images/iul_es.png",
+      "imageAlt": "Referidos IUL"
+    },
+    "title": "Referidos IUL",
+    "backButton": "Volver a IUL",
+    "stepper": {
+      "presentation": "Presentación",
+      "application": "Aplicación",
+      "referrals": "Referidos"
+    },
+    "completedLabel": "Proceso de Referidos Completado",
+    "incompleteLabel": "Proceso de Referidos Incompleto",
+    "switchDescription": "Marque esto como completado una vez que haya terminado de procesar los referidos a través de su CRM",
+    "completedText": "✓ Completado",
+    "pendingText": "Haz Clic para Completar",
+    "note": "Completaré el proceso de obtener referidos a través de mi CRM."
+  }
+}
+

@@ -28,7 +28,7 @@ export default function IULWorkflowStepper({
         {steps.map((step, index) => {
           const isActive = index === currentStep;
           const isCompleted = step.completed || index < currentStep;
-          const isClickable = onStepClick && (isCompleted || index <= currentStep);
+          const isClickable = !!onStepClick;
 
           return (
             <div key={step.id} className="flex items-center flex-1">
@@ -59,16 +59,21 @@ export default function IULWorkflowStepper({
                   )}
                 </button>
                 {/* Step Label */}
-                <span
+                <button
+                  type="button"
+                  onClick={() => isClickable && onStepClick?.(index)}
+                  disabled={!isClickable}
                   className={cn(
-                    "mt-2 text-xs sm:text-sm font-medium text-center",
+                    "mt-2 text-xs sm:text-sm font-medium text-center transition-colors",
                     isActive && "text-blue-600 font-semibold",
                     isCompleted && !isActive && "text-green-600",
-                    !isCompleted && !isActive && "text-gray-500"
+                    !isCompleted && !isActive && "text-gray-500",
+                    isClickable && "cursor-pointer hover:text-blue-600 hover:underline",
+                    !isClickable && "cursor-not-allowed"
                   )}
                 >
                   {step.label}
-                </span>
+                </button>
               </div>
 
               {/* Connector Line */}

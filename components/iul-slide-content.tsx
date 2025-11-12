@@ -1756,70 +1756,506 @@ function LoansSlide({ t }: { t: any }) {
   );
 }
 
-// Company Slide
+// Company Slide - National Life Group
 function CompanySlide({ t }: { t: any }) {
   const highlights = t.raw("highlights") || [];
   const productFeatures = t.raw("productFeatures") || [];
-  const companyName = t("companyName");
+  const values = t.raw("values") || [];
+  const ownership = t.raw("ownership") || {};
+  const companyName = t("companyName") || "National Life Group";
+  const logoUrl = t("logoUrl") || "https://res.cloudinary.com/isaacdev/image/upload/v1762909967/NLG_White_Logo_2x_Green_v1f7j5.png";
+  const videoUrl = t("videoUrl") || "https://www.youtube.com/embed/yJnhpIn6WF4?si=r5GV5nIXc0CbleSp";
 
   return (
     <motion.div
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="w-full"
+      className="w-full max-w-7xl mx-auto"
     >
-      <motion.h2 variants={itemVariants} className="text-5xl md:text-6xl font-bold text-gray-900 mb-4 text-center">
-        {t("title")}
-      </motion.h2>
-      <motion.p variants={itemVariants} className="text-2xl md:text-3xl text-blue-600 mb-6 text-center font-semibold">
-        {t("subtitle")}
-      </motion.p>
-      <motion.p variants={itemVariants} className="text-xl md:text-2xl text-gray-700 mb-12 text-center max-w-4xl mx-auto">
-        {t("description")}
-      </motion.p>
-      <div className="grid md:grid-cols-2 gap-6 mb-8">
-        {highlights.map((highlight: any, index: number) => (
+      {/* Hero Header with Logo */}
+      <motion.div variants={itemVariants} className="text-center mb-12">
+        {/* Company Logo */}
+        <motion.div
+          initial={{ scale: 0, rotate: -180 }}
+          animate={{ scale: 1, rotate: 0 }}
+          transition={{ type: "spring", stiffness: 200, delay: 0.2 }}
+          className="mb-8 flex justify-center"
+        >
+          <div className="relative w-64 h-32 md:w-80 md:h-40 bg-white rounded-2xl shadow-2xl border-4 border-green-300 flex items-center justify-center p-6">
+            <Image
+              src={logoUrl}
+              alt={`${companyName} Logo`}
+              width={300}
+              height={150}
+              className="object-contain w-full h-full"
+              unoptimized
+            />
+          </div>
+        </motion.div>
+
+        <motion.h2 
+          variants={itemVariants} 
+          className="text-5xl md:text-6xl font-bold text-gray-900 mb-4"
+        >
+          {t("title") || companyName}
+        </motion.h2>
+        <motion.p 
+          variants={itemVariants} 
+          className="text-2xl md:text-3xl text-green-600 mb-4 font-semibold"
+        >
+          {t("subtitle") || "Our Cause Is Our Story"}
+        </motion.p>
+        <motion.p 
+          variants={itemVariants} 
+          className="text-xl md:text-2xl text-gray-700 max-w-4xl mx-auto leading-relaxed"
+        >
+          {t("description") || "A mission-driven and purpose-filled business. For over 175 years, we've kept our promises to provide families stability in good times and in bad."}
+        </motion.p>
+      </motion.div>
+
+      {/* Core Values Banner */}
+      <motion.div
+        variants={highlightVariants}
+        className="bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 p-8 rounded-2xl shadow-2xl mb-12 border-4 border-green-400"
+      >
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          className="text-center"
+        >
+          <motion.h3 
+            className="text-3xl md:text-4xl font-bold text-white mb-8 flex items-center justify-center gap-3"
+          >
+            <Heart className="h-10 w-10 text-yellow-300" />
+            {t("valuesTitle") || "Our Core Values"}
+            <Heart className="h-10 w-10 text-yellow-300" />
+          </motion.h3>
+          <div className="grid md:grid-cols-3 gap-6">
+            {(values.length > 0 ? values : [
+              { title: "Do Good", description: "Actively contribute to the well-being of our communities through charitable activities, volunteer programs, and supporting nonprofits." },
+              { title: "Be Good", description: "Uphold the highest standards of integrity, honesty, and ethical behavior in all our professional and personal interactions." },
+              { title: "Make Good", description: "Deliver on our promises and commitments, ensuring reliability and trustworthiness in every endeavor for over 175 years." }
+            ]).map((value: any, index: number) => (
+              <motion.div
+                key={index}
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.6 + index * 0.1, type: "spring" }}
+                className="bg-white/20 backdrop-blur-sm px-6 py-6 rounded-xl border-2 border-white/30"
+              >
+                <p className="text-2xl md:text-3xl font-bold text-yellow-300 mb-3">{value.title}</p>
+                <p className="text-white text-sm md:text-base leading-relaxed">
+                  {value.description}
+                </p>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
+      </motion.div>
+
+      {/* Key Statistics */}
+      <motion.div
+        variants={itemVariants}
+        className="grid md:grid-cols-3 gap-6 mb-12"
+      >
+        <motion.div
+          variants={cardVariants}
+          whileHover={{ scale: 1.05, y: -5 }}
+          className="bg-gradient-to-br from-green-50 to-emerald-50 p-6 rounded-xl border-l-4 border-green-500 shadow-xl text-center"
+        >
           <motion.div
-            key={index}
-            variants={cardVariants}
-            whileHover={{ scale: 1.02, y: -3 }}
-            className="bg-gradient-to-br from-blue-50 to-cyan-50 p-6 rounded-xl border-l-4 border-blue-500 shadow-lg"
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 0.9, type: "spring" }}
+            className="mb-4"
+          >
+            <TrendingUp className="h-12 w-12 text-green-600 mx-auto" />
+          </motion.div>
+          <motion.h3
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.0 }}
+            className="text-4xl md:text-5xl font-bold text-green-700 mb-2"
+          >
+            $57.4B
+          </motion.h3>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1.1 }}
+            className="text-lg font-semibold text-gray-700"
+          >
+            {t("statistics.assets") || "Assets Under Management"}
+          </motion.p>
+        </motion.div>
+
+        <motion.div
+          variants={cardVariants}
+          whileHover={{ scale: 1.05, y: -5 }}
+          className="bg-gradient-to-br from-green-50 to-emerald-50 p-6 rounded-xl border-l-4 border-green-500 shadow-xl text-center"
+        >
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 1.0, type: "spring" }}
+            className="mb-4"
+          >
+            <Award className="h-12 w-12 text-green-600 mx-auto" />
+          </motion.div>
+          <motion.h3
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.1 }}
+            className="text-4xl md:text-5xl font-bold text-green-700 mb-2"
+          >
+            175+
+          </motion.h3>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1.2 }}
+            className="text-lg font-semibold text-gray-700"
+          >
+            {t("statistics.years") || "Years of Service"}
+          </motion.p>
+        </motion.div>
+
+        <motion.div
+          variants={cardVariants}
+          whileHover={{ scale: 1.05, y: -5 }}
+          className="bg-gradient-to-br from-green-50 to-emerald-50 p-6 rounded-xl border-l-4 border-green-500 shadow-xl text-center"
+        >
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 1.1, type: "spring" }}
+            className="mb-4"
+          >
+            <Shield className="h-12 w-12 text-green-600 mx-auto" />
+          </motion.div>
+          <motion.h3
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.2 }}
+            className="text-4xl md:text-5xl font-bold text-green-700 mb-2"
+          >
+            A+ Rating
+          </motion.h3>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1.3 }}
+            className="text-lg font-semibold text-gray-700"
+          >
+            {t("statistics.rating") || "Superior Financial Strength"}
+          </motion.p>
+        </motion.div>
+      </motion.div>
+
+      {/* Company Highlights */}
+      <div className="grid md:grid-cols-2 gap-6 mb-8">
+        {highlights.length > 0 ? (
+          highlights.map((highlight: any, index: number) => (
+            <motion.div
+              key={index}
+              variants={cardVariants}
+              whileHover={{ scale: 1.02, y: -3 }}
+              className="bg-gradient-to-br from-green-50 to-emerald-50 p-6 rounded-xl border-l-4 border-green-500 shadow-lg"
+            >
+              <motion.h3
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.2 + index * 0.1 }}
+                className="text-2xl font-bold text-green-700 mb-3 flex items-center"
+              >
+                <CheckCircle2 className="h-6 w-6 mr-2 text-green-600" />
+                {highlight.title}
+              </motion.h3>
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3 + index * 0.1 }}
+                className="text-gray-700 text-lg leading-relaxed"
+              >
+                {highlight.description}
+              </motion.p>
+            </motion.div>
+          ))
+        ) : (
+          <>
+            <motion.div
+              variants={cardVariants}
+              whileHover={{ scale: 1.02, y: -3 }}
+              className="bg-gradient-to-br from-green-50 to-emerald-50 p-6 rounded-xl border-l-4 border-green-500 shadow-lg"
+            >
+              <motion.h3
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 1.4 }}
+                className="text-2xl font-bold text-green-700 mb-3 flex items-center"
+              >
+                <Shield className="h-6 w-6 mr-2 text-green-600" />
+                Financial Strength
+              </motion.h3>
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 1.5 }}
+                className="text-gray-700 text-lg leading-relaxed"
+              >
+                With $57.4 billion in assets and $507 million in core earnings, National Life Group demonstrates exceptional financial stability and consistent performance, earning recognition on the Ward's 50 list.
+              </motion.p>
+            </motion.div>
+
+            <motion.div
+              variants={cardVariants}
+              whileHover={{ scale: 1.02, y: -3 }}
+              className="bg-gradient-to-br from-green-50 to-emerald-50 p-6 rounded-xl border-l-4 border-green-500 shadow-lg"
+            >
+              <motion.h3
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 1.5 }}
+                className="text-2xl font-bold text-green-700 mb-3 flex items-center"
+              >
+                <Heart className="h-6 w-6 mr-2 text-green-600" />
+                Community Impact
+              </motion.h3>
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 1.6 }}
+                className="text-gray-700 text-lg leading-relaxed"
+              >
+                Through our $2.3 million Foundation budget, employee volunteer programs, and initiatives like Do Good Fest and LifeChanger of the Year, we make a meaningful difference in communities nationwide.
+              </motion.p>
+            </motion.div>
+
+            <motion.div
+              variants={cardVariants}
+              whileHover={{ scale: 1.02, y: -3 }}
+              className="bg-gradient-to-br from-green-50 to-emerald-50 p-6 rounded-xl border-l-4 border-green-500 shadow-lg"
+            >
+              <motion.h3
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 1.6 }}
+                className="text-2xl font-bold text-green-700 mb-3 flex items-center"
+              >
+                <Award className="h-6 w-6 mr-2 text-green-600" />
+                Proven Track Record
+              </motion.h3>
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 1.7 }}
+                className="text-gray-700 text-lg leading-relaxed"
+              >
+                National Life has paid dividends on participating life insurance policies every year since 1855, delivering on promises through wars, depressions, and economic challenges.
+              </motion.p>
+            </motion.div>
+
+            <motion.div
+              variants={cardVariants}
+              whileHover={{ scale: 1.02, y: -3 }}
+              className="bg-gradient-to-br from-green-50 to-emerald-50 p-6 rounded-xl border-l-4 border-green-500 shadow-lg"
+            >
+              <motion.h3
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 1.7 }}
+                className="text-2xl font-bold text-green-700 mb-3 flex items-center"
+              >
+                <Zap className="h-6 w-6 mr-2 text-green-600" />
+                Innovative Solutions
+              </motion.h3>
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 1.8 }}
+                className="text-gray-700 text-lg leading-relaxed"
+              >
+                We offer innovative living benefits riders including Accelerated Benefits Alzheimer's Disease rider and Fertility Journey rider, addressing diverse client needs with cutting-edge solutions.
+              </motion.p>
+            </motion.div>
+          </>
+        )}
+      </div>
+
+      {/* Policyholder Ownership - Mutual Company */}
+      <motion.div
+        variants={itemVariants}
+        className="bg-gradient-to-br from-green-100 via-emerald-100 to-teal-100 p-8 rounded-2xl shadow-2xl border-4 border-green-400 mb-8"
+      >
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.9 }}
+          className="text-center"
+        >
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 2.0, type: "spring" }}
+            className="mb-6"
+          >
+            <Users className="h-16 w-16 text-green-600 mx-auto" />
+          </motion.div>
+          <motion.h3
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 2.1 }}
+            className="text-3xl md:text-4xl font-bold text-green-900 mb-4"
+          >
+            {ownership.title || t("ownershipTitle") || "You're Not Just a Customer - You're an Owner"}
+          </motion.h3>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 2.2 }}
+            className="text-xl md:text-2xl text-gray-800 leading-relaxed max-w-4xl mx-auto font-medium mb-4"
+            dangerouslySetInnerHTML={{ __html: ownership.description || t("ownershipDescription") || "National Life Group is a <strong>mutual company</strong>, which means our policyholders are the owners. This unique structure ensures that our interests are aligned with yours - not external shareholders." }}
+          />
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 2.3 }}
+            className="bg-white/80 backdrop-blur-sm p-6 rounded-xl border-2 border-green-300 max-w-3xl mx-auto mt-6"
+          >
+            <h4 className="text-2xl font-bold text-green-800 mb-4">{ownership.whyTitle || t("ownershipWhyTitle") || "Why This Matters:"}</h4>
+            <ul className="text-left space-y-3 text-lg text-gray-700">
+              {(ownership.benefits || t.raw("ownershipBenefits") || [
+                { label: "Dividends", text: "As an owner, you may be eligible to receive dividends. National Life has paid dividends every year since 1855 - over $25 million approved for 2025 alone." },
+                { label: "Long-term Focus", text: "Decisions are made with policyholders' best interests in mind, not short-term shareholder profits." },
+                { label: "Stability", text: "Mutual companies prioritize financial strength and long-term stability over quarterly earnings reports." },
+                { label: "Alignment", text: "When the company succeeds, you succeed. Your interests and our interests are one and the same." }
+              ]).map((benefit: any, index: number) => (
+                <li key={index} className="flex items-start">
+                  <CheckCircle2 className="h-6 w-6 text-green-600 mr-3 flex-shrink-0 mt-1" />
+                  <span><strong>{benefit.label}:</strong> {benefit.text}</span>
+                </li>
+              ))}
+            </ul>
+          </motion.div>
+        </motion.div>
+      </motion.div>
+
+      {/* Mission Statement */}
+      <motion.div
+        variants={itemVariants}
+        className="bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 p-8 rounded-2xl shadow-xl border-4 border-green-300 mb-8"
+      >
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 2.4 }}
+          className="text-center"
+        >
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 2.5, type: "spring" }}
+            className="mb-6"
+          >
+            <Target className="h-16 w-16 text-green-600 mx-auto" />
+          </motion.div>
+          <motion.h3
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 2.6 }}
+            className="text-3xl md:text-4xl font-bold text-green-900 mb-4"
+          >
+            {t("missionTitle") || "Our Mission"}
+          </motion.h3>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 2.7 }}
+            className="text-xl md:text-2xl text-gray-800 leading-relaxed max-w-4xl mx-auto font-medium"
+          >
+            {t("missionText") || "To Do good in our communities and with the individual families we serve. We make promises and deliver on those commitments 10, 20, or 50 years down the road, providing peace of mind in times of need."}
+          </motion.p>
+        </motion.div>
+      </motion.div>
+
+      {/* Company Video */}
+      <motion.div
+        variants={itemVariants}
+        className="mb-8"
+      >
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 2.8 }}
+          className="bg-gradient-to-br from-green-50 to-emerald-50 p-8 rounded-2xl shadow-2xl border-4 border-green-300"
+        >
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 2.9 }}
+            className="text-center mb-6"
           >
             <motion.h3
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 + index * 0.1 }}
-              className="text-2xl font-bold text-blue-700 mb-3"
+              className="text-3xl md:text-4xl font-bold text-gray-900 mb-2 flex items-center justify-center gap-3"
             >
-              {highlight.title}
+              <Zap className="h-10 w-10 text-green-600" />
+              {t("videoTitle") || "Our Story"}
+              <Zap className="h-10 w-10 text-green-600" />
             </motion.h3>
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.3 + index * 0.1 }}
-              className="text-gray-700 text-lg"
-            >
-              {highlight.description}
-            </motion.p>
+            <p className="text-lg text-gray-600">{t("videoDescription") || "Learn more about National Life Group's mission and values"}</p>
           </motion.div>
-        ))}
-      </div>
-      <motion.div variants={itemVariants} className="bg-white p-6 rounded-xl shadow-lg">
-        <h3 className="text-2xl font-bold text-gray-900 mb-4">Product Features:</h3>
-        <ul className="space-y-2 text-lg text-gray-700">
-          {productFeatures.map((feature: string, index: number) => (
-            <motion.li
-              key={index}
-              variants={itemVariants}
-              className="flex items-start"
-            >
-              <CheckCircle2 className="h-5 w-5 text-blue-600 mr-3 flex-shrink-0 mt-1" />
-              <span>{feature}</span>
-            </motion.li>
-          ))}
-        </ul>
+          
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 3.0, type: "spring" }}
+            className="relative w-full aspect-video rounded-xl overflow-hidden shadow-xl border-4 border-green-200 bg-gray-900"
+          >
+            <iframe
+              src={videoUrl}
+              title="National Life Group Company Video"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+              className="absolute top-0 left-0 w-full h-full"
+              style={{ border: 0 }}
+            />
+          </motion.div>
+        </motion.div>
       </motion.div>
+
+      {/* Product Features */}
+      {productFeatures.length > 0 && (
+        <motion.div 
+          variants={itemVariants} 
+          className="bg-gradient-to-br from-green-50 to-emerald-50 p-8 rounded-xl shadow-xl border-2 border-green-200"
+        >
+          <motion.h3
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 3.1 }}
+            className="text-3xl font-bold text-gray-900 mb-6 flex items-center"
+          >
+            <Briefcase className="h-8 w-8 mr-3 text-green-600" />
+            {t("productsTitle") || "Our Products & Services"}
+          </motion.h3>
+          <ul className="grid md:grid-cols-2 gap-4">
+            {productFeatures.map((feature: string, index: number) => (
+              <motion.li
+                key={index}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 3.2 + index * 0.1 }}
+                className="flex items-start text-lg text-gray-700"
+              >
+                <CheckCircle2 className="h-6 w-6 text-green-600 mr-3 flex-shrink-0 mt-1" />
+                <span className="font-medium">{feature}</span>
+              </motion.li>
+            ))}
+          </ul>
+        </motion.div>
+      )}
     </motion.div>
   );
 }

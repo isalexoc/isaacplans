@@ -1,0 +1,25 @@
+{
+  "iulApplication": {
+    "meta": {
+      "title": "Aplicación IUL | Isaac Plans",
+      "description": "Complete su aplicación IUL",
+      "keywords": "IUL, aplicación, seguro",
+      "image": "https://www.isaacplans.com/images/iul_es.png",
+      "imageAlt": "Aplicación IUL"
+    },
+    "title": "Aplicación IUL",
+    "backButton": "Volver a IUL",
+    "stepper": {
+      "presentation": "Presentación",
+      "application": "Aplicación",
+      "referrals": "Referidos"
+    },
+    "completedLabel": "Aplicación Completada",
+    "incompleteLabel": "Aplicación Incompleta",
+    "switchDescription": "Marque esto como completado una vez que haya terminado la aplicación a través del portal del corredor",
+    "completedText": "✓ Completado",
+    "pendingText": "Haz Clic para Completar",
+    "note": "Recuerda: Completaré la aplicación en línea a través del portal del corredor."
+  }
+}
+

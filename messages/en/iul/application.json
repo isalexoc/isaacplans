@@ -1,0 +1,25 @@
+{
+  "iulApplication": {
+    "meta": {
+      "title": "IUL Application | Isaac Plans",
+      "description": "Complete your IUL application",
+      "keywords": "IUL, application, insurance",
+      "image": "https://www.isaacplans.com/images/iul_en.png",
+      "imageAlt": "IUL Application"
+    },
+    "title": "IUL Application",
+    "backButton": "Back to IUL",
+    "stepper": {
+      "presentation": "Presentation",
+      "application": "Application",
+      "referrals": "Referrals"
+    },
+    "completedLabel": "Application Completed",
+    "incompleteLabel": "Application Incomplete",
+    "switchDescription": "Mark this as complete once you've finished the application through the broker portal",
+    "completedText": "✓ Completed",
+    "pendingText": "Click to Complete",
+    "note": "Remember: I will complete the application online through the broker portal."
+  }
+}
+

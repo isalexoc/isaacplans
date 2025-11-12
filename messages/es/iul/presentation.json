@@ -34,7 +34,7 @@
     "backButton": "Volver a IUL",
     "stepper": {
       "presentation": "Presentación",
-      "dataEntry": "Entrada de Datos",
+      "application": "Aplicación",
       "referrals": "Referidos"
     },
     "presentation": {
@@ -749,6 +749,91 @@
         ],
         "cta": "Construyamos Su Ilustración IUL Personalizada",
         "whatYoullSeeTitle": "Lo Que Verá en Su Ilustración:"
+      },
+      "slide26": {
+        "type": "company",
+        "title": "National Life Group",
+        "subtitle": "Nuestra Causa Es Nuestra Historia",
+        "description": "Un negocio impulsado por la misión y lleno de propósito. Durante más de 175 años, hemos cumplido nuestras promesas para brindar estabilidad a las familias en los buenos y malos tiempos.",
+        "companyName": "National Life Group",
+        "logoUrl": "https://res.cloudinary.com/isaacdev/image/upload/v1762909967/NLG_White_Logo_2x_Green_v1f7j5.png",
+        "videoUrl": "https://www.youtube.com/embed/yJnhpIn6WF4?si=r5GV5nIXc0CbleSp",
+        "valuesTitle": "Nuestros Valores Fundamentales",
+        "values": [
+          {
+            "title": "Hacer el Bien",
+            "description": "Contribuir activamente al bienestar de nuestras comunidades a través de actividades benéficas, programas de voluntariado y apoyo a organizaciones sin fines de lucro."
+          },
+          {
+            "title": "Ser Bueno",
+            "description": "Mantener los más altos estándares de integridad, honestidad y comportamiento ético en todas nuestras interacciones profesionales y personales."
+          },
+          {
+            "title": "Hacer Bien",
+            "description": "Cumplir con nuestras promesas y compromisos, garantizando confiabilidad y confianza en cada esfuerzo durante más de 175 años."
+          }
+        ],
+        "statistics": {
+          "assets": "Activos Bajo Administración",
+          "years": "Años de Servicio",
+          "rating": "Fortaleza Financiera Superior"
+        },
+        "highlights": [
+          {
+            "title": "Fortaleza Financiera",
+            "description": "Con $57.4 mil millones en activos y $507 millones en ganancias principales, National Life Group demuestra una estabilidad financiera excepcional y un rendimiento consistente, obteniendo reconocimiento en la lista Ward's 50."
+          },
+          {
+            "title": "Impacto en la Comunidad",
+            "description": "A través de nuestro presupuesto de Fundación de $2.3 millones, programas de voluntariado de empleados e iniciativas como Do Good Fest y LifeChanger of the Year, hacemos una diferencia significativa en las comunidades de todo el país."
+          },
+          {
+            "title": "Historial Comprobado",
+            "description": "National Life ha pagado dividendos en pólizas de seguro de vida participantes cada año desde 1855, cumpliendo promesas a través de guerras, depresiones y desafíos económicos."
+          },
+          {
+            "title": "Soluciones Innovadoras",
+            "description": "Ofrecemos beneficios de vida innovadores, incluidos el beneficio acelerado para la enfermedad de Alzheimer y el beneficio del viaje de fertilidad, abordando diversas necesidades de los clientes con soluciones de vanguardia."
+          }
+        ],
+        "ownership": {
+          "title": "No Eres Solo un Cliente - Eres un Propietario",
+          "description": "National Life Group es una <strong>compañía mutual</strong>, lo que significa que nuestros asegurados son los propietarios. Esta estructura única garantiza que nuestros intereses estén alineados con los tuyos, no con accionistas externos.",
+          "whyTitle": "Por Qué Esto Importa:",
+          "benefits": [
+            {
+              "label": "Dividendos",
+              "text": "Como propietario, puedes ser elegible para recibir dividendos. National Life ha pagado dividendos cada año desde 1855 - más de $25 millones aprobados solo para 2025."
+            },
+            {
+              "label": "Enfoque a Largo Plazo",
+              "text": "Las decisiones se toman pensando en el mejor interés de los asegurados, no en las ganancias a corto plazo de los accionistas."
+            },
+            {
+              "label": "Estabilidad",
+              "text": "Las compañías mutuales priorizan la fortaleza financiera y la estabilidad a largo plazo sobre los informes de ganancias trimestrales."
+            },
+            {
+              "label": "Alineación",
+              "text": "Cuando la compañía tiene éxito, tú tienes éxito. Tus intereses y nuestros intereses son uno y el mismo."
+            }
+          ]
+        },
+        "missionTitle": "Nuestra Misión",
+        "missionText": "Hacer el bien en nuestras comunidades y con las familias individuales que servimos. Hacemos promesas y cumplimos con esos compromisos 10, 20 o 50 años en el futuro, brindando tranquilidad en momentos de necesidad.",
+        "videoTitle": "Nuestra Historia",
+        "videoDescription": "Conoce más sobre la misión y los valores de National Life Group",
+        "productsTitle": "Nuestros Productos y Servicios",
+        "productFeatures": [
+          "Seguro de Vida",
+          "Anualidades",
+          "Planes de Jubilación",
+          "Beneficios de Vida Adicionales",
+          "Seguro Universal Indexado (IUL)",
+          "Fondos Mutuos",
+          "Soluciones IRA",
+          "Planes de Continuidad Empresarial"
+        ]
       }
     }
   }

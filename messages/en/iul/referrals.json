@@ -1,0 +1,25 @@
+{
+  "iulReferrals": {
+    "meta": {
+      "title": "IUL Referrals | Isaac Plans",
+      "description": "Complete your referrals process",
+      "keywords": "IUL, referrals, leads",
+      "image": "https://www.isaacplans.com/images/iul_en.png",
+      "imageAlt": "IUL Referrals"
+    },
+    "title": "IUL Referrals",
+    "backButton": "Back to IUL",
+    "stepper": {
+      "presentation": "Presentation",
+      "application": "Application",
+      "referrals": "Referrals"
+    },
+    "completedLabel": "Referrals Process Completed",
+    "incompleteLabel": "Referrals Process Incomplete",
+    "switchDescription": "Mark this as complete once you've finished processing referrals through your CRM",
+    "completedText": "✓ Completed",
+    "pendingText": "Click to Complete",
+    "note": "I will complete the process of getting referrals through my CRM."
+  }
+}
+

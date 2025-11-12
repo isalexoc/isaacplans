@@ -19,12 +19,21 @@ async function loadSplitMessages(locale: string): Promise<Record<string, any>> {
       // File doesn't exist, skip
     }
     
-    // Add more split file imports here as needed
-    // Example:
-    // try {
-    //   const iulDataEntry = (await import(`@/messages/${locale}/iul/data-entry.json`)).default;
-    //   Object.assign(splitMessages, iulDataEntry);
-    // } catch {}
+    // Load IUL application messages if they exist
+    try {
+      const iulApplication = (await import(`@/messages/${locale}/iul/application.json`)).default;
+      Object.assign(splitMessages, iulApplication);
+    } catch {
+      // File doesn't exist, skip
+    }
+    
+    // Load IUL referrals messages if they exist
+    try {
+      const iulReferrals = (await import(`@/messages/${locale}/iul/referrals.json`)).default;
+      Object.assign(splitMessages, iulReferrals);
+    } catch {
+      // File doesn't exist, skip
+    }
     
   } catch (error) {
     // If split folder doesn't exist, continue with main messages only
