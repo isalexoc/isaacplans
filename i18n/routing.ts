@@ -91,6 +91,18 @@ export const routing = defineRouting({
       en: "/final-expense/calendar",
       es: "/gastos-finales/calendario",
     },
+    "/faq": {
+      en: "/faq",
+      es: "/preguntas-frecuentes",
+    },
+    "/testimonials": {
+      en: "/testimonials",
+      es: "/testimonios",
+    },
+    "/glossary": {
+      en: "/glossary",
+      es: "/glosario",
+    },
   },
 });
 

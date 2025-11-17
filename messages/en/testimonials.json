@@ -1,0 +1,350 @@
+{
+  "testimonialsPage": {
+    "meta": {
+      "title": "Client Testimonials - Isaac Plans Insurance",
+      "description": "Read real testimonials from satisfied clients about their experiences with ACA, Short Term Medical, Dental & Vision, Hospital Indemnity, IUL, and Final Expense insurance plans.",
+      "keywords": "insurance testimonials, client reviews, health insurance reviews, ACA testimonials, dental vision reviews, life insurance testimonials",
+      "image": "https://www.isaacplans.com/images/testimonials.png",
+      "imageAlt": "Client Testimonials"
+    },
+    "hero": {
+      "title": "Client Testimonials",
+      "description": "Hear from real clients who have found the perfect insurance coverage for their needs. Their stories inspire us to continue providing exceptional service."
+    },
+    "testimonialSection": {
+      "titlePrefix": "Testimonials About",
+      "showMore": "Show More Testimonials",
+      "showLess": "Show Less"
+    },
+    "cta": {
+      "title": "Ready to Get Started with {category}?"
+    },
+    "categories": {
+      "iul": {
+        "title": "IUL - Indexed Universal Life",
+        "description": "Flexible permanent life insurance with cash value growth potential tied to market indexes, offering both protection and wealth accumulation.",
+        "testimonials": [
+          {
+            "name": "Michael Rodriguez",
+            "text": "Isaac helped me set up an IUL policy that's perfect for my retirement planning. The cash value growth has been impressive, and I love the flexibility. Highly recommend!"
+          },
+          {
+            "name": "Sarah Johnson",
+            "text": "After researching life insurance options, I chose IUL through Isaac Plans. The tax advantages and market protection make it an excellent investment for my family's future."
+          },
+          {
+            "name": "Carlos Martinez",
+            "text": "Isaac explained IUL in a way that made complete sense. The policy has already shown good growth, and I feel confident about my financial future. Great service!"
+          },
+          {
+            "name": "Jennifer Williams",
+            "text": "I was skeptical about IUL at first, but Isaac took the time to answer all my questions. Now I have a policy that provides both life insurance and retirement savings. Excellent!"
+          },
+          {
+            "name": "David Garcia",
+            "text": "The IUL policy Isaac set up for me has exceeded my expectations. The cash value is growing nicely, and I appreciate the downside protection. Very satisfied!"
+          },
+          {
+            "name": "Amanda Thompson",
+            "text": "Isaac made the IUL process so easy. He explained everything clearly and helped me choose the right policy for my situation. I'm very happy with my decision."
+          },
+          {
+            "name": "Roberto Sanchez",
+            "text": "As a business owner, I needed flexible life insurance. Isaac recommended IUL, and it's been perfect for my needs. The tax benefits are a huge plus!"
+          },
+          {
+            "name": "Emily Davis",
+            "text": "IUL has been a game-changer for my retirement planning. Isaac's expertise helped me understand all the benefits, and I'm grateful for his guidance."
+          },
+          {
+            "name": "Jose Hernandez",
+            "text": "Isaac helped me set up an IUL policy that protects my family while building cash value. The process was smooth, and I'm very pleased with the results."
+          },
+          {
+            "name": "Michelle Anderson",
+            "text": "I love how my IUL policy combines life insurance with investment potential. Isaac was patient and thorough in explaining everything. Highly recommend his services!"
+          },
+          {
+            "name": "Fernando Lopez",
+            "text": "Isaac's knowledge of IUL products is impressive. He helped me find a policy that fits my budget and goals perfectly. Great experience overall!"
+          },
+          {
+            "name": "Lisa Brown",
+            "text": "The IUL policy Isaac recommended has been excellent for my financial planning. The growth potential with downside protection gives me peace of mind."
+          }
+        ]
+      },
+      "aca": {
+        "title": "ACA – Affordable Care Act",
+        "description": "Get comprehensive health coverage through the ACA Marketplace with premium tax credits and essential health benefits.",
+        "testimonials": [
+          {
+            "name": "Maria Gonzalez",
+            "text": "Isaac helped me find an ACA plan that I can actually afford. The premium tax credits made a huge difference, and I finally have good health coverage!"
+          },
+          {
+            "name": "James Wilson",
+            "text": "I was confused about ACA enrollment, but Isaac walked me through everything. Now I have comprehensive coverage with great benefits. Thank you!"
+          },
+          {
+            "name": "Patricia Ramirez",
+            "text": "Isaac found me an ACA plan that covers all my pre-existing conditions. The peace of mind is priceless, and the premium is very reasonable."
+          },
+          {
+            "name": "Robert Taylor",
+            "text": "Isaac's expertise with ACA plans is unmatched. He helped me understand the metal tiers and found the perfect plan for my family. Excellent service!"
+          },
+          {
+            "name": "Carmen Flores",
+            "text": "I was worried about getting health insurance, but Isaac made it so easy. My ACA plan covers everything I need, and the cost is much lower than I expected."
+          },
+          {
+            "name": "Daniel Moore",
+            "text": "Isaac helped me navigate the ACA Marketplace during open enrollment. The plan he recommended has been perfect, and I'm saving money with tax credits."
+          },
+          {
+            "name": "Ana Martinez",
+            "text": "After years without insurance, Isaac helped me get an ACA plan. The coverage is comprehensive, and I can finally see doctors without worrying about costs."
+          },
+          {
+            "name": "Christopher Lee",
+            "text": "Isaac explained all my ACA options clearly and helped me choose the right metal tier. The plan has been great, and I'm very satisfied with the coverage."
+          },
+          {
+            "name": "Sofia Torres",
+            "text": "Isaac made ACA enrollment stress-free. He found me a plan that covers my medications and preferred doctors. I couldn't be happier!"
+          },
+          {
+            "name": "Matthew Harris",
+            "text": "The ACA plan Isaac recommended has been excellent. I have access to great doctors, and the preventive care benefits are fantastic. Highly recommend!"
+          },
+          {
+            "name": "Isabella Rivera",
+            "text": "Isaac helped me understand my ACA options and find a plan that fits my budget. The tax credits make it very affordable, and the coverage is comprehensive."
+          },
+          {
+            "name": "Kevin Clark",
+            "text": "Isaac's knowledge of ACA plans helped me get the best coverage for my money. The plan has exceeded my expectations, and I'm very grateful for his help."
+          }
+        ]
+      },
+      "dentalVision": {
+        "title": "Dental & Vision",
+        "description": "Affordable dental and vision insurance plans to help maintain your oral and eye health with coverage for exams, cleanings, and treatments.",
+        "testimonials": [
+          {
+            "name": "Laura Rodriguez",
+            "text": "Isaac found me a great dental and vision plan that covers my family's needs. The cleanings and eye exams are fully covered, and I'm saving so much money!"
+          },
+          {
+            "name": "Mark Thompson",
+            "text": "I needed dental work done, and Isaac helped me find a plan that made it affordable. The coverage kicked in quickly, and I'm very satisfied with the service."
+          },
+          {
+            "name": "Elena Vargas",
+            "text": "Isaac recommended a dental and vision plan that's perfect for my family. My kids' orthodontics are covered, and we all get annual eye exams. Excellent!"
+          },
+          {
+            "name": "Steven White",
+            "text": "The dental plan Isaac set up for me has been fantastic. I've had cleanings, fillings, and even a crown, all covered. Great value for the money!"
+          },
+          {
+            "name": "Rosa Mendoza",
+            "text": "Isaac helped me find a vision plan that covers my glasses and contacts. The annual exam is free, and I got a great discount on my new frames. Love it!"
+          },
+          {
+            "name": "Brian Jackson",
+            "text": "I was paying out of pocket for dental work until Isaac found me a plan. Now my cleanings, fillings, and even root canals are covered. Very happy!"
+          },
+          {
+            "name": "Gabriela Cruz",
+            "text": "Isaac's dental and vision plan recommendation was spot-on. My family gets regular checkups covered, and the orthodontic coverage for my daughter is a lifesaver!"
+          },
+          {
+            "name": "Jason Lewis",
+            "text": "The vision plan Isaac recommended covers my annual exam and gives me an allowance for glasses. The process was easy, and I'm very satisfied with the coverage."
+          },
+          {
+            "name": "Monica Perez",
+            "text": "Isaac found me a dental plan that covers preventive care immediately. I've already used it for cleanings and X-rays, and it's been great. Highly recommend!"
+          },
+          {
+            "name": "Ryan Walker",
+            "text": "I needed both dental and vision coverage, and Isaac found me a combined plan that's affordable and comprehensive. The benefits are excellent!"
+          },
+          {
+            "name": "Valeria Jimenez",
+            "text": "Isaac helped me understand dental plan waiting periods and found me one that works for my needs. The coverage has been great, and I'm saving money."
+          },
+          {
+            "name": "Andrew Hall",
+            "text": "The dental and vision plan Isaac recommended has been perfect. I get regular cleanings, my kids' braces are covered, and we all have vision benefits. Excellent!"
+          }
+        ]
+      },
+      "finalExpense": {
+        "title": "Final Expense (Burial)",
+        "description": "Affordable permanent life insurance designed to cover funeral costs, medical bills, and other final expenses, providing peace of mind for your loved ones.",
+        "testimonials": [
+          {
+            "name": "Rafael Ortiz",
+            "text": "Isaac helped me get final expense insurance that I can afford on my fixed income. I feel so much better knowing my family won't be burdened with funeral costs."
+          },
+          {
+            "name": "Dorothy Miller",
+            "text": "At my age, I was worried about qualifying for life insurance. Isaac found me a final expense policy with no medical exam. I'm so grateful for his help!"
+          },
+          {
+            "name": "Manuel Silva",
+            "text": "Isaac explained final expense insurance in a way that made sense. The premiums are fixed and affordable, and I have peace of mind knowing my family is protected."
+          },
+          {
+            "name": "Betty Young",
+            "text": "I wanted to make sure my final expenses were covered without burdening my children. Isaac found me the perfect final expense policy. Thank you!"
+          },
+          {
+            "name": "Jorge Morales",
+            "text": "Isaac helped me get final expense insurance that covers my funeral and any outstanding bills. The process was simple, and I'm very satisfied with the policy."
+          },
+          {
+            "name": "Helen King",
+            "text": "Isaac made getting final expense insurance so easy. No medical exam required, and the premiums are very reasonable. I feel much better about the future."
+          },
+          {
+            "name": "Alberto Ruiz",
+            "text": "I was looking for affordable life insurance for final expenses. Isaac found me a policy that fits my budget perfectly. Great service and peace of mind!"
+          },
+          {
+            "name": "Ruth Wright",
+            "text": "Isaac helped me understand final expense insurance and found me a policy with guaranteed acceptance. The premiums will never increase, which is perfect."
+          },
+          {
+            "name": "Francisco Chavez",
+            "text": "Isaac's final expense insurance recommendation was exactly what I needed. The policy is affordable, and I know my family will be taken care of. Excellent!"
+          },
+          {
+            "name": "Shirley Green",
+            "text": "I wanted to leave something for my family without high premiums. Isaac found me a final expense policy that's perfect. I'm very happy with my decision."
+          },
+          {
+            "name": "Ricardo Delgado",
+            "text": "Isaac helped me get final expense insurance that covers funeral costs and medical bills. The process was straightforward, and I'm very satisfied."
+          },
+          {
+            "name": "Nancy Adams",
+            "text": "Isaac made final expense insurance simple and affordable. The policy gives me peace of mind, and I know my loved ones won't have to worry about expenses."
+          }
+        ]
+      },
+      "hospitalIndemnity": {
+        "title": "Hospital Indemnity",
+        "description": "Supplemental insurance that pays cash benefits directly to you when you're hospitalized, helping cover expenses not covered by your primary health insurance.",
+        "testimonials": [
+          {
+            "name": "Thomas Baker",
+            "text": "Isaac recommended hospital indemnity insurance, and it was a lifesaver when I was hospitalized. The cash benefits helped cover my deductible and lost income."
+          },
+          {
+            "name": "Lupita Fernandez",
+            "text": "I have a high-deductible health plan, so Isaac suggested hospital indemnity. When I was in the hospital, the daily benefits really helped with expenses. Great advice!"
+          },
+          {
+            "name": "Richard Hill",
+            "text": "Isaac explained how hospital indemnity works, and I'm so glad I got it. The cash benefits were paid directly to me and helped cover costs my health insurance didn't."
+          },
+          {
+            "name": "Adriana Castro",
+            "text": "Isaac helped me understand hospital indemnity insurance, and it's been perfect for my situation. The benefits are paid directly to me, which gives me flexibility."
+          },
+          {
+            "name": "Paul Scott",
+            "text": "When I was hospitalized, my hospital indemnity policy from Isaac really helped. The daily benefits covered my deductible and other expenses. Very satisfied!"
+          },
+          {
+            "name": "Yolanda Rios",
+            "text": "Isaac recommended hospital indemnity as a supplement to my health insurance. It's been great knowing I have extra protection if I need to be hospitalized."
+          },
+          {
+            "name": "Edward Adams",
+            "text": "Isaac helped me get hospital indemnity insurance that pays daily benefits. When I was hospitalized, the cash helped cover expenses my main insurance didn't."
+          },
+          {
+            "name": "Consuelo Vega",
+            "text": "I have Medicare, and Isaac suggested hospital indemnity to help with out-of-pocket costs. The policy has been excellent, and I'm very grateful for his recommendation."
+          },
+          {
+            "name": "George Mitchell",
+            "text": "Isaac's hospital indemnity recommendation was spot-on. The daily benefits are paid directly to me, and it's been a great supplement to my health insurance."
+          },
+          {
+            "name": "Esperanza Herrera",
+            "text": "Isaac explained hospital indemnity insurance clearly and helped me choose the right daily benefit amount. I feel much more protected now. Thank you!"
+          },
+          {
+            "name": "Frank Nelson",
+            "text": "Isaac helped me get hospital indemnity insurance that complements my high-deductible plan. The cash benefits would really help if I'm hospitalized. Great coverage!"
+          },
+          {
+            "name": "Dolores Castillo",
+            "text": "Isaac's hospital indemnity recommendation has given me peace of mind. The daily benefits would help cover expenses if I'm hospitalized. Excellent service!"
+          }
+        ]
+      },
+      "shortTermMedical": {
+        "title": "Short Term Medical",
+        "description": "Temporary health insurance coverage for gaps between major medical plans, offering quick enrollment and flexible terms.",
+        "testimonials": [
+          {
+            "name": "Anthony Cooper",
+            "text": "I was between jobs and needed coverage fast. Isaac helped me get short-term medical insurance that started within days. Perfect solution for my situation!"
+          },
+          {
+            "name": "Marisol Reyes",
+            "text": "Isaac found me short-term medical coverage while I waited for my new employer's insurance to start. The enrollment was quick, and the coverage was good."
+          },
+          {
+            "name": "Joshua Ward",
+            "text": "I just graduated and needed temporary health insurance. Isaac helped me get short-term medical that was affordable and started immediately. Great service!"
+          },
+          {
+            "name": "Alejandra Moreno",
+            "text": "Isaac helped me get short-term medical insurance during a gap in coverage. The process was fast, and I had protection right away. Very satisfied!"
+          },
+          {
+            "name": "Brandon Foster",
+            "text": "I missed open enrollment and needed coverage. Isaac recommended short-term medical, and it was perfect for my needs. The enrollment was quick and easy."
+          },
+          {
+            "name": "Catalina Espinoza",
+            "text": "Isaac helped me understand short-term medical options and found me a plan that worked. The coverage started quickly, and it was exactly what I needed."
+          },
+          {
+            "name": "Justin Brooks",
+            "text": "I was waiting for ACA enrollment, and Isaac found me short-term medical coverage. It was affordable and gave me peace of mind during the gap. Excellent!"
+          },
+          {
+            "name": "Rocio Navarro",
+            "text": "Isaac recommended short-term medical for my transition period. The coverage started quickly, and it was perfect for my temporary needs. Thank you!"
+          },
+          {
+            "name": "Tyler Price",
+            "text": "I needed temporary coverage while changing jobs. Isaac helped me get short-term medical that started right away. The process was smooth and easy."
+          },
+          {
+            "name": "Guadalupe Solis",
+            "text": "Isaac found me short-term medical insurance that was perfect for my situation. The enrollment was fast, and I had coverage when I needed it. Great help!"
+          },
+          {
+            "name": "Zachary Bell",
+            "text": "I was in a coverage gap and needed insurance fast. Isaac helped me get short-term medical that started within 48 hours. Perfect solution!"
+          },
+          {
+            "name": "Yesenia Pacheco",
+            "text": "Isaac helped me get short-term medical coverage during a transition period. The process was quick, and the coverage was exactly what I needed. Very happy!"
+          }
+        ]
+      }
+    }
+  }
+}
+

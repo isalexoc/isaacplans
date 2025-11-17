@@ -35,6 +35,30 @@ async function loadSplitMessages(locale: string): Promise<Record<string, any>> {
       // File doesn't exist, skip
     }
     
+    // Load FAQ messages if they exist
+    try {
+      const faq = (await import(`@/messages/${locale}/faq.json`)).default;
+      Object.assign(splitMessages, faq);
+    } catch {
+      // File doesn't exist, skip
+    }
+    
+    // Load Testimonials messages if they exist
+    try {
+      const testimonials = (await import(`@/messages/${locale}/testimonials.json`)).default;
+      Object.assign(splitMessages, testimonials);
+    } catch {
+      // File doesn't exist, skip
+    }
+    
+    // Load Glossary messages if they exist
+    try {
+      const glossary = (await import(`@/messages/${locale}/glossary.json`)).default;
+      Object.assign(splitMessages, glossary);
+    } catch {
+      // File doesn't exist, skip
+    }
+    
   } catch (error) {
     // If split folder doesn't exist, continue with main messages only
     console.warn(`No split messages found for locale ${locale}`);

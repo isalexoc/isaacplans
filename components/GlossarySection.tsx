@@ -5,35 +5,29 @@ import clsx from "clsx";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { ChevronDown } from "lucide-react";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 
-type Faq = {
-  question: string;
-  answer: string;
+type GlossaryTerm = {
+  term: string;
+  definition: string;
 };
 
-interface FaqSectionProps {
+interface GlossarySectionProps {
   label?: string;
   title: React.ReactNode;
-  faqs: Faq[];
+  terms: GlossaryTerm[];
   imagePublicId?: string;
   imagePosition?: "left" | "right";
 }
 
-export default function FaqSection({
+export default function GlossarySection({
   label,
   title,
-  faqs,
+  terms,
   imagePublicId,
   imagePosition = "left",
-}: FaqSectionProps) {
-  const t = useTranslations("faqPage.faqSection");
+}: GlossarySectionProps) {
+  const t = useTranslations("glossaryPage.glossarySection");
   const [showAll, setShowAll] = useState(false);
   const isLeft = imagePosition === "left";
   const imgUrl =
@@ -41,8 +35,8 @@ export default function FaqSection({
     `https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_600,c_fill,g_face/${imagePublicId}.png`;
   
   const initialCount = 3;
-  const displayedFaqs = showAll ? faqs : faqs.slice(0, initialCount);
-  const hasMore = faqs.length > initialCount;
+  const displayedTerms = showAll ? terms : terms.slice(0, initialCount);
+  const hasMore = terms.length > initialCount;
 
   return (
     <section
@@ -70,7 +64,7 @@ export default function FaqSection({
             <div className="absolute inset-0 -translate-x-4 translate-y-4 rounded-xl border-4 border-dashed border-gray-300 dark:border-gray-700" />
             <Image
               src={imgUrl}
-              alt="FAQ visual"
+              alt="Glossary visual"
               width={500}
               height={500}
               className="relative rounded-xl shadow-xl object-cover w-full max-w-md"
@@ -79,7 +73,7 @@ export default function FaqSection({
           </div>
         )}
 
-        {/* ▸ FAQ block */}
+        {/* ▸ Glossary block */}
         <div className="w-full lg:w-1/2 max-w-xl mx-auto animate-fadeUp" style={{ animationDelay: "0.1s" }}>
           {label && (
             <div
@@ -99,34 +93,26 @@ export default function FaqSection({
           <div className="h-1.5 w-24 bg-gradient-to-r from-[hsl(var(--custom))] to-[hsl(var(--custom)/0.6)] 
                           mt-6 mb-10 rounded-full shadow-md shadow-[hsl(var(--custom)/0.3)]" />
 
-          {/* Accordion (first item open by default) */}
-          <Accordion
-            type="single"
-            collapsible
-            defaultValue={displayedFaqs.length ? "item-0" : undefined}
-            className="space-y-4"
-            role="region"
-            aria-label="Frequently asked questions"
-          >
-            {displayedFaqs.map((f, i) => (
-              <AccordionItem
-                key={`faq-${i}`}
-                value={`item-${i}`}
+          {/* Glossary Terms */}
+          <div className="space-y-6">
+            {displayedTerms.map((item, i) => (
+              <div
+                key={`term-${i}`}
                 className="bg-white/60 backdrop-blur-sm rounded-xl border border-gray-200/60 
-                           shadow-sm hover:shadow-md transition-all duration-300 px-5 py-2
+                           shadow-sm hover:shadow-md transition-all duration-300 px-6 py-5
                            hover:bg-white/80"
+                role="article"
+                aria-label={`Definition of ${item.term}`}
               >
-                <AccordionTrigger className="text-left text-base lg:text-lg font-semibold text-gray-900 dark:text-white 
-                                             hover:text-[hsl(var(--custom))] transition-colors duration-200
-                                             py-4">
-                  {f.question}
-                </AccordionTrigger>
-                <AccordionContent className="text-gray-700 dark:text-gray-300 leading-relaxed text-base lg:text-lg pt-2 pb-4">
-                  {f.answer}
-                </AccordionContent>
-              </AccordionItem>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                  {item.term}
+                </h3>
+                <p className="text-gray-700 dark:text-gray-300 leading-relaxed text-base lg:text-lg">
+                  {item.definition}
+                </p>
+              </div>
             ))}
-          </Accordion>
+          </div>
           
           {/* Show More / Show Less Button */}
           {hasMore && (
@@ -158,3 +144,4 @@ export default function FaqSection({
     </section>
   );
 }
+

@@ -1,0 +1,350 @@
+{
+  "glossaryPage": {
+    "meta": {
+      "title": "Glosario de Seguros - Isaac Plans Insurance",
+      "description": "Aprenda términos y definiciones importantes de seguros para planes de seguro ACA, Médico a Corto Plazo, Dental y Visión, Indemnización Hospitalaria, IUL y Gastos Finales.",
+      "keywords": "glosario de seguros, términos de seguros, definiciones de seguro de salud, términos ACA, términos dental visión, glosario de seguro de vida",
+      "image": "https://www.isaacplans.com/images/glossary.png",
+      "imageAlt": "Glosario de Seguros"
+    },
+    "hero": {
+      "title": "Glosario de Seguros",
+      "description": "Entender la terminología de seguros es clave para tomar decisiones informadas. Explore nuestro glosario completo de términos de seguros organizados por categoría."
+    },
+    "glossarySection": {
+      "titlePrefix": "Términos Sobre",
+      "showMore": "Mostrar Más Términos",
+      "showLess": "Mostrar Menos"
+    },
+    "cta": {
+      "title": "¿Listo para Comenzar con {category}?"
+    },
+    "categories": {
+      "iul": {
+        "title": "IUL - Seguro de Vida Universal Indexado",
+        "description": "Seguro de vida permanente flexible con potencial de crecimiento de valor en efectivo vinculado a índices del mercado, ofreciendo tanto protección como acumulación de riqueza.",
+        "terms": [
+          {
+            "term": "Seguro de Vida Universal Indexado (IUL)",
+            "definition": "Un tipo de seguro de vida permanente que combina un beneficio por fallecimiento con un componente de valor en efectivo. El valor en efectivo crece basándose en el rendimiento de los índices del mercado de valores mientras proporciona protección a la baja."
+          },
+          {
+            "term": "Valor en Efectivo",
+            "definition": "El componente de ahorros de una póliza de seguro de vida permanente que se acumula con el tiempo. En las pólizas IUL, el valor en efectivo crece basándose en el rendimiento del índice con límites máximos y mínimos."
+          },
+          {
+            "term": "Tasa Máxima",
+            "definition": "La tasa de interés máxima que su valor en efectivo IUL puede ganar en un período determinado, incluso si el índice vinculado tiene un mejor rendimiento. Esto limita el potencial alcista pero proporciona previsibilidad."
+          },
+          {
+            "term": "Tasa Mínima",
+            "definition": "La tasa de interés mínima que ganará su valor en efectivo IUL, típicamente 0% o 1%. Esto protege su valor en efectivo de las pérdidas del mercado, asegurando que no disminuirá debido a las caídas del mercado."
+          },
+          {
+            "term": "Beneficio por Fallecimiento",
+            "definition": "La cantidad pagada a los beneficiarios tras la muerte del asegurado. En las pólizas IUL, el beneficio por fallecimiento puede ajustarse, y los préstamos de la póliza pueden reducir el monto del beneficio."
+          },
+          {
+            "term": "Préstamo de Póliza",
+            "definition": "Un préstamo tomado contra el valor en efectivo de una póliza IUL. Estos préstamos típicamente no requieren verificaciones de crédito y acumulan interés, pero los préstamos no pagados reducen el beneficio por fallecimiento."
+          },
+          {
+            "term": "Flexibilidad de Prima",
+            "definition": "La capacidad de ajustar los pagos de primas en una póliza IUL. Puede aumentar, disminuir u omitir primas siempre que haya suficiente valor en efectivo para cubrir los cargos de la póliza."
+          },
+          {
+            "term": "Rendimiento del Índice",
+            "definition": "Qué tan bien se desempeña un índice del mercado de valores (como el S&P 500) durante un período específico. El crecimiento del valor en efectivo IUL está vinculado al rendimiento del índice, sujeto a tasas máximas y mínimas."
+          },
+          {
+            "term": "Garantía Sin Caducidad",
+            "definition": "Una cláusula adicional que mantiene una póliza IUL en vigor incluso si el valor en efectivo se agota, siempre que se paguen las primas mínimas. Esto proporciona protección contra la caducidad de la póliza."
+          },
+          {
+            "term": "Crecimiento con Impuestos Diferidos",
+            "definition": "El valor en efectivo en una póliza IUL crece sin ser gravado hasta el retiro. Esto permite un crecimiento compuesto con el tiempo sin implicaciones fiscales anuales."
+          },
+          {
+            "term": "Cargo por Rescate",
+            "definition": "Una tarifa cobrada si cancela una póliza IUL anticipadamente. Estos cargos típicamente disminuyen con el tiempo y están diseñados para alentar la propiedad de pólizas a largo plazo."
+          },
+          {
+            "term": "Cargo por Mortalidad",
+            "definition": "El costo del seguro deducido del valor en efectivo en una póliza IUL. Este cargo cubre el beneficio por fallecimiento y típicamente aumenta a medida que envejece."
+          }
+        ]
+      },
+      "aca": {
+        "title": "ACA – Ley de Cuidado de Salud Asequible",
+        "description": "Obtenga cobertura de salud integral a través del Mercado de Seguros ACA con créditos fiscales de prima y beneficios de salud esenciales.",
+        "terms": [
+          {
+            "term": "Ley de Cuidado de Salud Asequible (ACA)",
+            "definition": "Una ley federal promulgada en 2010 que proporciona acceso a un seguro de salud asequible a través del Mercado de Seguros de Salud. También conocida como Obamacare."
+          },
+          {
+            "term": "Crédito Fiscal de Prima",
+            "definition": "Un subsidio que ayuda a reducir las primas mensuales de seguro de salud para personas y familias elegibles. Los créditos se basan en ingresos, tamaño de familia y el costo de la cobertura."
+          },
+          {
+            "term": "Beneficios de Salud Esenciales",
+            "definition": "Diez categorías de servicios de salud que todos los planes ACA deben cubrir, incluida atención preventiva, servicios de emergencia, hospitalización, medicamentos recetados y servicios de salud mental."
+          },
+          {
+            "term": "Niveles de Metal",
+            "definition": "Categorías que indican cómo usted y su plan de seguro comparten los costos: Bronce (60% de cobertura), Plata (70%), Oro (80%) y Platino (90%). Los niveles más altos tienen primas más altas pero menores costos de bolsillo."
+          },
+          {
+            "term": "Período de Inscripción Abierta",
+            "definition": "El período anual cuando puede inscribirse o cambiar su plan de salud ACA. Típicamente se extiende del 1 de noviembre al 15 de enero en la mayoría de los estados."
+          },
+          {
+            "term": "Período Especial de Inscripción (SEP)",
+            "definition": "Un tiempo fuera de la Inscripción Abierta cuando puede inscribirse en un seguro de salud debido a un evento de vida calificado, como matrimonio, nacimiento, pérdida de cobertura o mudanza."
+          },
+          {
+            "term": "Condición Preexistente",
+            "definition": "Una condición de salud que tenía antes de que comenzara su cobertura. Bajo la ACA, las compañías de seguros no pueden negar la cobertura ni cobrar más debido a condiciones preexistentes."
+          },
+          {
+            "term": "Mercado de Seguros de Salud",
+            "definition": "Un servicio que ayuda a individuos y familias a buscar e inscribirse en un seguro de salud asequible. También llamado el Intercambio, está disponible en línea, por teléfono o en persona."
+          },
+          {
+            "term": "Reducción de Costos Compartidos",
+            "definition": "Ahorros adicionales que reducen los costos de bolsillo para deducibles, copagos y coseguro. Disponible para inscritos en planes Plata que califican según ingresos."
+          },
+          {
+            "term": "Mandato Individual",
+            "definition": "Un requisito de tener seguro de salud o pagar una penalización. Aunque la penalización federal se eliminó en 2019, algunos estados tienen sus propios mandatos individuales."
+          },
+          {
+            "term": "Plan de Salud Calificado",
+            "definition": "Un plan de seguro que cumple con los requisitos de ACA y está certificado por el Mercado de Seguros de Salud. Estos planes proporcionan beneficios de salud esenciales y protecciones al consumidor."
+          },
+          {
+            "term": "Valor Actuarial",
+            "definition": "El porcentaje de los costos promedio totales para beneficios cubiertos que un plan cubrirá. Por ejemplo, un plan con 80% de valor actuarial cubre el 80% de los costos, mientras que usted paga el 20%."
+          }
+        ]
+      },
+      "dentalVision": {
+        "title": "Dental y Visión",
+        "description": "Planes de seguro dental y de visión asequibles para ayudar a mantener su salud oral y ocular con cobertura para exámenes, limpiezas y tratamientos.",
+        "terms": [
+          {
+            "term": "Máximo Anual",
+            "definition": "La cantidad máxima que su seguro dental pagará por servicios cubiertos dentro de un año de beneficios. Una vez alcanzado, usted es responsable del 100% de los costos adicionales hasta el próximo año de beneficios."
+          },
+          {
+            "term": "Período de Espera",
+            "definition": "Un período de tiempo que debe esperar antes de que ciertos servicios dentales estén cubiertos. La atención preventiva a menudo no tiene período de espera, mientras que los procedimientos mayores pueden requerir 6-12 meses."
+          },
+          {
+            "term": "DHMO",
+            "definition": "Organización de Mantenimiento de Salud Dental - Un tipo de plan dental que requiere que vea dentistas dentro de una red específica. Típicamente tiene primas más bajas y sin deducibles pero menos flexibilidad."
+          },
+          {
+            "term": "DPPO",
+            "definition": "Organización de Proveedores Preferidos Dentales - Un tipo de plan dental que le permite ver cualquier dentista pero ofrece mejores beneficios y costos más bajos cuando usa proveedores en la red."
+          },
+          {
+            "term": "Cobertura de Ortodoncia",
+            "definition": "Cobertura de seguro para frenos y otros tratamientos de ortodoncia. A menudo tiene un máximo de por vida separado y período de espera, típicamente 12-24 meses."
+          },
+          {
+            "term": "Asignación de Visión",
+            "definition": "Una cantidad fija en dólares que su seguro de visión proporciona para monturas, lentes o lentes de contacto. Esta asignación típicamente se proporciona anualmente o cada 12-24 meses."
+          },
+          {
+            "term": "Copago",
+            "definition": "Una cantidad fija que paga por un servicio cubierto, como $10 por un examen de la vista. Los copagos típicamente se requieren en el momento del servicio."
+          },
+          {
+            "term": "Coseguro",
+            "definition": "Su parte del costo de un servicio cubierto, calculado como un porcentaje. Por ejemplo, si su plan tiene 20% de coseguro, paga el 20% del monto permitido después de cumplir su deducible."
+          },
+          {
+            "term": "Atención Preventiva",
+            "definition": "Servicios diseñados para prevenir problemas de salud, como limpiezas dentales, exámenes, radiografías y exámenes oculares anuales. Estos a menudo están cubiertos al 100% sin deducible."
+          },
+          {
+            "term": "Proveedor en la Red",
+            "definition": "Un dentista, optometrista u otro proveedor que ha acordado proporcionar servicios a tasas negociadas con su compañía de seguros. Usar proveedores en la red típicamente cuesta menos."
+          },
+          {
+            "term": "Fuera de la Red",
+            "definition": "Un proveedor que no ha acordado tasas negociadas con su seguro. Usar proveedores fuera de la red típicamente cuesta más, y algunos planes pueden no cubrir estos servicios."
+          },
+          {
+            "term": "Máximo de Por Vida",
+            "definition": "La cantidad total que su seguro pagará por ciertos servicios durante su vida. Común para cobertura de ortodoncia, típicamente oscilando entre $1,000 y $2,000."
+          }
+        ]
+      },
+      "finalExpense": {
+        "title": "Gastos Finales (Entierro)",
+        "description": "Seguro de vida permanente asequible diseñado para cubrir costos de funeral, facturas médicas y otros gastos finales, proporcionando tranquilidad para sus seres queridos.",
+        "terms": [
+          {
+            "term": "Seguro de Gastos Finales",
+            "definition": "Un tipo de seguro de vida entera diseñado para cubrir gastos del final de la vida, como costos de funeral, entierro o cremación, facturas médicas y deudas pendientes. También llamado seguro de entierro o funeral."
+          },
+          {
+            "term": "Aceptación Garantizada",
+            "definition": "Un tipo de póliza de gastos finales que acepta solicitantes independientemente de las condiciones de salud. Estas pólizas típicamente tienen períodos de espera y pueden tener primas más altas."
+          },
+          {
+            "term": "Emisión Simplificada",
+            "definition": "Un tipo de póliza de gastos finales que requiere responder algunas preguntas de salud pero sin examen médico. Estas pólizas típicamente tienen períodos de espera más cortos o sin espera en comparación con la aceptación garantizada."
+          },
+          {
+            "term": "Beneficio por Fallecimiento Graduado",
+            "definition": "Una estructura de beneficio por fallecimiento donde si el asegurado fallece dentro de los primeros 2-3 años, los beneficiarios reciben un beneficio limitado (típicamente devolución de primas más interés) en lugar del beneficio por fallecimiento completo."
+          },
+          {
+            "term": "Seguro de Vida Entera",
+            "definition": "Un tipo de seguro de vida permanente que proporciona cobertura durante toda su vida siempre que se paguen las primas. El seguro de gastos finales es típicamente una forma de seguro de vida entera."
+          },
+          {
+            "term": "Prima Fija",
+            "definition": "Un monto de prima que nunca aumenta, independientemente de cambios de edad o salud. La mayoría de las pólizas de gastos finales tienen primas fijas que permanecen constantes durante todo el término de la póliza."
+          },
+          {
+            "term": "Beneficio por Fallecimiento",
+            "definition": "La cantidad pagada a los beneficiarios tras la muerte del asegurado. Las pólizas de gastos finales típicamente tienen beneficios por fallecimiento más pequeños ($5,000-$50,000) en comparación con el seguro de vida tradicional."
+          },
+          {
+            "term": "Beneficiario",
+            "definition": "La persona o entidad designada para recibir el beneficio por fallecimiento de una póliza de seguro de vida. Puede nombrar múltiples beneficiarios y especificar cómo se debe dividir el beneficio."
+          },
+          {
+            "term": "Beneficio por Fallecimiento Acelerado",
+            "definition": "Una característica que le permite acceder a una porción del beneficio por fallecimiento si es diagnosticado con una enfermedad terminal. También llamado beneficios en vida, esto puede ayudar a cubrir gastos médicos mientras está vivo."
+          },
+          {
+            "term": "Valor en Efectivo",
+            "definition": "El componente de ahorros de una póliza de seguro de vida entera que se acumula con el tiempo. Puede pedir prestado contra o cancelar la póliza por su valor en efectivo, aunque esto reduce el beneficio por fallecimiento."
+          },
+          {
+            "term": "Caducidad de Póliza",
+            "definition": "Cuando una póliza de seguro de vida se termina debido al no pago de primas. Algunas pólizas tienen períodos de gracia y pueden usar el valor en efectivo para pagar primas si está disponible."
+          },
+          {
+            "term": "Seguro Reducido Pagado",
+            "definition": "Una opción que proporciona un beneficio por fallecimiento más pequeño sin pagos de primas adicionales si deja de pagar primas. Esto usa el valor en efectivo para comprar una póliza pagada."
+          }
+        ]
+      },
+      "hospitalIndemnity": {
+        "title": "Indemnización Hospitalaria",
+        "description": "Seguro complementario que paga beneficios en efectivo directamente a usted cuando está hospitalizado, ayudando a cubrir gastos no cubiertos por su seguro de salud principal.",
+        "terms": [
+          {
+            "term": "Seguro de Indemnización Hospitalaria",
+            "definition": "Un tipo de seguro complementario que paga beneficios en efectivo fijos (una cantidad fija de dólares por día) directamente a usted cuando está hospitalizado, independientemente de otra cobertura de seguro."
+          },
+          {
+            "term": "Beneficio Diario",
+            "definition": "La cantidad fija en dólares pagada por día de hospitalización en una póliza de indemnización hospitalaria. Los beneficios típicamente son $100-$500 por día, pagados directamente al titular de la póliza."
+          },
+          {
+            "term": "Período Máximo de Beneficios",
+            "definition": "El número máximo de días por hospitalización o por año que se pagarán los beneficios de indemnización hospitalaria. Algunos planes tienen períodos de beneficios ilimitados."
+          },
+          {
+            "term": "Seguro Complementario",
+            "definition": "Seguro diseñado para funcionar junto con su seguro de salud principal para ayudar a cubrir costos adicionales. La indemnización hospitalaria es una forma de seguro complementario."
+          },
+          {
+            "term": "Beneficio en Efectivo",
+            "definition": "Dinero pagado directamente a usted (no al hospital o proveedor) que puede usar para cualquier propósito. Los beneficios de indemnización hospitalaria se pagan como beneficios en efectivo."
+          },
+          {
+            "term": "Cobertura de Accidentes",
+            "definition": "Beneficios de indemnización hospitalaria para hospitalizaciones debido a accidentes, que típicamente están cubiertas inmediatamente sin períodos de espera, independientemente de condiciones preexistentes."
+          },
+          {
+            "term": "Cobertura de Enfermedades",
+            "definition": "Beneficios de indemnización hospitalaria para hospitalizaciones debido a enfermedades, que pueden tener períodos de espera (típicamente 30-90 días) antes de que comience la cobertura."
+          },
+          {
+            "term": "Beneficio de UCI",
+            "definition": "Un beneficio adicional que algunos planes de indemnización hospitalaria ofrecen para estadías en la Unidad de Cuidados Intensivos. Esto puede pagar un beneficio diario más alto o una suma global."
+          },
+          {
+            "term": "Beneficio de Sala de Emergencias",
+            "definition": "Un beneficio que algunos planes de indemnización hospitalaria proporcionan para visitas a la sala de emergencias, típicamente pagando una cantidad fija por visita independientemente de si es admitido."
+          },
+          {
+            "term": "Beneficio de Cirugía Ambulatoria",
+            "definition": "Un beneficio que algunos planes de indemnización hospitalaria ofrecen para procedimientos quirúrgicos ambulatorios, pagando una cantidad fija por procedimiento."
+          },
+          {
+            "term": "Coordinación de Beneficios",
+            "definition": "Cómo funcionan juntas múltiples pólizas de seguro. Los beneficios de indemnización hospitalaria se pagan independientemente de su seguro de salud, por lo que no se coordinan ni reducen según otra cobertura."
+          },
+          {
+            "term": "Exclusión de Condición Preexistente",
+            "definition": "Una limitación que excluye la cobertura para condiciones que tenía antes de que comenzara la póliza. Algunos planes de indemnización hospitalaria excluyen condiciones preexistentes, mientras que otros pueden cubrirlas después de un período de espera."
+          }
+        ]
+      },
+      "shortTermMedical": {
+        "title": "Médico a Corto Plazo",
+        "description": "Cobertura de seguro de salud temporal para brechas entre planes médicos principales, ofreciendo inscripción rápida y términos flexibles.",
+        "terms": [
+          {
+            "term": "Médico a Corto Plazo (STM)",
+            "definition": "Seguro de salud temporal que proporciona cobertura por períodos limitados, típicamente de 30 días a 12 meses, con algunos planes que permiten renovaciones de hasta 36 meses. Diseñado para llenar brechas de cobertura."
+          },
+          {
+            "term": "Brecha de Cobertura",
+            "definition": "Un período cuando no tiene cobertura de seguro de salud. El médico a corto plazo está diseñado para llenar estas brechas, como entre trabajos o mientras espera la inscripción de ACA."
+          },
+          {
+            "term": "Suscripción Médica",
+            "definition": "El proceso de evaluar su historial de salud para determinar elegibilidad y tasas de prima. Los planes médicos a corto plazo usan suscripción médica y pueden negar la cobertura basándose en condiciones de salud."
+          },
+          {
+            "term": "Renovación",
+            "definition": "La capacidad de extender una póliza médica a corto plazo más allá de su término inicial. Las renovaciones pueden estar limitadas por regulaciones estatales y pueden considerarse nuevas pólizas, lo que significa que las condiciones desarrolladas durante el término anterior podrían excluirse."
+          },
+          {
+            "term": "Exclusión de Condición Preexistente",
+            "definition": "Una limitación que excluye la cobertura para condiciones de salud que tenía antes de que comenzara la póliza. La mayoría de los planes médicos a corto plazo excluyen condiciones preexistentes por completo."
+          },
+          {
+            "term": "Beneficios Limitados",
+            "definition": "Restricciones de cobertura que limitan qué servicios están cubiertos o cuánto pagará el plan. Los planes médicos a corto plazo típicamente tienen beneficios más limitados que los planes que cumplen con ACA."
+          },
+          {
+            "term": "Máximo Anual",
+            "definition": "La cantidad máxima que un plan médico a corto plazo pagará por servicios cubiertos dentro de un año de beneficios. Estos máximos típicamente son más bajos que los límites de planes ACA."
+          },
+          {
+            "term": "Máximo de Por Vida",
+            "definition": "La cantidad total que un plan médico a corto plazo pagará durante su vida. Estos máximos típicamente son mucho más bajos que los planes ACA, que no tienen máximos de por vida para beneficios de salud esenciales."
+          },
+          {
+            "term": "Exclusión",
+            "definition": "Servicios o condiciones que no están cubiertos por el plan de seguro. Los planes médicos a corto plazo típicamente excluyen atención preventiva, atención materna, servicios de salud mental y condiciones preexistentes."
+          },
+          {
+            "term": "Inscripción Rápida",
+            "definition": "La capacidad de inscribirse en cobertura médica a corto plazo rápidamente, a menudo dentro de 24-48 horas de la aprobación de la solicitud. Esto hace que STM sea ideal para necesidades de cobertura inmediata."
+          },
+          {
+            "term": "No Cumple con ACA",
+            "definition": "Planes que no cumplen con los requisitos de la Ley de Cuidado de Salud Asequible. Los planes médicos a corto plazo no cumplen con ACA, lo que significa que no tienen que cubrir beneficios de salud esenciales ni aceptar personas con condiciones preexistentes."
+          },
+          {
+            "term": "Cobertura Transicional",
+            "definition": "Cobertura de seguro temporal durante transiciones de vida, como cambios de trabajo, graduación o espera de beneficios del empleador. El médico a corto plazo está diseñado para necesidades de cobertura transicional."
+          }
+        ]
+      }
+    }
+  }
+}
+

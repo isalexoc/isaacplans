@@ -135,4 +135,16 @@ body {
   .section-paragraph {
     @apply text-gray-700 dark:text-gray-300 leading-relaxed;
   }
+  
+  /* Navigation menu item hover override - using specific class for higher specificity */
+  [data-radix-navigation-menu-viewport] .nav-menu-item:hover {
+    background-color: rgb(249 250 251); /* gray-50 */
+  }
+  [data-radix-navigation-menu-viewport] .nav-menu-item[data-highlighted] {
+    background-color: rgb(249 250 251); /* gray-50 */
+  }
+  /* Ensure viewport is white */
+  [data-radix-navigation-menu-viewport] {
+    background-color: white;
+  }
 }

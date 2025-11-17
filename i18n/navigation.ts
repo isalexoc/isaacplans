@@ -21,4 +21,7 @@ export type AppHref =
   | "/iul"
   | "/iul/presentation"
   | "/short-term-medical"
-  | "/gastos-finales";
+  | "/gastos-finales"
+  | "/faq"
+  | "/testimonials"
+  | "/glossary";

@@ -4,36 +4,31 @@ import Image from "next/image";
 import clsx from "clsx";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { ChevronDown } from "lucide-react";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+import { ChevronDown, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-type Faq = {
-  question: string;
-  answer: string;
+type Testimonial = {
+  name: string;
+  text: string;
+  rating?: number;
 };
 
-interface FaqSectionProps {
+interface TestimonialSectionProps {
   label?: string;
   title: React.ReactNode;
-  faqs: Faq[];
+  testimonials: Testimonial[];
   imagePublicId?: string;
   imagePosition?: "left" | "right";
 }
 
-export default function FaqSection({
+export default function TestimonialSection({
   label,
   title,
-  faqs,
+  testimonials,
   imagePublicId,
   imagePosition = "left",
-}: FaqSectionProps) {
-  const t = useTranslations("faqPage.faqSection");
+}: TestimonialSectionProps) {
+  const t = useTranslations("testimonialsPage.testimonialSection");
   const [showAll, setShowAll] = useState(false);
   const isLeft = imagePosition === "left";
   const imgUrl =
@@ -41,8 +36,8 @@ export default function FaqSection({
     `https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_600,c_fill,g_face/${imagePublicId}.png`;
   
   const initialCount = 3;
-  const displayedFaqs = showAll ? faqs : faqs.slice(0, initialCount);
-  const hasMore = faqs.length > initialCount;
+  const displayedTestimonials = showAll ? testimonials : testimonials.slice(0, initialCount);
+  const hasMore = testimonials.length > initialCount;
 
   return (
     <section
@@ -70,7 +65,7 @@ export default function FaqSection({
             <div className="absolute inset-0 -translate-x-4 translate-y-4 rounded-xl border-4 border-dashed border-gray-300 dark:border-gray-700" />
             <Image
               src={imgUrl}
-              alt="FAQ visual"
+              alt="Testimonials visual"
               width={500}
               height={500}
               className="relative rounded-xl shadow-xl object-cover w-full max-w-md"
@@ -79,7 +74,7 @@ export default function FaqSection({
           </div>
         )}
 
-        {/* ▸ FAQ block */}
+        {/* ▸ Testimonials block */}
         <div className="w-full lg:w-1/2 max-w-xl mx-auto animate-fadeUp" style={{ animationDelay: "0.1s" }}>
           {label && (
             <div
@@ -99,34 +94,37 @@ export default function FaqSection({
           <div className="h-1.5 w-24 bg-gradient-to-r from-[hsl(var(--custom))] to-[hsl(var(--custom)/0.6)] 
                           mt-6 mb-10 rounded-full shadow-md shadow-[hsl(var(--custom)/0.3)]" />
 
-          {/* Accordion (first item open by default) */}
-          <Accordion
-            type="single"
-            collapsible
-            defaultValue={displayedFaqs.length ? "item-0" : undefined}
-            className="space-y-4"
-            role="region"
-            aria-label="Frequently asked questions"
-          >
-            {displayedFaqs.map((f, i) => (
-              <AccordionItem
-                key={`faq-${i}`}
-                value={`item-${i}`}
+          {/* Testimonials Grid */}
+          <div className="space-y-6">
+            {displayedTestimonials.map((testimonial, i) => (
+              <div
+                key={`testimonial-${i}`}
                 className="bg-white/60 backdrop-blur-sm rounded-xl border border-gray-200/60 
-                           shadow-sm hover:shadow-md transition-all duration-300 px-5 py-2
+                           shadow-sm hover:shadow-md transition-all duration-300 px-6 py-5
                            hover:bg-white/80"
+                role="article"
+                aria-label={`Testimonial from ${testimonial.name}`}
               >
-                <AccordionTrigger className="text-left text-base lg:text-lg font-semibold text-gray-900 dark:text-white 
-                                             hover:text-[hsl(var(--custom))] transition-colors duration-200
-                                             py-4">
-                  {f.question}
-                </AccordionTrigger>
-                <AccordionContent className="text-gray-700 dark:text-gray-300 leading-relaxed text-base lg:text-lg pt-2 pb-4">
-                  {f.answer}
-                </AccordionContent>
-              </AccordionItem>
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="flex items-center">
+                    {Array.from({ length: 5 }).map((_, idx) => (
+                      <Star
+                        key={idx}
+                        className="w-5 h-5 fill-yellow-400 text-yellow-400"
+                        aria-hidden="true"
+                      />
+                    ))}
+                  </div>
+                  <span className="font-semibold text-gray-900 dark:text-white text-base">
+                    {testimonial.name}
+                  </span>
+                </div>
+                <p className="text-gray-700 dark:text-gray-300 leading-relaxed text-base lg:text-lg">
+                  "{testimonial.text}"
+                </p>
+              </div>
             ))}
-          </Accordion>
+          </div>
           
           {/* Show More / Show Less Button */}
           {hasMore && (
@@ -158,3 +156,4 @@ export default function FaqSection({
     </section>
   );
 }
+

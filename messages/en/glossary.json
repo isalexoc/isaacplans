@@ -1,0 +1,350 @@
+{
+  "glossaryPage": {
+    "meta": {
+      "title": "Insurance Glossary - Isaac Plans Insurance",
+      "description": "Learn important insurance terms and definitions for ACA, Short Term Medical, Dental & Vision, Hospital Indemnity, IUL, and Final Expense insurance plans.",
+      "keywords": "insurance glossary, insurance terms, health insurance definitions, ACA terms, dental vision terms, life insurance glossary",
+      "image": "https://www.isaacplans.com/images/glossary.png",
+      "imageAlt": "Insurance Glossary"
+    },
+    "hero": {
+      "title": "Insurance Glossary",
+      "description": "Understanding insurance terminology is key to making informed decisions. Browse our comprehensive glossary of insurance terms organized by category."
+    },
+    "glossarySection": {
+      "titlePrefix": "Terms About",
+      "showMore": "Show More Terms",
+      "showLess": "Show Less"
+    },
+    "cta": {
+      "title": "Ready to Get Started with {category}?"
+    },
+    "categories": {
+      "iul": {
+        "title": "IUL - Indexed Universal Life",
+        "description": "Flexible permanent life insurance with cash value growth potential tied to market indexes, offering both protection and wealth accumulation.",
+        "terms": [
+          {
+            "term": "Indexed Universal Life (IUL)",
+            "definition": "A type of permanent life insurance that combines a death benefit with a cash value component. The cash value grows based on the performance of stock market indexes while providing downside protection."
+          },
+          {
+            "term": "Cash Value",
+            "definition": "The savings component of a permanent life insurance policy that accumulates over time. In IUL policies, cash value grows based on index performance with caps and floors."
+          },
+          {
+            "term": "Cap Rate",
+            "definition": "The maximum interest rate your IUL cash value can earn in a given period, even if the linked index performs better. This limits upside potential but provides predictability."
+          },
+          {
+            "term": "Floor Rate",
+            "definition": "The minimum interest rate your IUL cash value will earn, typically 0% or 1%. This protects your cash value from market losses, ensuring it won't decrease due to market downturns."
+          },
+          {
+            "term": "Death Benefit",
+            "definition": "The amount paid to beneficiaries upon the insured's death. In IUL policies, the death benefit can be adjusted, and policy loans may reduce the benefit amount."
+          },
+          {
+            "term": "Policy Loan",
+            "definition": "A loan taken against the cash value of an IUL policy. These loans typically don't require credit checks and accrue interest, but unpaid loans reduce the death benefit."
+          },
+          {
+            "term": "Premium Flexibility",
+            "definition": "The ability to adjust premium payments in an IUL policy. You can increase, decrease, or skip premiums as long as there's enough cash value to cover policy charges."
+          },
+          {
+            "term": "Index Performance",
+            "definition": "How well a stock market index (like the S&P 500) performs over a specific period. IUL cash value growth is linked to index performance, subject to cap and floor rates."
+          },
+          {
+            "term": "No-Lapse Guarantee",
+            "definition": "A rider that keeps an IUL policy in force even if cash value is depleted, as long as minimum premiums are paid. This provides protection against policy lapse."
+          },
+          {
+            "term": "Tax-Deferred Growth",
+            "definition": "The cash value in an IUL policy grows without being taxed until withdrawal. This allows for compound growth over time without annual tax implications."
+          },
+          {
+            "term": "Surrender Charge",
+            "definition": "A fee charged if you cancel an IUL policy early. These charges typically decrease over time and are designed to encourage long-term policy ownership."
+          },
+          {
+            "term": "Mortality Charge",
+            "definition": "The cost of insurance deducted from the cash value in an IUL policy. This charge covers the death benefit and typically increases as you age."
+          }
+        ]
+      },
+      "aca": {
+        "title": "ACA – Affordable Care Act",
+        "description": "Get comprehensive health coverage through the ACA Marketplace with premium tax credits and essential health benefits.",
+        "terms": [
+          {
+            "term": "Affordable Care Act (ACA)",
+            "definition": "A federal law enacted in 2010 that provides access to affordable health insurance through the Health Insurance Marketplace. Also known as Obamacare."
+          },
+          {
+            "term": "Premium Tax Credit",
+            "definition": "A subsidy that helps lower monthly health insurance premiums for eligible individuals and families. Credits are based on income, family size, and the cost of coverage."
+          },
+          {
+            "term": "Essential Health Benefits",
+            "definition": "Ten categories of health services that all ACA plans must cover, including preventive care, emergency services, hospitalization, prescription drugs, and mental health services."
+          },
+          {
+            "term": "Metal Tiers",
+            "definition": "Categories that indicate how you and your insurance plan share costs: Bronze (60% coverage), Silver (70%), Gold (80%), and Platinum (90%). Higher tiers have higher premiums but lower out-of-pocket costs."
+          },
+          {
+            "term": "Open Enrollment Period",
+            "definition": "The annual period when you can enroll in or change your ACA health plan. Typically runs from November 1 to January 15 in most states."
+          },
+          {
+            "term": "Special Enrollment Period (SEP)",
+            "definition": "A time outside of Open Enrollment when you can enroll in health insurance due to a qualifying life event, such as marriage, birth, loss of coverage, or moving."
+          },
+          {
+            "term": "Pre-Existing Condition",
+            "definition": "A health condition you had before your coverage started. Under the ACA, insurance companies cannot deny coverage or charge more due to pre-existing conditions."
+          },
+          {
+            "term": "Health Insurance Marketplace",
+            "definition": "A service that helps individuals and families shop for and enroll in affordable health insurance. Also called the Exchange, it's available online, by phone, or in person."
+          },
+          {
+            "term": "Cost-Sharing Reduction",
+            "definition": "Additional savings that reduce out-of-pocket costs for deductibles, copayments, and coinsurance. Available to Silver plan enrollees who qualify based on income."
+          },
+          {
+            "term": "Individual Mandate",
+            "definition": "A requirement to have health insurance or pay a penalty. While the federal penalty was eliminated in 2019, some states have their own individual mandates."
+          },
+          {
+            "term": "Qualified Health Plan",
+            "definition": "An insurance plan that meets ACA requirements and is certified by the Health Insurance Marketplace. These plans provide essential health benefits and consumer protections."
+          },
+          {
+            "term": "Actuarial Value",
+            "definition": "The percentage of total average costs for covered benefits that a plan will cover. For example, a plan with 80% actuarial value covers 80% of costs, while you pay 20%."
+          }
+        ]
+      },
+      "dentalVision": {
+        "title": "Dental & Vision",
+        "description": "Affordable dental and vision insurance plans to help maintain your oral and eye health with coverage for exams, cleanings, and treatments.",
+        "terms": [
+          {
+            "term": "Annual Maximum",
+            "definition": "The maximum amount your dental insurance will pay for covered services within a benefit year. Once reached, you're responsible for 100% of additional costs until the next benefit year."
+          },
+          {
+            "term": "Waiting Period",
+            "definition": "A period of time you must wait before certain dental services are covered. Preventive care often has no waiting period, while major procedures may require 6-12 months."
+          },
+          {
+            "term": "DHMO",
+            "definition": "Dental Health Maintenance Organization - A type of dental plan that requires you to see dentists within a specific network. Typically has lower premiums and no deductibles but less flexibility."
+          },
+          {
+            "term": "DPPO",
+            "definition": "Dental Preferred Provider Organization - A type of dental plan that allows you to see any dentist but offers better benefits and lower costs when using in-network providers."
+          },
+          {
+            "term": "Orthodontic Coverage",
+            "definition": "Insurance coverage for braces and other orthodontic treatments. Often has a separate lifetime maximum and waiting period, typically 12-24 months."
+          },
+          {
+            "term": "Vision Allowance",
+            "definition": "A fixed dollar amount your vision insurance provides for frames, lenses, or contact lenses. This allowance is typically provided annually or every 12-24 months."
+          },
+          {
+            "term": "Copayment (Copay)",
+            "definition": "A fixed amount you pay for a covered service, such as $10 for an eye exam. Copays are typically required at the time of service."
+          },
+          {
+            "term": "Coinsurance",
+            "definition": "Your share of the cost of a covered service, calculated as a percentage. For example, if your plan has 20% coinsurance, you pay 20% of the allowed amount after meeting your deductible."
+          },
+          {
+            "term": "Preventive Care",
+            "definition": "Services designed to prevent health problems, such as dental cleanings, exams, X-rays, and annual eye exams. These are often covered at 100% with no deductible."
+          },
+          {
+            "term": "In-Network Provider",
+            "definition": "A dentist, optometrist, or other provider who has agreed to provide services at negotiated rates with your insurance company. Using in-network providers typically costs less."
+          },
+          {
+            "term": "Out-of-Network",
+            "definition": "A provider who hasn't agreed to negotiated rates with your insurance. Using out-of-network providers typically costs more, and some plans may not cover these services."
+          },
+          {
+            "term": "Lifetime Maximum",
+            "definition": "The total amount your insurance will pay for certain services over your lifetime. Common for orthodontic coverage, typically ranging from $1,000 to $2,000."
+          }
+        ]
+      },
+      "finalExpense": {
+        "title": "Final Expense (Burial)",
+        "description": "Affordable permanent life insurance designed to cover funeral costs, medical bills, and other final expenses, providing peace of mind for your loved ones.",
+        "terms": [
+          {
+            "term": "Final Expense Insurance",
+            "definition": "A type of whole life insurance designed to cover end-of-life expenses such as funeral costs, burial or cremation, medical bills, and outstanding debts. Also called burial or funeral insurance."
+          },
+          {
+            "term": "Guaranteed Acceptance",
+            "definition": "A type of final expense policy that accepts applicants regardless of health conditions. These policies typically have waiting periods and may have higher premiums."
+          },
+          {
+            "term": "Simplified Issue",
+            "definition": "A type of final expense policy that requires answering a few health questions but no medical exam. These policies typically have shorter or no waiting periods compared to guaranteed acceptance."
+          },
+          {
+            "term": "Graded Death Benefit",
+            "definition": "A death benefit structure where if the insured dies within the first 2-3 years, beneficiaries receive a limited benefit (typically return of premiums plus interest) rather than the full death benefit."
+          },
+          {
+            "term": "Whole Life Insurance",
+            "definition": "A type of permanent life insurance that provides coverage for your entire life as long as premiums are paid. Final expense insurance is typically a form of whole life insurance."
+          },
+          {
+            "term": "Fixed Premium",
+            "definition": "A premium amount that never increases, regardless of age or health changes. Most final expense policies have fixed premiums that remain constant throughout the policy term."
+          },
+          {
+            "term": "Death Benefit",
+            "definition": "The amount paid to beneficiaries upon the insured's death. Final expense policies typically have smaller death benefits ($5,000-$50,000) compared to traditional life insurance."
+          },
+          {
+            "term": "Beneficiary",
+            "definition": "The person or entity designated to receive the death benefit from a life insurance policy. You can name multiple beneficiaries and specify how the benefit should be divided."
+          },
+          {
+            "term": "Accelerated Death Benefit",
+            "definition": "A feature that allows you to access a portion of the death benefit if you're diagnosed with a terminal illness. Also called living benefits, this can help cover medical expenses while you're alive."
+          },
+          {
+            "term": "Cash Value",
+            "definition": "The savings component of a whole life insurance policy that accumulates over time. You can borrow against or surrender the policy for its cash value, though this reduces the death benefit."
+          },
+          {
+            "term": "Policy Lapse",
+            "definition": "When a life insurance policy is terminated due to non-payment of premiums. Some policies have grace periods and may use cash value to pay premiums if available."
+          },
+          {
+            "term": "Reduced Paid-Up Insurance",
+            "definition": "An option that provides a smaller death benefit without further premium payments if you stop paying premiums. This uses the cash value to purchase a paid-up policy."
+          }
+        ]
+      },
+      "hospitalIndemnity": {
+        "title": "Hospital Indemnity",
+        "description": "Supplemental insurance that pays cash benefits directly to you when you're hospitalized, helping cover expenses not covered by your primary health insurance.",
+        "terms": [
+          {
+            "term": "Hospital Indemnity Insurance",
+            "definition": "A type of supplemental insurance that pays fixed cash benefits (a set dollar amount per day) directly to you when you're hospitalized, regardless of other insurance coverage."
+          },
+          {
+            "term": "Daily Benefit",
+            "definition": "The fixed dollar amount paid per day of hospitalization in a hospital indemnity policy. Benefits are typically $100-$500 per day, paid directly to the policyholder."
+          },
+          {
+            "term": "Maximum Benefit Period",
+            "definition": "The maximum number of days per hospitalization or per year that hospital indemnity benefits will be paid. Some plans have unlimited benefit periods."
+          },
+          {
+            "term": "Supplemental Insurance",
+            "definition": "Insurance designed to work alongside your primary health insurance to help cover additional costs. Hospital indemnity is a form of supplemental insurance."
+          },
+          {
+            "term": "Cash Benefit",
+            "definition": "Money paid directly to you (not to the hospital or provider) that you can use for any purpose. Hospital indemnity benefits are paid as cash benefits."
+          },
+          {
+            "term": "Accident Coverage",
+            "definition": "Hospital indemnity benefits for hospitalizations due to accidents, which are typically covered immediately without waiting periods, regardless of pre-existing conditions."
+          },
+          {
+            "term": "Illness Coverage",
+            "definition": "Hospital indemnity benefits for hospitalizations due to illness, which may have waiting periods (typically 30-90 days) before coverage begins."
+          },
+          {
+            "term": "ICU Benefit",
+            "definition": "An additional benefit some hospital indemnity plans offer for stays in the Intensive Care Unit. This may pay a higher daily benefit or a lump sum."
+          },
+          {
+            "term": "Emergency Room Benefit",
+            "definition": "A benefit some hospital indemnity plans provide for emergency room visits, typically paying a fixed amount per visit regardless of whether you're admitted."
+          },
+          {
+            "term": "Outpatient Surgery Benefit",
+            "definition": "A benefit some hospital indemnity plans offer for outpatient surgical procedures, paying a fixed amount per procedure."
+          },
+          {
+            "term": "Coordination of Benefits",
+            "definition": "How multiple insurance policies work together. Hospital indemnity benefits are paid independently of your health insurance, so they don't coordinate or reduce based on other coverage."
+          },
+          {
+            "term": "Pre-Existing Condition Exclusion",
+            "definition": "A limitation that excludes coverage for conditions you had before the policy started. Some hospital indemnity plans exclude pre-existing conditions, while others may cover them after a waiting period."
+          }
+        ]
+      },
+      "shortTermMedical": {
+        "title": "Short Term Medical",
+        "description": "Temporary health insurance coverage for gaps between major medical plans, offering quick enrollment and flexible terms.",
+        "terms": [
+          {
+            "term": "Short Term Medical (STM)",
+            "definition": "Temporary health insurance that provides coverage for limited periods, typically 30 days to 12 months, with some plans allowing renewals up to 36 months. Designed to fill coverage gaps."
+          },
+          {
+            "term": "Coverage Gap",
+            "definition": "A period when you don't have health insurance coverage. Short-term medical is designed to fill these gaps, such as between jobs or while waiting for ACA enrollment."
+          },
+          {
+            "term": "Medical Underwriting",
+            "definition": "The process of evaluating your health history to determine eligibility and premium rates. Short-term medical plans use medical underwriting and can deny coverage based on health conditions."
+          },
+          {
+            "term": "Renewal",
+            "definition": "The ability to extend a short-term medical policy beyond its initial term. Renewals may be limited by state regulations and may be considered new policies, meaning conditions developed during the previous term could be excluded."
+          },
+          {
+            "term": "Pre-Existing Condition Exclusion",
+            "definition": "A limitation that excludes coverage for health conditions you had before the policy started. Most short-term medical plans exclude pre-existing conditions entirely."
+          },
+          {
+            "term": "Limited Benefits",
+            "definition": "Coverage restrictions that limit what services are covered or how much the plan will pay. Short-term medical plans typically have more limited benefits than ACA-compliant plans."
+          },
+          {
+            "term": "Annual Maximum",
+            "definition": "The maximum amount a short-term medical plan will pay for covered services within a benefit year. These maximums are typically lower than ACA plan limits."
+          },
+          {
+            "term": "Lifetime Maximum",
+            "definition": "The total amount a short-term medical plan will pay over your lifetime. These maximums are typically much lower than ACA plans, which don't have lifetime maximums for essential health benefits."
+          },
+          {
+            "term": "Exclusion",
+            "definition": "Services or conditions that are not covered by the insurance plan. Short-term medical plans typically exclude preventive care, maternity care, mental health services, and pre-existing conditions."
+          },
+          {
+            "term": "Quick Enrollment",
+            "definition": "The ability to enroll in short-term medical coverage quickly, often within 24-48 hours of application approval. This makes STM ideal for immediate coverage needs."
+          },
+          {
+            "term": "Non-ACA Compliant",
+            "definition": "Plans that don't meet Affordable Care Act requirements. Short-term medical plans are not ACA-compliant, meaning they don't have to cover essential health benefits or accept people with pre-existing conditions."
+          },
+          {
+            "term": "Transitional Coverage",
+            "definition": "Temporary insurance coverage during life transitions, such as job changes, graduation, or waiting for employer benefits. Short-term medical is designed for transitional coverage needs."
+          }
+        ]
+      }
+    }
+  }
+}
+

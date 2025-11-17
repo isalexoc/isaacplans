@@ -1,0 +1,350 @@
+{
+  "testimonialsPage": {
+    "meta": {
+      "title": "Testimonios de Clientes - Isaac Plans Insurance",
+      "description": "Lea testimonios reales de clientes satisfechos sobre sus experiencias con planes de seguro ACA, Médico a Corto Plazo, Dental y Visión, Indemnización Hospitalaria, IUL y Gastos Finales.",
+      "keywords": "testimonios de seguros, reseñas de clientes, reseñas de seguro de salud, testimonios ACA, reseñas dental visión, testimonios de seguro de vida",
+      "image": "https://www.isaacplans.com/images/testimonials.png",
+      "imageAlt": "Testimonios de Clientes"
+    },
+    "hero": {
+      "title": "Testimonios de Clientes",
+      "description": "Escuche a clientes reales que han encontrado la cobertura de seguro perfecta para sus necesidades. Sus historias nos inspiran a continuar brindando un servicio excepcional."
+    },
+    "testimonialSection": {
+      "titlePrefix": "Testimonios Sobre",
+      "showMore": "Mostrar Más Testimonios",
+      "showLess": "Mostrar Menos"
+    },
+    "cta": {
+      "title": "¿Listo para Comenzar con {category}?"
+    },
+    "categories": {
+      "iul": {
+        "title": "IUL - Seguro de Vida Universal Indexado",
+        "description": "Seguro de vida permanente flexible con potencial de crecimiento de valor en efectivo vinculado a índices del mercado, ofreciendo tanto protección como acumulación de riqueza.",
+        "testimonials": [
+          {
+            "name": "Michael Rodriguez",
+            "text": "Isaac me ayudó a configurar una póliza IUL que es perfecta para mi planificación de jubilación. El crecimiento del valor en efectivo ha sido impresionante, y me encanta la flexibilidad. ¡Altamente recomendado!"
+          },
+          {
+            "name": "Sarah Johnson",
+            "text": "Después de investigar opciones de seguro de vida, elegí IUL a través de Isaac Plans. Las ventajas fiscales y la protección del mercado lo convierten en una excelente inversión para el futuro de mi familia."
+          },
+          {
+            "name": "Carlos Martinez",
+            "text": "Isaac explicó IUL de una manera que tenía mucho sentido. La póliza ya ha mostrado un buen crecimiento, y me siento confiado sobre mi futuro financiero. ¡Gran servicio!"
+          },
+          {
+            "name": "Jennifer Williams",
+            "text": "Al principio era escéptica sobre IUL, pero Isaac se tomó el tiempo para responder todas mis preguntas. Ahora tengo una póliza que proporciona tanto seguro de vida como ahorros para la jubilación. ¡Excelente!"
+          },
+          {
+            "name": "David Garcia",
+            "text": "La póliza IUL que Isaac configuró para mí ha superado mis expectativas. El valor en efectivo está creciendo muy bien, y aprecio la protección a la baja. ¡Muy satisfecho!"
+          },
+          {
+            "name": "Amanda Thompson",
+            "text": "Isaac hizo que el proceso IUL fuera tan fácil. Explicó todo claramente y me ayudó a elegir la póliza correcta para mi situación. Estoy muy contenta con mi decisión."
+          },
+          {
+            "name": "Roberto Sanchez",
+            "text": "Como propietario de un negocio, necesitaba un seguro de vida flexible. Isaac recomendó IUL, y ha sido perfecto para mis necesidades. ¡Los beneficios fiscales son una gran ventaja!"
+          },
+          {
+            "name": "Emily Davis",
+            "text": "IUL ha sido un cambio de juego para mi planificación de jubilación. La experiencia de Isaac me ayudó a entender todos los beneficios, y estoy agradecida por su orientación."
+          },
+          {
+            "name": "Jose Hernandez",
+            "text": "Isaac me ayudó a configurar una póliza IUL que protege a mi familia mientras construye valor en efectivo. El proceso fue fluido, y estoy muy satisfecho con los resultados."
+          },
+          {
+            "name": "Michelle Anderson",
+            "text": "Me encanta cómo mi póliza IUL combina seguro de vida con potencial de inversión. Isaac fue paciente y exhaustivo al explicar todo. ¡Altamente recomiendo sus servicios!"
+          },
+          {
+            "name": "Fernando Lopez",
+            "text": "El conocimiento de Isaac sobre productos IUL es impresionante. Me ayudó a encontrar una póliza que se ajusta perfectamente a mi presupuesto y objetivos. ¡Gran experiencia en general!"
+          },
+          {
+            "name": "Lisa Brown",
+            "text": "La póliza IUL que Isaac recomendó ha sido excelente para mi planificación financiera. El potencial de crecimiento con protección a la baja me da tranquilidad."
+          }
+        ]
+      },
+      "aca": {
+        "title": "ACA – Ley de Cuidado de Salud Asequible",
+        "description": "Obtenga cobertura de salud integral a través del Mercado de Seguros ACA con créditos fiscales de prima y beneficios de salud esenciales.",
+        "testimonials": [
+          {
+            "name": "Maria Gonzalez",
+            "text": "Isaac me ayudó a encontrar un plan ACA que realmente puedo pagar. Los créditos fiscales de prima marcaron una gran diferencia, ¡y finalmente tengo una buena cobertura de salud!"
+          },
+          {
+            "name": "James Wilson",
+            "text": "Estaba confundido sobre la inscripción de ACA, pero Isaac me guió a través de todo. Ahora tengo una cobertura integral con grandes beneficios. ¡Gracias!"
+          },
+          {
+            "name": "Patricia Ramirez",
+            "text": "Isaac me encontró un plan ACA que cubre todas mis condiciones preexistentes. La tranquilidad no tiene precio, y la prima es muy razonable."
+          },
+          {
+            "name": "Robert Taylor",
+            "text": "La experiencia de Isaac con planes ACA es inigualable. Me ayudó a entender los niveles de metal y encontró el plan perfecto para mi familia. ¡Excelente servicio!"
+          },
+          {
+            "name": "Carmen Flores",
+            "text": "Estaba preocupada por obtener un seguro de salud, pero Isaac lo hizo tan fácil. Mi plan ACA cubre todo lo que necesito, y el costo es mucho menor de lo que esperaba."
+          },
+          {
+            "name": "Daniel Moore",
+            "text": "Isaac me ayudó a navegar el Mercado de ACA durante la inscripción abierta. El plan que recomendó ha sido perfecto, y estoy ahorrando dinero con créditos fiscales."
+          },
+          {
+            "name": "Ana Martinez",
+            "text": "Después de años sin seguro, Isaac me ayudó a obtener un plan ACA. La cobertura es integral, y finalmente puedo ver médicos sin preocuparme por los costos."
+          },
+          {
+            "name": "Christopher Lee",
+            "text": "Isaac explicó todas mis opciones de ACA claramente y me ayudó a elegir el nivel de metal correcto. El plan ha sido excelente, y estoy muy satisfecho con la cobertura."
+          },
+          {
+            "name": "Sofia Torres",
+            "text": "Isaac hizo que la inscripción de ACA fuera sin estrés. Me encontró un plan que cubre mis medicamentos y médicos preferidos. ¡No podría estar más feliz!"
+          },
+          {
+            "name": "Matthew Harris",
+            "text": "El plan ACA que Isaac recomendó ha sido excelente. Tengo acceso a grandes médicos, y los beneficios de atención preventiva son fantásticos. ¡Altamente recomendado!"
+          },
+          {
+            "name": "Isabella Rivera",
+            "text": "Isaac me ayudó a entender mis opciones de ACA y encontrar un plan que se ajusta a mi presupuesto. Los créditos fiscales lo hacen muy asequible, y la cobertura es integral."
+          },
+          {
+            "name": "Kevin Clark",
+            "text": "El conocimiento de Isaac sobre planes ACA me ayudó a obtener la mejor cobertura por mi dinero. El plan ha superado mis expectativas, y estoy muy agradecido por su ayuda."
+          }
+        ]
+      },
+      "dentalVision": {
+        "title": "Dental y Visión",
+        "description": "Planes de seguro dental y de visión asequibles para ayudar a mantener su salud oral y ocular con cobertura para exámenes, limpiezas y tratamientos.",
+        "testimonials": [
+          {
+            "name": "Laura Rodriguez",
+            "text": "Isaac me encontró un gran plan dental y de visión que cubre las necesidades de mi familia. Las limpiezas y exámenes de la vista están completamente cubiertos, ¡y estoy ahorrando mucho dinero!"
+          },
+          {
+            "name": "Mark Thompson",
+            "text": "Necesitaba trabajo dental, e Isaac me ayudó a encontrar un plan que lo hizo asequible. La cobertura comenzó rápidamente, y estoy muy satisfecho con el servicio."
+          },
+          {
+            "name": "Elena Vargas",
+            "text": "Isaac recomendó un plan dental y de visión que es perfecto para mi familia. La ortodoncia de mis hijos está cubierta, y todos obtenemos exámenes oculares anuales. ¡Excelente!"
+          },
+          {
+            "name": "Steven White",
+            "text": "El plan dental que Isaac configuró para mí ha sido fantástico. He tenido limpiezas, empastes e incluso una corona, todo cubierto. ¡Gran valor por el dinero!"
+          },
+          {
+            "name": "Rosa Mendoza",
+            "text": "Isaac me ayudó a encontrar un plan de visión que cubre mis gafas y lentes de contacto. El examen anual es gratuito, y obtuve un gran descuento en mis nuevas monturas. ¡Me encanta!"
+          },
+          {
+            "name": "Brian Jackson",
+            "text": "Estaba pagando de mi bolsillo por trabajo dental hasta que Isaac me encontró un plan. Ahora mis limpiezas, empastes e incluso endodoncias están cubiertos. ¡Muy feliz!"
+          },
+          {
+            "name": "Gabriela Cruz",
+            "text": "La recomendación del plan dental y de visión de Isaac fue acertada. Mi familia obtiene chequeos regulares cubiertos, ¡y la cobertura de ortodoncia para mi hija es un salvavidas!"
+          },
+          {
+            "name": "Jason Lewis",
+            "text": "El plan de visión que Isaac recomendó cubre mi examen anual y me da una asignación para gafas. El proceso fue fácil, y estoy muy satisfecho con la cobertura."
+          },
+          {
+            "name": "Monica Perez",
+            "text": "Isaac me encontró un plan dental que cubre la atención preventiva inmediatamente. Ya lo he usado para limpiezas y radiografías, y ha sido excelente. ¡Altamente recomendado!"
+          },
+          {
+            "name": "Ryan Walker",
+            "text": "Necesitaba cobertura dental y de visión, e Isaac me encontró un plan combinado que es asequible e integral. ¡Los beneficios son excelentes!"
+          },
+          {
+            "name": "Valeria Jimenez",
+            "text": "Isaac me ayudó a entender los períodos de espera del plan dental y me encontró uno que funciona para mis necesidades. La cobertura ha sido excelente, y estoy ahorrando dinero."
+          },
+          {
+            "name": "Andrew Hall",
+            "text": "El plan dental y de visión que Isaac recomendó ha sido perfecto. Obtengo limpiezas regulares, los frenos de mis hijos están cubiertos, y todos tenemos beneficios de visión. ¡Excelente!"
+          }
+        ]
+      },
+      "finalExpense": {
+        "title": "Gastos Finales (Entierro)",
+        "description": "Seguro de vida permanente asequible diseñado para cubrir costos de funeral, facturas médicas y otros gastos finales, proporcionando tranquilidad para sus seres queridos.",
+        "testimonials": [
+          {
+            "name": "Rafael Ortiz",
+            "text": "Isaac me ayudó a obtener un seguro de gastos finales que puedo pagar con mi ingreso fijo. Me siento mucho mejor sabiendo que mi familia no estará agobiada con los costos del funeral."
+          },
+          {
+            "name": "Dorothy Miller",
+            "text": "A mi edad, estaba preocupada por calificar para un seguro de vida. Isaac me encontró una póliza de gastos finales sin examen médico. ¡Estoy tan agradecida por su ayuda!"
+          },
+          {
+            "name": "Manuel Silva",
+            "text": "Isaac explicó el seguro de gastos finales de una manera que tenía sentido. Las primas son fijas y asequibles, y tengo tranquilidad sabiendo que mi familia está protegida."
+          },
+          {
+            "name": "Betty Young",
+            "text": "Quería asegurarme de que mis gastos finales estuvieran cubiertos sin agobiar a mis hijos. Isaac me encontró la póliza de gastos finales perfecta. ¡Gracias!"
+          },
+          {
+            "name": "Jorge Morales",
+            "text": "Isaac me ayudó a obtener un seguro de gastos finales que cubre mi funeral y cualquier factura pendiente. El proceso fue simple, y estoy muy satisfecho con la póliza."
+          },
+          {
+            "name": "Helen King",
+            "text": "Isaac hizo que obtener un seguro de gastos finales fuera tan fácil. No se requiere examen médico, y las primas son muy razonables. Me siento mucho mejor sobre el futuro."
+          },
+          {
+            "name": "Alberto Ruiz",
+            "text": "Estaba buscando un seguro de vida asequible para gastos finales. Isaac me encontró una póliza que se ajusta perfectamente a mi presupuesto. ¡Gran servicio y tranquilidad!"
+          },
+          {
+            "name": "Ruth Wright",
+            "text": "Isaac me ayudó a entender el seguro de gastos finales y me encontró una póliza con aceptación garantizada. Las primas nunca aumentarán, lo cual es perfecto."
+          },
+          {
+            "name": "Francisco Chavez",
+            "text": "La recomendación de seguro de gastos finales de Isaac fue exactamente lo que necesitaba. La póliza es asequible, y sé que mi familia será cuidada. ¡Excelente!"
+          },
+          {
+            "name": "Shirley Green",
+            "text": "Quería dejar algo para mi familia sin primas altas. Isaac me encontró una póliza de gastos finales que es perfecta. Estoy muy contenta con mi decisión."
+          },
+          {
+            "name": "Ricardo Delgado",
+            "text": "Isaac me ayudó a obtener un seguro de gastos finales que cubre los costos del funeral y las facturas médicas. El proceso fue directo, y estoy muy satisfecho."
+          },
+          {
+            "name": "Nancy Adams",
+            "text": "Isaac hizo que el seguro de gastos finales fuera simple y asequible. La póliza me da tranquilidad, y sé que mis seres queridos no tendrán que preocuparse por los gastos."
+          }
+        ]
+      },
+      "hospitalIndemnity": {
+        "title": "Indemnización Hospitalaria",
+        "description": "Seguro complementario que paga beneficios en efectivo directamente a usted cuando está hospitalizado, ayudando a cubrir gastos no cubiertos por su seguro de salud principal.",
+        "testimonials": [
+          {
+            "name": "Thomas Baker",
+            "text": "Isaac recomendó un seguro de indemnización hospitalaria, y fue un salvavidas cuando estuve hospitalizado. Los beneficios en efectivo ayudaron a cubrir mi deducible e ingresos perdidos."
+          },
+          {
+            "name": "Lupita Fernandez",
+            "text": "Tengo un plan de salud con deducible alto, así que Isaac sugirió indemnización hospitalaria. Cuando estuve en el hospital, los beneficios diarios realmente ayudaron con los gastos. ¡Gran consejo!"
+          },
+          {
+            "name": "Richard Hill",
+            "text": "Isaac explicó cómo funciona la indemnización hospitalaria, y estoy tan contento de haberla obtenido. Los beneficios en efectivo se me pagaron directamente y ayudaron a cubrir costos que mi seguro de salud no cubrió."
+          },
+          {
+            "name": "Adriana Castro",
+            "text": "Isaac me ayudó a entender el seguro de indemnización hospitalaria, y ha sido perfecto para mi situación. Los beneficios se me pagan directamente, lo que me da flexibilidad."
+          },
+          {
+            "name": "Paul Scott",
+            "text": "Cuando estuve hospitalizado, mi póliza de indemnización hospitalaria de Isaac realmente ayudó. Los beneficios diarios cubrieron mi deducible y otros gastos. ¡Muy satisfecho!"
+          },
+          {
+            "name": "Yolanda Rios",
+            "text": "Isaac recomendó indemnización hospitalaria como complemento a mi seguro de salud. Ha sido excelente saber que tengo protección adicional si necesito ser hospitalizada."
+          },
+          {
+            "name": "Edward Adams",
+            "text": "Isaac me ayudó a obtener un seguro de indemnización hospitalaria que paga beneficios diarios. Cuando estuve hospitalizado, el efectivo ayudó a cubrir gastos que mi seguro principal no cubrió."
+          },
+          {
+            "name": "Consuelo Vega",
+            "text": "Tengo Medicare, e Isaac sugirió indemnización hospitalaria para ayudar con los costos de bolsillo. La póliza ha sido excelente, y estoy muy agradecida por su recomendación."
+          },
+          {
+            "name": "George Mitchell",
+            "text": "La recomendación de indemnización hospitalaria de Isaac fue acertada. Los beneficios diarios se me pagan directamente, y ha sido un gran complemento a mi seguro de salud."
+          },
+          {
+            "name": "Esperanza Herrera",
+            "text": "Isaac explicó el seguro de indemnización hospitalaria claramente y me ayudó a elegir la cantidad correcta de beneficio diario. Me siento mucho más protegida ahora. ¡Gracias!"
+          },
+          {
+            "name": "Frank Nelson",
+            "text": "Isaac me ayudó a obtener un seguro de indemnización hospitalaria que complementa mi plan con deducible alto. Los beneficios en efectivo realmente ayudarían si estoy hospitalizado. ¡Gran cobertura!"
+          },
+          {
+            "name": "Dolores Castillo",
+            "text": "La recomendación de indemnización hospitalaria de Isaac me ha dado tranquilidad. Los beneficios diarios ayudarían a cubrir gastos si estoy hospitalizada. ¡Excelente servicio!"
+          }
+        ]
+      },
+      "shortTermMedical": {
+        "title": "Médico a Corto Plazo",
+        "description": "Cobertura de seguro de salud temporal para brechas entre planes médicos principales, ofreciendo inscripción rápida y términos flexibles.",
+        "testimonials": [
+          {
+            "name": "Anthony Cooper",
+            "text": "Estaba entre trabajos y necesitaba cobertura rápido. Isaac me ayudó a obtener un seguro médico a corto plazo que comenzó en días. ¡Solución perfecta para mi situación!"
+          },
+          {
+            "name": "Marisol Reyes",
+            "text": "Isaac me encontró cobertura médica a corto plazo mientras esperaba que comenzara el seguro de mi nuevo empleador. La inscripción fue rápida, y la cobertura fue buena."
+          },
+          {
+            "name": "Joshua Ward",
+            "text": "Acabo de graduarme y necesitaba un seguro de salud temporal. Isaac me ayudó a obtener un médico a corto plazo que era asequible y comenzó inmediatamente. ¡Gran servicio!"
+          },
+          {
+            "name": "Alejandra Moreno",
+            "text": "Isaac me ayudó a obtener un seguro médico a corto plazo durante una brecha en la cobertura. El proceso fue rápido, y tuve protección de inmediato. ¡Muy satisfecha!"
+          },
+          {
+            "name": "Brandon Foster",
+            "text": "Perdí la inscripción abierta y necesitaba cobertura. Isaac recomendó médico a corto plazo, y fue perfecto para mis necesidades. La inscripción fue rápida y fácil."
+          },
+          {
+            "name": "Catalina Espinoza",
+            "text": "Isaac me ayudó a entender las opciones médicas a corto plazo y me encontró un plan que funcionó. La cobertura comenzó rápidamente, y era exactamente lo que necesitaba."
+          },
+          {
+            "name": "Justin Brooks",
+            "text": "Estaba esperando la inscripción de ACA, e Isaac me encontró cobertura médica a corto plazo. Era asequible y me dio tranquilidad durante la brecha. ¡Excelente!"
+          },
+          {
+            "name": "Rocio Navarro",
+            "text": "Isaac recomendó médico a corto plazo para mi período de transición. La cobertura comenzó rápidamente, y fue perfecto para mis necesidades temporales. ¡Gracias!"
+          },
+          {
+            "name": "Tyler Price",
+            "text": "Necesitaba cobertura temporal mientras cambiaba de trabajo. Isaac me ayudó a obtener un médico a corto plazo que comenzó de inmediato. El proceso fue fluido y fácil."
+          },
+          {
+            "name": "Guadalupe Solis",
+            "text": "Isaac me encontró un seguro médico a corto plazo que era perfecto para mi situación. La inscripción fue rápida, y tuve cobertura cuando la necesitaba. ¡Gran ayuda!"
+          },
+          {
+            "name": "Zachary Bell",
+            "text": "Estaba en una brecha de cobertura y necesitaba seguro rápido. Isaac me ayudó a obtener un médico a corto plazo que comenzó en 48 horas. ¡Solución perfecta!"
+          },
+          {
+            "name": "Yesenia Pacheco",
+            "text": "Isaac me ayudó a obtener cobertura médica a corto plazo durante un período de transición. El proceso fue rápido, y la cobertura era exactamente lo que necesitaba. ¡Muy feliz!"
+          }
+        ]
+      }
+    }
+  }
+}
+

@@ -1,0 +1,350 @@
+{
+  "faqPage": {
+    "meta": {
+    "title": "Preguntas Frecuentes - Isaac Plans Insurance",
+    "description": "Encuentre respuestas a preguntas comunes sobre seguros de salud ACA, Seguro Médico a Corto Plazo, Dental y Visión, Indemnización Hospitalaria, IUL y Seguro de Gastos Finales.",
+    "keywords": "Preguntas frecuentes, preguntas sobre seguro de salud, preguntas ACA, ayuda con seguros, preguntas dental visión, preguntas frecuentes seguro de vida",
+    "image": "https://www.isaacplans.com/images/faq.png",
+    "imageAlt": "Preguntas Frecuentes sobre Seguros"
+  },
+  "hero": {
+    "title": "Preguntas Frecuentes",
+    "description": "Encuentre respuestas a las preguntas más comunes sobre nuestros productos y servicios de seguros. Estamos aquí para ayudarle a tomar decisiones informadas sobre su cobertura."
+  },
+  "faqSection": {
+    "titlePrefix": "Preguntas Sobre",
+    "showMore": "Mostrar Más Preguntas",
+    "showLess": "Mostrar Menos"
+  },
+  "cta": {
+    "title": "¿Listo para Comenzar con {category}?"
+  },
+  "categories": {
+    "aca": {
+      "title": "ACA – Ley de Cuidado de Salud Asequible",
+      "description": "Obtenga cobertura de salud integral a través del Mercado de Seguros ACA con créditos fiscales de prima y beneficios de salud esenciales.",
+      "questions": [
+        {
+          "question": "¿Qué es la Ley de Cuidado de Salud Asequible (ACA)?",
+          "answer": "La Ley de Cuidado de Salud Asequible, también conocida como Obamacare, es una ley federal que proporciona acceso a seguro de salud asequible a través del Mercado de Seguros de Salud. Ofrece subsidios, créditos fiscales y garantiza cobertura para beneficios de salud esenciales, incluida atención preventiva, servicios de emergencia y medicamentos recetados."
+        },
+        {
+          "question": "¿Cuándo es el período de Inscripción Abierta de ACA?",
+          "answer": "El período anual de Inscripción Abierta generalmente va del 1 de noviembre al 15 de enero. Durante este tiempo, puede inscribirse en un plan nuevo, cambiar de plan o renovar su cobertura existente. Fuera de la Inscripción Abierta, puede calificar para un Período Especial de Inscripción si experimenta un evento calificado de vida como matrimonio, nacimiento de un hijo, pérdida de otra cobertura o mudanza a una nueva área."
+        },
+        {
+          "question": "¿Qué son los créditos fiscales de prima y cómo califico?",
+          "answer": "Los créditos fiscales de prima son subsidios que ayudan a reducir sus primas mensuales de seguro de salud. Puede calificar si el ingreso de su hogar está entre el 100% y el 400% del Nivel de Pobreza Federal. Los créditos se basan en su ingreso, tamaño de familia y el costo de la cobertura en su área. Puede aplicar el crédito directamente a su prima mensual o reclamarlo cuando presente sus impuestos."
+        },
+        {
+          "question": "¿Qué son los niveles de metal (Bronce, Plata, Oro, Platino)?",
+          "answer": "Los niveles de metal indican cómo usted y su plan de seguro comparten los costos. Los planes Bronce tienen las primas más bajas pero los costos de bolsillo más altos (60% de cobertura del plan). Los planes Plata cubren aproximadamente el 70% de los costos. Los planes Oro cubren aproximadamente el 80% con primas más altas. Los planes Platino tienen las primas más altas pero cubren aproximadamente el 90% de los costos. El nivel que elija depende de la frecuencia con la que espera usar servicios médicos."
+        },
+        {
+          "question": "¿Qué son los beneficios de salud esenciales?",
+          "answer": "Todos los planes ACA deben cubrir 10 beneficios de salud esenciales: servicios de pacientes ambulatorios, servicios de emergencia, hospitalización, atención materna y neonatal, servicios de salud mental y trastornos por uso de sustancias, medicamentos recetados, servicios de rehabilitación, servicios de laboratorio, servicios preventivos y de bienestar, y servicios pediátricos incluida atención oral y visual."
+        },
+        {
+          "question": "¿Pueden negarme la cobertura debido a condiciones preexistentes?",
+          "answer": "No. Bajo la ACA, las compañías de seguros no pueden negarle la cobertura ni cobrarle más debido a una condición preexistente. Esta protección se aplica a todas las condiciones de salud que tenía antes de que comenzara su cobertura, incluidas diabetes, cáncer, asma y embarazo."
+        },
+        {
+          "question": "¿Qué es un Período Especial de Inscripción?",
+          "answer": "Un Período Especial de Inscripción (SEP) le permite inscribirse o cambiar su plan de salud fuera de la Inscripción Abierta si experimenta un evento calificado de vida. Estos eventos incluyen pérdida de cobertura de salud, casarse o divorciarse, tener un bebé, adoptar un niño, mudarse a una nueva área o convertirse en ciudadano estadounidense. Típicamente tiene 60 días desde el evento para inscribirse."
+        },
+        {
+          "question": "¿Cómo estimo mi crédito fiscal de prima?",
+          "answer": "Puede estimar su crédito fiscal de prima usando la calculadora en línea del Mercado o trabajando con un agente con licencia. El crédito se basa en su ingreso familiar estimado para el año, tamaño de familia y el costo del segundo plan Plata de menor costo en su área. El Mercado verificará su ingreso y ajustará su crédito en consecuencia."
+        },
+        {
+          "question": "¿Cuál es la diferencia entre una Cuenta de Ahorros para la Salud (HSA) y un Acuerdo de Reembolso de Salud (HRA)?",
+          "answer": "Una HSA es una cuenta de ahorros con ventajas fiscales que puede usar para pagar gastos médicos calificados. Solo puede contribuir a una HSA si tiene un Plan de Salud con Deducible Alto (HDHP). Una HRA es una cuenta financiada por el empleador que reembolsa a los empleados por gastos médicos calificados. A diferencia de las HSA, las HRA son propiedad y están financiadas por empleadores, no empleados."
+        },
+        {
+          "question": "¿Puedo mantener mi médico actual con un plan ACA?",
+          "answer": "Esto depende de si su médico está en la red del plan. Antes de inscribirse, verifique el directorio de proveedores del plan para ver si sus médicos, hospitales y especialistas actuales están incluidos. Si mantener relaciones con proveedores específicos es importante, busque planes que los incluyan en su red."
+        },
+        {
+          "question": "¿Qué pasa si no tengo seguro de salud?",
+          "answer": "Aunque la penalización federal por no tener seguro de salud se eliminó en 2019, algunos estados tienen sus propios mandatos individuales con penalizaciones. Más importante aún, no tener seguro lo deja financieramente vulnerable a altos costos médicos. Incluso una simple visita a la sala de emergencias puede costar miles de dólares sin cobertura."
+        },
+        {
+          "question": "¿Cómo elijo el plan ACA correcto para mi familia?",
+          "answer": "Considere las necesidades de salud de su familia, presupuesto, médicos y hospitales preferidos, y gastos médicos esperados. Compare las redes de planes, deducibles, copagos, coseguro y máximos de bolsillo. Un agente con licencia puede ayudarle a evaluar sus opciones y encontrar un plan que equilibre la cobertura y el costo para su situación específica."
+        }
+      ]
+    },
+    "shortTermMedical": {
+      "title": "Seguro Médico a Corto Plazo",
+      "description": "Cobertura de seguro de salud temporal para brechas entre planes médicos principales, ofreciendo inscripción rápida y términos flexibles.",
+      "questions": [
+        {
+          "question": "¿Qué es el seguro médico a corto plazo?",
+          "answer": "El seguro médico a corto plazo (STM) proporciona cobertura de salud temporal por períodos que generalmente van de 30 días a 12 meses, con algunos planes que permiten renovaciones de hasta 36 meses. Está diseñado para llenar brechas de cobertura cuando está entre trabajos, esperando la inscripción de ACA, o en otras situaciones transitorias."
+        },
+        {
+          "question": "¿Para quién es mejor el seguro médico a corto plazo?",
+          "answer": "STM es ideal para personas saludables que necesitan cobertura temporal durante transiciones de vida como cambios de trabajo, recién graduados universitarios esperando cobertura del empleador, jubilados anticipados antes de la elegibilidad de Medicare, o aquellos esperando la Inscripción Abierta de ACA. No es adecuado para aquellos con condiciones preexistentes o que necesitan atención preventiva integral."
+        },
+        {
+          "question": "¿Qué tan rápido puedo obtener cobertura con seguro médico a corto plazo?",
+          "answer": "Los planes de seguro médico a corto plazo típicamente ofrecen inscripción muy rápida, a menudo proporcionando cobertura que comienza dentro de 24-48 horas de la aprobación de la solicitud. Esto lo convierte en una excelente opción cuando necesita cobertura inmediata y no puede esperar el próximo período de Inscripción Abierta."
+        },
+        {
+          "question": "¿Qué cubre el seguro médico a corto plazo?",
+          "answer": "Los planes STM generalmente cubren enfermedades y lesiones inesperadas, visitas a la sala de emergencias, estadías en el hospital, cirugía y algunas pruebas de diagnóstico. La cobertura varía según el plan, pero la mayoría no cubre atención preventiva, condiciones preexistentes, atención materna, servicios de salud mental o medicamentos recetados. Siempre revise los detalles específicos del plan antes de inscribirse."
+        },
+        {
+          "question": "¿Pueden negarme la cobertura de seguro médico a corto plazo?",
+          "answer": "Sí, a diferencia de los planes ACA, las aseguradoras de seguro médico a corto plazo pueden negar la cobertura basándose en su historial de salud, condiciones preexistentes o suscripción médica. También pueden excluir la cobertura para condiciones específicas o cobrar primas más altas basándose en su estado de salud."
+        },
+        {
+          "question": "¿Por cuánto tiempo puedo mantener el seguro médico a corto plazo?",
+          "answer": "Los planes de seguro médico a corto plazo típicamente duran de 30 días a 12 meses, dependiendo de las regulaciones estatales y el plan específico. Algunos estados permiten renovaciones o extensiones de hasta 36 meses en total. Sin embargo, los términos de cobertura varían por estado, así que verifique sus regulaciones locales."
+        },
+        {
+          "question": "¿Es el seguro médico a corto plazo más barato que los planes ACA?",
+          "answer": "El seguro médico a corto plazo a menudo tiene primas mensuales más bajas que los planes ACA porque ofrece menos cobertura integral y puede excluir condiciones preexistentes. Sin embargo, puede tener deducibles y costos de bolsillo más altos. El costo total depende de sus necesidades de salud y cuánto usa los servicios médicos."
+        },
+        {
+          "question": "¿Puedo usar seguro médico a corto plazo si tengo una condición preexistente?",
+          "answer": "La mayoría de los planes de seguro médico a corto plazo excluyen condiciones preexistentes, lo que significa que no cubrirán el tratamiento para condiciones que tenía antes de que comenzara la póliza. Algunos planes pueden ofrecer cobertura limitada después de un período de espera, pero esto varía según el plan y el estado. Si tiene necesidades de salud continuas, un plan ACA puede ser más apropiado."
+        },
+        {
+          "question": "¿Qué pasa cuando mi plan de seguro médico a corto plazo expira?",
+          "answer": "Cuando su plan STM expira, necesitará renovarlo (si está permitido en su estado), inscribirse en un plan ACA durante la Inscripción Abierta o un Período Especial de Inscripción, obtener cobertura del empleador, o quedarse sin seguro. Planifique con anticipación para evitar brechas de cobertura."
+        },
+        {
+          "question": "¿Cubre el seguro médico a corto plazo la atención preventiva?",
+          "answer": "La mayoría de los planes de seguro médico a corto plazo no cubren la atención preventiva como exámenes físicos anuales, vacunas, mamografías o colonoscopias. Estos servicios típicamente están cubiertos por los planes ACA pero generalmente están excluidos de las pólizas STM. Pagará de su bolsillo por servicios preventivos con STM."
+        },
+        {
+          "question": "¿Puedo obtener seguro médico a corto plazo si soy elegible para cobertura ACA?",
+          "answer": "Sí, puede comprar seguro médico a corto plazo incluso si es elegible para cobertura ACA. Sin embargo, STM no satisface el mandato individual en los estados que lo tienen, y no recibirá créditos fiscales de prima. Considere sus opciones cuidadosamente y consulte con un agente con licencia para determinar qué es mejor para su situación."
+        },
+        {
+          "question": "¿Qué debo considerar antes de elegir seguro médico a corto plazo?",
+          "answer": "Antes de elegir STM, considere su estado de salud, cuánto tiempo necesita cobertura, si tiene condiciones preexistentes, su presupuesto y qué servicios probablemente necesitará. Revise cuidadosamente las exclusiones del plan, deducibles, copagos y límites de cobertura. Si necesita cobertura integral o tiene necesidades de salud continuas, un plan ACA puede ser más adecuado."
+        }
+      ]
+    },
+    "dentalVision": {
+      "title": "Dental y Visión",
+      "description": "Planes de seguro dental y de visión asequibles para ayudar a mantener su salud oral y ocular con cobertura para exámenes, limpiezas y tratamientos.",
+      "questions": [
+        {
+          "question": "¿Por qué necesito seguro dental y de visión por separado?",
+          "answer": "Aunque algunos planes de salud incluyen beneficios dentales y de visión limitados para niños, la mayoría de los planes de seguro de salud para adultos no cubren limpiezas dentales de rutina, exámenes de la vista o lentes correctivos. El seguro dental y de visión por separado le ayuda a mantener la salud oral y ocular de manera asequible, cubriendo atención preventiva, tratamientos y a veces ortodoncia o cirugía LASIK."
+        },
+        {
+          "question": "¿Qué cubre típicamente el seguro dental?",
+          "answer": "El seguro dental generalmente cubre atención preventiva (limpiezas, exámenes, rayos X) al 100%, procedimientos básicos (empastes, extracciones) al 70-80%, y procedimientos mayores (coronas, endodoncias, puentes) al 50%. La mayoría de los planes tienen un beneficio máximo anual (típicamente $1,000-$2,000) y pueden incluir cobertura de ortodoncia para niños. La cobertura varía según el tipo de plan."
+        },
+        {
+          "question": "¿Qué cubre el seguro de visión?",
+          "answer": "El seguro de visión típicamente cubre exámenes anuales de la vista, anteojos recetados o lentes de contacto (generalmente con un copago o asignación), y a veces descuentos en cirugía LASIK. La cobertura puede incluir marcos, lentes y ajustes de lentes de contacto. Los beneficios generalmente se proporcionan anualmente, y los límites de cobertura varían según el plan."
+        },
+        {
+          "question": "¿Puedo obtener cobertura dental y de visión juntas?",
+          "answer": "Sí, muchas aseguradoras ofrecen planes combinados de dental y visión que proporcionan ambos tipos de cobertura en una sola póliza. Estos planes agrupados pueden ser más convenientes y a veces más rentables que comprar pólizas por separado. También puede comprar planes dentales o de visión independientes si solo necesita un tipo de cobertura."
+        },
+        {
+          "question": "¿Hay períodos de espera para la cobertura dental?",
+          "answer": "Muchos planes dentales tienen períodos de espera para procedimientos mayores (típicamente 6-12 meses) y ortodoncia (a menudo 12-24 meses). La atención preventiva generalmente está cubierta inmediatamente o después de un período de espera corto (30-90 días). Los períodos de espera ayudan a prevenir que las personas se inscriban solo cuando necesitan tratamientos costosos."
+        },
+        {
+          "question": "¿Cuál es la diferencia entre planes dentales DHMO y DPPO?",
+          "answer": "Un DHMO (Organización de Mantenimiento de Salud Dental) requiere que vea dentistas dentro de una red específica y típicamente tiene primas más bajas y sin deducibles, pero menos flexibilidad. Un DPPO (Organización de Proveedores Preferidos Dentales) le permite ver cualquier dentista pero ofrece mejores beneficios y costos más bajos cuando usa proveedores en la red. Los DPPO generalmente tienen deducibles y primas más altas."
+        },
+        {
+          "question": "¿Cubre el seguro de visión la cirugía LASIK?",
+          "answer": "La mayoría de los planes de seguro de visión no cubren completamente la cirugía LASIK pero pueden ofrecer descuentos (típicamente 10-20% de descuento) en proveedores participantes. Algunos planes premium pueden proporcionar un pequeño beneficio hacia LASIK. Si está considerando LASIK, verifique los detalles específicos del plan y compare los costos con y sin descuentos de seguro."
+        },
+        {
+          "question": "¿Puedo usar mi seguro dental inmediatamente?",
+          "answer": "La atención preventiva (limpiezas, exámenes, rayos X) generalmente está cubierta inmediatamente o después de un período de espera corto (30-90 días). Sin embargo, los procedimientos básicos y mayores a menudo tienen períodos de espera de 3-12 meses. La cobertura de ortodoncia típicamente requiere un período de espera de 12-24 meses. Verifique su plan específico para períodos de espera exactos."
+        },
+        {
+          "question": "¿Qué pasa si excedo mi máximo dental anual?",
+          "answer": "Si excede su beneficio máximo anual (típicamente $1,000-$2,000), será responsable del 100% de los costos adicionales hasta el próximo año de beneficios cuando su máximo se restablezca. Algunos planes ofrecen beneficios de transferencia o máximos más altos por una prima adicional. Considere sus necesidades dentales esperadas al elegir un plan."
+        },
+        {
+          "question": "¿Está cubierta la ortodoncia bajo el seguro dental?",
+          "answer": "Muchos planes dentales incluyen cobertura de ortodoncia, especialmente para niños, pero a menudo está sujeta a un máximo de por vida separado (típicamente $1,000-$2,000) y un período de espera (generalmente 12-24 meses). La ortodoncia para adultos puede tener cobertura limitada o copagos más altos. Revise los detalles del plan cuidadosamente si el tratamiento de ortodoncia es una prioridad."
+        },
+        {
+          "question": "¿Con qué frecuencia puedo obtener un examen de la vista con seguro de visión?",
+          "answer": "La mayoría de los planes de seguro de visión cubren un examen completo de la vista por año calendario. Algunos planes pueden permitir exámenes cada 12 meses desde la fecha de su último examen. Los exámenes adicionales pueden estar cubiertos si son médicamente necesarios, pero los exámenes de rutina típicamente están limitados a una vez por año."
+        },
+        {
+          "question": "¿Cuál es la diferencia entre seguro de visión y un plan de descuento de visión?",
+          "answer": "El seguro de visión proporciona beneficios específicos (como una asignación de examen anual y beneficios de marco/lente) con copagos y límites de cobertura. Un plan de descuento de visión ofrece descuentos porcentuales (típicamente 20-40% de descuento) en servicios y productos en proveedores participantes pero no proporciona beneficios fijos. Los planes de descuento generalmente tienen costos mensuales más bajos pero pueden no ahorrar tanto si necesita servicios integrales."
+        }
+      ]
+    },
+    "hospitalIndemnity": {
+      "title": "Indemnización Hospitalaria",
+      "description": "Seguro complementario que paga beneficios en efectivo directamente a usted cuando está hospitalizado, ayudando a cubrir gastos no cubiertos por su seguro de salud principal.",
+      "questions": [
+        {
+          "question": "¿Qué es el seguro de indemnización hospitalaria?",
+          "answer": "El seguro de indemnización hospitalaria es un tipo de seguro complementario que le paga beneficios en efectivo fijos (una cantidad fija de dólares por día) cuando está hospitalizado. A diferencia del seguro de salud tradicional que paga a los proveedores, la Indemnización Hospitalaria paga beneficios directamente a usted, que puede usar para cualquier propósito: facturas médicas, ingresos perdidos, gastos del hogar u otras necesidades."
+        },
+        {
+          "question": "¿Cómo funciona el seguro de indemnización hospitalaria?",
+          "answer": "Cuando es admitido en un hospital, su plan de Indemnización Hospitalaria paga un beneficio diario (por ejemplo, $100-$500 por día) por cada día que está hospitalizado, hasta un número máximo de días. Los beneficios se pagan directamente a usted, no al hospital. Algunos planes también pagan beneficios por visitas a la sala de emergencias, servicios de ambulancia o estadías en la unidad de cuidados intensivos."
+        },
+        {
+          "question": "¿Necesito Indemnización Hospitalaria si ya tengo seguro de salud?",
+          "answer": "La Indemnización Hospitalaria puede ser valiosa incluso si tiene seguro de salud porque proporciona beneficios en efectivo adicionales para ayudar a cubrir deducibles, copagos, coseguro y otros costos de bolsillo. También puede ayudar a reemplazar ingresos perdidos si no puede trabajar mientras está hospitalizado. Es particularmente útil si tiene un plan de salud con deducible alto."
+        },
+        {
+          "question": "¿Para qué gastos puedo usar los beneficios de Indemnización Hospitalaria?",
+          "answer": "Puede usar los beneficios de Indemnización Hospitalaria para cualquier propósito: facturas médicas, deducibles, copagos, gastos del hogar, pagos de hipoteca o alquiler, cuidado de niños, transporte, ingresos perdidos o cualquier otro gasto que incurra mientras está hospitalizado. El dinero se paga directamente a usted, así que usted decide cómo usarlo."
+        },
+        {
+          "question": "¿Cuánto cuesta el seguro de indemnización hospitalaria?",
+          "answer": "Las primas varían según su edad, género, ubicación, monto del beneficio y opciones de cobertura. Las primas mensuales típicas oscilan entre $20-$100+ dependiendo del monto del beneficio diario y el período máximo de beneficios. Los planes con beneficios diarios más altos y períodos de beneficios más largos cuestan más."
+        },
+        {
+          "question": "¿Hay períodos de espera para la cobertura de Indemnización Hospitalaria?",
+          "answer": "Muchos planes de Indemnización Hospitalaria tienen un período de espera (típicamente 30-90 días) antes de que comience la cobertura para hospitalizaciones relacionadas con enfermedades. Las hospitalizaciones relacionadas con accidentes generalmente están cubiertas inmediatamente. Las condiciones preexistentes pueden tener períodos de espera más largos o exclusiones. Verifique su plan específico para detalles."
+        },
+        {
+          "question": "¿Cubre la Indemnización Hospitalaria las condiciones preexistentes?",
+          "answer": "La cobertura para condiciones preexistentes varía según el plan. Algunos planes excluyen las condiciones preexistentes por completo, mientras que otros pueden cubrirlas después de un período de espera (a menudo 12-24 meses). Las hospitalizaciones relacionadas con accidentes típicamente están cubiertas independientemente de las condiciones preexistentes. Revise las exclusiones del plan cuidadosamente."
+        },
+        {
+          "question": "¿Cuál es la diferencia entre Indemnización Hospitalaria y seguro de Enfermedad Crítica?",
+          "answer": "La Indemnización Hospitalaria paga beneficios diarios por cada día que está hospitalizado, independientemente de la razón. El seguro de Enfermedad Crítica paga un beneficio de suma global (a menudo $10,000-$100,000+) cuando es diagnosticado con una enfermedad crítica específica como cáncer, ataque cardíaco o accidente cerebrovascular. Ambos son complementarios y pueden trabajar juntos para proporcionar protección integral."
+        },
+        {
+          "question": "¿Puedo obtener seguro de indemnización hospitalaria si estoy en Medicare?",
+          "answer": "Sí, el seguro de indemnización hospitalaria puede complementar la cobertura de Medicare. Puede ayudar a cubrir deducibles de Medicare, copagos y otros costos de bolsillo. Sin embargo, tenga en cuenta que algunos planes de Indemnización Hospitalaria pueden tener restricciones o beneficios diferentes para beneficiarios de Medicare, así que revise los detalles del plan cuidadosamente."
+        },
+        {
+          "question": "¿Por cuánto tiempo duran los beneficios de Indemnización Hospitalaria?",
+          "answer": "Los beneficios típicamente duran por un número específico de días por hospitalización (a menudo 30-365 días) y pueden tener un período máximo de beneficios por año o de por vida. Algunos planes tienen períodos de beneficios ilimitados. La duración de los beneficios depende de su plan específico y el monto del beneficio diario que seleccionó."
+        },
+        {
+          "question": "¿Los beneficios de Indemnización Hospitalaria se coordinan con mi seguro de salud?",
+          "answer": "Los beneficios de Indemnización Hospitalaria se pagan independientemente de su seguro de salud. Usted recibe los beneficios independientemente de lo que cubra o pague su seguro de salud. Esto significa que puede usar los beneficios en efectivo para ayudar a pagar sus deducibles de seguro de salud, copagos o cualquier otro gasto."
+        },
+        {
+          "question": "¿Qué debo considerar al elegir un plan de Indemnización Hospitalaria?",
+          "answer": "Considere el monto del beneficio diario (cuánto por día), período máximo de beneficios (cuántos días cubiertos), períodos de espera, cobertura para accidentes vs. enfermedades, exclusiones de condiciones preexistentes, costos de primas y si el plan ofrece beneficios adicionales como cobertura de UCI o beneficios de sala de emergencias. Elija un plan que se ajuste a su presupuesto y proporcione protección adecuada."
+        }
+      ]
+    },
+    "iul": {
+      "title": "IUL - Seguro de Vida Universal Indexado",
+      "description": "Seguro de vida permanente flexible con potencial de crecimiento de valor en efectivo vinculado a índices del mercado, ofreciendo tanto protección como acumulación de riqueza.",
+      "questions": [
+        {
+          "question": "¿Qué es el seguro de vida universal indexado (IUL)?",
+          "answer": "El seguro de vida universal indexado (IUL) es un tipo de seguro de vida permanente que combina un beneficio por muerte con un componente de valor en efectivo. El valor en efectivo puede crecer basándose en el rendimiento de los índices del mercado de valores (como el S&P 500) mientras proporciona protección contra pérdidas: su valor en efectivo no perderá valor debido a las caídas del mercado, aunque puede no ganar interés en años de bajada."
+        },
+        {
+          "question": "¿Cómo crece el valor en efectivo en una póliza IUL?",
+          "answer": "El crecimiento del valor en efectivo de IUL está vinculado al rendimiento de los índices del mercado de valores (típicamente el S&P 500). Cuando el índice se desempeña bien, su valor en efectivo puede ganar interés hasta un límite (a menudo 10-15%). Cuando el índice se desempeña mal, su valor en efectivo está protegido de pérdidas con un piso (típicamente 0%). La compañía de seguros acredita interés basándose en el rendimiento del índice dentro de estos parámetros."
+        },
+        {
+          "question": "¿Cuáles son los principales beneficios del seguro IUL?",
+          "answer": "IUL ofrece varios beneficios: protección de seguro de vida permanente, crecimiento de valor en efectivo con impuestos diferidos, potencial de mayores rendimientos que el seguro de vida entero tradicional, protección contra pérdidas del mercado, pagos de primas flexibles, capacidad de acceder al valor en efectivo a través de préstamos o retiros, y beneficio por muerte potencialmente libre de impuestos para beneficiarios."
+        },
+        {
+          "question": "¿Puedo acceder al valor en efectivo en mi póliza IUL?",
+          "answer": "Sí, puede acceder a su valor en efectivo de IUL a través de préstamos de póliza (que acumulan interés pero no requieren verificaciones de crédito) o retiros (que pueden reducir su beneficio por muerte). Los préstamos y retiros pueden tener implicaciones fiscales, y los préstamos no pagados reducen el beneficio por muerte. Consulte con un asesor financiero sobre la mejor manera de acceder a su valor en efectivo."
+        },
+        {
+          "question": "¿Cuál es la diferencia entre IUL y seguro de vida entero?",
+          "answer": "IUL ofrece primas flexibles y crecimiento de valor en efectivo vinculado a índices del mercado con límites y pisos. El seguro de vida entero tiene primas fijas y crecimiento de valor en efectivo garantizado a una tasa de interés fija. IUL tiene potencial de mayores rendimientos pero menos garantías, mientras que el seguro de vida entero ofrece más garantías pero típicamente menores rendimientos. Ambos son seguro de vida permanente."
+        },
+        {
+          "question": "¿Son las pólizas IUL adecuadas para la planificación de jubilación?",
+          "answer": "IUL puede usarse para la planificación de jubilación porque el valor en efectivo crece con impuestos diferidos y puede accederse libre de impuestos a través de préstamos de póliza. Sin embargo, IUL es un compromiso a largo plazo que requiere pagos de primas consistentes. Es mejor para aquellos que pueden comprometerse con la póliza por 15+ años y quieren tanto protección de seguro de vida como acumulación de efectivo."
+        },
+        {
+          "question": "¿Cuáles son las ventajas fiscales del seguro IUL?",
+          "answer": "IUL ofrece varias ventajas fiscales: el valor en efectivo crece con impuestos diferidos, los préstamos de póliza generalmente están libres de impuestos, los beneficios por muerte típicamente están libres de impuestos sobre la renta para beneficiarios, y los retiros hasta su base (primas pagadas) generalmente están libres de impuestos. Sin embargo, las leyes fiscales pueden cambiar, y las situaciones individuales varían, así que consulte con un asesor fiscal."
+        },
+        {
+          "question": "¿Qué pasa si dejo de pagar primas en mi póliza IUL?",
+          "answer": "Si deja de pagar primas, la póliza usará el valor en efectivo para cubrir costos. Si el valor en efectivo es insuficiente, la póliza puede caducar. Algunas pólizas tienen una cláusula de garantía sin caducidad que mantiene la póliza en vigor incluso si el valor en efectivo se agota, siempre que se paguen las primas mínimas. Revise los términos específicos de su póliza."
+        },
+        {
+          "question": "¿Puedo aumentar o disminuir mi beneficio por muerte de IUL?",
+          "answer": "Sí, las pólizas IUL típicamente ofrecen flexibilidad para aumentar o disminuir el beneficio por muerte (sujeto a suscripción para aumentos y requisitos mínimos para disminuciones). Aumentar el beneficio por muerte puede requerir primas adicionales, mientras que disminuirlo puede reducir sus requisitos de prima. Los cambios pueden tener implicaciones fiscales."
+        },
+        {
+          "question": "¿Qué es un límite y piso en las pólizas IUL?",
+          "answer": "El límite es la tasa de interés máxima que su valor en efectivo puede ganar en un período dado (a menudo 10-15%), incluso si el índice se desempeña mejor. El piso es la tasa de interés mínima (típicamente 0%), protegiéndolo de pérdidas cuando el índice se desempeña mal. Estas características proporcionan potencial de alza con protección contra pérdidas."
+        },
+        {
+          "question": "¿Cuánto tiempo tarda una póliza IUL en acumular valor en efectivo significativo?",
+          "answer": "La acumulación de valor en efectivo de IUL es un proceso a largo plazo. Típicamente toma 10-15 años para que se acumule valor en efectivo significativo, dependiendo de los pagos de primas, el rendimiento del índice, las tarifas de la póliza y el monto del beneficio por muerte. Los primeros años se enfocan en construir la póliza, mientras que los años posteriores ven un crecimiento de valor en efectivo más significativo."
+        },
+        {
+          "question": "¿Es el seguro IUL adecuado para mí?",
+          "answer": "IUL puede ser adecuado si necesita seguro de vida permanente, quiere potencial de crecimiento de valor en efectivo, puede comprometerse con pagos de primas a largo plazo (15+ años), entiende los riesgos y beneficios, y ha maximizado otras opciones de ahorro para jubilación. No es adecuado para necesidades a corto plazo, aquellos que no pueden pagar primas consistentes, o aquellos que buscan rendimientos garantizados. Consulte con un agente con licencia para evaluar si IUL se ajusta a sus objetivos financieros."
+        }
+      ]
+    },
+    "finalExpense": {
+      "title": "Gastos Finales (Sepultura)",
+      "description": "Seguro de vida permanente asequible diseñado para cubrir costos de funeral, facturas médicas y otros gastos finales, proporcionando tranquilidad para sus seres queridos.",
+      "questions": [
+        {
+          "question": "¿Qué es el seguro de gastos finales?",
+          "answer": "El seguro de gastos finales (también llamado seguro de sepultura o seguro de funeral) es un tipo de seguro de vida entero diseñado para cubrir gastos al final de la vida como costos de funeral, gastos de sepultura o cremación, facturas médicas, deudas pendientes y otros gastos finales. Típicamente ofrece beneficios por muerte más pequeños ($5,000-$50,000) y es más fácil de calificar que el seguro de vida tradicional."
+        },
+        {
+          "question": "¿Quién necesita seguro de gastos finales?",
+          "answer": "El seguro de gastos finales es ideal para personas mayores (típicamente de 50-85 años) que quieren asegurar que sus gastos de funeral y finales estén cubiertos sin cargar a su familia. También es adecuado para aquellos que pueden no calificar para seguro de vida tradicional debido a problemas de salud, tienen ahorros limitados, o quieren dejar una cantidad específica para gastos finales."
+        },
+        {
+          "question": "¿Cuánto seguro de gastos finales necesito?",
+          "answer": "La cantidad que necesita depende de sus costos de funeral esperados (típicamente $7,000-$15,000), facturas médicas pendientes, deudas que quiere cubrir y cualquier gasto adicional. La mayoría de las personas compran $10,000-$25,000 en cobertura. Considere su situación específica, costos de funeral locales y lo que quiere dejar para su familia."
+        },
+        {
+          "question": "¿Es más fácil calificar para el seguro de gastos finales que para el seguro de vida tradicional?",
+          "answer": "Sí, el seguro de gastos finales típicamente tiene suscripción más indulgente que el seguro de vida tradicional. Muchos planes ofrecen aceptación garantizada (sin preguntas de salud) o emisión simplificada (pocas preguntas de salud, sin examen médico). Sin embargo, los planes de aceptación garantizada pueden tener períodos de espera antes de que se paguen los beneficios completos, y las primas pueden ser más altas."
+        },
+        {
+          "question": "¿Qué es un beneficio por muerte graduado?",
+          "answer": "Un beneficio por muerte graduado significa que si muere dentro de los primeros 2-3 años de la póliza, sus beneficiarios reciben un beneficio limitado (típicamente devolución de primas más interés) en lugar del beneficio por muerte completo. Después del período graduado, se paga el beneficio por muerte completo. Esto es común con las pólizas de Gastos Finales de aceptación garantizada."
+        },
+        {
+          "question": "¿Pueden negarme el seguro de gastos finales?",
+          "answer": "Con los planes de aceptación garantizada, no se le puede negar la cobertura independientemente de su salud. Sin embargo, estos planes pueden tener períodos de espera y primas más altas. Los planes de emisión simplificada pueden negar la cobertura basándose en condiciones de salud graves, pero típicamente no requieren exámenes médicos y tienen períodos de espera más cortos o sin espera."
+        },
+        {
+          "question": "¿Cuánto cuesta el seguro de gastos finales?",
+          "answer": "Las primas varían según la edad, género, salud, monto de cobertura y tipo de plan. Las primas mensuales típicas oscilan entre $30-$150+ para $10,000-$25,000 en cobertura. Los planes de aceptación garantizada cuestan más que los planes de emisión simplificada. Las primas generalmente son fijas y no aumentarán a medida que envejezca."
+        },
+        {
+          "question": "¿El seguro de gastos finales acumula valor en efectivo?",
+          "answer": "Sí, la mayoría del seguro de gastos finales es seguro de vida entero, lo que significa que acumula valor en efectivo con el tiempo. Puede pedir prestado contra el valor en efectivo o cancelar la póliza por su valor en efectivo, aunque esto reduce o elimina el beneficio por muerte. La acumulación de valor en efectivo típicamente es más lenta que con pólizas de seguro de vida más grandes."
+        },
+        {
+          "question": "¿Puedo usar el seguro de gastos finales mientras estoy vivo?",
+          "answer": "Algunas pólizas de gastos finales ofrecen beneficios en vida (beneficios por muerte acelerados) que le permiten acceder a una porción del beneficio por muerte si es diagnosticado con una enfermedad terminal. También puede acceder al valor en efectivo a través de préstamos de póliza o retiros, aunque esto reduce el beneficio por muerte. Verifique su póliza específica para opciones disponibles."
+        },
+        {
+          "question": "¿Qué pasa si dejo de pagar las primas de gastos finales?",
+          "answer": "Si deja de pagar primas, la póliza puede caducar y perderá la cobertura. Algunas pólizas tienen un período de gracia (típicamente 30 días) y pueden usar el valor en efectivo para pagar primas si está disponible. Algunas pólizas ofrecen seguro reducido pagado, que proporciona un beneficio por muerte más pequeño sin primas adicionales. Revise los términos de su póliza cuidadosamente."
+        },
+        {
+          "question": "¿Puedo agregar seguro de gastos finales a mi seguro de vida existente?",
+          "answer": "Sí, puede comprar seguro de gastos finales incluso si tiene otro seguro de vida. Puede complementar su cobertura existente para cubrir específicamente los gastos finales, o puede comprarlo si su póliza existente no es suficiente para los gastos finales. No hay límite en cuánto seguro de vida puede poseer."
+        },
+        {
+          "question": "¿Cómo elijo el plan de seguro de gastos finales correcto?",
+          "answer": "Considere el monto de cobertura que necesita, si quiere aceptación garantizada o emisión simplificada, asequibilidad de primas, períodos de espera, características de valor en efectivo, fortaleza financiera de la compañía y flexibilidad de la póliza. Trabaje con un agente con licencia que pueda comparar múltiples aseguradoras y ayudarle a encontrar un plan que se ajuste a sus necesidades y presupuesto."
+        }
+      ]
+    }
+  }
+  }
+}
+
