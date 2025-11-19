@@ -1,0 +1,139 @@
+{
+  "renewalSupportPage": {
+    "meta": {
+      "title": "Apoyo en Renovación de Planes ACA - No Renueve Automáticamente Su Seguro de Salud | Isaac Plans Insurance",
+      "description": "Obtenga ayuda experta para renovar su plan de seguro de salud ACA. Evite errores costosos de renovación automática. El apoyo profesional en renovación asegura que obtenga la mejor cobertura y ahorros.",
+      "keywords": "renovación ACA, renovación de seguro de salud, renovación automática, apoyo en renovación de planes, renovación del mercado ACA, agente de seguro de salud",
+      "image": "https://www.isaacplans.com/images/renewal-support.png",
+      "imageAlt": "Servicios de Apoyo en Renovación de Planes ACA"
+    },
+    "hero": {
+      "title": "No Deje Que Su Plan ACA Se Renueve Automáticamente",
+      "description": "La renovación automática puede costarle cientos o miles de dólares. Obtenga apoyo profesional en renovación para asegurar que tenga la mejor cobertura al mejor precio."
+    },
+    "warning": {
+      "title": "Por Qué la Renovación Automática es Peligrosa",
+      "description": "Cuando su plan ACA se renueva automáticamente, puede perderse mejores opciones, pagar más de lo necesario o perder beneficios importantes. Esto es lo que puede salir mal:",
+      "risks": {
+        "0": {
+          "title": "Primas Más Altas",
+          "description": "La prima de su plan actual puede haber aumentado significativamente, y pueden estar disponibles opciones con mejor precio que no verá con la renovación automática."
+        },
+        "1": {
+          "title": "Pérdida de Cobertura",
+          "description": "Su plan puede haber cambiado su red, beneficios o formulario. La renovación automática significa que podría perder acceso a sus médicos o medicamentos preferidos."
+        },
+        "2": {
+          "title": "Subsidios Perdidos",
+          "description": "Sus ingresos o situación familiar pueden haber cambiado, haciéndolo elegible para mejores subsidios o reducciones de costos compartidos que la renovación automática no capturará."
+        },
+        "3": {
+          "title": "Sin Comparación de Planes",
+          "description": "La renovación automática le impide comparar todos los planes disponibles. Podría quedarse con un plan que ya no se ajusta a sus necesidades o presupuesto."
+        }
+      }
+    },
+    "process": {
+      "title": "El Proceso Profesional de Renovación",
+      "description": "Así es como le ayudamos a renovar su plan ACA de la manera correcta, asegurando que obtenga la mejor cobertura y ahorros:",
+      "steps": {
+        "0": {
+          "title": "Revisar Plan Actual",
+          "description": "Analizamos su cobertura actual, uso y cualquier cambio en sus necesidades de salud o situación financiera."
+        },
+        "1": {
+          "title": "Comparar Todas las Opciones",
+          "description": "Revisamos todos los planes disponibles en su área, comparando primas, deducibles, redes y beneficios lado a lado."
+        },
+        "2": {
+          "title": "Verificar Elegibilidad",
+          "description": "Verificamos su elegibilidad para créditos fiscales de prima, reducciones de costos compartidos y otros programas de asistencia financiera."
+        },
+        "3": {
+          "title": "Recomendar Mejor Opción",
+          "description": "Basándonos en sus necesidades y presupuesto, recomendamos el plan que ofrece el mejor valor y cobertura para su situación."
+        },
+        "4": {
+          "title": "Completar Renovación",
+          "description": "Le guiamos a través del proceso de renovación, manejamos el papeleo y nos aseguramos de que todo se envíe correctamente y a tiempo."
+        }
+      }
+    },
+    "benefits": {
+      "title": "¿Por Qué Obtener Ayuda Profesional en Renovación?",
+      "description": "Trabajar con un agente de seguros con licencia para su renovación ACA proporciona numerosas ventajas:",
+      "items": {
+        "0": {
+          "icon": "savings",
+          "title": "Ahorre Dinero",
+          "description": "Le ayudamos a encontrar planes con primas más bajas, mejores subsidios y costos de bolsillo reducidos que podría perderse por su cuenta."
+        },
+        "1": {
+          "icon": "protection",
+          "title": "Mejor Cobertura",
+          "description": "Asegúrese de que su plan aún cubra a sus médicos, medicamentos y hospitales preferidos. Verificamos cambios en la red y actualizaciones de beneficios."
+        },
+        "2": {
+          "icon": "support",
+          "title": "Servicio Personalizado",
+          "description": "Obtenga apoyo personalizado adaptado a sus necesidades específicas. Nos tomamos el tiempo para entender su situación y encontrar el plan perfecto."
+        },
+        "3": {
+          "icon": "expertise",
+          "title": "Conocimiento Experto",
+          "description": "Benefíciese de nuestro profundo entendimiento de las regulaciones ACA, cambios en planes y actualizaciones del mercado que afectan su cobertura."
+        },
+        "4": {
+          "icon": "updates",
+          "title": "Manténgase Informado",
+          "description": "Monitoreamos cambios en planes, nuevas opciones y actualizaciones regulatorias durante todo el año, no solo durante el período de inscripción abierta."
+        },
+        "5": {
+          "icon": "support",
+          "title": "Apoyo Continuo",
+          "description": "Estamos aquí durante todo el año para responder preguntas, ayudar con reclamos y asistir con cualquier problema de cobertura que surja."
+        }
+      }
+    },
+    "comparison": {
+      "title": "Renovación Automática vs. Ayuda Profesional",
+      "description": "Vea la diferencia entre dejar que su plan se renueve automáticamente y obtener asistencia profesional en renovación:",
+      "autoRenew": {
+        "title": "Renovación Automática",
+        "items": [
+          "Sin comparación de planes o búsqueda",
+          "Puede pagar primas más altas sin saberlo",
+          "Se pierde mejores subsidios o ayuda financiera",
+          "Riesgo de perder acceso a médicos preferidos",
+          "Nadie para responder preguntas o proporcionar orientación"
+        ]
+      },
+      "professional": {
+        "title": "Ayuda Profesional en Renovación",
+        "items": [
+          "Comparación exhaustiva de todos los planes disponibles",
+          "Encuentre el mejor precio y cobertura para sus necesidades",
+          "Maximice subsidios y reducciones de costos compartidos",
+          "Asegúrese de que sus médicos y medicamentos estén cubiertos",
+          "Orientación y apoyo experto durante todo el proceso"
+        ]
+      }
+    },
+    "ctaBanner": {
+      "message": "¿Listo para renovar su plan ACA de la manera correcta? ¡Obtenga ayuda profesional hoy!"
+    },
+    "contact": {
+      "title": "Comience con Su Renovación",
+      "description": "No espere hasta el último minuto. Contáctenos ahora para asegurar un proceso de renovación sin problemas y obtener la mejor cobertura para el próximo año.",
+      "phone": {
+        "label": "Llámenos",
+        "number": "540-426-1804"
+      },
+      "email": {
+        "label": "Envíenos un Correo",
+        "address": "info@isaacplans.com"
+      }
+    }
+  }
+}
+

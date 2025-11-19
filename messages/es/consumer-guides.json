@@ -1,0 +1,65 @@
+{
+  "consumerGuidesPage": {
+    "meta": {
+      "title": "Guías Gratuitas para Consumidores - Recursos de Seguros | Isaac Plans Insurance",
+      "description": "Descargue guías gratuitas para consumidores sobre seguro de salud ACA, Seguro Médico a Corto Plazo, Dental y Visión, Indemnización Hospitalaria, IUL y Seguro de Gastos Finales. Recursos expertos para ayudarle a tomar decisiones informadas.",
+      "keywords": "guías de seguros gratuitas, guías para consumidores, guía ACA, recursos de seguro de salud, educación sobre seguros, descargas gratuitas",
+      "image": "https://www.isaacplans.com/images/consumer-guides.png",
+      "imageAlt": "Guías Gratuitas de Seguros para Consumidores"
+    },
+    "hero": {
+      "title": "Guías Gratuitas para Consumidores",
+      "description": "Descargue guías expertas sobre seguro de salud, seguro de vida y más. Obtenga la información que necesita para tomar decisiones informadas sobre su cobertura."
+    },
+    "categories": {
+      "all": "Todas las Guías",
+      "aca": "ACA",
+      "shortTerm": "Corto Plazo",
+      "dentalVision": "Dental y Visión",
+      "hospitalIndemnity": "Indemnización Hospitalaria",
+      "iul": "IUL",
+      "finalExpense": "Gastos Finales"
+    },
+    "guides": {
+      "title": "Guías",
+      "description": "Guías gratuitas para ayudarle a entender las opciones de seguro de {category}."
+    },
+    "cta": {
+      "title": "Obtenga Orientación Experta en Seguros",
+      "description": "Desbloquee guías gratuitas llenas de conocimientos expertos, consejos e información para ayudarle a navegar el mundo de los seguros con confianza.",
+      "benefits": [
+        "Contenido escrito por expertos",
+        "Fácil de entender",
+        "Descarga instantánea"
+      ]
+    },
+    "card": {
+      "viewGuide": "Ver Guía",
+      "loading": "Cargando..."
+    }
+  },
+  "guideDetailPage": {
+    "meta": {
+      "title": "{title} - Guía Gratuita | Isaac Plans Insurance",
+      "description": "Descargue esta guía gratuita: {description}",
+      "keywords": "guía gratuita, guía de seguros, guía de {category}"
+    },
+    "download": {
+      "title": "Descargar Esta Guía Gratuita",
+      "description": "Complete el formulario a continuación con su información de contacto para descargar esta guía gratuita.",
+      "button": "¡Descargar Ahora!",
+      "submitting": "Procesando..."
+    },
+    "form": {
+      "firstName": "Nombre",
+      "lastName": "Apellido",
+      "email": "Correo Electrónico",
+      "phone": "Teléfono",
+      "submit": "Descargar Ahora",
+      "submitting": "Procesando...",
+      "required": "Este campo es requerido",
+      "invalidEmail": "Correo electrónico inválido"
+    }
+  }
+}
+

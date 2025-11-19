@@ -1,0 +1,48 @@
+{
+  "planComparisonPage": {
+    "meta": {
+      "title": "Compare Planes de Seguro de Salud ACA por Estado | Isaac Plans Insurance",
+      "description": "Compare planes de seguro de salud ACA en su estado. Encuentre opciones de cobertura asequibles, compare beneficios y obtenga cotizaciones del mercado de seguros de salud de su estado.",
+      "keywords": "comparar planes de seguro de salud, mercado ACA, comparación de seguro de salud, mercado estatal, comparar cotizaciones de seguro",
+      "image": "https://www.isaacplans.com/images/plan-comparison.png",
+      "imageAlt": "Herramienta de Comparación de Planes de Seguro de Salud"
+    },
+    "hero": {
+      "title": "Compare Planes de Seguro de Salud ACA",
+      "description": "Seleccione su estado para acceder al mercado de seguros de salud de su estado y comparar planes, beneficios y precios. Encuentre la mejor cobertura para sus necesidades y presupuesto."
+    },
+    "content": {
+      "title": "Encuentre Planes en Su Estado",
+      "description": "Cada estado tiene su propio mercado de seguros de salud donde puede comparar planes, ver precios, verificar elegibilidad para subsidios e inscribirse en cobertura. Seleccione su estado a continuación para comenzar.",
+      "selectLabel": "Seleccione Su Estado",
+      "selectPlaceholder": "Elija su estado...",
+      "stateMarketplaceNote": "{state} tiene su propio mercado estatal",
+      "buttonText": "Comparar Planes en Mi Estado",
+      "disclaimer": "Será redirigido al mercado oficial de seguros de salud de su estado o al mercado federal para comparar planes y obtener cotizaciones."
+    },
+    "info": {
+      "title": "Lo Que Puede Hacer",
+      "cards": {
+        "0": {
+          "title": "Compare Planes Lado a Lado",
+          "description": "Vea múltiples planes de seguro de salud a la vez, compare primas, deducibles, copagos y beneficios de cobertura para encontrar la mejor opción para usted."
+        },
+        "1": {
+          "title": "Verifique Su Elegibilidad",
+          "description": "Vea si califica para créditos fiscales de prima, reducciones de costos compartidos o Medicaid según sus ingresos y tamaño del hogar."
+        }
+      }
+    },
+    "marketplaces": {
+      "title": "Mercado Estatal vs. Mercado Federal",
+      "description": "Algunos estados operan sus propios mercados de seguros de salud, mientras que otros usan el mercado federal (HealthCare.gov). Esto es lo que necesita saber:",
+      "georgia": "Georgia Access - Mercado estatal para residentes de Georgia",
+      "virginia": "Virginia Marketplace - Mercado estatal para residentes de Virginia",
+      "colorado": "Connect for Health Colorado - Mercado estatal para residentes de Colorado",
+      "maryland": "Maryland Health Connection - Mercado estatal para residentes de Maryland",
+      "ffmTitle": "Todos los Demás Estados",
+      "ffmDescription": "Use el mercado federal (HealthCare.gov) o HealthSherpa para comparar e inscribirse en planes"
+    }
+  }
+}
+

@@ -52,6 +52,12 @@ const PAGES: Page[] = [
     changeFrequency: "monthly",
     priority: 0.6,
   },
+
+  // Resources
+  { href: "/subsidy-calculator", changeFrequency: "monthly", priority: 0.7 },
+  { href: "/plan-comparison", changeFrequency: "monthly", priority: 0.7 },
+  { href: "/renewal-support", changeFrequency: "monthly", priority: 0.7 },
+  { href: "/consumer-guides", changeFrequency: "weekly", priority: 0.8 },
 ];
 
 /** Build a fully-qualified URL for a given locale+href using next-intl’s routing */

@@ -1,0 +1,48 @@
+{
+  "planComparisonPage": {
+    "meta": {
+      "title": "Compare ACA Health Insurance Plans by State | Isaac Plans Insurance",
+      "description": "Compare ACA health insurance plans in your state. Find affordable coverage options, compare benefits, and get quotes from your state's health insurance marketplace.",
+      "keywords": "compare health insurance plans, ACA marketplace, health insurance comparison, state marketplace, compare insurance quotes",
+      "image": "https://www.isaacplans.com/images/plan-comparison.png",
+      "imageAlt": "Health Insurance Plan Comparison Tool"
+    },
+    "hero": {
+      "title": "Compare ACA Health Insurance Plans",
+      "description": "Select your state to access your state's health insurance marketplace and compare plans, benefits, and prices. Find the best coverage for your needs and budget."
+    },
+    "content": {
+      "title": "Find Plans in Your State",
+      "description": "Each state has its own health insurance marketplace where you can compare plans, see prices, check eligibility for subsidies, and enroll in coverage. Select your state below to get started.",
+      "selectLabel": "Select Your State",
+      "selectPlaceholder": "Choose your state...",
+      "stateMarketplaceNote": "{state} has its own state-based marketplace",
+      "buttonText": "Compare Plans in My State",
+      "disclaimer": "You will be redirected to your state's official health insurance marketplace or the federal marketplace to compare plans and get quotes."
+    },
+    "info": {
+      "title": "What You Can Do",
+      "cards": {
+        "0": {
+          "title": "Compare Plans Side-by-Side",
+          "description": "View multiple health insurance plans at once, compare premiums, deductibles, copays, and coverage benefits to find the best option for you."
+        },
+        "1": {
+          "title": "Check Your Eligibility",
+          "description": "See if you qualify for premium tax credits, cost-sharing reductions, or Medicaid based on your income and household size."
+        }
+      }
+    },
+    "marketplaces": {
+      "title": "State-Based vs. Federal Marketplace",
+      "description": "Some states operate their own health insurance marketplaces, while others use the federal marketplace (HealthCare.gov). Here's what you need to know:",
+      "georgia": "Georgia Access - State-based marketplace for Georgia residents",
+      "virginia": "Virginia Marketplace - State-based marketplace for Virginia residents",
+      "colorado": "Connect for Health Colorado - State-based marketplace for Colorado residents",
+      "maryland": "Maryland Health Connection - State-based marketplace for Maryland residents",
+      "ffmTitle": "All Other States",
+      "ffmDescription": "Use the federal marketplace (HealthCare.gov) or HealthSherpa to compare and enroll in plans"
+    }
+  }
+}
+

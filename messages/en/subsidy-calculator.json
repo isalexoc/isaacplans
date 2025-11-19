@@ -1,0 +1,55 @@
+{
+  "subsidyCalculatorPage": {
+    "meta": {
+      "title": "ACA Subsidy Calculator - Estimate Your Premium Tax Credits | Isaac Plans Insurance",
+      "description": "Use our ACA subsidy calculator to estimate how much you'll pay for health insurance premiums in 2026 with and without enhanced premium tax credits. Get an estimate of your financial assistance.",
+      "keywords": "ACA subsidy calculator, premium tax credit calculator, health insurance subsidy, ACA calculator 2026, Obamacare subsidy estimator",
+      "image": "https://www.isaacplans.com/images/subsidy-calculator.png",
+      "imageAlt": "ACA Subsidy Calculator Tool"
+    },
+    "hero": {
+      "title": "ACA Enhanced Premium Tax Credit Calculator",
+      "description": "Estimate how much you would pay in premiums with and without the ACA's enhanced premium tax credits. This calculator helps you understand your potential savings and financial assistance for 2026."
+    },
+    "content": {
+      "title": "Calculate Your ACA Premium Subsidy",
+      "description": "The Affordable Care Act (ACA) provides premium tax credits to help make health insurance more affordable for individuals and families. Under current law, the ACA enhanced premium tax credit expires at the end of 2025, which will increase premium payments for Marketplace coverage by 114% on average (an estimated $1,016 a year). Use the calculator below to see how this affects your premiums."
+    },
+    "infoBox": {
+      "title": "What You Can Calculate",
+      "items": [
+        "Your estimated monthly premium with enhanced tax credits",
+        "Your estimated monthly premium without enhanced tax credits",
+        "The amount of federal financial assistance you may be eligible for",
+        "How premium changes affect your household budget"
+      ]
+    },
+    "howItWorks": {
+      "title": "How to Use the Calculator",
+      "steps": [
+        "Enter your household information including income, age, family size, and location",
+        "Select whether you have access to employer-sponsored coverage",
+        "View your estimated premiums with and without enhanced premium tax credits"
+      ]
+    },
+    "cta": {
+      "description": "Ready to see your estimated premium costs?",
+      "buttonText": "Access the KFF Subsidy Calculator",
+      "disclaimer": "This calculator is provided by the Kaiser Family Foundation (KFF) and is for estimation purposes only. Actual premium amounts may vary based on your specific circumstances and plan selection."
+    },
+    "additionalInfo": {
+      "title": "Important Information",
+      "cards": {
+        "0": {
+          "title": "Enhanced Tax Credits Expiring",
+          "description": "The enhanced premium tax credits are currently available through the end of 2025. If not extended, premium payments will increase significantly for many enrollees. The calculator shows you both scenarios."
+        },
+        "1": {
+          "title": "Get Personalized Help",
+          "description": "While the calculator provides estimates, our licensed agents can help you understand your options, find the right plan, and navigate the enrollment process. Contact us for personalized assistance."
+        }
+      }
+    }
+  }
+}
+

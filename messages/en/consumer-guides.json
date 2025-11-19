@@ -1,0 +1,65 @@
+{
+  "consumerGuidesPage": {
+    "meta": {
+      "title": "Free Consumer Guides - Insurance Resources | Isaac Plans Insurance",
+      "description": "Download free consumer guides on ACA health insurance, Short Term Medical, Dental & Vision, Hospital Indemnity, IUL, and Final Expense insurance. Expert resources to help you make informed decisions.",
+      "keywords": "free insurance guides, consumer guides, ACA guide, health insurance resources, insurance education, free downloads",
+      "image": "https://www.isaacplans.com/images/consumer-guides.png",
+      "imageAlt": "Free Consumer Insurance Guides"
+    },
+    "hero": {
+      "title": "Free Consumer Guides",
+      "description": "Download expert guides on health insurance, life insurance, and more. Get the information you need to make informed decisions about your coverage."
+    },
+    "categories": {
+      "all": "All Guides",
+      "aca": "ACA",
+      "shortTerm": "Short Term",
+      "dentalVision": "Dental & Vision",
+      "hospitalIndemnity": "Hospital Indemnity",
+      "iul": "IUL",
+      "finalExpense": "Final Expense"
+    },
+    "guides": {
+      "title": "Guides",
+      "description": "Free guides to help you understand {category} insurance options."
+    },
+    "cta": {
+      "title": "Get Expert Insurance Guidance",
+      "description": "Unlock free guides packed with expert insights, tips, and information to help you navigate the world of insurance with confidence.",
+      "benefits": [
+        "Expert-written content",
+        "Easy to understand",
+        "Instant download"
+      ]
+    },
+    "card": {
+      "viewGuide": "View Guide",
+      "loading": "Loading..."
+    }
+  },
+  "guideDetailPage": {
+    "meta": {
+      "title": "{title} - Free Guide | Isaac Plans Insurance",
+      "description": "Download this free guide: {description}",
+      "keywords": "free guide, insurance guide, {category} guide"
+    },
+    "download": {
+      "title": "Download This Free Guide",
+      "description": "Complete the form below with your contact information to download this free guide.",
+      "button": "Download Now!",
+      "submitting": "Processing..."
+    },
+    "form": {
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "email": "Email",
+      "phone": "Phone Number",
+      "submit": "Download Now",
+      "submitting": "Processing...",
+      "required": "This field is required",
+      "invalidEmail": "Invalid email address"
+    }
+  }
+}
+

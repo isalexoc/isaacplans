@@ -24,4 +24,8 @@ export type AppHref =
   | "/gastos-finales"
   | "/faq"
   | "/testimonials"
-  | "/glossary";
+  | "/glossary"
+  | "/subsidy-calculator"
+  | "/plan-comparison"
+  | "/renewal-support"
+  | "/consumer-guides";

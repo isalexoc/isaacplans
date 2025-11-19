@@ -55,26 +55,13 @@ const resourceLinks = [
   { key: "faq", href: "/faq", icon: "HelpCircle" },
   { key: "blog", href: "", icon: "BookOpen" },
   { key: "testimonials", href: "/testimonials", icon: "MessageCircle" },
-  { key: "consumerGuides", href: "", icon: "FileText" },
-  { key: "coverageOptions", href: "", icon: "ShieldCheck" },
+  { key: "consumerGuides", href: "/consumer-guides", icon: "FileText" },
   { key: "glossary", href: "/glossary", icon: "Landmark" },
-  { key: "videos", href: "", icon: "Film" },
-  { key: "subsidyCalculator", href: "", icon: "Calculator" },
-  { key: "personalizedAssistance", href: "", icon: "UserCheck" },
-  { key: "downloads", href: "", icon: "Download" },
-  { key: "planComparison", href: "", icon: "GitCompareArrows" },
+  { key: "subsidyCalculator", href: "/subsidy-calculator", icon: "Calculator" },
+  { key: "personalizedAssistance", href: "/contact", icon: "UserCheck" },
+  { key: "planComparison", href: "/plan-comparison", icon: "GitCompareArrows" },
   { key: "newsletter", href: "", icon: "Mail" },
-  { key: "eligibilityTools", href: "", icon: "SearchCheck" },
-  { key: "successStories", href: "", icon: "Smile" },
-  { key: "renewalSupport", href: "", icon: "Repeat" },
-  { key: "newUserGuides", href: "", icon: "Compass" },
-  { key: "savingTips", href: "", icon: "PiggyBank" },
-  { key: "familySupport", href: "", icon: "Users" },
-  { key: "studentCoverage", href: "", icon: "BookUser" },
-  { key: "workplaceProtection", href: "", icon: "Briefcase" },
-  { key: "regulatoryUpdates", href: "", icon: "Gavel" },
-  { key: "immigrantInfo", href: "", icon: "Globe2" },
-  { key: "claimsGuide", href: "", icon: "FileCheck2" },
+  { key: "renewalSupport", href: "/renewal-support", icon: "Repeat" },
 ] as const satisfies ReadonlyArray<{
   key: string;
   href: AppHref | "";
@@ -118,7 +105,7 @@ const Header = () => {
 
   return (
     <Headroom style={{ zIndex: 50 }}>
-      <header className="bg-white/98 backdrop-blur-md border-b border-gray-100 shadow-sm transition-shadow duration-300">
+      <header className="bg-white border-b border-gray-100 shadow-sm transition-shadow duration-300">
         <div className="container mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between h-16 md:h-20">
             <Logo />

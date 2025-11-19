@@ -1,0 +1,139 @@
+{
+  "renewalSupportPage": {
+    "meta": {
+      "title": "ACA Plan Renewal Support - Don't Auto-Renew Your Health Insurance | Isaac Plans Insurance",
+      "description": "Get expert help renewing your ACA health insurance plan. Avoid costly auto-renewal mistakes. Professional renewal support ensures you get the best coverage and savings.",
+      "keywords": "ACA renewal, health insurance renewal, auto-renewal, plan renewal support, ACA marketplace renewal, health insurance agent",
+      "image": "https://www.isaacplans.com/images/renewal-support.png",
+      "imageAlt": "ACA Plan Renewal Support Services"
+    },
+    "hero": {
+      "title": "Don't Let Your ACA Plan Auto-Renew",
+      "description": "Auto-renewal can cost you hundreds or thousands of dollars. Get professional renewal support to ensure you have the best coverage at the best price."
+    },
+    "warning": {
+      "title": "Why Auto-Renewal is Dangerous",
+      "description": "When your ACA plan auto-renews, you may miss out on better options, pay more than necessary, or lose important benefits. Here's what can go wrong:",
+      "risks": {
+        "0": {
+          "title": "Higher Premiums",
+          "description": "Your current plan's premium may have increased significantly, and better-priced options may be available that you won't see with auto-renewal."
+        },
+        "1": {
+          "title": "Lost Coverage",
+          "description": "Your plan may have changed its network, benefits, or formulary. Auto-renewal means you might lose access to your preferred doctors or medications."
+        },
+        "2": {
+          "title": "Missed Subsidies",
+          "description": "Your income or family situation may have changed, making you eligible for better subsidies or cost-sharing reductions that auto-renewal won't capture."
+        },
+        "3": {
+          "title": "No Plan Comparison",
+          "description": "Auto-renewal prevents you from comparing all available plans. You might be stuck with a plan that no longer fits your needs or budget."
+        }
+      }
+    },
+    "process": {
+      "title": "The Professional Renewal Process",
+      "description": "Here's how we help you renew your ACA plan the right way, ensuring you get the best coverage and savings:",
+      "steps": {
+        "0": {
+          "title": "Review Current Plan",
+          "description": "We analyze your current coverage, usage, and any changes in your health needs or financial situation."
+        },
+        "1": {
+          "title": "Compare All Options",
+          "description": "We review all available plans in your area, comparing premiums, deductibles, networks, and benefits side-by-side."
+        },
+        "2": {
+          "title": "Check Eligibility",
+          "description": "We verify your eligibility for premium tax credits, cost-sharing reductions, and other financial assistance programs."
+        },
+        "3": {
+          "title": "Recommend Best Fit",
+          "description": "Based on your needs and budget, we recommend the plan that offers the best value and coverage for your situation."
+        },
+        "4": {
+          "title": "Complete Renewal",
+          "description": "We guide you through the renewal process, handle paperwork, and ensure everything is submitted correctly and on time."
+        }
+      }
+    },
+    "benefits": {
+      "title": "Why Get Professional Renewal Help?",
+      "description": "Working with a licensed insurance agent for your ACA renewal provides numerous advantages:",
+      "items": {
+        "0": {
+          "icon": "savings",
+          "title": "Save Money",
+          "description": "We help you find plans with lower premiums, better subsidies, and reduced out-of-pocket costs that you might miss on your own."
+        },
+        "1": {
+          "icon": "protection",
+          "title": "Better Coverage",
+          "description": "Ensure your plan still covers your doctors, medications, and preferred hospitals. We verify network changes and benefit updates."
+        },
+        "2": {
+          "icon": "support",
+          "title": "Personalized Service",
+          "description": "Get one-on-one support tailored to your specific needs. We take the time to understand your situation and find the perfect plan."
+        },
+        "3": {
+          "icon": "expertise",
+          "title": "Expert Knowledge",
+          "description": "Benefit from our deep understanding of ACA regulations, plan changes, and marketplace updates that affect your coverage."
+        },
+        "4": {
+          "icon": "updates",
+          "title": "Stay Informed",
+          "description": "We monitor plan changes, new options, and regulatory updates throughout the year, not just during open enrollment."
+        },
+        "5": {
+          "icon": "support",
+          "title": "Ongoing Support",
+          "description": "We're here year-round to answer questions, help with claims, and assist with any coverage issues that arise."
+        }
+      }
+    },
+    "comparison": {
+      "title": "Auto-Renewal vs. Professional Help",
+      "description": "See the difference between letting your plan auto-renew and getting professional renewal assistance:",
+      "autoRenew": {
+        "title": "Auto-Renewal",
+        "items": [
+          "No plan comparison or shopping around",
+          "May pay higher premiums without knowing it",
+          "Miss out on better subsidies or financial help",
+          "Risk losing access to preferred doctors",
+          "No one to answer questions or provide guidance"
+        ]
+      },
+      "professional": {
+        "title": "Professional Renewal Help",
+        "items": [
+          "Comprehensive comparison of all available plans",
+          "Find the best price and coverage for your needs",
+          "Maximize subsidies and cost-sharing reductions",
+          "Ensure your doctors and medications are covered",
+          "Expert guidance and support throughout the process"
+        ]
+      }
+    },
+    "ctaBanner": {
+      "message": "Ready to renew your ACA plan the right way? Get professional help today!"
+    },
+    "contact": {
+      "title": "Get Started with Your Renewal",
+      "description": "Don't wait until the last minute. Contact us now to ensure a smooth renewal process and get the best coverage for the coming year.",
+      "phone": {
+        "label": "Call Us",
+        "number": "540-426-1804"
+      },
+      "email": {
+        "label": "Email Us",
+        "address": "info@isaacplans.com"
+      }
+    }
+  }
+}
+

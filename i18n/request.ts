@@ -51,10 +51,50 @@ async function loadSplitMessages(locale: string): Promise<Record<string, any>> {
       // File doesn't exist, skip
     }
     
+    // Load Consumer Guides messages if they exist
+    try {
+      const consumerGuides = (await import(`@/messages/${locale}/consumer-guides.json`)).default;
+      Object.assign(splitMessages, consumerGuides);
+    } catch {
+      // File doesn't exist, skip
+    }
+    
     // Load Glossary messages if they exist
     try {
       const glossary = (await import(`@/messages/${locale}/glossary.json`)).default;
       Object.assign(splitMessages, glossary);
+    } catch {
+      // File doesn't exist, skip
+    }
+    
+    // Load Subsidy Calculator messages if they exist
+    try {
+      const subsidyCalculator = (await import(`@/messages/${locale}/subsidy-calculator.json`)).default;
+      Object.assign(splitMessages, subsidyCalculator);
+    } catch {
+      // File doesn't exist, skip
+    }
+    
+    // Load Plan Comparison messages if they exist
+    try {
+      const planComparison = (await import(`@/messages/${locale}/plan-comparison.json`)).default;
+      Object.assign(splitMessages, planComparison);
+    } catch {
+      // File doesn't exist, skip
+    }
+    
+    // Load Renewal Support messages if they exist
+    try {
+      const renewalSupport = (await import(`@/messages/${locale}/renewal-support.json`)).default;
+      Object.assign(splitMessages, renewalSupport);
+    } catch {
+      // File doesn't exist, skip
+    }
+    
+    // Load Consumer Guides messages if they exist
+    try {
+      const consumerGuides = (await import(`@/messages/${locale}/consumer-guides.json`)).default;
+      Object.assign(splitMessages, consumerGuides);
     } catch {
       // File doesn't exist, skip
     }

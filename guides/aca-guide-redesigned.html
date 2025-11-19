@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Guide to ACA Open Enrollment - Isaac Plans Insurance</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            line-height: 1.7;
+            color: #1f2937;
+            background: #ffffff;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0;
+        }
+        
+        /* Cover Page */
+        .cover {
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #8b5cf6 100%);
+            color: white;
+            padding: 80px 60px;
+            text-align: center;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .cover h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        
+        .cover .subtitle {
+            font-size: 1.5rem;
+            font-weight: 300;
+            margin-bottom: 3rem;
+            opacity: 0.95;
+        }
+        
+        .cover .author {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-top: 4rem;
+            padding-top: 3rem;
+            border-top: 2px solid rgba(255,255,255,0.3);
+            width: 100%;
+        }
+        
+        /* Page Break */
+        .page-break {
+            page-break-after: always;
+            break-after: page;
+        }
+        
+        /* Section Styling */
+        .section {
+            padding: 60px 60px;
+            page-break-inside: avoid;
+        }
+        
+        .section-header {
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            color: white;
+            padding: 40px 60px;
+            margin: 0;
+        }
+        
+        .section-header h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        
+        .section-header p {
+            font-size: 1.1rem;
+            opacity: 0.95;
+            line-height: 1.6;
+        }
+        
+        /* Welcome Section */
+        .welcome {
+            background: linear-gradient(to bottom, #f8fafc 0%, #ffffff 100%);
+            padding: 80px 60px;
+        }
+        
+        .welcome-content {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        .welcome h2 {
+            font-size: 2.8rem;
+            font-weight: 800;
+            color: #1e40af;
+            margin-bottom: 2rem;
+            line-height: 1.2;
+        }
+        
+        .welcome p {
+            font-size: 1.15rem;
+            margin-bottom: 1.5rem;
+            color: #374151;
+            line-height: 1.8;
+        }
+        
+        .signature {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 2px solid #e5e7eb;
+        }
+        
+        .signature p {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .contact-info {
+            margin-top: 1.5rem;
+            padding: 1.5rem;
+            background: #f3f4f6;
+            border-radius: 12px;
+            font-size: 1rem;
+        }
+        
+        .contact-info p {
+            margin-bottom: 0.5rem;
+            color: #1f2937;
+        }
+        
+        .contact-info a {
+            color: #2563eb;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        /* Tip Sections */
+        .tip-section {
+            background: #ffffff;
+            padding: 50px 60px;
+            border-left: 6px solid #3b82f6;
+            margin: 30px 0;
+            page-break-inside: avoid;
+        }
+        
+        .tip-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            color: white;
+            border-radius: 12px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+        }
+        
+        .tip-section h3 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1e40af;
+            margin-bottom: 1.5rem;
+            margin-left: 0;
+        }
+        
+        .tip-content {
+            margin-left: 0;
+        }
+        
+        .tip-content ul {
+            list-style: none;
+            margin: 1.5rem 0;
+        }
+        
+        .tip-content ul li {
+            padding: 0.75rem 0;
+            padding-left: 2rem;
+            position: relative;
+            font-size: 1.05rem;
+            line-height: 1.7;
+        }
+        
+        .tip-content ul li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #10b981;
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+        
+        .insight-box {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-left: 4px solid #f59e0b;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            border-radius: 8px;
+        }
+        
+        .insight-box .icon {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .insight-box p {
+            font-size: 1.05rem;
+            color: #78350f;
+            line-height: 1.7;
+            margin-bottom: 0.75rem;
+        }
+        
+        .insight-box p:last-child {
+            margin-bottom: 0;
+        }
+        
+        .call-to-action {
+            background: #eff6ff;
+            border: 2px solid #3b82f6;
+            padding: 1.25rem;
+            margin: 1.5rem 0;
+            border-radius: 8px;
+            font-size: 1.05rem;
+            color: #1e40af;
+        }
+        
+        .call-to-action strong {
+            font-weight: 600;
+        }
+        
+        /* Checklist Section */
+        .checklist-section {
+            background: #f9fafb;
+            padding: 60px;
+            border-top: 4px solid #3b82f6;
+        }
+        
+        .checklist-section h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #1e40af;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        
+        .checklist-item {
+            background: white;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-radius: 8px;
+            border-left: 4px solid #10b981;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .checklist-item h4 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 0.75rem;
+        }
+        
+        .checklist-item p {
+            color: #6b7280;
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+        
+        /* Warning Section */
+        .warning-section {
+            background: #fef2f2;
+            border: 2px solid #ef4444;
+            padding: 40px;
+            margin: 40px 0;
+            border-radius: 12px;
+        }
+        
+        .warning-section h3 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #dc2626;
+            margin-bottom: 1.5rem;
+        }
+        
+        .warning-section ul {
+            list-style: none;
+            margin: 1rem 0;
+        }
+        
+        .warning-section ul li {
+            padding: 0.75rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+            color: #991b1b;
+            font-size: 1.05rem;
+        }
+        
+        .warning-section ul li:before {
+            content: "⚠";
+            position: absolute;
+            left: 0;
+            font-size: 1.2rem;
+        }
+        
+        /* Final CTA */
+        .final-cta {
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            color: white;
+            padding: 60px;
+            text-align: center;
+            margin-top: 40px;
+        }
+        
+        .final-cta h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+        }
+        
+        .final-cta p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.95;
+            line-height: 1.7;
+        }
+        
+        .final-contact {
+            background: rgba(255,255,255,0.1);
+            padding: 2rem;
+            border-radius: 12px;
+            margin-top: 2rem;
+        }
+        
+        .final-contact p {
+            font-size: 1.1rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        .final-contact a {
+            color: white;
+            text-decoration: underline;
+        }
+        
+        /* Download Instructions */
+        .download-instructions {
+            background: #f3f4f6;
+            padding: 2rem;
+            border-radius: 12px;
+            margin: 2rem 0;
+            text-align: center;
+        }
+        
+        .download-instructions h4 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 1rem;
+        }
+        
+        .download-instructions ol {
+            text-align: left;
+            max-width: 400px;
+            margin: 1rem auto;
+            list-style-position: inside;
+        }
+        
+        .download-instructions ol li {
+            margin: 0.5rem 0;
+            color: #4b5563;
+        }
+        
+        @media print {
+            .page-break {
+                page-break-after: always;
+            }
+            .section {
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Cover Page -->
+    <div class="cover page-break">
+        <h1>Complete Guide to<br>ACA Open Enrollment</h1>
+        <p class="subtitle">Your Essential Resource for Making Informed Health Insurance Decisions</p>
+        <div class="author">
+            <p>Isaac Orraiz</p>
+            <p style="font-weight: 400; font-size: 1rem; margin-top: 0.5rem;">Licensed Health Insurance Specialist</p>
+        </div>
+    </div>
+
+    <!-- Welcome Section -->
+    <div class="section welcome page-break">
+        <div class="welcome-content">
+            <h2>Welcome, Friend!</h2>
+            
+            <p>I'm <strong>Isaac Orraiz</strong>, a licensed Health insurance specialist with <strong>8+ years of experience</strong>.</p>
+            
+            <p>If you're already enrolled in health insurance, you've made an important decision to secure you and your family's healthcare and financial well-being. But health insurance isn't a "set it and forget it" kind of program—it's important to ensure your plan continues to meet your needs year after year.</p>
+            
+            <p>Choosing the right health insurance plan can feel overwhelming with all the yearly plan changes and options to consider. <strong>That's where I come in.</strong></p>
+            
+            <p>My goal is to provide clarity and guidance, helping you make informed decisions to get the most out of your health insurance coverage.</p>
+            
+            <p>One of my favorite parts of being an agent is connecting with people just like you. I take pride in providing personalized guidance and answering all your questions—big or small—because they all matter. And most importantly, <strong>YOU matter.</strong></p>
+            
+            <p><strong>Reach out anytime</strong> ➞ If you ever feel unsure or have questions, don't hesitate to reach out. I'm just a phone call or email away, and I'd love to help you every step of the way.</p>
+            
+            <p>Together, we'll make sure your health insurance plan fits your unique needs. I'm so happy you're here and can't wait to support you on this journey!</p>
+            
+            <div class="signature">
+                <p>With care,</p>
+                <p style="font-size: 1.3rem; margin-top: 0.5rem;">Isaac Orraiz</p>
+            </div>
+            
+            <div class="contact-info">
+                <p><strong>📞 Phone:</strong> <a href="tel:5404261804">540-426-1804</a></p>
+                <p><strong>📧 Email:</strong> <a href="mailto:isaac@isaacplans.com">isaac@isaacplans.com</a></p>
+                <p><strong>🌐 Website/Book a Consultation:</strong> <a href="https://www.isaacplans.com/en/aca" target="_blank">https://www.isaacplans.com/en/aca</a></p>
+            </div>
+            
+            <div class="download-instructions">
+                <h4>I'm so happy to share this important information with you.</h4>
+                <p style="margin-bottom: 1rem; color: #4b5563;">To download your own copy of this guide:</p>
+                <ol>
+                    <li>Click the 3 dots in the upper right corner</li>
+                    <li>Select &gt; Download</li>
+                </ol>
+                <p style="margin-top: 1rem; color: #4b5563; font-size: 0.95rem;">You can also bookmark this link to easily refer back to the guide anytime!</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tip 1 -->
+    <div class="section-header page-break">
+        <div class="tip-number" style="display: inline-block; margin-bottom: 1rem;">1</div>
+        <h2>Understand Your Subsidy Options</h2>
+        <p>Health insurance subsidies (also known as Advanced Premium Tax Credits) are one of the easiest ways to lower your monthly premiums. These subsidies are available to individuals and families who meet certain income requirements when purchasing coverage through the ACA Marketplace.</p>
+    </div>
+    
+    <div class="tip-section">
+        <div class="tip-content">
+            <ul>
+                <li><strong>What are subsidies?</strong><br>They're financial assistance from the government that helps lower the cost of health insurance premiums.</li>
+                <li><strong>How do you qualify?</strong><br>Subsidies are based on your income and household size compared to the federal poverty level. Many people are surprised to learn they qualify for subsidies, even if they think their income is too high.</li>
+                <li><strong>How do you calculate your subsidy?</strong><br>Tools on the Marketplace website or assistance from an experienced agent can help you determine how much you're eligible for.</li>
+            </ul>
+            
+            <div class="insight-box">
+                <div class="icon">⭐️</div>
+                <p><strong>My Insight:</strong></p>
+                <p>I recently helped a family of four qualify for over $500 per month in premium savings through Marketplace subsidies — simply by recalculating their income and household size correctly. Many people don't realize they qualify for this level of help!</p>
+            </div>
+            
+            <div class="call-to-action">
+                <p><strong>💬 I'd be happy to review your situation and see how much you could be saving too.</strong></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tip 2 -->
+    <div class="section-header page-break">
+        <div class="tip-number" style="display: inline-block; margin-bottom: 1rem;">2</div>
+        <h2>Choose The Right Plan For Your Needs</h2>
+        <p>One size doesn't fit all when it comes to health insurance. Choosing the wrong plan can mean paying more than you need for benefits you won't use—or worse, ending up with unexpected expenses.</p>
+    </div>
+    
+    <div class="tip-section">
+        <div class="tip-content">
+            <h3 style="font-size: 1.5rem; margin-bottom: 1rem;">Evaluate the ACA Metal Tiers:</h3>
+            <ul>
+                <li><strong>Bronze Plans:</strong> Lower premiums but higher out-of-pocket costs (great for healthy individuals who rarely need care).</li>
+                <li><strong>Silver Plans:</strong> Moderate premiums and cost-sharing. Subsidies are often tied to this level.</li>
+                <li><strong>Gold/Platinum Plans:</strong> Higher premiums but lower out-of-pocket costs (ideal for those with frequent medical needs).</li>
+            </ul>
+            
+            <h3 style="font-size: 1.5rem; margin: 2rem 0 1rem 0;">Match Your Plan to Your Healthcare Needs:</h3>
+            <p style="margin-bottom: 1rem;">Consider how often you visit the doctor, your prescription costs, and your anticipated medical needs for the year.</p>
+            
+            <div class="insight-box">
+                <div class="icon">⭐️</div>
+                <p><strong>My Insight:</strong></p>
+                <p>I help my clients find the perfect balance between premiums and out-of-pocket costs, so they only pay for the coverage they actually need.</p>
+                <p style="margin-top: 1rem;">A common concern I hear is: "What if my doctor isn't in-network, my prescription isn't covered, or I missed Open Enrollment?"</p>
+            </div>
+            
+            <div class="call-to-action">
+                <p><strong>✅ The good news is that you may still qualify for a Special Enrollment Period (SEP) that fits your situation.</strong></p>
+                <p style="margin-top: 0.75rem;"><strong>📞 Call me at (540) 426-1804</strong> and let's review your options today — it's free and only takes a few minutes.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tip 3 -->
+    <div class="section-header page-break">
+        <div class="tip-number" style="display: inline-block; margin-bottom: 1rem;">3</div>
+        <h2>Maximize Preventative Care Benefits</h2>
+        <p>The ACA requires health insurance plans to cover many preventive services at no cost to you. Using these services is not only good for your health but can also save you money by catching potential issues early.</p>
+    </div>
+    
+    <div class="tip-section">
+        <div class="tip-content">
+            <ul>
+                <li><strong>Examples of Preventive Services:</strong> Annual check-ups, screenings (like mammograms or colonoscopies), immunizations, and more.</li>
+                <li><strong>Why It Saves Money:</strong> Preventing health issues or detecting them early can help avoid expensive treatments down the road.</li>
+            </ul>
+            
+            <div class="insight-box">
+                <div class="icon">⭐️</div>
+                <p><strong>My Insight:</strong></p>
+                <p>One of my clients recently caught a potential health issue early thanks to a free preventive screening included with their Marketplace plan.</p>
+                <p style="margin-top: 1rem;">Preventive care — like annual checkups, vaccines, and lab tests — is 100% covered on most ACA plans, meaning no extra cost to you.</p>
+            </div>
+            
+            <div class="call-to-action">
+                <p><strong>💡 Taking advantage of these benefits is one of the easiest ways to stay healthy and save money in the long run.</strong></p>
+                <p style="margin-top: 0.75rem;"><strong>📞 Call me at (540) 426-1804</strong> if you'd like to review your options for affordable coverage that keeps you protected all year long.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tip 4 -->
+    <div class="section-header page-break">
+        <div class="tip-number" style="display: inline-block; margin-bottom: 1rem;">4</div>
+        <h2>Use In-Network Providers</h2>
+        <p>Insurance companies negotiate lower rates with doctors, hospitals, and other healthcare providers who are in-network. Using out-of-network providers can result in significantly higher costs.</p>
+    </div>
+    
+    <div class="tip-section">
+        <div class="tip-content">
+            <ul>
+                <li><strong>What Does In-Network Mean?</strong> These are providers who have a contract with your insurance company.</li>
+                <li><strong>Why It Matters:</strong> Out-of-network services can result in surprise bills that aren't fully covered by your insurance.</li>
+                <li><strong>Pro Tip:</strong> Always check whether your doctor, hospital, or specialist is in-network before scheduling appointments.</li>
+            </ul>
+            
+            <div class="insight-box">
+                <div class="icon">⭐️</div>
+                <p><strong>My Insight:</strong></p>
+                <p>One of the biggest ways people overpay for healthcare is by accidentally going out-of-network — and getting hit with surprise bills.</p>
+                <p style="margin-top: 1rem;">That's why I always help my clients double-check that their doctors, specialists, and hospitals are in-network before they enroll in a plan.</p>
+            </div>
+            
+            <div class="call-to-action">
+                <p><strong>✅ Staying in-network = lower costs, fewer headaches, and full coverage for most services.</strong></p>
+                <p style="margin-top: 0.75rem;"><strong>📞 Need help verifying your providers?</strong> Call or text me at (540) 426-1804 — I'll make sure your new plan fits your needs and budget.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tip 5 -->
+    <div class="section-header page-break">
+        <div class="tip-number" style="display: inline-block; margin-bottom: 1rem;">5</div>
+        <h2>Review and Update Your Plan Annually - It's Not Too Late</h2>
+        <p>Your healthcare needs and financial situation change over time—and so do health insurance plans. That's why it's crucial to review your plan every year to ensure it still fits your needs.</p>
+    </div>
+    
+    <div class="tip-section">
+        <div class="tip-content">
+            <ul>
+                <li><strong>Open Enrollment Period:</strong> This is the annual window when you can switch plans (typically November 1–January 15).</li>
+                <li><strong>Special Enrollment Period (SEP):</strong> You may qualify to change your plan outside of Open Enrollment if you've experienced a qualifying life event like:
+                    <ul style="margin-top: 0.5rem; margin-left: 1rem;">
+                        <li>Loss of previous coverage.</li>
+                        <li>Marriage or divorce.</li>
+                        <li>Having a baby or adopting a child.</li>
+                        <li>Moving to a new area.</li>
+                    </ul>
+                </li>
+                <li><strong>Why Review Your Plan?</strong> Plans, premiums, networks, and subsidies can all change. Reviewing your plan ensures you're not paying more than you need or missing out on better options.</li>
+            </ul>
+            
+            <div class="insight-box">
+                <div class="icon">⭐️</div>
+                <p><strong>My Insight:</strong></p>
+                <p>Each year during Open Enrollment, I personally review my clients' plans to make sure their coverage still fits their health needs and budget.</p>
+                <p style="margin-top: 1rem;">So often, we discover ways to save even more or find plans with better doctor networks and lower copays.</p>
+            </div>
+            
+            <div class="call-to-action">
+                <p><strong>🗓 Open Enrollment is the perfect time to make sure you're not overpaying or missing out on benefits.</strong></p>
+                <p style="margin-top: 0.75rem;"><strong>💬 I'm happy to review your plan — at no cost to you.</strong></p>
+                <p style="margin-top: 0.75rem;"><strong>📞 Call or text (540) 426-1804</strong> to schedule your free review.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Checklist Section -->
+    <div class="checklist-section page-break">
+        <h2>Checklist: Is It Time To Rethink Your Health Insurance Plan?</h2>
+        <p style="text-align: center; font-size: 1.1rem; color: #6b7280; margin-bottom: 3rem;">Use this checklist to determine whether your health insurance plan might need an update:</p>
+        
+        <div class="checklist-item">
+            <h4>✅ Have you verified your eligibility for subsidies?</h4>
+            <p>If "no," you could be missing out on significant savings. Review your income and household details to determine if you qualify.</p>
+        </div>
+        
+        <div class="checklist-item">
+            <h4>✅ Does your current plan match your healthcare usage (e.g., doctor visits, prescriptions)?</h4>
+            <p>If "no," you may be overpaying for unnecessary coverage or facing higher out-of-pocket costs. Consider switching to a plan that aligns better with your needs.</p>
+        </div>
+        
+        <div class="checklist-item">
+            <h4>✅ Are you using preventive services included in your plan?</h4>
+            <p>If "no," you're missing out on free services that can help you avoid costly medical issues later. Take advantage of these benefits today.</p>
+        </div>
+        
+        <div class="checklist-item">
+            <h4>✅ Do you always confirm your providers are in-network before scheduling care?</h4>
+            <p>If "no," this could result in unexpected out-of-pocket costs. Double-check with your insurance provider to avoid surprises.</p>
+        </div>
+        
+        <div class="checklist-item">
+            <h4>✅ Have you reviewed your plan during Open Enrollment or Special Enrollment?</h4>
+            <p>If "no," you could be missing out on better plans or cost-saving opportunities. Consider working with an agent to review your options.</p>
+        </div>
+        
+        <div style="background: #eff6ff; padding: 2rem; border-radius: 12px; margin-top: 3rem; text-align: center;">
+            <p style="font-size: 1.2rem; font-weight: 600; color: #1e40af; margin-bottom: 1rem;">What to Do Next</p>
+            <p style="font-size: 1.05rem; color: #374151; line-height: 1.7;">If you answered "no" to any of the questions, it might be time to rethink your plan or consult with an agent who can help you find better options.</p>
+            <p style="font-size: 1.05rem; color: #374151; line-height: 1.7; margin-top: 1rem; font-weight: 600;">Health Insurance decisions are too important to leave to chance—don't hesitate to reach out for guidance!</p>
+        </div>
+    </div>
+
+    <!-- Warning Section -->
+    <div class="section page-break">
+        <div class="warning-section">
+            <h3>⚠️ Avoiding Scams and Misleading Practices</h3>
+            <p style="color: #991b1b; margin-bottom: 1.5rem; font-size: 1.1rem;">Health Insurance is an important decision, and unfortunately, there are dishonest individuals and companies out there who may try to take advantage of that.</p>
+            
+            <p style="color: #991b1b; font-weight: 600; margin-bottom: 1rem;">Be cautious of:</p>
+            <ul>
+                <li>High-pressure tactics or promises that sound too good to be true (guaranteed $0 health insurance, gift cards, restaurant cards, visa cards, etc)</li>
+                <li>Emphasis on freebies or giveaways rather than providing valuable insurance guidance: These tactics are often designed solely to collect your personal information without offering meaningful assistance.</li>
+                <li>Companies or individuals asking for your personal information without clearly explaining how it will be used.</li>
+                <li>Offers that focus solely on signing you up quickly rather than helping you understand your options.</li>
+            </ul>
+            
+            <div style="background: #fee2e2; padding: 1.5rem; border-radius: 8px; margin-top: 2rem;">
+                <h4 style="color: #dc2626; font-size: 1.3rem; margin-bottom: 1rem;">🚨 Agencies Offering Enrollment Without Speaking To An Agent</h4>
+                <p style="color: #991b1b; margin-bottom: 1rem;">Be cautious of agencies or individuals who offer to enroll you in a health plan without a personal consultation. This approach is often designed to quickly "flip" you into a plan for the sole purpose of earning a commission, rather than ensuring the plan is the right fit for your needs.</p>
+                <p style="color: #991b1b;">Avoid sharing your personal information with these companies and be wary of providing consent for them to make changes to your plan without thoroughly explaining your options. Your health coverage is too important to be handled by someone who doesn't take the time to understand your unique needs.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Final CTA -->
+    <div class="final-cta page-break">
+        <h2>The Right Plan For You</h2>
+        <p>Your health insurance plan is one of the most important decisions you'll make for you and your family's health and finances—don't leave it to chance!</p>
+        <p>It's frustrating to see individuals enrolled in plans that don't fully meet their needs or take their unique situations into account. That's why I'm here: to ensure you feel confident, informed, and supported every step of the way.</p>
+        <p style="font-weight: 600; margin-top: 2rem;">If you're unsure about your current coverage—or simply want peace of mind—I'd love to help.</p>
+        <p style="font-weight: 600;">Let's schedule a consultation to review your options and make sure you have the right plan for your needs.</p>
+        <p style="font-size: 1.3rem; font-weight: 600; margin-top: 2rem;">If you have any questions, I'm just a phone call away!</p>
+        
+        <div class="final-contact">
+            <p style="font-size: 1.4rem; font-weight: 700; margin-bottom: 1rem;">Isaac Orraiz</p>
+            <p><strong>📞 Phone:</strong> <a href="tel:5404261804">540-426-1804</a></p>
+            <p><strong>📧 Email:</strong> <a href="mailto:isaac@isaacplans.com">isaac@isaacplans.com</a></p>
+            <p><strong>🌐 Website/Book a Consultation:</strong> <a href="https://www.isaacplans.com/en/aca" target="_blank">https://www.isaacplans.com/en/aca</a></p>
+        </div>
+    </div>
+</body>
+</html>
+

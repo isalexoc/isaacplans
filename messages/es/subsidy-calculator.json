@@ -1,0 +1,55 @@
+{
+  "subsidyCalculatorPage": {
+    "meta": {
+      "title": "Calculadora de Subsidios ACA - Estime Sus Créditos Fiscales de Prima | Isaac Plans Insurance",
+      "description": "Use nuestra calculadora de subsidios ACA para estimar cuánto pagará por las primas de seguro de salud en 2026 con y sin créditos fiscales de prima mejorados. Obtenga una estimación de su asistencia financiera.",
+      "keywords": "calculadora de subsidios ACA, calculadora de crédito fiscal de prima, subsidio de seguro de salud, calculadora ACA 2026, estimador de subsidios Obamacare",
+      "image": "https://www.isaacplans.com/images/subsidy-calculator.png",
+      "imageAlt": "Herramienta de Calculadora de Subsidios ACA"
+    },
+    "hero": {
+      "title": "Calculadora de Crédito Fiscal de Prima Mejorado ACA",
+      "description": "Estime cuánto pagaría en primas con y sin los créditos fiscales de prima mejorados de la ACA. Esta calculadora le ayuda a entender sus posibles ahorros y asistencia financiera para 2026."
+    },
+    "content": {
+      "title": "Calcule Su Subsidio de Prima ACA",
+      "description": "La Ley de Cuidado de Salud Asequible (ACA) proporciona créditos fiscales de prima para ayudar a hacer el seguro de salud más asequible para individuos y familias. Según la ley actual, el crédito fiscal de prima mejorado de la ACA expira a finales de 2025, lo que aumentará los pagos de primas para la cobertura del Mercado en un 114% en promedio (un estimado de $1,016 al año). Use la calculadora a continuación para ver cómo esto afecta sus primas."
+    },
+    "infoBox": {
+      "title": "Lo Que Puede Calcular",
+      "items": [
+        "Su prima mensual estimada con créditos fiscales mejorados",
+        "Su prima mensual estimada sin créditos fiscales mejorados",
+        "La cantidad de asistencia financiera federal para la que puede ser elegible",
+        "Cómo los cambios de prima afectan el presupuesto de su hogar"
+      ]
+    },
+    "howItWorks": {
+      "title": "Cómo Usar la Calculadora",
+      "steps": [
+        "Ingrese la información de su hogar incluyendo ingresos, edad, tamaño de familia y ubicación",
+        "Seleccione si tiene acceso a cobertura patrocinada por el empleador",
+        "Vea sus primas estimadas con y sin créditos fiscales de prima mejorados"
+      ]
+    },
+    "cta": {
+      "description": "¿Listo para ver sus costos de prima estimados?",
+      "buttonText": "Acceder a la Calculadora de Subsidios KFF",
+      "disclaimer": "Esta calculadora es proporcionada por la Fundación de la Familia Kaiser (KFF) y es solo para fines de estimación. Los montos reales de prima pueden variar según sus circunstancias específicas y la selección de plan."
+    },
+    "additionalInfo": {
+      "title": "Información Importante",
+      "cards": {
+        "0": {
+          "title": "Créditos Fiscales Mejorados que Expiran",
+          "description": "Los créditos fiscales de prima mejorados están actualmente disponibles hasta finales de 2025. Si no se extienden, los pagos de prima aumentarán significativamente para muchos inscritos. La calculadora le muestra ambos escenarios."
+        },
+        "1": {
+          "title": "Obtenga Ayuda Personalizada",
+          "description": "Aunque la calculadora proporciona estimaciones, nuestros agentes con licencia pueden ayudarle a entender sus opciones, encontrar el plan correcto y navegar el proceso de inscripción. Contáctenos para asistencia personalizada."
+        }
+      }
+    }
+  }
+}
+

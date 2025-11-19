@@ -103,6 +103,22 @@ export const routing = defineRouting({
       en: "/glossary",
       es: "/glosario",
     },
+    "/subsidy-calculator": {
+      en: "/subsidy-calculator",
+      es: "/calculadora-de-subsidios",
+    },
+    "/plan-comparison": {
+      en: "/plan-comparison",
+      es: "/comparador-de-planes",
+    },
+    "/renewal-support": {
+      en: "/renewal-support",
+      es: "/apoyo-en-renovaciones",
+    },
+    "/consumer-guides": {
+      en: "/consumer-guides",
+      es: "/guias-para-consumidores",
+    },
   },
 });
 
