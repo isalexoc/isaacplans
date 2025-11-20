@@ -24,7 +24,7 @@ export default function LocaleSwitcherSelect({ defaultValue, label }: Props) {
   const params = useParams();
 
   function onSelectChange(nextLocale: string) {
-    router.replace({ pathname }, { locale: nextLocale as Locale });
+    router.replace({ pathname } as any, { locale: nextLocale as Locale });
   }
 
   return (
