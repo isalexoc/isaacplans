@@ -53,7 +53,7 @@ const serviceLinks = [
 
 const resourceLinks = [
   { key: "faq", href: "/faq", icon: "HelpCircle" },
-  { key: "blog", href: "", icon: "BookOpen" },
+  { key: "blog", href: "/blog", icon: "BookOpen" },
   { key: "testimonials", href: "/testimonials", icon: "MessageCircle" },
   { key: "consumerGuides", href: "/consumer-guides", icon: "FileText" },
   { key: "glossary", href: "/glossary", icon: "Landmark" },

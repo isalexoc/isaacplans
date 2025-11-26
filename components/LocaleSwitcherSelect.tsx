@@ -24,7 +24,27 @@ export default function LocaleSwitcherSelect({ defaultValue, label }: Props) {
   const params = useParams();
 
   function onSelectChange(nextLocale: string) {
-    router.replace({ pathname } as any, { locale: nextLocale as Locale });
+    // Check if pathname contains dynamic segments (e.g., [slug], [guideId])
+    const hasDynamicSegments = pathname.includes("[");
+    
+    if (hasDynamicSegments && params) {
+      // Extract all params except 'locale' (which is handled separately)
+      const routeParams: Record<string, string> = {};
+      Object.keys(params).forEach((key) => {
+        if (key !== "locale" && params[key]) {
+          routeParams[key] = params[key] as string;
+        }
+      });
+      
+      // Pass params for dynamic routes
+      router.replace(
+        { pathname, params: routeParams } as any,
+        { locale: nextLocale as Locale }
+      );
+    } else {
+      // For static routes, use the pathname as is
+      router.replace({ pathname } as any, { locale: nextLocale as Locale });
+    }
   }
 
   return (

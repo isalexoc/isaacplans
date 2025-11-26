@@ -1746,5 +1746,19 @@
         "backButton": "← Volver"
       }
     }
+  },
+  "blogPage": {
+    "meta": {
+      "title": "Blog de Seguros | Isaac Plans Insurance",
+      "description": "Artículos educativos sobre seguros de salud, planes ACA, visión dental y consejos de bienestar.",
+      "keywords": "blog de seguros, artículos de seguros de salud, información ACA, consejos de seguros",
+      "image": "https://www.isaacplans.com/images/blog.png",
+      "imageAlt": "Blog de Isaac Plans Insurance"
+    },
+    "hero": {
+      "title": "Blog de Seguros",
+      "description": "Mantente informado con nuestros últimos artículos sobre seguros de salud, consejos de bienestar e información de la industria."
+    },
+    "empty": "Aún no hay publicaciones disponibles. ¡Vuelve pronto!"
   }
 }

@@ -28,4 +28,5 @@ export type AppHref =
   | "/subsidy-calculator"
   | "/plan-comparison"
   | "/renewal-support"
-  | "/consumer-guides";
+  | "/consumer-guides"
+  | "/blog";

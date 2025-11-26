@@ -1758,5 +1758,19 @@
         "backButton": "← Go Back"
       }
     }
+  },
+  "blogPage": {
+    "meta": {
+      "title": "Insurance Blog | Isaac Plans Insurance",
+      "description": "Educational articles on health insurance, ACA plans, dental vision, and wellness tips.",
+      "keywords": "insurance blog, health insurance articles, ACA information, insurance tips",
+      "image": "https://www.isaacplans.com/images/blog.png",
+      "imageAlt": "Isaac Plans Insurance Blog"
+    },
+    "hero": {
+      "title": "Insurance Blog",
+      "description": "Stay informed with our latest articles on health insurance, wellness tips, and industry insights."
+    },
+    "empty": "No blog posts available yet. Check back soon!"
   }
 }

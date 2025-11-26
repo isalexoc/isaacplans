@@ -119,6 +119,26 @@ export const routing = defineRouting({
       en: "/consumer-guides",
       es: "/guias-para-consumidores",
     },
+    "/consumer-guides/[guideId]": {
+      en: "/consumer-guides/[guideId]",
+      es: "/guias-para-consumidores/[guideId]",
+    },
+    "/blog": {
+      en: "/blog",
+      es: "/blog",
+    },
+    "/blog/[slug]": {
+      en: "/blog/[slug]",
+      es: "/blog/[slug]",
+    },
+    "/blog/category/[category]": {
+      en: "/blog/category/[category]",
+      es: "/blog/category/[category]",
+    },
+    "/blog/categories": {
+      en: "/blog/categories",
+      es: "/blog/categorias",
+    },
   },
 });
 
