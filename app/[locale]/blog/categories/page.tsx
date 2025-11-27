@@ -30,6 +30,7 @@ const CATEGORY_LABELS: Record<string, { en: string; es: string; description: { e
       en: "Learn about Affordable Care Act plans, enrollment periods, and subsidies",
       es: "Aprende sobre planes de la Ley de Cuidado de Salud Asequible, períodos de inscripción y subsidios",
     },
+    image: "aca_obamacare_w1tive",
   },
   "short-term-medical": {
     en: "Short Term Medical",
@@ -38,6 +39,7 @@ const CATEGORY_LABELS: Record<string, { en: string; es: string; description: { e
       en: "Temporary health coverage for gaps between major medical plans",
       es: "Cobertura de salud temporal para brechas entre planes médicos principales",
     },
+    image: "short-term-medical_zfopfc",
   },
   "dental-vision": {
     en: "Dental & Vision",
@@ -46,6 +48,7 @@ const CATEGORY_LABELS: Record<string, { en: string; es: string; description: { e
       en: "Affordable dental and vision insurance plans",
       es: "Planes de seguro dental y de visión asequibles",
     },
+    image: "dental-vision_mfu7ip",
   },
   "hospital-indemnity": {
     en: "Hospital Indemnity",
@@ -54,6 +57,7 @@ const CATEGORY_LABELS: Record<string, { en: string; es: string; description: { e
       en: "Cash benefits for hospital stays and medical procedures",
       es: "Beneficios en efectivo para estancias hospitalarias y procedimientos médicos",
     },
+    image: "hospital-indemnity_a2hjke",
   },
   iul: {
     en: "IUL (Indexed Universal Life)",
@@ -62,6 +66,7 @@ const CATEGORY_LABELS: Record<string, { en: string; es: string; description: { e
       en: "Life insurance with cash value growth potential",
       es: "Seguro de vida con potencial de crecimiento de valor en efectivo",
     },
+    image: "iul_zxgyef",
   },
   "final-expense": {
     en: "Final Expense / Burial",
@@ -70,6 +75,7 @@ const CATEGORY_LABELS: Record<string, { en: string; es: string; description: { e
       en: "Life insurance to cover funeral and burial costs",
       es: "Seguro de vida para cubrir costos de funeral y sepultura",
     },
+    image: "final-expense_qkkzvd",
   },
   "cancer-plans": {
     en: "Cancer Plans",
@@ -78,6 +84,7 @@ const CATEGORY_LABELS: Record<string, { en: string; es: string; description: { e
       en: "Specialized insurance coverage for cancer treatment",
       es: "Cobertura de seguro especializada para tratamiento del cáncer",
     },
+    image: "cancer-plans_ntdmxh",
   },
   "heart-stroke": {
     en: "Heart Attack & Stroke Plans",
@@ -86,6 +93,7 @@ const CATEGORY_LABELS: Record<string, { en: string; es: string; description: { e
       en: "Insurance coverage for heart attack and stroke events",
       es: "Cobertura de seguro para eventos de ataque cardíaco y derrame",
     },
+    image: "heart-attack-stroke_btnlju",
   },
   general: {
     en: "General Insurance",
@@ -94,6 +102,7 @@ const CATEGORY_LABELS: Record<string, { en: string; es: string; description: { e
       en: "General insurance information and tips",
       es: "Información y consejos generales sobre seguros",
     },
+    image: "general-insurance_utbmcj",
   },
   "tips-guides": {
     en: "Insurance Tips & Guides",
@@ -102,6 +111,7 @@ const CATEGORY_LABELS: Record<string, { en: string; es: string; description: { e
       en: "Helpful tips and comprehensive guides for insurance",
       es: "Consejos útiles y guías completas sobre seguros",
     },
+    image: "insurance-tips-guides_wvrix3",
   },
   news: {
     en: "Industry News",
@@ -110,6 +120,7 @@ const CATEGORY_LABELS: Record<string, { en: string; es: string; description: { e
       en: "Latest news and updates from the insurance industry",
       es: "Últimas noticias y actualizaciones de la industria de seguros",
     },
+    image: "news-insurance-news_tkd88r",
   },
 };
 
@@ -152,16 +163,22 @@ export default async function CategoriesPage() {
     }
   });
 
-  // Get all categories that have posts
-  const categoriesWithPosts = Object.keys(categoryCounts)
+  // Get all categories from CATEGORY_LABELS, including those with 0 posts
+  const allCategories = Object.keys(CATEGORY_LABELS)
     .map((category) => ({
       id: category,
-      count: categoryCounts[category],
+      count: categoryCounts[category] || 0,
       label: CATEGORY_LABELS[category]?.[locale] || category,
       description: CATEGORY_LABELS[category]?.description[locale] || "",
       image: CATEGORY_LABELS[category]?.image,
     }))
-    .sort((a, b) => b.count - a.count); // Sort by post count
+    .sort((a, b) => {
+      // Sort by post count (descending), then alphabetically by label
+      if (b.count !== a.count) {
+        return b.count - a.count;
+      }
+      return a.label.localeCompare(b.label);
+    });
 
   return (
     <main className="container mx-auto min-h-screen max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
@@ -195,17 +212,8 @@ export default async function CategoriesPage() {
         </p>
       </div>
 
-      {categoriesWithPosts.length === 0 ? (
-        <div className="text-center py-16">
-          <p className="text-gray-600 dark:text-gray-400 text-lg">
-            {locale === "en"
-              ? "No categories available yet."
-              : "Aún no hay categorías disponibles."}
-          </p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-          {categoriesWithPosts.map((category) => {
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+        {allCategories.map((category) => {
             const imageUrl = category.image
               ? `https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_400,h_250,c_fill,g_auto/${category.image}`
               : null;
@@ -284,8 +292,7 @@ export default async function CategoriesPage() {
               </Link>
             );
           })}
-        </div>
-      )}
+      </div>
     </main>
   );
 }

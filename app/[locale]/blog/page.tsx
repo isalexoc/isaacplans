@@ -12,6 +12,7 @@ import {
   languageAlternatesPrefixed,
   type SupportedLocale,
 } from "@/lib/seo/i18n";
+import { BlogCategoryFilter } from "@/components/blog-category-filter";
 
 const POSTS_QUERY = `*[
   _type == "post"
@@ -182,22 +183,7 @@ export default async function BlogPage() {
       )}
 
       {/* Category Filter */}
-      {categories.length > 0 && (
-        <div className="mb-8 flex flex-wrap gap-2 justify-center">
-          <button className="px-4 py-2 rounded-full bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition-colors">
-            {locale === 'en' ? 'All Posts' : 'Todas las Publicaciones'}
-          </button>
-          {categories.map((category) => (
-            <Link
-              key={category}
-              href={`/${locale}/blog/category/${category}`}
-              className="px-4 py-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
-            >
-              {CATEGORY_LABELS[category]?.[locale] || category}
-            </Link>
-          ))}
-        </div>
-      )}
+      <BlogCategoryFilter categories={categories} />
 
       {/* All Posts */}
       {allPosts.length === 0 ? (
