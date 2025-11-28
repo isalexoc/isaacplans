@@ -410,9 +410,9 @@ export default async function BlogPostPage({
   const breadcrumbLd = getBlogPostBreadcrumbLd(
     locale,
     post.slug.current,
+    post.title,
     post.category,
-    categoryLabel,
-    post.title
+    categoryLabel
   );
 
   return (

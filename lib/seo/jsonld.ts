@@ -7,6 +7,7 @@ import {
   Person,
   WebPage,
   Article,
+  ListItem,
 } from "schema-dts";
 
 /* ─────────────────────────  shared constants ─────────────────────── */
@@ -593,14 +594,14 @@ export const getBlogPostArticleLd = (
 export const getBlogPostBreadcrumbLd = (
   locale: string,
   slug: string,
+  postTitle: string,
   category?: string,
-  categoryLabel?: string,
-  postTitle: string
+  categoryLabel?: string
 ): WithContext<BreadcrumbList> => {
   const homeLabel = locale === "en" ? "Home" : "Inicio";
   const blogLabel = locale === "en" ? "Blog" : "Blog";
   
-  const items = [
+  const items: ListItem[] = [
     {
       "@type": "ListItem",
       position: 1,
