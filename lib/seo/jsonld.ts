@@ -564,21 +564,42 @@ export const getBlogPostArticleLd = (
 ): WithContext<Article> => {
   const url = post.canonicalUrl || `${BASE_URL}/${post.locale}/blog/${post.slug}`;
   
+  // Prepare image array with multiple sizes if available
+  const images = post.image ? [
+    post.image,
+    // You can add more image sizes here if you have them
+  ] : undefined;
+
+  // Author as Person object (not just reference) for better Google recognition
+  const authorPerson = {
+    "@type": "Person" as const,
+    "@id": `${BASE_URL}/#isaacOrraiz`,
+    name: post.author,
+    url: `${BASE_URL}/about`,
+  };
+
+  // Publisher with Organization details including logo
+  const publisherOrg = {
+    "@type": "Organization" as const,
+    "@id": `${BASE_URL}/#organization`,
+    name: "Isaac Plans Insurance",
+    logo: {
+      "@type": "ImageObject" as const,
+      url: LOGO_URL,
+    },
+  };
+
   return {
     "@context": "https://schema.org",
     "@type": "Article",
     "@id": `${url}#article`,
     headline: post.title,
     description: post.description,
-    image: post.image ? [post.image] : undefined,
+    image: images,
     datePublished: post.publishedAt,
     dateModified: post.updatedAt || post.publishedAt,
-    author: {
-      "@id": `${BASE_URL}/#isaacOrraiz`,
-    },
-    publisher: {
-      "@id": `${BASE_URL}/#organization`,
-    },
+    author: [authorPerson],
+    publisher: publisherOrg,
     mainEntityOfPage: {
       "@type": "WebPage",
       "@id": url,
