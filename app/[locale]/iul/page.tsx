@@ -6,6 +6,7 @@ import FaqSection from "@/components/FaqSection";
 import EnrollmentSectionGeneric from "@/components/enrollment-section-template";
 import EligibilitySection from "@/components/eligibility-section";
 import AboutSectionGeneric from "@/components/about-section-template";
+import { BackHome } from "@/components/back-home";
 import type { Metadata } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
 import { getIulPageLd, getIulBreadcrumbLd } from "@/lib/seo/jsonld";
@@ -80,8 +81,9 @@ export default async function IndexedUniversalLifePage() {
 
   return (
     <>
-     
-
+      <div className="relative">
+        <BackHome />
+      </div>
       {/* HERO ----------------------------------------------------------- */}
       <HeroWithTestimonials
         badge={t("hero.badge")}

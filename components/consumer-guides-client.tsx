@@ -4,6 +4,7 @@ import { useState, Suspense } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { BackHome } from "@/components/back-home";
 import { FileText, BookOpen, TrendingUp, Sparkles, Download, Filter } from "lucide-react";
 import { GuideCard, type Guide } from "./guide-card";
 import { useSearchParams } from "next/navigation";
@@ -56,7 +57,8 @@ function ConsumerGuidesContent() {
   }));
 
   return (
-    <main className="w-full flex flex-col overflow-x-hidden">
+    <main className="w-full flex flex-col overflow-x-hidden relative">
+      <BackHome />
       {/* Hero Section */}
       <section className="relative isolate overflow-hidden bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:to-gray-800">
         <div className="mx-auto max-w-5xl px-4 py-24 text-center">

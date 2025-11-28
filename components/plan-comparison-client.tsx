@@ -10,6 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { BackHome } from "@/components/back-home";
 import { ExternalLink, MapPin, ArrowRight, CheckCircle2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
@@ -104,7 +105,8 @@ export default function PlanComparisonClient() {
   };
 
   return (
-    <main className="w-full flex flex-col overflow-x-hidden">
+    <main className="w-full flex flex-col overflow-x-hidden relative">
+      <BackHome />
       {/* Hero Section */}
       <section className="relative isolate overflow-hidden bg-gradient-to-br from-blue-50 to-white dark:from-gray-900 dark:to-gray-800">
         <div className="mx-auto max-w-5xl px-4 py-24 text-center">

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
 import { Shield, Clock, Info, ExternalLink } from "lucide-react";
 import HIButton from "@/components/HIButton";
+import { BackHome } from "@/components/back-home";
 import {
   getUhoneShortTermPageLd,
   getUhoneShortTermBreadcrumbLd,
@@ -88,7 +89,8 @@ export default async function ShortTermMedicalPage() {
   );
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen relative">
+      <BackHome />
       {/* Hero */}
       <section className="relative overflow-hidden bg-gradient-to-b from-primary/10 via-background to-background">
         <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">

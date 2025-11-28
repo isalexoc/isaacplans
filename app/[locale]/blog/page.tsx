@@ -14,6 +14,7 @@ import {
 } from "@/lib/seo/i18n";
 import { BlogCategoryFilter } from "@/components/blog-category-filter";
 import { BlogUserAuth } from "@/components/blog-user-auth";
+import { BackHome } from "@/components/back-home";
 
 const POSTS_QUERY = `*[
   _type == "post"
@@ -144,6 +145,10 @@ export default async function BlogPage() {
   return (
     <main className="container mx-auto min-h-screen max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
       <div className="mb-12">
+        {/* Back Home - Top Left */}
+        <div className="mb-4">
+          <BackHome variant="inline" />
+        </div>
         {/* Language Switcher and User Auth - Top */}
         <div className="mb-6 flex items-center justify-between flex-wrap gap-4">
           <Link

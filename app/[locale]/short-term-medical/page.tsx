@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
 import HIButton from "@/components/HIButton";
+import { BackHome } from "@/components/back-home";
 import ShortTermCarriersSection from "@/components/shortterm-carriers-section";
 
 import {
@@ -98,7 +99,8 @@ export default async function ShortTermMedicalPage() {
   );
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen relative">
+      <BackHome />
       {/* HERO ----------------------------------------------------------- */}
       <HeroWithTestimonialsGeneric
         badge={tem("hero.badge")}

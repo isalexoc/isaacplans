@@ -10,6 +10,7 @@ import FaqSection from "@/components/FaqSection";
 import CTABanner from "@/components/CTABanner-template";
 import PlanEnrollCard from "@/components/SelfEnrollSection";
 import ACAButton from "@/components/ACAButton";
+import { BackHome } from "@/components/back-home";
 import { getAcaPageLd, getAcaBreadcrumbLd } from "@/lib/seo/jsonld";
 import type { Metadata } from "next";
 
@@ -116,6 +117,9 @@ export default async function AcaPage() {
 
   return (
     <>
+      <div className="relative">
+        <BackHome />
+      </div>
       {/* HERO ---------------------------------------------------------- */}
       <HeroWithTestimonials
         badge={t("hero.badge")}

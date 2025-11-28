@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { BackHome } from "@/components/back-home";
 import { Download, ArrowLeft, CheckCircle2, ArrowDown } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -183,9 +184,10 @@ export default function GuideDetailClient({ guide }: GuideDetailClientProps) {
   }
 
   return (
-    <main className="w-full flex flex-col overflow-x-hidden">
+    <main className="w-full flex flex-col overflow-x-hidden relative">
+      <BackHome />
       {/* Back Button */}
-      <div className="container mx-auto px-4 max-w-5xl mt-6">
+      <div className="container mx-auto px-4 max-w-5xl mt-2">
         <Link 
           href={`/${locale}/consumer-guides`}
           className="inline-flex items-center text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"

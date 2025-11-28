@@ -7,6 +7,7 @@ import EligibilitySection from "@/components/eligibility-section";
 import EnrollmentSection from "@/components/enrollment-section-template";
 import FaqSection from "@/components/FaqSection";
 import CTABanner from "@/components/CTABanner-template";
+import { BackHome } from "@/components/back-home";
 import type { Metadata } from "next";
 import {
   getDentalVisionPageLd,
@@ -107,6 +108,9 @@ export default async function DentalVisionPage() {
 
   return (
     <>
+      <div className="relative">
+        <BackHome />
+      </div>
       {/* HERO */}
       <HeroWithTestimonials
         badge={t("hero.badge")}

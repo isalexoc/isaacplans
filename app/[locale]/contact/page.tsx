@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Facebook, Instagram, Linkedin, Youtube, Phone, Mail, MessageCircle, UserPlus, Globe, Calendar } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import ContactForm from "@/components/contact-form"; // client island
+import { BackHome } from "@/components/back-home";
 import { getLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import type { WithContext, WebPage, BreadcrumbList } from "schema-dts";
@@ -124,6 +125,9 @@ export default async function ContactPage() {
 
   return (
     <>
+      <div className="relative">
+        <BackHome />
+      </div>
       <section
         className="relative py-16 lg:py-24 px-4 sm:px-6 lg:px-8 
                    bg-gradient-to-br from-[hsl(var(--custom)/0.06)] via-white to-[hsl(var(--custom)/0.04)] 

@@ -1,6 +1,7 @@
 import { getLocale, getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { BackHome } from "@/components/back-home";
 import { AlertTriangle, CheckCircle2, XCircle, ArrowRight, Calendar, DollarSign, Shield, Users, FileCheck, Phone, Mail } from "lucide-react";
 import ACAButton from "@/components/ACAButton";
 import CTABanner from "@/components/CTABanner-template";
@@ -66,7 +67,8 @@ export default async function RenewalSupportPage() {
   const t = await getTranslations({ locale, namespace: "renewalSupportPage" });
 
   return (
-    <main className="w-full flex flex-col overflow-x-hidden">
+    <main className="w-full flex flex-col overflow-x-hidden relative">
+      <BackHome />
       {/* Hero Section */}
       <section className="relative isolate overflow-hidden bg-gradient-to-br from-blue-50 via-white to-blue-50 dark:from-gray-900 dark:to-gray-800">
         <div className="mx-auto max-w-5xl px-4 py-24 text-center">

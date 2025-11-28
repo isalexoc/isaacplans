@@ -6,6 +6,7 @@ import EnrollmentSectionGeneric from "@/components/enrollment-section-template";
 import EligibilitySection from "@/components/eligibility-section";
 import PlanEnrollCard from "@/components/SelfEnrollSection";
 import AboutSectionGeneric from "@/components/about-section-template";
+import { BackHome } from "@/components/back-home";
 import type { Metadata } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
 import { getHiPageLd, getHiBreadcrumbLd } from "@/lib/seo/jsonld";
@@ -79,6 +80,9 @@ export default async function HospitalIndemnityPage() {
 
   return (
     <>
+      <div className="relative">
+        <BackHome />
+      </div>
       <HeroWithTestimonials
         badge={t("hero.badge")}
         name={t("hero.name")}

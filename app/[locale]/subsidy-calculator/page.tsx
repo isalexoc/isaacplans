@@ -1,6 +1,7 @@
 import { getLocale, getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 import { Button } from "@/components/ui/button";
+import { BackHome } from "@/components/back-home";
 import { ExternalLink, Calculator } from "lucide-react";
 import {
   ogLocaleOf,
@@ -63,7 +64,8 @@ export default async function SubsidyCalculatorPage() {
   const t = await getTranslations({ locale, namespace: "subsidyCalculatorPage" });
 
   return (
-    <main className="w-full flex flex-col overflow-x-hidden">
+    <main className="w-full flex flex-col overflow-x-hidden relative">
+      <BackHome />
       {/* Hero Section */}
       <section className="relative isolate overflow-hidden bg-gradient-to-br from-blue-50 to-white dark:from-gray-900 dark:to-gray-800">
         <div className="mx-auto max-w-5xl px-4 py-24 text-center">
