@@ -13,6 +13,7 @@ import {
   type SupportedLocale,
 } from "@/lib/seo/i18n";
 import { BlogCategoryFilter } from "@/components/blog-category-filter";
+import { BlogUserAuth } from "@/components/blog-user-auth";
 
 const POSTS_QUERY = `*[
   _type == "post"
@@ -139,32 +140,38 @@ export default async function BlogPage() {
 
   return (
     <main className="container mx-auto min-h-screen max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
-      <div className="mb-12 text-center">
-        <h1 className="text-4xl sm:text-5xl font-bold mb-4 text-gray-900 dark:text-white">
-          {t("hero.title")}
-        </h1>
-        <p className="text-lg text-gray-700 dark:text-gray-300 max-w-2xl mx-auto mb-6">
-          {t("hero.description")}
-        </p>
-        <Link
-          href={`/${locale}/blog/categories`}
-          className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors shadow-lg hover:shadow-xl"
-        >
-          <svg
-            className="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+      <div className="mb-12 flex items-center justify-between flex-wrap gap-4">
+        <div className="flex-1 text-center">
+          <h1 className="text-4xl sm:text-5xl font-bold mb-4 text-gray-900 dark:text-white">
+            {t("hero.title")}
+          </h1>
+          <p className="text-lg text-gray-700 dark:text-gray-300 max-w-2xl mx-auto mb-6">
+            {t("hero.description")}
+          </p>
+          <Link
+            href={`/${locale}/blog/categories`}
+            className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors shadow-lg hover:shadow-xl"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
-            />
-          </svg>
-          {locale === "en" ? "Browse Categories" : "Explorar Categorías"}
-        </Link>
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
+              />
+            </svg>
+            {locale === "en" ? "Browse Categories" : "Explorar Categorías"}
+          </Link>
+        </div>
+        {/* User Auth Button */}
+        <div className="flex-shrink-0">
+          <BlogUserAuth />
+        </div>
       </div>
 
       {/* Featured Posts Section */}

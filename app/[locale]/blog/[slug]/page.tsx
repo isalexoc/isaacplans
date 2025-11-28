@@ -15,6 +15,7 @@ import {
 import Image from "next/image";
 import BlogCTA from "@/components/blog-cta";
 import { BlogSocialActions } from "@/components/blog-social-actions";
+import { BlogUserAuth } from "@/components/blog-user-auth";
 
 const POST_QUERY = `*[_type == "post" && slug.current == $slug && locale == $locale][0]{
   _id,
@@ -351,13 +352,18 @@ export default async function BlogPostPage({
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth={2}
-                d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"
+                d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"
               />
             </svg>
             {alternateText}
           </Link>
         </div>
       )}
+
+      {/* User Auth */}
+      <div className="mb-6 flex justify-end">
+        <BlogUserAuth />
+      </div>
 
       {/* Top CTA */}
       {showTopCTA && post.leadCapture && (
@@ -449,12 +455,13 @@ export default async function BlogPostPage({
           </div>
         )}
 
-        {/* Social Actions */}
-        <BlogSocialActions
-          postId={post._id}
-          postTitle={post.title}
-          postUrl={`https://www.isaacplans.com/${locale}/blog/${post.slug.current}`}
-        />
+      {/* Social Actions */}
+      <BlogSocialActions
+        postId={post._id}
+        postTitle={post.title}
+        postSlug={post.slug.current}
+        postUrl={`https://www.isaacplans.com/${locale}/blog/${post.slug.current}`}
+      />
       </header>
 
       {/* Featured Image */}
@@ -523,6 +530,7 @@ export default async function BlogPostPage({
       <BlogSocialActions
         postId={post._id}
         postTitle={post.title}
+        postSlug={post.slug.current}
         postUrl={`https://www.isaacplans.com/${locale}/blog/${post.slug.current}`}
       />
 

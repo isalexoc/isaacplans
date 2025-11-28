@@ -11,6 +11,8 @@ import { getTranslations } from "next-intl/server";
 import { agencyLd, siteLd, isaacPersonLd } from "@/lib/seo/jsonld";
 import { getLocale } from "next-intl/server";
 import Script from "next/script";
+import { ClerkProvider } from '@clerk/nextjs';
+import { esES, enUS } from '@clerk/localizations';
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
@@ -87,7 +89,12 @@ export default async function LocaleLayout({
 
   const chat = CHAT_CONFIG[locale] ?? CHAT_CONFIG.en;
 
+  // Map your locale to Clerk's localization
+  const clerkLocale = locale === "es" ? esES : enUS;
+
   return (
+    // @ts-ignore - ClerkProvider works correctly with React 19, TypeScript types need update
+    <ClerkProvider localization={clerkLocale}>
     <html
       lang={locale}
       translate="no"
@@ -102,7 +109,7 @@ export default async function LocaleLayout({
           <main className="flex-1 w-full">{children}</main>
           <Toaster />
           {/* <CrispChat /> */}
-          {/* @ts-expect-error - Next.js async server components are valid JSX */}
+          {/* @ts-ignore - Footer is an async server component, works correctly with React 19 */}
           <Footer />
           {/* Agent CRM (LeadConnector) chat – loads after page is interactive */}
           <Script
@@ -125,5 +132,6 @@ export default async function LocaleLayout({
         />
       </body>
     </html>
+    </ClerkProvider>
   );
 }

@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, boolean, integer, index } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, boolean, integer, index, uniqueIndex } from "drizzle-orm/pg-core";
 
 // Guides table - stores all available guides
 export const guides = pgTable("guides", {
@@ -53,5 +53,18 @@ export const guideAnalytics = pgTable("guide_analytics", {
   guideIdIdx: index("analytics_guide_id_idx").on(table.guideId),
   eventTypeIdx: index("analytics_event_type_idx").on(table.eventType),
   createdAtIdx: index("analytics_created_at_idx").on(table.createdAt),
+}));
+
+// Blog likes table - tracks user likes on blog posts
+export const blogLikes = pgTable("blog_likes", {
+  id: text("id").primaryKey(),
+  postId: text("post_id").notNull(), // Sanity post ID
+  postSlug: text("post_slug").notNull(), // For easier querying
+  userId: text("user_id").notNull(), // Clerk user ID
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => ({
+  postIdIdx: index("blog_likes_post_id_idx").on(table.postId),
+  userIdIdx: index("blog_likes_user_id_idx").on(table.userId),
+  postUserUniqueIdx: uniqueIndex("blog_likes_post_user_unique_idx").on(table.postId, table.userId), // Unique constraint to prevent duplicate likes
 }));
 
