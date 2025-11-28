@@ -14,6 +14,7 @@ import {
 } from "@/lib/seo/i18n";
 import Image from "next/image";
 import BlogCTA from "@/components/blog-cta";
+import { BlogSocialActions } from "@/components/blog-social-actions";
 
 const POST_QUERY = `*[_type == "post" && slug.current == $slug && locale == $locale][0]{
   _id,
@@ -83,6 +84,23 @@ const FIND_RELATED_QUERY = `*[
     category,
     publishedAt
   }
+}`;
+
+// Query to get posts from the same category
+const RELATED_CATEGORY_POSTS_QUERY = `*[
+  _type == "post"
+  && defined(slug.current)
+  && locale == $locale
+  && status == "published"
+  && category == $category
+  && slug.current != $currentSlug
+]|order(publishedAt desc)[0...3]{
+  _id,
+  title,
+  slug,
+  image,
+  category,
+  publishedAt
 }`;
 
 const options = { next: { revalidate: 30 } };
@@ -287,6 +305,33 @@ export default async function BlogPostPage({
   const showBottomCTA =
     post.leadCapture?.enableCTA && post.leadCapture?.ctaPosition === "bottom";
 
+  // Get related posts from same category if we don't have enough related posts
+  let relatedPosts = post.relatedPosts || [];
+  if (!Array.isArray(relatedPosts)) {
+    relatedPosts = [];
+  }
+
+  // If we have less than 3 related posts, fetch from same category
+  if (relatedPosts.length < 3 && post.category) {
+    const categoryPosts = await client.fetch<SanityDocument[]>(
+      RELATED_CATEGORY_POSTS_QUERY,
+      {
+        locale,
+        category: post.category,
+        currentSlug: post.slug.current,
+      },
+      options
+    );
+
+    // Merge and deduplicate
+    const existingIds = new Set(relatedPosts.map((p: any) => p._id));
+    const additionalPosts = categoryPosts
+      .filter((p) => !existingIds.has(p._id))
+      .slice(0, 3 - relatedPosts.length);
+    
+    relatedPosts = [...relatedPosts, ...additionalPosts];
+  }
+
   return (
     <article className="container mx-auto min-h-screen max-w-4xl p-4 sm:p-8">
       {/* Language switcher */}
@@ -403,6 +448,13 @@ export default async function BlogPostPage({
             </div>
           </div>
         )}
+
+        {/* Social Actions */}
+        <BlogSocialActions
+          postId={post._id}
+          postTitle={post.title}
+          postUrl={`https://www.isaacplans.com/${locale}/blog/${post.slug.current}`}
+        />
       </header>
 
       {/* Featured Image */}
@@ -467,18 +519,23 @@ export default async function BlogPostPage({
         />
       )}
 
+      {/* Social Actions - End of Post */}
+      <BlogSocialActions
+        postId={post._id}
+        postTitle={post.title}
+        postUrl={`https://www.isaacplans.com/${locale}/blog/${post.slug.current}`}
+      />
+
       {/* Related Posts */}
-      {post.relatedPosts &&
-        Array.isArray(post.relatedPosts) &&
-        post.relatedPosts.length > 0 && (
-          <section className="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700">
-            <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">
-              {locale === "en" ? "Related Posts" : "Publicaciones Relacionadas"}
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {post.relatedPosts.slice(0, 3).map((related: any) => {
+      {relatedPosts && relatedPosts.length > 0 && (
+        <section className="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700">
+          <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">
+            {locale === "en" ? "Related Posts" : "Publicaciones Relacionadas"}
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {relatedPosts.slice(0, 3).map((related: any) => {
                 const relatedImageUrl = related.image
-                  ? urlFor(related.image).width(400).height(250).url()
+                  ? urlFor(related.image).width(600).height(400).fit('crop').crop('top').url()
                   : null;
                 return (
                   <Link
@@ -486,25 +543,25 @@ export default async function BlogPostPage({
                     href={`/${locale}/blog/${related.slug.current}`}
                     className="group"
                   >
-                    <article className="flex gap-4 p-4 rounded-lg border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all">
+                    <article className="h-full flex flex-col bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
                       {relatedImageUrl && (
-                        <div className="relative w-24 h-24 flex-shrink-0 rounded overflow-hidden">
+                        <div className="relative w-full h-48 overflow-hidden">
                           <Image
                             src={relatedImageUrl}
                             alt={related.title}
                             fill
-                            className="object-cover"
-                            sizes="96px"
+                            className="object-cover object-top group-hover:scale-110 transition-transform duration-300"
+                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                           />
                         </div>
                       )}
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-2">
+                      <div className="flex-1 flex flex-col p-6">
+                        <h3 className="text-lg font-bold mb-2 text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-2">
                           {related.title}
                         </h3>
                         <time
                           dateTime={related.publishedAt}
-                          className="text-xs text-gray-500 dark:text-gray-400 mt-1 block"
+                          className="text-sm text-gray-500 dark:text-gray-400 mt-auto"
                         >
                           {new Date(related.publishedAt).toLocaleDateString(
                             locale,
