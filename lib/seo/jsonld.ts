@@ -6,6 +6,7 @@ import {
   OpeningHoursSpecification,
   Person,
   WebPage,
+  Article,
 } from "schema-dts";
 
 /* ─────────────────────────  shared constants ─────────────────────── */
@@ -539,5 +540,100 @@ export const getFeBreadcrumbLd = (
         item: `${BASE_URL}/${locale}/${path}`,
       },
     ],
+  };
+};
+
+/* ───────────── Blog Post Article JSON-LD ───────────── */
+export interface BlogPostData {
+  title: string;
+  description: string;
+  slug: string;
+  locale: string;
+  publishedAt: string;
+  updatedAt?: string;
+  author: string;
+  image?: string;
+  category?: string;
+  tags?: string[];
+  canonicalUrl?: string;
+}
+
+export const getBlogPostArticleLd = (
+  post: BlogPostData
+): WithContext<Article> => {
+  const url = post.canonicalUrl || `${BASE_URL}/${post.locale}/blog/${post.slug}`;
+  
+  return {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "@id": `${url}#article`,
+    headline: post.title,
+    description: post.description,
+    image: post.image ? [post.image] : undefined,
+    datePublished: post.publishedAt,
+    dateModified: post.updatedAt || post.publishedAt,
+    author: {
+      "@id": `${BASE_URL}/#isaacOrraiz`,
+    },
+    publisher: {
+      "@id": `${BASE_URL}/#organization`,
+    },
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": url,
+    },
+    articleSection: post.category,
+    keywords: post.tags?.join(", "),
+    inLanguage: post.locale,
+    url: url,
+  };
+};
+
+/* ───────────── Blog Post Breadcrumb JSON-LD ───────────── */
+export const getBlogPostBreadcrumbLd = (
+  locale: string,
+  slug: string,
+  category?: string,
+  categoryLabel?: string,
+  postTitle: string
+): WithContext<BreadcrumbList> => {
+  const homeLabel = locale === "en" ? "Home" : "Inicio";
+  const blogLabel = locale === "en" ? "Blog" : "Blog";
+  
+  const items = [
+    {
+      "@type": "ListItem",
+      position: 1,
+      name: homeLabel,
+      item: `${BASE_URL}/${locale}`,
+    },
+    {
+      "@type": "ListItem",
+      position: 2,
+      name: blogLabel,
+      item: `${BASE_URL}/${locale}/blog`,
+    },
+  ];
+
+  if (category && categoryLabel) {
+    items.push({
+      "@type": "ListItem",
+      position: 3,
+      name: categoryLabel,
+      item: `${BASE_URL}/${locale}/blog/category/${category}`,
+    });
+  }
+
+  items.push({
+    "@type": "ListItem",
+    position: items.length + 1,
+    name: postTitle,
+    item: `${BASE_URL}/${locale}/blog/${slug}`,
+  });
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: items,
   };
 };

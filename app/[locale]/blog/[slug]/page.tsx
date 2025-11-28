@@ -12,7 +12,9 @@ import {
   withLocalePrefix,
   type SupportedLocale,
 } from "@/lib/seo/i18n";
+import { getBlogPostArticleLd, getBlogPostBreadcrumbLd } from "@/lib/seo/jsonld";
 import Image from "next/image";
+import Script from "next/script";
 import BlogCTA from "@/components/blog-cta";
 import { BlogSocialActions } from "@/components/blog-social-actions";
 import { BlogUserAuth } from "@/components/blog-user-auth";
@@ -158,14 +160,19 @@ export async function generateMetadata({
       return `Read ${post.title} on Isaac Plans Insurance blog`;
     })();
 
-  const title = `${metaTitle} | Isaac Plans Insurance`;
+  // Use metaTitle directly if it's custom, otherwise add site name
+  const title = post.seo?.metaTitle || `${post.title} | Isaac Plans Insurance`;
   const imageUrl = post.ogImage
     ? urlFor(post.ogImage).width(1200).height(630).url()
     : post.image
     ? urlFor(post.image).width(1200).height(630).url()
     : "https://www.isaacplans.com/images/blog.png";
 
-  const canonical = post.seo?.canonicalUrl || `/${locale}/blog/${slug}`;
+  const canonical = post.seo?.canonicalUrl 
+    ? (post.seo.canonicalUrl.startsWith("http") 
+        ? post.seo.canonicalUrl 
+        : `https://www.isaacplans.com${post.seo.canonicalUrl}`)
+    : `https://www.isaacplans.com/${locale}/blog/${slug}`;
   const ogLocale = ogLocaleOf(locale as SupportedLocale);
 
   // Build keywords array
@@ -177,12 +184,25 @@ export async function generateMetadata({
     .filter(Boolean)
     .join(", ");
 
+  // Get alternate language URL if related post exists
+  const alternateLocale = locale === "en" ? "es" : "en";
+  const alternateUrl = post.relatedPost?.slug?.current
+    ? `https://www.isaacplans.com/${alternateLocale}/blog/${post.relatedPost.slug.current}`
+    : undefined;
+
   return {
     title,
     description: metaDescription,
     keywords: keywords || undefined,
+    authors: [{ name: post.author || "Isaac Orraiz" }],
     alternates: {
       canonical,
+      languages: alternateUrl
+        ? {
+            [locale]: canonical,
+            [alternateLocale]: alternateUrl,
+          }
+        : undefined,
     },
     openGraph: {
       title,
@@ -190,10 +210,12 @@ export async function generateMetadata({
       url: canonical,
       siteName: "Isaac Plans Insurance",
       locale: ogLocale,
+      alternateLocale: alternateUrl ? (locale === "en" ? "es_ES" : "en_US") : undefined,
       type: "article",
       publishedTime: post.publishedAt,
-      modifiedTime: post.updatedAt,
+      modifiedTime: post.updatedAt || post.publishedAt,
       authors: [post.author || "Isaac Orraiz"],
+      section: post.category,
       tags: post.tags || [],
       images: [
         {
@@ -209,6 +231,17 @@ export async function generateMetadata({
       title,
       description: metaDescription,
       images: [{ url: imageUrl, alt: post.image?.alt || post.title }],
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-video-preview": -1,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+      },
     },
   };
 }
@@ -258,7 +291,7 @@ export default async function BlogPostPage({
     ? urlFor(post.image).width(1200).height(630).fit('crop').crop('top').url()
     : null;
 
-  const ogImageUrl = post.ogImage
+  const ogImageUrlForDisplay = post.ogImage
     ? urlFor(post.ogImage).width(1200).height(630).fit('crop').crop('top').url()
     : imageUrl;
 
@@ -333,8 +366,74 @@ export default async function BlogPostPage({
     relatedPosts = [...relatedPosts, ...additionalPosts];
   }
 
+  // Prepare metadata for JSON-LD
+  const metaDescription =
+    post.seo?.metaDescription ||
+    post.excerpt ||
+    (() => {
+      if (post.body && Array.isArray(post.body)) {
+        const firstBlock = post.body.find(
+          (block: any) => block._type === "block" && block.children
+        );
+        if (firstBlock?.children?.[0]?.text) {
+          return firstBlock.children[0].text.substring(0, 160) + "...";
+        }
+      }
+      return `Read ${post.title} on Isaac Plans Insurance blog`;
+    })();
+
+  const canonicalUrl = post.seo?.canonicalUrl 
+    ? (post.seo.canonicalUrl.startsWith("http") 
+        ? post.seo.canonicalUrl 
+        : `https://www.isaacplans.com${post.seo.canonicalUrl}`)
+    : `https://www.isaacplans.com/${locale}/blog/${post.slug.current}`;
+
+  const ogImageUrlForJsonLd = post.ogImage
+    ? urlFor(post.ogImage).width(1200).height(630).fit('crop').crop('top').url()
+    : imageUrl;
+
+  // Prepare JSON-LD structured data
+  const articleLd = getBlogPostArticleLd({
+    title: post.title,
+    description: metaDescription,
+    slug: post.slug.current,
+    locale,
+    publishedAt: post.publishedAt,
+    updatedAt: post.updatedAt,
+    author: post.author || "Isaac Orraiz",
+    image: ogImageUrlForJsonLd || undefined,
+    category: post.category,
+    tags: post.tags,
+    canonicalUrl: canonicalUrl,
+  });
+
+  const breadcrumbLd = getBlogPostBreadcrumbLd(
+    locale,
+    post.slug.current,
+    post.category,
+    categoryLabel,
+    post.title
+  );
+
   return (
-    <article className="container mx-auto min-h-screen max-w-4xl p-4 sm:p-8">
+    <>
+      {/* JSON-LD Structured Data */}
+      <Script
+        id="article-jsonld"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(articleLd),
+        }}
+      />
+      <Script
+        id="breadcrumb-jsonld"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(breadcrumbLd),
+        }}
+      />
+
+      <article className="container mx-auto min-h-screen max-w-4xl p-4 sm:p-8">
       {/* Language switcher and User Auth */}
       <div className="mb-6 flex items-center justify-between flex-wrap gap-4">
         {relatedPost && relatedPost.slug ? (
@@ -483,10 +582,10 @@ export default async function BlogPostPage({
       </header>
 
       {/* Featured Image */}
-      {ogImageUrl && (
+      {ogImageUrlForDisplay && (
         <div className="mb-8 relative w-full h-[200px] sm:h-[300px] lg:h-[400px] overflow-hidden rounded-lg shadow-lg">
           <Image
-            src={ogImageUrl}
+            src={ogImageUrlForDisplay}
             alt={post.image?.alt || post.title}
             fill
             className="object-cover object-top"
@@ -630,6 +729,7 @@ export default async function BlogPostPage({
         </Link>
       </div>
     </article>
+    </>
   );
 }
 
