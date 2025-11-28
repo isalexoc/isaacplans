@@ -163,7 +163,7 @@ export default async function CategoriesPage() {
     }
   });
 
-  // Get all categories from CATEGORY_LABELS, including those with 0 posts
+  // Get all categories from CATEGORY_LABELS, but only show those with posts
   const allCategories = Object.keys(CATEGORY_LABELS)
     .map((category) => ({
       id: category,
@@ -172,6 +172,7 @@ export default async function CategoriesPage() {
       description: CATEGORY_LABELS[category]?.description[locale] || "",
       image: CATEGORY_LABELS[category]?.image,
     }))
+    .filter((category) => category.count > 0) // Only show categories with posts
     .sort((a, b) => {
       // Sort by post count (descending), then alphabetically by label
       if (b.count !== a.count) {

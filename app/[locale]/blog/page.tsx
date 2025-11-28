@@ -138,10 +138,38 @@ export default async function BlogPage() {
     new Set(allPosts.map((p) => p.category).filter(Boolean))
   ).sort();
 
+  const alternateLocale = locale === "en" ? "es" : "en";
+  const alternateText = locale === "en" ? "Leer en español" : "Read in English";
+
   return (
     <main className="container mx-auto min-h-screen max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
-      <div className="mb-12 flex items-center justify-between flex-wrap gap-4">
-        <div className="flex-1 text-center">
+      <div className="mb-12">
+        {/* Language Switcher and User Auth - Top */}
+        <div className="mb-6 flex items-center justify-between flex-wrap gap-4">
+          <Link
+            href={`/${alternateLocale}/blog`}
+            className="inline-flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
+          >
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"
+              />
+            </svg>
+            {alternateText}
+          </Link>
+          <BlogUserAuth />
+        </div>
+        
+        {/* Title Section */}
+        <div className="text-center">
           <h1 className="text-4xl sm:text-5xl font-bold mb-4 text-gray-900 dark:text-white">
             {t("hero.title")}
           </h1>
@@ -167,10 +195,6 @@ export default async function BlogPage() {
             </svg>
             {locale === "en" ? "Browse Categories" : "Explorar Categorías"}
           </Link>
-        </div>
-        {/* User Auth Button */}
-        <div className="flex-shrink-0">
-          <BlogUserAuth />
         </div>
       </div>
 

@@ -109,6 +109,23 @@ export function BlogSocialActions({
     }
   }, [postId, isSignedIn]);
 
+  // Listen for like updates from other instances of this component (for syncing top/bottom)
+  useEffect(() => {
+    const handleLikeUpdate = (event: Event) => {
+      const customEvent = event as CustomEvent<{ postId: string; likes: number; isLiked: boolean }>;
+      // Only update if this event is for the same post
+      if (customEvent.detail.postId === postId) {
+        setLikes(customEvent.detail.likes);
+        setIsLiked(customEvent.detail.isLiked);
+      }
+    };
+
+    window.addEventListener('blog-likes-updated', handleLikeUpdate);
+    return () => {
+      window.removeEventListener('blog-likes-updated', handleLikeUpdate);
+    };
+  }, [postId]);
+
   const handleLike = async () => {
     if (!isSignedIn) {
       // This should not be called when wrapped in SignInButton, but keeping as safety check
@@ -137,6 +154,15 @@ export function BlogSocialActions({
         // Update with server response (source of truth)
         setLikes(data.count);
         setIsLiked(data.liked);
+        
+        // Dispatch custom event to sync other instances (top/bottom)
+        window.dispatchEvent(new CustomEvent('blog-likes-updated', {
+          detail: {
+            postId,
+            likes: data.count,
+            isLiked: data.liked,
+          },
+        }));
       } else {
         // Rollback on error
         setIsLiked(previousLiked);

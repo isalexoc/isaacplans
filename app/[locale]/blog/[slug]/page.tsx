@@ -335,9 +335,9 @@ export default async function BlogPostPage({
 
   return (
     <article className="container mx-auto min-h-screen max-w-4xl p-4 sm:p-8">
-      {/* Language switcher */}
-      {relatedPost && relatedPost.slug && (
-        <div className="mb-6">
+      {/* Language switcher and User Auth */}
+      <div className="mb-6 flex items-center justify-between flex-wrap gap-4">
+        {relatedPost && relatedPost.slug ? (
           <Link
             href={`/${alternateLocale}/blog/${relatedPost.slug.current}`}
             className="inline-flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
@@ -357,12 +357,33 @@ export default async function BlogPostPage({
             </svg>
             {alternateText}
           </Link>
-        </div>
-      )}
-
-      {/* User Auth */}
-      <div className="mb-6 flex justify-end">
+        ) : (
+          <div></div>
+        )}
         <BlogUserAuth />
+      </div>
+
+      {/* Back to Blog Button - Top */}
+      <div className="mb-6">
+        <Link
+          href={`/${locale}/blog`}
+          className="inline-flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
+        >
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M15 19l-7-7 7-7"
+            />
+          </svg>
+          {locale === "en" ? "Back to Blog" : "Volver al Blog"}
+        </Link>
       </div>
 
       {/* Top CTA */}
@@ -428,29 +449,26 @@ export default async function BlogPostPage({
 
         {/* Author Section */}
         {post.author && (
-          <div className="mb-6">
-            
-            <div className="flex items-center gap-2 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700 w-fit">
-              <div className="relative flex-shrink-0">
-                <Image
-                  src="https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_60,h_60,c_fill,g_face,r_max/isaacpic_c8kca5_3_hz35qm"
-                  alt={post.author}
-                  width={60}
-                  height={60}
-                  className="rounded-full border-2 border-blue-500 dark:border-blue-400 shadow-md"
-                />
-              </div>
-              <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              {locale === "en" ? "Author:" : "Autor:"}
-            </p>
-                <p className="font-semibold text-gray-900 dark:text-white text-base">
-                  {post.author}
-                </p>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  {locale === "en" ? "Insurance Specialist" : "Especialista en Seguros"}
-                </p>
-              </div>
+          <div className="mb-6 flex items-center gap-3">
+            <div className="relative flex-shrink-0">
+              <Image
+                src="https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_40,h_40,c_fill,g_face,r_max/isaacpic_c8kca5_3_hz35qm"
+                alt={post.author}
+                width={40}
+                height={40}
+                className="rounded-full"
+              />
+            </div>
+            <div>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-0.5">
+                {locale === "en" ? "Author" : "Autor"}
+              </p>
+              <p className="text-sm font-medium text-gray-900 dark:text-white">
+                {post.author}
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                {locale === "en" ? "Insurance Specialist" : "Especialista en Seguros"}
+              </p>
             </div>
           </div>
         )}
@@ -588,6 +606,29 @@ export default async function BlogPostPage({
             </div>
           </section>
         )}
+
+      {/* Back to Blog Button - Bottom */}
+      <div className="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700">
+        <Link
+          href={`/${locale}/blog`}
+          className="inline-flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
+        >
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M15 19l-7-7 7-7"
+            />
+          </svg>
+          {locale === "en" ? "Back to Blog" : "Volver al Blog"}
+        </Link>
+      </div>
     </article>
   );
 }
