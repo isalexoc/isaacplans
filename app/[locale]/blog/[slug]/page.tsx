@@ -17,6 +17,7 @@ import Image from "next/image";
 import Script from "next/script";
 import BlogCTA from "@/components/blog-cta";
 import { BlogSocialActions } from "@/components/blog-social-actions";
+import { BlogComments } from "@/components/blog-comments";
 import { BlogUserAuth } from "@/components/blog-user-auth";
 
 const POST_QUERY = `*[_type == "post" && slug.current == $slug && locale == $locale][0]{
@@ -649,6 +650,12 @@ export default async function BlogPostPage({
         postTitle={post.title}
         postSlug={post.slug.current}
         postUrl={`https://www.isaacplans.com/${locale}/blog/${post.slug.current}`}
+      />
+
+      {/* Comments */}
+      <BlogComments
+        postId={post._id}
+        postSlug={post.slug.current}
       />
 
       {/* Related Posts */}

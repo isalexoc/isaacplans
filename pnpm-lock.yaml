@@ -158,6 +158,9 @@ importers:
       lucide-react:
         specifier: ^0.454.0
         version: 0.454.0(react@19.0.0)
+      nanoid:
+        specifier: ^5.1.6
+        version: 5.1.6
       next:
         specifier: 15.2.4
         version: 15.2.4(@babel/core@7.28.5)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)

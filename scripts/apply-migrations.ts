@@ -1,86 +1,86 @@
-import 'dotenv/config';
-import { neon } from '@neondatabase/serverless';
-import { readFileSync } from 'fs';
-import { join } from 'path';
+import "dotenv/config";
+import { neon } from "@neondatabase/serverless";
+import { readdirSync, readFileSync } from "fs";
+import { join } from "path";
 
 if (!process.env.DATABASE_URL) {
-  throw new Error('DATABASE_URL is not set');
+  throw new Error("DATABASE_URL is not set");
 }
 
 const sql = neon(process.env.DATABASE_URL);
 
 async function applyMigrations() {
   try {
-    console.log('Applying migrations...\n');
+    console.log("Applying migrations...\n");
 
-    // Read migration files
-    const migration1 = readFileSync(
-      join(process.cwd(), 'drizzle', '0001_great_thundra.sql'),
-      'utf-8'
-    );
-    const migration2 = readFileSync(
-      join(process.cwd(), 'drizzle', '0002_steady_sage.sql'),
-      'utf-8'
-    );
+    const migrationsDir = join(process.cwd(), "drizzle");
+
+    // Find all .sql migration files (ignore meta folder)
+    const files = readdirSync(migrationsDir)
+      .filter((file) => file.endsWith(".sql"))
+      .sort(); // 0000_..., 0001_..., 0002_..., 0003_...
+
+    if (files.length === 0) {
+      console.log("No migration files found in drizzle/");
+      return;
+    }
 
     // Split by statement breakpoints and execute each statement
     const parseStatements = (migration: string): string[] => {
       return migration
-        .split('--> statement-breakpoint')
-        .map(s => s.trim())
-        .filter(s => s.length > 0 && !s.startsWith('--'))
-        .map(s => s.replace(/;\s*$/, '')) // Remove trailing semicolons
-        .filter(s => s.length > 0);
+        .split("--> statement-breakpoint")
+        .map((s) => s.trim())
+        .filter((s) => s.length > 0 && !s.startsWith("--"))
+        .map((s) => s.replace(/;\s*$/, "")) // Remove trailing semicolons
+        .filter((s) => s.length > 0);
     };
 
-    const statements1 = parseStatements(migration1);
-    const statements2 = parseStatements(migration2);
+    for (const file of files) {
+      const fullPath = join(migrationsDir, file);
+      console.log(`Applying migration ${file}...`);
 
-    console.log('Applying migration 0001_great_thundra.sql...');
-    for (const statement of statements1) {
-      if (statement.trim()) {
+      const migration = readFileSync(fullPath, "utf-8");
+      const statements = parseStatements(migration);
+
+      for (const statement of statements) {
+        if (!statement.trim()) continue;
+
         try {
           await sql(statement);
-          console.log('✓ Executed statement');
+          console.log("✓ Executed statement");
         } catch (error: any) {
-          // Ignore "already exists" errors
-          if (error.message?.includes('already exists') || error.message?.includes('duplicate')) {
-            console.log('⚠️  Already exists (skipping)');
+          // Ignore "already exists" / duplicate errors to keep idempotency
+          if (
+            error.message?.includes("already exists") ||
+            error.message?.includes("duplicate")
+          ) {
+            console.log("⚠️  Already exists (skipping)");
           } else {
             throw error;
           }
         }
       }
+
+      console.log("");
     }
 
-    console.log('\nApplying migration 0002_steady_sage.sql...');
-    for (const statement of statements2) {
-      if (statement.trim()) {
-        try {
-          await sql(statement);
-          console.log('✓ Executed statement');
-        } catch (error: any) {
-          // Ignore "already exists" errors
-          if (error.message?.includes('already exists') || error.message?.includes('duplicate')) {
-            console.log('⚠️  Already exists (skipping)');
-          } else {
-            throw error;
-          }
-        }
-      }
-    }
-
-    console.log('\n✅ All migrations applied successfully!');
+    console.log("✅ All migrations applied successfully!");
   } catch (error: any) {
-    if (error.message?.includes('already exists') || error.message?.includes('duplicate')) {
-      console.log('⚠️  Some tables/indexes already exist. This is okay if migrations were partially applied.');
-      console.log('Migration process completed.');
+    if (
+      error.message?.includes("already exists") ||
+      error.message?.includes("duplicate")
+    ) {
+      console.log(
+        "⚠️  Some tables/indexes already exist. This is okay if migrations were partially applied."
+      );
+      console.log("Migration process completed.");
     } else {
-      console.error('❌ Error applying migrations:', error);
+      console.error("❌ Error applying migrations:", error);
       process.exit(1);
     }
   }
 }
 
 applyMigrations();
+
 

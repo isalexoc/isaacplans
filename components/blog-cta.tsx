@@ -69,7 +69,7 @@ export default function BlogCTA({
       case "guide":
         return {
           text:
-            ctaText ||
+            
             (locale === "en"
               ? "Download Free Guide"
               : "Descargar Guía Gratis"),

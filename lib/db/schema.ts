@@ -68,3 +68,45 @@ export const blogLikes = pgTable("blog_likes", {
   postUserUniqueIdx: uniqueIndex("blog_likes_post_user_unique_idx").on(table.postId, table.userId), // Unique constraint to prevent duplicate likes
 }));
 
+// Blog comments table - stores comments on blog posts
+export const blogComments = pgTable("blog_comments", {
+  id: text("id").primaryKey(), // nanoid/uuid
+  postId: text("post_id").notNull(), // Sanity post ID
+  postSlug: text("post_slug").notNull(), // For easier querying
+  userId: text("user_id").notNull(), // Clerk user ID
+  parentId: text("parent_id"), // null = top-level comment
+  body: text("body").notNull(), // sanitized HTML/markdown
+  status: text("status").notNull().default("approved"), // pending | approved | hidden
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at"),
+}, (table) => ({
+  blogCommentsPostIdx: index("blog_comments_post_idx").on(table.postId),
+  blogCommentsParentIdx: index("blog_comments_parent_idx").on(table.parentId),
+  blogCommentsUserIdx: index("blog_comments_user_idx").on(table.userId),
+}));
+
+// Blog comment likes - tracks likes on individual comments
+export const blogCommentLikes = pgTable("blog_comment_likes", {
+  id: text("id").primaryKey(),
+  commentId: text("comment_id").notNull(),
+  userId: text("user_id").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => ({
+  blogCommentLikesCommentIdx: index("blog_comment_likes_comment_idx").on(table.commentId),
+  blogCommentLikesUserIdx: index("blog_comment_likes_user_idx").on(table.userId),
+  blogCommentLikesUniqueIdx: uniqueIndex("blog_comment_likes_unique_idx").on(table.commentId, table.userId),
+}));
+
+// Blog comment flags - allows users to report problematic comments
+export const blogCommentFlags = pgTable("blog_comment_flags", {
+  id: text("id").primaryKey(),
+  commentId: text("comment_id").notNull(),
+  userId: text("user_id").notNull(),
+  reason: text("reason"),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => ({
+  blogCommentFlagsCommentIdx: index("blog_comment_flags_comment_idx").on(table.commentId),
+  blogCommentFlagsUniqueIdx: uniqueIndex("blog_comment_flags_unique_idx").on(table.commentId, table.userId),
+}));
+
+

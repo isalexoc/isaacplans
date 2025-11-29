@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useLocale } from "next-intl";
 import { useUser, SignInButton } from "@clerk/nextjs";
 import { Skeleton } from "@/components/ui/skeleton";
+import { BlogLikesAvatars } from "@/components/blog-likes-avatars";
 
 interface BlogSocialActionsProps {
   postId: string;
@@ -35,6 +36,7 @@ export function BlogSocialActions({
   const [showToast, setShowToast] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [isLoadingLikes, setIsLoadingLikes] = useState(true);
+  const [hasProcessedPendingLike, setHasProcessedPendingLike] = useState(false);
 
   // Store current URL before authentication for redirect after sign-up (OAuth flow)
   useEffect(() => {
@@ -108,6 +110,26 @@ export function BlogSocialActions({
       setIsLoadingLikes(false);
     }
   }, [postId, isSignedIn]);
+
+  // After sign-in, automatically apply a pending "like" intent (so user doesn't have to click twice)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!isSignedIn) return;
+    if (isLoadingLikes) return; // wait until we know current like state
+    if (hasProcessedPendingLike) return;
+
+    const pendingPostId = localStorage.getItem("pending_like_post_id");
+    if (pendingPostId && pendingPostId === postId && !isLiked) {
+      // Clear first to avoid duplicate processing
+      localStorage.removeItem("pending_like_post_id");
+      localStorage.removeItem("pending_like_timestamp");
+
+      // Trigger the real like with optimistic UI + server update
+      handleLike();
+    }
+
+    setHasProcessedPendingLike(true);
+  }, [isSignedIn, isLoadingLikes, hasProcessedPendingLike, isLiked, postId]);
 
   // Listen for like updates from other instances of this component (for syncing top/bottom)
   useEffect(() => {
@@ -246,6 +268,9 @@ export function BlogSocialActions({
   return (
     <>
       <div className="border-t border-b border-gray-200 dark:border-gray-700 py-4 my-8">
+        {/* Like avatars - above actions */}
+        <BlogLikesAvatars postId={postId} />
+        
         {/* Action buttons */}
         <div className="flex items-center gap-2 flex-wrap">
           {!isSignedIn ? (
@@ -257,6 +282,16 @@ export function BlogSocialActions({
               signUpFallbackRedirectUrl={currentUrl}
             >
               <button
+                onClick={() => {
+                  if (typeof window !== "undefined") {
+                    try {
+                      localStorage.setItem("pending_like_post_id", postId);
+                      localStorage.setItem("pending_like_timestamp", Date.now().toString());
+                    } catch {
+                      // Ignore storage errors (e.g., in private mode)
+                    }
+                  }
+                }}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-colors bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700`}
                 aria-label={locale === "en" ? "Like this post" : "Me gusta esta publicación"}
               >
