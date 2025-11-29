@@ -29,4 +29,5 @@ export type AppHref =
   | "/plan-comparison"
   | "/renewal-support"
   | "/consumer-guides"
-  | "/blog";
+  | "/blog"
+  | "/newsletter";

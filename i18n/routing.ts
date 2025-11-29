@@ -139,6 +139,10 @@ export const routing = defineRouting({
       en: "/blog/categories",
       es: "/blog/categorias",
     },
+    "/newsletter": {
+      en: "/newsletter",
+      es: "/boletín",
+    },
   },
 });
 

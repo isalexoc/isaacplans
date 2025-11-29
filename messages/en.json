@@ -285,7 +285,7 @@
           },
           "newsletter": {
             "title": "Newsletter",
-            "description": "Subscribe to receive updates on insurance and health."
+            "description": "Get insurance tips, guides, and updates delivered to your inbox."
           },
           "eligibilityTools": {
             "title": "Eligibility Tools",
@@ -1769,8 +1769,41 @@
     },
     "hero": {
       "title": "Insurance Blog",
-      "description": "Stay informed with our latest articles on health insurance, wellness tips, and industry insights."
+      "description": "Stay informed with our latest articles on insurance, helpful guides, and industry insights."
     },
     "empty": "No blog posts available yet. Check back soon!"
+  },
+  "newsletterPage": {
+    "meta": {
+      "title": "Newsletter Subscription | Isaac Plans Insurance",
+      "description": "Subscribe to our newsletter for insurance tips, guides, and industry updates delivered to your inbox.",
+      "keywords": "newsletter, insurance newsletter, subscribe, insurance tips, insurance guides",
+      "image": "https://www.isaacplans.com/images/newsletter.png",
+      "imageAlt": "Isaac Plans Insurance Newsletter Subscription"
+    },
+    "hero": {
+      "title": "Subscribe to Our Newsletter",
+      "description": "Get insurance tips, guides, and updates delivered straight to your inbox."
+    },
+    "benefits": {
+      "title": "What You'll Get",
+      "item1": {
+        "title": "Latest Articles",
+        "description": "Stay updated with our newest blog posts on insurance topics"
+      },
+      "item2": {
+        "title": "Helpful Guides",
+        "description": "Access free guides and resources to help you make informed decisions"
+      },
+      "item3": {
+        "title": "Industry Insights",
+        "description": "Learn about changes in the insurance industry and how they affect you"
+      },
+      "item4": {
+        "title": "Exclusive Content",
+        "description": "Receive special content and tips not available elsewhere"
+      }
+    },
+    "privacy": "We respect your privacy. Your email will only be used to send you our newsletter. You can unsubscribe at any time by clicking the link in any email we send you."
   }
 }

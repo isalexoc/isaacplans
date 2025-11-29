@@ -109,4 +109,25 @@ export const blogCommentFlags = pgTable("blog_comment_flags", {
   blogCommentFlagsUniqueIdx: uniqueIndex("blog_comment_flags_unique_idx").on(table.commentId, table.userId),
 }));
 
+// Newsletter subscribers table
+export const newsletterSubscribers = pgTable("newsletter_subscribers", {
+  id: text("id").primaryKey(), // nanoid
+  email: text("email").notNull(),
+  status: text("status").notNull().default("pending"), // pending | confirmed | unsubscribed
+  confirmationToken: text("confirmation_token"), // for double opt-in
+  unsubscribeToken: text("unsubscribe_token"), // for unsubscribe
+  source: text("source"), // 'blog', 'homepage', 'newsletter-page', 'direct', etc.
+  locale: text("locale").default("en"), // en | es
+  confirmedAt: timestamp("confirmed_at"),
+  unsubscribedAt: timestamp("unsubscribed_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at"),
+}, (table) => ({
+  emailIdx: index("newsletter_email_idx").on(table.email),
+  statusIdx: index("newsletter_status_idx").on(table.status),
+  confirmationTokenIdx: index("newsletter_confirmation_token_idx").on(table.confirmationToken),
+  unsubscribeTokenIdx: index("newsletter_unsubscribe_token_idx").on(table.unsubscribeToken),
+  emailUniqueIdx: uniqueIndex("newsletter_email_unique_idx").on(table.email), // Prevent duplicates
+}));
+
 

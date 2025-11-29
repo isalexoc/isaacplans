@@ -273,8 +273,8 @@
             "description": "Compara beneficios, precios y coberturas entre distintos planes."
           },
           "newsletter": {
-            "title": "Boletín Informativo",
-            "description": "Suscríbete para recibir noticias sobre salud y seguros."
+            "title": "Boletín",
+            "description": "Recibe consejos de seguros, guías y actualizaciones en tu bandeja de entrada."
           },
           "eligibilityTools": {
             "title": "Herramientas de Elegibilidad",
@@ -1757,8 +1757,41 @@
     },
     "hero": {
       "title": "Blog de Seguros",
-      "description": "Mantente informado con nuestros últimos artículos sobre seguros de salud, consejos de bienestar e información de la industria."
+      "description": "Mantente informado con nuestros últimos artículos sobre seguros, guías útiles e información de la industria."
     },
     "empty": "Aún no hay publicaciones disponibles. ¡Vuelve pronto!"
+  },
+  "newsletterPage": {
+    "meta": {
+      "title": "Suscripción al Boletín | Isaac Plans Insurance",
+      "description": "Suscríbete a nuestro boletín para recibir consejos de seguros, guías y actualizaciones de la industria directamente en tu bandeja de entrada.",
+      "keywords": "boletín, boletín de seguros, suscribirse, consejos de seguros, guías de seguros",
+      "image": "https://www.isaacplans.com/images/newsletter.png",
+      "imageAlt": "Suscripción al Boletín de Isaac Plans Insurance"
+    },
+    "hero": {
+      "title": "Suscríbete a Nuestro Boletín",
+      "description": "Recibe consejos de seguros, guías y actualizaciones directamente en tu bandeja de entrada."
+    },
+    "benefits": {
+      "title": "Lo Que Recibirás",
+      "item1": {
+        "title": "Últimos Artículos",
+        "description": "Mantente actualizado con nuestras publicaciones más recientes sobre temas de seguros"
+      },
+      "item2": {
+        "title": "Guías Útiles",
+        "description": "Accede a guías y recursos gratuitos para ayudarte a tomar decisiones informadas"
+      },
+      "item3": {
+        "title": "Información de la Industria",
+        "description": "Aprende sobre cambios en la industria de seguros y cómo te afectan"
+      },
+      "item4": {
+        "title": "Contenido Exclusivo",
+        "description": "Recibe contenido especial y consejos no disponibles en otros lugares"
+      }
+    },
+    "privacy": "Respetamos tu privacidad. Tu correo electrónico solo se usará para enviarte nuestro boletín. Puedes cancelar tu suscripción en cualquier momento haciendo clic en el enlace en cualquier correo que te enviemos."
   }
 }

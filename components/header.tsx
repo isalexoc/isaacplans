@@ -60,7 +60,7 @@ const resourceLinks = [
   { key: "subsidyCalculator", href: "/subsidy-calculator", icon: "Calculator" },
   { key: "personalizedAssistance", href: "/contact", icon: "UserCheck" },
   { key: "planComparison", href: "/plan-comparison", icon: "GitCompareArrows" },
-  { key: "newsletter", href: "", icon: "Mail" },
+  { key: "newsletter", href: "/newsletter", icon: "Mail" },
   { key: "renewalSupport", href: "/renewal-support", icon: "Repeat" },
 ] as const satisfies ReadonlyArray<{
   key: string;
