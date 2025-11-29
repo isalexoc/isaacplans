@@ -1,14 +1,26 @@
 import nodemailer from "nodemailer";
+import type SMTPTransport from "nodemailer/lib/smtp-transport";
 
-const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST,
-  port: parseInt(process.env.EMAIL_PORT || "587", 10),
-  secure: process.env.EMAIL_SECURE === "true",
-  auth: {
-    user: process.env.EMAIL_USER_INFO,
-    pass: process.env.EMAIL_PASS_INFO,
-  },
-});
+// Create transporter function (better for serverless - creates fresh connection each time)
+function createTransporter() {
+  const config: SMTPTransport.Options = {
+    host: process.env.EMAIL_HOST,
+    port: parseInt(process.env.EMAIL_PORT || "587", 10),
+    secure: process.env.EMAIL_SECURE === "true",
+    auth: {
+      user: process.env.EMAIL_USER_INFO,
+      pass: process.env.EMAIL_PASS_INFO,
+    },
+    // Serverless-optimized settings
+    connectionTimeout: 10000, // 10 seconds
+    greetingTimeout: 10000,
+    socketTimeout: 10000,
+    // Note: pool, maxConnections, and maxMessages are not valid for SMTPTransport.Options
+    // Creating a fresh transporter per request already handles serverless isolation
+  };
+  
+  return nodemailer.createTransport(config);
+}
 
 interface CommentNotificationData {
   postTitle: string;
@@ -29,6 +41,7 @@ export async function sendCommentNotification(
       return;
     }
 
+    const transporter = createTransporter(); // Create fresh transporter for serverless
     const postUrl = `https://www.isaacplans.com/${data.postLocale}/blog/${data.postSlug}`;
     const commentUrl = `${postUrl}#comment-${data.commentId}`;
     const commenterDisplay = data.commenterName || data.commenterEmail || "A user";
@@ -288,6 +301,7 @@ export async function sendNewsletterEmail(
         : "You've been unsubscribed from our newsletter. You will no longer receive emails from us.";
     }
 
+    const transporter = createTransporter(); // Create fresh transporter for serverless
     await transporter.sendMail({
       from: `"Isaac Plans Insurance" <${process.env.EMAIL_USER_INFO}>`,
       to: data.email,
@@ -297,8 +311,17 @@ export async function sendNewsletterEmail(
     });
 
     console.log(`Newsletter ${data.type} email sent to: ${data.email}`);
-  } catch (error) {
-    console.error(`Error sending newsletter ${data.type} email:`, error);
+  } catch (error: any) {
+    // More detailed error logging for production debugging
+    console.error(`Error sending newsletter ${data.type} email:`, {
+      message: error.message,
+      code: error.code,
+      command: error.command,
+      response: error.response,
+      responseCode: error.responseCode,
+      email: data.email,
+      type: data.type,
+    });
     throw error; // Re-throw for API routes to handle
   }
 }

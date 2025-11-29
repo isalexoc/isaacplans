@@ -5,6 +5,9 @@ import { eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { sendNewsletterEmail } from "@/lib/email/notifications";
 
+// Configure max duration for Vercel serverless functions
+export const maxDuration = 30; // 30 seconds should be enough for email connection
+
 // POST /api/newsletter/subscribe
 export async function POST(request: NextRequest) {
   try {

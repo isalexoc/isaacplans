@@ -7,6 +7,9 @@ import { nanoid } from "nanoid";
 import { sendCommentNotification } from "@/lib/email/notifications";
 import { client } from "@/sanity/lib/client";
 
+// Configure max duration for Vercel serverless functions
+export const maxDuration = 30; // 30 seconds should be enough for email connection
+
 // GET /api/blog/comments?postId=...&parentId=...&cursor=...&limit=...
 export async function GET(request: NextRequest) {
   try {

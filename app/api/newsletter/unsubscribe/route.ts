@@ -4,6 +4,9 @@ import { newsletterSubscribers } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { sendNewsletterEmail } from "@/lib/email/notifications";
 
+// Configure max duration for Vercel serverless functions
+export const maxDuration = 30; // 30 seconds should be enough for email connection
+
 // GET /api/newsletter/unsubscribe?token=...
 export async function GET(request: NextRequest) {
   try {
