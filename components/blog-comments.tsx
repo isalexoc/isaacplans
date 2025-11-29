@@ -781,7 +781,7 @@ export function BlogComments({ postId, postSlug }: BlogCommentsProps) {
   };
 
   return (
-    <section className="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700">
+    <section className="mt-12">
       <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">
         {t("Comments", "Comentarios")}
       </h2>

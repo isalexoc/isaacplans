@@ -19,6 +19,9 @@ import BlogCTA from "@/components/blog-cta";
 import { BlogSocialActions } from "@/components/blog-social-actions";
 import { BlogComments } from "@/components/blog-comments";
 import { BlogUserAuth } from "@/components/blog-user-auth";
+import BlogCategoryCTA from "@/components/blog-category-cta";
+import { BlogSocialLinks } from "@/components/blog-social-links";
+import { BlogNewsletter } from "@/components/blog-newsletter";
 
 const POST_QUERY = `*[_type == "post" && slug.current == $slug && locale == $locale][0]{
   _id,
@@ -651,6 +654,17 @@ export default async function BlogPostPage({
         postSlug={post.slug.current}
         postUrl={`https://www.isaacplans.com/${locale}/blog/${post.slug.current}`}
       />
+
+     
+
+      {/* Category CTA - Before Comments */}
+      <BlogCategoryCTA category={post.category} />
+
+       {/* Social Links */}
+       <BlogSocialLinks />
+
+      {/* Newsletter */}
+      <BlogNewsletter />
 
       {/* Comments */}
       <BlogComments

@@ -267,7 +267,7 @@ export function BlogSocialActions({
 
   return (
     <>
-      <div className="border-t border-b border-gray-200 dark:border-gray-700 py-4 my-8">
+      <div className="border-t border-gray-200 dark:border-gray-700 py-4 my-8">
         {/* Like avatars - above actions */}
         <BlogLikesAvatars postId={postId} />
         
