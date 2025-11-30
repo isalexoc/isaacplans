@@ -26,6 +26,12 @@ function createTransporter() {
     connectionTimeout: 10000, // 10 seconds
     greetingTimeout: 10000,
     socketTimeout: 10000,
+    // Additional options for better compatibility
+    requireTLS: !(process.env.EMAIL_SECURE === "true"), // Require TLS for non-secure connections (port 587)
+    tls: {
+      // Don't reject unauthorized certificates (some SMTP servers use self-signed certs)
+      rejectUnauthorized: false,
+    },
     // Note: pool, maxConnections, and maxMessages are not valid for SMTPTransport.Options
     // Creating a fresh transporter per request already handles serverless isolation
   };
@@ -330,22 +336,32 @@ export async function sendNewsletterEmail(
     console.log(`[EMAIL] Email content prepared for ${data.type}, creating transporter...`);
     const transporter = createTransporter(); // Create fresh transporter for serverless
     
-    // Test connection before sending (optional but helpful for debugging)
+    // Test connection before sending (optional - skip if it times out, some servers don't support verify)
     try {
       console.log(`[EMAIL] Verifying SMTP connection...`);
       const verifyStartTime = Date.now();
-      await transporter.verify();
+      
+      // Add timeout to verify (5 seconds)
+      const verifyWithTimeout = Promise.race([
+        transporter.verify(),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error("SMTP verify timeout after 5 seconds")), 5000)
+        )
+      ]);
+      
+      await verifyWithTimeout;
       const verifyDuration = Date.now() - verifyStartTime;
       console.log(`[EMAIL] SMTP connection verified successfully in ${verifyDuration}ms`);
     } catch (verifyError: any) {
-      console.error(`[EMAIL] SMTP connection verification failed:`, {
+      // Log but don't throw - some SMTP servers don't support verify but can still send emails
+      console.warn(`[EMAIL] SMTP connection verification failed or timed out (will still attempt to send):`, {
         message: verifyError.message,
         code: verifyError.code,
         command: verifyError.command,
         response: verifyError.response,
         responseCode: verifyError.responseCode,
       });
-      throw verifyError;
+      // Don't throw - continue to attempt sending
     }
     
     const mailOptions = {
