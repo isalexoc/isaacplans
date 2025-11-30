@@ -330,6 +330,24 @@ export async function sendNewsletterEmail(
     console.log(`[EMAIL] Email content prepared for ${data.type}, creating transporter...`);
     const transporter = createTransporter(); // Create fresh transporter for serverless
     
+    // Test connection before sending (optional but helpful for debugging)
+    try {
+      console.log(`[EMAIL] Verifying SMTP connection...`);
+      const verifyStartTime = Date.now();
+      await transporter.verify();
+      const verifyDuration = Date.now() - verifyStartTime;
+      console.log(`[EMAIL] SMTP connection verified successfully in ${verifyDuration}ms`);
+    } catch (verifyError: any) {
+      console.error(`[EMAIL] SMTP connection verification failed:`, {
+        message: verifyError.message,
+        code: verifyError.code,
+        command: verifyError.command,
+        response: verifyError.response,
+        responseCode: verifyError.responseCode,
+      });
+      throw verifyError;
+    }
+    
     const mailOptions = {
       from: `"Isaac Plans Insurance" <${process.env.EMAIL_USER_INFO}>`,
       to: data.email,
@@ -344,13 +362,27 @@ export async function sendNewsletterEmail(
       type: data.type,
     });
 
-    const result = await transporter.sendMail(mailOptions);
-    const duration = Date.now() - startTime;
+    // Add timeout wrapper to prevent hanging
+    const sendMailWithTimeout = Promise.race([
+      transporter.sendMail(mailOptions),
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error("Email send timeout after 25 seconds")), 25000)
+      )
+    ]);
+
+    console.log(`[EMAIL] sendMail() called, waiting for response...`);
+    const sendStartTime = Date.now();
     
+    const result = await sendMailWithTimeout as any;
+    const sendDuration = Date.now() - sendStartTime;
+    const totalDuration = Date.now() - startTime;
+    
+    console.log(`[EMAIL] sendMail() completed in ${sendDuration}ms`);
     console.log(`[EMAIL] Newsletter ${data.type} email sent successfully to: ${data.email}`, {
       messageId: result.messageId,
       response: result.response,
-      duration: `${duration}ms`,
+      sendDuration: `${sendDuration}ms`,
+      totalDuration: `${totalDuration}ms`,
     });
   } catch (error: any) {
     const duration = Date.now() - startTime;
