@@ -179,7 +179,7 @@ export async function sendNewsletterEmail(
     let text: string;
 
     if (data.type === "confirmation") {
-      const confirmUrl = `${baseUrl}/${data.locale}/newsletter/confirm?token=${data.token}`;
+      const confirmUrl = `${baseUrl}/api/newsletter/confirm?token=${data.token}`;
       subject = isES
         ? "Confirma tu suscripción al boletín"
         : "Confirm your newsletter subscription";
