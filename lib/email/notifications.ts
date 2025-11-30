@@ -3,6 +3,17 @@ import type SMTPTransport from "nodemailer/lib/smtp-transport";
 
 // Create transporter function (better for serverless - creates fresh connection each time)
 function createTransporter() {
+  // Log email configuration (without sensitive data)
+  console.log("[EMAIL] Creating transporter with config:", {
+    host: process.env.EMAIL_HOST,
+    port: parseInt(process.env.EMAIL_PORT || "587", 10),
+    secure: process.env.EMAIL_SECURE === "true",
+    hasUser: !!process.env.EMAIL_USER_INFO,
+    hasPass: !!process.env.EMAIL_PASS_INFO,
+    userLength: process.env.EMAIL_USER_INFO?.length || 0,
+    passLength: process.env.EMAIL_PASS_INFO?.length || 0,
+  });
+
   const config: SMTPTransport.Options = {
     host: process.env.EMAIL_HOST,
     port: parseInt(process.env.EMAIL_PORT || "587", 10),
@@ -19,7 +30,9 @@ function createTransporter() {
     // Creating a fresh transporter per request already handles serverless isolation
   };
   
-  return nodemailer.createTransport(config);
+  const transporter = nodemailer.createTransport(config);
+  console.log("[EMAIL] Transporter created successfully");
+  return transporter;
 }
 
 interface CommentNotificationData {
@@ -133,11 +146,24 @@ interface NewsletterEmailData {
 export async function sendNewsletterEmail(
   data: NewsletterEmailData
 ): Promise<void> {
+  const startTime = Date.now();
+  console.log(`[EMAIL] Starting to send newsletter ${data.type} email to: ${data.email}`);
+  
   try {
     if (!process.env.EMAIL_USER_INFO) {
-      console.warn("EMAIL_USER_INFO not set, skipping newsletter email");
+      console.warn("[EMAIL] EMAIL_USER_INFO not set, skipping newsletter email");
       return;
     }
+
+    // Validate all required env vars
+    if (!process.env.EMAIL_HOST) {
+      throw new Error("EMAIL_HOST environment variable is not set");
+    }
+    if (!process.env.EMAIL_PASS_INFO) {
+      throw new Error("EMAIL_PASS_INFO environment variable is not set");
+    }
+
+    console.log(`[EMAIL] Environment variables validated for ${data.type} email`);
 
     const baseUrl = "https://www.isaacplans.com";
     const isES = data.locale === "es";
@@ -301,26 +327,48 @@ export async function sendNewsletterEmail(
         : "You've been unsubscribed from our newsletter. You will no longer receive emails from us.";
     }
 
+    console.log(`[EMAIL] Email content prepared for ${data.type}, creating transporter...`);
     const transporter = createTransporter(); // Create fresh transporter for serverless
-    await transporter.sendMail({
+    
+    const mailOptions = {
       from: `"Isaac Plans Insurance" <${process.env.EMAIL_USER_INFO}>`,
       to: data.email,
       subject,
       html,
       text,
+    };
+    
+    console.log(`[EMAIL] Attempting to send email to ${data.email}...`, {
+      from: mailOptions.from,
+      subject: mailOptions.subject,
+      type: data.type,
     });
 
-    console.log(`Newsletter ${data.type} email sent to: ${data.email}`);
+    const result = await transporter.sendMail(mailOptions);
+    const duration = Date.now() - startTime;
+    
+    console.log(`[EMAIL] Newsletter ${data.type} email sent successfully to: ${data.email}`, {
+      messageId: result.messageId,
+      response: result.response,
+      duration: `${duration}ms`,
+    });
   } catch (error: any) {
+    const duration = Date.now() - startTime;
     // More detailed error logging for production debugging
-    console.error(`Error sending newsletter ${data.type} email:`, {
+    console.error(`[EMAIL] Error sending newsletter ${data.type} email to ${data.email}:`, {
       message: error.message,
       code: error.code,
       command: error.command,
       response: error.response,
       responseCode: error.responseCode,
+      errno: error.errno,
+      syscall: error.syscall,
+      hostname: error.hostname,
+      port: error.port,
       email: data.email,
       type: data.type,
+      duration: `${duration}ms`,
+      stack: error.stack,
     });
     throw error; // Re-throw for API routes to handle
   }
