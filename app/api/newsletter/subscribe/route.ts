@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { after } from "next/server";
 import { db } from "@/lib/db";
 import { newsletterSubscribers } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
@@ -67,20 +68,21 @@ export async function POST(request: NextRequest) {
 
       if (existing.status === "pending") {
         console.log(`[NEWSLETTER] Resending confirmation email to ${normalizedEmail}`);
-        // Resend confirmation email (fire-and-forget, like comment notifications)
+        // Resend confirmation email using after() to prevent Vercel timeouts
         if (existing.confirmationToken) {
-          sendNewsletterEmail({
-            email: normalizedEmail,
-            locale: existing.locale || locale,
-            token: existing.confirmationToken,
-            type: "confirmation",
-          })
-            .then(() => {
+          after(async () => {
+            try {
+              await sendNewsletterEmail({
+                email: normalizedEmail,
+                locale: existing.locale || locale,
+                token: existing.confirmationToken!,
+                type: "confirmation",
+              });
               console.log(`[NEWSLETTER] Confirmation email resent successfully to ${normalizedEmail}`);
-            })
-            .catch((error) => {
+            } catch (error) {
               console.error(`[NEWSLETTER] Error resending confirmation email to ${normalizedEmail}:`, error);
-            });
+            }
+          });
         } else {
           console.warn(`[NEWSLETTER] No confirmation token found for pending subscriber: ${normalizedEmail}`);
         }
@@ -113,19 +115,20 @@ export async function POST(request: NextRequest) {
           .where(eq(newsletterSubscribers.id, existing.id));
 
         console.log(`[NEWSLETTER] Sending confirmation email for re-subscription to ${normalizedEmail}`);
-        // Send confirmation email (fire-and-forget, like comment notifications)
-        sendNewsletterEmail({
-          email: normalizedEmail,
-          locale,
-          token: confirmationToken,
-          type: "confirmation",
-        })
-          .then(() => {
+        // Send confirmation email using after() to prevent Vercel timeouts
+        after(async () => {
+          try {
+            await sendNewsletterEmail({
+              email: normalizedEmail,
+              locale,
+              token: confirmationToken,
+              type: "confirmation",
+            });
             console.log(`[NEWSLETTER] Re-subscription confirmation email sent successfully to ${normalizedEmail}`);
-          })
-          .catch((error) => {
+          } catch (error) {
             console.error(`[NEWSLETTER] Error sending re-subscription confirmation email to ${normalizedEmail}:`, error);
-          });
+          }
+        });
 
         return NextResponse.json({
           success: true,
@@ -154,19 +157,20 @@ export async function POST(request: NextRequest) {
     });
 
     console.log(`[NEWSLETTER] Subscriber record created, sending confirmation email to ${normalizedEmail}`);
-    // Send confirmation email (fire-and-forget, like comment notifications)
-    sendNewsletterEmail({
-      email: normalizedEmail,
-      locale,
-      token: confirmationToken,
-      type: "confirmation",
-    })
-      .then(() => {
+    // Send confirmation email using after() to prevent Vercel timeouts
+    after(async () => {
+      try {
+        await sendNewsletterEmail({
+          email: normalizedEmail,
+          locale,
+          token: confirmationToken,
+          type: "confirmation",
+        });
         console.log(`[NEWSLETTER] Confirmation email sent successfully to ${normalizedEmail}`);
-      })
-      .catch((error) => {
+      } catch (error) {
         console.error(`[NEWSLETTER] Error sending newsletter confirmation email to ${normalizedEmail}:`, error);
-      });
+      }
+    });
 
     const duration = Date.now() - requestStartTime;
     console.log(`[NEWSLETTER] Subscribe request completed successfully in ${duration}ms`);
