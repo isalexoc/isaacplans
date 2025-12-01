@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { after } from "next/server";
 import { db } from "@/lib/db";
 import { newsletterSubscribers } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
@@ -56,14 +57,19 @@ export async function GET(request: NextRequest) {
       })
       .where(eq(newsletterSubscribers.id, subscriber.id));
 
-    // Send welcome email (fire-and-forget, like comment notifications)
-    sendNewsletterEmail({
-      email: subscriber.email,
-      locale: subscriber.locale || "en",
-      token: subscriber.unsubscribeToken || "",
-      type: "welcome",
-    }).catch((error) => {
-      console.error("Error sending welcome email:", error);
+    // Send welcome email using after() to prevent Vercel timeouts
+    after(async () => {
+      try {
+        await sendNewsletterEmail({
+          email: subscriber.email,
+          locale: subscriber.locale || "en",
+          token: subscriber.unsubscribeToken || "",
+          type: "welcome",
+        });
+        console.log(`[NEWSLETTER] Welcome email sent successfully to ${subscriber.email}`);
+      } catch (error) {
+        console.error(`[NEWSLETTER] Error sending welcome email to ${subscriber.email}:`, error);
+      }
     });
 
     // Redirect to success page

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { after } from "next/server";
 import { auth, currentUser, clerkClient } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
 import { blogComments, blogCommentLikes } from "@/lib/db/schema";
@@ -194,25 +195,27 @@ export async function POST(request: NextRequest) {
       updatedAt: now,
     });
 
-    // Send email notification asynchronously (don't await - fire and forget)
+    // Send email notification using after() to prevent Vercel timeouts
     // Only send for top-level comments (not replies)
     if (!parentId) {
-      // Fetch post title from Sanity and get user info from Clerk
-      Promise.all([
-        // Fetch post title from Sanity
-        client
-          .fetch(
-            `*[_type == "post" && _id == $postId][0]{ title, locale }`,
-            { postId },
-            { next: { revalidate: 0 } } // Don't cache for notifications
-          )
-          .catch(() => null),
-        // Get user info from Clerk
-        currentUser().catch(() => null),
-      ])
-        .then(([post, user]) => {
+      after(async () => {
+        try {
+          // Fetch post title from Sanity and get user info from Clerk
+          const [post, user] = await Promise.all([
+            // Fetch post title from Sanity
+            client
+              .fetch(
+                `*[_type == "post" && _id == $postId][0]{ title, locale }`,
+                { postId },
+                { next: { revalidate: 0 } } // Don't cache for notifications
+              )
+              .catch(() => null),
+            // Get user info from Clerk
+            currentUser().catch(() => null),
+          ]);
+
           if (post && post.title) {
-            return sendCommentNotification({
+            await sendCommentNotification({
               postTitle: post.title,
               postSlug,
               postLocale: post.locale || "en",
@@ -223,11 +226,12 @@ export async function POST(request: NextRequest) {
               commenterEmail: user?.primaryEmailAddress?.emailAddress || undefined,
               commentId: id,
             });
+            console.log(`[COMMENTS] Comment notification email sent for post: ${post.title}`);
           }
-        })
-        .catch((error) => {
-          console.error("Error in comment notification background task:", error);
-        });
+        } catch (error) {
+          console.error("[COMMENTS] Error in comment notification background task:", error);
+        }
+      });
     }
 
     return NextResponse.json({

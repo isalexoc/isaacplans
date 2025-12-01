@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { after } from "next/server";
 import { db } from "@/lib/db";
 import { newsletterSubscribers } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
@@ -55,14 +56,19 @@ export async function GET(request: NextRequest) {
       })
       .where(eq(newsletterSubscribers.id, subscriber.id));
 
-    // Send unsubscribe confirmation email (fire-and-forget, like comment notifications)
-    sendNewsletterEmail({
-      email: subscriber.email,
-      locale: subscriber.locale || "en",
-      token: subscriber.unsubscribeToken || "",
-      type: "unsubscribe_confirmation",
-    }).catch((error) => {
-      console.error("Error sending unsubscribe confirmation email:", error);
+    // Send unsubscribe confirmation email using after() to prevent Vercel timeouts
+    after(async () => {
+      try {
+        await sendNewsletterEmail({
+          email: subscriber.email,
+          locale: subscriber.locale || "en",
+          token: subscriber.unsubscribeToken || "",
+          type: "unsubscribe_confirmation",
+        });
+        console.log(`[NEWSLETTER] Unsubscribe confirmation email sent successfully to ${subscriber.email}`);
+      } catch (error) {
+        console.error(`[NEWSLETTER] Error sending unsubscribe confirmation email to ${subscriber.email}:`, error);
+      }
     });
 
     // Redirect to confirmation page

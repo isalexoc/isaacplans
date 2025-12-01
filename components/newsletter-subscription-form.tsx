@@ -105,6 +105,74 @@ export function NewsletterSubscriptionForm({
     }
   };
 
+  // Show confirmation success UI for confirmed/already_confirmed statuses
+  if (statusType === "confirmed" || statusType === "already_confirmed") {
+    return (
+      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-12 shadow-lg">
+        <div className="text-center space-y-6">
+          {/* Success Icon with Animation */}
+          <div className="flex justify-center">
+            <div className="relative">
+              <div className="absolute inset-0 bg-green-500 rounded-full animate-ping opacity-20"></div>
+              <div className="relative bg-green-100 dark:bg-green-900/30 rounded-full p-6">
+                <CheckCircle className="w-16 h-16 text-green-600 dark:text-green-400" />
+              </div>
+            </div>
+          </div>
+
+          {/* Success Message */}
+          <div className="space-y-2">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
+              {statusType === "confirmed"
+                ? isES
+                  ? "¡Suscripción Confirmada!"
+                  : "Subscription Confirmed!"
+                : isES
+                ? "Ya Estás Suscrito"
+                : "Already Subscribed"}
+            </h2>
+            <p className="text-lg text-gray-600 dark:text-gray-400">
+              {message}
+            </p>
+          </div>
+
+          {/* Additional Info */}
+          <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              {isES
+                ? "Revisa tu bandeja de entrada para recibir nuestras últimas actualizaciones."
+                : "Check your inbox to receive our latest updates."}
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show unsubscribe confirmation UI
+  if (statusType === "unsubscribed" || statusType === "already_unsubscribed") {
+    return (
+      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-12 shadow-lg">
+        <div className="text-center space-y-6">
+          <div className="flex justify-center">
+            <div className="bg-blue-100 dark:bg-blue-900/30 rounded-full p-6">
+              <Mail className="w-16 h-16 text-blue-600 dark:text-blue-400" />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
+              {isES ? "Suscripción Cancelada" : "Unsubscribed"}
+            </h2>
+            <p className="text-lg text-gray-600 dark:text-gray-400">
+              {message}
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show normal subscription form
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-8 shadow-lg">
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -151,7 +219,7 @@ export function NewsletterSubscriptionForm({
         </Button>
 
         {/* Status Messages */}
-        {message && (
+        {message && statusType !== "confirmed" && statusType !== "already_confirmed" && (
           <div
             className={`flex items-start gap-3 p-4 rounded-lg ${
               status === "error"
