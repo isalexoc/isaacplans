@@ -4,6 +4,7 @@ import Hero from "@/components/hero";
 import Services from "@/components/services";
 import About from "@/components/about";
 import Coverage from "@/components/states";
+import HomeBlogPosts from "@/components/home-blog-posts";
 import {
   ogLocaleOf,
   type SupportedLocale,
@@ -69,13 +70,10 @@ export async function generateMetadata(): Promise<Metadata> {
 export default function HomePage() {
   return (
     <main className="w-full flex flex-col overflow-x-hidden">
-      {/* @ts-expect-error - Next.js async server components are valid JSX */}
       <Hero />
-      {/* @ts-expect-error - Next.js async server components are valid JSX */}
       <Services />
-      {/* @ts-expect-error - Next.js async server components are valid JSX */}
       <About />
-      {/* @ts-expect-error - Next.js async server components are valid JSX */}
+      <HomeBlogPosts />
       <Coverage />
     </main>
   );

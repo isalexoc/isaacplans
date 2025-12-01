@@ -14,6 +14,7 @@ import Image from "next/image";
 import { Link } from "@/i18n/navigation"; // locale‑aware wrappers
 import { getTranslations } from "next-intl/server";
 import { Separator } from "@/components/ui/separator";
+import { NewsletterFooter } from "@/components/newsletter-footer";
 
 /* ──────────────────────────────────────────────
    Site constants (could live in /lib/siteConfig)
@@ -54,8 +55,16 @@ export default async function Footer() {
       },
       { name: tServices("life.title"), href: "/iul" },
       { name: tServices("finalExpense.title"), href: "/final-expense" },
-
-      
+    ],
+    resources: [
+      { name: tRes("faq.title"), href: "/faq" },
+      { name: tRes("blog.title"), href: "/blog" },
+      { name: tRes("testimonials.title"), href: "/testimonials" },
+      { name: tRes("consumerGuides.title"), href: "/consumer-guides" },
+      { name: tRes("glossary.title"), href: "/glossary" },
+      { name: tRes("subsidyCalculator.title"), href: "/subsidy-calculator" },
+      { name: tRes("planComparison.title"), href: "/plan-comparison" },
+      { name: tRes("renewalSupport.title"), href: "/renewal-support" },
     ],
     company: [
       { name: tNav("about.label"), href: "/about" },
@@ -83,7 +92,7 @@ export default async function Footer() {
       </div>
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16 relative z-10">
-        <div className="grid md:grid-cols-3 gap-8 lg:gap-12">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
           {/* Brand & contact */}
           <section aria-labelledby="footer-company" className="space-y-6">
             <h2 id="footer-company" className="sr-only">
@@ -97,12 +106,19 @@ export default async function Footer() {
               licensedStates={tContact("licensedStates", { states })}
               whatsappLabel={tContact("whatsappLabel")}
             />
+            <NewsletterFooter />
           </section>
 
           {/* Services */}
           <FooterColumn
             title={tFooter("services")}
             links={footerLinks.services}
+          />
+
+          {/* Resources */}
+          <FooterColumn
+            title={tNav("resources.label")}
+            links={footerLinks.resources}
           />
 
           {/* Company & social */}

@@ -191,6 +191,11 @@
         "email": "Email Me",
         "reassurance": "Response within business hours · Se habla Español"
       }
+    },
+    "blogSection": {
+      "title": "Latest Articles",
+      "description": "Stay informed with our latest insurance insights and tips",
+      "viewAll": "View All Posts"
     }
   },
 

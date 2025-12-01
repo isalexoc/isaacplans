@@ -181,6 +181,11 @@
         "email": "Enviarme un correo",
         "reassurance": "Respuesta en horario comercial · Se habla Español"
       }
+    },
+    "blogSection": {
+      "title": "Últimos Artículos",
+      "description": "Mantente informado con nuestros últimos consejos e información sobre seguros",
+      "viewAll": "Ver Todas las Publicaciones"
     }
   },
   "header": {
