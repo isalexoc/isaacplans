@@ -67,7 +67,7 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default function HomePage() {
+export default async function HomePage() {
   return (
     <main className="w-full flex flex-col overflow-x-hidden">
       <Hero />
