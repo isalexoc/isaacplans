@@ -15,6 +15,25 @@ const BASE_URL = "https://www.isaacplans.com";
 const PHONE = "+15404261804";
 const LOGO_URL = `${BASE_URL}/images/logo_ip.png`;
 
+/* ─────────────────────────  Social Media Links ─────────────────────── */
+const getSocialLinks = (locale: string) => {
+  const isES = locale === "es";
+  return {
+    facebook: isES
+      ? "https://www.facebook.com/isaacplanses"
+      : "https://www.facebook.com/isaacplansi",
+    instagram: isES
+      ? "https://www.instagram.com/isaacplans_es"
+      : "https://www.instagram.com/isalexoc",
+    youtube: isES
+      ? "https://www.youtube.com/@isaacplans_es"
+      : "https://www.youtube.com/@isaacplans",
+    linkedin: isES
+      ? "https://www.linkedin.com/in/isaacplans-es"
+      : "https://www.linkedin.com/in/isaacplans",
+  };
+};
+
 /* Opening hours (7 days, 08–20) */
 const weekdayHours: OpeningHoursSpecification = {
   "@type": "OpeningHoursSpecification",
@@ -32,7 +51,9 @@ const weekdayHours: OpeningHoursSpecification = {
 };
 
 /* ───────────── InsuranceAgency (Organization / LocalBusiness) ────── */
-export const agencyLd: WithContext<InsuranceAgency> = {
+export const getAgencyLd = (locale: string = "en"): WithContext<InsuranceAgency> => {
+  const socialLinks = getSocialLinks(locale);
+  return {
   "@context": "https://schema.org",
   "@type": "InsuranceAgency",
   "@id": `${BASE_URL}/#organization`,
@@ -80,10 +101,10 @@ export const agencyLd: WithContext<InsuranceAgency> = {
 
   /* Social links */
   sameAs: [
-    "https://www.facebook.com/isaacagent",
-    "https://www.instagram.com/isalexoc",
-    "https://www.linkedin.com/in/isaacplans",
-    "https://www.youtube.com/@isaacplans",
+    socialLinks.facebook,
+    socialLinks.instagram,
+    socialLinks.linkedin,
+    socialLinks.youtube,
   ],
 
   /* Reference to person (no duplication) */
@@ -124,6 +145,7 @@ export const agencyLd: WithContext<InsuranceAgency> = {
       },
     ],
   },
+  };
 };
 
 /* ───────────── WebSite (+ optional SearchAction) ───────────── */
@@ -174,7 +196,9 @@ export const getRootBreadcrumbLd = (
 });
 
 /* ───────────── Person (global) ───────────── */
-export const isaacPersonLd: WithContext<Person> = {
+export const getIsaacPersonLd = (locale: string = "en"): WithContext<Person> => {
+  const socialLinks = getSocialLinks(locale);
+  return {
   "@context": "https://schema.org",
   "@type": "Person",
   "@id": `${BASE_URL}/#isaacOrraiz`,
@@ -190,10 +214,10 @@ export const isaacPersonLd: WithContext<Person> = {
   telephone: PHONE,
 
   sameAs: [
-    "https://www.facebook.com/isaacagent",
-    "https://www.instagram.com/isalexoc",
-    "https://www.linkedin.com/in/isaacplans",
-    "https://www.youtube.com/@isaacplans",
+    socialLinks.facebook,
+    socialLinks.instagram,
+    socialLinks.linkedin,
+    socialLinks.youtube,
   ],
 
   knowsLanguage: ["English", "Spanish"],
@@ -203,6 +227,7 @@ export const isaacPersonLd: WithContext<Person> = {
     credentialCategory: "Professional Certificate",
     name: "Certified Health Care Reform Specialist",
   },
+  };
 };
 
 /* ───────────── Page-specific helpers ───────────── */

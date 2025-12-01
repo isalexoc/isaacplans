@@ -8,7 +8,7 @@ import { Toaster } from "@/components/ui/toaster";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
 import { getTranslations } from "next-intl/server";
-import { agencyLd, siteLd, isaacPersonLd } from "@/lib/seo/jsonld";
+import { getAgencyLd, siteLd, getIsaacPersonLd } from "@/lib/seo/jsonld";
 import { getLocale } from "next-intl/server";
 import Script from "next/script";
 import { ClerkProvider } from '@clerk/nextjs';
@@ -124,9 +124,9 @@ export default async function LocaleLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify([
-              agencyLd,
+              getAgencyLd(locale),
               siteLd,
-              isaacPersonLd, // ← moved here
+              getIsaacPersonLd(locale),
             ]).replace(/</g, "\\u003c"),
           }}
         />
