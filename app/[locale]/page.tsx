@@ -70,10 +70,15 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function HomePage() {
   return (
     <main className="w-full flex flex-col overflow-x-hidden">
+      {/* @ts-expect-error Async Server Component */}
       <Hero />
+      {/* @ts-expect-error Async Server Component */}
       <Services />
+      {/* @ts-expect-error Async Server Component */}
       <About />
+      {/* @ts-expect-error Async Server Component */}
       <HomeBlogPosts />
+      {/* @ts-expect-error Async Server Component */}
       <Coverage />
     </main>
   );
