@@ -219,7 +219,7 @@ export function NewsletterSubscriptionForm({
         </Button>
 
         {/* Status Messages */}
-        {message && statusType !== "confirmed" && statusType !== "already_confirmed" && (
+        {message && (
           <div
             className={`flex items-start gap-3 p-4 rounded-lg ${
               status === "error"
