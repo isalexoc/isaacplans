@@ -272,7 +272,7 @@ export async function sendNewsletterEmail(
                   ? "¿Ya no quieres recibir nuestros correos?"
                   : "Don't want to receive our emails anymore?"}
               </p>
-              <a href="${baseUrl}/${data.locale}/newsletter/unsubscribe?token=${data.token}" 
+              <a href="${baseUrl}/api/newsletter/unsubscribe?token=${data.token}" 
                  style="color: #6b7280; text-decoration: underline;">
                 ${isES ? "Cancelar suscripción" : "Unsubscribe"}
               </a>
