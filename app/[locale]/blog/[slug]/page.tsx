@@ -110,7 +110,14 @@ const RELATED_CATEGORY_POSTS_QUERY = `*[
   publishedAt
 }`;
 
-const options = { next: { revalidate: 30 } };
+// ISR with 1 hour fallback - on-demand revalidation via webhook is preferred
+// Tags allow granular revalidation of specific posts
+const options = { 
+  next: { 
+    revalidate: 3600, // 1 hour fallback
+    tags: ['blog-listing'] // Will be overridden per-post below
+  } 
+};
 
 export async function generateMetadata({
   params,
@@ -119,11 +126,19 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug, locale } = await params;
   
+  // Use post-specific tags for granular revalidation
+  const postOptions = { 
+    next: { 
+      revalidate: 3600, // 1 hour fallback
+      tags: [`blog-post-${slug}`, `blog-post-${slug}-${locale}`, 'blog-listing']
+    } 
+  };
+  
   // First, try to find the post with the current slug and locale
   let post = await client.fetch<SanityDocument>(
     POST_QUERY,
     { slug, locale },
-    options
+    postOptions
   );
 
   // If not found, try to find the related post in the alternate locale
@@ -136,7 +151,7 @@ export async function generateMetadata({
         sourceLocale: alternateLocale,
         targetLocale: locale 
       },
-      options
+      postOptions
     );
   }
 
@@ -258,11 +273,19 @@ export default async function BlogPostPage({
   const { slug, locale } = await params;
   const t = await getTranslations({ locale, namespace: "blogPage" });
   
+  // Use post-specific tags for granular revalidation
+  const postOptions = { 
+    next: { 
+      revalidate: 3600, // 1 hour fallback
+      tags: [`blog-post-${slug}`, `blog-post-${slug}-${locale}`, 'blog-listing']
+    } 
+  };
+  
   // First, try to find the post with the current slug and locale
   let post = await client.fetch<SanityDocument>(
     POST_QUERY,
     { slug, locale },
-    options
+    postOptions
   );
 
   // If not found, try to find the related post in the alternate locale
@@ -276,7 +299,7 @@ export default async function BlogPostPage({
         sourceLocale: alternateLocale,
         targetLocale: locale 
       },
-      options
+      postOptions
     );
     
     // If we found the related post, redirect to it
@@ -351,6 +374,13 @@ export default async function BlogPostPage({
 
   // If we have less than 3 related posts, fetch from same category
   if (relatedPosts.length < 3 && post.category) {
+    const categoryOptions = { 
+      next: { 
+        revalidate: 3600,
+        tags: [`blog-category-${post.category}`, 'blog-listing']
+      } 
+    };
+    
     const categoryPosts = await client.fetch<SanityDocument[]>(
       RELATED_CATEGORY_POSTS_QUERY,
       {
@@ -358,7 +388,7 @@ export default async function BlogPostPage({
         category: post.category,
         currentSlug: post.slug.current,
       },
-      options
+      categoryOptions
     );
 
     // Merge and deduplicate

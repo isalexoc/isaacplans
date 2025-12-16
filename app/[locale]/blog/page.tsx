@@ -57,7 +57,13 @@ const FEATURED_POSTS_QUERY = `*[
   author
 }`;
 
-const options = { next: { revalidate: 30 } };
+// ISR with 1 hour fallback - on-demand revalidation via webhook is preferred
+const options = { 
+  next: { 
+    revalidate: 3600, // 1 hour fallback
+    tags: ['blog-listing'] // Allows granular revalidation
+  } 
+};
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = (await getLocale()) as SupportedLocale;

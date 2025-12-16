@@ -32,7 +32,14 @@ const CATEGORY_POSTS_QUERY = `*[
   author
 }`;
 
-const options = { next: { revalidate: 30 } };
+// ISR with 1 hour fallback - on-demand revalidation via webhook is preferred
+// Category-specific tag allows granular revalidation
+const getCategoryOptions = (category: string) => ({
+  next: { 
+    revalidate: 3600, // 1 hour fallback
+    tags: [`blog-category-${category}`, 'blog-listing'] // Allows granular revalidation
+  }
+});
 
 // Category labels mapping
 const CATEGORY_LABELS: Record<string, { en: string; es: string }> = {
@@ -93,7 +100,7 @@ export default async function CategoryPage({
   const posts = await client.fetch<SanityDocument[]>(
     CATEGORY_POSTS_QUERY,
     { locale, category },
-    options
+    getCategoryOptions(category)
   );
 
   return (
