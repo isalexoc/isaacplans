@@ -3,7 +3,7 @@ import Image from "next/image";
 import { getLocale, getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 import { type SanityDocument } from "next-sanity";
-import { client } from "@/sanity/lib/client";
+import { sanityFetch } from "@/sanity/lib/live";
 import { urlFor } from "@/sanity/lib/image";
 import {
   ogLocaleOf,
@@ -131,10 +131,13 @@ export default async function BlogPage() {
   const t = await getTranslations({ locale, namespace: "blogPage" });
   
   // Fetch featured posts and regular posts
-  const [featuredPosts, allPosts] = await Promise.all([
-    client.fetch<SanityDocument[]>(FEATURED_POSTS_QUERY, { locale }, options),
-    client.fetch<SanityDocument[]>(POSTS_QUERY, { locale }, options),
+  const [featuredResult, allPostsResult] = await Promise.all([
+    sanityFetch({ query: FEATURED_POSTS_QUERY, params: { locale }, ...options }),
+    sanityFetch({ query: POSTS_QUERY, params: { locale }, ...options }),
   ]);
+  
+  const featuredPosts: SanityDocument[] = featuredResult.data || [];
+  const allPosts: SanityDocument[] = allPostsResult.data || [];
 
   // Filter out featured posts from all posts to avoid duplicates
   const featuredIds = new Set(featuredPosts.map((p) => p._id));

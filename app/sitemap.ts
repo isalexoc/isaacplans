@@ -3,7 +3,7 @@ import type { MetadataRoute } from "next";
 import type { Locale } from "next-intl";
 import { routing } from "@/i18n/routing";
 import { getPathname } from "@/i18n/navigation";
-import { client } from "@/sanity/lib/client";
+import { sanityFetch } from "@/sanity/lib/live";
 import type { SanityDocument } from "next-sanity";
 
 /**
@@ -129,10 +129,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
 
   // Fetch blog posts and categories from Sanity
-  const [blogPosts, categoryData] = await Promise.all([
-    client.fetch<SanityDocument[]>(BLOG_POSTS_QUERY, {}, options).catch(() => []),
-    client.fetch<SanityDocument[]>(BLOG_CATEGORIES_QUERY, {}, options).catch(() => []),
+  const [blogPostsResult, categoryDataResult] = await Promise.all([
+    sanityFetch({ query: BLOG_POSTS_QUERY, params: {}, ...options }).catch(() => ({ data: [] })),
+    sanityFetch({ query: BLOG_CATEGORIES_QUERY, params: {}, ...options }).catch(() => ({ data: [] })),
   ]);
+  
+  const blogPosts: SanityDocument[] = blogPostsResult.data || [];
+  const categoryData: SanityDocument[] = categoryDataResult.data || [];
 
   // Get unique categories
   const categories = Array.from(

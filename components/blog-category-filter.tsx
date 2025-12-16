@@ -39,8 +39,15 @@ export function BlogCategoryFilter({ categories }: BlogCategoryFilterProps) {
     }
   };
 
-  // Get all categories from CATEGORY_LABELS, sorted alphabetically
-  const allCategories = Object.keys(CATEGORY_LABELS).sort();
+  // Filter categories to only show those that have posts available
+  // Sort them alphabetically by their label
+  const availableCategories = categories
+    .filter((cat) => CATEGORY_LABELS[cat]) // Only include categories we have labels for
+    .sort((a, b) => {
+      const labelA = CATEGORY_LABELS[a]?.[locale as 'en' | 'es'] || a;
+      const labelB = CATEGORY_LABELS[b]?.[locale as 'en' | 'es'] || b;
+      return labelA.localeCompare(labelB);
+    });
 
   return (
     <div className="mb-8 flex justify-center">
@@ -57,7 +64,7 @@ export function BlogCategoryFilter({ categories }: BlogCategoryFilterProps) {
           <option value="all">
             {locale === 'en' ? 'All Posts' : 'Todas las Publicaciones'}
           </option>
-          {allCategories.map((category) => (
+          {availableCategories.map((category) => (
             <option key={category} value={category}>
               {CATEGORY_LABELS[category]?.[locale as 'en' | 'es'] || category}
             </option>

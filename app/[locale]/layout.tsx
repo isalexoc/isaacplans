@@ -13,6 +13,7 @@ import { getLocale } from "next-intl/server";
 import Script from "next/script";
 import { ClerkProvider } from '@clerk/nextjs';
 import { esES, enUS } from '@clerk/localizations';
+import { SanityLive } from '@/sanity/lib/live';
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
@@ -105,6 +106,7 @@ export default async function LocaleLayout({
         className={`${inter.className} flex min-h-screen flex-col bg-white text-gray-900 overflow-x-hidden`}
       >
         <NextIntlClientProvider locale={locale}>
+          <SanityLive />
           <Header />
           <main className="flex-1 w-full">{children}</main>
           <Toaster />

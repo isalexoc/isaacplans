@@ -3,7 +3,7 @@ import Link from "next/link";
 import { getLocale, getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 import { type SanityDocument } from "next-sanity";
-import { client } from "@/sanity/lib/client";
+import { sanityFetch } from "@/sanity/lib/live";
 import { urlFor } from "@/sanity/lib/image";
 import { PortableText } from "@portabletext/react";
 import { portableTextComponents } from "@/components/portable-text-components";
@@ -135,24 +135,26 @@ export async function generateMetadata({
   };
   
   // First, try to find the post with the current slug and locale
-  let post = await client.fetch<SanityDocument>(
-    POST_QUERY,
-    { slug, locale },
-    postOptions
-  );
+  let postResult = await sanityFetch({
+    query: POST_QUERY,
+    params: { slug, locale },
+    ...postOptions
+  });
+  let post: SanityDocument | null = postResult.data || null;
 
   // If not found, try to find the related post in the alternate locale
   if (!post) {
     const alternateLocale = locale === "en" ? "es" : "en";
-    post = await client.fetch<SanityDocument>(
-      FIND_RELATED_QUERY,
-      { 
+    const relatedResult = await sanityFetch({
+      query: FIND_RELATED_QUERY,
+      params: { 
         slug, 
         sourceLocale: alternateLocale,
         targetLocale: locale 
       },
-      postOptions
-    );
+      ...postOptions
+    });
+    post = relatedResult.data || null;
   }
 
   if (!post) {
@@ -282,25 +284,27 @@ export default async function BlogPostPage({
   };
   
   // First, try to find the post with the current slug and locale
-  let post = await client.fetch<SanityDocument>(
-    POST_QUERY,
-    { slug, locale },
-    postOptions
-  );
+  let postResult = await sanityFetch({
+    query: POST_QUERY,
+    params: { slug, locale },
+    ...postOptions
+  });
+  let post: SanityDocument | null = postResult.data || null;
 
   // If not found, try to find the related post in the alternate locale
   // This handles the case where user switched language and the slug is different
   if (!post) {
     const alternateLocale = locale === "en" ? "es" : "en";
-    post = await client.fetch<SanityDocument>(
-      FIND_RELATED_QUERY,
-      { 
+    const relatedResult = await sanityFetch({
+      query: FIND_RELATED_QUERY,
+      params: { 
         slug, 
         sourceLocale: alternateLocale,
         targetLocale: locale 
       },
-      postOptions
-    );
+      ...postOptions
+    });
+    post = relatedResult.data || null;
     
     // If we found the related post, redirect to it
     if (post && post.slug?.current) {
@@ -381,15 +385,16 @@ export default async function BlogPostPage({
       } 
     };
     
-    const categoryPosts = await client.fetch<SanityDocument[]>(
-      RELATED_CATEGORY_POSTS_QUERY,
-      {
+    const categoryPostsResult = await sanityFetch({
+      query: RELATED_CATEGORY_POSTS_QUERY,
+      params: {
         locale,
         category: post.category,
         currentSlug: post.slug.current,
       },
-      categoryOptions
-    );
+      ...categoryOptions
+    });
+    const categoryPosts: SanityDocument[] = categoryPostsResult.data || [];
 
     // Merge and deduplicate
     const existingIds = new Set(relatedPosts.map((p: any) => p._id));

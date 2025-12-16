@@ -2,7 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { getLocale, getTranslations } from "next-intl/server";
 import { type SanityDocument } from "next-sanity";
-import { client } from "@/sanity/lib/client";
+import { sanityFetch } from "@/sanity/lib/live";
 import { urlFor } from "@/sanity/lib/image";
 import { type SupportedLocale } from "@/lib/seo/i18n";
 import { ArrowRight } from "lucide-react";
@@ -77,24 +77,26 @@ export default async function HomeBlogPosts() {
   const t = await getTranslations({ locale, namespace: "HomePage" });
 
   // Try to get featured posts first, fallback to latest posts
-  const featuredPosts = await client.fetch<SanityDocument[]>(
-    FEATURED_POSTS_QUERY,
-    { locale },
-    options
-  );
+  const featuredResult = await sanityFetch({
+    query: FEATURED_POSTS_QUERY,
+    params: { locale },
+    ...options
+  });
+  const featuredPosts: SanityDocument[] = featuredResult.data || [];
 
-  const posts = featuredPosts.length >= 3
+  const posts: SanityDocument[] = featuredPosts.length >= 3
     ? featuredPosts.slice(0, 3)
-    : await client.fetch<SanityDocument[]>(
-        LATEST_POSTS_QUERY,
-        { locale },
-        options
-      ).then((latest) => {
+    : await sanityFetch({
+        query: LATEST_POSTS_QUERY,
+        params: { locale },
+        ...options
+      }).then((latestResult) => {
+        const latest: SanityDocument[] = latestResult.data || [];
         // If we have some featured posts but less than 3, combine with latest
         if (featuredPosts.length > 0 && featuredPosts.length < 3) {
-          const featuredIds = new Set(featuredPosts.map((p) => p._id));
+          const featuredIds = new Set(featuredPosts.map((p: SanityDocument) => p._id));
           const additional = latest
-            .filter((p) => !featuredIds.has(p._id))
+            .filter((p: SanityDocument) => !featuredIds.has(p._id))
             .slice(0, 3 - featuredPosts.length);
           return [...featuredPosts, ...additional];
         }

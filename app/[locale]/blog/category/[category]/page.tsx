@@ -3,7 +3,7 @@ import Image from "next/image";
 import { getLocale, getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 import { type SanityDocument } from "next-sanity";
-import { client } from "@/sanity/lib/client";
+import { sanityFetch } from "@/sanity/lib/live";
 import { urlFor } from "@/sanity/lib/image";
 import {
   ogLocaleOf,
@@ -97,11 +97,12 @@ export default async function CategoryPage({
   const categoryLabel =
     CATEGORY_LABELS[category]?.[localeTyped] || category;
 
-  const posts = await client.fetch<SanityDocument[]>(
-    CATEGORY_POSTS_QUERY,
-    { locale, category },
-    getCategoryOptions(category)
-  );
+  const postsResult = await sanityFetch({
+    query: CATEGORY_POSTS_QUERY,
+    params: { locale, category },
+    ...getCategoryOptions(category)
+  });
+  const posts: SanityDocument[] = postsResult.data || [];
 
   return (
     <main className="container mx-auto min-h-screen max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
