@@ -20,7 +20,8 @@ import { NewsletterFooter } from "@/components/newsletter-footer";
    Site constants (could live in /lib/siteConfig)
 ────────────────────────────────────────────── */
 const PHONE_RAW = "540-426-1804";
-const WHATSAPP_E164 = "15406813507";
+const WHATSAPP_E164 = "15406813507"; // E.164 format: country code 1 + 5406813507
+const WHATSAPP_DISPLAY = "5406813507"; // Display format for WhatsApp number
 const EMAIL = "info@isaacplans.com";
 const SITE_NAME = "Isaac Plans";
 const LOGO_URL =
@@ -235,7 +236,7 @@ const WhatsAppLine = ({ label }: { label: string }) => (
     rel="noopener noreferrer"
     className="flex items-center space-x-3 text-gray-300 hover:text-white 
                transition-colors duration-200 group"
-    aria-label={`${label}: ${PHONE_RAW} (opens in new tab)`}
+    aria-label={`${label}: ${WHATSAPP_DISPLAY} (opens in new tab)`}
   >
     <div className="p-1.5 rounded-md bg-[hsl(var(--custom)/0.15)] group-hover:bg-[hsl(var(--custom)/0.25)] transition-colors duration-200">
       <Image
@@ -248,7 +249,7 @@ const WhatsAppLine = ({ label }: { label: string }) => (
       />
     </div>
     <span className="text-sm lg:text-base">
-      {label}: {PHONE_RAW}
+      {label}: {WHATSAPP_DISPLAY}
     </span>
   </a>
 );
