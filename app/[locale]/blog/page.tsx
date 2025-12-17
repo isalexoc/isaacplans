@@ -15,26 +15,45 @@ import {
 import { BlogCategoryFilter } from "@/components/blog-category-filter";
 import { BlogUserAuth } from "@/components/blog-user-auth";
 import { BackHome } from "@/components/back-home";
+import { BlogPagination } from "@/components/blog-pagination";
+import { BlogSearch } from "@/components/blog-search";
 
-const POSTS_QUERY = `*[
+const POSTS_PER_PAGE = 12;
+
+// Base query for posts - excludes featured posts on page 1 to ensure we get 12 non-featured posts
+// We'll build the query conditionally based on whether we need to exclude featured posts
+const getPostsQuery = (excludeFeatured: boolean) => {
+  // Use (featured != true) which handles null/undefined cases correctly
+  // This ensures we exclude posts where featured is explicitly true
+  const featuredFilter = excludeFeatured ? "&& (featured != true || !defined(featured))" : "";
+  return `*[
+    _type == "post"
+    && defined(slug.current)
+    && locale == $locale
+    && status == "published"
+    ${featuredFilter}
+  ]|order(publishedAt desc)[$start...$end]{
+    _id, 
+    title, 
+    slug, 
+    publishedAt, 
+    image, 
+    locale,
+    category,
+    excerpt,
+    featured,
+    tags,
+    readingTime,
+    author
+  }`;
+};
+
+const POSTS_COUNT_QUERY = `count(*[
   _type == "post"
   && defined(slug.current)
   && locale == $locale
   && status == "published"
-]|order(publishedAt desc)[0...24]{
-  _id, 
-  title, 
-  slug, 
-  publishedAt, 
-  image, 
-  locale,
-  category,
-  excerpt,
-  featured,
-  tags,
-  readingTime,
-  author
-}`;
+])`;
 
 const FEATURED_POSTS_QUERY = `*[
   _type == "post"
@@ -65,9 +84,15 @@ const options = {
   } 
 };
 
-export async function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams?: Promise<{ page?: string }>;
+}): Promise<Metadata> {
   const locale = (await getLocale()) as SupportedLocale;
   const t = await getTranslations({ locale, namespace: "blogPage.meta" });
+  const params = searchParams ? await searchParams : {};
+  const currentPage = params?.page ? parseInt(params.page, 10) : 1;
 
   const title = t("title");
   const description = t("description");
@@ -79,21 +104,38 @@ export async function generateMetadata(): Promise<Metadata> {
 
   const routeKey = "/blog";
   const slug = localizedSlug(routeKey, locale);
-  const canonical = withLocalePrefix(locale, slug);
+  const baseUrl = withLocalePrefix(locale, slug);
+  
+  // Build canonical URL - page 1 has no query param
+  const canonical = currentPage === 1 
+    ? baseUrl 
+    : `${baseUrl}?page=${currentPage}`;
+  
   const languages = languageAlternatesPrefixed(routeKey);
   const ogLocale = ogLocaleOf(locale);
   const xDefault = withLocalePrefix("en", localizedSlug(routeKey, "en"));
 
+  // Get total count for prev/next links
+  const totalCountResult = await sanityFetch({
+    query: POSTS_COUNT_QUERY,
+    params: { locale },
+    ...options,
+  });
+  const totalPosts = (totalCountResult.data as number) || 0;
+  const totalPages = Math.ceil(totalPosts / POSTS_PER_PAGE);
+
+  const alternates: Metadata["alternates"] = {
+    canonical,
+    languages: { ...languages, "x-default": xDefault },
+  };
+
   return {
-    title,
+    title: currentPage > 1 ? `${title} - Page ${currentPage}` : title,
     description,
     keywords,
-    alternates: {
-      canonical,
-      languages: { ...languages, "x-default": xDefault },
-    },
+    alternates,
     openGraph: {
-      title,
+      title: currentPage > 1 ? `${title} - Page ${currentPage}` : title,
       description,
       url: canonical,
       siteName: "Isaac Plans Insurance",
@@ -104,7 +146,7 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     twitter: {
       card: "summary_large_image",
-      title,
+      title: currentPage > 1 ? `${title} - Page ${currentPage}` : title,
       description,
       images: [{ url: image, alt }],
     },
@@ -126,26 +168,103 @@ const CATEGORY_LABELS: Record<string, { en: string; es: string }> = {
   'news': { en: 'Industry News', es: 'Noticias de la Industria' },
 };
 
-export default async function BlogPage() {
+export default async function BlogPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
   const locale = (await getLocale()) as SupportedLocale;
   const t = await getTranslations({ locale, namespace: "blogPage" });
+  const params = await searchParams;
   
-  // Fetch featured posts and regular posts
-  const [featuredResult, allPostsResult] = await Promise.all([
+  // Get current page from search params, default to 1
+  const currentPage = params?.page ? Math.max(1, parseInt(params.page, 10)) : 1;
+  
+  // Calculate pagination offsets
+  const start = (currentPage - 1) * POSTS_PER_PAGE;
+  const end = start + POSTS_PER_PAGE - 1;
+
+  // On page 1, we need to fetch more posts to account for featured posts that will be filtered out
+  // Fetch enough to ensure we have 12 non-featured posts after filtering
+  // On other pages, fetch normal amount
+  const excludeFeatured = currentPage === 1;
+  const postsQuery = getPostsQuery(excludeFeatured);
+  // On page 1, fetch extra posts (15 instead of 12) to ensure we have 12 after filtering featured
+  // This accounts for the case where some of the first 12 posts might be featured
+  const fetchEnd = excludeFeatured && start === 0 ? start + 14 : end; // Fetch 15 posts on page 1
+
+  // Fetch featured posts, paginated posts, and total count
+  const [featuredResult, allPostsResult, totalCountResult] = await Promise.all([
     sanityFetch({ query: FEATURED_POSTS_QUERY, params: { locale }, ...options }),
-    sanityFetch({ query: POSTS_QUERY, params: { locale }, ...options }),
+    sanityFetch({ 
+      query: postsQuery, 
+      params: { locale, start, end: fetchEnd }, 
+      ...options 
+    }),
+    sanityFetch({ 
+      query: POSTS_COUNT_QUERY, 
+      params: { locale }, 
+      ...options 
+    }),
   ]);
   
   const featuredPosts: SanityDocument[] = featuredResult.data || [];
   const allPosts: SanityDocument[] = allPostsResult.data || [];
-
-  // Filter out featured posts from all posts to avoid duplicates
+  const totalPosts = (totalCountResult.data as number) || 0;
+  
+  // On page 1, posts are already filtered in the query (excludeFeatured = true)
+  // But we still filter to be absolutely sure, and take only the first 12
+  // On other pages, we filter to be safe (though featured posts won't appear in separate section)
   const featuredIds = new Set(featuredPosts.map((p) => p._id));
-  const regularPosts = allPosts.filter((p) => !featuredIds.has(p._id));
+  const filteredPosts = allPosts.filter((p) => !featuredIds.has(p._id));
+  // Take exactly POSTS_PER_PAGE posts to ensure we always have 12
+  const regularPosts = filteredPosts.slice(0, POSTS_PER_PAGE);
+  
+  // Debug logging - this will help identify the issue
+  if (process.env.NODE_ENV === 'development') {
+    console.log(`Blog Page ${currentPage}:`, {
+      fetched: allPosts.length,
+      afterFilter: filteredPosts.length,
+      regularPosts: regularPosts.length,
+      featured: featuredPosts.length,
+      excludeFeatured,
+      start,
+      end,
+      fetchEnd,
+      expected: POSTS_PER_PAGE
+    });
+  }
+  
+  // Safety check: If we don't have 12 posts on page 1, log a warning
+  if (currentPage === 1 && regularPosts.length < POSTS_PER_PAGE && filteredPosts.length >= POSTS_PER_PAGE) {
+    console.warn(`Warning: Only ${regularPosts.length} posts displayed but ${filteredPosts.length} available. Check slice logic.`);
+  }
+  
+  // For pagination: use total posts count (all posts including featured)
+  // For display: on page 1, show adjusted count (excluding featured from total)
+  const totalPages = Math.ceil(totalPosts / POSTS_PER_PAGE);
+  const displayTotalPosts = currentPage === 1 && excludeFeatured
+    ? totalPosts - featuredPosts.length
+    : totalPosts;
 
-  // Get unique categories from posts
+  // Get unique categories from all posts (we need to fetch all categories, not just current page)
+  // For better UX, we'll fetch categories separately or use a cached list
+  const categoriesQuery = `*[
+    _type == "post"
+    && defined(slug.current)
+    && locale == $locale
+    && status == "published"
+  ]{
+    category
+  }`;
+  const categoriesResult = await sanityFetch({
+    query: categoriesQuery,
+    params: { locale },
+    ...options,
+  });
+  const allPostsForCategories: SanityDocument[] = categoriesResult.data || [];
   const categories = Array.from(
-    new Set(allPosts.map((p) => p.category).filter(Boolean))
+    new Set(allPostsForCategories.map((p) => p.category).filter(Boolean))
   ).sort();
 
   const alternateLocale = locale === "en" ? "es" : "en";
@@ -158,6 +277,11 @@ export default async function BlogPage() {
         <div className="mb-4">
           <BackHome variant="inline" />
         </div>
+        {/* Search Bar */}
+        <div className="mb-6 flex justify-center">
+          <BlogSearch locale={locale} />
+        </div>
+
         {/* Language Switcher and User Auth - Top */}
         <div className="mb-6 flex items-center justify-between flex-wrap gap-4">
           <Link
@@ -212,8 +336,8 @@ export default async function BlogPage() {
         </div>
       </div>
 
-      {/* Featured Posts Section */}
-      {featuredPosts.length > 0 && (
+      {/* Featured Posts Section - Only show on page 1 */}
+      {currentPage === 1 && featuredPosts.length > 0 && (
         <section className="mb-16">
           <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white flex items-center gap-2">
             <span className="text-yellow-500">⭐</span>
@@ -237,14 +361,32 @@ export default async function BlogPage() {
         </div>
       ) : (
         <section>
-          <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">
-            {locale === 'en' ? 'All Posts' : 'Todas las Publicaciones'}
-          </h2>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+              {locale === 'en' ? 'All Posts' : 'Todas las Publicaciones'}
+            </h2>
+            {displayTotalPosts > 0 && (
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                {locale === 'en' 
+                  ? `Showing ${start + 1}-${Math.min(start + regularPosts.length, displayTotalPosts)} of ${displayTotalPosts} posts`
+                  : `Mostrando ${start + 1}-${Math.min(start + regularPosts.length, displayTotalPosts)} de ${displayTotalPosts} publicaciones`
+                }
+              </p>
+            )}
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
             {regularPosts.map((post) => (
               <BlogCard key={post._id} post={post} locale={locale} />
             ))}
           </div>
+          
+          {/* Pagination */}
+          <BlogPagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            baseUrl={`/${locale}/blog`}
+            locale={locale}
+          />
         </section>
       )}
     </main>
@@ -325,6 +467,13 @@ function BlogCard({
           <h2 className="text-xl font-bold mb-2 text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors line-clamp-2">
             {post.title}
           </h2>
+
+          {/* Excerpt */}
+          {post.excerpt && (
+            <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-2">
+              {post.excerpt}
+            </p>
+          )}
 
           <div className="mt-auto pt-4 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
             <time dateTime={post.publishedAt} className="flex items-center gap-2">
