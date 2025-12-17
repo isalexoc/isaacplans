@@ -578,32 +578,82 @@ export interface BlogPostData {
   publishedAt: string;
   updatedAt?: string;
   author: string;
-  image?: string;
+  image?: string | string[]; // Can be single URL or array of URLs for multiple sizes
+  imageObject?: any; // Sanity image object for generating multiple sizes
   category?: string;
   tags?: string[];
   canonicalUrl?: string;
 }
+
+/**
+ * Formats a date string to ISO 8601 format with timezone
+ * If the date is already in ISO format, returns it as-is
+ * Otherwise, converts it to ISO 8601 with UTC timezone
+ */
+const formatDateToISO8601 = (dateString: string): string => {
+  if (!dateString) return new Date().toISOString();
+  
+  // If already in ISO format, return as-is
+  if (dateString.includes('T') && dateString.includes('Z')) {
+    return dateString;
+  }
+  
+  // If it's just a date, add time and timezone
+  if (dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
+    return `${dateString}T00:00:00Z`;
+  }
+  
+  // Try to parse and convert to ISO
+  try {
+    const date = new Date(dateString);
+    if (!isNaN(date.getTime())) {
+      return date.toISOString();
+    }
+  } catch (e) {
+    // Fallback to current date if parsing fails
+  }
+  
+  return new Date().toISOString();
+};
 
 export const getBlogPostArticleLd = (
   post: BlogPostData
 ): WithContext<Article> => {
   const url = post.canonicalUrl || `${BASE_URL}/${post.locale}/blog/${post.slug}`;
   
-  // Prepare image array with multiple sizes if available
-  const images = post.image ? [
-    post.image,
-    // You can add more image sizes here if you have them
-  ] : undefined;
+  // Prepare image array with multiple sizes per Google's recommendations
+  // Google recommends: 16x9, 4x3, and 1x1 aspect ratios with minimum 50K pixels
+  // We'll generate: 1200x675 (16x9) = 810K pixels, 1200x900 (4x3) = 1.08M pixels, 1200x1200 (1x1) = 1.44M pixels
+  let images: string[] | undefined = undefined;
+  
+  if (Array.isArray(post.image)) {
+    // If array is provided, use it directly
+    images = post.image;
+  } else if (post.image) {
+    // If single URL provided, use it (backward compatibility)
+    images = [post.image];
+  }
+  
+  // Format dates to ISO 8601 with timezone
+  const datePublished = formatDateToISO8601(post.publishedAt);
+  const dateModified = post.updatedAt 
+    ? formatDateToISO8601(post.updatedAt)
+    : datePublished;
 
-  // Author as Person object (not just reference) for better Google recognition
-  const authorPerson = {
-    "@type": "Person" as const,
+  // Author as Person object following Google's best practices:
+  // - Use Person type for people (not Organization)
+  // - Include url property for author identification (link to author profile page)
+  // - Only name in author.name (no job titles, prefixes, introductory words)
+  // - Use separate publisher property for the organization
+  const authorPerson: Person = {
+    "@type": "Person",
     "@id": `${BASE_URL}/#isaacOrraiz`,
-    name: post.author,
-    url: `${BASE_URL}/about`,
+    name: post.author.trim(), // Only the name, no additional info
+    url: `${BASE_URL}/about`, // Link to author's profile page for disambiguation
   };
 
-  // Publisher with Organization details including logo
+  // Publisher as Organization (separate from author)
+  // This is required and should be the organization that publishes the content
   const publisherOrg = {
     "@type": "Organization" as const,
     "@id": `${BASE_URL}/#organization`,
@@ -614,26 +664,29 @@ export const getBlogPostArticleLd = (
     },
   };
 
+  // Use BlogPosting type (more specific than Article for blog posts)
+  // Google accepts Article, NewsArticle, or BlogPosting - BlogPosting is most appropriate for blogs
+  // TypeScript type uses Article (base type), but JSON-LD uses "BlogPosting" string
   return {
     "@context": "https://schema.org",
-    "@type": "Article",
+    "@type": "BlogPosting" as any, // BlogPosting is valid per Google, but may not be in schema-dts types
     "@id": `${url}#article`,
     headline: post.title,
     description: post.description,
-    image: images,
-    datePublished: post.publishedAt,
-    dateModified: post.updatedAt || post.publishedAt,
-    author: [authorPerson],
-    publisher: publisherOrg,
+    image: images, // Array of image URLs (multiple sizes recommended: 16x9, 4x3, 1x1)
+    datePublished: datePublished, // ISO 8601 format with timezone (e.g., "2024-01-05T08:00:00+08:00")
+    dateModified: dateModified, // ISO 8601 format with timezone
+    author: [authorPerson], // Array of Person objects (can include multiple authors)
+    publisher: publisherOrg, // Organization that publishes the content
     mainEntityOfPage: {
       "@type": "WebPage",
       "@id": url,
     },
-    articleSection: post.category,
-    keywords: post.tags?.join(", "),
-    inLanguage: post.locale,
-    url: url,
-  };
+    articleSection: post.category, // Category/section of the article
+    keywords: post.tags?.join(", "), // Comma-separated keywords
+    inLanguage: post.locale, // Language code (e.g., "en", "es")
+    url: url, // Canonical URL of the article
+  } as WithContext<Article>;
 };
 
 /* ───────────── Blog Post Breadcrumb JSON-LD ───────────── */

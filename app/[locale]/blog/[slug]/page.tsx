@@ -427,11 +427,23 @@ export default async function BlogPostPage({
         : `https://www.isaacplans.com${post.seo.canonicalUrl}`)
     : `https://www.isaacplans.com/${locale}/blog/${post.slug.current}`;
 
-  const ogImageUrlForJsonLd = post.ogImage
-    ? urlFor(post.ogImage).width(1200).height(630).fit('crop').crop('top').url()
-    : imageUrl;
+  // Generate multiple image sizes for structured data (Google recommends 16x9, 4x3, 1x1)
+  // Minimum 50K pixels: 1200x675 (16x9) = 810K, 1200x900 (4x3) = 1.08M, 1200x1200 (1x1) = 1.44M
+  const imageSource = post.ogImage || post.image;
+  let imageUrls: string[] | undefined = undefined;
+  
+  if (imageSource) {
+    imageUrls = [
+      // 16x9 aspect ratio (recommended for social sharing)
+      urlFor(imageSource).width(1200).height(675).fit('crop').crop('center').url(),
+      // 4x3 aspect ratio (standard blog image)
+      urlFor(imageSource).width(1200).height(900).fit('crop').crop('center').url(),
+      // 1x1 aspect ratio (square, good for mobile)
+      urlFor(imageSource).width(1200).height(1200).fit('crop').crop('center').url(),
+    ];
+  }
 
-  // Prepare JSON-LD structured data
+  // Prepare JSON-LD structured data with multiple image sizes
   const articleLd = getBlogPostArticleLd({
     title: post.title,
     description: metaDescription,
@@ -440,7 +452,7 @@ export default async function BlogPostPage({
     publishedAt: post.publishedAt,
     updatedAt: post.updatedAt,
     author: post.author || "Isaac Orraiz",
-    image: ogImageUrlForJsonLd || undefined,
+    image: imageUrls, // Array of multiple image sizes
     category: post.category,
     tags: post.tags,
     canonicalUrl: canonicalUrl,
