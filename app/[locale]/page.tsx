@@ -79,7 +79,6 @@ export default async function HomePage() {
       <About />
       {/* @ts-expect-error Async Server Component */}
       <HomeBlogPosts />
-      {/* @ts-expect-error Async Server Component */}
       <HomeNewsletter />
       {/* @ts-expect-error Async Server Component */}
       <Coverage />
