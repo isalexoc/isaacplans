@@ -5,6 +5,8 @@ import { Award, Users, Clock, GraduationCap } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { getTranslations } from "next-intl/server";
+import { sanityFetch } from "@/sanity/lib/live";
+import { type SanityDocument } from "next-sanity";
 
 /* Achievements + icons map --------------------------------------------- */
 const ACHIEVEMENTS = [
@@ -14,13 +16,49 @@ const ACHIEVEMENTS = [
   { slug: "education", Icon: GraduationCap },
 ] as const;
 
+/* States query ---------------------------------------------------------- */
+const STATES_QUERY = `*[
+  _type == "state"
+  && active == true
+]|order(order asc, name asc){
+  _id,
+  name,
+  code,
+  order
+}`;
+
+// ISR with 1 hour fallback - on-demand revalidation via webhook is preferred
+const statesOptions = { 
+  next: { 
+    revalidate: 3600, // 1 hour fallback
+    tags: ['states'] // Allows granular revalidation
+  } 
+};
+
 /* ---------------------------------------------------------------------- */
 export default async function About() {
   const t = await getTranslations("HomePage.profile");
-  const states = process.env.NEXT_PUBLIC_STATES ?? "9";
+  
+  // Fetch states from Sanity
+  const statesResult = await sanityFetch({ 
+    query: STATES_QUERY, 
+    ...statesOptions 
+  });
+  
+  const states: SanityDocument[] = statesResult.data || [];
+  const statesCount = states.length;
+  const statesDisplay = process.env.NEXT_PUBLIC_STATES ?? String(statesCount);
 
-  const certs: string[] = t.raw("certs");
-  const subtitle1 = t("description1", { states });
+  // Extract state names for display, with fallback to translations if Sanity is empty
+  let certs: string[];
+  if (states.length > 0) {
+    certs = states.map((state: any) => state.name);
+  } else {
+    // Fallback to translations if no states found in Sanity
+    certs = t.raw("certs") || [];
+  }
+
+  const subtitle1 = t("description1", { states: statesDisplay });
   const subtitle2 = t("description2");
 
   return (
@@ -154,7 +192,7 @@ export default async function About() {
                         />
                       </div>
                       <h4 className="font-bold text-sm lg:text-base mb-2 text-gray-900">
-                        {t(`achievements.${slug}.title`, { states })}
+                        {t(`achievements.${slug}.title`, { states: statesDisplay })}
                       </h4>
                       <p className="text-xs lg:text-sm text-gray-600 leading-relaxed">
                         {t(`achievements.${slug}.description`)}
