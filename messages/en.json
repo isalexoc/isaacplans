@@ -7,7 +7,33 @@
       "name": "Isaac Orraiz",
       "title": "Your Trusted",
       "subtitle": "Insurance Agent",
-      "description": "ACA (Affordable Care Act) insurance, dental and vision, hospital indemnity, life insurance, cancer plans and more ...",
+      "description": "Comprehensive insurance solutions including ACA (Affordable Care Act) health plans, dental & vision coverage, hospital indemnity, Indexed Universal Life (IUL), final expense insurance, short-term medical, and more. Expert guidance in English and Spanish.",
+      "services": {
+        "aca": {
+          "title": "ACA Health Plans",
+          "desc": "Affordable Care Act coverage with subsidies"
+        },
+        "dentalVision": {
+          "title": "Dental & Vision",
+          "desc": "Complete oral and eye care coverage"
+        },
+        "hospitalIndemnity": {
+          "title": "Hospital Indemnity",
+          "desc": "Cash benefits during hospital stays"
+        },
+        "iul": {
+          "title": "Indexed Universal Life",
+          "desc": "Flexible protection with growth potential"
+        },
+        "finalExpense": {
+          "title": "Final Expense",
+          "desc": "Simple, permanent burial coverage"
+        },
+        "shortTermMedical": {
+          "title": "Short Term Medical",
+          "desc": "Temporary coverage for gaps"
+        }
+      },
       "cta1": "Get Free Quote",
       "cta2": "Schedule Consultation",
       "ctas": {
@@ -196,6 +222,16 @@
       "title": "Latest Articles",
       "description": "Stay informed with our latest insurance insights and tips",
       "viewAll": "View All Posts"
+    },
+    "newsletter": {
+      "title": "Stay Informed with Our Newsletter",
+      "description": "Get expert insurance tips, guides, and updates delivered directly to your inbox. Join thousands of subscribers who stay ahead with our insights.",
+      "privacy": "We respect your privacy. Unsubscribe at any time.",
+      "benefits": {
+        "tips": "Expert insurance tips & strategies",
+        "guides": "Free downloadable guides & resources",
+        "updates": "Latest industry news & updates"
+      }
     }
   },
 

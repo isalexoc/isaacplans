@@ -3,8 +3,9 @@ import type { Metadata } from "next";
 import Hero from "@/components/hero";
 import Services from "@/components/services";
 import About from "@/components/about";
-import Coverage from "@/components/states";
 import HomeBlogPosts from "@/components/home-blog-posts";
+import HomeNewsletter from "@/components/home-newsletter";
+import Coverage from "@/components/states";
 import {
   ogLocaleOf,
   type SupportedLocale,
@@ -78,6 +79,8 @@ export default async function HomePage() {
       <About />
       {/* @ts-expect-error Async Server Component */}
       <HomeBlogPosts />
+      {/* @ts-expect-error Async Server Component */}
+      <HomeNewsletter />
       {/* @ts-expect-error Async Server Component */}
       <Coverage />
     </main>

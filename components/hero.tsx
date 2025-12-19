@@ -4,6 +4,7 @@ import { Shield, Users, Award } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { Card } from "@/components/ui/card";
 import CTAButton from "@/components/cta-button"; // already client
+import HeroRotatingCards from "@/components/hero-rotating-cards";
 
 export default async function Hero() {
   const states = process.env.NEXT_PUBLIC_STATES ?? "12";
@@ -135,21 +136,15 @@ export default async function Hero() {
                 />
               </div>
 
-              {/* floating cards */}
-              <FloatingCard
+              {/* rotating floating cards */}
+              <HeroRotatingCards
                 side="left"
                 top="-top-10"
-                icon={Shield}
-                title={t("hero.onPicUp.title")}
-                desc={t("hero.onPicUp.des")}
                 delay="animate-fadeUp-d2"
               />
-              <FloatingCard
+              <HeroRotatingCards
                 side="right"
                 top="bottom-20"
-                icon={Users}
-                title={t("hero.onPicDown.title")}
-                desc={t("hero.onPicDown.des")}
                 delay="animate-fadeUp-d4"
               />
             </div>
@@ -203,44 +198,3 @@ function FeatureCard({
   );
 }
 
-function FloatingCard({
-  side,
-  top,
-  icon: Icon,
-  title,
-  desc,
-  delay,
-}: {
-  side: "left" | "right";
-  top: string;
-  icon: React.ComponentType<{ className?: string }>;
-  title: string;
-  desc: string;
-  delay: string;
-}) {
-  const pos =
-    side === "left"
-      ? `hidden lg:block absolute -left-8 xl:-left-12 ${top} z-20`
-      : `hidden lg:block absolute -right-8 xl:-right-12 ${top} z-20`;
-
-  return (
-    <div className={`${pos} ${delay}`}>
-      <Card
-        className="p-5 bg-white/95 backdrop-blur-sm shadow-2xl hover:shadow-3xl 
-                     border border-gray-100 w-56 xl:w-64
-                     transition-all duration-300 hover:-translate-y-1 hover:scale-105
-                     focus-within:ring-2 focus-within:ring-[hsl(var(--custom))] focus-within:ring-offset-2"
-      >
-        <div className="flex items-start space-x-3">
-          <div className="p-2.5 bg-gradient-to-br from-[hsl(var(--custom)/0.2)] to-[hsl(var(--custom)/0.1)] rounded-xl shrink-0">
-            <Icon className="w-6 h-6 text-[hsl(var(--custom))]" aria-hidden="true" />
-          </div>
-          <div className="min-w-0">
-            <div className="font-bold text-sm text-gray-900 mb-1.5">{title}</div>
-            <div className="text-xs text-gray-600 leading-relaxed">{desc}</div>
-          </div>
-        </div>
-      </Card>
-    </div>
-  );
-}

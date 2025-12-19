@@ -6,7 +6,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import {
   BriefcaseMedical,
   Shield,
@@ -14,19 +13,51 @@ import {
   Users,
   TriangleAlert,
   Heart,
+  ArrowRight,
 } from "lucide-react";
 import CTAButton from "@/components/cta-button"; // client island
 import { Link } from "@/i18n/routing";
 import { getTranslations } from "next-intl/server";
+import Image from "next/image";
 
 /* icon / slug config ------------------------------------------------------- */
 const serviceMap = [
-  { key: "aca", icon: BriefcaseMedical, link: "/aca" },
-  { key: "dentalVision", icon: Shield, link: "/dental-vision" },
-  { key: "hospitalIndemnity", icon: Hospital, link: "/hospital-indemnity" },
-  { key: "iul", icon: Users, link: "/iul" },
-  { key: "finalExpense", icon: TriangleAlert, link: "/final-expense" },
-  { key: "shortTermMedical", icon: Heart, link: "/short-term-medical" },
+  { 
+    key: "aca", 
+    icon: BriefcaseMedical, 
+    link: "/aca",
+    imagePublicId: "tmpfs1tzoqj_1_qqzvsx"
+  },
+  { 
+    key: "dentalVision", 
+    icon: Shield, 
+    link: "/dental-vision",
+    imagePublicId: "tmp48ylol1v_1_ig0hto"
+  },
+  { 
+    key: "hospitalIndemnity", 
+    icon: Hospital, 
+    link: "/hospital-indemnity",
+    imagePublicId: "pexels-rdne-6129237_vbgahf_1_gfwx1z"
+  },
+  { 
+    key: "iul", 
+    icon: Users, 
+    link: "/iul",
+    imagePublicId: "pexels-victor-l-19338-2790434_1_pr9bng"
+  },
+  { 
+    key: "finalExpense", 
+    icon: TriangleAlert, 
+    link: "/final-expense",
+    imagePublicId: "feh2_orkuxu"
+  },
+  { 
+    key: "shortTermMedical", 
+    icon: Heart, 
+    link: "/short-term-medical",
+    imagePublicId: "pexels-chokniti-khongchum-1197604-3938022_bujifm"
+  },
 ] as const;
 
 /* ------------------------------------------------------------------------- */
@@ -65,12 +96,15 @@ export default async function Services() {
           role="list"
           aria-label="Insurance services list"
         >
-          {serviceMap.map(({ key, icon: Icon, link }, idx) => {
+          {serviceMap.map(({ key, icon: Icon, link, imagePublicId }, idx) => {
             const base = `items.${key}` as const;
             const serviceTitle = t(`${base}.title`);
 
             /* next-intl can return non-string values via `.raw`  */
             const features = t.raw(`${base}.features`);
+
+            // Cloudinary image URL with optimized settings
+            const imageUrl = `https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_600,h_400,c_fill,g_auto/${imagePublicId}`;
 
             return (
               <article
@@ -79,23 +113,46 @@ export default async function Services() {
                 style={{ animationDelay: `${idx * 0.1}s` }}
                 role="listitem"
               >
-                <Card
-                  className="h-full flex flex-col justify-between bg-white/95 backdrop-blur-sm
-                             border border-gray-200/60 shadow-lg hover:shadow-2xl
-                             transition-all duration-300 hover:-translate-y-2 hover:border-[hsl(var(--custom)/0.3)]
-                             focus-within:ring-2 focus-within:ring-[hsl(var(--custom))] focus-within:ring-offset-2"
+                <Link
+                  href={link}
+                  className="block h-full focus:outline-none focus:ring-2 focus:ring-[hsl(var(--custom))] focus:ring-offset-2 rounded-lg"
+                  aria-label={`Learn more about ${serviceTitle}`}
                 >
-                  <CardHeader className="pb-4">
-                    <div
-                      className="w-12 h-12 lg:w-14 lg:h-14 bg-gradient-to-br from-[hsl(var(--custom)/0.15)] to-[hsl(var(--custom)/0.1)]
-                                 rounded-xl flex items-center justify-center mb-4 lg:mb-5
-                                 shadow-md shadow-[hsl(var(--custom)/0.2)]"
-                    >
-                      <Icon
-                        className="w-6 h-6 lg:w-7 lg:h-7 text-[hsl(var(--custom))]"
-                        aria-hidden="true"
-                      />
+                  <Card
+                    className="h-full flex flex-col justify-between bg-white/95 backdrop-blur-sm
+                               border border-gray-200/60 shadow-lg hover:shadow-2xl
+                               transition-all duration-300 hover:-translate-y-2 hover:border-[hsl(var(--custom)/0.3)]
+                               overflow-hidden group cursor-pointer"
+                  >
+                  {/* Image Section */}
+                  <div className="relative w-full h-48 lg:h-56 overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200">
+                    <Image
+                      src={imageUrl}
+                      alt={serviceTitle}
+                      fill
+                      className="object-cover object-center group-hover:scale-110 transition-transform duration-500 ease-out"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      priority={idx < 3}
+                    />
+                    {/* Gradient overlay for better text readability */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    {/* Icon badge overlay */}
+                    <div className="absolute top-4 right-4">
+                      <div
+                        className="w-12 h-12 lg:w-14 lg:h-14 bg-white/95 backdrop-blur-sm
+                                   rounded-xl flex items-center justify-center
+                                   shadow-lg shadow-black/20 border border-white/50
+                                   group-hover:scale-110 transition-transform duration-300"
+                      >
+                        <Icon
+                          className="w-6 h-6 lg:w-7 lg:h-7 text-[hsl(var(--custom))]"
+                          aria-hidden="true"
+                        />
+                      </div>
                     </div>
+                  </div>
+
+                  <CardHeader className="pb-4">
                     <CardTitle className="text-xl lg:text-2xl font-bold text-gray-900 mb-2">
                       {serviceTitle}
                     </CardTitle>
@@ -124,29 +181,15 @@ export default async function Services() {
                       ))}
                     </ul>
 
-                    {link && (
-                      <div className="mt-auto pt-4 border-t border-gray-100">
-                        <Button
-                          asChild
-                          variant="outline"
-                          className="w-full border-2 border-[hsl(var(--custom)/0.3)] 
-                                     text-[hsl(var(--custom))] hover:bg-[hsl(var(--custom)/0.1)]
-                                     hover:border-[hsl(var(--custom))] transition-all duration-300
-                                     font-semibold"
-                        >
-                          <Link
-                            href={link}
-                            title={`Learn more about ${serviceTitle}`}
-                            aria-label={`Learn more about ${serviceTitle}`}
-                          >
-                            {t("ctaLearnMore", { defaultValue: "Learn More" })}
-                            <span className="sr-only">: {serviceTitle}</span>
-                          </Link>
-                        </Button>
+                    <div className="mt-auto pt-4 border-t border-gray-100">
+                      <div className="flex items-center justify-between text-sm font-semibold text-[hsl(var(--custom))] group-hover:gap-2 transition-all duration-300">
+                        <span>{t("ctaLearnMore", { defaultValue: "Learn More" })}</span>
+                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" aria-hidden="true" />
                       </div>
-                    )}
+                    </div>
                   </CardContent>
-                </Card>
+                  </Card>
+                </Link>
               </article>
             );
           })}

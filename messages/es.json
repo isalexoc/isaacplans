@@ -7,7 +7,33 @@
       "name": "Isaac Orraiz",
       "title": "Su Agente de Seguros",
       "subtitle": "de Confianza",
-      "description": "Seguros ACA (Affordable Care Act) Obamacare, dental y visión, indemnización Hospitalaria, seguro de vida, planes contra el Cáncer y mucho más...",
+      "description": "Soluciones integrales de seguros que incluyen planes de salud ACA (Affordable Care Act), cobertura dental y visión, indemnización hospitalaria, Seguro Universal Indexado (IUL), seguro de gastos finales, seguro médico de corto plazo y más. Orientación experta en inglés y español.",
+      "services": {
+        "aca": {
+          "title": "Planes de Salud ACA",
+          "desc": "Cobertura de la Ley de Cuidado de Salud Asequible con subsidios"
+        },
+        "dentalVision": {
+          "title": "Dental y Visión",
+          "desc": "Cobertura completa de cuidado oral y visual"
+        },
+        "hospitalIndemnity": {
+          "title": "Indemnización Hospitalaria",
+          "desc": "Beneficios en efectivo durante estancias hospitalarias"
+        },
+        "iul": {
+          "title": "Seguro Universal Indexado",
+          "desc": "Protección flexible con potencial de crecimiento"
+        },
+        "finalExpense": {
+          "title": "Gastos Finales",
+          "desc": "Cobertura permanente y simple para entierro"
+        },
+        "shortTermMedical": {
+          "title": "Seguro Médico de Corto Plazo",
+          "desc": "Cobertura temporal para brechas"
+        }
+      },
       "cta1": "Cotización Gratis",
       "cta2": "Agendar Consulta",
       "ctas": {
@@ -186,6 +212,16 @@
       "title": "Últimos Artículos",
       "description": "Mantente informado con nuestros últimos consejos e información sobre seguros",
       "viewAll": "Ver Todas las Publicaciones"
+    },
+    "newsletter": {
+      "title": "Mantente Informado con Nuestro Boletín",
+      "description": "Recibe consejos expertos sobre seguros, guías y actualizaciones directamente en tu correo. Únete a miles de suscriptores que se mantienen al día con nuestros consejos.",
+      "privacy": "Respetamos tu privacidad. Cancela tu suscripción en cualquier momento.",
+      "benefits": {
+        "tips": "Consejos y estrategias expertas de seguros",
+        "guides": "Guías y recursos descargables gratuitos",
+        "updates": "Últimas noticias y actualizaciones de la industria"
+      }
     }
   },
   "header": {
