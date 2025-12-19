@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { getTranslations } from "next-intl/server";
 import { sanityFetch } from "@/sanity/lib/live";
 import { type SanityDocument } from "next-sanity";
+import StatesMap from "@/components/states-map";
 
 /* Achievements + icons map --------------------------------------------- */
 const ACHIEVEMENTS = [
@@ -123,42 +124,28 @@ export default async function About() {
             </div>
           </div>
 
-          {/* ── Images & achievements ────────────────────────────────── */}
+          {/* ── Images, Map & achievements ────────────────────────────────── */}
           <div
             className="space-y-6 lg:space-y-8 order-2 animate-fadeRight"
             style={{ animationDelay: "0.1s" }}
           >
-            <div className="relative mb-6 lg:mb-8 grid grid-cols-1 sm:grid-cols-2 gap-6 place-items-center">
-              <div className="relative group">
-                <div className="absolute inset-0 bg-gradient-to-br from-[hsl(var(--custom)/0.2)] to-transparent rounded-2xl blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10" />
-                <Image
-                  src="https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_350/ChatGPT_Image_Jul_11_2025_12_32_22_AM_ym5ioh.png"
-                  alt={t("title")}
-                  width={350}
-                  height={350}
-                  className="rounded-2xl shadow-xl w-full max-w-xs object-contain 
-                             border-4 border-white/50 group-hover:shadow-2xl 
-                             transition-all duration-300"
-                  priority
-                  fetchPriority="high"
-                />
-              </div>
+            
 
-              <div className="relative group">
-                <div className="absolute inset-0 bg-gradient-to-br from-[hsl(var(--custom)/0.2)] to-transparent rounded-2xl blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10" />
-                <Image
-                  src="https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_350,h_350,c_crop/pexels-pavel-danilyuk-8112186_epgbrd.png"
-                  alt={t("certifications")}
-                  width={350}
-                  height={350}
-                  className="rounded-2xl shadow-xl w-full max-w-xs object-cover 
-                             border-4 border-white/50 group-hover:shadow-2xl 
-                             transition-all duration-300"
-                  priority
-                  fetchPriority="high"
-                />
+            {/* States Map */}
+            {states.length > 0 && (
+              <div className="relative mb-6 lg:mb-8 animate-fadeUp" style={{ animationDelay: "0.2s" }}>
+                <Card className="bg-white/95 backdrop-blur-sm border border-gray-200/60 shadow-xl overflow-hidden">
+                  <CardContent className="p-4 lg:p-6">
+                    <h3 className="text-xl lg:text-2xl font-semibold text-gray-900 mb-4 text-center">
+                      {t("certifications")}
+                    </h3>
+                    <div className="rounded-lg overflow-hidden border-2 border-gray-200/60">
+                      <StatesMap states={states} />
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
-            </div>
+            )}
 
             {/* Achievement cards */}
             <div
