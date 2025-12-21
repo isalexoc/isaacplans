@@ -72,6 +72,18 @@ export const GuideUnlockModal = ({
       });
 
       if (unlockResponse.ok) {
+        // Track Facebook Pixel events
+        const { trackLead, trackDownload } = await import("@/lib/facebook-pixel");
+        trackLead({
+          contentName: guideName,
+          source: "consumer_guides",
+        });
+        trackDownload({
+          contentName: guideName,
+          contentCategory: category,
+          source: "consumer_guides",
+        });
+        
         onUnlockSuccess?.(guideId, formData.email, formData.phone);
         setOpen(false);
       } else {

@@ -1,12 +1,14 @@
 // components/form-modal.tsx
 "use client";
 
+import { useEffect } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { X } from "lucide-react";
 import { useLocale } from "next-intl";
 import type { ComponentType } from "react";
 import ContactFormIFrame from "@/components/contact-form-iframe";
 import ContactFormIFrameSpanish from "@/components/contact-form-iframe-spanish";
+import { trackInitiateCheckout } from "@/lib/facebook-pixel";
 
 interface QuoteModalProps {
   open: boolean;
@@ -24,6 +26,15 @@ export const QuoteModal = ({ open, setOpen }: QuoteModalProps) => {
 
   // Make the iframe tall so the MODAL scrolls (not the iframe).
   const IFRAME_HEIGHT = isES ? 1400 : 1200;
+
+  // Track when modal opens
+  useEffect(() => {
+    if (open) {
+      trackInitiateCheckout({
+        contentName: "ACA Quote Request",
+      });
+    }
+  }, [open]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

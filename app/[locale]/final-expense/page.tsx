@@ -6,6 +6,7 @@ import EnrollmentSectionGeneric from "@/components/enrollment-section-template";
 import EligibilitySection from "@/components/eligibility-section";
 import AboutSectionGeneric from "@/components/about-section-template";
 import { BackHome } from "@/components/back-home";
+import ServicePageTracker from "@/components/service-page-tracker";
 import type { Metadata } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
 import { getFePageLd, getFeBreadcrumbLd } from "@/lib/seo/jsonld";
@@ -93,6 +94,7 @@ export default async function FinalExpensePage() {
 
   return (
     <>
+      <ServicePageTracker serviceName="Final Expense Insurance" serviceCategory="final-expense" />
       <div className="relative">
         <BackHome />
       </div>

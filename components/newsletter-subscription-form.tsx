@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useLocale } from "next-intl";
 import { Mail, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { trackSubscribe, trackCompleteRegistration } from "@/lib/facebook-pixel";
 
 interface NewsletterSubscriptionFormProps {
   locale: string;
@@ -88,6 +89,27 @@ export function NewsletterSubscriptionForm({
         setStatus("success");
         setStatusType(data.status);
         setMessage(data.message);
+        
+        // Track Facebook Pixel events
+        if (data.status === "confirmed" || data.status === "already_confirmed") {
+          // User is confirmed - track both Subscribe and CompleteRegistration
+          trackSubscribe({
+            contentName: "Newsletter Subscription",
+            source: source,
+          });
+          trackCompleteRegistration({
+            contentName: "Newsletter Subscription",
+            status: data.status,
+            source: source,
+          });
+        } else if (data.status === "pending") {
+          // User submitted but needs to confirm - track Subscribe
+          trackSubscribe({
+            contentName: "Newsletter Subscription (Pending)",
+            source: source,
+          });
+        }
+        
         if (data.status === "pending" || data.status === "resubscribed") {
           setEmail(""); // Clear email on success
         }

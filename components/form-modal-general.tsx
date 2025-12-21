@@ -1,12 +1,13 @@
 // components/form-modal-general.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import ContactFormIFrameGeneral from "@/components/contact-form-iframe-general";
 import ContactFormIFrameGeneralSpanish from "@/components/contact-form-iframe-general-spanish";
 import { useLocale } from "next-intl";
 import { X } from "lucide-react";
+import { trackInitiateCheckout } from "@/lib/facebook-pixel";
 
 interface QuoteModalProps {
   open?: boolean;
@@ -28,6 +29,15 @@ export const QuoteModalGeneral = ({ open, setOpen }: QuoteModalProps = {}) => {
 
   // Reasonable heights; modal will scroll (not the iframe)
   const IFRAME_HEIGHT = isES ? 950 : 760;
+
+  // Track when modal opens
+  useEffect(() => {
+    if (actualOpen) {
+      trackInitiateCheckout({
+        contentName: "General Quote Request",
+      });
+    }
+  }, [actualOpen]);
 
   return (
     <Dialog open={actualOpen} onOpenChange={actualSetOpen}>

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
 import HIButton from "@/components/HIButton";
 import { BackHome } from "@/components/back-home";
+import ServicePageTracker from "@/components/service-page-tracker";
 import ShortTermCarriersSection from "@/components/shortterm-carriers-section";
 
 import {
@@ -100,6 +101,7 @@ export default async function ShortTermMedicalPage() {
 
   return (
     <div className="min-h-screen relative">
+      <ServicePageTracker serviceName="Short Term Medical Insurance" serviceCategory="short-term-medical" />
       <BackHome />
       {/* HERO ----------------------------------------------------------- */}
       <HeroWithTestimonialsGeneric

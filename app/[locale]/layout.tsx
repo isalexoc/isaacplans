@@ -14,6 +14,7 @@ import Script from "next/script";
 import { ClerkProvider } from '@clerk/nextjs';
 import { esES, enUS } from '@clerk/localizations';
 import { SanityLive } from '@/sanity/lib/live';
+import FacebookPixel from "@/components/facebook-pixel";
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
@@ -90,6 +91,9 @@ export default async function LocaleLayout({
 
   const chat = CHAT_CONFIG[locale] ?? CHAT_CONFIG.en;
 
+  // Get Facebook Pixel ID from environment variable
+  const facebookPixelId = process.env.NEXT_PUBLIC_FACEBOOK_PIXEL_ID;
+
   // Map your locale to Clerk's localization
   const clerkLocale = locale === "es" ? esES : enUS;
 
@@ -113,6 +117,8 @@ export default async function LocaleLayout({
           {/* <CrispChat /> */}
           {/* @ts-ignore - Footer is an async server component, works correctly with React 19 */}
           <Footer />
+          {/* Facebook Pixel */}
+          {facebookPixelId && <FacebookPixel pixelId={facebookPixelId} />}
           {/* Agent CRM (LeadConnector) chat – loads after page is interactive */}
           <Script
             id={`agentcrm-chat-${locale}`} // unique per-locale to avoid dedupe

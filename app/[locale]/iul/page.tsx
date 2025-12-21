@@ -7,6 +7,7 @@ import EnrollmentSectionGeneric from "@/components/enrollment-section-template";
 import EligibilitySection from "@/components/eligibility-section";
 import AboutSectionGeneric from "@/components/about-section-template";
 import { BackHome } from "@/components/back-home";
+import ServicePageTracker from "@/components/service-page-tracker";
 import type { Metadata } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
 import { getIulPageLd, getIulBreadcrumbLd } from "@/lib/seo/jsonld";
@@ -81,6 +82,7 @@ export default async function IndexedUniversalLifePage() {
 
   return (
     <>
+      <ServicePageTracker serviceName="Indexed Universal Life (IUL)" serviceCategory="iul" />
       <div className="relative">
         <BackHome />
       </div>

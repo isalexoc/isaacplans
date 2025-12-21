@@ -1,11 +1,13 @@
 "use client";
 
+import { useEffect } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { X } from "lucide-react";
 import { useLocale } from "next-intl";
 import type { ComponentType } from "react";
 import ContactFormIFrameFE from "@/components/contact-form-iframe-fe";
 import ContactFormIFrameFESpanish from "@/components/contact-form-iframe-fe-spanish";
+import { trackInitiateCheckout } from "@/lib/facebook-pixel";
 
 interface Props {
   open: boolean;
@@ -20,6 +22,15 @@ export const FEQuoteModal = ({ open, setOpen }: Props) => {
 
   // tuned heights for comfortable scroll inside modal
   const IFRAME_HEIGHT = isES ? 950 : 900;
+
+  // Track when modal opens
+  useEffect(() => {
+    if (open) {
+      trackInitiateCheckout({
+        contentName: "Final Expense Quote Request",
+      });
+    }
+  }, [open]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

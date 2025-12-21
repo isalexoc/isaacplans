@@ -8,6 +8,7 @@ import EnrollmentSection from "@/components/enrollment-section-template";
 import FaqSection from "@/components/FaqSection";
 import CTABanner from "@/components/CTABanner-template";
 import { BackHome } from "@/components/back-home";
+import ServicePageTracker from "@/components/service-page-tracker";
 import type { Metadata } from "next";
 import {
   getDentalVisionPageLd,
@@ -108,6 +109,7 @@ export default async function DentalVisionPage() {
 
   return (
     <>
+      <ServicePageTracker serviceName="Dental & Vision Plans" serviceCategory="dental-vision" />
       <div className="relative">
         <BackHome />
       </div>

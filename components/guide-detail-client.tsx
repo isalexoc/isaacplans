@@ -10,6 +10,7 @@ import Image from "next/image";
 import Link from "next/link";
 import GuideUnlockFormCustom from "@/components/guide-unlock-form-custom";
 import type { Guide } from "@/components/guide-card";
+import { trackDownload, trackLead } from "@/lib/facebook-pixel";
 
 interface GuideDetailClientProps {
   guide: Guide & {
@@ -139,6 +140,18 @@ export default function GuideDetailClient({ guide }: GuideDetailClientProps) {
 
       if (unlockResponse.ok) {
         setIsUnlocked(true);
+        
+        // Track Facebook Pixel events
+        trackLead({
+          contentName: formData.guideName || title,
+          source: "consumer_guides",
+        });
+        trackDownload({
+          contentName: formData.guideName || title,
+          contentCategory: guide.category,
+          source: "consumer_guides",
+        });
+        
         // Auto-download after 500ms
         setTimeout(() => downloadGuide(), 500);
       } else {
@@ -163,6 +176,13 @@ export default function GuideDetailClient({ guide }: GuideDetailClientProps) {
       : (guide.pdfUrl.startsWith('http') 
           ? guide.pdfUrl 
           : `https://res.cloudinary.com/isaacdev/image/upload/${guide.pdfUrl}`);
+    
+    // Track download event
+    trackDownload({
+      contentName: title,
+      contentCategory: guide.category,
+      source: "consumer_guides",
+    });
     
     window.open(pdfUrl, '_blank');
   };

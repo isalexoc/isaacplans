@@ -1,11 +1,13 @@
 "use client";
 
+import { useEffect } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { X } from "lucide-react";
 import { useLocale } from "next-intl";
 import type { ComponentType } from "react";
 import ContactFormIFrameIUL from "@/components/contact-form-iframe-iul";
 import ContactFormIFrameIULSpanish from "@/components/contact-form-iframe-iul-spanish";
+import { trackInitiateCheckout } from "@/lib/facebook-pixel";
 
 interface Props {
   open: boolean;
@@ -20,6 +22,15 @@ export const IULQuoteModal = ({ open, setOpen }: Props) => {
 
   // Tune iframe height per locale (based on AgentCRM embed defaults)
   const IFRAME_HEIGHT = isES ? 640 : 620;
+
+  // Track when modal opens
+  useEffect(() => {
+    if (open) {
+      trackInitiateCheckout({
+        contentName: "IUL Quote Request",
+      });
+    }
+  }, [open]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

@@ -22,6 +22,7 @@ import { BlogUserAuth } from "@/components/blog-user-auth";
 import BlogCategoryCTA from "@/components/blog-category-cta";
 import { BlogSocialLinks } from "@/components/blog-social-links";
 import { BlogNewsletter } from "@/components/blog-newsletter";
+import BlogPostTracker from "@/components/blog-post-tracker";
 
 const POST_QUERY = `*[_type == "post" && slug.current == $slug && locale == $locale][0]{
   _id,
@@ -468,6 +469,11 @@ export default async function BlogPostPage({
 
   return (
     <>
+      <BlogPostTracker 
+        postTitle={post.title || "Blog Post"}
+        postSlug={slug}
+        postCategory={post.category}
+      />
       {/* JSON-LD Structured Data */}
       <Script
         id="article-jsonld"

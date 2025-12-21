@@ -1,12 +1,14 @@
 /* components/form-modal-dental.tsx */
 "use client";
 
+import { useEffect } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { X } from "lucide-react";
 import { useLocale } from "next-intl";
 import type { ComponentType } from "react";
 import ContactFormIFrame from "@/components/contact-form-iframe-dental";
 import ContactFormIFrameSpanish from "@/components/contact-form-iframe-dental-spanish";
+import { trackInitiateCheckout } from "@/lib/facebook-pixel";
 
 interface QuoteModalProps {
   open: boolean;
@@ -21,6 +23,15 @@ export const QuoteModal = ({ open, setOpen }: QuoteModalProps) => {
     isES ? ContactFormIFrameSpanish : ContactFormIFrame
   ) as ComponentType<{ heightPx?: number }>;
   const IFRAME_HEIGHT = isES ? 1300 : 1100; // sheet scrolls, iframe stays fixed height
+
+  // Track when modal opens
+  useEffect(() => {
+    if (open) {
+      trackInitiateCheckout({
+        contentName: "Dental & Vision Quote Request",
+      });
+    }
+  }, [open]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

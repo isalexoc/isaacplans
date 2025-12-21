@@ -12,6 +12,7 @@ import PlanEnrollCard from "@/components/SelfEnrollSection";
 import ACAButton from "@/components/ACAButton";
 import { BackHome } from "@/components/back-home";
 import { getAcaPageLd, getAcaBreadcrumbLd } from "@/lib/seo/jsonld";
+import ServicePageTracker from "@/components/service-page-tracker";
 import type { Metadata } from "next";
 
 import {
@@ -117,6 +118,7 @@ export default async function AcaPage() {
 
   return (
     <>
+      <ServicePageTracker serviceName="ACA Health Plans" serviceCategory="aca" />
       <div className="relative">
         <BackHome />
       </div>

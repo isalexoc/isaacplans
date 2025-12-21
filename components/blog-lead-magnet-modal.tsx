@@ -5,6 +5,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { X } from "lucide-react";
 import { useLocale } from "next-intl";
 import GuideUnlockFormCustom from "@/components/guide-unlock-form-custom";
+import { trackLead, trackDownload } from "@/lib/facebook-pixel";
 
 interface BlogLeadMagnetModalProps {
   open: boolean;
@@ -80,6 +81,17 @@ export const BlogLeadMagnetModal = ({
           postTitle,
           postCategory,
         }),
+      });
+
+      // Track Facebook Pixel events
+      trackLead({
+        contentName: leadMagnet.title || postTitle,
+        source: "blog_post",
+      });
+      trackDownload({
+        contentName: leadMagnet.title || postTitle,
+        contentCategory: postCategory,
+        source: "blog_post",
       });
 
       // Download the file
