@@ -72,12 +72,24 @@ export const GuideUnlockModal = ({
       });
 
       if (unlockResponse.ok) {
-        // Track Facebook Pixel events
-        const { trackLead, trackDownload } = await import("@/lib/facebook-pixel");
+        // Prepare user data for advanced matching
+        const userData = {
+          em: formData.email?.toLowerCase().trim(),
+          fn: formData.firstName?.toLowerCase().trim(),
+          ln: formData.lastName?.toLowerCase().trim(),
+          ph: formData.phone?.replace(/\D/g, ""),
+        };
+        
+        // Track Facebook Pixel events with user data
+        const { trackLead, trackDownload, updateAdvancedMatching } = await import("@/lib/facebook-pixel");
+        
+        // Update advanced matching with user data
+        updateAdvancedMatching(userData);
+        
         trackLead({
           contentName: guideName,
           source: "consumer_guides",
-        });
+        }, userData);
         trackDownload({
           contentName: guideName,
           contentCategory: category,

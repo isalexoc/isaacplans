@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useLocale } from "next-intl";
 import { Mail, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { trackSubscribe, trackCompleteRegistration } from "@/lib/facebook-pixel";
+import { trackSubscribe, trackCompleteRegistration, updateAdvancedMatching } from "@/lib/facebook-pixel";
 
 interface NewsletterSubscriptionFormProps {
   locale: string;
@@ -90,13 +90,21 @@ export function NewsletterSubscriptionForm({
         setStatusType(data.status);
         setMessage(data.message);
         
+        // Prepare user data for advanced matching
+        const userData = email ? { em: email.toLowerCase().trim() } : undefined;
+        
+        // Update advanced matching with user data
+        if (userData) {
+          updateAdvancedMatching(userData);
+        }
+        
         // Track Facebook Pixel events
         if (data.status === "confirmed" || data.status === "already_confirmed") {
           // User is confirmed - track both Subscribe and CompleteRegistration
           trackSubscribe({
             contentName: "Newsletter Subscription",
             source: source,
-          });
+          }, userData);
           trackCompleteRegistration({
             contentName: "Newsletter Subscription",
             status: data.status,
@@ -107,7 +115,7 @@ export function NewsletterSubscriptionForm({
           trackSubscribe({
             contentName: "Newsletter Subscription (Pending)",
             source: source,
-          });
+          }, userData);
         }
         
         if (data.status === "pending" || data.status === "resubscribed") {

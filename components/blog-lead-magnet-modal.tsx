@@ -5,7 +5,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { X } from "lucide-react";
 import { useLocale } from "next-intl";
 import GuideUnlockFormCustom from "@/components/guide-unlock-form-custom";
-import { trackLead, trackDownload } from "@/lib/facebook-pixel";
+import { trackLead, trackDownload, updateAdvancedMatching } from "@/lib/facebook-pixel";
 
 interface BlogLeadMagnetModalProps {
   open: boolean;
@@ -83,11 +83,22 @@ export const BlogLeadMagnetModal = ({
         }),
       });
 
-      // Track Facebook Pixel events
+      // Prepare user data for advanced matching
+      const userData = {
+        em: formData.email?.toLowerCase().trim(),
+        fn: formData.firstName?.toLowerCase().trim(),
+        ln: formData.lastName?.toLowerCase().trim(),
+        ph: formData.phone?.replace(/\D/g, ""),
+      };
+      
+      // Update advanced matching with user data
+      updateAdvancedMatching(userData);
+      
+      // Track Facebook Pixel events with user data
       trackLead({
         contentName: leadMagnet.title || postTitle,
         source: "blog_post",
-      });
+      }, userData);
       trackDownload({
         contentName: leadMagnet.title || postTitle,
         contentCategory: postCategory,

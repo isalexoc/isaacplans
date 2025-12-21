@@ -18,6 +18,153 @@ declare global {
 }
 
 /**
+ * User data interface for advanced matching
+ */
+export interface AdvancedMatchingData {
+  em?: string; // Email (lowercase, unhashed or SHA-256 hashed)
+  fn?: string; // First name (lowercase)
+  ln?: string; // Last name (lowercase)
+  ph?: string; // Phone (digits only, including country code)
+  external_id?: string; // External ID
+  ge?: string; // Gender (f or m)
+  db?: string; // Birthdate (YYYYMMDD)
+  ct?: string; // City (lowercase, no spaces)
+  st?: string; // State (lowercase two-letter code)
+  zp?: string; // Zip code
+  country?: string; // Country (lowercase two-letter code)
+}
+
+/**
+ * Hash a string using SHA-256
+ * Used for advanced matching when data needs to be hashed
+ */
+async function hashSHA256(text: string): Promise<string> {
+  // Use Web Crypto API if available (browser)
+  if (typeof window !== "undefined" && window.crypto && window.crypto.subtle) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(text);
+    const hashBuffer = await window.crypto.subtle.digest("SHA-256", data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+  }
+  
+  // Fallback: return original text (shouldn't happen in browser)
+  return text;
+}
+
+/**
+ * Normalize and prepare user data for advanced matching
+ * - Lowercases emails, names, cities
+ * - Removes spaces from cities
+ * - Formats phone numbers (digits only)
+ */
+export function prepareAdvancedMatchingData(
+  data: Partial<AdvancedMatchingData>
+): Partial<AdvancedMatchingData> {
+  const prepared: Partial<AdvancedMatchingData> = {};
+
+  if (data.em) {
+    // Email: lowercase, pixel will hash automatically if unhashed
+    prepared.em = data.em.toLowerCase().trim();
+  }
+
+  if (data.fn) {
+    // First name: lowercase
+    prepared.fn = data.fn.toLowerCase().trim();
+  }
+
+  if (data.ln) {
+    // Last name: lowercase
+    prepared.ln = data.ln.toLowerCase().trim();
+  }
+
+  if (data.ph) {
+    // Phone: digits only
+    prepared.ph = data.ph.replace(/\D/g, "");
+  }
+
+  if (data.ct) {
+    // City: lowercase, no spaces
+    prepared.ct = data.ct.toLowerCase().replace(/\s+/g, "");
+  }
+
+  if (data.st) {
+    // State: lowercase
+    prepared.st = data.st.toLowerCase().trim();
+  }
+
+  if (data.country) {
+    // Country: lowercase
+    prepared.country = data.country.toLowerCase().trim();
+  }
+
+  // Pass through other fields as-is
+  if (data.external_id) prepared.external_id = data.external_id;
+  if (data.ge) prepared.ge = data.ge.toLowerCase();
+  if (data.db) prepared.db = data.db;
+  if (data.zp) prepared.zp = data.zp;
+
+  return prepared;
+}
+
+/**
+ * Update Facebook Pixel with user data for advanced matching
+ * Call this when you have user information (e.g., after form submission)
+ * 
+ * @param userData - User data for advanced matching
+ */
+export async function updateAdvancedMatching(
+  userData: Partial<AdvancedMatchingData>
+): Promise<void> {
+  if (typeof window === "undefined") return;
+
+  const prepared = prepareAdvancedMatchingData(userData);
+
+  // Store in localStorage for future page loads
+  if (prepared.em) {
+    localStorage.setItem("fb_am_email", prepared.em);
+  }
+  if (prepared.fn) {
+    localStorage.setItem("fb_am_fn", prepared.fn);
+  }
+  if (prepared.ln) {
+    localStorage.setItem("fb_am_ln", prepared.ln);
+  }
+  if (prepared.ph) {
+    localStorage.setItem("fb_am_ph", prepared.ph);
+  }
+
+  // If pixel is already loaded, update it
+  if (isPixelLoaded() && Object.keys(prepared).length > 0) {
+    // Note: Advanced matching data should ideally be set in fbq('init')
+    // But we can also set it via fbq('init') again or use setUserData (if available)
+    // For now, we'll store it and it will be used on next page load
+    console.log("[Facebook Pixel] Advanced matching data prepared:", Object.keys(prepared));
+  }
+}
+
+/**
+ * Get stored advanced matching data from localStorage
+ */
+export function getStoredAdvancedMatchingData(): Partial<AdvancedMatchingData> {
+  if (typeof window === "undefined") return {};
+
+  const data: Partial<AdvancedMatchingData> = {};
+
+  const email = localStorage.getItem("fb_am_email");
+  const firstName = localStorage.getItem("fb_am_fn");
+  const lastName = localStorage.getItem("fb_am_ln");
+  const phone = localStorage.getItem("fb_am_ph");
+
+  if (email) data.em = email;
+  if (firstName) data.fn = firstName;
+  if (lastName) data.ln = lastName;
+  if (phone) data.ph = phone;
+
+  return data;
+}
+
+/**
  * Check if Facebook Pixel is loaded and available
  */
 function isPixelLoaded(): boolean {
@@ -104,13 +251,17 @@ export function trackCustomEvent(
  * 
  * @param params - Additional parameters (content_name, value, currency, etc.)
  * Default value: $10 for guide downloads, $50 for quote requests
+ * @param userData - Optional user data for advanced matching
  */
-export function trackLead(params?: {
-  contentName?: string;
-  value?: number;
-  currency?: string;
-  source?: string;
-}): void {
+export function trackLead(
+  params?: {
+    contentName?: string;
+    value?: number;
+    currency?: string;
+    source?: string;
+  },
+  userData?: Partial<AdvancedMatchingData>
+): void {
   // Set default value based on source if not provided
   let value = params?.value;
   if (value === undefined) {
@@ -121,12 +272,20 @@ export function trackLead(params?: {
     }
   }
   
-  trackEvent("Lead", {
+  const eventParams: Record<string, unknown> = {
     content_name: params?.contentName,
     value: value,
     currency: params?.currency || "USD",
     source: params?.source,
-  });
+  };
+
+  // Add user data for advanced matching if provided
+  if (userData) {
+    const prepared = prepareAdvancedMatchingData(userData);
+    Object.assign(eventParams, prepared);
+  }
+  
+  trackEvent("Lead", eventParams);
 }
 
 /**
@@ -151,18 +310,30 @@ export function trackCompleteRegistration(params?: {
  * 
  * @param params - Additional parameters
  * Default value: $5 for newsletter subscriptions
+ * @param userData - Optional user data for advanced matching
  */
-export function trackSubscribe(params?: {
-  contentName?: string;
-  source?: string;
-  value?: number;
-}): void {
-  trackEvent("Subscribe", {
+export function trackSubscribe(
+  params?: {
+    contentName?: string;
+    source?: string;
+    value?: number;
+  },
+  userData?: Partial<AdvancedMatchingData>
+): void {
+  const eventParams: Record<string, unknown> = {
     content_name: params?.contentName,
     source: params?.source,
     value: params?.value ?? 5, // Default value for newsletter subscriptions
     currency: "USD",
-  });
+  };
+
+  // Add user data for advanced matching if provided
+  if (userData) {
+    const prepared = prepareAdvancedMatchingData(userData);
+    Object.assign(eventParams, prepared);
+  }
+
+  trackEvent("Subscribe", eventParams);
 }
 
 /**

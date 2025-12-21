@@ -5,7 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { Mail, CheckCircle, AlertCircle, Loader2, Sparkles, TrendingUp, BookOpen, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { trackSubscribe, trackCompleteRegistration } from "@/lib/facebook-pixel";
+import { trackSubscribe, trackCompleteRegistration, updateAdvancedMatching } from "@/lib/facebook-pixel";
 
 export default function HomeNewsletter() {
   const locale = useLocale();
@@ -34,13 +34,21 @@ export default function HomeNewsletter() {
         setStatus("success");
         setMessage(data.message);
         
+        // Prepare user data for advanced matching
+        const userData = email ? { em: email.toLowerCase().trim() } : undefined;
+        
+        // Update advanced matching with user data
+        if (userData) {
+          updateAdvancedMatching(userData);
+        }
+        
         // Track Facebook Pixel events
         if (data.status === "confirmed" || data.status === "already_confirmed") {
           // User is confirmed - track both Subscribe and CompleteRegistration
           trackSubscribe({
             contentName: "Newsletter Subscription",
             source: "homepage",
-          });
+          }, userData);
           trackCompleteRegistration({
             contentName: "Newsletter Subscription",
             status: data.status,
@@ -51,7 +59,7 @@ export default function HomeNewsletter() {
           trackSubscribe({
             contentName: "Newsletter Subscription (Pending)",
             source: "homepage",
-          });
+          }, userData);
         }
         
         if (data.status === "pending" || data.status === "resubscribed") {

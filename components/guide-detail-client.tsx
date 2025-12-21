@@ -10,7 +10,7 @@ import Image from "next/image";
 import Link from "next/link";
 import GuideUnlockFormCustom from "@/components/guide-unlock-form-custom";
 import type { Guide } from "@/components/guide-card";
-import { trackDownload, trackLead } from "@/lib/facebook-pixel";
+import { trackDownload, trackLead, updateAdvancedMatching } from "@/lib/facebook-pixel";
 
 interface GuideDetailClientProps {
   guide: Guide & {
@@ -141,11 +141,22 @@ export default function GuideDetailClient({ guide }: GuideDetailClientProps) {
       if (unlockResponse.ok) {
         setIsUnlocked(true);
         
-        // Track Facebook Pixel events
+        // Prepare user data for advanced matching
+        const userData = {
+          em: formData.email?.toLowerCase().trim(),
+          fn: formData.firstName?.toLowerCase().trim(),
+          ln: formData.lastName?.toLowerCase().trim(),
+          ph: formData.phone?.replace(/\D/g, ""),
+        };
+        
+        // Update advanced matching with user data
+        updateAdvancedMatching(userData);
+        
+        // Track Facebook Pixel events with user data
         trackLead({
           contentName: formData.guideName || title,
           source: "consumer_guides",
-        });
+        }, userData);
         trackDownload({
           contentName: formData.guideName || title,
           contentCategory: guide.category,

@@ -2,7 +2,8 @@
 
 import Script from "next/script";
 import { usePathname } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
+import { getStoredAdvancedMatchingData, prepareAdvancedMatchingData } from "@/lib/facebook-pixel";
 
 declare global {
   interface Window {
@@ -23,6 +24,15 @@ interface FacebookPixelProps {
 export default function FacebookPixel({ pixelId }: FacebookPixelProps) {
   const pathname = usePathname();
 
+  // Get stored user data for advanced matching
+  const advancedMatchingData = useMemo(() => {
+    if (typeof window === "undefined") return null;
+    const stored = getStoredAdvancedMatchingData();
+    const prepared = prepareAdvancedMatchingData(stored);
+    // Only return if we have at least one field
+    return Object.keys(prepared).length > 0 ? prepared : null;
+  }, []);
+
   useEffect(() => {
     // Track page views on route changes
     if (typeof window !== "undefined" && window.fbq) {
@@ -33,6 +43,11 @@ export default function FacebookPixel({ pixelId }: FacebookPixelProps) {
   if (!pixelId) {
     return null;
   }
+
+  // Build the init call with advanced matching data if available
+  const initCall = advancedMatchingData
+    ? `fbq('init', '${pixelId}', ${JSON.stringify(advancedMatchingData)});`
+    : `fbq('init', '${pixelId}');`;
 
   return (
     <>
@@ -50,7 +65,7 @@ export default function FacebookPixel({ pixelId }: FacebookPixelProps) {
             t.src=v;s=b.getElementsByTagName(e)[0];
             s.parentNode.insertBefore(t,s)}(window, document,'script',
             'https://connect.facebook.net/en_US/fbevents.js');
-            fbq('init', '${pixelId}');
+            ${initCall}
             fbq('track', 'PageView');
           `,
         }}
