@@ -26,6 +26,7 @@ export default function FacebookPixel({ pixelId }: FacebookPixelProps) {
   const pathname = usePathname();
   const isInitialMount = useRef(true);
   const pixelLoaded = useRef(false);
+  const pageViewTracked = useRef(false);
 
   // Get stored user data for advanced matching
   const advancedMatchingData = useMemo(() => {
@@ -36,30 +37,64 @@ export default function FacebookPixel({ pixelId }: FacebookPixelProps) {
     return Object.keys(prepared).length > 0 ? prepared : null;
   }, []);
 
-  // Track page views on route changes (but not on initial load - handled by script)
+  // Track page views on route changes and initial load
   useEffect(() => {
-    // Skip initial page view (handled by script)
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
+    // Reset tracking flag for new page
+    pageViewTracked.current = false;
+
+    const trackPageView = () => {
+      if (typeof window !== "undefined" && window.fbq && typeof window.fbq === "function") {
+        try {
+          // The pixel queue will handle this even if script hasn't loaded yet
+          window.fbq("track", "PageView");
+          pageViewTracked.current = true;
+          pixelLoaded.current = true;
+          if (process.env.NODE_ENV === "development") {
+            console.log("[Facebook Pixel] PageView tracked for:", pathname);
+          }
+          return true;
+        } catch (error) {
+          console.error("[Facebook Pixel] Error tracking PageView:", error);
+          return false;
+        }
+      }
+      return false;
+    };
+
+    // Try to track immediately
+    if (trackPageView()) {
+      if (isInitialMount.current) {
+        isInitialMount.current = false;
+      }
       return;
     }
 
-    // Wait for pixel to be ready before tracking
-    const trackPageView = () => {
-      if (typeof window !== "undefined" && window.fbq && pixelLoaded.current) {
-        try {
-          window.fbq("track", "PageView");
-        } catch (error) {
-          console.error("[Facebook Pixel] Error tracking PageView:", error);
+    // If fbq doesn't exist yet, wait for it (shouldn't happen but safety check)
+    const retryInterval = setInterval(() => {
+      if (trackPageView()) {
+        clearInterval(retryInterval);
+        if (isInitialMount.current) {
+          isInitialMount.current = false;
         }
-      } else {
-        // Retry after a short delay if pixel isn't ready
-        setTimeout(trackPageView, 100);
       }
-    };
+    }, 100);
 
-    trackPageView();
+    // Cleanup after 5 seconds
+    setTimeout(() => clearInterval(retryInterval), 5000);
+
+    return () => clearInterval(retryInterval);
   }, [pathname]);
+
+  // Check if pixel is already loaded on mount (e.g., from previous page navigation)
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.fbq && typeof window.fbq === "function") {
+      // Pixel is already loaded
+      pixelLoaded.current = true;
+      if (window.fbq.loaded !== false) {
+        window.fbq.loaded = true;
+      }
+    }
+  }, []);
 
   // Monitor pixel loading status
   useEffect(() => {
@@ -107,25 +142,28 @@ export default function FacebookPixel({ pixelId }: FacebookPixelProps) {
           `,
         }}
         onLoad={() => {
-          // Mark pixel as loaded and track PageView
+          // Mark pixel as loaded
           if (typeof window !== "undefined" && window.fbq) {
             pixelLoaded.current = true;
             if (window.fbq) {
               window.fbq.loaded = true;
             }
-            // Small delay to ensure pixel is fully initialized
-            setTimeout(() => {
-              if (window.fbq && typeof window.fbq === "function") {
-                try {
-                  window.fbq("track", "PageView");
-                  if (process.env.NODE_ENV === "development") {
-                    console.log("[Facebook Pixel] Initialized and PageView tracked");
+            // Track PageView if not already tracked (for initial page load)
+            if (!pageViewTracked.current) {
+              setTimeout(() => {
+                if (window.fbq && typeof window.fbq === "function") {
+                  try {
+                    window.fbq("track", "PageView");
+                    pageViewTracked.current = true;
+                    if (process.env.NODE_ENV === "development") {
+                      console.log("[Facebook Pixel] Initialized and PageView tracked");
+                    }
+                  } catch (error) {
+                    console.error("[Facebook Pixel] Error tracking PageView:", error);
                   }
-                } catch (error) {
-                  console.error("[Facebook Pixel] Error tracking PageView:", error);
                 }
-              }
-            }, 100);
+              }, 100);
+            }
           }
         }}
         onError={(e) => {
