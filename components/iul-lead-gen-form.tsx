@@ -17,7 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { trackInitiateCheckout, trackLead, updateAdvancedMatching } from "@/lib/facebook-pixel";
+import { trackInitiateCheckout, trackLead, updateAdvancedMatching, trackCustomEvent } from "@/lib/facebook-pixel";
 import { ArrowLeft, ArrowRight, Check } from "lucide-react";
 
 // All US states
@@ -89,6 +89,18 @@ interface FormData {
 
 const TOTAL_STEPS = 8;
 
+// Step names mapping for comprehensive tracking
+const STEP_NAMES: Record<number, string> = {
+  1: "Retirement Timeline",
+  2: "Current Investments",
+  3: "Monthly Savings",
+  4: "Age",
+  5: "State",
+  6: "Name",
+  7: "Email",
+  8: "Phone",
+};
+
 export default function IULLeadGenForm() {
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -154,11 +166,48 @@ export default function IULLeadGenForm() {
     }
   }, [currentStep, formData]);
 
+  // Track step completion with comprehensive marketing data
+  const trackStepCompletion = useCallback((step: number, autoAdvanced: boolean = false) => {
+    const progress = (step / TOTAL_STEPS) * 100;
+    const nextStep = step + 1;
+    const nextStepProgress = nextStep <= TOTAL_STEPS ? (nextStep / TOTAL_STEPS) * 100 : 100;
+
+    trackCustomEvent("IULFormStepCompleted", {
+      // Step identification
+      step_number: step,
+      step_name: STEP_NAMES[step],
+      next_step_number: nextStep <= TOTAL_STEPS ? nextStep : null,
+      next_step_name: nextStep <= TOTAL_STEPS ? STEP_NAMES[nextStep] : "Complete",
+      
+      // Progress tracking
+      progress_percentage: Math.round(progress),
+      next_progress_percentage: Math.round(nextStepProgress),
+      steps_remaining: TOTAL_STEPS - step,
+      steps_completed: step,
+      total_steps: TOTAL_STEPS,
+      
+      // Form context
+      form_type: "IUL Lead Generation",
+      form_id: "iul_lead_gen",
+      campaign_source: "iul_lead_gen",
+      
+      // User behavior
+      auto_advanced: autoAdvanced,
+      interaction_type: autoAdvanced ? "auto_advance" : "manual_click",
+      
+      // Value estimation (for conversion optimization)
+      estimated_value: Math.round(progress * 0.5), // Progressive value based on completion
+      currency: "USD",
+    });
+  }, []);
+
   const handleNext = useCallback(() => {
     if (canProceed() && currentStep < TOTAL_STEPS) {
+      // Track step completion before advancing
+      trackStepCompletion(currentStep, false);
       setCurrentStep((prev) => prev + 1);
     }
-  }, [canProceed, currentStep]);
+  }, [canProceed, currentStep, trackStepCompletion]);
 
   const handleBack = () => {
     if (currentStep > 1) {
@@ -170,24 +219,28 @@ export default function IULLeadGenForm() {
   useEffect(() => {
     if (currentStep === 1 && formData.retirementTimeline && canProceed()) {
       const timer = setTimeout(() => {
+        // Track step completion before auto-advancing
+        trackStepCompletion(currentStep, true);
         handleNext();
       }, 500); // 500ms delay for better UX
       return () => clearTimeout(timer);
     }
     if (currentStep === 3 && formData.monthlySavings && canProceed()) {
       const timer = setTimeout(() => {
+        trackStepCompletion(currentStep, true);
         handleNext();
       }, 500);
       return () => clearTimeout(timer);
     }
     if (currentStep === 5 && formData.state && canProceed()) {
       const timer = setTimeout(() => {
+        trackStepCompletion(currentStep, true);
         handleNext();
       }, 500);
       return () => clearTimeout(timer);
     }
     // Note: Step 4 (age) doesn't auto-advance - user needs to confirm with Next button
-  }, [formData.retirementTimeline, formData.monthlySavings, formData.state, currentStep, canProceed, handleNext]);
+  }, [formData.retirementTimeline, formData.monthlySavings, formData.state, currentStep, canProceed, handleNext, trackStepCompletion]);
 
   const handleSubmit = async () => {
     if (!canProceed()) return;
