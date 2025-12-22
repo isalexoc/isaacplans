@@ -2,7 +2,7 @@
 
 import Script from "next/script";
 import { usePathname } from "next/navigation";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { getStoredAdvancedMatchingData, prepareAdvancedMatchingData } from "@/lib/facebook-pixel";
 
 declare global {
@@ -13,6 +13,7 @@ declare global {
       params?: Record<string, unknown>
     ) => void) & {
       q?: Array<any[]>;
+      loaded?: boolean;
     };
   }
 }
@@ -23,6 +24,7 @@ interface FacebookPixelProps {
 
 export default function FacebookPixel({ pixelId }: FacebookPixelProps) {
   const pathname = usePathname();
+  const hasTrackedInitialPageView = useRef(false);
 
   // Get stored user data for advanced matching
   const advancedMatchingData = useMemo(() => {
@@ -33,11 +35,21 @@ export default function FacebookPixel({ pixelId }: FacebookPixelProps) {
     return Object.keys(prepared).length > 0 ? prepared : null;
   }, []);
 
+  // Track page views on route changes (but not on initial load)
   useEffect(() => {
-    // Track page views on route changes
-    if (typeof window !== "undefined" && window.fbq) {
-      window.fbq("track", "PageView");
+    // Skip initial page view (handled by onLoad)
+    if (!hasTrackedInitialPageView.current) {
+      return;
     }
+
+    // Wait a bit to ensure pixel is ready
+    const timer = setTimeout(() => {
+      if (typeof window !== "undefined" && window.fbq) {
+        window.fbq("track", "PageView");
+      }
+    }, 100);
+
+    return () => clearTimeout(timer);
   }, [pathname]);
 
   if (!pixelId) {
@@ -55,6 +67,18 @@ export default function FacebookPixel({ pixelId }: FacebookPixelProps) {
       <Script
         id="facebook-pixel"
         strategy="afterInteractive"
+        onLoad={() => {
+          // Track initial PageView after pixel is fully loaded
+          if (typeof window !== "undefined" && window.fbq) {
+            // Small delay to ensure pixel is ready
+            setTimeout(() => {
+              if (window.fbq) {
+                window.fbq("track", "PageView");
+                hasTrackedInitialPageView.current = true;
+              }
+            }, 100);
+          }
+        }}
         dangerouslySetInnerHTML={{
           __html: `
             !function(f,b,e,v,n,t,s)
@@ -66,7 +90,6 @@ export default function FacebookPixel({ pixelId }: FacebookPixelProps) {
             s.parentNode.insertBefore(t,s)}(window, document,'script',
             'https://connect.facebook.net/en_US/fbevents.js');
             ${initCall}
-            fbq('track', 'PageView');
           `,
         }}
       />

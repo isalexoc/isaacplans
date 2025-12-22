@@ -13,6 +13,7 @@ declare global {
       params?: Record<string, unknown>
     ) => void) & {
       q?: Array<any[]>;
+      loaded?: boolean;
     };
   }
 }

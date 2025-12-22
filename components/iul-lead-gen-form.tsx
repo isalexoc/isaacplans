@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
+import { Slider } from "@/components/ui/slider";
 import { Card, CardContent } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -78,12 +79,11 @@ interface FormData {
   retirementTimeline: string;
   investments: string[];
   monthlySavings: string;
-  age: string;
+  age: number;
   state: string;
   firstName: string;
   lastName: string;
   email: string;
-  phoneCountryCode: string;
   phone: string;
 }
 
@@ -99,12 +99,11 @@ export default function IULLeadGenForm() {
     retirementTimeline: "",
     investments: [],
     monthlySavings: "",
-    age: "",
+    age: 29,
     state: "",
     firstName: "",
     lastName: "",
     email: "",
-    phoneCountryCode: "+1",
     phone: "",
   });
 
@@ -122,6 +121,7 @@ export default function IULLeadGenForm() {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
+
   const handleInvestmentToggle = (investment: string) => {
     setFormData((prev) => {
       const investments = prev.investments.includes(investment)
@@ -131,7 +131,7 @@ export default function IULLeadGenForm() {
     });
   };
 
-  const canProceed = () => {
+  const canProceed = useCallback(() => {
     switch (currentStep) {
       case 1:
         return !!formData.retirementTimeline;
@@ -140,7 +140,7 @@ export default function IULLeadGenForm() {
       case 3:
         return !!formData.monthlySavings;
       case 4:
-        return !!formData.age && parseInt(formData.age) >= 18 && parseInt(formData.age) <= 100;
+        return formData.age >= 0 && formData.age <= 80;
       case 5:
         return !!formData.state;
       case 6:
@@ -152,19 +152,42 @@ export default function IULLeadGenForm() {
       default:
         return false;
     }
-  };
+  }, [currentStep, formData]);
 
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     if (canProceed() && currentStep < TOTAL_STEPS) {
       setCurrentStep((prev) => prev + 1);
     }
-  };
+  }, [canProceed, currentStep]);
 
   const handleBack = () => {
     if (currentStep > 1) {
       setCurrentStep((prev) => prev - 1);
     }
   };
+
+  // Auto-advance for single-select steps (1, 3, 5) after selection
+  useEffect(() => {
+    if (currentStep === 1 && formData.retirementTimeline && canProceed()) {
+      const timer = setTimeout(() => {
+        handleNext();
+      }, 500); // 500ms delay for better UX
+      return () => clearTimeout(timer);
+    }
+    if (currentStep === 3 && formData.monthlySavings && canProceed()) {
+      const timer = setTimeout(() => {
+        handleNext();
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+    if (currentStep === 5 && formData.state && canProceed()) {
+      const timer = setTimeout(() => {
+        handleNext();
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+    // Note: Step 4 (age) doesn't auto-advance - user needs to confirm with Next button
+  }, [formData.retirementTimeline, formData.monthlySavings, formData.state, currentStep, canProceed, handleNext]);
 
   const handleSubmit = async () => {
     if (!canProceed()) return;
@@ -174,6 +197,7 @@ export default function IULLeadGenForm() {
 
     try {
       // Submit to Agent CRM
+      const phoneNumber = `+1${formData.phone.replace(/\D/g, "")}`;
       const response = await fetch("/api/create-contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -181,7 +205,7 @@ export default function IULLeadGenForm() {
           firstName: formData.firstName,
           lastName: formData.lastName,
           email: formData.email,
-          phone: `${formData.phoneCountryCode}${formData.phone.replace(/\D/g, "")}`,
+          phone: phoneNumber,
           guideName: "IUL Lead Generation Campaign",
           leadMagnet: true,
         }),
@@ -197,7 +221,7 @@ export default function IULLeadGenForm() {
         em: formData.email?.toLowerCase().trim(),
         fn: formData.firstName?.toLowerCase().trim(),
         ln: formData.lastName?.toLowerCase().trim(),
-        ph: `${formData.phoneCountryCode}${formData.phone.replace(/\D/g, "")}`,
+        ph: phoneNumber,
       };
 
       // Update advanced matching
@@ -290,30 +314,34 @@ export default function IULLeadGenForm() {
                     onValueChange={(value) => updateFormData("retirementTimeline", value)}
                     className="space-y-3"
                   >
-                    <div className="flex items-center space-x-2 p-4 border rounded-md hover:bg-accent cursor-pointer">
+                    <label
+                      htmlFor="within-10"
+                      className="flex items-center space-x-2 p-4 border rounded-md hover:bg-accent cursor-pointer transition-colors"
+                    >
                       <RadioGroupItem value="within-10" id="within-10" />
-                      <Label htmlFor="within-10" className="cursor-pointer flex-1">
-                        Within 10 Years
-                      </Label>
-                    </div>
-                    <div className="flex items-center space-x-2 p-4 border rounded-md hover:bg-accent cursor-pointer">
+                      <span className="flex-1">Within 10 Years</span>
+                    </label>
+                    <label
+                      htmlFor="within-20"
+                      className="flex items-center space-x-2 p-4 border rounded-md hover:bg-accent cursor-pointer transition-colors"
+                    >
                       <RadioGroupItem value="within-20" id="within-20" />
-                      <Label htmlFor="within-20" className="cursor-pointer flex-1">
-                        Within 20 Years
-                      </Label>
-                    </div>
-                    <div className="flex items-center space-x-2 p-4 border rounded-md hover:bg-accent cursor-pointer">
+                      <span className="flex-1">Within 20 Years</span>
+                    </label>
+                    <label
+                      htmlFor="within-30"
+                      className="flex items-center space-x-2 p-4 border rounded-md hover:bg-accent cursor-pointer transition-colors"
+                    >
                       <RadioGroupItem value="within-30" id="within-30" />
-                      <Label htmlFor="within-30" className="cursor-pointer flex-1">
-                        Within 30 Years
-                      </Label>
-                    </div>
-                    <div className="flex items-center space-x-2 p-4 border rounded-md hover:bg-accent cursor-pointer">
+                      <span className="flex-1">Within 30 Years</span>
+                    </label>
+                    <label
+                      htmlFor="retired"
+                      className="flex items-center space-x-2 p-4 border rounded-md hover:bg-accent cursor-pointer transition-colors"
+                    >
                       <RadioGroupItem value="retired" id="retired" />
-                      <Label htmlFor="retired" className="cursor-pointer flex-1">
-                        I'm Currently Retired
-                      </Label>
-                    </div>
+                      <span className="flex-1">I'm Currently Retired</span>
+                    </label>
                   </RadioGroup>
                 </div>
               </div>
@@ -335,19 +363,23 @@ export default function IULLeadGenForm() {
                       "Active Trading",
                       "Self Directed Brokerage Account",
                       "No current investments",
-                    ].map((investment) => (
-                      <div
-                        key={investment}
-                        className="flex items-center space-x-2 p-4 border rounded-md hover:bg-accent cursor-pointer"
-                        onClick={() => handleInvestmentToggle(investment)}
-                      >
-                        <Checkbox
-                          checked={formData.investments.includes(investment)}
-                          onCheckedChange={() => handleInvestmentToggle(investment)}
-                        />
-                        <Label className="cursor-pointer flex-1">{investment}</Label>
-                      </div>
-                    ))}
+                    ].map((investment) => {
+                      const investmentId = `investment-${investment.toLowerCase().replace(/\s+/g, "-")}`;
+                      return (
+                        <label
+                          key={investment}
+                          htmlFor={investmentId}
+                          className="flex items-center space-x-2 p-4 border rounded-md hover:bg-accent cursor-pointer transition-colors"
+                        >
+                          <Checkbox
+                            id={investmentId}
+                            checked={formData.investments.includes(investment)}
+                            onCheckedChange={() => handleInvestmentToggle(investment)}
+                          />
+                          <span className="flex-1">{investment}</span>
+                        </label>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
@@ -365,30 +397,34 @@ export default function IULLeadGenForm() {
                     onValueChange={(value) => updateFormData("monthlySavings", value)}
                     className="space-y-3"
                   >
-                    <div className="flex items-center space-x-2 p-4 border rounded-md hover:bg-accent cursor-pointer">
+                    <label
+                      htmlFor="less-300"
+                      className="flex items-center space-x-2 p-4 border rounded-md hover:bg-accent cursor-pointer transition-colors"
+                    >
                       <RadioGroupItem value="less-300" id="less-300" />
-                      <Label htmlFor="less-300" className="cursor-pointer flex-1">
-                        Less than $300
-                      </Label>
-                    </div>
-                    <div className="flex items-center space-x-2 p-4 border rounded-md hover:bg-accent cursor-pointer">
+                      <span className="flex-1">Less than $300</span>
+                    </label>
+                    <label
+                      htmlFor="300-500"
+                      className="flex items-center space-x-2 p-4 border rounded-md hover:bg-accent cursor-pointer transition-colors"
+                    >
                       <RadioGroupItem value="300-500" id="300-500" />
-                      <Label htmlFor="300-500" className="cursor-pointer flex-1">
-                        $300 - $500
-                      </Label>
-                    </div>
-                    <div className="flex items-center space-x-2 p-4 border rounded-md hover:bg-accent cursor-pointer">
+                      <span className="flex-1">$300 - $500</span>
+                    </label>
+                    <label
+                      htmlFor="500-1000"
+                      className="flex items-center space-x-2 p-4 border rounded-md hover:bg-accent cursor-pointer transition-colors"
+                    >
                       <RadioGroupItem value="500-1000" id="500-1000" />
-                      <Label htmlFor="500-1000" className="cursor-pointer flex-1">
-                        $500 - $1,000
-                      </Label>
-                    </div>
-                    <div className="flex items-center space-x-2 p-4 border rounded-md hover:bg-accent cursor-pointer">
+                      <span className="flex-1">$500 - $1,000</span>
+                    </label>
+                    <label
+                      htmlFor="more-1000"
+                      className="flex items-center space-x-2 p-4 border rounded-md hover:bg-accent cursor-pointer transition-colors"
+                    >
                       <RadioGroupItem value="more-1000" id="more-1000" />
-                      <Label htmlFor="more-1000" className="cursor-pointer flex-1">
-                        More than $1,000
-                      </Label>
-                    </div>
+                      <span className="flex-1">More than $1,000</span>
+                    </label>
                   </RadioGroup>
                 </div>
               </div>
@@ -402,21 +438,27 @@ export default function IULLeadGenForm() {
                     What is your current age? (This helps us determine how long you have to fund
                     the IUL) *
                   </Label>
-                  <Input
-                    type="number"
-                    min="18"
-                    max="100"
-                    value={formData.age}
-                    onChange={(e) => updateFormData("age", e.target.value)}
-                    placeholder="Enter your age"
-                    className="text-lg h-12"
-                  />
-                  {formData.age && (
-                    <p className="text-sm text-muted-foreground mt-2">
-                      You have approximately {65 - parseInt(formData.age) || 0} years until
-                      retirement age.
-                    </p>
-                  )}
+                  <div className="space-y-4">
+                    <div className="px-2">
+                      <Slider
+                        value={[formData.age]}
+                        onValueChange={(value) => updateFormData("age", value[0])}
+                        min={0}
+                        max={80}
+                        step={1}
+                        className="w-full"
+                      />
+                    </div>
+                    <div className="text-center">
+                      <div className="text-4xl font-bold text-[#0ea5e9] mb-2">{formData.age}</div>
+                      {formData.age >= 18 && (
+                        <p className="text-sm text-muted-foreground">
+                          You have approximately {Math.max(0, 65 - formData.age)} years until
+                          retirement age.
+                        </p>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
@@ -504,29 +546,16 @@ export default function IULLeadGenForm() {
                   <Label className="text-lg font-semibold mb-4 block">
                     What's your best phone number?
                   </Label>
-                  <div className="flex gap-2">
-                    <Select
-                      value={formData.phoneCountryCode}
-                      onValueChange={(value) => updateFormData("phoneCountryCode", value)}
-                    >
-                      <SelectTrigger className="w-32 h-12">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="+1">United States (+1)</SelectItem>
-                        <SelectItem value="+52">Mexico (+52)</SelectItem>
-                        <SelectItem value="+44">United Kingdom (+44)</SelectItem>
-                        <SelectItem value="+34">Spain (+34)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <Input
-                      type="tel"
-                      value={formData.phone}
-                      onChange={(e) => updateFormData("phone", e.target.value)}
-                      placeholder="Your phone number"
-                      className="flex-1 h-12 text-base"
-                    />
-                  </div>
+                  <Input
+                    type="tel"
+                    value={formData.phone}
+                    onChange={(e) => updateFormData("phone", e.target.value)}
+                    placeholder="(555) 123-4567"
+                    className="h-12 text-base"
+                  />
+                  <p className="text-sm text-muted-foreground mt-2">
+                    United States phone number
+                  </p>
                 </div>
               </div>
             )}
@@ -534,16 +563,18 @@ export default function IULLeadGenForm() {
         </AnimatePresence>
 
         {/* Navigation Buttons */}
-        <div className="flex justify-between mt-8">
-          <Button
-            variant="outline"
-            onClick={handleBack}
-            disabled={currentStep === 1 || isSubmitting}
-            className="flex items-center gap-2"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back
-          </Button>
+        <div className={`flex ${currentStep === 1 ? "justify-end" : "justify-between"} mt-8`}>
+          {currentStep > 1 && (
+            <Button
+              variant="outline"
+              onClick={handleBack}
+              disabled={isSubmitting}
+              className="flex items-center gap-2"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Back
+            </Button>
+          )}
 
           {currentStep < TOTAL_STEPS ? (
             <Button
