@@ -201,10 +201,12 @@ export default function IULLeadGenForm() {
     });
   }, []);
 
-  const handleNext = useCallback(() => {
+  const handleNext = useCallback((skipTracking: boolean = false) => {
     if (canProceed() && currentStep < TOTAL_STEPS) {
-      // Track step completion before advancing
-      trackStepCompletion(currentStep, false);
+      // Track step completion before advancing (unless already tracked by auto-advance)
+      if (!skipTracking) {
+        trackStepCompletion(currentStep, false);
+      }
       setCurrentStep((prev) => prev + 1);
     }
   }, [canProceed, currentStep, trackStepCompletion]);
@@ -219,23 +221,23 @@ export default function IULLeadGenForm() {
   useEffect(() => {
     if (currentStep === 1 && formData.retirementTimeline && canProceed()) {
       const timer = setTimeout(() => {
-        // Track step completion before auto-advancing
+        // Track step completion before auto-advancing (skip tracking in handleNext)
         trackStepCompletion(currentStep, true);
-        handleNext();
+        handleNext(true); // Pass true to skip duplicate tracking
       }, 500); // 500ms delay for better UX
       return () => clearTimeout(timer);
     }
     if (currentStep === 3 && formData.monthlySavings && canProceed()) {
       const timer = setTimeout(() => {
         trackStepCompletion(currentStep, true);
-        handleNext();
+        handleNext(true); // Pass true to skip duplicate tracking
       }, 500);
       return () => clearTimeout(timer);
     }
     if (currentStep === 5 && formData.state && canProceed()) {
       const timer = setTimeout(() => {
         trackStepCompletion(currentStep, true);
-        handleNext();
+        handleNext(true); // Pass true to skip duplicate tracking
       }, 500);
       return () => clearTimeout(timer);
     }
