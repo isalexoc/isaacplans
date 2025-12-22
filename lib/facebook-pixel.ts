@@ -231,19 +231,34 @@ export function trackCustomEvent(
   eventName: string,
   params?: Record<string, unknown>
 ): void {
-  if (isPixelLoaded()) {
-    window.fbq("trackCustom", eventName, params || {});
-  } else {
-    // Queue the event if pixel hasn't loaded yet
-    if (typeof window !== "undefined") {
-      if (!window.fbq) {
-        window.fbq = function (...args: any[]) {
-          (window.fbq.q = window.fbq.q || []).push(args);
-        } as any;
-        (window.fbq as any).q = [];
-      }
+  if (typeof window === "undefined") return;
+
+  // Ensure fbq queue exists
+  if (!window.fbq) {
+    window.fbq = function (...args: any[]) {
+      (window.fbq.q = window.fbq.q || []).push(args);
+    } as any;
+    (window.fbq as any).q = [];
+  }
+
+  try {
+    if (isPixelLoaded()) {
       window.fbq("trackCustom", eventName, params || {});
+      
+      // Development logging (only in browser console, not in production)
+      if (process.env.NODE_ENV === "development") {
+        console.log(`[Facebook Pixel] Custom event tracked: ${eventName}`, params);
+      }
+    } else {
+      // Queue the event if pixel hasn't loaded yet
+      window.fbq("trackCustom", eventName, params || {});
+      
+      if (process.env.NODE_ENV === "development") {
+        console.log(`[Facebook Pixel] Custom event queued: ${eventName}`, params);
+      }
     }
+  } catch (error) {
+    console.error(`[Facebook Pixel] Error tracking custom event ${eventName}:`, error);
   }
 }
 
