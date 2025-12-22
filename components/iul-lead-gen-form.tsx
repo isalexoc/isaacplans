@@ -719,7 +719,7 @@ export default function IULLeadGenForm() {
 
           {currentStep < TOTAL_STEPS ? (
             <Button
-              onClick={handleNext}
+              onClick={() => handleNext()}
               disabled={!canProceed() || isSubmitting}
               className="flex items-center gap-2 bg-gradient-to-r from-[#0ea5e9] to-[#2563eb] hover:from-[#3b82f6] hover:to-[#1d4ed8]"
             >
