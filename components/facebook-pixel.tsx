@@ -38,7 +38,7 @@ export default function FacebookPixel({ pixelId }: FacebookPixelProps) {
 
   // Track page views on route changes (but not on initial load - handled by script)
   useEffect(() => {
-    // Skip initial page view (handled by script onLoad)
+    // Skip initial page view (handled by script)
     if (isInitialMount.current) {
       isInitialMount.current = false;
       return;
@@ -61,6 +61,23 @@ export default function FacebookPixel({ pixelId }: FacebookPixelProps) {
     trackPageView();
   }, [pathname]);
 
+  // Monitor pixel loading status
+  useEffect(() => {
+    const checkPixelLoaded = setInterval(() => {
+      if (typeof window !== "undefined" && window.fbq && typeof window.fbq === "function") {
+        if (window.fbq.loaded) {
+          pixelLoaded.current = true;
+          clearInterval(checkPixelLoaded);
+        }
+      }
+    }, 100);
+
+    // Cleanup after 10 seconds
+    setTimeout(() => clearInterval(checkPixelLoaded), 10000);
+
+    return () => clearInterval(checkPixelLoaded);
+  }, []);
+
   if (!pixelId) {
     return null;
   }
@@ -70,29 +87,12 @@ export default function FacebookPixel({ pixelId }: FacebookPixelProps) {
     ? `fbq('init', '${pixelId}', ${JSON.stringify(advancedMatchingData)});`
     : `fbq('init', '${pixelId}');`;
 
-  // Handle script load - ensure pixel is ready before tracking
-  const handleScriptLoad = () => {
-    if (typeof window !== "undefined" && window.fbq) {
-      pixelLoaded.current = true;
-      
-      // Wait a moment for pixel to fully initialize, then track initial PageView
-      setTimeout(() => {
-        try {
-          window.fbq("track", "PageView");
-        } catch (error) {
-          console.error("[Facebook Pixel] Error tracking initial PageView:", error);
-        }
-      }, 100);
-    }
-  };
-
   return (
     <>
-      {/* Facebook Pixel Code */}
+      {/* Facebook Pixel Code - Standard implementation */}
       <Script
         id="facebook-pixel"
         strategy="afterInteractive"
-        onLoad={handleScriptLoad}
         dangerouslySetInnerHTML={{
           __html: `
             !function(f,b,e,v,n,t,s)
@@ -104,7 +104,37 @@ export default function FacebookPixel({ pixelId }: FacebookPixelProps) {
             s.parentNode.insertBefore(t,s)}(window, document,'script',
             'https://connect.facebook.net/en_US/fbevents.js');
             ${initCall}
+            
+            // Wait for pixel to load, then track PageView
+            (function trackInitialPageView() {
+              if (window.fbq && typeof window.fbq === 'function') {
+                try {
+                  window.fbq('track', 'PageView');
+                  window.fbq.loaded = true;
+                  if (typeof console !== 'undefined' && console.log) {
+                    console.log('[Facebook Pixel] Initialized and PageView tracked');
+                  }
+                } catch(e) {
+                  console.error('[Facebook Pixel] Error:', e);
+                  setTimeout(trackInitialPageView, 100);
+                }
+              } else {
+                setTimeout(trackInitialPageView, 100);
+              }
+            })();
           `,
+        }}
+        onLoad={() => {
+          // Additional check when script loads
+          if (typeof window !== "undefined" && window.fbq) {
+            pixelLoaded.current = true;
+            if (window.fbq) {
+              window.fbq.loaded = true;
+            }
+          }
+        }}
+        onError={(e) => {
+          console.error("[Facebook Pixel] Script load error:", e);
         }}
       />
       {/* Noscript fallback for users with JavaScript disabled */}

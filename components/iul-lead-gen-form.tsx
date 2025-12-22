@@ -101,6 +101,24 @@ const STEP_NAMES: Record<number, string> = {
   8: "Phone",
 };
 
+// Step hash mapping for URL tracking (like competitor)
+const STEP_HASHES: Record<number, string> = {
+  1: "#retirement-timeline",
+  2: "#current-investments",
+  3: "#monthly-savings",
+  4: "#age",
+  5: "#state",
+  6: "#name",
+  7: "#email",
+  8: "#phone",
+};
+
+// Generate screen ID for a step
+function generateStepScreenId(step: number): string {
+  const stepName = STEP_NAMES[step].toLowerCase().replace(/\s+/g, "-");
+  return `id-${stepName}-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+}
+
 export default function IULLeadGenForm() {
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -131,16 +149,52 @@ export default function IULLeadGenForm() {
 
   const updateFormData = (field: keyof FormData, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+    
+    // Track option selection (like competitor - e.g., "Within_10_Years", "Less_than__300")
+    if (typeof value === "string" && value) {
+      const eventName = value
+        .replace(/\s+/g, "_")
+        .replace(/[^a-zA-Z0-9_]/g, "")
+        .replace(/_+/g, "_");
+      
+      // Track the selection as a custom event
+      trackCustomEvent(eventName, {
+        screen_id: generateStepScreenId(currentStep),
+        hash: STEP_HASHES[currentStep],
+        step_name: STEP_NAMES[currentStep],
+        selected_option: value,
+        flow_id: "iul_lead_gen_flow",
+      });
+    }
   };
 
-
   const handleInvestmentToggle = (investment: string) => {
+    const isAdding = !formData.investments.includes(investment);
+    
     setFormData((prev) => {
-      const investments = prev.investments.includes(investment)
-        ? prev.investments.filter((i) => i !== investment)
-        : [...prev.investments, investment];
+      const investments = isAdding
+        ? [...prev.investments, investment]
+        : prev.investments.filter((i) => i !== investment);
       return { ...prev, investments };
     });
+    
+    // Track investment selection (like competitor - e.g., "IRA", "401(k)")
+    if (isAdding) {
+      const eventName = investment
+        .replace(/\s+/g, "_")
+        .replace(/[^a-zA-Z0-9_]/g, "")
+        .replace(/\(/g, "")
+        .replace(/\)/g, "")
+        .replace(/_+/g, "_");
+      
+      trackCustomEvent(eventName, {
+        screen_id: generateStepScreenId(currentStep),
+        hash: STEP_HASHES[currentStep],
+        step_name: STEP_NAMES[currentStep],
+        selected_investment: investment,
+        flow_id: "iul_lead_gen_flow",
+      });
+    }
   };
 
   const canProceed = useCallback(() => {
@@ -166,16 +220,47 @@ export default function IULLeadGenForm() {
     }
   }, [currentStep, formData]);
 
-  // Track step completion with comprehensive marketing data
+  // Track step completion with comprehensive marketing data (similar to competitor)
   const trackStepCompletion = useCallback((step: number, autoAdvanced: boolean = false) => {
     const progress = (step / TOTAL_STEPS) * 100;
     const nextStep = step + 1;
     const nextStepProgress = nextStep <= TOTAL_STEPS ? (nextStep / TOTAL_STEPS) * 100 : 100;
+    const stepName = STEP_NAMES[step];
+    const stepHash = STEP_HASHES[step];
+    const screenId = generateStepScreenId(step);
+    
+    // Create descriptive event name like competitor (e.g., "Retirement_Timeline", "Current_Investments")
+    const eventName = stepName.replace(/\s+/g, "_");
+    
+    // Get selected value for this step (for more context)
+    let selectedValue: string | null = null;
+    switch (step) {
+      case 1:
+        selectedValue = formData.retirementTimeline || null;
+        break;
+      case 2:
+        selectedValue = formData.investments.join(", ") || null;
+        break;
+      case 3:
+        selectedValue = formData.monthlySavings || null;
+        break;
+      case 4:
+        selectedValue = formData.age.toString();
+        break;
+      case 5:
+        selectedValue = formData.state || null;
+        break;
+    }
 
-    trackCustomEvent("IULFormStepCompleted", {
+    trackCustomEvent(eventName, {
+      // Screen/Step tracking (like competitor)
+      screen_id: screenId,
+      hash: stepHash,
+      
       // Step identification
       step_number: step,
-      step_name: STEP_NAMES[step],
+      step_name: stepName,
+      selected_value: selectedValue,
       next_step_number: nextStep <= TOTAL_STEPS ? nextStep : null,
       next_step_name: nextStep <= TOTAL_STEPS ? STEP_NAMES[nextStep] : "Complete",
       
@@ -190,16 +275,17 @@ export default function IULLeadGenForm() {
       form_type: "IUL Lead Generation",
       form_id: "iul_lead_gen",
       campaign_source: "iul_lead_gen",
+      flow_id: "iul_lead_gen_flow",
       
       // User behavior
       auto_advanced: autoAdvanced,
       interaction_type: autoAdvanced ? "auto_advance" : "manual_click",
       
       // Value estimation (for conversion optimization)
-      estimated_value: Math.round(progress * 0.5), // Progressive value based on completion
+      estimated_value: Math.round(progress * 0.5),
       currency: "USD",
     });
-  }, []);
+  }, [formData]);
 
   const handleNext = useCallback((skipTracking: boolean = false) => {
     if (canProceed() && currentStep < TOTAL_STEPS) {

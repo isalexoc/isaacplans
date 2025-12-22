@@ -173,6 +173,84 @@ function isPixelLoaded(): boolean {
 }
 
 /**
+ * Generate or retrieve session ID (persists for the browser session)
+ */
+function getSessionId(): string {
+  if (typeof window === "undefined") return "";
+  
+  const storageKey = "fb_pixel_session_id";
+  let sessionId = sessionStorage.getItem(storageKey);
+  
+  if (!sessionId) {
+    sessionId = `session_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
+    sessionStorage.setItem(storageKey, sessionId);
+  }
+  
+  return sessionId;
+}
+
+/**
+ * Generate a unique screen/step ID
+ */
+function generateScreenId(stepName?: string): string {
+  const prefix = stepName ? stepName.toLowerCase().replace(/\s+/g, "-") : "screen";
+  return `id-${prefix}-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+}
+
+/**
+ * Get comprehensive event parameters (similar to competitor implementation)
+ * Includes session tracking, screen info, UTM parameters, etc.
+ */
+export function getComprehensiveEventParams(additionalParams?: Record<string, unknown>): Record<string, unknown> {
+  if (typeof window === "undefined") {
+    return additionalParams || {};
+  }
+
+  const params: Record<string, unknown> = {
+    // Session tracking
+    session_id: getSessionId(),
+    
+    // Screen/viewport info
+    screen_width: window.screen?.width || 0,
+    screen_height: window.screen?.height || 0,
+    
+    // Page info
+    host: window.location.hostname,
+    path: window.location.pathname,
+    hash: window.location.hash || "Not Set",
+    origin: window.location.origin,
+    referrer: document.referrer || "Not Set",
+    title: document.title || "Not Set",
+    
+    // UTM parameters
+    utm_source: getUrlParameter("utm_source") || "Not Set",
+    utm_medium: getUrlParameter("utm_medium") || "Not Set",
+    utm_campaign: getUrlParameter("utm_campaign") || "Not Set",
+    utm_content: getUrlParameter("utm_content") || "Not Set",
+    utm_term: getUrlParameter("utm_term") || "Not Set",
+    
+    // Form/flow context
+    flow_id: "iul_lead_gen_flow",
+    is_embedded: false,
+    
+    // Add any additional parameters
+    ...(additionalParams || {}),
+  };
+
+  return params;
+}
+
+/**
+ * Get URL parameter value
+ */
+function getUrlParameter(name: string): string | null {
+  if (typeof window === "undefined") return null;
+  
+  const urlParams = new URLSearchParams(window.location.search);
+  return urlParams.get(name);
+}
+
+/**
  * Generate a unique event ID for deduplication
  * Uses timestamp + random string to ensure uniqueness
  */
@@ -219,17 +297,19 @@ export function trackEvent(
 }
 
 /**
- * Track a custom Facebook Pixel event
+ * Track a custom Facebook Pixel event with comprehensive parameters
  * 
  * @param eventName - Custom event name
- * @param params - Optional parameters
+ * @param params - Optional parameters (will be merged with comprehensive params)
+ * @param includeComprehensiveParams - Whether to include comprehensive tracking params (default: true)
  * 
  * @example
  * trackCustomEvent('GuideDownload', { guide_name: 'ACA Guide', category: 'Health Insurance' })
  */
 export function trackCustomEvent(
   eventName: string,
-  params?: Record<string, unknown>
+  params?: Record<string, unknown>,
+  includeComprehensiveParams: boolean = true
 ): void {
   if (typeof window === "undefined") return;
 
@@ -242,19 +322,29 @@ export function trackCustomEvent(
   }
 
   try {
+    // Merge comprehensive parameters with custom parameters
+    const eventParams = includeComprehensiveParams
+      ? {
+          ...getComprehensiveEventParams(),
+          event: "CustomEvent",
+          customEventLabel: eventName,
+          ...(params || {}),
+        }
+      : params || {};
+
     if (isPixelLoaded()) {
-      window.fbq("trackCustom", eventName, params || {});
+      window.fbq("trackCustom", eventName, eventParams);
       
       // Development logging (only in browser console, not in production)
       if (process.env.NODE_ENV === "development") {
-        console.log(`[Facebook Pixel] Custom event tracked: ${eventName}`, params);
+        console.log(`[Facebook Pixel] Custom event tracked: ${eventName}`, eventParams);
       }
     } else {
       // Queue the event if pixel hasn't loaded yet
-      window.fbq("trackCustom", eventName, params || {});
+      window.fbq("trackCustom", eventName, eventParams);
       
       if (process.env.NODE_ENV === "development") {
-        console.log(`[Facebook Pixel] Custom event queued: ${eventName}`, params);
+        console.log(`[Facebook Pixel] Custom event queued: ${eventName}`, eventParams);
       }
     }
   } catch (error) {
