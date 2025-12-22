@@ -24,7 +24,7 @@ interface FacebookPixelProps {
 
 export default function FacebookPixel({ pixelId }: FacebookPixelProps) {
   const pathname = usePathname();
-  const hasTrackedInitialPageView = useRef(false);
+  const isInitialMount = useRef(true);
 
   // Get stored user data for advanced matching
   const advancedMatchingData = useMemo(() => {
@@ -35,10 +35,11 @@ export default function FacebookPixel({ pixelId }: FacebookPixelProps) {
     return Object.keys(prepared).length > 0 ? prepared : null;
   }, []);
 
-  // Track page views on route changes (but not on initial load)
+  // Track page views on route changes (but not on initial load - handled by script)
   useEffect(() => {
-    // Skip initial page view (handled by onLoad)
-    if (!hasTrackedInitialPageView.current) {
+    // Skip initial page view (handled by script)
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
       return;
     }
 
@@ -67,18 +68,6 @@ export default function FacebookPixel({ pixelId }: FacebookPixelProps) {
       <Script
         id="facebook-pixel"
         strategy="afterInteractive"
-        onLoad={() => {
-          // Track initial PageView after pixel is fully loaded
-          if (typeof window !== "undefined" && window.fbq) {
-            // Small delay to ensure pixel is ready
-            setTimeout(() => {
-              if (window.fbq) {
-                window.fbq("track", "PageView");
-                hasTrackedInitialPageView.current = true;
-              }
-            }, 100);
-          }
-        }}
         dangerouslySetInnerHTML={{
           __html: `
             !function(f,b,e,v,n,t,s)
@@ -90,6 +79,7 @@ export default function FacebookPixel({ pixelId }: FacebookPixelProps) {
             s.parentNode.insertBefore(t,s)}(window, document,'script',
             'https://connect.facebook.net/en_US/fbevents.js');
             ${initCall}
+            fbq('track', 'PageView');
           `,
         }}
       />
