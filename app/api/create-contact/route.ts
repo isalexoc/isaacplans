@@ -311,6 +311,64 @@ export async function POST(request: NextRequest) {
 
     const contactId = createResponseData.contact?.id || createResponseData.id;
 
+    // Helper function to add contact to a workflow
+    const addContactToWorkflow = async (workflowId: string, workflowName: string): Promise<void> => {
+      if (!workflowId || !contactId) {
+        return;
+      }
+
+      try {
+        // Add contact to workflow
+        // LeadConnector API: POST /contacts/{contactId}/workflow/{workflowId}?locationId={locationId}
+        // Based on documentation: https://marketplace.gohighlevel.com/docs/ghl/workflows/get-workflow
+        const workflowResponse = await fetch(`${baseUrl}/contacts/${contactId}/workflow/${workflowId}?locationId=${locationId}`, {
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${piToken}`,
+            'Content-Type': 'application/json',
+            'Version': '2021-07-28',
+          },
+        });
+
+        if (workflowResponse.ok) {
+          const workflowData = await workflowResponse.json().catch(() => ({}));
+          console.log(`[Workflow] Successfully added contact ${contactId} to ${workflowName} workflow (${workflowId})`);
+          if (process.env.NODE_ENV === "development") {
+            console.log('[Workflow] Response:', workflowData);
+          }
+        } else {
+          const workflowErrorText = await workflowResponse.text();
+          console.warn(`[Workflow] Failed to add contact to ${workflowName} workflow (non-blocking):`, {
+            workflowId,
+            status: workflowResponse.status,
+            statusText: workflowResponse.statusText,
+            error: workflowErrorText,
+          });
+        }
+      } catch (workflowError) {
+        // Log error but don't fail the request - workflow activation is non-critical
+        console.error(`[Workflow] Error activating ${workflowName} workflow (non-blocking):`, workflowError);
+      }
+    };
+
+    // Step 1: Activate notification workflow FIRST (if configured)
+    const notificationWorkflowId = process.env.AGENT_CRM_WORKFLOW_NOTIFICATION;
+    if (notificationWorkflowId && contactId) {
+      await addContactToWorkflow(notificationWorkflowId, "Notification");
+    }
+
+    // Step 2: Activate language-specific workflow (English or Spanish)
+    const workflowEnId = process.env.AGENT_CRM_WORKFLOW_EN;
+    const workflowEsId = process.env.AGENT_CRM_WORKFLOW_ES;
+    const language = iulLeadGenData?.language || 'en'; // Default to English
+
+    // Determine which workflow to use
+    const languageWorkflowId = language === 'es' ? workflowEsId : workflowEnId;
+    if (languageWorkflowId && contactId) {
+      await addContactToWorkflow(languageWorkflowId, language === 'es' ? 'Spanish' : 'English');
+    }
+
     // Send Meta Conversions API event (if configured and metadata provided)
     const pixelId = process.env.NEXT_PUBLIC_FACEBOOK_PIXEL_ID;
     const accessToken = process.env.META_CAPI_ACCESS_TOKEN;

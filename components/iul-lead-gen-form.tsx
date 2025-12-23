@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations, useLocale } from "next-intl";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
@@ -133,6 +134,7 @@ function generateStepScreenId(step: number): string {
 export default function IULLeadGenForm() {
   const t = useTranslations("iulLeadGen.form");
   const locale = useLocale();
+  const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -425,6 +427,34 @@ export default function IULLeadGenForm() {
 
   const progress = (currentStep / TOTAL_STEPS) * 100;
 
+  // Helper function to build calendar URL
+  const getCalendarUrl = useCallback(() => {
+    const calendarPath = locale === "es" ? "/iul/calendario" : "/iul/calendar";
+    const queryParams = new URLSearchParams({
+      first_name: formData.firstName,
+      last_name: formData.lastName,
+      email: formData.email,
+      phone: formData.phone.replace(/\D/g, ""), // Remove formatting for phone
+    });
+    return `/${locale}${calendarPath}?${queryParams.toString()}`;
+  }, [locale, formData]);
+
+  // Redirect to calendar page after 5 seconds when form is complete
+  useEffect(() => {
+    if (isComplete) {
+      const redirectTimer = setTimeout(() => {
+        router.push(getCalendarUrl());
+      }, 5000); // 5 seconds
+
+      return () => clearTimeout(redirectTimer);
+    }
+  }, [isComplete, getCalendarUrl, router]);
+
+  // Handle manual redirect (when user clicks the link)
+  const handleScheduleNow = () => {
+    router.push(getCalendarUrl());
+  };
+
   if (isComplete) {
     return (
       <Card className="w-full max-w-2xl mx-auto">
@@ -438,9 +468,18 @@ export default function IULLeadGenForm() {
             <Check className="w-8 h-8 text-white" />
           </motion.div>
           <h2 className="text-2xl font-bold mb-2">{t("completion.title")}</h2>
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground mb-4">
             {t("completion.message")}
           </p>
+          <p className="text-sm text-muted-foreground animate-pulse mb-4">
+            {t("completion.redirectMessage")}
+          </p>
+          <Button
+            onClick={handleScheduleNow}
+            className="bg-gradient-to-r from-[#0ea5e9] to-[#2563eb] hover:from-[#3b82f6] hover:to-[#1d4ed8]"
+          >
+            {t("completion.scheduleNow")}
+          </Button>
         </CardContent>
       </Card>
     );

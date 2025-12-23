@@ -100,7 +100,9 @@
     },
       "completion": {
         "title": "Thank You!",
-        "message": "We've received your information. Our team will contact you shortly to discuss your IUL options."
+        "message": "We've received your information. Our team will contact you shortly to discuss your IUL options.",
+        "redirectMessage": "You'll be redirected to schedule an appointment in a moment...",
+        "scheduleNow": "or click here to schedule now"
       }
     }
   }

@@ -100,7 +100,9 @@
     },
       "completion": {
         "title": "¡Gracias!",
-        "message": "Hemos recibido tu información. Nuestro equipo se pondrá en contacto contigo pronto para discutir tus opciones de IUL."
+        "message": "Hemos recibido tu información. Nuestro equipo se pondrá en contacto contigo pronto para discutir tus opciones de IUL.",
+        "redirectMessage": "Serás redirigido para programar una cita en un momento...",
+        "scheduleNow": "o haz clic aquí para programar ahora"
       }
     }
   }
