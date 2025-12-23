@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { sendMetaCapiEvent } from "@/lib/meta-capi";
 
 export async function POST(request: NextRequest) {
   try {
@@ -28,7 +29,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { firstName, lastName, email, phone, guideName, leadMagnet } = body;
+    const { firstName, lastName, email, phone, iulLeadGenData, meta } = body;
 
     // Validate required fields
     if (!firstName || !lastName || !email || !phone) {
@@ -44,11 +45,9 @@ export async function POST(request: NextRequest) {
 
     const baseUrl = 'https://services.leadconnectorhq.com';
     
-    // First, fetch custom fields to get their IDs and keys
-    let guideNameFieldId: string | null = null;
-    let guideNameFieldKey: string | null = null;
-    let leadMagnetFieldId: string | null = null;
-    let leadMagnetFieldKey: string | null = null;
+    // First, fetch custom fields to get the IUL Lead Gen Data field ID
+    let iulLeadGenDataFieldId: string | null = null;
+    let iulLeadGenDataFieldKey: string | null = null;
     
     try {
       const customFieldsResponse = await fetch(`${baseUrl}/locations/${locationId}/customFields`, {
@@ -64,62 +63,64 @@ export async function POST(request: NextRequest) {
         const customFieldsData = await customFieldsResponse.json();
         const customFields = customFieldsData.customFields || customFieldsData;
         
-        // Log the full structure to understand the format
-        console.log('Custom fields response structure:', JSON.stringify(customFields, null, 2));
-        
-        // Find the custom field IDs and keys by name
+        // Find the iul_lead_gen_data custom field
         if (Array.isArray(customFields)) {
           for (const field of customFields) {
-            // Check if field name matches (could be "guide_name", "contact.guide_name", etc.)
             const fieldName = field.name?.toLowerCase() || '';
             const fieldKey = field.key?.toLowerCase() || '';
             
-            if (fieldName.includes('guide') && fieldName.includes('name') || 
-                fieldKey.includes('guide') && fieldKey.includes('name')) {
-              guideNameFieldId = field.id;
-              guideNameFieldKey = field.key || field.name;
-              console.log('Found guide_name field:', { id: field.id, key: field.key, name: field.name, fullField: field });
-            }
-            
-            if (fieldName.includes('lead') && fieldName.includes('magnet') || 
-                fieldKey.includes('lead') && fieldKey.includes('magnet')) {
-              leadMagnetFieldId = field.id;
-              leadMagnetFieldKey = field.key || field.name;
-              console.log('Found lead_magnet field:', { id: field.id, key: field.key, name: field.name, fullField: field });
+            // Look for iul_lead_gen_data field
+            if (fieldKey === 'iul_lead_gen_data' || 
+                fieldKey.includes('iul') && fieldKey.includes('lead') && fieldKey.includes('gen') ||
+                fieldName.includes('iul') && fieldName.includes('lead') && fieldName.includes('gen')) {
+              iulLeadGenDataFieldId = field.id;
+              iulLeadGenDataFieldKey = field.key || field.name;
+              console.log('Found iul_lead_gen_data field:', { id: field.id, key: field.key, name: field.name });
+              break;
             }
           }
         }
-        
-        console.log('Found custom field IDs and keys:', { 
-          guideNameFieldId, 
-          guideNameFieldKey,
-          leadMagnetFieldId,
-          leadMagnetFieldKey
-        });
       }
     } catch (err) {
       console.warn('Could not fetch custom fields, will try without IDs:', err);
     }
     
-    // Build customFields array according to API documentation
+    // Build customFields array
     // Format: { id: string, key?: string, field_value: string | string[] }
     const customFieldsArray: Array<{ id: string; key?: string; field_value: string | string[] }> = [];
     
-    if (guideName && guideNameFieldId) {
+    // Format IUL Lead Gen data as a readable multi-line string
+    if (iulLeadGenData && iulLeadGenDataFieldId) {
+      const formatInvestments = (investments: string[] | undefined): string => {
+        if (!investments || !Array.isArray(investments) || investments.length === 0) {
+          return 'None';
+        }
+        return investments.join(', ');
+      };
+      
+      // Format language display name
+      const languageDisplay = iulLeadGenData.language === 'es' ? 'Spanish (Español)' : 
+                              iulLeadGenData.language === 'en' ? 'English' : 
+                              iulLeadGenData.language || 'Not provided';
+      
+      const leadGenDataText = [
+        'IUL Lead Generation Form Data',
+        '============================',
+        '',
+        `Language: ${languageDisplay}`,
+        `Retirement Timeline: ${iulLeadGenData.retirementTimeline || 'Not provided'}`,
+        `Current Investments: ${formatInvestments(iulLeadGenData.investments)}`,
+        `Monthly Savings: ${iulLeadGenData.monthlySavings || 'Not provided'}`,
+        `Age: ${iulLeadGenData.age || 'Not provided'}`,
+        `State: ${iulLeadGenData.state || 'Not provided'}`,
+        '',
+        `Submitted: ${new Date().toLocaleString()}`,
+      ].join('\n');
+      
       customFieldsArray.push({
-        id: guideNameFieldId,
-        key: guideNameFieldKey || undefined,
-        field_value: guideName // Text field - string value
-      });
-    }
-    
-    if (leadMagnet !== undefined && leadMagnetFieldId) {
-      // Checkbox field - field_value should be an array of selected option values
-      // The checkbox has "Yes" and "No" options, so use the exact option values
-      customFieldsArray.push({
-        id: leadMagnetFieldId,
-        key: leadMagnetFieldKey || undefined,
-        field_value: leadMagnet ? ['Yes'] : ['No'] // Checkbox - array with exact option values ("Yes" or "No")
+        id: iulLeadGenDataFieldId,
+        key: iulLeadGenDataFieldKey || undefined,
+        field_value: leadGenDataText // Multi-line text field - string value
       });
     }
     
@@ -309,6 +310,50 @@ export async function POST(request: NextRequest) {
     }
 
     const contactId = createResponseData.contact?.id || createResponseData.id;
+
+    // Send Meta Conversions API event (if configured and metadata provided)
+    const pixelId = process.env.NEXT_PUBLIC_FACEBOOK_PIXEL_ID;
+    const accessToken = process.env.META_CAPI_ACCESS_TOKEN;
+    const testEventCode = process.env.META_TEST_EVENT_CODE; // Optional, for testing
+
+    if (pixelId && accessToken && meta?.eventId && meta?.eventSourceUrl) {
+      try {
+        // Get user agent and IP from request headers
+        const userAgent = request.headers.get("user-agent") || "";
+        const xff = request.headers.get("x-forwarded-for") || "";
+        const ip = xff.split(",")[0]?.trim(); // Best effort behind proxies
+
+        // Determine value - IUL lead gen is always 100
+        const value = 100;
+        const source = "iul_lead_gen";
+
+        await sendMetaCapiEvent({
+          pixelId,
+          accessToken,
+          eventName: "Lead",
+          eventId: meta.eventId, // Must match Pixel eventID
+          eventSourceUrl: meta.eventSourceUrl,
+          userAgent,
+          ip,
+          fbp: meta.fbp,
+          fbc: meta.fbc,
+          email,
+          phone,
+          firstName,
+          lastName,
+          customData: {
+            content_name: "IUL Lead Generation Campaign",
+            currency: "USD",
+            value: value,
+            source: source,
+          },
+          testEventCode, // Only used during testing
+        });
+      } catch (capiError) {
+        // Log error but don't fail the request - CAPI is a backup
+        console.error("[Meta CAPI] Failed to send event (non-blocking):", capiError);
+      }
+    }
 
     // Success!
     return NextResponse.json({

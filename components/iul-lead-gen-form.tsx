@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslations, useLocale } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
@@ -18,7 +19,17 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { trackInitiateCheckout, trackLead, updateAdvancedMatching, trackCustomEvent } from "@/lib/facebook-pixel";
+import { getFacebookCookies } from "@/lib/meta-capi";
+
 import { ArrowLeft, ArrowRight, Check } from "lucide-react";
+
+// Generate event ID for CAPI deduplication (client-side safe)
+function generateEventId(): string {
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
+    return crypto.randomUUID();
+  }
+  return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
 
 // All US states
 const ALL_STATES = [
@@ -120,6 +131,8 @@ function generateStepScreenId(step: number): string {
 }
 
 export default function IULLeadGenForm() {
+  const t = useTranslations("iulLeadGen.form");
+  const locale = useLocale();
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -337,7 +350,13 @@ export default function IULLeadGenForm() {
     setSubmitError(null);
 
     try {
-      // Submit to Agent CRM
+      // Generate event ID for CAPI deduplication (must be same for Pixel and CAPI)
+      const eventId = generateEventId();
+      
+      // Get Facebook cookies for better matching
+      const { fbp, fbc } = getFacebookCookies();
+      
+      // Submit to Agent CRM with CAPI metadata
       const phoneNumber = `+1${formData.phone.replace(/\D/g, "")}`;
       const response = await fetch("/api/create-contact", {
         method: "POST",
@@ -347,8 +366,22 @@ export default function IULLeadGenForm() {
           lastName: formData.lastName,
           email: formData.email,
           phone: phoneNumber,
-          guideName: "IUL Lead Generation Campaign",
-          leadMagnet: true,
+          // IUL Lead Gen form data
+          iulLeadGenData: {
+            retirementTimeline: formData.retirementTimeline,
+            investments: formData.investments,
+            monthlySavings: formData.monthlySavings,
+            age: formData.age,
+            state: formData.state,
+            language: locale, // Include the language/locale
+          },
+          // CAPI metadata for deduplication
+          meta: {
+            eventId,
+            fbp,
+            fbc,
+            eventSourceUrl: window.location.href,
+          },
         }),
       });
 
@@ -368,21 +401,22 @@ export default function IULLeadGenForm() {
       // Update advanced matching
       updateAdvancedMatching(userData);
 
-      // Track Lead event
+      // Track Lead event with eventID for CAPI deduplication
       trackLead(
         {
           contentName: "IUL Lead Generation Campaign",
           source: "iul_lead_gen",
           value: 100,
         },
-        userData
+        userData,
+        eventId // Pass eventID so Pixel and CAPI can deduplicate
       );
 
       setIsComplete(true);
     } catch (error) {
       console.error("Error submitting form:", error);
       setSubmitError(
-        error instanceof Error ? error.message : "Failed to submit form. Please try again."
+        error instanceof Error ? error.message : t("errors.submitFailed")
       );
     } finally {
       setIsSubmitting(false);
@@ -403,10 +437,9 @@ export default function IULLeadGenForm() {
           >
             <Check className="w-8 h-8 text-white" />
           </motion.div>
-          <h2 className="text-2xl font-bold mb-2">Thank You!</h2>
+          <h2 className="text-2xl font-bold mb-2">{t("completion.title")}</h2>
           <p className="text-muted-foreground">
-            We've received your information. Our team will contact you shortly to discuss your IUL
-            options.
+            {t("completion.message")}
           </p>
         </CardContent>
       </Card>
@@ -420,9 +453,11 @@ export default function IULLeadGenForm() {
         <div className="mb-6">
           <div className="flex justify-between items-center mb-2">
             <span className="text-sm font-medium">
-              Step {currentStep} of {TOTAL_STEPS}
+              {t("progress.step", { current: currentStep, total: TOTAL_STEPS })}
             </span>
-            <span className="text-sm text-muted-foreground">{Math.round(progress)}%</span>
+            <span className="text-sm text-muted-foreground">
+              {t("progress.percent", { percent: Math.round(progress) })}
+            </span>
           </div>
           <Progress value={progress} className="h-2" />
         </div>
@@ -448,7 +483,7 @@ export default function IULLeadGenForm() {
               <div className="space-y-6">
                 <div>
                   <Label className="text-lg font-semibold mb-4 block">
-                    How soon are you planning to retire? *
+                    {t("steps.1.title")}
                   </Label>
                   <RadioGroup
                     value={formData.retirementTimeline}
@@ -460,28 +495,28 @@ export default function IULLeadGenForm() {
                       className="flex items-center space-x-2 p-4 border rounded-md hover:bg-accent cursor-pointer transition-colors"
                     >
                       <RadioGroupItem value="within-10" id="within-10" />
-                      <span className="flex-1">Within 10 Years</span>
+                      <span className="flex-1">{t("steps.1.options.within-10")}</span>
                     </label>
                     <label
                       htmlFor="within-20"
                       className="flex items-center space-x-2 p-4 border rounded-md hover:bg-accent cursor-pointer transition-colors"
                     >
                       <RadioGroupItem value="within-20" id="within-20" />
-                      <span className="flex-1">Within 20 Years</span>
+                      <span className="flex-1">{t("steps.1.options.within-20")}</span>
                     </label>
                     <label
                       htmlFor="within-30"
                       className="flex items-center space-x-2 p-4 border rounded-md hover:bg-accent cursor-pointer transition-colors"
                     >
                       <RadioGroupItem value="within-30" id="within-30" />
-                      <span className="flex-1">Within 30 Years</span>
+                      <span className="flex-1">{t("steps.1.options.within-30")}</span>
                     </label>
                     <label
                       htmlFor="retired"
                       className="flex items-center space-x-2 p-4 border rounded-md hover:bg-accent cursor-pointer transition-colors"
                     >
                       <RadioGroupItem value="retired" id="retired" />
-                      <span className="flex-1">I'm Currently Retired</span>
+                      <span className="flex-1">{t("steps.1.options.retired")}</span>
                     </label>
                   </RadioGroup>
                 </div>
@@ -493,31 +528,31 @@ export default function IULLeadGenForm() {
               <div className="space-y-6">
                 <div>
                   <Label className="text-lg font-semibold mb-4 block">
-                    What are your current investments?
+                    {t("steps.2.title")}
                   </Label>
-                  <p className="text-sm text-muted-foreground mb-4">Select all that apply</p>
+                  <p className="text-sm text-muted-foreground mb-4">{t("steps.2.subtitle")}</p>
                   <div className="space-y-3">
                     {[
-                      "401(k)",
-                      "IRA",
-                      "Cash Savings",
-                      "Active Trading",
-                      "Self Directed Brokerage Account",
-                      "No current investments",
-                    ].map((investment) => {
-                      const investmentId = `investment-${investment.toLowerCase().replace(/\s+/g, "-")}`;
+                      { key: "401k", value: "401(k)" },
+                      { key: "ira", value: "IRA" },
+                      { key: "cashSavings", value: "Cash Savings" },
+                      { key: "activeTrading", value: "Active Trading" },
+                      { key: "selfDirected", value: "Self Directed Brokerage Account" },
+                      { key: "none", value: "No current investments" },
+                    ].map(({ key, value }) => {
+                      const investmentId = `investment-${key}`;
                       return (
                         <label
-                          key={investment}
+                          key={key}
                           htmlFor={investmentId}
                           className="flex items-center space-x-2 p-4 border rounded-md hover:bg-accent cursor-pointer transition-colors"
                         >
                           <Checkbox
                             id={investmentId}
-                            checked={formData.investments.includes(investment)}
-                            onCheckedChange={() => handleInvestmentToggle(investment)}
+                            checked={formData.investments.includes(value)}
+                            onCheckedChange={() => handleInvestmentToggle(value)}
                           />
-                          <span className="flex-1">{investment}</span>
+                          <span className="flex-1">{t(`steps.2.options.${key}`)}</span>
                         </label>
                       );
                     })}
@@ -531,7 +566,7 @@ export default function IULLeadGenForm() {
               <div className="space-y-6">
                 <div>
                   <Label className="text-lg font-semibold mb-4 block">
-                    How much do you set aside in savings each month?
+                    {t("steps.3.title")}
                   </Label>
                   <RadioGroup
                     value={formData.monthlySavings}
@@ -543,28 +578,28 @@ export default function IULLeadGenForm() {
                       className="flex items-center space-x-2 p-4 border rounded-md hover:bg-accent cursor-pointer transition-colors"
                     >
                       <RadioGroupItem value="less-300" id="less-300" />
-                      <span className="flex-1">Less than $300</span>
+                      <span className="flex-1">{t("steps.3.options.less-300")}</span>
                     </label>
                     <label
                       htmlFor="300-500"
                       className="flex items-center space-x-2 p-4 border rounded-md hover:bg-accent cursor-pointer transition-colors"
                     >
                       <RadioGroupItem value="300-500" id="300-500" />
-                      <span className="flex-1">$300 - $500</span>
+                      <span className="flex-1">{t("steps.3.options.300-500")}</span>
                     </label>
                     <label
                       htmlFor="500-1000"
                       className="flex items-center space-x-2 p-4 border rounded-md hover:bg-accent cursor-pointer transition-colors"
                     >
                       <RadioGroupItem value="500-1000" id="500-1000" />
-                      <span className="flex-1">$500 - $1,000</span>
+                      <span className="flex-1">{t("steps.3.options.500-1000")}</span>
                     </label>
                     <label
                       htmlFor="more-1000"
                       className="flex items-center space-x-2 p-4 border rounded-md hover:bg-accent cursor-pointer transition-colors"
                     >
                       <RadioGroupItem value="more-1000" id="more-1000" />
-                      <span className="flex-1">More than $1,000</span>
+                      <span className="flex-1">{t("steps.3.options.more-1000")}</span>
                     </label>
                   </RadioGroup>
                 </div>
@@ -576,8 +611,7 @@ export default function IULLeadGenForm() {
               <div className="space-y-6">
                 <div>
                   <Label className="text-lg font-semibold mb-4 block">
-                    What is your current age? (This helps us determine how long you have to fund
-                    the IUL) *
+                    {t("steps.4.title")}
                   </Label>
                   <div className="space-y-4">
                     <div className="px-2">
@@ -594,8 +628,7 @@ export default function IULLeadGenForm() {
                       <div className="text-4xl font-bold text-[#0ea5e9] mb-2">{formData.age}</div>
                       {formData.age >= 18 && (
                         <p className="text-sm text-muted-foreground">
-                          You have approximately {Math.max(0, 65 - formData.age)} years until
-                          retirement age.
+                          {t("steps.4.retirementMessage", { years: Math.max(0, 65 - formData.age) })}
                         </p>
                       )}
                     </div>
@@ -609,11 +642,11 @@ export default function IULLeadGenForm() {
               <div className="space-y-6">
                 <div>
                   <Label className="text-lg font-semibold mb-4 block">
-                    What state do you live in?
+                    {t("steps.5.title")}
                   </Label>
                   <Select value={formData.state} onValueChange={(value) => updateFormData("state", value)}>
                     <SelectTrigger className="h-12 text-base">
-                      <SelectValue placeholder="Select your state" />
+                      <SelectValue placeholder={t("steps.5.placeholder")} />
                     </SelectTrigger>
                     <SelectContent>
                       {ALL_STATES.map((state) => (
@@ -631,29 +664,29 @@ export default function IULLeadGenForm() {
             {currentStep === 6 && (
               <div className="space-y-6">
                 <div>
-                  <Label className="text-lg font-semibold mb-4 block">What is your name?</Label>
+                  <Label className="text-lg font-semibold mb-4 block">{t("steps.6.title")}</Label>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="firstName" className="mb-2 block">
-                        First name
+                        {t("steps.6.firstName.label")}
                       </Label>
                       <Input
                         id="firstName"
                         value={formData.firstName}
                         onChange={(e) => updateFormData("firstName", e.target.value)}
-                        placeholder="First name"
+                        placeholder={t("steps.6.firstName.placeholder")}
                         className="h-12"
                       />
                     </div>
                     <div>
                       <Label htmlFor="lastName" className="mb-2 block">
-                        Last name
+                        {t("steps.6.lastName.label")}
                       </Label>
                       <Input
                         id="lastName"
                         value={formData.lastName}
                         onChange={(e) => updateFormData("lastName", e.target.value)}
-                        placeholder="Last name"
+                        placeholder={t("steps.6.lastName.placeholder")}
                         className="h-12"
                       />
                     </div>
@@ -667,13 +700,13 @@ export default function IULLeadGenForm() {
               <div className="space-y-6">
                 <div>
                   <Label className="text-lg font-semibold mb-4 block">
-                    What's your best email address?
+                    {t("steps.7.title")}
                   </Label>
                   <Input
                     type="email"
                     value={formData.email}
                     onChange={(e) => updateFormData("email", e.target.value)}
-                    placeholder="Your email address"
+                    placeholder={t("steps.7.placeholder")}
                     className="h-12 text-base"
                   />
                 </div>
@@ -685,17 +718,17 @@ export default function IULLeadGenForm() {
               <div className="space-y-6">
                 <div>
                   <Label className="text-lg font-semibold mb-4 block">
-                    What's your best phone number?
+                    {t("steps.8.title")}
                   </Label>
                   <Input
                     type="tel"
                     value={formData.phone}
                     onChange={(e) => updateFormData("phone", e.target.value)}
-                    placeholder="(555) 123-4567"
+                    placeholder={t("steps.8.placeholder")}
                     className="h-12 text-base"
                   />
                   <p className="text-sm text-muted-foreground mt-2">
-                    United States phone number
+                    {t("steps.8.subtitle")}
                   </p>
                 </div>
               </div>
@@ -713,7 +746,7 @@ export default function IULLeadGenForm() {
               className="flex items-center gap-2"
             >
               <ArrowLeft className="w-4 h-4" />
-              Back
+              {t("buttons.back")}
             </Button>
           )}
 
@@ -723,7 +756,7 @@ export default function IULLeadGenForm() {
               disabled={!canProceed() || isSubmitting}
               className="flex items-center gap-2 bg-gradient-to-r from-[#0ea5e9] to-[#2563eb] hover:from-[#3b82f6] hover:to-[#1d4ed8]"
             >
-              Next Step
+              {t("buttons.next")}
               <ArrowRight className="w-4 h-4" />
             </Button>
           ) : (
@@ -732,7 +765,7 @@ export default function IULLeadGenForm() {
               disabled={!canProceed() || isSubmitting}
               className="flex items-center gap-2 bg-gradient-to-r from-[#0ea5e9] to-[#2563eb] hover:from-[#3b82f6] hover:to-[#1d4ed8]"
             >
-              {isSubmitting ? "Submitting..." : "Confirm My Phone"}
+              {isSubmitting ? t("buttons.submitting") : t("buttons.submit")}
             </Button>
           )}
         </div>

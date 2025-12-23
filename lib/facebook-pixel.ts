@@ -346,6 +346,14 @@ export function trackCustomEvent(
  * @param params - Additional parameters (content_name, value, currency, etc.)
  * Default value: $10 for guide downloads, $50 for quote requests
  * @param userData - Optional user data for advanced matching
+ * @param eventID - Optional event ID for CAPI deduplication (if not provided, will be auto-generated)
+ * 
+ * @example
+ * trackLead({ contentName: 'Contact Form', source: 'iul_lead_gen' })
+ * 
+ * @example With custom eventID for CAPI deduplication
+ * const eventId = generateEventId();
+ * trackLead({ contentName: 'Contact Form' }, userData, eventId);
  */
 export function trackLead(
   params?: {
@@ -354,7 +362,8 @@ export function trackLead(
     currency?: string;
     source?: string;
   },
-  userData?: Partial<AdvancedMatchingData>
+  userData?: Partial<AdvancedMatchingData>,
+  eventID?: string
 ): void {
   // Set default value based on source if not provided
   let value = params?.value;
@@ -373,13 +382,18 @@ export function trackLead(
     source: params?.source,
   };
 
+  // Add eventID if provided (for CAPI deduplication)
+  if (eventID) {
+    eventParams.eventID = eventID;
+  }
+
   // Add user data for advanced matching if provided
   if (userData) {
     const prepared = prepareAdvancedMatchingData(userData);
     Object.assign(eventParams, prepared);
   }
   
-  trackEvent("Lead", eventParams);
+  trackEvent("Lead", eventParams, !eventID); // Only auto-generate eventID if not provided
 }
 
 /**
