@@ -259,6 +259,17 @@ function generateEventId(): string {
 }
 
 /**
+ * Safe wrapper to call fbq - only calls if fbq exists (never creates it)
+ * Handles all fbq call patterns: track, trackCustom, etc.
+ */
+function safeFbqCall(action: string, ...args: any[]): void {
+  if (typeof window === "undefined") return;
+  if (typeof window.fbq !== "function") return;
+  // Use Function.prototype.apply to handle variable arguments safely
+  (window.fbq as any).apply(null, [action, ...args]);
+}
+
+/**
  * Track a standard Facebook Pixel event
  * 
  * @param eventName - The event name (e.g., 'Lead', 'CompleteRegistration', 'Subscribe')
@@ -280,20 +291,9 @@ export function trackEvent(
     eventParams.eventID = generateEventId();
   }
   
-  if (isPixelLoaded()) {
-    window.fbq("track", eventName, eventParams);
-  } else {
-    // Queue the event if pixel hasn't loaded yet
-    if (typeof window !== "undefined") {
-      if (!window.fbq) {
-        window.fbq = function (...args: any[]) {
-          (window.fbq.q = window.fbq.q || []).push(args);
-        } as any;
-        (window.fbq as any).q = [];
-      }
-      window.fbq("track", eventName, eventParams);
-    }
-  }
+  // Safe call - fbq will queue if not loaded, or send immediately if loaded
+  // The base pixel script handles queuing automatically
+  safeFbqCall("track", eventName, eventParams);
 }
 
 /**
@@ -313,14 +313,6 @@ export function trackCustomEvent(
 ): void {
   if (typeof window === "undefined") return;
 
-  // Ensure fbq queue exists
-  if (!window.fbq) {
-    window.fbq = function (...args: any[]) {
-      (window.fbq.q = window.fbq.q || []).push(args);
-    } as any;
-    (window.fbq as any).q = [];
-  }
-
   try {
     // Merge comprehensive parameters with custom parameters
     const eventParams = includeComprehensiveParams
@@ -332,20 +324,16 @@ export function trackCustomEvent(
         }
       : params || {};
 
-    if (isPixelLoaded()) {
-      window.fbq("trackCustom", eventName, eventParams);
-      
-      // Development logging (only in browser console, not in production)
-      if (process.env.NODE_ENV === "development") {
-        console.log(`[Facebook Pixel] Custom event tracked: ${eventName}`, eventParams);
-      }
-    } else {
-      // Queue the event if pixel hasn't loaded yet
-      window.fbq("trackCustom", eventName, eventParams);
-      
-      if (process.env.NODE_ENV === "development") {
-        console.log(`[Facebook Pixel] Custom event queued: ${eventName}`, eventParams);
-      }
+    // Safe call - fbq will queue if not loaded, or send immediately if loaded
+    safeFbqCall("trackCustom", eventName, eventParams);
+    
+    // Development logging (only in browser console, not in production)
+    if (process.env.NODE_ENV === "development") {
+      const isLoaded = isPixelLoaded();
+      console.log(
+        `[Facebook Pixel] Custom event ${isLoaded ? "tracked" : "queued"}: ${eventName}`,
+        eventParams
+      );
     }
   } catch (error) {
     console.error(`[Facebook Pixel] Error tracking custom event ${eventName}:`, error);

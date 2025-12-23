@@ -24,28 +24,25 @@ export default function FacebookPixel({ pixelId }: FacebookPixelProps) {
   useEffect(() => {
     if (typeof window === "undefined") return;
     
-    // Use a global lock to prevent concurrent initializations
-    const globalLockKey = "__fbPixelInitializing";
-    if ((window as any)[globalLockKey]) {
-      // Another component is initializing, wait and check again
-      if (process.env.NODE_ENV === "development") {
-        console.log("[Facebook Pixel] Another initialization in progress, skipping");
-      }
-      return;
-    }
+    // ATOMIC CHECK: Check if init was already called FIRST (before any other checks)
+    // This prevents race conditions where multiple components check simultaneously
+    const initFlagKey = "__fbPixelInitCalled";
+    const initAlreadyCalled = (window as any)[initFlagKey] === pixelId;
     
     // Check if pixel is already initialized globally
     const scriptExists = document.querySelector('script[src*="fbevents.js"]');
     const fbqExists = window.fbq && typeof window.fbq === "function";
     const fbqAny = window.fbq as any;
     
-    // Check if init was already called for this pixel ID
-    const initAlreadyCalled = (window as any).__fbPixelInitCalled === pixelId;
+    // Check if init is already in the queue (another safety check)
+    const initInQueue = fbqAny?.q?.some((item: any[]) => 
+      item && item[0] === "init" && item[1] === pixelId
+    ) || false;
     
-    // If script exists AND init was called, pixel is fully initialized
-    // OR if script exists AND fbq is loaded (script processed the queue)
+    // If script exists AND (init was called OR init is in queue OR script is loaded), pixel is initialized
     const isFullyInitialized = scriptExists && fbqExists && (
       initAlreadyCalled || 
+      initInQueue ||
       (fbqAny?.loaded === true || fbqAny?.callMethod !== undefined)
     );
     
@@ -57,7 +54,8 @@ export default function FacebookPixel({ pixelId }: FacebookPixelProps) {
           scriptInDOM: !!scriptExists,
           fbqLoaded: fbqAny?.loaded,
           callMethod: !!fbqAny?.callMethod,
-          initCalled: initAlreadyCalled
+          initCalled: initAlreadyCalled,
+          initInQueue: initInQueue
         });
       }
       return;
@@ -65,7 +63,16 @@ export default function FacebookPixel({ pixelId }: FacebookPixelProps) {
 
     // Don't initialize twice in the same component instance
     if (initializedRef.current) {
-      (window as any)[globalLockKey] = false;
+      return;
+    }
+    
+    // Use a global lock to prevent concurrent initializations
+    const globalLockKey = "__fbPixelInitializing";
+    if ((window as any)[globalLockKey]) {
+      // Another component is initializing, wait and check again
+      if (process.env.NODE_ENV === "development") {
+        console.log("[Facebook Pixel] Another initialization in progress, skipping");
+      }
       return;
     }
     
@@ -156,11 +163,13 @@ export default function FacebookPixel({ pixelId }: FacebookPixelProps) {
       // Insert script into DOM (only if it doesn't exist)
       const insertedScript = insertScript();
       
-      // Only call init if it hasn't been called yet for this pixel ID
-      if (!initAlreadyCalled) {
-        // Mark that init will be called for this pixel ID BEFORE calling it
-        // This prevents other components from calling init at the same time
-        (window as any).__fbPixelInitCalled = pixelId;
+      // ATOMIC OPERATION: Check and set flag in one operation to prevent race conditions
+      // Double-check after acquiring lock (another component might have set it)
+      const currentInitFlag = (window as any)[initFlagKey];
+      if (currentInitFlag !== pixelId && !initInQueue) {
+        // Set the flag IMMEDIATELY and synchronously BEFORE calling init
+        // This is the critical atomic operation that prevents duplicates
+        (window as any)[initFlagKey] = pixelId;
         
         // Queue init call (only once, when first initializing)
         // This will be processed when the script loads
@@ -171,11 +180,16 @@ export default function FacebookPixel({ pixelId }: FacebookPixelProps) {
         }
         
         if (process.env.NODE_ENV === "development") {
-          console.log("[Facebook Pixel] Init queued for pixel ID:", pixelId);
+          console.log("[Facebook Pixel] Init queued for pixel ID:", pixelId, {
+            queueLength: fbqAny?.q?.length || 0
+          });
         }
       } else {
         if (process.env.NODE_ENV === "development") {
-          console.log("[Facebook Pixel] Init already called for this pixel, skipping");
+          console.log("[Facebook Pixel] Init already called or in queue, skipping", {
+            currentFlag: currentInitFlag,
+            initInQueue: initInQueue
+          });
         }
       }
 

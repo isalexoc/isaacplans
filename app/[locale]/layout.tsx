@@ -14,7 +14,7 @@ import Script from "next/script";
 import { ClerkProvider } from '@clerk/nextjs';
 import { esES, enUS } from '@clerk/localizations';
 import { SanityLive } from '@/sanity/lib/live';
-import FacebookPixel from "@/components/facebook-pixel";
+import MetaPixelWrapper from "@/components/meta-pixel-wrapper";
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
@@ -118,7 +118,7 @@ export default async function LocaleLayout({
           {/* @ts-ignore - Footer is an async server component, works correctly with React 19 */}
           <Footer />
           {/* Facebook Pixel */}
-          {facebookPixelId && <FacebookPixel pixelId={facebookPixelId} />}
+          {facebookPixelId && <MetaPixelWrapper pixelId={facebookPixelId} />}
           {/* Agent CRM (LeadConnector) chat – loads after page is interactive */}
           <Script
             id={`agentcrm-chat-${locale}`} // unique per-locale to avoid dedupe
