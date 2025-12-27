@@ -310,6 +310,7 @@ export async function POST(request: NextRequest) {
     }
 
     const contactId = createResponseData.contact?.id || createResponseData.id;
+    const isNewContact = true; // This is a new contact (we just created it)
 
     // Helper function to add contact to a workflow
     const addContactToWorkflow = async (workflowId: string, workflowName: string): Promise<void> => {
@@ -370,11 +371,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Send Meta Conversions API event (if configured and metadata provided)
+    // ⚠️ IMPORTANT: Only send CAPI for NEW contacts to avoid double-counting
     const pixelId = process.env.NEXT_PUBLIC_FACEBOOK_PIXEL_ID;
     const accessToken = process.env.META_CAPI_ACCESS_TOKEN;
     const testEventCode = process.env.META_TEST_EVENT_CODE; // Optional, for testing
 
-    if (pixelId && accessToken && meta?.eventId && meta?.eventSourceUrl) {
+    if (pixelId && accessToken && meta?.eventId && meta?.eventSourceUrl && isNewContact) {
       try {
         // Get user agent and IP from request headers
         const userAgent = request.headers.get("user-agent") || "";

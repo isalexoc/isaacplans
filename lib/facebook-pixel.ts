@@ -7,11 +7,7 @@
 
 declare global {
   interface Window {
-    fbq: ((
-      action: string,
-      event: string,
-      params?: Record<string, unknown>
-    ) => void) & {
+    fbq: (...args: any[]) => void & {
       q?: Array<any[]>;
       loaded?: boolean;
     };
@@ -274,26 +270,29 @@ function safeFbqCall(action: string, ...args: any[]): void {
  * 
  * @param eventName - The event name (e.g., 'Lead', 'CompleteRegistration', 'Subscribe')
  * @param params - Optional parameters to send with the event
- * @param includeEventId - Whether to include event_id for deduplication (default: true)
+ * @param eventID - Optional event ID for CAPI deduplication (if not provided, will be auto-generated)
+ * @returns The event ID used (for potential reuse)
  * 
  * @example
  * trackEvent('Lead', { content_name: 'Contact Form' })
+ * 
+ * @example With custom eventID for CAPI deduplication
+ * const eventId = generateEventId();
+ * trackEvent('Lead', { content_name: 'Contact Form' }, eventId);
  */
 export function trackEvent(
   eventName: string,
   params?: Record<string, unknown>,
-  includeEventId: boolean = true
-): void {
-  const eventParams = { ...params };
-  
-  // Add event_id for deduplication if not already present
-  if (includeEventId && !eventParams.eventID) {
-    eventParams.eventID = generateEventId();
-  }
-  
-  // Safe call - fbq will queue if not loaded, or send immediately if loaded
-  // The base pixel script handles queuing automatically
-  safeFbqCall("track", eventName, eventParams);
+  eventID?: string
+): string {
+  const id = eventID ?? generateEventId();
+  const eventParams = { ...(params || {}) };
+
+  // ✅ CRITICAL: eventID must be passed in the 4th argument (options object)
+  // This is required for proper deduplication with CAPI
+  safeFbqCall("track", eventName, eventParams, { eventID: id });
+
+  return id;
 }
 
 /**
@@ -343,17 +342,20 @@ export function trackCustomEvent(
 /**
  * Track a Lead event (when someone submits a form)
  * 
+ * ⚠️ IMPORTANT: Do NOT pass PII (email, phone, name) in params.
+ * Advanced matching data should be set via fbq('init') or stored for next page load.
+ * 
  * @param params - Additional parameters (content_name, value, currency, etc.)
  * Default value: $10 for guide downloads, $50 for quote requests
- * @param userData - Optional user data for advanced matching
  * @param eventID - Optional event ID for CAPI deduplication (if not provided, will be auto-generated)
+ * @returns The event ID used (for potential reuse with CAPI)
  * 
  * @example
  * trackLead({ contentName: 'Contact Form', source: 'iul_lead_gen' })
  * 
  * @example With custom eventID for CAPI deduplication
  * const eventId = generateEventId();
- * trackLead({ contentName: 'Contact Form' }, userData, eventId);
+ * trackLead({ contentName: 'Contact Form', source: 'iul_lead_gen' }, eventId);
  */
 export function trackLead(
   params?: {
@@ -362,9 +364,8 @@ export function trackLead(
     currency?: string;
     source?: string;
   },
-  userData?: Partial<AdvancedMatchingData>,
   eventID?: string
-): void {
+): string {
   // Set default value based on source if not provided
   let value = params?.value;
   if (value === undefined) {
@@ -382,18 +383,8 @@ export function trackLead(
     source: params?.source,
   };
 
-  // Add eventID if provided (for CAPI deduplication)
-  if (eventID) {
-    eventParams.eventID = eventID;
-  }
-
-  // Add user data for advanced matching if provided
-  if (userData) {
-    const prepared = prepareAdvancedMatchingData(userData);
-    Object.assign(eventParams, prepared);
-  }
-  
-  trackEvent("Lead", eventParams, !eventID); // Only auto-generate eventID if not provided
+  // ✅ eventID is now passed as 3rd argument (will be moved to 4th arg options in trackEvent)
+  return trackEvent("Lead", eventParams, eventID);
 }
 
 /**
@@ -416,17 +407,18 @@ export function trackCompleteRegistration(params?: {
 /**
  * Track a Subscribe event (newsletter subscription)
  * 
+ * ⚠️ IMPORTANT: Do NOT pass PII (email, phone, name) in params.
+ * Advanced matching data should be set via fbq('init') or stored for next page load.
+ * 
  * @param params - Additional parameters
  * Default value: $5 for newsletter subscriptions
- * @param userData - Optional user data for advanced matching
  */
 export function trackSubscribe(
   params?: {
     contentName?: string;
     source?: string;
     value?: number;
-  },
-  userData?: Partial<AdvancedMatchingData>
+  }
 ): void {
   const eventParams: Record<string, unknown> = {
     content_name: params?.contentName,
@@ -434,12 +426,6 @@ export function trackSubscribe(
     value: params?.value ?? 5, // Default value for newsletter subscriptions
     currency: "USD",
   };
-
-  // Add user data for advanced matching if provided
-  if (userData) {
-    const prepared = prepareAdvancedMatchingData(userData);
-    Object.assign(eventParams, prepared);
-  }
 
   trackEvent("Subscribe", eventParams);
 }

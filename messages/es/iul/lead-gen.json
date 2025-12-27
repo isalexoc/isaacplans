@@ -30,7 +30,11 @@
     },
     "errors": {
       "submitFailed": "Error al enviar el formulario. Por favor, inténtalo de nuevo.",
-      "genericError": "Ocurrió un error. Por favor, inténtalo de nuevo."
+      "genericError": "Ocurrió un error. Por favor, inténtalo de nuevo.",
+      "invalidEmail": "Por favor ingresa una dirección de correo electrónico válida (ej., ejemplo@gmail.com)",
+      "invalidEmailIncomplete": "Por favor ingresa una dirección de correo electrónico válida (ej., ejemplo@gmail.com)",
+      "invalidPhone": "Por favor ingresa un número de teléfono válido de 10 dígitos",
+      "invalidPhoneLength": "El número de teléfono es demasiado largo. Por favor ingresa un número válido de 10 dígitos"
     },
     "steps": {
       "1": {
@@ -65,11 +69,14 @@
       },
       "4": {
         "title": "¿Cuál es tu edad actual? (Esto nos ayuda a determinar cuánto tiempo tienes para financiar el IUL) *",
-        "retirementMessage": "Tienes aproximadamente {years} años hasta la edad de jubilación."
+        "retirementMessage": "Tienes aproximadamente {years} años hasta la edad de jubilación.",
+        "yearsOld": "años"
       },
       "5": {
         "title": "¿En qué estado vives?",
-        "placeholder": "Selecciona tu estado"
+        "placeholder": "Selecciona tu estado",
+        "searchPlaceholder": "Buscar estado...",
+        "noResults": "No se encontró ningún estado."
       },
       "6": {
         "title": "¿Cuál es tu nombre?",
@@ -95,14 +102,15 @@
     "buttons": {
       "back": "Atrás",
       "next": "Siguiente Paso",
-      "submit": "Confirmar Mi Teléfono",
+      "submit": "Enviar y Obtener Mi Cotización",
       "submitting": "Enviando..."
     },
       "completion": {
         "title": "¡Gracias!",
         "message": "Hemos recibido tu información. Nuestro equipo se pondrá en contacto contigo pronto para discutir tus opciones de IUL.",
         "redirectMessage": "Serás redirigido para programar una cita en un momento...",
-        "scheduleNow": "o haz clic aquí para programar ahora"
+        "redirectCountdown": "Serás redirigido para programar una cita en {seconds}...",
+        "scheduleNow": "Programar Ahora"
       }
     }
   }

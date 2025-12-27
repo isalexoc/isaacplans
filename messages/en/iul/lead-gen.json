@@ -30,7 +30,11 @@
     },
     "errors": {
       "submitFailed": "Failed to submit form. Please try again.",
-      "genericError": "An error occurred. Please try again."
+      "genericError": "An error occurred. Please try again.",
+      "invalidEmail": "Please enter a valid email address (e.g., example@gmail.com)",
+      "invalidEmailIncomplete": "Please enter a valid email address (e.g., example@gmail.com)",
+      "invalidPhone": "Please enter a valid 10-digit phone number",
+      "invalidPhoneLength": "Phone number is too long. Please enter a valid 10-digit number"
     },
     "steps": {
       "1": {
@@ -65,11 +69,14 @@
       },
       "4": {
         "title": "What is your current age? (This helps us determine how long you have to fund the IUL) *",
-        "retirementMessage": "You have approximately {years} years until retirement age."
+        "retirementMessage": "You have approximately {years} years until retirement age.",
+        "yearsOld": "years old"
       },
       "5": {
         "title": "What state do you live in?",
-        "placeholder": "Select your state"
+        "placeholder": "Select your state",
+        "searchPlaceholder": "Search state...",
+        "noResults": "No state found."
       },
       "6": {
         "title": "What is your name?",
@@ -95,14 +102,15 @@
     "buttons": {
       "back": "Back",
       "next": "Next Step",
-      "submit": "Confirm My Phone",
+      "submit": "Submit & Get My Quote",
       "submitting": "Submitting..."
     },
       "completion": {
         "title": "Thank You!",
         "message": "We've received your information. Our team will contact you shortly to discuss your IUL options.",
         "redirectMessage": "You'll be redirected to schedule an appointment in a moment...",
-        "scheduleNow": "or click here to schedule now"
+        "redirectCountdown": "You'll be redirected to schedule an appointment in {seconds}...",
+        "scheduleNow": "Schedule Now"
       }
     }
   }

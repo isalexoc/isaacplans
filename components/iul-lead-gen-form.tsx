@@ -19,10 +19,19 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 import { trackInitiateCheckout, trackLead, updateAdvancedMatching, trackCustomEvent } from "@/lib/facebook-pixel";
 import { getFacebookCookies } from "@/lib/meta-capi";
 
-import { ArrowLeft, ArrowRight, Check } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, ChevronsUpDown } from "lucide-react";
 
 // Generate event ID for CAPI deduplication (client-side safe)
 function generateEventId(): string {
@@ -139,6 +148,29 @@ export default function IULLeadGenForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isComplete, setIsComplete] = useState(false);
+  const [countdown, setCountdown] = useState<number | null>(null);
+  
+  // Validation errors
+  const [emailError, setEmailError] = useState<string | null>(null);
+  const [phoneError, setPhoneError] = useState<string | null>(null);
+  
+  // State combobox
+  const [stateOpen, setStateOpen] = useState(false);
+  const [stateSearch, setStateSearch] = useState("");
+  
+  // Track navigation direction to prevent auto-advance when going back
+  const [isNavigatingBack, setIsNavigatingBack] = useState(false);
+  // Track the previous step to detect back navigation
+  const [previousStep, setPreviousStep] = useState<number>(1);
+  // Track values when arriving at auto-advance steps to prevent auto-advance if value already existed
+  const [valuesOnArrival, setValuesOnArrival] = useState<{
+    step1?: string;
+    step3?: string;
+    step5?: string;
+  }>({});
+  
+  // Local state for age input to allow empty input
+  const [ageInputValue, setAgeInputValue] = useState<string>("");
   
   const [formData, setFormData] = useState<FormData>({
     retirementTimeline: "",
@@ -152,35 +184,108 @@ export default function IULLeadGenForm() {
     phone: "",
   });
 
-  // Track InitiateCheckout when form starts
+  // Track form start with a custom event (more accurate than InitiateCheckout for lead gen)
   useEffect(() => {
     if (currentStep === 1) {
-      trackInitiateCheckout({
-        contentName: "IUL Lead Generation Form",
-        value: 50,
-      });
+      trackCustomEvent("StartForm", {
+        form_type: "IUL Lead Generation",
+        form_id: "iul_lead_gen",
+        source: "iul_lead_gen",
+      }, false); // Don't include comprehensive params for this simple event
     }
-  }, []);
+  }, [currentStep]);
+  
+  // Sync age input value with formData.age when step changes or formData changes externally (slider)
+  useEffect(() => {
+    if (currentStep === 4) {
+      setAgeInputValue(formData.age === 0 ? "" : formData.age.toString());
+    }
+  }, [formData.age, currentStep]);
+
+  // Track values when arriving at auto-advance steps to prevent auto-advance if value already existed
+  useEffect(() => {
+    if (currentStep === 1) {
+      setValuesOnArrival((prev) => ({ ...prev, step1: formData.retirementTimeline }));
+    } else if (currentStep === 3) {
+      setValuesOnArrival((prev) => ({ ...prev, step3: formData.monthlySavings }));
+    } else if (currentStep === 5) {
+      setValuesOnArrival((prev) => ({ ...prev, step5: formData.state }));
+    }
+  }, [currentStep]); // Only run when step changes, not when values change
+  
+  // Reset state search when popover closes
+  useEffect(() => {
+    if (!stateOpen) {
+      setStateSearch("");
+    }
+  }, [stateOpen]);
+
+  // Phone formatting function
+  const formatPhoneNumber = (value: string): string => {
+    const phoneNumber = value.replace(/\D/g, "");
+    if (phoneNumber.length === 0) return "";
+    if (phoneNumber.length <= 3) return `(${phoneNumber}`;
+    if (phoneNumber.length <= 6) return `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(3)}`;
+    return `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(3, 6)}-${phoneNumber.slice(6, 10)}`;
+  };
+
+  // Email validation
+  const validateEmail = (email: string): string | null => {
+    if (!email) return null;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      if (email.includes("@") && !email.includes(".")) {
+        return t("errors.invalidEmailIncomplete", { defaultValue: "Please enter a valid email address (e.g., example@gmail.com)" });
+      }
+      return t("errors.invalidEmail", { defaultValue: "Please enter a valid email address (e.g., example@gmail.com)" });
+    }
+    return null;
+  };
+
+  // Phone validation
+  const validatePhone = (phone: string): string | null => {
+    if (!phone) return null;
+    const phoneNumber = phone.replace(/\D/g, "");
+    if (phoneNumber.length < 10) {
+      return t("errors.invalidPhone", { defaultValue: "Please enter a valid 10-digit phone number" });
+    }
+    if (phoneNumber.length > 10) {
+      return t("errors.invalidPhoneLength", { defaultValue: "Phone number is too long. Please enter a valid 10-digit number" });
+    }
+    return null;
+  };
 
   const updateFormData = (field: keyof FormData, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     
-    // Track option selection (like competitor - e.g., "Within_10_Years", "Less_than__300")
-    if (typeof value === "string" && value) {
-      const eventName = value
-        .replace(/\s+/g, "_")
-        .replace(/[^a-zA-Z0-9_]/g, "")
-        .replace(/_+/g, "_");
-      
-      // Track the selection as a custom event
-      trackCustomEvent(eventName, {
-        screen_id: generateStepScreenId(currentStep),
-        hash: STEP_HASHES[currentStep],
-        step_name: STEP_NAMES[currentStep],
-        selected_option: value,
-        flow_id: "iul_lead_gen_flow",
-      });
+    // Real-time validation for email
+    if (field === "email") {
+      setEmailError(validateEmail(value));
     }
+    
+    // Real-time validation for phone
+    if (field === "phone") {
+      setPhoneError(validatePhone(value));
+    }
+    
+    // Reset previousStep when user changes a value on auto-advance steps
+    // This allows auto-advance to work again if they change their selection
+    if ((field === "retirementTimeline" && currentStep === 1) ||
+        (field === "monthlySavings" && currentStep === 3) ||
+        (field === "state" && currentStep === 5)) {
+      setPreviousStep(currentStep);
+      // Update valuesOnArrival to the old value so that the new value triggers auto-advance
+      if (field === "retirementTimeline") {
+        setValuesOnArrival((prev) => ({ ...prev, step1: formData.retirementTimeline }));
+      } else if (field === "monthlySavings") {
+        setValuesOnArrival((prev) => ({ ...prev, step3: formData.monthlySavings }));
+      } else if (field === "state") {
+        setValuesOnArrival((prev) => ({ ...prev, step5: formData.state }));
+      }
+    }
+    
+    // Note: Removed individual option tracking to reduce event noise
+    // Step completion tracking below provides sufficient funnel analytics
   };
 
   const handleInvestmentToggle = (investment: string) => {
@@ -193,23 +298,8 @@ export default function IULLeadGenForm() {
       return { ...prev, investments };
     });
     
-    // Track investment selection (like competitor - e.g., "IRA", "401(k)")
-    if (isAdding) {
-      const eventName = investment
-        .replace(/\s+/g, "_")
-        .replace(/[^a-zA-Z0-9_]/g, "")
-        .replace(/\(/g, "")
-        .replace(/\)/g, "")
-        .replace(/_+/g, "_");
-      
-      trackCustomEvent(eventName, {
-        screen_id: generateStepScreenId(currentStep),
-        hash: STEP_HASHES[currentStep],
-        step_name: STEP_NAMES[currentStep],
-        selected_investment: investment,
-        flow_id: "iul_lead_gen_flow",
-      });
-    }
+    // Note: Removed individual investment tracking to reduce event noise
+    // Step completion tracking provides sufficient funnel analytics
   };
 
   const canProceed = useCallback(() => {
@@ -227,27 +317,21 @@ export default function IULLeadGenForm() {
       case 6:
         return !!formData.firstName && !!formData.lastName;
       case 7:
-        return !!formData.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email);
+        return !!formData.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email) && !emailError;
       case 8:
-        return !!formData.phone && formData.phone.replace(/\D/g, "").length >= 10;
+        return !!formData.phone && formData.phone.replace(/\D/g, "").length >= 10 && !phoneError;
       default:
         return false;
     }
   }, [currentStep, formData]);
 
-  // Track step completion with comprehensive marketing data (similar to competitor)
+  // Track step completion with consolidated event (reduces noise vs individual events per step)
   const trackStepCompletion = useCallback((step: number, autoAdvanced: boolean = false) => {
     const progress = (step / TOTAL_STEPS) * 100;
     const nextStep = step + 1;
-    const nextStepProgress = nextStep <= TOTAL_STEPS ? (nextStep / TOTAL_STEPS) * 100 : 100;
     const stepName = STEP_NAMES[step];
-    const stepHash = STEP_HASHES[step];
-    const screenId = generateStepScreenId(step);
     
-    // Create descriptive event name like competitor (e.g., "Retirement_Timeline", "Current_Investments")
-    const eventName = stepName.replace(/\s+/g, "_");
-    
-    // Get selected value for this step (for more context)
+    // Get selected value for this step (for context)
     let selectedValue: string | null = null;
     switch (step) {
       case 1:
@@ -267,39 +351,18 @@ export default function IULLeadGenForm() {
         break;
     }
 
-    trackCustomEvent(eventName, {
-      // Screen/Step tracking (like competitor)
-      screen_id: screenId,
-      hash: stepHash,
-      
-      // Step identification
+    // ✅ Use ONE event name with parameters (cleaner than unique event names per step)
+    trackCustomEvent("FormStep", {
       step_number: step,
       step_name: stepName,
       selected_value: selectedValue,
-      next_step_number: nextStep <= TOTAL_STEPS ? nextStep : null,
-      next_step_name: nextStep <= TOTAL_STEPS ? STEP_NAMES[nextStep] : "Complete",
-      
-      // Progress tracking
       progress_percentage: Math.round(progress),
-      next_progress_percentage: Math.round(nextStepProgress),
-      steps_remaining: TOTAL_STEPS - step,
       steps_completed: step,
       total_steps: TOTAL_STEPS,
-      
-      // Form context
       form_type: "IUL Lead Generation",
       form_id: "iul_lead_gen",
-      campaign_source: "iul_lead_gen",
-      flow_id: "iul_lead_gen_flow",
-      
-      // User behavior
       auto_advanced: autoAdvanced,
-      interaction_type: autoAdvanced ? "auto_advance" : "manual_click",
-      
-      // Value estimation (for conversion optimization)
-      estimated_value: Math.round(progress * 0.5),
-      currency: "USD",
-    });
+    }, false); // Don't include comprehensive params to reduce noise
   }, [formData]);
 
   const handleNext = useCallback((skipTracking: boolean = false) => {
@@ -308,42 +371,63 @@ export default function IULLeadGenForm() {
       if (!skipTracking) {
         trackStepCompletion(currentStep, false);
       }
+      setPreviousStep(currentStep);
       setCurrentStep((prev) => prev + 1);
     }
   }, [canProceed, currentStep, trackStepCompletion]);
 
   const handleBack = () => {
     if (currentStep > 1) {
+      setIsNavigatingBack(true);
+      setPreviousStep(currentStep);
       setCurrentStep((prev) => prev - 1);
+      // Reset the flag after a longer delay to prevent auto-advance when going back
+      setTimeout(() => setIsNavigatingBack(false), 1000);
     }
   };
 
   // Auto-advance for single-select steps (1, 3, 5) after selection
+  // Only auto-advance if not navigating back, not coming from a higher step, and value was just changed
   useEffect(() => {
+    // Don't auto-advance when going back or if we came from a higher step
+    if (isNavigatingBack || previousStep > currentStep) return;
+    
+    let timer: NodeJS.Timeout | null = null;
+    
+    // Only auto-advance if the value exists AND is different from when we arrived
+    // This prevents auto-advance when navigating to a step that already has a value
     if (currentStep === 1 && formData.retirementTimeline && canProceed()) {
-      const timer = setTimeout(() => {
-        // Track step completion before auto-advancing (skip tracking in handleNext)
-        trackStepCompletion(currentStep, true);
-        handleNext(true); // Pass true to skip duplicate tracking
-      }, 500); // 500ms delay for better UX
-      return () => clearTimeout(timer);
-    }
-    if (currentStep === 3 && formData.monthlySavings && canProceed()) {
-      const timer = setTimeout(() => {
-        trackStepCompletion(currentStep, true);
-        handleNext(true); // Pass true to skip duplicate tracking
-      }, 500);
-      return () => clearTimeout(timer);
-    }
-    if (currentStep === 5 && formData.state && canProceed()) {
-      const timer = setTimeout(() => {
-        trackStepCompletion(currentStep, true);
-        handleNext(true); // Pass true to skip duplicate tracking
-      }, 500);
-      return () => clearTimeout(timer);
+      // Only auto-advance if value changed (was empty or different when we arrived)
+      if (formData.retirementTimeline !== valuesOnArrival.step1) {
+        timer = setTimeout(() => {
+          // Track step completion before auto-advancing (skip tracking in handleNext)
+          trackStepCompletion(currentStep, true);
+          handleNext(true); // Pass true to skip duplicate tracking
+        }, 500); // 500ms delay for better UX
+      }
+    } else if (currentStep === 3 && formData.monthlySavings && canProceed()) {
+      // Only auto-advance if value changed (was empty or different when we arrived)
+      if (formData.monthlySavings !== valuesOnArrival.step3) {
+        timer = setTimeout(() => {
+          trackStepCompletion(currentStep, true);
+          handleNext(true); // Pass true to skip duplicate tracking
+        }, 500);
+      }
+    } else if (currentStep === 5 && formData.state && canProceed()) {
+      // Only auto-advance if value changed (was empty or different when we arrived)
+      if (formData.state !== valuesOnArrival.step5) {
+        timer = setTimeout(() => {
+          trackStepCompletion(currentStep, true);
+          handleNext(true); // Pass true to skip duplicate tracking
+        }, 500);
+      }
     }
     // Note: Step 4 (age) doesn't auto-advance - user needs to confirm with Next button
-  }, [formData.retirementTimeline, formData.monthlySavings, formData.state, currentStep, canProceed, handleNext, trackStepCompletion]);
+    
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, [formData.retirementTimeline, formData.monthlySavings, formData.state, currentStep, canProceed, handleNext, trackStepCompletion, isNavigatingBack, previousStep, valuesOnArrival]);
 
   const handleSubmit = async () => {
     if (!canProceed()) return;
@@ -392,27 +476,39 @@ export default function IULLeadGenForm() {
         throw new Error(errorData.error || "Failed to submit form");
       }
 
-      // Prepare user data for advanced matching
-      const userData = {
-        em: formData.email?.toLowerCase().trim(),
-        fn: formData.firstName?.toLowerCase().trim(),
-        ln: formData.lastName?.toLowerCase().trim(),
-        ph: phoneNumber,
-      };
+      const data = await response.json();
 
-      // Update advanced matching
-      updateAdvancedMatching(userData);
+      // Only track Lead for NEW contacts (not duplicates)
+      // This prevents inflating conversion counts
+      if (!data.isExisting) {
+        // Prepare user data for advanced matching (stored for future page loads)
+        const userData = {
+          em: formData.email?.toLowerCase().trim(),
+          fn: formData.firstName?.toLowerCase().trim(),
+          ln: formData.lastName?.toLowerCase().trim(),
+          ph: phoneNumber,
+        };
 
-      // Track Lead event with eventID for CAPI deduplication
-      trackLead(
-        {
-          contentName: "IUL Lead Generation Campaign",
-          source: "iul_lead_gen",
-          value: 100,
-        },
-        userData,
-        eventId // Pass eventID so Pixel and CAPI can deduplicate
-      );
+        // Update advanced matching (stores in localStorage for next page load)
+        updateAdvancedMatching(userData);
+
+        // Track Lead event with eventID for CAPI deduplication
+        // Note: PII is NOT passed in event params - it's handled via init/CAPI
+        trackLead(
+          {
+            contentName: "IUL Lead Generation Campaign",
+            source: "iul_lead_gen",
+            value: 100,
+          },
+          eventId // Pass eventID so Pixel and CAPI can deduplicate
+        );
+      } else {
+        // For existing contacts, optionally track a different event (or skip)
+        // This helps you understand repeat submissions without inflating Lead count
+        if (process.env.NODE_ENV === "development") {
+          console.log("[Facebook Pixel] Skipping Lead event for existing contact");
+        }
+      }
 
       setIsComplete(true);
     } catch (error) {
@@ -439,15 +535,23 @@ export default function IULLeadGenForm() {
     return `/${locale}${calendarPath}?${queryParams.toString()}`;
   }, [locale, formData]);
 
-  // Redirect to calendar page after 5 seconds when form is complete
+  // Countdown and redirect to calendar page after 5 seconds when form is complete
   useEffect(() => {
-    if (isComplete) {
-      const redirectTimer = setTimeout(() => {
-        router.push(getCalendarUrl());
-      }, 5000); // 5 seconds
+    if (!isComplete) return;
+    
+    setCountdown(5);
+    const countdownInterval = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev === null || prev <= 1) {
+          clearInterval(countdownInterval);
+          router.push(getCalendarUrl());
+          return null;
+        }
+        return prev - 1;
+      });
+    }, 1000);
 
-      return () => clearTimeout(redirectTimer);
-    }
+    return () => clearInterval(countdownInterval);
   }, [isComplete, getCalendarUrl, router]);
 
   // Handle manual redirect (when user clicks the link)
@@ -455,6 +559,7 @@ export default function IULLeadGenForm() {
     router.push(getCalendarUrl());
   };
 
+  // Render completion screen or form
   if (isComplete) {
     return (
       <Card className="w-full max-w-2xl mx-auto">
@@ -471,9 +576,18 @@ export default function IULLeadGenForm() {
           <p className="text-muted-foreground mb-4">
             {t("completion.message")}
           </p>
-          <p className="text-sm text-muted-foreground animate-pulse mb-4">
-            {t("completion.redirectMessage")}
-          </p>
+          {countdown !== null && countdown > 0 && (
+            <motion.p
+              key={countdown}
+              initial={{ scale: 1.2 }}
+              animate={{ scale: 1 }}
+              className="text-lg font-semibold text-[#0ea5e9] mb-4"
+            >
+              {t("completion.redirectCountdown", { 
+                seconds: countdown
+              }) || `You'll be redirected to schedule an appointment in ${countdown}...`}
+            </motion.p>
+          )}
           <Button
             onClick={handleScheduleNow}
             className="bg-gradient-to-r from-[#0ea5e9] to-[#2563eb] hover:from-[#3b82f6] hover:to-[#1d4ed8]"
@@ -485,6 +599,7 @@ export default function IULLeadGenForm() {
     );
   }
 
+  // Render form
   return (
     <Card className="w-full max-w-2xl mx-auto">
       <CardContent className="p-6 md:p-8">
@@ -663,8 +778,64 @@ export default function IULLeadGenForm() {
                         className="w-full"
                       />
                     </div>
-                    <div className="text-center">
-                      <div className="text-4xl font-bold text-[#0ea5e9] mb-2">{formData.age}</div>
+                    <div className="text-center space-y-3">
+                      <div className="flex items-center justify-center gap-4">
+                        <Input
+                          type="text"
+                          inputMode="numeric"
+                          value={ageInputValue}
+                          onChange={(e) => {
+                            const inputValue = e.target.value;
+                            // Update local state immediately for responsive UI
+                            setAgeInputValue(inputValue);
+                            
+                            // Allow empty input
+                            if (inputValue === "") {
+                              return; // Keep input empty, don't update formData yet
+                            }
+                            
+                            // Only allow digits
+                            const digitsOnly = inputValue.replace(/\D/g, "");
+                            if (digitsOnly === "") {
+                              setAgeInputValue("");
+                              return;
+                            }
+                            
+                            const value = parseInt(digitsOnly, 10);
+                            if (!isNaN(value)) {
+                              const clampedValue = Math.min(Math.max(0, value), 80);
+                              updateFormData("age", clampedValue);
+                              // Update local state to match clamped value
+                              setAgeInputValue(clampedValue.toString());
+                            }
+                          }}
+                          onBlur={(e) => {
+                            // Ensure we have a valid age on blur
+                            const inputValue = e.target.value.trim();
+                            if (inputValue === "") {
+                              // If empty, restore to current formData age or default to 29
+                              const ageToUse = formData.age > 0 ? formData.age : 29;
+                              updateFormData("age", ageToUse);
+                              setAgeInputValue(ageToUse.toString());
+                            } else {
+                              const value = parseInt(inputValue, 10);
+                              if (isNaN(value) || value < 0) {
+                                const ageToUse = formData.age > 0 ? formData.age : 29;
+                                updateFormData("age", ageToUse);
+                                setAgeInputValue(ageToUse.toString());
+                              } else {
+                                const clampedValue = Math.min(Math.max(0, value), 80);
+                                updateFormData("age", clampedValue);
+                                setAgeInputValue(clampedValue.toString());
+                              }
+                            }
+                          }}
+                          min={0}
+                          max={80}
+                          className="w-24 h-12 text-center text-2xl font-bold text-[#0ea5e9] border-2 border-[#0ea5e9] focus:ring-2 focus:ring-[#0ea5e9]"
+                        />
+                        <span className="text-2xl font-semibold text-muted-foreground">{t("steps.4.yearsOld")}</span>
+                      </div>
                       {formData.age >= 18 && (
                         <p className="text-sm text-muted-foreground">
                           {t("steps.4.retirementMessage", { years: Math.max(0, 65 - formData.age) })}
@@ -683,18 +854,128 @@ export default function IULLeadGenForm() {
                   <Label className="text-lg font-semibold mb-4 block">
                     {t("steps.5.title")}
                   </Label>
-                  <Select value={formData.state} onValueChange={(value) => updateFormData("state", value)}>
-                    <SelectTrigger className="h-12 text-base">
-                      <SelectValue placeholder={t("steps.5.placeholder")} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {ALL_STATES.map((state) => (
-                        <SelectItem key={state.code} value={state.code}>
-                          {state.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Popover open={stateOpen} onOpenChange={setStateOpen}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        role="combobox"
+                        aria-expanded={stateOpen}
+                        className="w-full h-12 justify-between text-base font-normal"
+                      >
+                        {formData.state
+                          ? ALL_STATES.find((state) => state.code === formData.state)?.name
+                          : t("steps.5.placeholder")}
+                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
+                      <Command shouldFilter={false}>
+                        <CommandInput
+                          placeholder={t("steps.5.searchPlaceholder", { defaultValue: "Search state..." })}
+                          value={stateSearch}
+                          onValueChange={setStateSearch}
+                        />
+                        <CommandList>
+                          <CommandEmpty>
+                            {t("steps.5.noResults", { defaultValue: "No state found." })}
+                          </CommandEmpty>
+                          <CommandGroup>
+                            {(() => {
+                              const searchLower = stateSearch.toLowerCase().trim();
+                              
+                              // Filter states based on search
+                              const filteredStates = ALL_STATES.filter((state) => {
+                                if (!searchLower) return true;
+                                
+                                const nameLower = state.name.toLowerCase();
+                                const codeLower = state.code.toLowerCase();
+                                
+                                // Priority 1: Exact match or starts with (e.g., "co" -> Colorado, Connecticut)
+                                if (nameLower.startsWith(searchLower) || codeLower.startsWith(searchLower)) {
+                                  return true;
+                                }
+                                
+                                // Priority 2: Check if any word in the state name starts with the search term
+                                const nameWords = nameLower.split(/\s+/);
+                                if (nameWords.some(word => word.startsWith(searchLower))) {
+                                  return true;
+                                }
+                                
+                                // Priority 3: Fuzzy match for partial word matches (e.g., "vigin" -> "virginia")
+                                // Check if search term appears as a sequence of characters in state name
+                                let searchIndex = 0;
+                                for (let i = 0; i < nameLower.length && searchIndex < searchLower.length; i++) {
+                                  if (nameLower[i] === searchLower[searchIndex]) {
+                                    searchIndex++;
+                                  }
+                                }
+                                if (searchIndex === searchLower.length) {
+                                  return true;
+                                }
+                                
+                                // Priority 4: Contains match (only for 3+ characters to avoid too many results)
+                                if (searchLower.length >= 3) {
+                                  if (nameLower.includes(searchLower) || codeLower.includes(searchLower)) {
+                                    return true;
+                                  }
+                                }
+                                
+                                return false;
+                              });
+                              
+                              // Sort filtered states
+                              const sortedStates = filteredStates.sort((a, b) => {
+                                if (!searchLower) return a.name.localeCompare(b.name);
+                                
+                                const searchLowerSort = searchLower;
+                                const aName = a.name.toLowerCase();
+                                const bName = b.name.toLowerCase();
+                                const aCode = a.code.toLowerCase();
+                                const bCode = b.code.toLowerCase();
+                                
+                                // Priority 1: States that start with search term (name or code)
+                                const aStarts = aName.startsWith(searchLowerSort) || aCode.startsWith(searchLowerSort);
+                                const bStarts = bName.startsWith(searchLowerSort) || bCode.startsWith(searchLowerSort);
+                                
+                                if (aStarts && !bStarts) return -1;
+                                if (!aStarts && bStarts) return 1;
+                                
+                                // Priority 2: States where any word starts with search term
+                                const aWordsStart = aName.split(/\s+/).some(word => word.startsWith(searchLowerSort));
+                                const bWordsStart = bName.split(/\s+/).some(word => word.startsWith(searchLowerSort));
+                                
+                                if (aWordsStart && !bWordsStart) return -1;
+                                if (!aWordsStart && bWordsStart) return 1;
+                                
+                                // Priority 3: Alphabetical order
+                                return a.name.localeCompare(b.name);
+                              });
+                              
+                              return sortedStates.map((state) => (
+                                <CommandItem
+                                  key={state.code}
+                                  value={`${state.name} ${state.code}`}
+                                  onSelect={() => {
+                                    updateFormData("state", state.code);
+                                    setStateOpen(false);
+                                    setStateSearch("");
+                                  }}
+                                  className="cursor-pointer"
+                                >
+                                  <Check
+                                    className={`mr-2 h-4 w-4 ${
+                                      formData.state === state.code ? "opacity-100" : "opacity-0"
+                                    }`}
+                                  />
+                                  {state.name}
+                                </CommandItem>
+                              ));
+                            })()}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
                 </div>
               </div>
             )}
@@ -746,8 +1027,14 @@ export default function IULLeadGenForm() {
                     value={formData.email}
                     onChange={(e) => updateFormData("email", e.target.value)}
                     placeholder={t("steps.7.placeholder")}
-                    className="h-12 text-base"
+                    className={`h-12 text-base ${emailError ? "border-red-500 focus-visible:ring-red-500" : ""}`}
                   />
+                  {emailError && (
+                    <p className="mt-2 text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+                      <span>⚠️</span>
+                      <span>{emailError}</span>
+                    </p>
+                  )}
                 </div>
               </div>
             )}
@@ -762,10 +1049,25 @@ export default function IULLeadGenForm() {
                   <Input
                     type="tel"
                     value={formData.phone}
-                    onChange={(e) => updateFormData("phone", e.target.value)}
+                    onChange={(e) => {
+                      const formatted = formatPhoneNumber(e.target.value);
+                      updateFormData("phone", formatted);
+                    }}
                     placeholder={t("steps.8.placeholder")}
-                    className="h-12 text-base"
+                    className={`h-12 text-base ${phoneError ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+                    maxLength={14}
                   />
+                  {phoneError && (
+                    <p className="mt-2 text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+                      <span>⚠️</span>
+                      <span>{phoneError}</span>
+                    </p>
+                  )}
+                  {!phoneError && formData.phone && (
+                    <p className="text-sm text-green-600 dark:text-green-400 mt-2">
+                      ✓ Valid phone number
+                    </p>
+                  )}
                   <p className="text-sm text-muted-foreground mt-2">
                     {t("steps.8.subtitle")}
                   </p>
