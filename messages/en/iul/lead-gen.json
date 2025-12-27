@@ -7,7 +7,9 @@
     },
     "hero": {
       "title": "Discover How IUL Can Transform Your Financial Future",
-      "description": "Answer a few quick questions to get personalized IUL recommendations and see how Indexed Universal Life insurance can help you build wealth while protecting your loved ones."
+      "titleMobile": "Get Your Free IUL Quote",
+      "description": "Answer a few quick questions to get personalized IUL recommendations and see how Indexed Universal Life insurance can help you build wealth while protecting your loved ones.",
+      "descriptionMobile": "Get personalized IUL recommendations in minutes."
     },
     "trustIndicators": {
       "freeConsultation": {
@@ -102,7 +104,7 @@
     "buttons": {
       "back": "Back",
       "next": "Next Step",
-      "submit": "Submit & Get My Quote",
+      "submit": "Submit",
       "submitting": "Submitting..."
     },
       "completion": {

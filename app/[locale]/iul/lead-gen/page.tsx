@@ -55,13 +55,15 @@ export default async function IULLeadGenPage() {
       <IULLeadGenTracker />
       
       {/* Hero Section */}
-      <div className="container mx-auto px-4 py-12 md:py-16">
-        <div className="max-w-4xl mx-auto text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-[#0ea5e9] to-[#2563eb] bg-clip-text text-transparent">
-            {t("hero.title")}
+      <div className="container mx-auto px-4 py-6 md:py-12 lg:py-16">
+        <div className="max-w-4xl mx-auto text-center mb-6 md:mb-12">
+          <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold mb-2 md:mb-4 bg-gradient-to-r from-[#0ea5e9] to-[#2563eb] bg-clip-text text-transparent">
+            <span className="md:hidden">{t("hero.titleMobile")}</span>
+            <span className="hidden md:inline">{t("hero.title")}</span>
           </h1>
-          <p className="text-xl text-muted-foreground mb-8">
-            {t("hero.description")}
+          <p className="text-sm md:text-xl text-muted-foreground mb-4 md:mb-8">
+            <span className="md:hidden">{t("hero.descriptionMobile")}</span>
+            <span className="hidden md:inline">{t("hero.description")}</span>
           </p>
         </div>
 
@@ -71,7 +73,7 @@ export default async function IULLeadGenPage() {
         </div>
 
         {/* Trust Indicators */}
-        <div className="max-w-4xl mx-auto mt-12 text-center">
+        <div className="max-w-4xl mx-auto mt-6 md:mt-12 text-center">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
               <div className="text-3xl font-bold text-[#0ea5e9] mb-2">

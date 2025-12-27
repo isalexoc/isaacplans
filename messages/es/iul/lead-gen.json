@@ -7,7 +7,9 @@
     },
     "hero": {
       "title": "Descubre Cómo el IUL Puede Transformar Tu Futuro Financiero",
-      "description": "Responde unas pocas preguntas rápidas para obtener recomendaciones personalizadas de IUL y ver cómo el seguro de Vida Universal Indexado puede ayudarte a construir riqueza mientras proteges a tus seres queridos."
+      "titleMobile": "Obtén Tu Cotización IUL Gratis",
+      "description": "Responde unas pocas preguntas rápidas para obtener recomendaciones personalizadas de IUL y ver cómo el seguro de Vida Universal Indexado puede ayudarte a construir riqueza mientras proteges a tus seres queridos.",
+      "descriptionMobile": "Obtén recomendaciones personalizadas de IUL en minutos."
     },
     "trustIndicators": {
       "freeConsultation": {
@@ -102,7 +104,7 @@
     "buttons": {
       "back": "Atrás",
       "next": "Siguiente Paso",
-      "submit": "Enviar y Obtener Mi Cotización",
+      "submit": "Enviar",
       "submitting": "Enviando..."
     },
       "completion": {
