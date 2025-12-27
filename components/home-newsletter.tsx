@@ -48,7 +48,7 @@ export default function HomeNewsletter() {
           trackSubscribe({
             contentName: "Newsletter Subscription",
             source: "homepage",
-          }, userData);
+          });
           trackCompleteRegistration({
             contentName: "Newsletter Subscription",
             status: data.status,
@@ -59,7 +59,7 @@ export default function HomeNewsletter() {
           trackSubscribe({
             contentName: "Newsletter Subscription (Pending)",
             source: "homepage",
-          }, userData);
+          });
         }
         
         if (data.status === "pending" || data.status === "resubscribed") {

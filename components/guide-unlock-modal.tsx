@@ -89,7 +89,7 @@ export const GuideUnlockModal = ({
         trackLead({
           contentName: guideName,
           source: "consumer_guides",
-        }, userData);
+        });
         trackDownload({
           contentName: guideName,
           contentCategory: category,

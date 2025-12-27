@@ -94,11 +94,11 @@ export const BlogLeadMagnetModal = ({
       // Update advanced matching with user data
       updateAdvancedMatching(userData);
       
-      // Track Facebook Pixel events with user data
+      // Track Facebook Pixel events
       trackLead({
         contentName: leadMagnet.title || postTitle,
         source: "blog_post",
-      }, userData);
+      });
       trackDownload({
         contentName: leadMagnet.title || postTitle,
         contentCategory: postCategory,

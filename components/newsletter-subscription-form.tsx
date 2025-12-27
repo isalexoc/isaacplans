@@ -104,7 +104,7 @@ export function NewsletterSubscriptionForm({
           trackSubscribe({
             contentName: "Newsletter Subscription",
             source: source,
-          }, userData);
+          });
           trackCompleteRegistration({
             contentName: "Newsletter Subscription",
             status: data.status,
@@ -115,7 +115,7 @@ export function NewsletterSubscriptionForm({
           trackSubscribe({
             contentName: "Newsletter Subscription (Pending)",
             source: source,
-          }, userData);
+          });
         }
         
         if (data.status === "pending" || data.status === "resubscribed") {

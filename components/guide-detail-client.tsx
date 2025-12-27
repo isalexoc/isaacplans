@@ -152,11 +152,11 @@ export default function GuideDetailClient({ guide }: GuideDetailClientProps) {
         // Update advanced matching with user data
         updateAdvancedMatching(userData);
         
-        // Track Facebook Pixel events with user data
+        // Track Facebook Pixel events
         trackLead({
           contentName: formData.guideName || title,
           source: "consumer_guides",
-        }, userData);
+        });
         trackDownload({
           contentName: formData.guideName || title,
           contentCategory: guide.category,
