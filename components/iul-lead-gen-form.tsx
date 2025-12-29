@@ -646,28 +646,28 @@ export default function IULLeadGenForm() {
                   >
                     <label
                       htmlFor="within-10"
-                      className="flex items-center space-x-2 p-4 border rounded-md hover:bg-accent cursor-pointer transition-colors"
+                      className="flex items-center space-x-2 p-4 border rounded-md bg-transparent hover:bg-transparent cursor-pointer transition-colors"
                     >
                       <RadioGroupItem value="within-10" id="within-10" />
                       <span className="flex-1">{t("steps.1.options.within-10")}</span>
                     </label>
                     <label
                       htmlFor="within-20"
-                      className="flex items-center space-x-2 p-4 border rounded-md hover:bg-accent cursor-pointer transition-colors"
+                      className="flex items-center space-x-2 p-4 border rounded-md bg-transparent hover:bg-transparent cursor-pointer transition-colors"
                     >
                       <RadioGroupItem value="within-20" id="within-20" />
                       <span className="flex-1">{t("steps.1.options.within-20")}</span>
                     </label>
                     <label
                       htmlFor="within-30"
-                      className="flex items-center space-x-2 p-4 border rounded-md hover:bg-accent cursor-pointer transition-colors"
+                      className="flex items-center space-x-2 p-4 border rounded-md bg-transparent hover:bg-transparent cursor-pointer transition-colors"
                     >
                       <RadioGroupItem value="within-30" id="within-30" />
                       <span className="flex-1">{t("steps.1.options.within-30")}</span>
                     </label>
                     <label
                       htmlFor="retired"
-                      className="flex items-center space-x-2 p-4 border rounded-md hover:bg-accent cursor-pointer transition-colors"
+                      className="flex items-center space-x-2 p-4 border rounded-md bg-transparent hover:bg-transparent cursor-pointer transition-colors"
                     >
                       <RadioGroupItem value="retired" id="retired" />
                       <span className="flex-1">{t("steps.1.options.retired")}</span>
@@ -699,7 +699,7 @@ export default function IULLeadGenForm() {
                         <label
                           key={key}
                           htmlFor={investmentId}
-                          className="flex items-center space-x-2 p-4 border rounded-md hover:bg-accent cursor-pointer transition-colors"
+                          className="flex items-center space-x-2 p-4 border rounded-md bg-transparent hover:bg-transparent cursor-pointer transition-colors"
                         >
                           <Checkbox
                             id={investmentId}
@@ -729,28 +729,28 @@ export default function IULLeadGenForm() {
                   >
                     <label
                       htmlFor="less-300"
-                      className="flex items-center space-x-2 p-4 border rounded-md hover:bg-accent cursor-pointer transition-colors"
+                      className="flex items-center space-x-2 p-4 border rounded-md bg-transparent hover:bg-transparent cursor-pointer transition-colors"
                     >
                       <RadioGroupItem value="less-300" id="less-300" />
                       <span className="flex-1">{t("steps.3.options.less-300")}</span>
                     </label>
                     <label
                       htmlFor="300-500"
-                      className="flex items-center space-x-2 p-4 border rounded-md hover:bg-accent cursor-pointer transition-colors"
+                      className="flex items-center space-x-2 p-4 border rounded-md bg-transparent hover:bg-transparent cursor-pointer transition-colors"
                     >
                       <RadioGroupItem value="300-500" id="300-500" />
                       <span className="flex-1">{t("steps.3.options.300-500")}</span>
                     </label>
                     <label
                       htmlFor="500-1000"
-                      className="flex items-center space-x-2 p-4 border rounded-md hover:bg-accent cursor-pointer transition-colors"
+                      className="flex items-center space-x-2 p-4 border rounded-md bg-transparent hover:bg-transparent cursor-pointer transition-colors"
                     >
                       <RadioGroupItem value="500-1000" id="500-1000" />
                       <span className="flex-1">{t("steps.3.options.500-1000")}</span>
                     </label>
                     <label
                       htmlFor="more-1000"
-                      className="flex items-center space-x-2 p-4 border rounded-md hover:bg-accent cursor-pointer transition-colors"
+                      className="flex items-center space-x-2 p-4 border rounded-md bg-transparent hover:bg-transparent cursor-pointer transition-colors"
                     >
                       <RadioGroupItem value="more-1000" id="more-1000" />
                       <span className="flex-1">{t("steps.3.options.more-1000")}</span>
@@ -832,7 +832,7 @@ export default function IULLeadGenForm() {
                           }}
                           min={0}
                           max={80}
-                          className="w-24 h-12 text-center text-2xl font-bold text-[#0ea5e9] border-2 border-[#0ea5e9] focus:outline-none focus:ring-0"
+                          className="w-24 h-12 text-center text-2xl font-bold text-[#0ea5e9] border-2 border-[#0ea5e9] focus:outline-none focus:ring-0 focus:bg-transparent active:bg-transparent"
                         />
                         <span className="text-2xl font-semibold text-muted-foreground">{t("steps.4.yearsOld")}</span>
                       </div>
@@ -995,7 +995,7 @@ export default function IULLeadGenForm() {
                         value={formData.firstName}
                         onChange={(e) => updateFormData("firstName", e.target.value)}
                         placeholder={t("steps.6.firstName.placeholder")}
-                        className="h-12 focus-visible:ring-0 focus-visible:ring-offset-0"
+                        className="h-12 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:bg-transparent focus:bg-transparent focus:outline-none active:bg-transparent"
                       />
                     </div>
                     <div>
@@ -1007,7 +1007,7 @@ export default function IULLeadGenForm() {
                         value={formData.lastName}
                         onChange={(e) => updateFormData("lastName", e.target.value)}
                         placeholder={t("steps.6.lastName.placeholder")}
-                        className="h-12 focus-visible:ring-0 focus-visible:ring-offset-0"
+                        className="h-12 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:bg-transparent focus:bg-transparent focus:outline-none active:bg-transparent"
                       />
                     </div>
                   </div>
@@ -1027,7 +1027,7 @@ export default function IULLeadGenForm() {
                     value={formData.email}
                     onChange={(e) => updateFormData("email", e.target.value)}
                     placeholder={t("steps.7.placeholder")}
-                    className={`h-12 text-base focus-visible:ring-0 focus-visible:ring-offset-0 ${emailError ? "border-red-500" : ""}`}
+                    className={`h-12 text-base focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:bg-transparent focus:bg-transparent focus:outline-none active:bg-transparent ${emailError ? "border-red-500" : ""}`}
                   />
                   {emailError && (
                     <p className="mt-2 text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
@@ -1054,7 +1054,7 @@ export default function IULLeadGenForm() {
                       updateFormData("phone", formatted);
                     }}
                     placeholder={t("steps.8.placeholder")}
-                    className={`h-12 text-base focus-visible:ring-0 focus-visible:ring-offset-0 ${phoneError ? "border-red-500" : ""}`}
+                    className={`h-12 text-base focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:bg-transparent focus:bg-transparent focus:outline-none active:bg-transparent ${phoneError ? "border-red-500" : ""}`}
                     maxLength={14}
                   />
                   {phoneError && (

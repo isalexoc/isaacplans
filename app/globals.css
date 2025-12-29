@@ -110,6 +110,22 @@ body {
   body {
     @apply bg-background text-foreground;
   }
+  /* Remove mobile tap highlight */
+  input, textarea, select {
+    -webkit-tap-highlight-color: transparent;
+  }
+  /* Remove background from selected radio/checkbox labels */
+  label:has(input[type="radio"]:checked),
+  label:has(input[type="checkbox"]:checked),
+  label:has([data-state="checked"]),
+  label:has([aria-checked="true"]) {
+    background-color: transparent !important;
+  }
+  /* Remove background from Radix UI radio/checkbox when checked */
+  [data-state="checked"] ~ span,
+  [aria-checked="true"] ~ span {
+    background-color: transparent !important;
+  }
 }
 
 @layer components {
