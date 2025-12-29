@@ -376,6 +376,16 @@ export async function POST(request: NextRequest) {
     const accessToken = process.env.META_CAPI_ACCESS_TOKEN;
     const testEventCode = process.env.META_TEST_EVENT_CODE; // Optional, for testing
 
+    // Log CAPI check for debugging
+    console.log("[Meta CAPI] Check:", {
+      hasPixelId: !!pixelId,
+      hasAccessToken: !!accessToken,
+      hasEventId: !!meta?.eventId,
+      hasEventSourceUrl: !!meta?.eventSourceUrl,
+      isNewContact: isNewContact,
+      willSend: !!(pixelId && accessToken && meta?.eventId && meta?.eventSourceUrl && isNewContact),
+    });
+
     if (pixelId && accessToken && meta?.eventId && meta?.eventSourceUrl && isNewContact) {
       try {
         // Get user agent and IP from request headers
@@ -386,6 +396,14 @@ export async function POST(request: NextRequest) {
         // Determine value - IUL lead gen is always 100
         const value = 100;
         const source = "iul_lead_gen";
+
+        console.log("[Meta CAPI] Sending event:", {
+          eventId: meta.eventId,
+          eventName: "Lead",
+          email: email.substring(0, 3) + "***", // Partial for privacy
+          hasFbp: !!meta.fbp,
+          hasFbc: !!meta.fbc,
+        });
 
         await sendMetaCapiEvent({
           pixelId,
@@ -409,10 +427,15 @@ export async function POST(request: NextRequest) {
           },
           testEventCode, // Only used during testing
         });
+
+        // Log success in production
+        console.log("[Meta CAPI] Event sent successfully (production)");
       } catch (capiError) {
         // Log error but don't fail the request - CAPI is a backup
         console.error("[Meta CAPI] Failed to send event (non-blocking):", capiError);
       }
+    } else {
+      console.log("[Meta CAPI] Skipped - missing requirements or existing contact");
     }
 
     // Success!

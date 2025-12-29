@@ -142,13 +142,13 @@ export async function sendMetaCapiEvent(options: MetaCapiEventOptions): Promise<
       throw new Error(`Meta CAPI failed: ${errorMessage}`);
     }
 
-    if (process.env.NODE_ENV === "development") {
-      console.log("[Meta CAPI] Event sent successfully:", {
-        eventName,
-        eventId,
-        events_received: json.events_received,
-      });
-    }
+    // Log success in both development and production
+    console.log("[Meta CAPI] Event sent successfully:", {
+      eventName,
+      eventId,
+      events_received: json.events_received,
+      environment: process.env.NODE_ENV,
+    });
 
     return json;
   } catch (error) {
