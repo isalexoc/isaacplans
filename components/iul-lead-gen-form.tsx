@@ -832,7 +832,7 @@ export default function IULLeadGenForm() {
                           }}
                           min={0}
                           max={80}
-                          className="w-24 h-12 text-center text-2xl font-bold text-[#0ea5e9] border-2 border-[#0ea5e9] focus:ring-2 focus:ring-[#0ea5e9]"
+                          className="w-24 h-12 text-center text-2xl font-bold text-[#0ea5e9] border-2 border-[#0ea5e9] focus:outline-none focus:ring-0"
                         />
                         <span className="text-2xl font-semibold text-muted-foreground">{t("steps.4.yearsOld")}</span>
                       </div>
@@ -995,7 +995,7 @@ export default function IULLeadGenForm() {
                         value={formData.firstName}
                         onChange={(e) => updateFormData("firstName", e.target.value)}
                         placeholder={t("steps.6.firstName.placeholder")}
-                        className="h-12"
+                        className="h-12 focus-visible:ring-0 focus-visible:ring-offset-0"
                       />
                     </div>
                     <div>
@@ -1007,7 +1007,7 @@ export default function IULLeadGenForm() {
                         value={formData.lastName}
                         onChange={(e) => updateFormData("lastName", e.target.value)}
                         placeholder={t("steps.6.lastName.placeholder")}
-                        className="h-12"
+                        className="h-12 focus-visible:ring-0 focus-visible:ring-offset-0"
                       />
                     </div>
                   </div>
@@ -1027,7 +1027,7 @@ export default function IULLeadGenForm() {
                     value={formData.email}
                     onChange={(e) => updateFormData("email", e.target.value)}
                     placeholder={t("steps.7.placeholder")}
-                    className={`h-12 text-base ${emailError ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+                    className={`h-12 text-base focus-visible:ring-0 focus-visible:ring-offset-0 ${emailError ? "border-red-500" : ""}`}
                   />
                   {emailError && (
                     <p className="mt-2 text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
@@ -1054,7 +1054,7 @@ export default function IULLeadGenForm() {
                       updateFormData("phone", formatted);
                     }}
                     placeholder={t("steps.8.placeholder")}
-                    className={`h-12 text-base ${phoneError ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+                    className={`h-12 text-base focus-visible:ring-0 focus-visible:ring-offset-0 ${phoneError ? "border-red-500" : ""}`}
                     maxLength={14}
                   />
                   {phoneError && (
