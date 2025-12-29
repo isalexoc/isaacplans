@@ -65,6 +65,7 @@ const PAGES: Page[] = [
 
   // IUL
   { href: "/iul", changeFrequency: "monthly", priority: 0.8 },
+  { href: "/iul/quote", changeFrequency: "monthly", priority: 0.9 },
   { href: "/iul/calendar", changeFrequency: "monthly", priority: 0.6 },
   { href: "/iul/presentation", changeFrequency: "monthly", priority: 0.7 },
   { href: "/iul/application", changeFrequency: "monthly", priority: 0.7 },

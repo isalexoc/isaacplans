@@ -1,0 +1,120 @@
+{
+  "iulQuote": {
+    "meta": {
+      "title": "Obtén Tu Cotización IUL Gratis - Recomendaciones Personalizadas | Isaac Plans",
+      "description": "Déjame ayudarte a descubrir cómo el seguro de Vida Universal Indexado (IUL) puede transformar tu futuro financiero. Obtén recomendaciones personalizadas de IUL y descubre cómo puede ayudarte a construir riqueza mientras proteges a tus seres queridos.",
+      "keywords": "cotización IUL, seguro de Vida Universal Indexado, calculadora IUL, cotización IUL gratis, recomendaciones IUL, cotización de seguro de vida"
+    },
+    "hero": {
+      "title": "Descubre Cómo el IUL Puede Transformar Tu Futuro Financiero",
+      "titleMobile": "Obtén Tu Cotización IUL Gratis",
+      "description": "Déjame ayudarte a descubrir cómo el seguro de Vida Universal Indexado puede ayudarte a construir riqueza mientras proteges a tus seres queridos. Responde unas pocas preguntas rápidas para obtener recomendaciones personalizadas de IUL adaptadas a tus objetivos financieros.",
+      "descriptionMobile": "Obtén recomendaciones personalizadas de IUL en minutos."
+    },
+    "trustIndicators": {
+      "freeConsultation": {
+        "value": "100%",
+        "label": "Consulta Gratis"
+      },
+      "quickProcess": {
+        "value": "5 Min",
+        "label": "Proceso Rápido"
+      },
+      "expertGuidance": {
+        "value": "Experto",
+        "label": "Orientación"
+      }
+    },
+    "form": {
+    "progress": {
+      "step": "Paso {current} de {total}",
+      "percent": "{percent}%"
+    },
+    "errors": {
+      "submitFailed": "Error al enviar el formulario. Por favor, inténtalo de nuevo.",
+      "genericError": "Ocurrió un error. Por favor, inténtalo de nuevo.",
+      "invalidEmail": "Por favor ingresa una dirección de correo electrónico válida (ej., ejemplo@gmail.com)",
+      "invalidEmailIncomplete": "Por favor ingresa una dirección de correo electrónico válida (ej., ejemplo@gmail.com)",
+      "invalidPhone": "Por favor ingresa un número de teléfono válido de 10 dígitos",
+      "invalidPhoneLength": "El número de teléfono es demasiado largo. Por favor ingresa un número válido de 10 dígitos"
+    },
+    "steps": {
+      "1": {
+        "title": "¿Qué tan pronto planeas jubilarte? *",
+        "options": {
+          "within-10": "Dentro de 10 Años",
+          "within-20": "Dentro de 20 Años",
+          "within-30": "Dentro de 30 Años",
+          "retired": "Ya Estoy Jubilado"
+        }
+      },
+      "2": {
+        "title": "¿Cuáles son tus inversiones actuales?",
+        "subtitle": "Selecciona todas las que apliquen",
+        "options": {
+          "401k": "401(k)",
+          "ira": "IRA",
+          "cashSavings": "Ahorros en Efectivo",
+          "activeTrading": "Trading Activo",
+          "selfDirected": "Cuenta de Corretaje Autodirigida",
+          "none": "No tengo inversiones actuales"
+        }
+      },
+      "3": {
+        "title": "¿Cuánto apartas en ahorros cada mes?",
+        "options": {
+          "less-300": "Menos de $300",
+          "300-500": "$300 - $500",
+          "500-1000": "$500 - $1,000",
+          "more-1000": "Más de $1,000"
+        }
+      },
+      "4": {
+        "title": "¿Cuál es tu edad actual? (Esto nos ayuda a determinar cuánto tiempo tienes para financiar el IUL) *",
+        "retirementMessage": "Tienes aproximadamente {years} años hasta la edad de jubilación.",
+        "yearsOld": "años"
+      },
+      "5": {
+        "title": "¿En qué estado vives?",
+        "placeholder": "Selecciona tu estado",
+        "searchPlaceholder": "Buscar estado...",
+        "noResults": "No se encontró ningún estado."
+      },
+      "6": {
+        "title": "¿Cuál es tu nombre?",
+        "firstName": {
+          "label": "Nombre",
+          "placeholder": "Nombre"
+        },
+        "lastName": {
+          "label": "Apellido",
+          "placeholder": "Apellido"
+        }
+      },
+      "7": {
+        "title": "¿Cuál es tu mejor dirección de correo electrónico?",
+        "placeholder": "Tu dirección de correo electrónico"
+      },
+      "8": {
+        "title": "¿Cuál es tu mejor número de teléfono?",
+        "placeholder": "(555) 123-4567",
+        "subtitle": "Número de teléfono de Estados Unidos"
+      }
+    },
+    "buttons": {
+      "back": "Atrás",
+      "next": "Siguiente Paso",
+      "submit": "Enviar",
+      "submitting": "Enviando..."
+    },
+      "completion": {
+        "title": "¡Gracias!",
+        "message": "Hemos recibido tu información. Nuestro equipo se pondrá en contacto contigo pronto para discutir tus opciones de IUL.",
+        "redirectMessage": "Serás redirigido para programar una cita en un momento...",
+        "redirectCountdown": "Serás redirigido para programar una cita en {seconds}...",
+        "scheduleNow": "Programar Ahora"
+      }
+    }
+  }
+}
+

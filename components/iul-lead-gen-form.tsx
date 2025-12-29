@@ -141,7 +141,7 @@ function generateStepScreenId(step: number): string {
 }
 
 export default function IULLeadGenForm() {
-  const t = useTranslations("iulLeadGen.form");
+  const t = useTranslations("iulQuote.form");
   const locale = useLocale();
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);

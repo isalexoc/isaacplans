@@ -1,0 +1,120 @@
+{
+  "iulQuote": {
+    "meta": {
+      "title": "Get Your Free IUL Quote - Personalized Recommendations | Isaac Plans",
+      "description": "Let me help you discover how Indexed Universal Life (IUL) insurance can transform your financial future. Get personalized IUL recommendations and see how it can help you build wealth while protecting your loved ones.",
+      "keywords": "IUL quote, Indexed Universal Life insurance, IUL calculator, free IUL quote, IUL recommendations, life insurance quote"
+    },
+    "hero": {
+      "title": "Discover How IUL Can Transform Your Financial Future",
+      "titleMobile": "Get Your Free IUL Quote",
+      "description": "Let me help you discover how Indexed Universal Life insurance can help you build wealth while protecting your loved ones. Answer a few quick questions to get personalized IUL recommendations tailored to your financial goals.",
+      "descriptionMobile": "Get personalized IUL recommendations in minutes."
+    },
+    "trustIndicators": {
+      "freeConsultation": {
+        "value": "100%",
+        "label": "Free Consultation"
+      },
+      "quickProcess": {
+        "value": "5 Min",
+        "label": "Quick Process"
+      },
+      "expertGuidance": {
+        "value": "Expert",
+        "label": "Guidance"
+      }
+    },
+    "form": {
+    "progress": {
+      "step": "Step {current} of {total}",
+      "percent": "{percent}%"
+    },
+    "errors": {
+      "submitFailed": "Failed to submit form. Please try again.",
+      "genericError": "An error occurred. Please try again.",
+      "invalidEmail": "Please enter a valid email address (e.g., example@gmail.com)",
+      "invalidEmailIncomplete": "Please enter a valid email address (e.g., example@gmail.com)",
+      "invalidPhone": "Please enter a valid 10-digit phone number",
+      "invalidPhoneLength": "Phone number is too long. Please enter a valid 10-digit number"
+    },
+    "steps": {
+      "1": {
+        "title": "How soon are you planning to retire? *",
+        "options": {
+          "within-10": "Within 10 Years",
+          "within-20": "Within 20 Years",
+          "within-30": "Within 30 Years",
+          "retired": "I'm Currently Retired"
+        }
+      },
+      "2": {
+        "title": "What are your current investments?",
+        "subtitle": "Select all that apply",
+        "options": {
+          "401k": "401(k)",
+          "ira": "IRA",
+          "cashSavings": "Cash Savings",
+          "activeTrading": "Active Trading",
+          "selfDirected": "Self Directed Brokerage Account",
+          "none": "No current investments"
+        }
+      },
+      "3": {
+        "title": "How much do you set aside in savings each month?",
+        "options": {
+          "less-300": "Less than $300",
+          "300-500": "$300 - $500",
+          "500-1000": "$500 - $1,000",
+          "more-1000": "More than $1,000"
+        }
+      },
+      "4": {
+        "title": "What is your current age? (This helps us determine how long you have to fund the IUL) *",
+        "retirementMessage": "You have approximately {years} years until retirement age.",
+        "yearsOld": "years old"
+      },
+      "5": {
+        "title": "What state do you live in?",
+        "placeholder": "Select your state",
+        "searchPlaceholder": "Search state...",
+        "noResults": "No state found."
+      },
+      "6": {
+        "title": "What is your name?",
+        "firstName": {
+          "label": "First name",
+          "placeholder": "First name"
+        },
+        "lastName": {
+          "label": "Last name",
+          "placeholder": "Last name"
+        }
+      },
+      "7": {
+        "title": "What's your best email address?",
+        "placeholder": "Your email address"
+      },
+      "8": {
+        "title": "What's your best phone number?",
+        "placeholder": "(555) 123-4567",
+        "subtitle": "United States phone number"
+      }
+    },
+    "buttons": {
+      "back": "Back",
+      "next": "Next Step",
+      "submit": "Submit",
+      "submitting": "Submitting..."
+    },
+      "completion": {
+        "title": "Thank You!",
+        "message": "We've received your information. Our team will contact you shortly to discuss your IUL options.",
+        "redirectMessage": "You'll be redirected to schedule an appointment in a moment...",
+        "redirectCountdown": "You'll be redirected to schedule an appointment in {seconds}...",
+        "scheduleNow": "Schedule Now"
+      }
+    }
+  }
+}
+

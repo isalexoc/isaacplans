@@ -31,7 +31,7 @@ META_TEST_EVENT_CODE=TEST12345
 
 ### 1. Form Submission Flow
 
-When a user submits the IUL lead-gen form:
+When a user submits the IUL quote form:
 
 1. **Client generates event ID** (before API call)
 2. **Client fires Pixel event** with `eventID`

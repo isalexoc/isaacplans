@@ -13,13 +13,13 @@ import {
 /* ───────── SEO ───────── */
 export async function generateMetadata(): Promise<Metadata> {
   const locale = (await getLocale()) as SupportedLocale;
-  const t = await getTranslations({ locale, namespace: "iulLeadGen.meta" });
+  const t = await getTranslations({ locale, namespace: "iulQuote.meta" });
 
   const title = t("title");
   const description = t("description");
   const keywords = t("keywords", { default: "" });
 
-  const routeKey = "/iul/lead-gen";
+  const routeKey = "/iul/quote";
   const slug = localizedSlug(routeKey, locale);
   const canonical = withLocalePrefix(locale, slug);
   const languages = languageAlternatesPrefixed(routeKey);
@@ -46,9 +46,9 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function IULLeadGenPage() {
+export default async function IULQuotePage() {
   const locale = (await getLocale()) as SupportedLocale;
-  const t = await getTranslations({ locale, namespace: "iulLeadGen" });
+  const t = await getTranslations({ locale, namespace: "iulQuote" });
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-800">
@@ -105,3 +105,4 @@ export default async function IULLeadGenPage() {
     </div>
   );
 }
+

@@ -22,7 +22,7 @@
 
 ### 3. Test PageView Event
 
-1. Navigate to: `https://www.isaacplans.com/en/iul/lead-gen`
+1. Navigate to: `https://www.isaacplans.com/en/iul/quote`
 2. **Check Console**: Should see pixel initialization (if in development)
 3. **Check Network Tab**: Look for request to `facebook.com/tr` with `ev=PageView`
 4. **Check Pixel Helper**: Should show PageView event (may take a few seconds)
@@ -52,7 +52,7 @@
 1. Go to: https://business.facebook.com/events_manager2
 2. Select your Pixel ID: `866476789191859`
 3. Click **Test Events** tab
-4. Enter your website URL: `https://www.isaacplans.com/en/iul/lead-gen`
+4. Enter your website URL: `https://www.isaacplans.com/en/iul/quote`
 5. Interact with the form
 6. **You should see**:
    - `PageView` events

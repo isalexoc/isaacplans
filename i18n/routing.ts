@@ -83,9 +83,9 @@ export const routing = defineRouting({
       en: "/iul/referrals",
       es: "/iul/referidos",
     },
-    "/iul/lead-gen": {
-      en: "/iul/lead-gen",
-      es: "/iul/lead-gen",
+    "/iul/quote": {
+      en: "/iul/quote",
+      es: "/iul/cotizacion",
     },
     "/final-expense": {
       en: "/final-expense",

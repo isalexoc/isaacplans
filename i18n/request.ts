@@ -35,10 +35,10 @@ async function loadSplitMessages(locale: string): Promise<Record<string, any>> {
       // File doesn't exist, skip
     }
     
-    // Load IUL lead-gen messages if they exist
+    // Load IUL quote messages if they exist
     try {
-      const iulLeadGen = (await import(`@/messages/${locale}/iul/lead-gen.json`)).default;
-      Object.assign(splitMessages, iulLeadGen);
+      const iulQuote = (await import(`@/messages/${locale}/iul/quote.json`)).default;
+      Object.assign(splitMessages, iulQuote);
     } catch {
       // File doesn't exist, skip
     }
