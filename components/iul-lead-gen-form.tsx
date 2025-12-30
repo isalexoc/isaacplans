@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/command";
 import { trackInitiateCheckout, trackLead, updateAdvancedMatching, trackCustomEvent } from "@/lib/facebook-pixel";
 import { getFacebookCookies } from "@/lib/meta-capi";
+import { sendGAEvent } from '@next/third-parties/google';
 
 import { ArrowLeft, ArrowRight, Check, ChevronsUpDown } from "lucide-react";
 
@@ -184,6 +185,19 @@ export default function IULLeadGenForm() {
     phone: "",
   });
 
+  // Helper function to get UTM parameters from URL
+  const getUTMParams = useCallback(() => {
+    if (typeof window === "undefined") return {};
+    const params = new URLSearchParams(window.location.search);
+    return {
+      utm_source: params.get("utm_source") || "",
+      utm_medium: params.get("utm_medium") || "",
+      utm_campaign: params.get("utm_campaign") || "",
+      utm_content: params.get("utm_content") || "",
+      utm_term: params.get("utm_term") || "",
+    };
+  }, []);
+
   // Track form start with a custom event (more accurate than InitiateCheckout for lead gen)
   useEffect(() => {
     if (currentStep === 1) {
@@ -192,8 +206,15 @@ export default function IULLeadGenForm() {
         form_id: "iul_lead_gen",
         source: "iul_lead_gen",
       }, false); // Don't include comprehensive params for this simple event
+      
+      // Track form start in GA4
+      sendGAEvent('event', 'form_start', {
+        form_type: 'IUL Lead Generation',
+        form_id: 'iul_lead_gen',
+        language: locale,
+      });
     }
-  }, [currentStep]);
+  }, [currentStep, locale]);
   
   // Sync age input value with formData.age when step changes or formData changes externally (slider)
   useEffect(() => {
@@ -363,6 +384,15 @@ export default function IULLeadGenForm() {
       form_id: "iul_lead_gen",
       auto_advanced: autoAdvanced,
     }, false); // Don't include comprehensive params to reduce noise
+    
+    // Track form progress in GA4
+    sendGAEvent('event', 'form_progress', {
+      step_number: step,
+      step_name: stepName,
+      progress_percentage: Math.round(progress),
+      form_type: 'IUL Lead Generation',
+      form_id: 'iul_lead_gen',
+    });
   }, [formData]);
 
   const handleNext = useCallback((skipTracking: boolean = false) => {
@@ -502,6 +532,20 @@ export default function IULLeadGenForm() {
           },
           eventId // Pass eventID so Pixel and CAPI can deduplicate
         );
+
+        // Get UTM parameters for GA4 tracking
+        const utmParams = getUTMParams();
+        
+        // Track Lead in GA4
+        sendGAEvent('event', 'generate_lead', {
+          ...utmParams,
+          currency: 'USD',
+          value: 100,
+          source: 'iul_lead_gen',
+          form_type: 'IUL Lead Generation',
+          form_id: 'iul_lead_gen',
+          language: locale,
+        });
       } else {
         // For existing contacts, optionally track a different event (or skip)
         // This helps you understand repeat submissions without inflating Lead count
