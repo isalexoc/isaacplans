@@ -26,6 +26,10 @@ export async function generateMetadata(): Promise<Metadata> {
   const xDefault = withLocalePrefix("en", localizedSlug(routeKey, "en"));
   const ogLocale = ogLocaleOf(locale);
 
+  // Get locale-specific OG image (optimized for social sharing: 1200x630)
+  const ogImageId = locale === "es" ? "quote_iul_es_bcqglt" : "quote_iul_en_cxwq4x";
+  const ogImageUrl = `https://res.cloudinary.com/isaacdev/image/upload/w_1200,h_630,c_fit,f_auto,q_auto/${ogImageId}`;
+
   return {
     title,
     description,
@@ -42,6 +46,20 @@ export async function generateMetadata(): Promise<Metadata> {
       locale: ogLocale,
       alternateLocale: ogLocale === "en_US" ? ["es_ES"] : ["en_US"],
       type: "website",
+      images: [
+        {
+          url: ogImageUrl,
+          width: 1200,
+          height: 630,
+          alt: title,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [{ url: ogImageUrl, alt: title }],
     },
   };
 }
