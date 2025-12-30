@@ -15,6 +15,7 @@ import { ClerkProvider } from '@clerk/nextjs';
 import { esES, enUS } from '@clerk/localizations';
 import { SanityLive } from '@/sanity/lib/live';
 import MetaPixelWrapper from "@/components/meta-pixel-wrapper";
+import { GoogleAnalytics } from '@next/third-parties/google'
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
@@ -139,6 +140,7 @@ export default async function LocaleLayout({
           }}
         />
       </body>
+      <GoogleAnalytics gaId="G-5SDTGH29ER" />
     </html>
     </ClerkProvider>
   );
