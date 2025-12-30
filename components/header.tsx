@@ -213,16 +213,17 @@ const Header = () => {
 
                   {/* CONTACT */}
                   <NavigationMenuItem>
-                    <Link href="/contact" legacyBehavior passHref>
-                      <NavigationMenuLink
+                    <NavigationMenuLink asChild>
+                      <Link
+                        href="/contact"
                         className={cn(
                           navigationMenuTriggerStyle(),
                           "text-sm font-medium text-gray-700 hover:text-brand transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/20 focus-visible:ring-offset-2 rounded-md px-3 py-2"
                         )}
                       >
                         {nav("contact.label")}
-                      </NavigationMenuLink>
-                    </Link>
+                      </Link>
+                    </NavigationMenuLink>
                   </NavigationMenuItem>
                 </NavigationMenuList>
               </NavigationMenu>
