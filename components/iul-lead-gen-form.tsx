@@ -173,6 +173,10 @@ export default function IULLeadGenForm() {
   // Local state for age input to allow empty input
   const [ageInputValue, setAgeInputValue] = useState<string>("");
   
+  // Time tracking for analytics
+  const [formStartTime] = useState(Date.now());
+  const [stepStartTimes, setStepStartTimes] = useState<Record<number, number>>({});
+  
   const [formData, setFormData] = useState<FormData>({
     retirementTimeline: "",
     investments: [],
@@ -201,6 +205,9 @@ export default function IULLeadGenForm() {
   // Track form start with a custom event (more accurate than InitiateCheckout for lead gen)
   useEffect(() => {
     if (currentStep === 1) {
+      // Initialize step start time for step 1
+      setStepStartTimes({ [1]: Date.now() });
+      
       trackCustomEvent("StartForm", {
         form_type: "IUL Lead Generation",
         form_id: "iul_lead_gen",
@@ -241,6 +248,74 @@ export default function IULLeadGenForm() {
     }
   }, [stateOpen]);
 
+  // Track time spent on each step
+  useEffect(() => {
+    // Record start time for current step
+    setStepStartTimes(prev => ({
+      ...prev,
+      [currentStep]: Date.now()
+    }));
+
+    // If we have a previous step and it's different, calculate time spent
+    if (previousStep !== currentStep && stepStartTimes[previousStep]) {
+      const timeSpent = Math.round((Date.now() - stepStartTimes[previousStep]) / 1000);
+      
+      // Only track if time is reasonable (not a quick back/forward)
+      if (timeSpent > 0 && timeSpent < 3600) { // Less than 1 hour
+        sendGAEvent('event', 'form_step_time', {
+          step_number: previousStep,
+          step_name: STEP_NAMES[previousStep],
+          time_spent_seconds: timeSpent,
+          form_type: 'IUL Lead Generation',
+          form_id: 'iul_lead_gen',
+        });
+      }
+    }
+  }, [currentStep, previousStep, stepStartTimes]);
+
+  // Track form abandonment (when user leaves without completing)
+  useEffect(() => {
+    // Track abandonment when user leaves the page
+    const handleBeforeUnload = () => {
+      if (currentStep > 1 && currentStep < TOTAL_STEPS && !isComplete) {
+        const timeOnForm = Math.round((Date.now() - formStartTime) / 1000);
+        sendGAEvent('event', 'form_abandon', {
+          step_abandoned: currentStep,
+          step_name: STEP_NAMES[currentStep],
+          progress_percentage: Math.round((currentStep / TOTAL_STEPS) * 100),
+          form_type: 'IUL Lead Generation',
+          form_id: 'iul_lead_gen',
+          time_on_form: timeOnForm,
+          abandon_type: 'page_unload',
+        });
+      }
+    };
+
+    // Track when page becomes hidden (user switches tabs, closes, etc.)
+    const handleVisibilityChange = () => {
+      if (document.hidden && currentStep > 1 && currentStep < TOTAL_STEPS && !isComplete) {
+        const timeOnForm = Math.round((Date.now() - formStartTime) / 1000);
+        sendGAEvent('event', 'form_abandon', {
+          step_abandoned: currentStep,
+          step_name: STEP_NAMES[currentStep],
+          progress_percentage: Math.round((currentStep / TOTAL_STEPS) * 100),
+          form_type: 'IUL Lead Generation',
+          form_id: 'iul_lead_gen',
+          time_on_form: timeOnForm,
+          abandon_type: 'visibility_change',
+        });
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [currentStep, isComplete, formStartTime]);
+
   // Phone formatting function
   const formatPhoneNumber = (value: string): string => {
     const phoneNumber = value.replace(/\D/g, "");
@@ -276,17 +351,39 @@ export default function IULLeadGenForm() {
     return null;
   };
 
+  // Track validation errors
+  const trackValidationError = useCallback((step: number, field: string, errorType: string) => {
+    sendGAEvent('event', 'form_validation_error', {
+      step_number: step,
+      step_name: STEP_NAMES[step],
+      field_name: field,
+      error_type: errorType,
+      form_type: 'IUL Lead Generation',
+      form_id: 'iul_lead_gen',
+    });
+  }, []);
+
   const updateFormData = (field: keyof FormData, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     
     // Real-time validation for email
     if (field === "email") {
-      setEmailError(validateEmail(value));
+      const error = validateEmail(value);
+      setEmailError(error);
+      // Track validation error if it exists
+      if (error && currentStep === 7) {
+        trackValidationError(7, 'email', 'invalid_format');
+      }
     }
     
     // Real-time validation for phone
     if (field === "phone") {
-      setPhoneError(validatePhone(value));
+      const error = validatePhone(value);
+      setPhoneError(error);
+      // Track validation error if it exists
+      if (error && currentStep === 8) {
+        trackValidationError(8, 'phone', 'invalid_format');
+      }
     }
     
     // Reset previousStep when user changes a value on auto-advance steps
@@ -372,6 +469,12 @@ export default function IULLeadGenForm() {
         break;
     }
 
+    // Calculate time spent on this step
+    const timeOnStep = stepStartTimes[step] 
+      ? Math.round((Date.now() - stepStartTimes[step]) / 1000)
+      : 0;
+    const totalTimeOnForm = Math.round((Date.now() - formStartTime) / 1000);
+
     // ✅ Use ONE event name with parameters (cleaner than unique event names per step)
     trackCustomEvent("FormStep", {
       step_number: step,
@@ -385,15 +488,19 @@ export default function IULLeadGenForm() {
       auto_advanced: autoAdvanced,
     }, false); // Don't include comprehensive params to reduce noise
     
-    // Track form progress in GA4
+    // Track form progress in GA4 with enhanced metrics
     sendGAEvent('event', 'form_progress', {
       step_number: step,
       step_name: stepName,
       progress_percentage: Math.round(progress),
       form_type: 'IUL Lead Generation',
       form_id: 'iul_lead_gen',
+      selected_value: selectedValue,
+      time_on_step: timeOnStep,
+      total_time_on_form: totalTimeOnForm,
+      is_auto_advanced: autoAdvanced,
     });
-  }, [formData]);
+  }, [formData, stepStartTimes, formStartTime]);
 
   const handleNext = useCallback((skipTracking: boolean = false) => {
     if (canProceed() && currentStep < TOTAL_STEPS) {
@@ -409,6 +516,16 @@ export default function IULLeadGenForm() {
   const handleBack = () => {
     if (currentStep > 1) {
       setIsNavigatingBack(true);
+      
+      // Track back navigation
+      sendGAEvent('event', 'form_step_back', {
+        from_step: currentStep,
+        to_step: currentStep - 1,
+        step_name: STEP_NAMES[currentStep],
+        form_type: 'IUL Lead Generation',
+        form_id: 'iul_lead_gen',
+      });
+      
       setPreviousStep(currentStep);
       setCurrentStep((prev) => prev - 1);
       // Reset the flag after a longer delay to prevent auto-advance when going back
@@ -536,7 +653,11 @@ export default function IULLeadGenForm() {
         // Get UTM parameters for GA4 tracking
         const utmParams = getUTMParams();
         
-        // Track Lead in GA4
+        // Calculate completion metrics
+        const totalTimeSeconds = Math.round((Date.now() - formStartTime) / 1000);
+        const averageTimePerStep = Math.round(totalTimeSeconds / TOTAL_STEPS);
+        
+        // Track Lead in GA4 with completion metrics
         sendGAEvent('event', 'generate_lead', {
           ...utmParams,
           currency: 'USD',
@@ -545,6 +666,9 @@ export default function IULLeadGenForm() {
           form_type: 'IUL Lead Generation',
           form_id: 'iul_lead_gen',
           language: locale,
+          total_time_seconds: totalTimeSeconds,
+          average_time_per_step: averageTimePerStep,
+          total_steps: TOTAL_STEPS,
         });
       } else {
         // For existing contacts, optionally track a different event (or skip)
