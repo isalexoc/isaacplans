@@ -251,27 +251,32 @@ export default function IULLeadGenForm() {
   // Track time spent on each step
   useEffect(() => {
     // Record start time for current step
-    setStepStartTimes(prev => ({
-      ...prev,
-      [currentStep]: Date.now()
-    }));
-
-    // If we have a previous step and it's different, calculate time spent
-    if (previousStep !== currentStep && stepStartTimes[previousStep]) {
-      const timeSpent = Math.round((Date.now() - stepStartTimes[previousStep]) / 1000);
+    const currentTime = Date.now();
+    setStepStartTimes(prev => {
+      const newTimes = {
+        ...prev,
+        [currentStep]: currentTime
+      };
       
-      // Only track if time is reasonable (not a quick back/forward)
-      if (timeSpent > 0 && timeSpent < 3600) { // Less than 1 hour
-        sendGAEvent('event', 'form_step_time', {
-          step_number: previousStep,
-          step_name: STEP_NAMES[previousStep],
-          time_spent_seconds: timeSpent,
-          form_type: 'IUL Lead Generation',
-          form_id: 'iul_lead_gen',
-        });
+      // If we have a previous step and it's different, calculate time spent
+      if (previousStep !== currentStep && prev[previousStep]) {
+        const timeSpent = Math.round((currentTime - prev[previousStep]) / 1000);
+        
+        // Only track if time is reasonable (not a quick back/forward)
+        if (timeSpent > 0 && timeSpent < 3600) { // Less than 1 hour
+          sendGAEvent('event', 'form_step_time', {
+            step_number: previousStep,
+            step_name: STEP_NAMES[previousStep],
+            time_spent_seconds: timeSpent,
+            form_type: 'IUL Lead Generation',
+            form_id: 'iul_lead_gen',
+          });
+        }
       }
-    }
-  }, [currentStep, previousStep, stepStartTimes]);
+      
+      return newTimes;
+    });
+  }, [currentStep, previousStep]);
 
   // Track form abandonment (when user leaves without completing)
   useEffect(() => {
