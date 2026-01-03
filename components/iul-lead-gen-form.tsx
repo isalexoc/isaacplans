@@ -1289,7 +1289,7 @@ export default function IULLeadGenForm() {
                           ? "text-red-700 dark:text-red-400 font-medium" 
                           : "text-muted-foreground"
                       }`}>
-                        I Consent to Receive SMS Notifications, Alerts from Isaac Plans Insurance. Message frequency varies. Message & data rates may apply. Text HELP to (540) 426-1804 for assistance. You can reply STOP to unsubscribe at any time.
+                        {t("smsConsent.text")}
                       </span>
                     </label>
                   </div>

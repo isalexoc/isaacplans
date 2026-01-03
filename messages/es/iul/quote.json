@@ -129,6 +129,9 @@
     "legal": {
       "agreeText": "Al enviar este formulario, aceptas nuestra"
     },
+    "smsConsent": {
+      "text": "Consiento recibir Notificaciones SMS y Alertas de Isaac Plans Insurance. La frecuencia de mensajes varía. Pueden aplicarse tarifas de mensajes y datos. Envía HELP al (540) 426-1804 para asistencia. Puedes responder STOP para cancelar la suscripción en cualquier momento."
+    },
       "completion": {
         "title": "¡Gracias!",
         "message": "Hemos recibido tu información. Nuestro equipo se pondrá en contacto contigo pronto para discutir tus opciones de IUL.",
