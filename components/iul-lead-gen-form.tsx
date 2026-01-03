@@ -754,7 +754,7 @@ export default function IULLeadGenForm() {
               key={countdown}
               initial={{ scale: 1.2 }}
               animate={{ scale: 1 }}
-              className="text-lg font-semibold text-[#0ea5e9] mb-4"
+              className="text-lg font-semibold text-[#0284c7] mb-4"
             >
               {t("completion.redirectCountdown", { 
                 seconds: countdown
@@ -763,7 +763,7 @@ export default function IULLeadGenForm() {
           )}
           <Button
             onClick={handleScheduleNow}
-            className="bg-gradient-to-r from-[#0ea5e9] to-[#2563eb] hover:from-[#3b82f6] hover:to-[#1d4ed8]"
+            className="bg-gradient-to-r from-[#0284c7] to-[#2563eb] hover:from-[#0369a1] hover:to-[#1d4ed8]"
           >
             {t("completion.scheduleNow")}
           </Button>
@@ -779,14 +779,21 @@ export default function IULLeadGenForm() {
         {/* Progress Bar */}
         <div className="mb-6">
           <div className="flex justify-between items-center mb-2">
-            <span className="text-sm font-medium">
+            <span className="text-sm font-medium" id="progress-label">
               {t("progress.step", { current: currentStep, total: TOTAL_STEPS })}
             </span>
             <span className="text-sm text-muted-foreground">
               {t("progress.percent", { percent: Math.round(progress) })}
             </span>
           </div>
-          <Progress value={progress} className="h-2" />
+          <Progress 
+            value={progress} 
+            className="h-2" 
+            aria-labelledby="progress-label"
+            aria-valuenow={Math.round(progress)}
+            aria-valuemin={0}
+            aria-valuemax={100}
+          />
         </div>
 
         {/* Error Message */}
@@ -1005,7 +1012,7 @@ export default function IULLeadGenForm() {
                           }}
                           min={0}
                           max={80}
-                          className="w-24 h-12 text-center text-2xl font-bold text-[#0ea5e9] border-2 border-[#0ea5e9] focus:outline-none focus:ring-0 focus:bg-transparent active:bg-transparent"
+                          className="w-24 h-12 text-center text-2xl font-bold text-[#0284c7] border-2 border-[#0284c7] focus:outline-none focus:ring-0 focus:bg-transparent active:bg-transparent"
                         />
                         <span className="text-2xl font-semibold text-muted-foreground">{t("steps.4.yearsOld")}</span>
                       </div>
@@ -1268,7 +1275,7 @@ export default function IULLeadGenForm() {
             <Button
               onClick={() => handleNext()}
               disabled={!canProceed() || isSubmitting}
-              className="flex items-center gap-2 bg-gradient-to-r from-[#0ea5e9] to-[#2563eb] hover:from-[#3b82f6] hover:to-[#1d4ed8]"
+              className="flex items-center gap-2 bg-gradient-to-r from-[#0284c7] to-[#2563eb] hover:from-[#0369a1] hover:to-[#1d4ed8]"
             >
               {t("buttons.next")}
               <ArrowRight className="w-4 h-4" />
@@ -1277,7 +1284,7 @@ export default function IULLeadGenForm() {
             <Button
               onClick={handleSubmit}
               disabled={!canProceed() || isSubmitting}
-              className="flex items-center gap-2 bg-gradient-to-r from-[#0ea5e9] to-[#2563eb] hover:from-[#3b82f6] hover:to-[#1d4ed8]"
+              className="flex items-center gap-2 bg-gradient-to-r from-[#0284c7] to-[#2563eb] hover:from-[#0369a1] hover:to-[#1d4ed8]"
             >
               {isSubmitting ? t("buttons.submitting") : t("buttons.submit")}
             </Button>

@@ -75,7 +75,7 @@ export default async function IULQuotePage() {
       {/* Hero Section */}
       <div className="container mx-auto px-4 py-6 md:py-12 lg:py-16">
         <div className="max-w-4xl mx-auto text-center mb-6 md:mb-12">
-          <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold mb-2 md:mb-4 bg-gradient-to-r from-[#0ea5e9] to-[#2563eb] bg-clip-text text-transparent">
+          <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold mb-2 md:mb-4 bg-gradient-to-r from-[#0284c7] to-[#2563eb] bg-clip-text text-transparent">
             <span className="md:hidden">{t("hero.titleMobile")}</span>
             <span className="hidden md:inline">{t("hero.title")}</span>
           </h1>
@@ -94,7 +94,7 @@ export default async function IULQuotePage() {
         <div className="max-w-4xl mx-auto mt-6 md:mt-12 text-center">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
-              <div className="text-3xl font-bold text-[#0ea5e9] mb-2">
+              <div className="text-3xl font-bold text-[#0284c7] mb-2">
                 {t("trustIndicators.freeConsultation.value")}
               </div>
               <p className="text-muted-foreground">
@@ -102,7 +102,7 @@ export default async function IULQuotePage() {
               </p>
             </div>
             <div className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
-              <div className="text-3xl font-bold text-[#0ea5e9] mb-2">
+              <div className="text-3xl font-bold text-[#0284c7] mb-2">
                 {t("trustIndicators.quickProcess.value")}
               </div>
               <p className="text-muted-foreground">
@@ -110,7 +110,7 @@ export default async function IULQuotePage() {
               </p>
             </div>
             <div className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
-              <div className="text-3xl font-bold text-[#0ea5e9] mb-2">
+              <div className="text-3xl font-bold text-[#0284c7] mb-2">
                 {t("trustIndicators.expertGuidance.value")}
               </div>
               <p className="text-muted-foreground">
