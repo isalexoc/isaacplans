@@ -112,6 +112,9 @@
       "submit": "Submit",
       "submitting": "Submitting..."
     },
+    "legal": {
+      "agreeText": "By submitting this form, you agree to our"
+    },
       "completion": {
         "title": "Thank You!",
         "message": "We've received your information. Our team will contact you shortly to discuss your IUL options.",

@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations, useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -137,6 +138,7 @@ function generateStepScreenId(step: number): string {
 
 export default function IULLeadGenForm() {
   const t = useTranslations("iulQuote.form");
+  const tFooter = useTranslations("footer.links");
   const locale = useLocale();
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
@@ -1226,7 +1228,7 @@ export default function IULLeadGenForm() {
                   </div>
 
                   {/* Phone */}
-                  <div className="mb-4">
+                  <div className="mb-6">
                     <Label htmlFor="phone" className="mb-2 block text-sm font-medium">
                       {t("steps.8.title") || "Phone"}
                     </Label>
@@ -1258,8 +1260,19 @@ export default function IULLeadGenForm() {
                     )}
                   </div>
 
+                  {/* Submit Button */}
+                  <div className="mb-6">
+                    <Button
+                      onClick={handleSubmit}
+                      disabled={isSubmitting}
+                      className="w-full h-12 text-base font-semibold bg-gradient-to-r from-[#0284c7] to-[#2563eb] hover:from-[#0369a1] hover:to-[#1d4ed8] disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isSubmitting ? t("buttons.submitting") : t("buttons.submit")}
+                    </Button>
+                  </div>
+
                   {/* SMS Consent Checkbox */}
-                  <div className={`mt-6 p-3 rounded-lg ${
+                  <div className={`mb-6 p-3 rounded-lg ${
                     showValidationErrors && !formData.smsConsent ? "bg-red-50 dark:bg-red-900/20 border-2 border-red-300 dark:border-red-700" : ""
                   }`}>
                     <label className="flex items-start space-x-3 cursor-pointer">
@@ -1280,6 +1293,32 @@ export default function IULLeadGenForm() {
                       </span>
                     </label>
                   </div>
+
+                  {/* Privacy Policy and Terms Links */}
+                  <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <p className="text-xs text-muted-foreground text-center mb-2">
+                      {t("legal.agreeText")}
+                    </p>
+                    <div className="flex justify-center items-center gap-4 text-xs">
+                      <Link
+                        href={`/${locale}/privacy-policy`}
+                        className="text-[#0284c7] hover:text-[#0369a1] underline transition-colors"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {tFooter("privacy")}
+                      </Link>
+                      <span className="text-muted-foreground">•</span>
+                      <Link
+                        href={`/${locale}/terms-of-service`}
+                        className="text-[#0284c7] hover:text-[#0369a1] underline transition-colors"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {tFooter("terms")}
+                      </Link>
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
@@ -1287,20 +1326,20 @@ export default function IULLeadGenForm() {
         </AnimatePresence>
 
         {/* Navigation Buttons */}
-        <div className={`flex ${currentStep === 1 ? "justify-end" : "justify-between"} mt-8`}>
-          {currentStep > 1 && (
-            <Button
-              variant="outline"
-              onClick={handleBack}
-              disabled={isSubmitting}
-              className="flex items-center gap-2"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              {t("buttons.back")}
-            </Button>
-          )}
+        {currentStep < TOTAL_STEPS && (
+          <div className={`flex ${currentStep === 1 ? "justify-end" : "justify-between"} mt-8`}>
+            {currentStep > 1 && (
+              <Button
+                variant="outline"
+                onClick={handleBack}
+                disabled={isSubmitting}
+                className="flex items-center gap-2"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                {t("buttons.back")}
+              </Button>
+            )}
 
-          {currentStep < TOTAL_STEPS ? (
             <Button
               onClick={() => {
                 if (canProceed()) {
@@ -1338,16 +1377,23 @@ export default function IULLeadGenForm() {
               {t("buttons.next")}
               <ArrowRight className="w-4 h-4" />
             </Button>
-          ) : (
+          </div>
+        )}
+
+        {/* Back Button for Step 6 */}
+        {currentStep === TOTAL_STEPS && (
+          <div className="flex justify-start mt-8">
             <Button
-              onClick={handleSubmit}
+              variant="outline"
+              onClick={handleBack}
               disabled={isSubmitting}
-              className="flex items-center gap-2 bg-gradient-to-r from-[#0284c7] to-[#2563eb] hover:from-[#0369a1] hover:to-[#1d4ed8] disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center gap-2"
             >
-              {isSubmitting ? t("buttons.submitting") : t("buttons.submit")}
+              <ArrowLeft className="w-4 h-4" />
+              {t("buttons.back")}
             </Button>
-          )}
-        </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

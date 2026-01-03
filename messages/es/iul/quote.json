@@ -112,6 +112,9 @@
       "submit": "Enviar",
       "submitting": "Enviando..."
     },
+    "legal": {
+      "agreeText": "Al enviar este formulario, aceptas nuestra"
+    },
       "completion": {
         "title": "¡Gracias!",
         "message": "Hemos recibido tu información. Nuestro equipo se pondrá en contacto contigo pronto para discutir tus opciones de IUL.",
