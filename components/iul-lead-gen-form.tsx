@@ -6,8 +6,6 @@ import { useTranslations, useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Progress } from "@/components/ui/progress";
-import { Slider } from "@/components/ui/slider";
 import { Card, CardContent } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -101,26 +99,24 @@ interface FormData {
   retirementTimeline: string;
   investments: string[];
   monthlySavings: string;
-  age: number;
   state: string;
   firstName: string;
   lastName: string;
   email: string;
   phone: string;
+  smsConsent: boolean;
 }
 
-const TOTAL_STEPS = 8;
+const TOTAL_STEPS = 6;
 
 // Step names mapping for comprehensive tracking
 const STEP_NAMES: Record<number, string> = {
   1: "Retirement Timeline",
   2: "Current Investments",
   3: "Monthly Savings",
-  4: "Age",
-  5: "State",
-  6: "Name",
-  7: "Email",
-  8: "Phone",
+  4: "State",
+  5: "Name",
+  6: "Contact Info",
 };
 
 // Step hash mapping for URL tracking (like competitor)
@@ -128,11 +124,9 @@ const STEP_HASHES: Record<number, string> = {
   1: "#retirement-timeline",
   2: "#current-investments",
   3: "#monthly-savings",
-  4: "#age",
-  5: "#state",
-  6: "#name",
-  7: "#email",
-  8: "#phone",
+  4: "#state",
+  5: "#name",
+  6: "#contact-info",
 };
 
 // Generate screen ID for a step
@@ -154,6 +148,8 @@ export default function IULLeadGenForm() {
   // Validation errors
   const [emailError, setEmailError] = useState<string | null>(null);
   const [phoneError, setPhoneError] = useState<string | null>(null);
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  const [showValidationErrors, setShowValidationErrors] = useState(false);
   
   // State combobox
   const [stateOpen, setStateOpen] = useState(false);
@@ -167,11 +163,8 @@ export default function IULLeadGenForm() {
   const [valuesOnArrival, setValuesOnArrival] = useState<{
     step1?: string;
     step3?: string;
-    step5?: string;
+    step4?: string;
   }>({});
-  
-  // Local state for age input to allow empty input
-  const [ageInputValue, setAgeInputValue] = useState<string>("");
   
   // Time tracking for analytics
   const [formStartTime] = useState(Date.now());
@@ -181,12 +174,12 @@ export default function IULLeadGenForm() {
     retirementTimeline: "",
     investments: [],
     monthlySavings: "",
-    age: 29,
     state: "",
     firstName: "",
     lastName: "",
     email: "",
     phone: "",
+    smsConsent: false,
   });
 
   // Helper function to get UTM parameters from URL
@@ -223,21 +216,14 @@ export default function IULLeadGenForm() {
     }
   }, [currentStep, locale]);
   
-  // Sync age input value with formData.age when step changes or formData changes externally (slider)
-  useEffect(() => {
-    if (currentStep === 4) {
-      setAgeInputValue(formData.age === 0 ? "" : formData.age.toString());
-    }
-  }, [formData.age, currentStep]);
-
   // Track values when arriving at auto-advance steps to prevent auto-advance if value already existed
   useEffect(() => {
     if (currentStep === 1) {
       setValuesOnArrival((prev) => ({ ...prev, step1: formData.retirementTimeline }));
     } else if (currentStep === 3) {
       setValuesOnArrival((prev) => ({ ...prev, step3: formData.monthlySavings }));
-    } else if (currentStep === 5) {
-      setValuesOnArrival((prev) => ({ ...prev, step5: formData.state }));
+    } else if (currentStep === 4) {
+      setValuesOnArrival((prev) => ({ ...prev, step4: formData.state }));
     }
   }, [currentStep]); // Only run when step changes, not when values change
   
@@ -371,13 +357,17 @@ export default function IULLeadGenForm() {
   const updateFormData = (field: keyof FormData, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     
-    // Real-time validation for email
+      // Real-time validation for email
     if (field === "email") {
       const error = validateEmail(value);
       setEmailError(error);
       // Track validation error if it exists
-      if (error && currentStep === 7) {
-        trackValidationError(7, 'email', 'invalid_format');
+      if (error && currentStep === 6) {
+        trackValidationError(6, 'email', 'invalid_format');
+      }
+      // Clear validation errors when user starts typing
+      if (showValidationErrors && value) {
+        setShowValidationErrors(false);
       }
     }
     
@@ -386,16 +376,25 @@ export default function IULLeadGenForm() {
       const error = validatePhone(value);
       setPhoneError(error);
       // Track validation error if it exists
-      if (error && currentStep === 8) {
-        trackValidationError(8, 'phone', 'invalid_format');
+      if (error && currentStep === 6) {
+        trackValidationError(6, 'phone', 'invalid_format');
       }
+      // Clear validation errors when user starts typing
+      if (showValidationErrors && value) {
+        setShowValidationErrors(false);
+      }
+    }
+    
+    // Clear validation errors when user makes any change
+    if (showValidationErrors) {
+      setShowValidationErrors(false);
     }
     
     // Reset previousStep when user changes a value on auto-advance steps
     // This allows auto-advance to work again if they change their selection
     if ((field === "retirementTimeline" && currentStep === 1) ||
         (field === "monthlySavings" && currentStep === 3) ||
-        (field === "state" && currentStep === 5)) {
+        (field === "state" && currentStep === 4)) {
       setPreviousStep(currentStep);
       // Update valuesOnArrival to the old value so that the new value triggers auto-advance
       if (field === "retirementTimeline") {
@@ -403,7 +402,7 @@ export default function IULLeadGenForm() {
       } else if (field === "monthlySavings") {
         setValuesOnArrival((prev) => ({ ...prev, step3: formData.monthlySavings }));
       } else if (field === "state") {
-        setValuesOnArrival((prev) => ({ ...prev, step5: formData.state }));
+        setValuesOnArrival((prev) => ({ ...prev, step4: formData.state }));
       }
     }
     
@@ -434,19 +433,56 @@ export default function IULLeadGenForm() {
       case 3:
         return !!formData.monthlySavings;
       case 4:
-        return formData.age >= 0 && formData.age <= 80;
-      case 5:
         return !!formData.state;
-      case 6:
+      case 5:
         return !!formData.firstName && !!formData.lastName;
-      case 7:
-        return !!formData.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email) && !emailError;
-      case 8:
-        return !!formData.phone && formData.phone.replace(/\D/g, "").length >= 10 && !phoneError;
+      case 6:
+        return !!formData.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email) && !emailError &&
+               !!formData.phone && formData.phone.replace(/\D/g, "").length >= 10 && !phoneError &&
+               formData.smsConsent;
       default:
         return false;
     }
-  }, [currentStep, formData]);
+  }, [currentStep, formData, emailError, phoneError]);
+
+  // Validate all form fields and return specific errors
+  const validateAllFields = useCallback((): string[] => {
+    const errors: string[] = [];
+    
+    if (!formData.retirementTimeline) {
+      errors.push("Please select your retirement timeline");
+    }
+    if (formData.investments.length === 0) {
+      errors.push("Please select at least one current investment");
+    }
+    if (!formData.monthlySavings) {
+      errors.push("Please select your monthly savings amount");
+    }
+    if (!formData.state) {
+      errors.push("Please select your state");
+    }
+    if (!formData.firstName) {
+      errors.push("Please enter your first name");
+    }
+    if (!formData.lastName) {
+      errors.push("Please enter your last name");
+    }
+    if (!formData.email) {
+      errors.push("Please enter your email address");
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      errors.push("Please enter a valid email address");
+    }
+    if (!formData.phone) {
+      errors.push("Please enter your phone number");
+    } else if (formData.phone.replace(/\D/g, "").length < 10) {
+      errors.push("Please enter a valid 10-digit phone number");
+    }
+    if (!formData.smsConsent) {
+      errors.push("Please consent to receive SMS notifications to continue");
+    }
+    
+    return errors;
+  }, [formData]);
 
   // Track step completion with consolidated event (reduces noise vs individual events per step)
   const trackStepCompletion = useCallback((step: number, autoAdvanced: boolean = false) => {
@@ -467,9 +503,6 @@ export default function IULLeadGenForm() {
         selectedValue = formData.monthlySavings || null;
         break;
       case 4:
-        selectedValue = formData.age.toString();
-        break;
-      case 5:
         selectedValue = formData.state || null;
         break;
     }
@@ -509,6 +542,10 @@ export default function IULLeadGenForm() {
 
   const handleNext = useCallback((skipTracking: boolean = false) => {
     if (canProceed() && currentStep < TOTAL_STEPS) {
+      // Clear validation errors when moving forward
+      setShowValidationErrors(false);
+      setValidationErrors([]);
+      
       // Track step completion before advancing (unless already tracked by auto-advance)
       if (!skipTracking) {
         trackStepCompletion(currentStep, false);
@@ -521,6 +558,10 @@ export default function IULLeadGenForm() {
   const handleBack = () => {
     if (currentStep > 1) {
       setIsNavigatingBack(true);
+      
+      // Clear validation errors when going back
+      setShowValidationErrors(false);
+      setValidationErrors([]);
       
       // Track back navigation
       sendGAEvent('event', 'form_step_back', {
@@ -565,16 +606,15 @@ export default function IULLeadGenForm() {
           handleNext(true); // Pass true to skip duplicate tracking
         }, 500);
       }
-    } else if (currentStep === 5 && formData.state && canProceed()) {
+    } else if (currentStep === 4 && formData.state && canProceed()) {
       // Only auto-advance if value changed (was empty or different when we arrived)
-      if (formData.state !== valuesOnArrival.step5) {
+      if (formData.state !== valuesOnArrival.step4) {
         timer = setTimeout(() => {
           trackStepCompletion(currentStep, true);
           handleNext(true); // Pass true to skip duplicate tracking
         }, 500);
       }
     }
-    // Note: Step 4 (age) doesn't auto-advance - user needs to confirm with Next button
     
     return () => {
       if (timer) clearTimeout(timer);
@@ -582,8 +622,48 @@ export default function IULLeadGenForm() {
   }, [formData.retirementTimeline, formData.monthlySavings, formData.state, currentStep, canProceed, handleNext, trackStepCompletion, isNavigatingBack, previousStep, valuesOnArrival]);
 
   const handleSubmit = async () => {
-    if (!canProceed()) return;
+    // Validate all fields first
+    const errors = validateAllFields();
+    
+    if (errors.length > 0) {
+      setValidationErrors(errors);
+      setShowValidationErrors(true);
+      
+      // Scroll to top of form to show errors
+      const formCard = document.querySelector('[class*="max-w-2xl"]');
+      if (formCard) {
+        formCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+      
+      // Focus on first missing field if on step 6
+      if (currentStep === 6) {
+        setTimeout(() => {
+          if (!formData.email) {
+            document.getElementById('email')?.focus();
+          } else if (!formData.phone) {
+            document.getElementById('phone')?.focus();
+          } else if (!formData.smsConsent) {
+            document.getElementById('sms-consent')?.focus();
+          }
+        }, 100);
+      }
+      
+      // Track validation error
+      sendGAEvent('event', 'form_validation_error', {
+        step_number: currentStep,
+        step_name: STEP_NAMES[currentStep],
+        error_count: errors.length,
+        form_type: 'IUL Lead Generation',
+        form_id: 'iul_lead_gen',
+        error_type: 'submit_attempt_with_errors',
+      });
+      
+      return;
+    }
 
+    // Clear any previous validation errors
+    setValidationErrors([]);
+    setShowValidationErrors(false);
     setIsSubmitting(true);
     setSubmitError(null);
 
@@ -609,9 +689,9 @@ export default function IULLeadGenForm() {
             retirementTimeline: formData.retirementTimeline,
             investments: formData.investments,
             monthlySavings: formData.monthlySavings,
-            age: formData.age,
             state: formData.state,
             language: locale, // Include the language/locale
+            smsConsent: formData.smsConsent,
           },
           // CAPI metadata for deduplication
           meta: {
@@ -694,8 +774,6 @@ export default function IULLeadGenForm() {
     }
   };
 
-  const progress = (currentStep / TOTAL_STEPS) * 100;
-
   // Helper function to build calendar URL
   const getCalendarUrl = useCallback(() => {
     const calendarPath = locale === "es" ? "/iul/calendario" : "/iul/calendar";
@@ -776,27 +854,30 @@ export default function IULLeadGenForm() {
   return (
     <Card className="w-full max-w-2xl mx-auto">
       <CardContent className="p-6 md:p-8">
-        {/* Progress Bar */}
-        <div className="mb-6">
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-sm font-medium" id="progress-label">
-              {t("progress.step", { current: currentStep, total: TOTAL_STEPS })}
-            </span>
-            <span className="text-sm text-muted-foreground">
-              {t("progress.percent", { percent: Math.round(progress) })}
-            </span>
-          </div>
-          <Progress 
-            value={progress} 
-            className="h-2" 
-            aria-labelledby="progress-label"
-            aria-valuenow={Math.round(progress)}
-            aria-valuemin={0}
-            aria-valuemax={100}
-          />
-        </div>
+        {/* Validation Errors Summary */}
+        {showValidationErrors && validationErrors.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border-2 border-red-300 dark:border-red-700 rounded-lg"
+          >
+            <div className="flex items-start gap-2 mb-2">
+              <span className="text-xl">⚠️</span>
+              <div className="flex-1">
+                <h3 className="font-semibold text-red-800 dark:text-red-300 mb-2">
+                  Almost there! Please complete the following:
+                </h3>
+                <ul className="list-disc list-inside space-y-1 text-sm text-red-700 dark:text-red-400">
+                  {validationErrors.map((error, index) => (
+                    <li key={index}>{error}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </motion.div>
+        )}
 
-        {/* Error Message */}
+        {/* Submit Error Message */}
         {submitError && (
           <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
             <p className="text-sm text-red-600 dark:text-red-400">{submitError}</p>
@@ -940,95 +1021,8 @@ export default function IULLeadGenForm() {
               </div>
             )}
 
-            {/* Step 4: Age */}
+            {/* Step 4: State */}
             {currentStep === 4 && (
-              <div className="space-y-6">
-                <div>
-                  <Label className="text-lg font-semibold mb-4 block">
-                    {t("steps.4.title")}
-                  </Label>
-                  <div className="space-y-4">
-                    <div className="px-2">
-                      <Slider
-                        value={[formData.age]}
-                        onValueChange={(value) => updateFormData("age", value[0])}
-                        min={0}
-                        max={80}
-                        step={1}
-                        className="w-full"
-                      />
-                    </div>
-                    <div className="text-center space-y-3">
-                      <div className="flex items-center justify-center gap-4">
-                        <Input
-                          type="text"
-                          inputMode="numeric"
-                          value={ageInputValue}
-                          onChange={(e) => {
-                            const inputValue = e.target.value;
-                            // Update local state immediately for responsive UI
-                            setAgeInputValue(inputValue);
-                            
-                            // Allow empty input
-                            if (inputValue === "") {
-                              return; // Keep input empty, don't update formData yet
-                            }
-                            
-                            // Only allow digits
-                            const digitsOnly = inputValue.replace(/\D/g, "");
-                            if (digitsOnly === "") {
-                              setAgeInputValue("");
-                              return;
-                            }
-                            
-                            const value = parseInt(digitsOnly, 10);
-                            if (!isNaN(value)) {
-                              const clampedValue = Math.min(Math.max(0, value), 80);
-                              updateFormData("age", clampedValue);
-                              // Update local state to match clamped value
-                              setAgeInputValue(clampedValue.toString());
-                            }
-                          }}
-                          onBlur={(e) => {
-                            // Ensure we have a valid age on blur
-                            const inputValue = e.target.value.trim();
-                            if (inputValue === "") {
-                              // If empty, restore to current formData age or default to 29
-                              const ageToUse = formData.age > 0 ? formData.age : 29;
-                              updateFormData("age", ageToUse);
-                              setAgeInputValue(ageToUse.toString());
-                            } else {
-                              const value = parseInt(inputValue, 10);
-                              if (isNaN(value) || value < 0) {
-                                const ageToUse = formData.age > 0 ? formData.age : 29;
-                                updateFormData("age", ageToUse);
-                                setAgeInputValue(ageToUse.toString());
-                              } else {
-                                const clampedValue = Math.min(Math.max(0, value), 80);
-                                updateFormData("age", clampedValue);
-                                setAgeInputValue(clampedValue.toString());
-                              }
-                            }
-                          }}
-                          min={0}
-                          max={80}
-                          className="w-24 h-12 text-center text-2xl font-bold text-[#0284c7] border-2 border-[#0284c7] focus:outline-none focus:ring-0 focus:bg-transparent active:bg-transparent"
-                        />
-                        <span className="text-2xl font-semibold text-muted-foreground">{t("steps.4.yearsOld")}</span>
-                      </div>
-                      {formData.age >= 18 && (
-                        <p className="text-sm text-muted-foreground">
-                          {t("steps.4.retirementMessage", { years: Math.max(0, 65 - formData.age) })}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Step 5: State */}
-            {currentStep === 5 && (
               <div className="space-y-6">
                 <div>
                   <Label className="text-lg font-semibold mb-4 block">
@@ -1160,8 +1154,8 @@ export default function IULLeadGenForm() {
               </div>
             )}
 
-            {/* Step 6: Name */}
-            {currentStep === 6 && (
+            {/* Step 5: Name */}
+            {currentStep === 5 && (
               <div className="space-y-6">
                 <div>
                   <Label className="text-lg font-semibold mb-4 block">{t("steps.6.title")}</Label>
@@ -1175,7 +1169,9 @@ export default function IULLeadGenForm() {
                         value={formData.firstName}
                         onChange={(e) => updateFormData("firstName", e.target.value)}
                         placeholder={t("steps.6.firstName.placeholder")}
-                        className="h-12 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:bg-transparent focus:bg-transparent focus:outline-none active:bg-transparent"
+                        className={`h-12 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:bg-transparent focus:bg-transparent focus:outline-none active:bg-transparent ${
+                          showValidationErrors && !formData.firstName ? "border-red-500 border-2" : ""
+                        }`}
                       />
                     </div>
                     <div>
@@ -1187,7 +1183,9 @@ export default function IULLeadGenForm() {
                         value={formData.lastName}
                         onChange={(e) => updateFormData("lastName", e.target.value)}
                         placeholder={t("steps.6.lastName.placeholder")}
-                        className="h-12 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:bg-transparent focus:bg-transparent focus:outline-none active:bg-transparent"
+                        className={`h-12 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:bg-transparent focus:bg-transparent focus:outline-none active:bg-transparent ${
+                          showValidationErrors && !formData.lastName ? "border-red-500 border-2" : ""
+                        }`}
                       />
                     </div>
                   </div>
@@ -1195,62 +1193,93 @@ export default function IULLeadGenForm() {
               </div>
             )}
 
-            {/* Step 7: Email */}
-            {currentStep === 7 && (
+            {/* Step 6: Email, Phone, and Consent */}
+            {currentStep === 6 && (
               <div className="space-y-6">
                 <div>
                   <Label className="text-lg font-semibold mb-4 block">
-                    {t("steps.7.title")}
+                    {t("steps.7.title") || "Contact Information"}
                   </Label>
-                  <Input
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => updateFormData("email", e.target.value)}
-                    placeholder={t("steps.7.placeholder")}
-                    className={`h-12 text-base focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:bg-transparent focus:bg-transparent focus:outline-none active:bg-transparent ${emailError ? "border-red-500" : ""}`}
-                  />
-                  {emailError && (
-                    <p className="mt-2 text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
-                      <span>⚠️</span>
-                      <span>{emailError}</span>
-                    </p>
-                  )}
-                </div>
-              </div>
-            )}
+                  
+                  {/* Email */}
+                  <div className="mb-4">
+                    <Label htmlFor="email" className="mb-2 block text-sm font-medium">
+                      {t("steps.7.title") || "Email"}
+                    </Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      value={formData.email}
+                      onChange={(e) => updateFormData("email", e.target.value)}
+                      placeholder={t("steps.7.placeholder") || "Enter your email"}
+                      className={`h-12 text-base focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:bg-transparent focus:bg-transparent focus:outline-none active:bg-transparent ${
+                        emailError || (showValidationErrors && (!formData.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))) 
+                          ? "border-red-500 border-2" : ""
+                      }`}
+                    />
+                    {emailError && (
+                      <p className="mt-2 text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+                        <span>⚠️</span>
+                        <span>{emailError}</span>
+                      </p>
+                    )}
+                  </div>
 
-            {/* Step 8: Phone */}
-            {currentStep === 8 && (
-              <div className="space-y-6">
-                <div>
-                  <Label className="text-lg font-semibold mb-4 block">
-                    {t("steps.8.title")}
-                  </Label>
-                  <Input
-                    type="tel"
-                    value={formData.phone}
-                    onChange={(e) => {
-                      const formatted = formatPhoneNumber(e.target.value);
-                      updateFormData("phone", formatted);
-                    }}
-                    placeholder={t("steps.8.placeholder")}
-                    className={`h-12 text-base focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:bg-transparent focus:bg-transparent focus:outline-none active:bg-transparent ${phoneError ? "border-red-500" : ""}`}
-                    maxLength={14}
-                  />
-                  {phoneError && (
-                    <p className="mt-2 text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
-                      <span>⚠️</span>
-                      <span>{phoneError}</span>
-                    </p>
-                  )}
-                  {!phoneError && formData.phone && (
-                    <p className="text-sm text-green-600 dark:text-green-400 mt-2">
-                      ✓ Valid phone number
-                    </p>
-                  )}
-                  <p className="text-sm text-muted-foreground mt-2">
-                    {t("steps.8.subtitle")}
-                  </p>
+                  {/* Phone */}
+                  <div className="mb-4">
+                    <Label htmlFor="phone" className="mb-2 block text-sm font-medium">
+                      {t("steps.8.title") || "Phone"}
+                    </Label>
+                    <Input
+                      id="phone"
+                      type="tel"
+                      value={formData.phone}
+                      onChange={(e) => {
+                        const formatted = formatPhoneNumber(e.target.value);
+                        updateFormData("phone", formatted);
+                      }}
+                      placeholder={t("steps.8.placeholder") || "Enter your phone number"}
+                      className={`h-12 text-base focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:bg-transparent focus:bg-transparent focus:outline-none active:bg-transparent ${
+                        phoneError || (showValidationErrors && (!formData.phone || formData.phone.replace(/\D/g, "").length < 10)) 
+                          ? "border-red-500 border-2" : ""
+                      }`}
+                      maxLength={14}
+                    />
+                    {phoneError && (
+                      <p className="mt-2 text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+                        <span>⚠️</span>
+                        <span>{phoneError}</span>
+                      </p>
+                    )}
+                    {!phoneError && formData.phone && (
+                      <p className="text-sm text-green-600 dark:text-green-400 mt-2">
+                        ✓ Valid phone number
+                      </p>
+                    )}
+                  </div>
+
+                  {/* SMS Consent Checkbox */}
+                  <div className={`mt-6 p-3 rounded-lg ${
+                    showValidationErrors && !formData.smsConsent ? "bg-red-50 dark:bg-red-900/20 border-2 border-red-300 dark:border-red-700" : ""
+                  }`}>
+                    <label className="flex items-start space-x-3 cursor-pointer">
+                      <Checkbox
+                        id="sms-consent"
+                        checked={formData.smsConsent}
+                        onCheckedChange={(checked) => updateFormData("smsConsent", checked === true)}
+                        className={`mt-1 ${
+                          showValidationErrors && !formData.smsConsent ? "border-red-500" : ""
+                        }`}
+                      />
+                      <span className={`text-sm ${
+                        showValidationErrors && !formData.smsConsent 
+                          ? "text-red-700 dark:text-red-400 font-medium" 
+                          : "text-muted-foreground"
+                      }`}>
+                        I Consent to Receive SMS Notifications, Alerts from Isaac Plans Insurance. Message frequency varies. Message & data rates may apply. Text HELP to (540) 426-1804 for assistance. You can reply STOP to unsubscribe at any time.
+                      </span>
+                    </label>
+                  </div>
                 </div>
               </div>
             )}
@@ -1273,9 +1302,38 @@ export default function IULLeadGenForm() {
 
           {currentStep < TOTAL_STEPS ? (
             <Button
-              onClick={() => handleNext()}
-              disabled={!canProceed() || isSubmitting}
-              className="flex items-center gap-2 bg-gradient-to-r from-[#0284c7] to-[#2563eb] hover:from-[#0369a1] hover:to-[#1d4ed8]"
+              onClick={() => {
+                if (canProceed()) {
+                  handleNext();
+                } else {
+                  // Show helpful message for current step
+                  let message = "";
+                  switch (currentStep) {
+                    case 1:
+                      message = "Please select your retirement timeline";
+                      break;
+                    case 2:
+                      message = "Please select at least one current investment";
+                      break;
+                    case 3:
+                      message = "Please select your monthly savings amount";
+                      break;
+                    case 4:
+                      message = "Please select your state";
+                      break;
+                    case 5:
+                      message = "Please enter both your first and last name";
+                      break;
+                  }
+                  if (message) {
+                    setValidationErrors([message]);
+                    setShowValidationErrors(true);
+                    setTimeout(() => setShowValidationErrors(false), 3000);
+                  }
+                }
+              }}
+              disabled={isSubmitting}
+              className="flex items-center gap-2 bg-gradient-to-r from-[#0284c7] to-[#2563eb] hover:from-[#0369a1] hover:to-[#1d4ed8] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {t("buttons.next")}
               <ArrowRight className="w-4 h-4" />
@@ -1283,8 +1341,8 @@ export default function IULLeadGenForm() {
           ) : (
             <Button
               onClick={handleSubmit}
-              disabled={!canProceed() || isSubmitting}
-              className="flex items-center gap-2 bg-gradient-to-r from-[#0284c7] to-[#2563eb] hover:from-[#0369a1] hover:to-[#1d4ed8]"
+              disabled={isSubmitting}
+              className="flex items-center gap-2 bg-gradient-to-r from-[#0284c7] to-[#2563eb] hover:from-[#0369a1] hover:to-[#1d4ed8] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSubmitting ? t("buttons.submitting") : t("buttons.submit")}
             </Button>

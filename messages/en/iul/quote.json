@@ -11,6 +11,11 @@
       "description": "Let me help you discover how Indexed Universal Life insurance can help you build wealth while protecting your loved ones. Answer a few quick questions to get personalized IUL recommendations tailored to your financial goals.",
       "descriptionMobile": "Get personalized IUL recommendations in minutes."
     },
+    "landing": {
+      "title": "3 Things You NEED To Know BEFORE Getting An IUL",
+      "subtitle": "Watch this video to see how to set an IUL up properly, then complete the survey below",
+      "surveyCta": "Complete the survey to get your free quote."
+    },
     "trustIndicators": {
       "freeConsultation": {
         "value": "100%",

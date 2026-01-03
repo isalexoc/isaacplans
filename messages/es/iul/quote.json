@@ -11,6 +11,11 @@
       "description": "Déjame ayudarte a descubrir cómo el seguro de Vida Universal Indexado puede ayudarte a construir riqueza mientras proteges a tus seres queridos. Responde unas pocas preguntas rápidas para obtener recomendaciones personalizadas de IUL adaptadas a tus objetivos financieros.",
       "descriptionMobile": "Obtén recomendaciones personalizadas de IUL en minutos."
     },
+    "landing": {
+      "title": "3 Cosas que NECESITAS Saber ANTES de Obtener un IUL",
+      "subtitle": "Mira este video para ver cómo configurar un IUL correctamente, luego completa la encuesta a continuación",
+      "surveyCta": "Completa la encuesta para obtener tu cotización gratis."
+    },
     "trustIndicators": {
       "freeConsultation": {
         "value": "100%",
