@@ -41,7 +41,21 @@
       "invalidEmail": "Por favor ingresa una dirección de correo electrónico válida (ej., ejemplo@gmail.com)",
       "invalidEmailIncomplete": "Por favor ingresa una dirección de correo electrónico válida (ej., ejemplo@gmail.com)",
       "invalidPhone": "Por favor ingresa un número de teléfono válido de 10 dígitos",
-      "invalidPhoneLength": "El número de teléfono es demasiado largo. Por favor ingresa un número válido de 10 dígitos"
+      "invalidPhoneLength": "El número de teléfono es demasiado largo. Por favor ingresa un número válido de 10 dígitos",
+      "retirementTimelineRequired": "Por favor selecciona tu línea de tiempo de jubilación",
+      "investmentRequired": "Por favor selecciona al menos una inversión actual",
+      "monthlySavingsRequired": "Por favor selecciona tu cantidad de ahorros mensuales",
+      "stateRequired": "Por favor selecciona tu estado",
+      "firstNameRequired": "Por favor ingresa tu nombre",
+      "lastNameRequired": "Por favor ingresa tu apellido",
+      "nameRequired": "Por favor ingresa tanto tu nombre como tu apellido",
+      "emailRequired": "Por favor ingresa tu dirección de correo electrónico",
+      "emailInvalid": "Por favor ingresa una dirección de correo electrónico válida",
+      "phoneRequired": "Por favor ingresa tu número de teléfono",
+      "phoneInvalid": "Por favor ingresa un número de teléfono válido de 10 dígitos",
+      "smsConsentRequired": "Por favor acepta recibir notificaciones SMS para continuar",
+      "validationSummaryTitle": "¡Casi terminamos! Por favor completa lo siguiente:",
+      "phoneValid": "✓ Número de teléfono válido"
     },
     "steps": {
       "1": {

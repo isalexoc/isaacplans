@@ -41,7 +41,21 @@
       "invalidEmail": "Please enter a valid email address (e.g., example@gmail.com)",
       "invalidEmailIncomplete": "Please enter a valid email address (e.g., example@gmail.com)",
       "invalidPhone": "Please enter a valid 10-digit phone number",
-      "invalidPhoneLength": "Phone number is too long. Please enter a valid 10-digit number"
+      "invalidPhoneLength": "Phone number is too long. Please enter a valid 10-digit number",
+      "retirementTimelineRequired": "Please select your retirement timeline",
+      "investmentRequired": "Please select at least one current investment",
+      "monthlySavingsRequired": "Please select your monthly savings amount",
+      "stateRequired": "Please select your state",
+      "firstNameRequired": "Please enter your first name",
+      "lastNameRequired": "Please enter your last name",
+      "nameRequired": "Please enter both your first and last name",
+      "emailRequired": "Please enter your email address",
+      "emailInvalid": "Please enter a valid email address",
+      "phoneRequired": "Please enter your phone number",
+      "phoneInvalid": "Please enter a valid 10-digit phone number",
+      "smsConsentRequired": "Please consent to receive SMS notifications to continue",
+      "validationSummaryTitle": "Almost there! Please complete the following:",
+      "phoneValid": "✓ Valid phone number"
     },
     "steps": {
       "1": {

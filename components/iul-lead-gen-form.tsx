@@ -452,39 +452,39 @@ export default function IULLeadGenForm() {
     const errors: string[] = [];
     
     if (!formData.retirementTimeline) {
-      errors.push("Please select your retirement timeline");
+      errors.push(t("errors.retirementTimelineRequired"));
     }
     if (formData.investments.length === 0) {
-      errors.push("Please select at least one current investment");
+      errors.push(t("errors.investmentRequired"));
     }
     if (!formData.monthlySavings) {
-      errors.push("Please select your monthly savings amount");
+      errors.push(t("errors.monthlySavingsRequired"));
     }
     if (!formData.state) {
-      errors.push("Please select your state");
+      errors.push(t("errors.stateRequired"));
     }
     if (!formData.firstName) {
-      errors.push("Please enter your first name");
+      errors.push(t("errors.firstNameRequired"));
     }
     if (!formData.lastName) {
-      errors.push("Please enter your last name");
+      errors.push(t("errors.lastNameRequired"));
     }
     if (!formData.email) {
-      errors.push("Please enter your email address");
+      errors.push(t("errors.emailRequired"));
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      errors.push("Please enter a valid email address");
+      errors.push(t("errors.emailInvalid"));
     }
     if (!formData.phone) {
-      errors.push("Please enter your phone number");
+      errors.push(t("errors.phoneRequired"));
     } else if (formData.phone.replace(/\D/g, "").length < 10) {
-      errors.push("Please enter a valid 10-digit phone number");
+      errors.push(t("errors.phoneInvalid"));
     }
     if (!formData.smsConsent) {
-      errors.push("Please consent to receive SMS notifications to continue");
+      errors.push(t("errors.smsConsentRequired"));
     }
     
     return errors;
-  }, [formData]);
+  }, [formData, t]);
 
   // Track step completion with consolidated event (reduces noise vs individual events per step)
   const trackStepCompletion = useCallback((step: number, autoAdvanced: boolean = false) => {
@@ -867,7 +867,7 @@ export default function IULLeadGenForm() {
               <span className="text-xl">⚠️</span>
               <div className="flex-1">
                 <h3 className="font-semibold text-red-800 dark:text-red-300 mb-2">
-                  Almost there! Please complete the following:
+                  {t("errors.validationSummaryTitle")}
                 </h3>
                 <ul className="list-disc list-inside space-y-1 text-sm text-red-700 dark:text-red-400">
                   {validationErrors.map((error, index) => (
@@ -1255,7 +1255,7 @@ export default function IULLeadGenForm() {
                     )}
                     {!phoneError && formData.phone && (
                       <p className="text-sm text-green-600 dark:text-green-400 mt-2">
-                        ✓ Valid phone number
+                        {t("errors.phoneValid")}
                       </p>
                     )}
                   </div>
@@ -1349,19 +1349,19 @@ export default function IULLeadGenForm() {
                   let message = "";
                   switch (currentStep) {
                     case 1:
-                      message = "Please select your retirement timeline";
+                      message = t("errors.retirementTimelineRequired");
                       break;
                     case 2:
-                      message = "Please select at least one current investment";
+                      message = t("errors.investmentRequired");
                       break;
                     case 3:
-                      message = "Please select your monthly savings amount";
+                      message = t("errors.monthlySavingsRequired");
                       break;
                     case 4:
-                      message = "Please select your state";
+                      message = t("errors.stateRequired");
                       break;
                     case 5:
-                      message = "Please enter both your first and last name";
+                      message = t("errors.nameRequired");
                       break;
                   }
                   if (message) {
