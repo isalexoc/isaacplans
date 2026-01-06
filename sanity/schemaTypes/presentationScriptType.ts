@@ -49,7 +49,25 @@ export const presentationScriptType = defineType({
           type: 'array',
           title: 'Content (English)',
           description: 'The script content in English',
-          of: [{type: 'block'}],
+          of: [
+            {type: 'block'},
+            {
+              type: 'image',
+              fields: [
+                {
+                  name: 'alt',
+                  type: 'string',
+                  title: 'Alt Text',
+                  description: 'Important for SEO and accessibility',
+                },
+                {
+                  name: 'caption',
+                  type: 'string',
+                  title: 'Caption',
+                },
+              ],
+            },
+          ],
           validation: (rule: any) => rule.required(),
         },
         {
@@ -57,7 +75,25 @@ export const presentationScriptType = defineType({
           type: 'array',
           title: 'Content (Spanish)',
           description: 'El contenido del guión en español',
-          of: [{type: 'block'}],
+          of: [
+            {type: 'block'},
+            {
+              type: 'image',
+              fields: [
+                {
+                  name: 'alt',
+                  type: 'string',
+                  title: 'Alt Text',
+                  description: 'Importante para SEO y accesibilidad',
+                },
+                {
+                  name: 'caption',
+                  type: 'string',
+                  title: 'Caption',
+                },
+              ],
+            },
+          ],
           validation: (rule: any) => rule.required(),
         },
         {
@@ -65,14 +101,50 @@ export const presentationScriptType = defineType({
           type: 'array',
           title: 'Tips (English)',
           description: 'Key tips and strategies in English',
-          of: [{type: 'block'}],
+          of: [
+            {type: 'block'},
+            {
+              type: 'image',
+              fields: [
+                {
+                  name: 'alt',
+                  type: 'string',
+                  title: 'Alt Text',
+                  description: 'Important for SEO and accessibility',
+                },
+                {
+                  name: 'caption',
+                  type: 'string',
+                  title: 'Caption',
+                },
+              ],
+            },
+          ],
         },
         {
           name: 'tipsEs',
           type: 'array',
           title: 'Tips (Spanish)',
           description: 'Consejos clave y estrategias en español',
-          of: [{type: 'block'}],
+          of: [
+            {type: 'block'},
+            {
+              type: 'image',
+              fields: [
+                {
+                  name: 'alt',
+                  type: 'string',
+                  title: 'Alt Text',
+                  description: 'Importante para SEO y accesibilidad',
+                },
+                {
+                  name: 'caption',
+                  type: 'string',
+                  title: 'Caption',
+                },
+              ],
+            },
+          ],
         },
       ],
       validation: (rule: any) => rule.required(),
@@ -86,27 +158,99 @@ export const presentationScriptType = defineType({
           name: 'contentEn',
           type: 'array',
           title: 'Content (English)',
-          of: [{type: 'block'}],
+          of: [
+            {type: 'block'},
+            {
+              type: 'image',
+              fields: [
+                {
+                  name: 'alt',
+                  type: 'string',
+                  title: 'Alt Text',
+                  description: 'Important for SEO and accessibility',
+                },
+                {
+                  name: 'caption',
+                  type: 'string',
+                  title: 'Caption',
+                },
+              ],
+            },
+          ],
           validation: (rule: any) => rule.required(),
         },
         {
           name: 'contentEs',
           type: 'array',
           title: 'Content (Spanish)',
-          of: [{type: 'block'}],
+          of: [
+            {type: 'block'},
+            {
+              type: 'image',
+              fields: [
+                {
+                  name: 'alt',
+                  type: 'string',
+                  title: 'Alt Text',
+                  description: 'Importante para SEO y accesibilidad',
+                },
+                {
+                  name: 'caption',
+                  type: 'string',
+                  title: 'Caption',
+                },
+              ],
+            },
+          ],
           validation: (rule: any) => rule.required(),
         },
         {
           name: 'tipsEn',
           type: 'array',
           title: 'Tips (English)',
-          of: [{type: 'block'}],
+          of: [
+            {type: 'block'},
+            {
+              type: 'image',
+              fields: [
+                {
+                  name: 'alt',
+                  type: 'string',
+                  title: 'Alt Text',
+                  description: 'Important for SEO and accessibility',
+                },
+                {
+                  name: 'caption',
+                  type: 'string',
+                  title: 'Caption',
+                },
+              ],
+            },
+          ],
         },
         {
           name: 'tipsEs',
           type: 'array',
           title: 'Tips (Spanish)',
-          of: [{type: 'block'}],
+          of: [
+            {type: 'block'},
+            {
+              type: 'image',
+              fields: [
+                {
+                  name: 'alt',
+                  type: 'string',
+                  title: 'Alt Text',
+                  description: 'Importante para SEO y accesibilidad',
+                },
+                {
+                  name: 'caption',
+                  type: 'string',
+                  title: 'Caption',
+                },
+              ],
+            },
+          ],
         },
       ],
       validation: (rule: any) => rule.required(),
@@ -120,27 +264,99 @@ export const presentationScriptType = defineType({
           name: 'contentEn',
           type: 'array',
           title: 'Content (English)',
-          of: [{type: 'block'}],
+          of: [
+            {type: 'block'},
+            {
+              type: 'image',
+              fields: [
+                {
+                  name: 'alt',
+                  type: 'string',
+                  title: 'Alt Text',
+                  description: 'Important for SEO and accessibility',
+                },
+                {
+                  name: 'caption',
+                  type: 'string',
+                  title: 'Caption',
+                },
+              ],
+            },
+          ],
           validation: (rule: any) => rule.required(),
         },
         {
           name: 'contentEs',
           type: 'array',
           title: 'Content (Spanish)',
-          of: [{type: 'block'}],
+          of: [
+            {type: 'block'},
+            {
+              type: 'image',
+              fields: [
+                {
+                  name: 'alt',
+                  type: 'string',
+                  title: 'Alt Text',
+                  description: 'Importante para SEO y accesibilidad',
+                },
+                {
+                  name: 'caption',
+                  type: 'string',
+                  title: 'Caption',
+                },
+              ],
+            },
+          ],
           validation: (rule: any) => rule.required(),
         },
         {
           name: 'tipsEn',
           type: 'array',
           title: 'Tips (English)',
-          of: [{type: 'block'}],
+          of: [
+            {type: 'block'},
+            {
+              type: 'image',
+              fields: [
+                {
+                  name: 'alt',
+                  type: 'string',
+                  title: 'Alt Text',
+                  description: 'Important for SEO and accessibility',
+                },
+                {
+                  name: 'caption',
+                  type: 'string',
+                  title: 'Caption',
+                },
+              ],
+            },
+          ],
         },
         {
           name: 'tipsEs',
           type: 'array',
           title: 'Tips (Spanish)',
-          of: [{type: 'block'}],
+          of: [
+            {type: 'block'},
+            {
+              type: 'image',
+              fields: [
+                {
+                  name: 'alt',
+                  type: 'string',
+                  title: 'Alt Text',
+                  description: 'Importante para SEO y accesibilidad',
+                },
+                {
+                  name: 'caption',
+                  type: 'string',
+                  title: 'Caption',
+                },
+              ],
+            },
+          ],
         },
       ],
       validation: (rule: any) => rule.required(),
@@ -154,27 +370,99 @@ export const presentationScriptType = defineType({
           name: 'contentEn',
           type: 'array',
           title: 'Content (English)',
-          of: [{type: 'block'}],
+          of: [
+            {type: 'block'},
+            {
+              type: 'image',
+              fields: [
+                {
+                  name: 'alt',
+                  type: 'string',
+                  title: 'Alt Text',
+                  description: 'Important for SEO and accessibility',
+                },
+                {
+                  name: 'caption',
+                  type: 'string',
+                  title: 'Caption',
+                },
+              ],
+            },
+          ],
           validation: (rule: any) => rule.required(),
         },
         {
           name: 'contentEs',
           type: 'array',
           title: 'Content (Spanish)',
-          of: [{type: 'block'}],
+          of: [
+            {type: 'block'},
+            {
+              type: 'image',
+              fields: [
+                {
+                  name: 'alt',
+                  type: 'string',
+                  title: 'Alt Text',
+                  description: 'Importante para SEO y accesibilidad',
+                },
+                {
+                  name: 'caption',
+                  type: 'string',
+                  title: 'Caption',
+                },
+              ],
+            },
+          ],
           validation: (rule: any) => rule.required(),
         },
         {
           name: 'tipsEn',
           type: 'array',
           title: 'Tips (English)',
-          of: [{type: 'block'}],
+          of: [
+            {type: 'block'},
+            {
+              type: 'image',
+              fields: [
+                {
+                  name: 'alt',
+                  type: 'string',
+                  title: 'Alt Text',
+                  description: 'Important for SEO and accessibility',
+                },
+                {
+                  name: 'caption',
+                  type: 'string',
+                  title: 'Caption',
+                },
+              ],
+            },
+          ],
         },
         {
           name: 'tipsEs',
           type: 'array',
           title: 'Tips (Spanish)',
-          of: [{type: 'block'}],
+          of: [
+            {type: 'block'},
+            {
+              type: 'image',
+              fields: [
+                {
+                  name: 'alt',
+                  type: 'string',
+                  title: 'Alt Text',
+                  description: 'Importante para SEO y accesibilidad',
+                },
+                {
+                  name: 'caption',
+                  type: 'string',
+                  title: 'Caption',
+                },
+              ],
+            },
+          ],
         },
       ],
       validation: (rule: any) => rule.required(),
@@ -188,27 +476,99 @@ export const presentationScriptType = defineType({
           name: 'contentEn',
           type: 'array',
           title: 'Content (English)',
-          of: [{type: 'block'}],
+          of: [
+            {type: 'block'},
+            {
+              type: 'image',
+              fields: [
+                {
+                  name: 'alt',
+                  type: 'string',
+                  title: 'Alt Text',
+                  description: 'Important for SEO and accessibility',
+                },
+                {
+                  name: 'caption',
+                  type: 'string',
+                  title: 'Caption',
+                },
+              ],
+            },
+          ],
           validation: (rule: any) => rule.required(),
         },
         {
           name: 'contentEs',
           type: 'array',
           title: 'Content (Spanish)',
-          of: [{type: 'block'}],
+          of: [
+            {type: 'block'},
+            {
+              type: 'image',
+              fields: [
+                {
+                  name: 'alt',
+                  type: 'string',
+                  title: 'Alt Text',
+                  description: 'Importante para SEO y accesibilidad',
+                },
+                {
+                  name: 'caption',
+                  type: 'string',
+                  title: 'Caption',
+                },
+              ],
+            },
+          ],
           validation: (rule: any) => rule.required(),
         },
         {
           name: 'tipsEn',
           type: 'array',
           title: 'Tips (English)',
-          of: [{type: 'block'}],
+          of: [
+            {type: 'block'},
+            {
+              type: 'image',
+              fields: [
+                {
+                  name: 'alt',
+                  type: 'string',
+                  title: 'Alt Text',
+                  description: 'Important for SEO and accessibility',
+                },
+                {
+                  name: 'caption',
+                  type: 'string',
+                  title: 'Caption',
+                },
+              ],
+            },
+          ],
         },
         {
           name: 'tipsEs',
           type: 'array',
           title: 'Tips (Spanish)',
-          of: [{type: 'block'}],
+          of: [
+            {type: 'block'},
+            {
+              type: 'image',
+              fields: [
+                {
+                  name: 'alt',
+                  type: 'string',
+                  title: 'Alt Text',
+                  description: 'Importante para SEO y accesibilidad',
+                },
+                {
+                  name: 'caption',
+                  type: 'string',
+                  title: 'Caption',
+                },
+              ],
+            },
+          ],
         },
       ],
       validation: (rule: any) => rule.required(),
@@ -222,27 +582,99 @@ export const presentationScriptType = defineType({
           name: 'contentEn',
           type: 'array',
           title: 'Content (English)',
-          of: [{type: 'block'}],
+          of: [
+            {type: 'block'},
+            {
+              type: 'image',
+              fields: [
+                {
+                  name: 'alt',
+                  type: 'string',
+                  title: 'Alt Text',
+                  description: 'Important for SEO and accessibility',
+                },
+                {
+                  name: 'caption',
+                  type: 'string',
+                  title: 'Caption',
+                },
+              ],
+            },
+          ],
           validation: (rule: any) => rule.required(),
         },
         {
           name: 'contentEs',
           type: 'array',
           title: 'Content (Spanish)',
-          of: [{type: 'block'}],
+          of: [
+            {type: 'block'},
+            {
+              type: 'image',
+              fields: [
+                {
+                  name: 'alt',
+                  type: 'string',
+                  title: 'Alt Text',
+                  description: 'Importante para SEO y accesibilidad',
+                },
+                {
+                  name: 'caption',
+                  type: 'string',
+                  title: 'Caption',
+                },
+              ],
+            },
+          ],
           validation: (rule: any) => rule.required(),
         },
         {
           name: 'tipsEn',
           type: 'array',
           title: 'Tips (English)',
-          of: [{type: 'block'}],
+          of: [
+            {type: 'block'},
+            {
+              type: 'image',
+              fields: [
+                {
+                  name: 'alt',
+                  type: 'string',
+                  title: 'Alt Text',
+                  description: 'Important for SEO and accessibility',
+                },
+                {
+                  name: 'caption',
+                  type: 'string',
+                  title: 'Caption',
+                },
+              ],
+            },
+          ],
         },
         {
           name: 'tipsEs',
           type: 'array',
           title: 'Tips (Spanish)',
-          of: [{type: 'block'}],
+          of: [
+            {type: 'block'},
+            {
+              type: 'image',
+              fields: [
+                {
+                  name: 'alt',
+                  type: 'string',
+                  title: 'Alt Text',
+                  description: 'Importante para SEO y accesibilidad',
+                },
+                {
+                  name: 'caption',
+                  type: 'string',
+                  title: 'Caption',
+                },
+              ],
+            },
+          ],
         },
       ],
       validation: (rule: any) => rule.required(),
