@@ -1,0 +1,22 @@
+{
+  "presentations": {
+    "meta": {
+      "title": "Presentaciones - Admin | Isaac Plans",
+      "description": "Área de presentaciones de administrador"
+    },
+    "title": "Presentaciones",
+    "description": "¡Bienvenido al área de presentaciones de administrador!",
+    "content": "Esta es un área protegida de administrador. Agrega el contenido de tus presentaciones aquí."
+  },
+  "unauthorized": {
+    "meta": {
+      "title": "Acceso Denegado | Isaac Plans",
+      "description": "No tienes permiso para acceder a esta página."
+    },
+    "title": "Acceso Denegado",
+    "message": "No tienes permiso para acceder a esta página.",
+    "backToHome": "Volver al Inicio",
+    "helpText": "Si crees que esto es un error, por favor contacta al soporte."
+  }
+}
+

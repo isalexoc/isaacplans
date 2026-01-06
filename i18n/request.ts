@@ -107,6 +107,14 @@ async function loadSplitMessages(locale: string): Promise<Record<string, any>> {
       // File doesn't exist, skip
     }
     
+    // Load Presentations messages if they exist
+    try {
+      const presentations = (await import(`@/messages/${locale}/presentations.json`)).default;
+      Object.assign(splitMessages, presentations);
+    } catch {
+      // File doesn't exist, skip
+    }
+    
   } catch (error) {
     // If split folder doesn't exist, continue with main messages only
     console.warn(`No split messages found for locale ${locale}`);

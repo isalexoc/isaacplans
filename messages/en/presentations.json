@@ -1,0 +1,22 @@
+{
+  "presentations": {
+    "meta": {
+      "title": "Presentations - Admin | Isaac Plans",
+      "description": "Admin presentations area"
+    },
+    "title": "Presentations",
+    "description": "Welcome to the admin presentations area!",
+    "content": "This is a protected admin area. Add your presentations content here."
+  },
+  "unauthorized": {
+    "meta": {
+      "title": "Access Denied | Isaac Plans",
+      "description": "You don't have permission to access this page."
+    },
+    "title": "Access Denied",
+    "message": "You don't have permission to access this page.",
+    "backToHome": "Return to Home",
+    "helpText": "If you believe this is an error, please contact support."
+  }
+}
+

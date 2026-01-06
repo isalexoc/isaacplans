@@ -1,17 +1,29 @@
 // middleware.ts
-import { clerkMiddleware } from "@clerk/nextjs/server";
+import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import createMiddleware from "next-intl/middleware";
 import { routing } from "./i18n/routing";
 
 // Create the next-intl middleware
 const intlMiddleware = createMiddleware(routing);
 
-export default clerkMiddleware((auth, req) => {
+// Define protected routes
+const isProtectedRoute = createRouteMatcher([
+  '/presentations(.*)',
+  '/en/presentations(.*)',
+  '/es/presentations(.*)'
+]);
+
+export default clerkMiddleware(async (auth, req) => {
   // Handle API routes that need auth
   if (req.nextUrl.pathname.startsWith('/api/blog')) {
     // API routes are handled by the route handlers themselves
     // Just ensure middleware runs for Clerk context
     return;
+  }
+
+  // Protect presentations route - requires authentication
+  if (isProtectedRoute(req)) {
+    await auth.protect();
   }
   
   // All other routes are public for now - no auth.protect() call
