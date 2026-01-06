@@ -37,6 +37,64 @@ export const presentationScriptType = defineType({
       description: 'Brief description of this script',
       rows: 2,
     } as any),
+    {
+      name: 'completeScript',
+      type: 'object',
+      title: 'Complete Script (All-in-One)',
+      description: 'A compressed version of the entire script in one place for quick reference',
+      fields: [
+        {
+          name: 'contentEn',
+          type: 'array',
+          title: 'Complete Script (English)',
+          description: 'The entire script compressed into one document in English',
+          of: [
+            {type: 'block'},
+            {
+              type: 'image',
+              fields: [
+                {
+                  name: 'alt',
+                  type: 'string',
+                  title: 'Alt Text',
+                  description: 'Important for SEO and accessibility',
+                },
+                {
+                  name: 'caption',
+                  type: 'string',
+                  title: 'Caption',
+                },
+              ],
+            },
+          ],
+        },
+        {
+          name: 'contentEs',
+          type: 'array',
+          title: 'Complete Script (Spanish)',
+          description: 'El guión completo comprimido en un solo documento en español',
+          of: [
+            {type: 'block'},
+            {
+              type: 'image',
+              fields: [
+                {
+                  name: 'alt',
+                  type: 'string',
+                  title: 'Alt Text',
+                  description: 'Importante para SEO y accesibilidad',
+                },
+                {
+                  name: 'caption',
+                  type: 'string',
+                  title: 'Caption',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
     
     // ========== SCRIPT SECTIONS ==========
     {

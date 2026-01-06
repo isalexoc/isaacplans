@@ -20,6 +20,10 @@ interface PresentationScript {
   title?: string;
   description?: string;
   lineOfBusiness: string;
+  completeScript?: {
+    contentEn?: any[];
+    contentEs?: any[];
+  };
   openingIntroduction?: ScriptSection;
   discoveryQuestions?: ScriptSection;
   productPresentation?: ScriptSection;
@@ -210,6 +214,45 @@ export default function PresentationScriptsContent({ script }: PresentationScrip
           </Button>
         </div>
       </div>
+
+      {/* Complete Script Section - Show first if available */}
+      {script?.completeScript && (
+        <div className="mb-6 bg-gradient-to-r from-primary/10 to-primary/5 rounded-lg border border-primary/20 overflow-hidden">
+          <div className="p-4 border-b border-primary/20 bg-primary/5">
+            <h3 className="font-bold text-base md:text-lg flex items-center gap-2">
+              <span className="text-primary">📄</span>
+              {language === "en" ? "Complete Script (All-in-One)" : "Guión Completo (Todo en Uno)"}
+            </h3>
+            <p className="text-xs md:text-sm text-muted-foreground mt-1">
+              {language === "en" 
+                ? "Full script compressed into one document for quick reference" 
+                : "Guión completo comprimido en un solo documento para referencia rápida"}
+            </p>
+          </div>
+          <div className="p-4 md:p-6">
+            {(() => {
+              const completeContent = language === "en" 
+                ? script.completeScript.contentEn 
+                : script.completeScript.contentEs;
+              const safeCompleteContent = Array.isArray(completeContent) && completeContent.length > 0 
+                ? completeContent 
+                : null;
+              
+              return safeCompleteContent ? (
+                <div className="prose prose-sm max-w-none text-xs md:text-sm leading-relaxed">
+                  <PortableText value={safeCompleteContent} components={portableTextComponents} />
+                </div>
+              ) : (
+                <p className="text-muted-foreground italic text-sm">
+                  {language === "en" 
+                    ? "Complete script not available in English." 
+                    : "Guión completo no disponible en español."}
+                </p>
+              );
+            })()}
+          </div>
+        </div>
+      )}
 
       {/* Script Sections */}
       <div className="space-y-3">

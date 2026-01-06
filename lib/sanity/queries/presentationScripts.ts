@@ -11,6 +11,10 @@ export const PRESENTATION_SCRIPT_QUERY = `*[
   title,
   description,
   lineOfBusiness,
+  completeScript{
+    contentEn,
+    contentEs
+  },
   openingIntroduction{
     contentEn,
     contentEs,
