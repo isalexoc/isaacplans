@@ -4,12 +4,15 @@ import React, { useState } from "react";
 import { useLocale } from "next-intl";
 import { Languages } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { PortableText } from "@portabletext/react";
+import Image from "next/image";
+import { urlFor } from "@/sanity/lib/image";
 
 interface ScriptSection {
-  contentEn?: string;
-  contentEs?: string;
-  tipsEn?: string;
-  tipsEs?: string;
+  contentEn?: any[];
+  contentEs?: any[];
+  tipsEn?: any[];
+  tipsEs?: any[];
 }
 
 interface PresentationScript {
@@ -71,26 +74,106 @@ export default function PresentationScriptsContent({ script }: PresentationScrip
     setExpandedSection(expandedSection === sectionKey ? null : sectionKey);
   };
 
-  const formatContent = (text: string | undefined) => {
-    if (!text) return null;
-    const lines = text.split('\n');
-    const elements: React.ReactNode[] = [];
-    
-    lines.forEach((line, idx) => {
-      if (line.trim() === '') {
-        elements.push(<br key={idx} />);
-      } else if (line.startsWith('**') && line.endsWith('**')) {
-        elements.push(
-          <strong key={idx} className="font-bold text-foreground block mb-2">
-            {line.replace(/\*\*/g, '')}
-          </strong>
+  // Portable text components for presentation scripts (compact styling)
+  const portableTextComponents = {
+    types: {
+      image: ({ value }: any) => {
+        if (!value?.asset) return null;
+        const imageUrl = urlFor(value).width(500).fit('max').url();
+        return (
+          <div className="my-4 flex justify-center">
+            <div className="w-full" style={{ maxWidth: '500px' }}>
+              <Image
+                src={imageUrl}
+                alt={value.alt || "Presentation script image"}
+                width={500}
+                height={600}
+                className="rounded-lg w-full h-auto shadow-md"
+                style={{ objectFit: 'contain', maxWidth: '500px', height: 'auto' }}
+              />
+              {value.caption && (
+                <p className="text-xs text-muted-foreground text-center mt-2 italic">
+                  {value.caption}
+                </p>
+              )}
+            </div>
+          </div>
         );
-      } else {
-        elements.push(<p key={idx} className="mb-2">{line}</p>);
-      }
-    });
-    
-    return elements;
+      },
+    },
+    block: {
+      h1: ({ children }: any) => (
+        <h1 className="text-xl font-bold text-foreground mt-4 mb-2">
+          {children}
+        </h1>
+      ),
+      h2: ({ children }: any) => (
+        <h2 className="text-lg font-semibold text-foreground mt-3 mb-2">
+          {children}
+        </h2>
+      ),
+      h3: ({ children }: any) => (
+        <h3 className="text-base font-semibold text-foreground mt-3 mb-2">
+          {children}
+        </h3>
+      ),
+      h4: ({ children }: any) => (
+        <h4 className="text-sm font-semibold text-foreground mt-2 mb-1">
+          {children}
+        </h4>
+      ),
+      blockquote: ({ children }: any) => (
+        <blockquote className="border-l-4 border-blue-500 pl-3 py-2 my-3 bg-blue-50 dark:bg-blue-900/20 rounded-r text-sm italic text-muted-foreground">
+          {children}
+        </blockquote>
+      ),
+      normal: ({ children }: any) => (
+        <p className="mb-2 text-sm leading-relaxed text-foreground">
+          {children}
+        </p>
+      ),
+    },
+    list: {
+      bullet: ({ children }: any) => (
+        <ul className="list-disc list-inside space-y-1 my-2 text-sm">
+          {children}
+        </ul>
+      ),
+      number: ({ children }: any) => (
+        <ol className="list-decimal list-inside space-y-1 my-2 text-sm">
+          {children}
+        </ol>
+      ),
+    },
+    listItem: {
+      bullet: ({ children }: any) => (
+        <li className="text-sm text-foreground">{children}</li>
+      ),
+      number: ({ children }: any) => (
+        <li className="text-sm text-foreground">{children}</li>
+      ),
+    },
+    marks: {
+      strong: ({ children }: any) => (
+        <strong className="font-bold text-foreground">{children}</strong>
+      ),
+      em: ({ children }: any) => (
+        <em className="italic text-foreground">{children}</em>
+      ),
+      link: ({ value, children }: any) => {
+        const target = (value?.href || "").startsWith("http") ? "_blank" : undefined;
+        return (
+          <a
+            href={value?.href || "#"}
+            target={target}
+            rel={target === "_blank" ? "noopener noreferrer" : undefined}
+            className="text-blue-600 dark:text-blue-400 hover:underline"
+          >
+            {children}
+          </a>
+        );
+      },
+    },
   };
 
   if (!script) {
@@ -138,6 +221,10 @@ export default function PresentationScriptsContent({ script }: PresentationScrip
           const content = language === "en" ? section.contentEn : section.contentEs;
           const tips = language === "en" ? section.tipsEn : section.tipsEs;
           const title = language === "en" ? config.titleEn : config.titleEs;
+          
+          // Safety check: ensure content is an array (handle legacy string data or query issues)
+          const safeContent = Array.isArray(content) ? content : null;
+          const safeTips = Array.isArray(tips) ? tips : null;
 
           return (
             <div
@@ -158,9 +245,9 @@ export default function PresentationScriptsContent({ script }: PresentationScrip
               
               {expandedSection === config.key && (
                 <div className="p-4 pt-0 space-y-4 border-t">
-                  {content ? (
-                    <div className="prose prose-sm max-w-none text-xs md:text-sm leading-relaxed whitespace-pre-wrap">
-                      {formatContent(content)}
+                  {safeContent && safeContent.length > 0 ? (
+                    <div className="prose prose-sm max-w-none text-xs md:text-sm leading-relaxed">
+                      <PortableText value={safeContent} components={portableTextComponents} />
                     </div>
                   ) : (
                     <p className="text-muted-foreground italic text-sm">
@@ -168,10 +255,10 @@ export default function PresentationScriptsContent({ script }: PresentationScrip
                     </p>
                   )}
                   
-                  {tips && (
+                  {safeTips && safeTips.length > 0 && (
                     <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-md border border-blue-200 dark:border-blue-800">
                       <div className="prose prose-sm max-w-none text-xs md:text-sm">
-                        {formatContent(tips)}
+                        <PortableText value={safeTips} components={portableTextComponents} />
                       </div>
                     </div>
                   )}

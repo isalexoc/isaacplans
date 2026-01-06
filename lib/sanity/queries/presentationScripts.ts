@@ -11,12 +11,42 @@ export const PRESENTATION_SCRIPT_QUERY = `*[
   title,
   description,
   lineOfBusiness,
-  openingIntroduction,
-  discoveryQuestions,
-  productPresentation,
-  closingTechniques,
-  objectionHandling,
-  psychologySalesTips,
+  openingIntroduction{
+    contentEn,
+    contentEs,
+    tipsEn,
+    tipsEs
+  },
+  discoveryQuestions{
+    contentEn,
+    contentEs,
+    tipsEn,
+    tipsEs
+  },
+  productPresentation{
+    contentEn,
+    contentEs,
+    tipsEn,
+    tipsEs
+  },
+  closingTechniques{
+    contentEn,
+    contentEs,
+    tipsEn,
+    tipsEs
+  },
+  objectionHandling{
+    contentEn,
+    contentEs,
+    tipsEn,
+    tipsEs
+  },
+  psychologySalesTips{
+    contentEn,
+    contentEs,
+    tipsEn,
+    tipsEs
+  },
   updatedAt
 }`;
 
