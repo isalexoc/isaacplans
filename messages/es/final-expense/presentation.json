@@ -1,0 +1,228 @@
+{
+  "finalExpensePresentation": {
+    "meta": {
+      "title": "Modo presentación Gastos Finales | Isaac Plans",
+      "description": "Presentación de gastos finales Senior Life para citas presenciales",
+      "keywords": "gastos finales, seguro funerario, Senior Life, presentación",
+      "image": "https://www.isaacplans.com/images/final_expense_og_placeholder_en.png",
+      "imageAlt": "Presentación Gastos Finales"
+    },
+    "title": "Modo presentación Gastos Finales",
+    "backButton": "Volver a Gastos Finales",
+    "stepper": {
+      "presentation": "Presentación",
+      "qualification": "Calificación",
+      "referrals": "Referidos"
+    },
+    "fullscreen": {
+      "enter": "Pantalla completa",
+      "exit": "Salir de pantalla completa"
+    },
+    "slides": {
+      "slide1": {
+        "type": "agent",
+        "title": "Conozca a su Especialista en Beneficios Senior",
+        "subtitle": "Construyendo confianza con transparencia",
+        "role": "Agente de Seguros Licenciado",
+        "introduction": "Me comprometo a brindarle orientación honesta, transparente y personalizada sobre gastos finales. Trabajo con Senior Life Insurance Company para ayudarle a encontrar una cobertura accesible que proteja a su familia de los gastos funerarios y finales.",
+        "contact": {
+          "name": "Isaac Orraiz",
+          "phone": "540-426-1804",
+          "email": "info@isaacplans.com",
+          "website": "www.isaacplans.com"
+        },
+        "credentials": {
+          "title": "Credenciales profesionales",
+          "list": [
+            "Licenciado en múltiples estados",
+            "Especialista en seguros de vida",
+            "Especialista en gastos finales",
+            "Agente de Senior Life",
+            "Años de experiencia en la industria"
+          ]
+        },
+        "credentialTitle": "Credencial Senior Life",
+        "credentialAlt": "Credencial de agente de seguros Senior Life"
+      },
+      "slide2": {
+        "type": "cover",
+        "title": "Gastos Finales",
+        "items": [
+          "MOTIVO",
+          "EXPERIENCIA",
+          "TIEMPO",
+          "AHORRO",
+          "HIJOS / NIETOS"
+        ],
+        "imageUrl": "https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_1200/v1771370946/pexels-pixabay-302083_licqgt.jpg",
+        "imageAlt": "Familia y planificación",
+        "whyPlan": "¿Por qué planificar hoy?"
+      },
+      "slide3": {
+        "type": "planificacion",
+        "title": "¿Sabía usted que hay 3 maneras de hacer una planificación funeral?",
+        "subtitle": "Planificación",
+        "imageUrl": "https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_1200/v1771377550/pexels-marcus-aurelius-6787960_ttjhqv.jpg",
+        "imageAlt": "Planificar con anticipación",
+        "options": [
+          { "title": "Tradicional", "subtitle": "Funeral + Propiedad Cementerio" },
+          { "title": "Cremación", "subtitle": "Directa, Media o Completa" },
+          { "title": "Traslado de Restos Mortales", "subtitle": "Repatriación a país de origen" }
+        ]
+      },
+      "slide4": {
+        "type": "riesgo",
+        "title": "Comparación de riesgo",
+        "rowLabel": "",
+        "headers": ["TRADICIONAL", "P.A.F. (Prenecesidad)", "PLAN GASTOS FINALES", "NO HACER NADA"],
+        "rows": [
+          { "label": "Enganche", "cols": ["10–20%", "Sí", "No", "—"] },
+          { "label": "Intereses", "cols": ["Sí", "Sí", "No", "—"] },
+          { "label": "Uso local", "cols": ["Sí", "Sí", "No", "—"] },
+          { "label": "Cancelarlo", "cols": ["Sí", "Sí", "No", "—"] },
+          { "label": "Cobertura", "cols": ["—", "—", "Inmediata – Accidental – Mundial", "—"] },
+          { "label": "Pago 24 horas", "cols": ["—", "—", "Sí", "—"] },
+          { "label": "¿Quién de mi familia pagará?", "cols": ["—", "—", "—", "?"] }
+        ],
+        "pyramid": {
+          "centerLabel": "RIESGO",
+          "cards": [
+            {
+              "id": "tradicional",
+              "title": "TRADICIONAL P.A.F.",
+              "bullets": ["Enganche (10-20%)", "Intereses", "Uso local", "Cancelarlo"]
+            },
+            {
+              "id": "plan",
+              "title": "PLAN GASTOS FINALES",
+              "bullets": ["NO enganche • Sin intereses", "Apoyo familiar", "Cobertura", "Inmediata – Accidental – Mundial", "Pago 24 horas"]
+            },
+            {
+              "id": "nothing",
+              "title": "NO HACER NADA",
+              "bullets": ["¿Quién de mi familia pagará esos $$?", "¿Parece buena opción dejar esa responsabilidad a mi familia?"],
+              "highlightBullets": [0]
+            }
+          ]
+        }
+      },
+      "slide5": {
+        "type": "company",
+        "title": "Senior Life Insurance Company",
+        "bullets": [
+          "Protegiendo familias desde 1970",
+          "Sede: Thomasville, Georgia",
+          "Presencia en todos los estados (EE.UU.)",
+          "Atención al cliente en español e inglés"
+        ],
+        "customerService": "CUSTOMER SERVICE: 877-777-8808",
+        "imageUrl": "https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_1200/v1771386255/2022-07-06_iauo2l.webp",
+        "imageAlt": "Senior Life",
+        "imagePlaceholder": "Placeholder de imagen – agregar URL de Cloudinary después"
+      },
+      "slide6": {
+        "type": "definicion",
+        "title": "¿Gastos Finales?",
+        "body": "Es un seguro funeral que evitará dejarle a nuestros seres queridos compromisos y deudas para cuando ese momento llegue.",
+        "imageUrl": "https://res.cloudinary.com/isaacdev/image/upload/v1771432152/1000_F_64265376_6VGJulBCw8BxPv7rnPkstcktcUuTm0Ci_dbkvsz.jpg",
+        "imageAlt": "Planificación de gastos finales"
+      },
+      "slide7": {
+        "type": "preocupaciones",
+        "title": "¿Qué le preocupa más a las personas?",
+        "questions": [
+          "A. ¿Quién pagará por mis gastos funerarios?",
+          "B. ¿Quién se encargará?",
+          "C. La parte emocional"
+        ],
+        "mainImageUrl": "https://res.cloudinary.com/isaacdev/image/upload/v1771432768/word-image-254308-1_kwmcjm.png",
+        "mainImageAlt": "Qué preocupa a las personas",
+        "categories": [
+          {
+            "label": "Salud / Edad",
+            "items": ["¿Hemos pensado?"],
+            "images": [
+              { "url": "https://res.cloudinary.com/isaacdev/image/upload/v1771432766/age-evolution-theme-illustration_23-2148413621_wpntq1.avif", "alt": "Edad y salud" },
+              { "url": "https://res.cloudinary.com/isaacdev/image/upload/v1771432766/envio-12_uph1n5.jpg", "alt": "Cuidado de la salud" }
+            ]
+          },
+          {
+            "label": "Financiera (Dinero)",
+            "items": ["Apoyo familiar – Nos encargamos"],
+            "images": [
+              { "url": "https://res.cloudinary.com/isaacdev/image/upload/v1771433082/istockphoto-652872508-612x612_ykhdi9.jpg", "alt": "Planificación financiera" }
+            ]
+          },
+          {
+            "label": "Emocional",
+            "items": ["Legado familiar"],
+            "images": [
+              { "url": "https://res.cloudinary.com/isaacdev/image/upload/v1771432766/get-to-know-you-questions_ygobeh.jpg", "alt": "Familia y conexión" },
+              { "url": "https://res.cloudinary.com/isaacdev/image/upload/v1771433202/vector-red-check-list-mark-symbol-icon-checklist-pencil-approved-design-concept-web-graphic-eps-illustration-44421370_zy4z6j.webp", "alt": "Lista" }
+            ]
+          }
+        ]
+      },
+      "slide8": {
+        "type": "imagePlaceholder",
+        "title": "",
+        "imageUrl": "https://res.cloudinary.com/isaacdev/image/upload/v1769009020/comp_es_ualfci.png",
+        "imageAlt": "Comparación gastos finales",
+        "imagePlaceholder": ""
+      },
+      "slide10": {
+        "type": "riders",
+        "title": "Beneficios (Riders)",
+        "riders": [
+          {
+            "title": "ACCIDENTAL",
+            "description": "Si el fallecimiento ocurriese por muerte accidental, su beneficiario recibirá una indemnización DOBLE de su cobertura base.",
+            "example": "",
+            "imageUrl": "https://res.cloudinary.com/isaacdev/image/upload/v1771441965/00000169-0ce6-dbbe-a16f-4ee6aa020000_hqatz2.webp"
+          },
+          {
+            "title": "NIÑOS Y NIETOS",
+            "description": "Desde 30 días de nacido hasta los 17 años. Cobertura hasta los 25 años. Monto máximo (póliza base): 0,40 por $1.000.",
+            "example": "Ejemplo: $10.000 cobertura × $4 mensuales. Posibilidad de anexar a sus hijos y nietos dentro de su póliza.",
+            "imageUrl": "https://res.cloudinary.com/isaacdev/image/upload/v1771441965/iStock-1385436395_fxtaa2.jpg"
+          }
+        ]
+      },
+      "slide11": {
+        "type": "mejorProteccion",
+        "title": "Por qué es la mejor protección del mercado",
+        "mainImageUrl": "https://res.cloudinary.com/isaacdev/image/upload/v1771440818/main_image_a3itr4.jpg",
+        "mainImageAlt": "Mejor protección",
+        "items": [
+          { "text": "Protección permanente (póliza de vida entera)", "imageUrl": "https://res.cloudinary.com/isaacdev/image/upload/v1771440820/Protecci%C3%B3n_permanente_p%C3%B3liza_de_vida_entera_qinkaw.jpg" },
+          { "text": "Prima nivelada: nunca aumenta", "imageUrl": "https://res.cloudinary.com/isaacdev/image/upload/v1771440820/Prima_nivelada_nunca_aumenta_xzcs01.jpg" },
+          { "text": "Sin intereses ni cargos ocultos", "imageUrl": "https://res.cloudinary.com/isaacdev/image/upload/v1771440823/Sin_intereses_ni_cargos_ocultos_ixp3yz.webp" },
+          { "text": "Sus beneficios no disminuyen", "imageUrl": "https://res.cloudinary.com/isaacdev/image/upload/v1771440820/Sus_beneficios_no_disminuyen_ozz1pr.jpg" },
+          { "text": "Sin examen médico: nadie va a su casa", "imageUrl": "https://res.cloudinary.com/isaacdev/image/upload/v1771440822/Sin_examen_m%C3%A9dico_nadie_va_a_su_casa_id6or3.png" },
+          { "text": "Cobertura nacional e internacional", "imageUrl": "https://res.cloudinary.com/isaacdev/image/upload/v1771440817/Cobertura_nacional_e_internacional_kkfsbm.jpg" },
+          { "text": "Protección inmediata con pago en 24 horas", "imageUrl": "https://res.cloudinary.com/isaacdev/image/upload/v1771440820/Protecci%C3%B3n_inmediata_con_pago_en_24_horas_tdam4v.jpg" },
+          { "text": "La prima nunca aumenta por edad ni por salud", "imageUrl": "https://res.cloudinary.com/isaacdev/image/upload/v1771440823/La_prima_nunca_aumenta_por_edad_ni_por_salud_kcmznz.webp" },
+          { "text": "Aproveche hoy: su calificación puede cambiar mañana", "imageUrl": "https://res.cloudinary.com/isaacdev/image/upload/v1771440822/Aproveche_hoy_su_calificaci%C3%B3n_puede_cambiar_ma%C3%B1ana_espanol_bsfrgm.png" }
+        ]
+      },
+      "slide12": {
+        "type": "pharmacy",
+        "title": "Senior Life Pharmacy",
+        "subtitle": "Medicamentos preenvasados mensuales para personas mayores",
+        "bullets": [
+          "Medicamentos despachados y entregados GRATIS por Senior Life Pharmacy",
+          "Paquetes por día y hora—sin frascos que confundan",
+          "Entrega mensual a su puerta; sin viajes a la farmacia",
+          "Vinculado a su seguro—copagos y beneficios no cambian"
+        ],
+        "stepsTitle": "Solo 2 pasos",
+        "step1Title": "Confirmamos su información",
+        "step2Title": "Senior Life se contacta con su médico y se encarga de todo",
+        "imageBoxUrl": "https://res.cloudinary.com/isaacdev/image/upload/v1768918211/box_snp_rzpiro.jpg",
+        "imagePacketsUrl": "https://res.cloudinary.com/isaacdev/image/upload/v1768844260/senior_life_pharmacy_spanish_sqmfol.png",
+        "imageBoxAlt": "Caja de medicamentos Senior Life Pharmacy",
+        "imagePouchAlt": "Paquetes de medicamentos Senior Life Pharmacy"
+      }
+    }
+  }
+}

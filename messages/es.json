@@ -1682,6 +1682,9 @@
       "title": "Solicitar Información",
       "subtitle": "Estimado rápido y sin compromiso"
     },
+    "presentationButton": {
+      "title": "Ir al modo presentación"
+    },
     "about": {
       "badge": "Acerca de Isaac",
       "headline": "Su guía de confianza para una protección simple y permanente",

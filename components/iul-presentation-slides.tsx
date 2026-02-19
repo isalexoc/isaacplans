@@ -70,39 +70,43 @@ export default function IULPresentationSlides({
 
   const slideVariants = {
     enter: (direction: number) => ({
-      x: direction > 0 ? 1000 : -1000,
+      x: direction > 0 ? 120 : -120,
       opacity: 0,
+      scale: 0.98,
+      filter: "blur(4px)",
     }),
     center: {
       x: 0,
       opacity: 1,
+      scale: 1,
+      filter: "blur(0px)",
     },
     exit: (direction: number) => ({
-      x: direction < 0 ? 1000 : -1000,
+      x: direction < 0 ? 120 : -120,
       opacity: 0,
+      scale: 0.98,
+      filter: "blur(4px)",
     }),
   };
 
   const slideTransition = {
-    x: { type: "spring" as const, stiffness: 300, damping: 30 },
-    opacity: { duration: 0.2 },
+    x: { type: "spring" as const, stiffness: 320, damping: 32 },
+    opacity: { duration: 0.35 },
+    scale: { duration: 0.35 },
+    filter: { duration: 0.25 },
   };
 
   const contentVariants = {
-    hidden: { opacity: 0, y: 20 },
+    hidden: { opacity: 0, y: 24 },
     visible: {
       opacity: 1,
       y: 0,
       transition: {
-        duration: 0.6,
-        staggerChildren: 0.1,
+        duration: 0.5,
+        staggerChildren: 0.08,
+        delayChildren: 0.1,
       },
     },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0 },
   };
 
   return (
@@ -140,7 +144,7 @@ export default function IULPresentationSlides({
           onClick={prevSlide}
           disabled={currentSlide === 0}
           className={cn(
-            "pointer-events-auto ml-4 h-12 w-12 rounded-full bg-white/90 backdrop-blur-sm shadow-lg hover:bg-white transition-all",
+            "pointer-events-auto ml-4 h-12 w-12 rounded-full bg-white/95 backdrop-blur-md shadow-[0_4px_20px_rgba(0,0,0,0.12)] hover:bg-white hover:scale-105 transition-all duration-200 border border-gray-200/50",
             currentSlide === 0 && "opacity-50 cursor-not-allowed"
           )}
           aria-label="Previous slide"
@@ -153,7 +157,7 @@ export default function IULPresentationSlides({
           onClick={nextSlide}
           disabled={currentSlide === slides.length - 1}
           className={cn(
-            "pointer-events-auto mr-4 h-12 w-12 rounded-full bg-white/90 backdrop-blur-sm shadow-lg hover:bg-white transition-all",
+            "pointer-events-auto mr-4 h-12 w-12 rounded-full bg-white/95 backdrop-blur-md shadow-[0_4px_20px_rgba(0,0,0,0.12)] hover:bg-white hover:scale-105 transition-all duration-200 border border-gray-200/50",
             currentSlide === slides.length - 1 && "opacity-50 cursor-not-allowed"
           )}
           aria-label="Next slide"
@@ -171,7 +175,7 @@ export default function IULPresentationSlides({
             className={cn(
               "h-2 rounded-full transition-all duration-300",
               index === currentSlide
-                ? "w-8 bg-blue-600"
+                ? "w-8 bg-[#003366] shadow-md"
                 : "w-2 bg-gray-300 hover:bg-gray-400"
             )}
             aria-label={`Go to slide ${index + 1}`}
@@ -180,7 +184,7 @@ export default function IULPresentationSlides({
       </div>
 
       {/* Slide Counter */}
-      <div className="absolute top-6 right-6 bg-black/50 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm font-medium">
+      <div className="absolute top-6 right-6 bg-[#003366]/90 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm font-medium shadow-lg">
         {currentSlide + 1} / {slides.length}
       </div>
     </div>

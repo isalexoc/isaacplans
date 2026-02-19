@@ -1694,6 +1694,9 @@
       "title": "Request Information",
       "subtitle": "Fast, no-obligation estimate"
     },
+    "presentationButton": {
+      "title": "Go to Presentation Mode"
+    },
     "about": {
       "badge": "About Isaac",
       "headline": "Your trusted guide for simple, permanent protection",

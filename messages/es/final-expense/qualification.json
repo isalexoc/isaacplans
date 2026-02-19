@@ -1,0 +1,24 @@
+{
+  "finalExpenseQualification": {
+    "meta": {
+      "title": "Calificación Gastos Finales | Isaac Plans",
+      "description": "Complete su paso de calificación de gastos finales",
+      "keywords": "gastos finales, calificación, Senior Life, seguro funerario",
+      "image": "https://www.isaacplans.com/images/final_expense_og_placeholder_en.png",
+      "imageAlt": "Calificación Gastos Finales"
+    },
+    "title": "Calificación",
+    "backButton": "Volver a Gastos Finales",
+    "stepper": {
+      "presentation": "Presentación",
+      "qualification": "Calificación",
+      "referrals": "Referidos"
+    },
+    "completedLabel": "Calificación Completada",
+    "incompleteLabel": "Calificación Incompleta",
+    "switchDescription": "Marque esto como completado cuando haya terminado la calificación con el cliente",
+    "completedText": "✓ Completado",
+    "pendingText": "Haz Clic para Completar",
+    "note": "Complete la calificación con su proceso habitual y márquela aquí cuando termine."
+  }
+}

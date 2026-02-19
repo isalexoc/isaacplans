@@ -1,0 +1,24 @@
+{
+  "finalExpenseQualification": {
+    "meta": {
+      "title": "Final Expense Qualification | Isaac Plans",
+      "description": "Complete your final expense qualification step",
+      "keywords": "final expense, qualification, Senior Life, burial insurance",
+      "image": "https://www.isaacplans.com/images/final_expense_og_placeholder_en.png",
+      "imageAlt": "Final Expense Qualification"
+    },
+    "title": "Qualification",
+    "backButton": "Back to Final Expense",
+    "stepper": {
+      "presentation": "Presentation",
+      "qualification": "Qualification",
+      "referrals": "Referrals"
+    },
+    "completedLabel": "Qualification Completed",
+    "incompleteLabel": "Qualification Incomplete",
+    "switchDescription": "Mark this as complete once you've finished the qualification with the client",
+    "completedText": "✓ Completed",
+    "pendingText": "Click to Complete",
+    "note": "Complete the qualification through your normal process, then mark it here when done."
+  }
+}

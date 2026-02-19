@@ -95,6 +95,18 @@ export const routing = defineRouting({
       en: "/final-expense/calendar",
       es: "/gastos-finales/calendario",
     },
+    "/final-expense/presentation": {
+      en: "/final-expense/presentation",
+      es: "/gastos-finales/presentacion",
+    },
+    "/final-expense/qualification": {
+      en: "/final-expense/qualification",
+      es: "/gastos-finales/calificacion",
+    },
+    "/final-expense/referrals": {
+      en: "/final-expense/referrals",
+      es: "/gastos-finales/referidos",
+    },
     "/faq": {
       en: "/faq",
       es: "/preguntas-frecuentes",

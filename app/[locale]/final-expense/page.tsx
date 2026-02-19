@@ -1,5 +1,6 @@
 import HeroWithTestimonials from "@/components/hero-template";
 import FEButton from "@/components/FEButton"; // simple wrapper like HIButton (or reuse your generic CTA)
+import FinalExpensePresentationButton from "@/components/FinalExpensePresentationButton";
 import CTABanner from "@/components/CTABanner-template";
 import FaqSection from "@/components/FaqSection";
 import EnrollmentSectionGeneric from "@/components/enrollment-section-template";
@@ -121,6 +122,11 @@ export default async function FinalExpensePage() {
           subtitle: t("hero.happyClient.subtitle"),
         }}
       />
+
+      {/* PRESENTATION MODE BUTTON ----------------------------------------- */}
+      <div className="container mx-auto px-4 pt-8 pb-4">
+        <FinalExpensePresentationButton />
+      </div>
 
       {/* ABOUT ISAAC ---------------------------------------------------- */}
       <AboutSectionGeneric

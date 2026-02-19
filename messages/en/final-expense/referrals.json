@@ -1,0 +1,34 @@
+{
+  "finalExpenseReferrals": {
+    "meta": {
+      "title": "Final Expense Referrals | Isaac Plans",
+      "description": "Request a review and capture referrals for final expense",
+      "keywords": "final expense, referrals, review, Senior Life",
+      "image": "https://www.isaacplans.com/images/final_expense_og_placeholder_en.png",
+      "imageAlt": "Final Expense Referrals"
+    },
+    "title": "Referrals",
+    "backButton": "Back to Final Expense",
+    "stepper": {
+      "presentation": "Presentation",
+      "qualification": "Qualification",
+      "referrals": "Referrals"
+    },
+    "review": {
+      "sectionTitle": "1. Ask for a review",
+      "completedLabel": "Review requested",
+      "incompleteLabel": "Review not yet requested",
+      "switchDescription": "Ask the client to leave a review (e.g. Google, Trustpilot). Mark complete once you've requested it.",
+      "completedText": "✓ Review requested",
+      "pendingText": "Click when you've asked for the review"
+    },
+    "capture": {
+      "sectionTitle": "2. Referral capture",
+      "completedLabel": "Referrals captured",
+      "incompleteLabel": "Referrals not yet captured",
+      "switchDescription": "Capture referral names and contact info. Mark complete once you've recorded the referrals.",
+      "completedText": "✓ Referrals captured",
+      "pendingText": "Click when you've captured the referrals"
+    }
+  }
+}

@@ -42,6 +42,30 @@ async function loadSplitMessages(locale: string): Promise<Record<string, any>> {
     } catch {
       // File doesn't exist, skip
     }
+
+    // Load Final Expense presentation messages if they exist
+    try {
+      const fePresentation = (await import(`@/messages/${locale}/final-expense/presentation.json`)).default;
+      Object.assign(splitMessages, fePresentation);
+    } catch {
+      // File doesn't exist, skip
+    }
+
+    // Load Final Expense qualification messages if they exist
+    try {
+      const feQualification = (await import(`@/messages/${locale}/final-expense/qualification.json`)).default;
+      Object.assign(splitMessages, feQualification);
+    } catch {
+      // File doesn't exist, skip
+    }
+
+    // Load Final Expense referrals messages if they exist
+    try {
+      const feReferrals = (await import(`@/messages/${locale}/final-expense/referrals.json`)).default;
+      Object.assign(splitMessages, feReferrals);
+    } catch {
+      // File doesn't exist, skip
+    }
     
     // Load FAQ messages if they exist
     try {
