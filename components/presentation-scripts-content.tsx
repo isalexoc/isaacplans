@@ -38,26 +38,6 @@ interface PresentationScriptsContentProps {
 
 const sectionConfig = [
   {
-    key: 'openingIntroduction',
-    titleEn: 'Opening & Introduction',
-    titleEs: 'Apertura e Introducción',
-  },
-  {
-    key: 'discoveryQuestions',
-    titleEn: 'Discovery Questions & Qualification',
-    titleEs: 'Preguntas de Descubrimiento y Calificación',
-  },
-  {
-    key: 'productPresentation',
-    titleEn: 'Product Presentation',
-    titleEs: 'Presentación del Producto',
-  },
-  {
-    key: 'closingTechniques',
-    titleEn: 'Closing - Three Options',
-    titleEs: 'Cierre - Tres Opciones',
-  },
-  {
     key: 'objectionHandling',
     titleEn: 'Objection Handling',
     titleEs: 'Manejo de Objeciones',
