@@ -89,15 +89,21 @@ export default function FullscreenButton({
       ref={buttonRef}
       onClick={toggleFullscreen}
       variant="outline"
-      size="icon"
-      className={cn("relative", className)}
+      size="default"
+      className={cn("relative gap-2", className)}
       aria-label={isFullscreen ? exitLabel : label}
       title={isFullscreen ? exitLabel : label}
     >
       {isFullscreen ? (
-        <Minimize2 className="h-5 w-5" />
+        <>
+          <Minimize2 className="h-4 w-4 flex-shrink-0" />
+          <span className="font-medium whitespace-nowrap">{exitLabel}</span>
+        </>
       ) : (
-        <Maximize2 className="h-5 w-5" />
+        <>
+          <Maximize2 className="h-4 w-4 flex-shrink-0" />
+          <span className="font-medium whitespace-nowrap">{label}</span>
+        </>
       )}
     </Button>
   );

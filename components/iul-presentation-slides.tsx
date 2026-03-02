@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Minimize2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -11,17 +11,93 @@ interface Slide {
   content: React.ReactNode;
 }
 
+const SWIPE_THRESHOLD = 50;
+const SWIPE_HORIZONTAL_MIN = 20;
+
 interface IULPresentationSlidesProps {
   slides: Slide[];
   className?: string;
+  /** Label for exit fullscreen button shown when in fullscreen (e.g. "Exit Fullscreen") */
+  exitFullscreenLabel?: string;
 }
 
 export default function IULPresentationSlides({
   slides,
   className,
+  exitFullscreenLabel = "Exit Fullscreen",
 }: IULPresentationSlidesProps) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [direction, setDirection] = useState(0);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+  const swipeIntentRef = useRef<"horizontal" | "vertical" | null>(null);
+
+  // Detect when we're inside the fullscreen element
+  useEffect(() => {
+    const checkFullscreen = () => {
+      const el = document.fullscreenElement ?? (document as any).webkitFullscreenElement ?? (document as any).mozFullScreenElement ?? (document as any).msFullscreenElement;
+      const weAreFullscreen = !!el && containerRef.current?.closest("#presentation-content")
+        ? el === document.getElementById("presentation-content")
+        : !!el;
+      setIsFullscreen(weAreFullscreen);
+    };
+    checkFullscreen();
+    document.addEventListener("fullscreenchange", checkFullscreen);
+    document.addEventListener("webkitfullscreenchange", checkFullscreen);
+    document.addEventListener("mozfullscreenchange", checkFullscreen);
+    document.addEventListener("MSFullscreenChange", checkFullscreen);
+    return () => {
+      document.removeEventListener("fullscreenchange", checkFullscreen);
+      document.removeEventListener("webkitfullscreenchange", checkFullscreen);
+      document.removeEventListener("mozfullscreenchange", checkFullscreen);
+      document.removeEventListener("MSFullscreenChange", checkFullscreen);
+    };
+  }, []);
+
+  const handleExitFullscreen = useCallback(() => {
+    if (document.exitFullscreen) {
+      document.exitFullscreen();
+    } else if ((document as any).webkitExitFullscreen) {
+      (document as any).webkitExitFullscreen();
+    } else if ((document as any).mozCancelFullScreen) {
+      (document as any).mozCancelFullScreen();
+    } else if ((document as any).msExitFullscreen) {
+      (document as any).msExitFullscreen();
+    }
+  }, []);
+
+  // Touch swipe: horizontal = change slide, vertical = scroll content
+  const onTouchStart = (e: React.TouchEvent) => {
+    touchStartRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    swipeIntentRef.current = null;
+  };
+  const onTouchMove = (e: React.TouchEvent) => {
+    if (!touchStartRef.current) return;
+    const dx = e.touches[0].clientX - touchStartRef.current.x;
+    const dy = e.touches[0].clientY - touchStartRef.current.y;
+    if (swipeIntentRef.current === null) {
+      if (Math.abs(dx) > SWIPE_HORIZONTAL_MIN || Math.abs(dy) > SWIPE_HORIZONTAL_MIN) {
+        swipeIntentRef.current = Math.abs(dx) >= Math.abs(dy) ? "horizontal" : "vertical";
+      }
+    }
+    if (swipeIntentRef.current === "horizontal" && Math.abs(dx) > 5) {
+      e.preventDefault();
+    }
+  };
+  const onTouchEnd = (e: React.TouchEvent) => {
+    if (!touchStartRef.current) return;
+    const endX = e.changedTouches[0].clientX;
+    const endY = e.changedTouches[0].clientY;
+    const dx = endX - touchStartRef.current.x;
+    const dy = endY - touchStartRef.current.y;
+    if (swipeIntentRef.current === "horizontal" && Math.abs(dx) >= SWIPE_THRESHOLD) {
+      if (dx > 0) prevSlide();
+      else nextSlide();
+    }
+    touchStartRef.current = null;
+    swipeIntentRef.current = null;
+  };
 
   // Keyboard navigation
   useEffect(() => {
@@ -110,9 +186,36 @@ export default function IULPresentationSlides({
   };
 
   return (
-    <div className={cn("relative w-full h-full overflow-hidden", className)}>
-      {/* Slide Content */}
-      <div className="relative w-full h-full [&:fullscreen]:h-screen [&:fullscreen]:w-screen overflow-y-auto overflow-x-hidden">
+    <div
+      ref={containerRef}
+      className={cn("relative w-full h-full overflow-hidden touch-pan-y", className)}
+      style={{ touchAction: "pan-y" }}
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+      onTouchCancel={onTouchEnd}
+    >
+      {/* Exit fullscreen button when in fullscreen - avoids needing to swipe up on tablet */}
+      {isFullscreen && (
+        <div className="absolute top-4 left-4 z-50">
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={handleExitFullscreen}
+            className="gap-2 bg-white/95 backdrop-blur-md shadow-lg border border-gray-200 hover:bg-white"
+            aria-label={exitFullscreenLabel}
+          >
+            <Minimize2 className="h-4 w-4" />
+            <span className="font-medium">{exitFullscreenLabel}</span>
+          </Button>
+        </div>
+      )}
+
+      {/* Slide Content - vertical scroll allowed (swipe down/up for content), horizontal = slide change */}
+      <div
+        className="relative w-full h-full [&:fullscreen]:h-screen [&:fullscreen]:w-screen overflow-y-auto overflow-x-hidden overscroll-contain"
+        style={{ overscrollBehavior: "contain" }}
+      >
         <AnimatePresence mode="wait" custom={direction}>
           <motion.div
             key={currentSlide}

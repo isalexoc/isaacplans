@@ -87,7 +87,7 @@ export default async function FinalExpensePresentationPage() {
           <h1 className="text-2xl sm:text-3xl font-bold text-center flex-1 text-[#003366]">
             {t("title")}
           </h1>
-          <div className="w-[110px] sm:w-[120px] flex justify-end">
+          <div className="min-w-[140px] sm:min-w-[180px] flex justify-end">
             <FullscreenButton
               targetId="presentation-content"
               label={t("fullscreen.enter")}
@@ -101,12 +101,13 @@ export default async function FinalExpensePresentationPage() {
           <FinalExpenseWorkflowStepperWrapper steps={steps} currentStep={0} />
         </div>
 
-        {/* Presentation Content Area */}
+        {/* Presentation Content Area - overscroll-contain in fullscreen reduces accidental exit on swipe */}
         <div
           id="presentation-content"
-          className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg shadow-lg min-h-[600px] h-[70vh] overflow-hidden relative [&:fullscreen]:h-screen [&:fullscreen]:w-screen [&:fullscreen]:rounded-none [&:fullscreen]:min-h-screen"
+          className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg shadow-lg min-h-[600px] h-[70vh] overflow-hidden relative [&:fullscreen]:h-screen [&:fullscreen]:w-screen [&:fullscreen]:rounded-none [&:fullscreen]:min-h-screen [&:fullscreen]:overscroll-none"
         >
           <IULPresentationSlides
+            exitFullscreenLabel={t("fullscreen.exit")}
             slides={[
               { id: 1, content: <FinalExpenseSlideContent slideKey="slide1" /> },
               { id: 2, content: <FinalExpenseSlideContent slideKey="slide2" /> },
