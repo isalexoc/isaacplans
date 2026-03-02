@@ -13,6 +13,8 @@ interface Slide {
 
 const SWIPE_THRESHOLD = 50;
 const SWIPE_HORIZONTAL_MIN = 20;
+const CUSTOM_FULLSCREEN_CLASS = "presentation-fullscreen-custom";
+const CUSTOM_FULLSCREEN_EVENT = "presentation-fullscreen-change";
 
 interface IULPresentationSlidesProps {
   slides: Slide[];
@@ -34,38 +36,39 @@ export default function IULPresentationSlides({
   const touchStartRef = useRef<{ x: number; y: number; scrollTop: number } | null>(null);
   const swipeIntentRef = useRef<"horizontal" | "vertical" | null>(null);
 
-  // Detect when we're inside the fullscreen element
+  // Detect when we're in fullscreen (native API or CSS custom fullscreen on iOS)
   useEffect(() => {
     const checkFullscreen = () => {
       const el = document.fullscreenElement ?? (document as any).webkitFullscreenElement ?? (document as any).mozFullScreenElement ?? (document as any).msFullscreenElement;
-      const weAreFullscreen = !!el && containerRef.current?.closest("#presentation-content")
-        ? el === document.getElementById("presentation-content")
-        : !!el;
-      setIsFullscreen(weAreFullscreen);
+      const nativeFs = !!el && (containerRef.current?.closest("#presentation-content") ? el === document.getElementById("presentation-content") : !!el);
+      const customFs = document.body.classList.contains(CUSTOM_FULLSCREEN_CLASS);
+      setIsFullscreen(nativeFs || customFs);
     };
     checkFullscreen();
     document.addEventListener("fullscreenchange", checkFullscreen);
     document.addEventListener("webkitfullscreenchange", checkFullscreen);
     document.addEventListener("mozfullscreenchange", checkFullscreen);
     document.addEventListener("MSFullscreenChange", checkFullscreen);
+    document.addEventListener(CUSTOM_FULLSCREEN_EVENT, checkFullscreen);
     return () => {
       document.removeEventListener("fullscreenchange", checkFullscreen);
       document.removeEventListener("webkitfullscreenchange", checkFullscreen);
       document.removeEventListener("mozfullscreenchange", checkFullscreen);
       document.removeEventListener("MSFullscreenChange", checkFullscreen);
+      document.removeEventListener(CUSTOM_FULLSCREEN_EVENT, checkFullscreen);
     };
   }, []);
 
   const handleExitFullscreen = useCallback(() => {
-    if (document.exitFullscreen) {
-      document.exitFullscreen();
-    } else if ((document as any).webkitExitFullscreen) {
-      (document as any).webkitExitFullscreen();
-    } else if ((document as any).mozCancelFullScreen) {
-      (document as any).mozCancelFullScreen();
-    } else if ((document as any).msExitFullscreen) {
-      (document as any).msExitFullscreen();
+    if (document.body.classList.contains(CUSTOM_FULLSCREEN_CLASS)) {
+      document.body.classList.remove(CUSTOM_FULLSCREEN_CLASS, "presentation-fullscreen");
+      document.dispatchEvent(new CustomEvent(CUSTOM_FULLSCREEN_EVENT));
+      return;
     }
+    if (document.exitFullscreen) document.exitFullscreen();
+    else if ((document as any).webkitExitFullscreen) (document as any).webkitExitFullscreen();
+    else if ((document as any).mozCancelFullScreen) (document as any).mozCancelFullScreen();
+    else if ((document as any).msExitFullscreen) (document as any).msExitFullscreen();
   }, []);
 
   // Touch swipe: horizontal = change slide, vertical = scroll content.

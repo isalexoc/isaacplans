@@ -5,6 +5,18 @@ import { Maximize2, Minimize2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
+/** iOS/iPadOS uses native fullscreen and shows "Swipe down to exit" — we use CSS fullscreen instead so only our button exits. */
+function isIOSOrIPad(): boolean {
+  if (typeof navigator === "undefined") return false;
+  const ua = navigator.userAgent;
+  if (/iPad|iPhone|iPod/.test(ua)) return true;
+  if (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1) return true;
+  return false;
+}
+
+const CUSTOM_FULLSCREEN_CLASS = "presentation-fullscreen-custom";
+const CUSTOM_FULLSCREEN_EVENT = "presentation-fullscreen-change";
+
 interface FullscreenButtonProps {
   targetId?: string;
   className?: string;
@@ -20,64 +32,102 @@ export default function FullscreenButton({
 }: FullscreenButtonProps) {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
+  const useCustomFullscreen = useRef(false);
 
   useEffect(() => {
-    const handleFullscreenChange = () => {
-      const isFullscreenNow = !!document.fullscreenElement;
-      setIsFullscreen(isFullscreenNow);
-      
-      // Add/remove class to body for fullscreen styling
-      if (isFullscreenNow) {
+    useCustomFullscreen.current = isIOSOrIPad() && !!targetId;
+  }, [targetId]);
+
+  useEffect(() => {
+    const checkFullscreen = () => {
+      const nativeFs = !!(
+        document.fullscreenElement ??
+        (document as any).webkitFullscreenElement ??
+        (document as any).mozFullScreenElement ??
+        (document as any).msFullscreenElement
+      );
+      const customFs = document.body.classList.contains(CUSTOM_FULLSCREEN_CLASS);
+      setIsFullscreen(nativeFs || customFs);
+      if (nativeFs) {
         document.body.classList.add("presentation-fullscreen");
-      } else {
+      } else if (!customFs) {
         document.body.classList.remove("presentation-fullscreen");
       }
     };
 
-    document.addEventListener("fullscreenchange", handleFullscreenChange);
-    document.addEventListener("webkitfullscreenchange", handleFullscreenChange);
-    document.addEventListener("mozfullscreenchange", handleFullscreenChange);
-    document.addEventListener("MSFullscreenChange", handleFullscreenChange);
+    checkFullscreen();
+    document.addEventListener("fullscreenchange", checkFullscreen);
+    document.addEventListener("webkitfullscreenchange", checkFullscreen);
+    document.addEventListener("mozfullscreenchange", checkFullscreen);
+    document.addEventListener("MSFullscreenChange", checkFullscreen);
+    document.addEventListener(CUSTOM_FULLSCREEN_EVENT, checkFullscreen);
 
     return () => {
-      document.removeEventListener("fullscreenchange", handleFullscreenChange);
-      document.removeEventListener("webkitfullscreenchange", handleFullscreenChange);
-      document.removeEventListener("mozfullscreenchange", handleFullscreenChange);
-      document.removeEventListener("MSFullscreenChange", handleFullscreenChange);
-      document.body.classList.remove("presentation-fullscreen");
+      document.removeEventListener("fullscreenchange", checkFullscreen);
+      document.removeEventListener("webkitfullscreenchange", checkFullscreen);
+      document.removeEventListener("mozfullscreenchange", checkFullscreen);
+      document.removeEventListener("MSFullscreenChange", checkFullscreen);
+      document.removeEventListener(CUSTOM_FULLSCREEN_EVENT, checkFullscreen);
+      document.body.classList.remove("presentation-fullscreen", CUSTOM_FULLSCREEN_CLASS);
     };
   }, []);
 
+  // Inject CSS for custom fullscreen (iOS) so target fills viewport without native fullscreen API
+  useEffect(() => {
+    if (!targetId || !isIOSOrIPad()) return;
+    const id = targetId.startsWith("#") ? targetId.slice(1) : targetId;
+    const style = document.createElement("style");
+    style.setAttribute("data-presentation-custom-fullscreen", "true");
+    style.textContent = `
+      body.${CUSTOM_FULLSCREEN_CLASS} { overflow: hidden !important; }
+      body.${CUSTOM_FULLSCREEN_CLASS} #${id} {
+        position: fixed !important;
+        inset: 0 !important;
+        z-index: 99999 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        min-height: 100vh !important;
+        max-height: 100vh !important;
+        border-radius: 0 !important;
+        background: var(--background, #f8fafc) !important;
+      }
+    `;
+    document.head.appendChild(style);
+    return () => {
+      const s = document.querySelector("[data-presentation-custom-fullscreen=true]");
+      if (s) s.remove();
+    };
+  }, [targetId]);
+
   const toggleFullscreen = async () => {
-    try {
-      const element = targetId
-        ? document.getElementById(targetId)
-        : document.documentElement;
+    const useCustom = useCustomFullscreen.current;
+    const element = targetId ? document.getElementById(targetId) : document.documentElement;
+    if (!element) return;
 
-      if (!element) return;
-
+    if (useCustom) {
       if (!isFullscreen) {
-        // Enter fullscreen
-        if (element.requestFullscreen) {
-          await element.requestFullscreen();
-        } else if ((element as any).webkitRequestFullscreen) {
-          await (element as any).webkitRequestFullscreen();
-        } else if ((element as any).mozRequestFullScreen) {
-          await (element as any).mozRequestFullScreen();
-        } else if ((element as any).msRequestFullscreen) {
-          await (element as any).msRequestFullscreen();
-        }
+        document.body.classList.add(CUSTOM_FULLSCREEN_CLASS, "presentation-fullscreen");
+        document.dispatchEvent(new CustomEvent(CUSTOM_FULLSCREEN_EVENT));
+        setIsFullscreen(true);
       } else {
-        // Exit fullscreen
-        if (document.exitFullscreen) {
-          await document.exitFullscreen();
-        } else if ((document as any).webkitExitFullscreen) {
-          await (document as any).webkitExitFullscreen();
-        } else if ((document as any).mozCancelFullScreen) {
-          await (document as any).mozCancelFullScreen();
-        } else if ((document as any).msExitFullscreen) {
-          await (document as any).msExitFullscreen();
-        }
+        document.body.classList.remove(CUSTOM_FULLSCREEN_CLASS, "presentation-fullscreen");
+        document.dispatchEvent(new CustomEvent(CUSTOM_FULLSCREEN_EVENT));
+        setIsFullscreen(false);
+      }
+      return;
+    }
+
+    try {
+      if (!isFullscreen) {
+        if (element.requestFullscreen) await element.requestFullscreen();
+        else if ((element as any).webkitRequestFullscreen) await (element as any).webkitRequestFullscreen();
+        else if ((element as any).mozRequestFullScreen) await (element as any).mozRequestFullScreen();
+        else if ((element as any).msRequestFullscreen) await (element as any).msRequestFullscreen();
+      } else {
+        if (document.exitFullscreen) await document.exitFullscreen();
+        else if ((document as any).webkitExitFullscreen) await (document as any).webkitExitFullscreen();
+        else if ((document as any).mozCancelFullScreen) await (document as any).mozCancelFullScreen();
+        else if ((document as any).msExitFullscreen) await (document as any).msExitFullscreen();
       }
     } catch (error) {
       console.error("Error toggling fullscreen:", error);
