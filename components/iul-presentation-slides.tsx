@@ -30,7 +30,8 @@ export default function IULPresentationSlides({
   const [direction, setDirection] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+  const scrollableRef = useRef<HTMLDivElement>(null);
+  const touchStartRef = useRef<{ x: number; y: number; scrollTop: number } | null>(null);
   const swipeIntentRef = useRef<"horizontal" | "vertical" | null>(null);
 
   // Detect when we're inside the fullscreen element
@@ -67,9 +68,11 @@ export default function IULPresentationSlides({
     }
   }, []);
 
-  // Touch swipe: horizontal = change slide, vertical = scroll content
+  // Touch swipe: horizontal = change slide, vertical = scroll content.
+  // In fullscreen we preventDefault on all touchmove so the browser cannot use swipe to exit fullscreen; we handle scroll manually.
   const onTouchStart = (e: React.TouchEvent) => {
-    touchStartRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    const scrollTop = scrollableRef.current?.scrollTop ?? 0;
+    touchStartRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY, scrollTop };
     swipeIntentRef.current = null;
   };
   const onTouchMove = (e: React.TouchEvent) => {
@@ -81,16 +84,23 @@ export default function IULPresentationSlides({
         swipeIntentRef.current = Math.abs(dx) >= Math.abs(dy) ? "horizontal" : "vertical";
       }
     }
-    if (swipeIntentRef.current === "horizontal" && Math.abs(dx) > 5) {
+    if (isFullscreen) {
       e.preventDefault();
+      if (swipeIntentRef.current === "vertical" && scrollableRef.current) {
+        const el = scrollableRef.current;
+        const newScroll = touchStartRef.current.scrollTop + touchStartRef.current.y - e.touches[0].clientY;
+        el.scrollTop = Math.max(0, Math.min(newScroll, el.scrollHeight - el.clientHeight));
+      }
+    } else {
+      if (swipeIntentRef.current === "horizontal" && Math.abs(dx) > 5) {
+        e.preventDefault();
+      }
     }
   };
   const onTouchEnd = (e: React.TouchEvent) => {
     if (!touchStartRef.current) return;
     const endX = e.changedTouches[0].clientX;
-    const endY = e.changedTouches[0].clientY;
     const dx = endX - touchStartRef.current.x;
-    const dy = endY - touchStartRef.current.y;
     if (swipeIntentRef.current === "horizontal" && Math.abs(dx) >= SWIPE_THRESHOLD) {
       if (dx > 0) prevSlide();
       else nextSlide();
@@ -99,9 +109,14 @@ export default function IULPresentationSlides({
     swipeIntentRef.current = null;
   };
 
-  // Keyboard navigation
+  // Keyboard navigation + block Escape in fullscreen so only the button can exit
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isFullscreen) {
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
       if (e.key === "ArrowRight" || e.key === "ArrowDown") {
         if (currentSlide < slides.length - 1) {
           setDirection(1);
@@ -121,9 +136,9 @@ export default function IULPresentationSlides({
       }
     };
 
-    window.addEventListener("keydown", handleKeyPress);
-    return () => window.removeEventListener("keydown", handleKeyPress);
-  }, [currentSlide, slides.length]);
+    window.addEventListener("keydown", handleKeyPress, true);
+    return () => window.removeEventListener("keydown", handleKeyPress, true);
+  }, [currentSlide, slides.length, isFullscreen]);
 
   const nextSlide = () => {
     if (currentSlide < slides.length - 1) {
@@ -188,8 +203,8 @@ export default function IULPresentationSlides({
   return (
     <div
       ref={containerRef}
-      className={cn("relative w-full h-full overflow-hidden touch-pan-y", className)}
-      style={{ touchAction: "pan-y" }}
+      className={cn("relative w-full h-full overflow-hidden", !isFullscreen && "touch-pan-y", className)}
+      style={{ touchAction: isFullscreen ? "none" : "pan-y" }}
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
@@ -213,6 +228,7 @@ export default function IULPresentationSlides({
 
       {/* Slide Content - vertical scroll allowed (swipe down/up for content), horizontal = slide change */}
       <div
+        ref={scrollableRef}
         className="relative w-full h-full [&:fullscreen]:h-screen [&:fullscreen]:w-screen overflow-y-auto overflow-x-hidden overscroll-contain"
         style={{ overscrollBehavior: "contain" }}
       >
