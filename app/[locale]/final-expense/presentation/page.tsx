@@ -104,7 +104,7 @@ export default async function FinalExpensePresentationPage() {
         {/* Presentation Content Area - overscroll-contain in fullscreen reduces accidental exit on swipe */}
         <div
           id="presentation-content"
-          className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg shadow-lg min-h-[600px] h-[70vh] overflow-hidden relative [&:fullscreen]:h-screen [&:fullscreen]:w-screen [&:fullscreen]:rounded-none [&:fullscreen]:min-h-screen [&:fullscreen]:overscroll-none"
+          className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg shadow-lg min-h-[600px] h-[70vh] overflow-hidden relative [&:fullscreen]:h-screen [&:fullscreen]:w-screen [&:fullscreen]:rounded-none [&:fullscreen]:min-h-screen [&:fullscreen]:overscroll-none [&:fullscreen]:bg-black/70"
         >
           <IULPresentationSlides
             exitFullscreenLabel={t("fullscreen.exit")}

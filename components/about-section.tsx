@@ -71,8 +71,6 @@ export function AboutSection() {
             <p className="font-bold text-lg text-gray-900">Isaac&nbsp;Orraiz</p>
             <p className="text-gray-700">
               Insurance Agent
-              <br />
-              NPN: 21592068
             </p>
           </div>
 

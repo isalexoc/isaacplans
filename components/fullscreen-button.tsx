@@ -80,6 +80,14 @@ export default function FullscreenButton({
     style.setAttribute("data-presentation-custom-fullscreen", "true");
     style.textContent = `
       body.${CUSTOM_FULLSCREEN_CLASS} { overflow: hidden !important; }
+      body.${CUSTOM_FULLSCREEN_CLASS}::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        z-index: 99998;
+        background: rgba(0, 0, 0, 0.65);
+        pointer-events: none;
+      }
       body.${CUSTOM_FULLSCREEN_CLASS} #${id} {
         position: fixed !important;
         inset: 0 !important;

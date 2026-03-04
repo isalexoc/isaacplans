@@ -103,14 +103,6 @@ const AboutSectionGeneric: React.FC<AboutSectionProps> = ({
             </p>
             <p className="text-gray-700 dark:text-gray-300 text-base lg:text-lg">
               {role}
-              {credential && (
-                <>
-                  <br />
-                  <span className="text-sm lg:text-base text-gray-600 dark:text-gray-400">
-                    NPN: {credential}
-                  </span>
-                </>
-              )}
             </p>
           </div>
 
