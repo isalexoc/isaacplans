@@ -79,20 +79,20 @@ export default async function FinalExpensePresentationPage() {
   return (
     <main className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       <div className="container mx-auto px-4 py-8 max-w-7xl">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex gap-2">
-            <Button asChild variant="secondary">
+        {/* Header - stacks vertically on mobile to prevent overflow */}
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8">
+          <div className="flex flex-wrap gap-2 shrink-0">
+            <Button asChild variant="secondary" size="sm">
               <Link href="/final-expense">{t("backButton")}</Link>
             </Button>
             <Button asChild variant="outline" size="sm">
               <Link href="/final-expense/leave-behind">{t("leaveBehindLink")}</Link>
             </Button>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-center flex-1 text-[#003366]">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-center sm:flex-1 text-[#003366] min-w-0">
             {t("title")}
           </h1>
-          <div className="min-w-[140px] sm:min-w-[180px] flex justify-end">
+          <div className="flex justify-center sm:justify-end shrink-0">
             <FullscreenButton
               targetId="presentation-content"
               label={t("fullscreen.enter")}
