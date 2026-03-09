@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import html2canvas from "html2canvas";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { FileImage, ArrowRight, Pencil } from "lucide-react";
+import { FileImage, ArrowRight, Pencil, Share2 } from "lucide-react";
 
 // 2x resolution (560px) for crisp html2canvas capture at 280px display
 const SENIOR_LIFE_LOGO =
@@ -19,8 +19,16 @@ function formatCurrency(value: number): string {
   return new Intl.NumberFormat("en-US", {
     style: "decimal",
     minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
+    maximumFractionDigits: 2,
   }).format(value);
+}
+
+/** Allow digits and one decimal point (e.g. 69.73) for mobile keyboard */
+function sanitizeDecimalInput(value: string): string {
+  const cleaned = value.replace(/[^\d.]/g, "");
+  const parts = cleaned.split(".");
+  if (parts.length <= 1) return parts[0] || "";
+  return `${parts[0]}.${(parts[1] ?? "").slice(0, 2)}`;
 }
 
 function parseNames(input: string): string[] {
@@ -34,6 +42,12 @@ export default function FinalExpenseLeaveBehindForm() {
   const t = useTranslations("finalExpenseLeaveBehind");
   const [phase, setPhase] = useState<1 | 2>(1);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [isSharing, setIsSharing] = useState(false);
+  const [canShare, setCanShare] = useState(false);
+
+  useEffect(() => {
+    setCanShare(typeof navigator !== "undefined" && !!navigator.share);
+  }, []);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const [prospectName, setProspectName] = useState("");
@@ -45,9 +59,9 @@ export default function FinalExpenseLeaveBehindForm() {
 
   const imageRef = useRef<HTMLDivElement>(null);
 
-  const naturalNum = parseInt(naturalDeath.replace(/\D/g, ""), 10) || 0;
-  const accidentalNum = parseInt(accidentalDeath.replace(/\D/g, ""), 10) || 0;
-  const premiumNum = parseInt(monthlyPremium.replace(/\D/g, ""), 10) || 0;
+  const naturalNum = parseFloat(sanitizeDecimalInput(naturalDeath)) || 0;
+  const accidentalNum = parseFloat(sanitizeDecimalInput(accidentalDeath)) || 0;
+  const premiumNum = parseFloat(sanitizeDecimalInput(monthlyPremium)) || 0;
   const totalCoverage = naturalNum + accidentalNum;
   const avoidList = parseNames(avoidNames);
   const protectList = parseNames(protectNames);
@@ -73,45 +87,93 @@ export default function FinalExpenseLeaveBehindForm() {
     setPhase(2);
   };
 
-  const handleDownload = async () => {
+  const captureImageAsBlob = async (): Promise<Blob | null> => {
+    if (!imageRef.current) return null;
+    imageRef.current.scrollIntoView({ behavior: "auto", block: "center" });
+    await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+
+    const images = imageRef.current.querySelectorAll<HTMLImageElement>("img");
+    await Promise.all(
+      Array.from(images).map(
+        (img) =>
+          new Promise<void>((resolve) => {
+            if (img.complete && img.naturalWidth > 0) return resolve();
+            img.onload = () => resolve();
+            img.onerror = () => resolve();
+            setTimeout(resolve, 5000);
+          })
+      )
+    );
+
+    const canvas = await html2canvas(imageRef.current, {
+      backgroundColor: "#0a1628",
+      scale: 2,
+      logging: false,
+      useCORS: true,
+      imageTimeout: 15000,
+      windowWidth: Math.max(imageRef.current.scrollWidth, 360),
+      windowHeight: Math.max(imageRef.current.scrollHeight, 640),
+    });
+
+    return new Promise<Blob | null>((resolve) => {
+      canvas.toBlob(
+        (blob) => resolve(blob),
+        "image/png",
+        1.0
+      );
+    });
+  };
+
+  const handleDownload = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     if (!imageRef.current) return;
     setIsDownloading(true);
     try {
-      // Ensure element is in view and has dimensions before capture
-      imageRef.current.scrollIntoView({ behavior: "auto", block: "center" });
-      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+      const blob = await captureImageAsBlob();
+      if (!blob) return;
 
-      // Wait for all images to load to avoid createPattern 0x0 canvas error
-      const images = imageRef.current.querySelectorAll<HTMLImageElement>("img");
-      await Promise.all(
-        Array.from(images).map(
-          (img) =>
-            new Promise<void>((resolve) => {
-              if (img.complete && img.naturalWidth > 0) return resolve();
-              img.onload = () => resolve();
-              img.onerror = () => resolve();
-              setTimeout(resolve, 5000);
-            })
-        )
-      );
-
-      const canvas = await html2canvas(imageRef.current, {
-        backgroundColor: "#0a1628",
-        scale: 2,
-        logging: false,
-        useCORS: true,
-        imageTimeout: 15000,
-        windowWidth: Math.max(imageRef.current.scrollWidth, 360),
-        windowHeight: Math.max(imageRef.current.scrollHeight, 640),
-      });
+      const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
+      link.href = url;
       link.download = `senior-life-quote-${Date.now()}.png`;
-      link.href = canvas.toDataURL("image/png");
+      link.style.display = "none";
+      document.body.appendChild(link);
       link.click();
+      setTimeout(() => {
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      }, 100);
     } catch (error) {
       console.error("Error downloading image:", error);
     } finally {
       setIsDownloading(false);
+    }
+  };
+
+  const handleShare = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!navigator.share) return;
+    setIsSharing(true);
+    try {
+      const blob = await captureImageAsBlob();
+      if (!blob) return;
+
+      const file = new File([blob], `senior-life-quote-${Date.now()}.png`, { type: "image/png" });
+      if (navigator.canShare?.({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: "Senior Life Quote",
+          text: prospectName.trim() ? `Quote prepared for ${prospectName.trim()}` : "Your Senior Life quote",
+        });
+      }
+    } catch (error) {
+      if ((error as Error).name !== "AbortError") {
+        console.error("Error sharing image:", error);
+      }
+    } finally {
+      setIsSharing(false);
     }
   };
 
@@ -146,10 +208,10 @@ export default function FinalExpenseLeaveBehindForm() {
                 <Input
                   id="natural"
                   type="text"
-                  inputMode="numeric"
+                  inputMode="decimal"
                   placeholder={t("phase1.naturalDeathPlaceholder")}
                   value={naturalDeath}
-                  onChange={(e) => setNaturalDeath(e.target.value)}
+                  onChange={(e) => setNaturalDeath(sanitizeDecimalInput(e.target.value))}
                   className={errors.natural ? "border-red-500" : ""}
                 />
                 {errors.natural && (
@@ -161,10 +223,10 @@ export default function FinalExpenseLeaveBehindForm() {
                 <Input
                   id="accidental"
                   type="text"
-                  inputMode="numeric"
+                  inputMode="decimal"
                   placeholder={t("phase1.accidentalDeathPlaceholder")}
                   value={accidentalDeath}
-                  onChange={(e) => setAccidentalDeath(e.target.value)}
+                  onChange={(e) => setAccidentalDeath(sanitizeDecimalInput(e.target.value))}
                   className={errors.accidental ? "border-red-500" : ""}
                 />
                 {errors.accidental && (
@@ -181,10 +243,10 @@ export default function FinalExpenseLeaveBehindForm() {
               <Input
                 id="premium"
                 type="text"
-                inputMode="numeric"
+                inputMode="decimal"
                 placeholder={t("phase1.monthlyPremiumPlaceholder")}
                 value={monthlyPremium}
-                onChange={(e) => setMonthlyPremium(e.target.value)}
+                onChange={(e) => setMonthlyPremium(sanitizeDecimalInput(e.target.value))}
               />
               <p className="text-sm text-gray-500">{t("phase1.monthlyPremiumHint")}</p>
             </div>
@@ -238,12 +300,23 @@ export default function FinalExpenseLeaveBehindForm() {
             </Button>
             <Button
               onClick={handleDownload}
-              disabled={isDownloading}
+              disabled={isDownloading || isSharing}
               className="gap-2 bg-[#003366] hover:bg-[#004080]"
             >
               <FileImage className="h-4 w-4" />
               {isDownloading ? t("phase2.downloading") : t("phase2.downloadButton")}
             </Button>
+            {canShare && (
+              <Button
+                variant="outline"
+                onClick={handleShare}
+                disabled={isDownloading || isSharing}
+                className="gap-2"
+              >
+                <Share2 className="h-4 w-4" />
+                {isSharing ? t("phase2.sharing") : t("phase2.shareButton")}
+              </Button>
+            )}
           </div>
 
           {/* Image preview - portrait 9:16 for phone viewing, shareable design */}
