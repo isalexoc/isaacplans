@@ -3,12 +3,20 @@
 
 import { useEffect, useRef, useState } from "react";
 import FormSkeleton from "@/components/form-skeleton";
+import { loadAgentCrmOnce } from "@/lib/agentCrmLoader";
 
-type Props = { heightPx?: number };
+type Props = { heightPx?: number; fillContainer?: boolean };
 
-export default function ContactFormIFrameGeneral({ heightPx = 760 }: Props) {
+export default function ContactFormIFrameGeneral({ heightPx = 1200, fillContainer = false }: Props) {
   const [visible, setVisible] = useState(false);
   const revealTimer = useRef<number | null>(null);
+
+  useEffect(() => {
+    const id = requestAnimationFrame(() => {
+      loadAgentCrmOnce().catch(() => {});
+    });
+    return () => cancelAnimationFrame(id);
+  }, []);
 
   const onIFrameLoad = () => {
     if (revealTimer.current) window.clearTimeout(revealTimer.current);
@@ -24,9 +32,9 @@ export default function ContactFormIFrameGeneral({ heightPx = 760 }: Props) {
 
   return (
     <div
-      className="relative w-full"
+      className={`relative mx-auto w-full max-w-[640px] min-w-0 ${fillContainer ? "min-h-0 flex-1 self-stretch w-full" : "overflow-hidden"}`}
       aria-busy={!visible}
-      style={{ height: heightPx }}
+      style={fillContainer ? undefined : { height: heightPx }}
     >
       {/* Iframe */}
       <iframe
@@ -48,7 +56,7 @@ export default function ContactFormIFrameGeneral({ heightPx = 760 }: Props) {
         data-activation-type="alwaysActivated"
         data-deactivation-type="neverDeactivate"
         data-form-name="A2P General Optin"
-        data-height={`${heightPx}`}
+        data-height={fillContainer ? "800" : `${heightPx}`}
         data-layout-iframe-id="inline-R7X4k5dTsAORoIyMq6Kz"
         data-form-id="R7X4k5dTsAORoIyMq6Kz"
       />

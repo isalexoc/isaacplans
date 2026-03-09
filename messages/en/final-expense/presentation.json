@@ -9,6 +9,7 @@
     },
     "title": "Final Expense Presentation Mode",
     "backButton": "Back to Final Expense",
+    "leaveBehindLink": "Quote Image",
     "stepper": {
       "presentation": "Presentation",
       "qualification": "Qualification",

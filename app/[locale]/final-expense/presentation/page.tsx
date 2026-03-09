@@ -81,9 +81,14 @@ export default async function FinalExpensePresentationPage() {
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
-          <Button asChild variant="secondary">
-            <Link href="/final-expense">{t("backButton")}</Link>
-          </Button>
+          <div className="flex gap-2">
+            <Button asChild variant="secondary">
+              <Link href="/final-expense">{t("backButton")}</Link>
+            </Button>
+            <Button asChild variant="outline" size="sm">
+              <Link href="/final-expense/leave-behind">{t("leaveBehindLink")}</Link>
+            </Button>
+          </div>
           <h1 className="text-2xl sm:text-3xl font-bold text-center flex-1 text-[#003366]">
             {t("title")}
           </h1>

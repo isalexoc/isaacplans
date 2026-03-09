@@ -1,0 +1,56 @@
+{
+  "finalExpenseLeaveBehind": {
+    "meta": {
+      "title": "Imagen de Cotización para Dejar | Isaac Plans",
+      "description": "Crea una imagen de cotización personalizada para enviar a clientes después de tu presentación de gastos finales",
+      "keywords": "gastos finales, imagen cotización, Senior Life, dejar",
+      "image": "https://www.isaacplans.com/images/final_expense_og_placeholder_en.png",
+      "imageAlt": "Cotización Gastos Finales para Dejar"
+    },
+    "title": "Imagen de Cotización para Dejar",
+    "subtitle": "Crea una imagen para enviar a clientes con los detalles de su plan y cotización",
+    "backButton": "Volver a Gastos Finales",
+    "phase1": {
+      "title": "1. Ingresar Información",
+      "description": "Completa los detalles recopilados durante tu presentación",
+      "prospectName": "Nombre del prospecto / asegurado",
+      "prospectNamePlaceholder": "ej. María García",
+      "prospectNameHint": "La persona para quien es esta cotización",
+      "naturalDeath": "Cobertura muerte natural ($)",
+      "naturalDeathPlaceholder": "ej. 10000",
+      "accidentalDeath": "Cobertura muerte accidental ($)",
+      "accidentalDeathPlaceholder": "ej. 10000",
+      "accidentalHint": "Si la muerte accidental duplica el pago, usa el mismo monto que muerte natural",
+      "monthlyPremium": "Prima mensual ($)",
+      "monthlyPremiumPlaceholder": "ej. 45",
+      "monthlyPremiumHint": "El pequeño monto mensual por esta cobertura",
+      "avoidNames": "Personas que fallecieron sin preparación (separadas por comas)",
+      "avoidNamesPlaceholder": "ej. Juan, María",
+      "avoidHint": "Nombres de familiares o amigos que fallecieron sin planificación de gastos finales",
+      "protectNames": "Familiares a proteger (separados por comas)",
+      "protectNamesPlaceholder": "ej. Sara, Mike, Hijos",
+      "protectHint": "Cónyuge, hijos u otros seres queridos que quieren proteger"
+    },
+    "phase2": {
+      "title": "2. Vista Previa y Descargar",
+      "generateButton": "Generar Imagen",
+      "editButton": "Editar Información",
+      "downloadButton": "Descargar como Imagen",
+      "downloading": "Descargando...",
+      "preparedFor": "Preparado para",
+      "totalCoverage": "Cobertura Total",
+      "smallPremiumOf": "Por un pequeño aporte de",
+      "perMonth": "",
+      "naturalDeathLabel": "Muerte natural",
+      "plusAccidental": "más",
+      "ifAccidental": "si muerte accidental",
+      "avoidPrefix": "EVITA LO QUE PASÓ CON:",
+      "protectPrefix": "PROTEGE A TUS SERES QUERIDOS:"
+    },
+    "validation": {
+      "naturalRequired": "El monto de muerte natural es requerido",
+      "accidentalRequired": "El monto de muerte accidental es requerido",
+      "minAmount": "El monto debe ser al menos $1"
+    }
+  }
+}

@@ -9,6 +9,7 @@
     },
     "title": "Modo presentación Gastos Finales",
     "backButton": "Volver a Gastos Finales",
+    "leaveBehindLink": "Imagen Cotización",
     "stepper": {
       "presentation": "Presentación",
       "qualification": "Calificación",

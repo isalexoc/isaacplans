@@ -1,8 +1,8 @@
 // components/form-modal-general.tsx
 "use client";
 
-import { useState, useEffect } from "react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { useState, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import ContactFormIFrameGeneral from "@/components/contact-form-iframe-general";
 import ContactFormIFrameGeneralSpanish from "@/components/contact-form-iframe-general-spanish";
 import { useLocale } from "next-intl";
@@ -14,9 +14,10 @@ interface QuoteModalProps {
   setOpen?: (v: boolean) => void;
 }
 
-/** Modal that chooses the proper form by locale (en ⇢ English, es ⇢ Spanish) */
+/** Modal that chooses the proper form by locale (en ⇢ English, es ⇢ Spanish).
+ * Uses a custom div-based modal instead of Radix Dialog to avoid RemoveScroll
+ * blocking scroll inside the form. */
 export const QuoteModalGeneral = ({ open, setOpen }: QuoteModalProps = {}) => {
-  // fallback to uncontrolled mode
   const [internalOpen, setInternalOpen] = useState(false);
   const actualOpen = open ?? internalOpen;
   const actualSetOpen = setOpen ?? setInternalOpen;
@@ -27,67 +28,76 @@ export const QuoteModalGeneral = ({ open, setOpen }: QuoteModalProps = {}) => {
     ? ContactFormIFrameGeneralSpanish
     : ContactFormIFrameGeneral;
 
-  // Reasonable heights; modal will scroll (not the iframe)
-  const IFRAME_HEIGHT = isES ? 950 : 760;
 
-  // Track when modal opens
+  const handleClose = useCallback(() => {
+    actualSetOpen(false);
+  }, [actualSetOpen]);
+
   useEffect(() => {
     if (actualOpen) {
-      trackInitiateCheckout({
-        contentName: "General Quote Request",
-      });
+      trackInitiateCheckout({ contentName: "General Quote Request" });
+      const prevOverflow = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = prevOverflow;
+      };
     }
   }, [actualOpen]);
 
-  return (
-    <Dialog open={actualOpen} onOpenChange={actualSetOpen}>
-      <DialogContent
-        forceMount
-        className="
-          p-0 border-0 
-          data-[state=open]:!animate-none data-[state=closed]:!animate-none
-        "
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape") handleClose();
+    };
+    if (actualOpen) {
+      document.addEventListener("keydown", handleEscape);
+      return () => document.removeEventListener("keydown", handleEscape);
+    }
+  }, [actualOpen, handleClose]);
+
+  if (!actualOpen) return null;
+
+  const modalContent = (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="form-modal-title"
+    >
+      {/* Backdrop */}
+      <div
+        className="fixed inset-0 bg-black/80"
+        onClick={handleClose}
+        aria-hidden="true"
+      />
+
+      {/* Modal panel - explicit h-[90svh] so scroll area gets bounded height */}
+      <div
+        className="relative z-10 flex flex-col w-full max-w-[720px] h-[90svh] rounded-xl bg-background shadow-xl overflow-y-scroll"
+        onClick={(e) => e.stopPropagation()}
       >
-        {/* Card wrapper: centered, with its own scroll area */}
-        <div className="w-[min(95vw,720px)] max-h-[90svh] overflow-hidden rounded-xl bg-background shadow-xl">
-          {/* Header */}
-          <div className="sticky top-0 z-10 flex items-center justify-between border-b px-4 py-3 bg-background/95 backdrop-blur">
-            <div className="font-semibold flex-1 text-center">
-              {isES ? "Contáctanos" : "Get in touch"}
-            </div>
-            <button
-              onClick={() => actualSetOpen(false)}
-              aria-label={isES ? "Cerrar" : "Close"}
-              className="rounded-md p-2 hover:bg-muted focus:outline-none focus-visible:ring"
-            >
-              <X className="h-5 w-5" />
-            </button>
+        <div
+          id="form-modal-title"
+          className="flex-shrink-0 flex items-center justify-between border-b px-4 py-3 bg-background/95 backdrop-blur"
+        >
+          <div className="font-semibold flex-1 text-center">
+            {isES ? "Contáctanos" : "Get in touch"}
           </div>
-
-          {/* Scroll area (hide scrollbars visually) */}
-          <div className="max-h-[calc(90svh-52px)] overflow-y-auto overflow-x-hidden scrollbar-none">
-            <Form heightPx={IFRAME_HEIGHT} />
-
-            {/* <div className="px-4 py-3 text-center text-sm text-muted-foreground">
-              {isES ? "¿Problemas?" : "Having trouble?"}{" "}
-              <a
-                href={
-                  isES
-                    ? "https://link.agent-crm.com/widget/form/B3YtFv2qtHRnDmdCiQvj"
-                    : "https://link.agent-crm.com/widget/form/R7X4k5dTsAORoIyMq6Kz"
-                }
-                target="_blank"
-                rel="noopener noreferrer"
-                className="underline"
-              >
-                {isES
-                  ? "Abrir en una nueva pestaña"
-                  : "Open the form in a new tab"}
-              </a>
-            </div> */}
-          </div>
+          <button
+            onClick={handleClose}
+            aria-label={isES ? "Cerrar" : "Close"}
+            className="rounded-md p-2 hover:bg-muted focus:outline-none focus-visible:ring"
+          >
+            <X className="h-5 w-5" />
+          </button>
         </div>
-      </DialogContent>
-    </Dialog>
+
+        {/* Iframe container - iframe fills this and scrolls internally (avoids our div capturing scroll over iframe) */}
+        <div className="flex-1 min-h-0 flex flex-col items-center w-full pb-4">
+          <Form fillContainer />
+        </div>
+      </div>
+    </div>
   );
+
+  return createPortal(modalContent, document.body);
 };

@@ -65,6 +65,7 @@ const PAGES: Page[] = [
   { href: "/final-expense/presentation", changeFrequency: "monthly", priority: 0.7 },
   { href: "/final-expense/qualification", changeFrequency: "monthly", priority: 0.7 },
   { href: "/final-expense/referrals", changeFrequency: "monthly", priority: 0.7 },
+  { href: "/final-expense/leave-behind", changeFrequency: "monthly", priority: 0.6 },
 
   // IUL
   { href: "/iul", changeFrequency: "monthly", priority: 0.8 },

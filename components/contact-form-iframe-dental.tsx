@@ -20,7 +20,7 @@ export default function ContactFormIFrameDental({ heightPx = 1100 }: Props) {
   }, []);
 
   return (
-    <div className="relative w-full">
+    <div className="relative mx-auto w-full max-w-[640px] min-w-0" style={{ minHeight: heightPx }}>
       {/* Skeleton overlay (hidden once iframe is painted) */}
       {!visible && <FormSkeleton />}
 

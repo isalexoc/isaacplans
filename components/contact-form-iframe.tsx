@@ -1,14 +1,22 @@
-// components/contact-form-iframe-spanish.tsx
+// components/contact-form-iframe.tsx – ACA English form
 "use client";
 
 import { useEffect, useRef, useState } from "react";
 import FormSkeleton from "@/components/form-skeleton";
+import { loadAgentCrmOnce } from "@/lib/agentCrmLoader";
 
 type Props = { heightPx?: number };
 
-export default function ContactFormIFrameSpanish({ heightPx = 1400 }: Props) {
+export default function ContactFormIFrame({ heightPx = 1200 }: Props) {
   const [visible, setVisible] = useState(false);
   const revealTimer = useRef<number | null>(null);
+
+  useEffect(() => {
+    const id = requestAnimationFrame(() => {
+      loadAgentCrmOnce().catch(() => {});
+    });
+    return () => cancelAnimationFrame(id);
+  }, []);
 
   const onIFrameLoad = () => {
     if (revealTimer.current) window.clearTimeout(revealTimer.current);
@@ -23,7 +31,7 @@ export default function ContactFormIFrameSpanish({ heightPx = 1400 }: Props) {
 
   return (
     <div
-      className="relative w-full"
+      className="relative mx-auto w-full max-w-[640px] min-w-0 overflow-hidden"
       aria-busy={!visible}
       style={{ height: heightPx }}
     >
@@ -47,6 +55,7 @@ export default function ContactFormIFrameSpanish({ heightPx = 1400 }: Props) {
         data-deactivation-type="neverDeactivate"
         data-deactivation-value=""
         data-form-name="ACA - Lead Intake - Isaac Plans"
+        data-height={`${heightPx}`}
         data-layout-iframe-id="inline-z3BuLLWvo2JRqrtkElq8"
         data-form-id="z3BuLLWvo2JRqrtkElq8"
       />

@@ -24,9 +24,9 @@ export default async function ContactForm() {
         <p className="text-lg  text-gray-700">{t("sub")}</p>
       </div>
 
-      {/* client-only iframe embed */}
-      <div className="mt-10 px-4">
-        <Form />
+      {/* client-only iframe embed - centered, tall enough to scroll and submit */}
+      <div className="mx-auto mt-10 w-full max-w-[640px] px-4 pb-8">
+        <Form heightPx={1400} />
       </div>
     </section>
   );

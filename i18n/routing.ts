@@ -107,6 +107,10 @@ export const routing = defineRouting({
       en: "/final-expense/referrals",
       es: "/gastos-finales/referidos",
     },
+    "/final-expense/leave-behind": {
+      en: "/final-expense/leave-behind",
+      es: "/gastos-finales/dejar-imagen",
+    },
     "/faq": {
       en: "/faq",
       es: "/preguntas-frecuentes",

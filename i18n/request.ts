@@ -66,6 +66,14 @@ async function loadSplitMessages(locale: string): Promise<Record<string, any>> {
     } catch {
       // File doesn't exist, skip
     }
+
+    // Load Final Expense leave-behind messages if they exist
+    try {
+      const feLeaveBehind = (await import(`@/messages/${locale}/final-expense/leave-behind.json`)).default;
+      Object.assign(splitMessages, feLeaveBehind);
+    } catch {
+      // File doesn't exist, skip
+    }
     
     // Load FAQ messages if they exist
     try {

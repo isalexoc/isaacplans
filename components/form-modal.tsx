@@ -24,8 +24,8 @@ export const QuoteModal = ({ open, setOpen }: QuoteModalProps) => {
     isES ? ContactFormIFrameSpanish : ContactFormIFrame
   ) as ComponentType<{ heightPx?: number }>;
 
-  // Make the iframe tall so the MODAL scrolls (not the iframe).
-  const IFRAME_HEIGHT = isES ? 1400 : 1200;
+  // Tall enough so users can scroll to see and submit the entire form
+  const IFRAME_HEIGHT = isES ? 1700 : 1500;
 
   // Track when modal opens
   useEffect(() => {
@@ -40,16 +40,16 @@ export const QuoteModal = ({ open, setOpen }: QuoteModalProps) => {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent
         forceMount
-        // Keep Dialog centered; just remove animations and padding
         className="
-          p-0 border-0
+          max-w-[min(95vw,720px)] w-full max-h-[90svh] p-0 border-0 overflow-hidden
+          flex flex-col
           data-[state=open]:!animate-none data-[state=closed]:!animate-none
         "
       >
-        {/* Card wrapper: fixed max width/height; internal scroller */}
-        <div className="w-[min(95vw,720px)] max-h-[90svh] overflow-hidden rounded-xl bg-background shadow-xl">
-          {/* Header */}
-          <div className="sticky top-0 z-10 flex items-center justify-between border-b px-4 py-3 bg-background/95 backdrop-blur">
+        {/* Card wrapper: flex column so scroll area gets remaining space */}
+        <div className="flex flex-col min-h-0 flex-1 w-full rounded-xl bg-background shadow-xl">
+          {/* Header - flex-shrink-0 keeps it fixed */}
+          <div className="flex-shrink-0 z-10 flex items-center justify-between border-b px-4 py-3 bg-background/95 backdrop-blur">
             <div className="font-semibold flex-1 text-center">
               {isES ? "Cotiza tu plan ACA" : "Get Your ACA Quote"}
             </div>
@@ -62,8 +62,8 @@ export const QuoteModal = ({ open, setOpen }: QuoteModalProps) => {
             </button>
           </div>
 
-          {/* Scroll area (hide scrollbars visually) */}
-          <div className="max-h-[calc(90svh-52px)] overflow-y-auto overflow-x-hidden scrollbar-none">
+          {/* Scroll area - flex-1 min-h-0 allows it to shrink and scroll */}
+          <div className="flex-1 min-h-0 overflow-y-scroll overflow-x-hidden overscroll-y-contain scrollbar-none pb-12 flex flex-col items-center">
             <Form heightPx={IFRAME_HEIGHT} />
           </div>
         </div>

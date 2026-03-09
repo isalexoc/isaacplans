@@ -1,0 +1,56 @@
+{
+  "finalExpenseLeaveBehind": {
+    "meta": {
+      "title": "Leave-Behind Quote Image | Isaac Plans",
+      "description": "Create a personalized quote image to send clients after your final expense presentation",
+      "keywords": "final expense, quote image, Senior Life, leave-behind",
+      "image": "https://www.isaacplans.com/images/final_expense_og_placeholder_en.png",
+      "imageAlt": "Final Expense Leave-Behind Quote"
+    },
+    "title": "Leave-Behind Quote Image",
+    "subtitle": "Create an image to send clients with their plan and quote details",
+    "backButton": "Back to Final Expense",
+    "phase1": {
+      "title": "1. Enter Information",
+      "description": "Fill in the details collected during your presentation",
+      "prospectName": "Prospect / insured name",
+      "prospectNamePlaceholder": "e.g. Maria Garcia",
+      "prospectNameHint": "The person this quote is for",
+      "naturalDeath": "Natural death coverage ($)",
+      "naturalDeathPlaceholder": "e.g. 10000",
+      "accidentalDeath": "Accidental death coverage ($)",
+      "accidentalDeathPlaceholder": "e.g. 10000",
+      "accidentalHint": "If accidental death doubles the payout, use the same amount as natural death",
+      "monthlyPremium": "Monthly premium ($)",
+      "monthlyPremiumPlaceholder": "e.g. 45",
+      "monthlyPremiumHint": "The small monthly amount for this coverage",
+      "avoidNames": "People who passed away unprepared (comma-separated)",
+      "avoidNamesPlaceholder": "e.g. John, Maria",
+      "avoidHint": "Names of family or friends who passed without final expense planning",
+      "protectNames": "Family members to protect (comma-separated)",
+      "protectNamesPlaceholder": "e.g. Sarah, Mike, Kids",
+      "protectHint": "Spouse, kids, or other loved ones they want to protect"
+    },
+    "phase2": {
+      "title": "2. Preview & Download",
+      "generateButton": "Generate Image",
+      "editButton": "Edit Information",
+      "downloadButton": "Download as Image",
+      "downloading": "Downloading...",
+      "preparedFor": "Prepared for",
+      "totalCoverage": "Total Coverage",
+      "smallPremiumOf": "For a small premium of",
+      "perMonth": "per month",
+      "naturalDeathLabel": "Natural death",
+      "plusAccidental": "plus",
+      "ifAccidental": "if accidental death",
+      "avoidPrefix": "AVOID WHAT HAPPENED WITH:",
+      "protectPrefix": "PROTECT YOUR LOVED ONES:"
+    },
+    "validation": {
+      "naturalRequired": "Natural death amount is required",
+      "accidentalRequired": "Accidental death amount is required",
+      "minAmount": "Amount must be at least $1"
+    }
+  }
+}

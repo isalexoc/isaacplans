@@ -724,6 +724,7 @@
       "description": "Soy Isaac Orraiz, un agente de seguros de salud licenciado especializado en planes ACA (Obamacare). Ayudo a individuos y familias a obtener cobertura asequible adaptada a sus necesidades, incluyendo dental, visión, indemnización hospitalaria, planes contra cáncer, planes contra derrames y más. Proporciono orientación experta en cada paso.",
       "name": "Isaac Orraiz",
       "role": "Agente de Seguros",
+      "credential": "Agente de Seguros de Salud Licenciado",
       "cta": "Solicitar Información"
     },
     "eligibility": {
@@ -926,7 +927,8 @@
       "headline": "Comprometido con tu Salud Dental y Visual",
       "description": "Soy Isaac Orraiz, un agente de seguros licenciado que se especializa en planes dentales y de visión independientes. ...",
       "name": "Isaac Orraiz",
-      "role": "Agente de Seguros"
+      "role": "Agente de Seguros",
+      "credential": "Agente de Seguros Licenciado"
     },
 
     "selfEnroll": {
@@ -1071,7 +1073,8 @@
       "headline": "Su aliado de confianza en seguros de salud",
       "description": "Con licencias en múltiples estados y experiencia en planes suplementarios, Isaac asegura que no quede ningún vacío en su cobertura.",
       "name": "Isaac Orraiz",
-      "role": "Agente de Seguros Licenciado"
+      "role": "Agente de Seguros Licenciado",
+      "credential": "Agente de Seguros de Salud Licenciado"
     },
 
     "definition": {
@@ -1308,7 +1311,8 @@
               "headline": "Su asesor de confianza para coberturas temporales",
               "description": "Le ayudo a entender cuándo un plan de corto plazo puede tener sentido y cuándo un plan ACA u otra opción sería mejor.",
               "name": "Isaac Orraiz",
-              "role": "Agente de Seguros Licenciado"
+              "role": "Agente de Seguros Licenciado",
+              "credential": "Agente de Seguros de Salud Licenciado"
             },
 
             "eligibility": {
@@ -1552,7 +1556,8 @@
       "headline": "Estrategias de vida a tu medida—según tus objetivos",
       "description": "Ayudo a las familias a diseñar pólizas IUL con el equilibrio adecuado entre protección y flexibilidad. Revisamos cómo financiar, los ‘riders’, y cómo los préstamos/retiros impactan tu cobertura y metas a largo plazo.",
       "name": "Isaac Orraiz",
-      "role": "Agente de Seguros Licenciado"
+      "role": "Agente de Seguros Licenciado",
+      "credential": "Agente de Seguros Licenciado"
     },
 
     "definition": {
@@ -1684,7 +1689,8 @@
       "headline": "Su guía de confianza para una protección simple y permanente",
       "description": "Le ayudo a comparar aseguradoras de gastos finales, definir un monto realista y aplicar en línea—a menudo con decisión instantánea.",
       "name": "Isaac Orraiz",
-      "role": "Agente de Seguros Licenciado"
+      "role": "Agente de Seguros Licenciado",
+      "credential": "Agente de Senior Life"
     },
     "definition": {
       "title": "¿Qué es el Seguro de Gastos Finales?",

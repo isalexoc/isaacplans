@@ -124,10 +124,10 @@ export const GuideUnlockModal = ({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent
         forceMount
-        className="p-0 border-0 data-[state=open]:!animate-none data-[state=closed]:!animate-none"
+        className="w-[min(95vw,720px)] max-h-[90svh] p-0 border-0 overflow-hidden flex flex-col data-[state=open]:!animate-none data-[state=closed]:!animate-none"
       >
-        <div className="w-[min(95vw,720px)] max-h-[90svh] overflow-hidden rounded-xl bg-background shadow-xl">
-          <div className="sticky top-0 z-10 flex items-center justify-between border-b px-4 py-3 bg-background/95 backdrop-blur">
+        <div className="flex flex-col min-h-0 flex-1 w-full rounded-xl bg-background shadow-xl">
+          <div className="flex-shrink-0 z-10 flex items-center justify-between border-b px-4 py-3 bg-background/95 backdrop-blur">
             <div className="font-semibold flex-1 text-center">
               {isES ? "Descargar Guía Gratuita" : "Download Free Guide"}
             </div>
@@ -140,7 +140,7 @@ export const GuideUnlockModal = ({
               <X className="h-5 w-5" />
             </button>
           </div>
-          <div className="max-h-[calc(90svh-52px)] overflow-y-auto overflow-x-hidden scrollbar-none">
+          <div className="flex-1 min-h-0 overflow-y-scroll overflow-x-hidden overscroll-y-contain scrollbar-none pb-12">
             {isSubmitting ? (
               <div className="flex items-center justify-center p-8">
                 <div className="text-center">

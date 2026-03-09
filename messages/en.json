@@ -734,6 +734,7 @@
       "description": "I am Isaac Orraiz, a licensed health-insurance agent specializing in ACA (The Affordable Care Act) plans. I help individuals and families get affordable coverage tailored to their needs, including dental, vision, hospital indemnity, cancer plans, stroke plans and more. I provide expert guidance every step of the way.",
       "name": "Isaac Orraiz",
       "role": "Insurance Agent",
+      "credential": "Licensed Health Insurance Agent",
       "cta": "Request Information"
     },
     "eligibility": {
@@ -937,7 +938,8 @@
       "headline": "Committed to Your Dental & Vision Health",
       "description": "I’m Isaac Orraiz, a licensed insurance agent who specializes in standalone dental and vision plans. I help individuals and families secure affordable coverage for preventive cleanings, major dental work, eye exams, glasses, and more—tailored to your unique needs.",
       "name": "Isaac Orraiz",
-      "role": "Insurance Agent"
+      "role": "Insurance Agent",
+      "credential": "Licensed Insurance Agent"
     },
 
     "selfEnroll": {
@@ -1081,7 +1083,8 @@
       "headline": "Your trusted health-insurance partner",
       "description": "With licenses in multiple states and expert knowledge of supplemental plans, Isaac makes sure no gap is left unprotected.",
       "name": "Isaac Orraiz",
-      "role": "Licensed Health Insurance Agent"
+      "role": "Licensed Health Insurance Agent",
+      "credential": "Licensed Health Insurance Agent"
     },
 
     "definition": {
@@ -1320,7 +1323,8 @@
               "headline": "Your trusted advisor for gap coverage",
               "description": "I help you understand when short-term coverage may make sense and when an ACA plan or other option may be a better fit.",
               "name": "Isaac Orraiz",
-              "role": "Licensed Health-Insurance Agent"
+              "role": "Licensed Health-Insurance Agent",
+              "credential": "Licensed Health Insurance Agent"
             },
 
             "eligibility": {
@@ -1564,7 +1568,8 @@
       "headline": "Tailored life-insurance strategies—built around your goals",
       "description": "I help families design IUL policies with the right blend of protection and flexibility. We’ll review funding strategies, riders, and how loans/withdrawals can impact your coverage and long-term goals.",
       "name": "Isaac Orraiz",
-      "role": "Licensed Insurance Agent"
+      "role": "Licensed Insurance Agent",
+      "credential": "Licensed Insurance Agent"
     },
 
     "definition": {
@@ -1696,7 +1701,8 @@
       "headline": "Your trusted guide for simple, permanent protection",
       "description": "I help you compare final expense carriers, build a realistic benefit amount, and apply online—often with instant decisions.",
       "name": "Isaac Orraiz",
-      "role": "Licensed Insurance Agent"
+      "role": "Licensed Insurance Agent",
+      "credential": "Senior Life appointed agent"
     },
     "definition": {
       "title": "What Is Final Expense Insurance?",

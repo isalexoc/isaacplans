@@ -20,8 +20,7 @@ export const FEQuoteModal = ({ open, setOpen }: Props) => {
     isES ? ContactFormIFrameFESpanish : ContactFormIFrameFE
   ) as ComponentType<{ heightPx?: number }>;
 
-  // tuned heights for comfortable scroll inside modal
-  const IFRAME_HEIGHT = isES ? 950 : 900;
+  const IFRAME_HEIGHT = isES ? 1400 : 1200; // tall enough to scroll and submit
 
   // Track when modal opens
   useEffect(() => {
@@ -36,11 +35,11 @@ export const FEQuoteModal = ({ open, setOpen }: Props) => {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent
         forceMount
-        className="p-0 border-0 data-[state=open]:!animate-none data-[state=closed]:!animate-none"
+        className="max-w-[min(95vw,720px)] w-full max-h-[90svh] p-0 border-0 overflow-hidden flex flex-col data-[state=open]:!animate-none data-[state=closed]:!animate-none"
       >
-        <div className="w-[min(95vw,720px)] max-h-[90svh] overflow-hidden rounded-xl bg-background shadow-xl">
+        <div className="flex flex-col min-h-0 flex-1 w-full rounded-xl bg-background shadow-xl">
           {/* header */}
-          <div className="sticky top-0 z-10 flex items-center justify-between border-b px-4 py-3 bg-background/95 backdrop-blur">
+          <div className="flex-shrink-0 z-10 flex items-center justify-between border-b px-4 py-3 bg-background/95 backdrop-blur">
             <div className="font-semibold flex-1 text-center">
               {isES ? "Cotización Gastos Finales" : "Final Expense Quote"}
             </div>
@@ -53,8 +52,8 @@ export const FEQuoteModal = ({ open, setOpen }: Props) => {
             </button>
           </div>
 
-          {/* body */}
-          <div className="max-h[calc(90svh-52px)] max-h-[calc(90svh-52px)] overflow-y-auto overflow-x-hidden scrollbar-none">
+          {/* body - flex-1 min-h-0 allows scroll; pb-12 ensures submit button is reachable */}
+          <div className="flex-1 min-h-0 overflow-y-scroll overflow-x-hidden overscroll-y-contain scrollbar-none pb-12 flex flex-col items-center">
             <Form heightPx={IFRAME_HEIGHT} />
           </div>
         </div>

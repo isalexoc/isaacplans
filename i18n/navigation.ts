@@ -23,6 +23,7 @@ export type AppHref =
   | "/final-expense/presentation"
   | "/final-expense/qualification"
   | "/final-expense/referrals"
+  | "/final-expense/leave-behind"
   | "/short-term-medical"
   | "/gastos-finales"
   | "/faq"

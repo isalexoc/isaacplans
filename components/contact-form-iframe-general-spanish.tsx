@@ -3,14 +3,23 @@
 
 import { useEffect, useRef, useState } from "react";
 import FormSkeleton from "@/components/form-skeleton";
+import { loadAgentCrmOnce } from "@/lib/agentCrmLoader";
 
-type Props = { heightPx?: number };
+type Props = { heightPx?: number; fillContainer?: boolean };
 
 export default function ContactFormIFrameGeneralSpanish({
-  heightPx = 950,
+  heightPx = 1400,
+  fillContainer = false,
 }: Props) {
   const [visible, setVisible] = useState(false);
   const revealTimer = useRef<number | null>(null);
+
+  useEffect(() => {
+    const id = requestAnimationFrame(() => {
+      loadAgentCrmOnce().catch(() => {});
+    });
+    return () => cancelAnimationFrame(id);
+  }, []);
 
   const onIFrameLoad = () => {
     if (revealTimer.current) window.clearTimeout(revealTimer.current);
@@ -25,9 +34,9 @@ export default function ContactFormIFrameGeneralSpanish({
 
   return (
     <div
-      className="relative w-full"
+      className={`relative mx-auto w-full max-w-[640px] min-w-0 ${fillContainer ? "min-h-0 flex-1 self-stretch w-full" : "overflow-hidden"}`}
       aria-busy={!visible}
-      style={{ height: heightPx }}
+      style={fillContainer ? undefined : { height: heightPx }}
     >
       <iframe
         src="https://link.agent-crm.com/widget/form/B3YtFv2qtHRnDmdCiQvj"
@@ -46,7 +55,7 @@ export default function ContactFormIFrameGeneralSpanish({
         data-activation-type="alwaysActivated"
         data-deactivation-type="neverDeactivate"
         data-form-name="A2P General Opt-in – Spanish"
-        data-height={`${heightPx}`}
+        data-height={fillContainer ? "800" : `${heightPx}`}
         data-layout-iframe-id="inline-B3YtFv2qtHRnDmdCiQvj"
         data-form-id="B3YtFv2qtHRnDmdCiQvj"
       />

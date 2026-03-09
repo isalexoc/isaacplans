@@ -10,13 +10,14 @@ body {
   .text-balance {
     text-wrap: balance;
   }
-  /* Hide scrollbars but keep scrollability */
+  /* Hide scrollbars but keep scrollability; smooth scroll on iOS */
   .scrollbar-none::-webkit-scrollbar {
     display: none;
   } /* Chrome/Safari */
   .scrollbar-none {
     scrollbar-width: none;
     -ms-overflow-style: none;
+    -webkit-overflow-scrolling: touch; /* Smooth scroll on iOS */
   } /* Firefox/IE/Edge */
   .hide-scrollbar {
     scrollbar-width: none; /* Firefox */

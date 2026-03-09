@@ -21,7 +21,7 @@ export default function ContactFormIFrameDentalSpanish({
   }, []);
 
   return (
-    <div className="relative w-full">
+    <div className="relative mx-auto w-full max-w-[640px] min-w-0" style={{ minHeight: heightPx }}>
       {!visible && <FormSkeleton />}
 
       <iframe

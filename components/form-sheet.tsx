@@ -17,7 +17,7 @@ export const QuoteSheet = ({ open, setOpen }: Props) => {
   const Form = (
     isES ? ContactFormIFrameSpanish : ContactFormIFrame
   ) as ComponentType<{ heightPx?: number }>;
-  const FORM_HEIGHT = isES ? 1400 : 1200; // tall enough so the SHEET scrolls, not the iframe
+  const FORM_HEIGHT = isES ? 1700 : 1500; // tall enough to scroll and submit
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -39,12 +39,9 @@ export const QuoteSheet = ({ open, setOpen }: Props) => {
           </button>
         </div>
 
-        {/* Content: scrollable container with hidden scrollbars */}
-        <div className="h-[calc(100svh-56px)] overflow-y-auto overflow-x-hidden scrollbar-none px-0">
-          {/* Wrapper to prevent any horizontal bleed */}
-          <div className="w-full max-w-full">
-            <Form heightPx={FORM_HEIGHT} />
-          </div>
+        {/* Content: scrollable - min-h-0 fixes flex overflow; pb-8 ensures submit button is reachable */}
+        <div className="flex min-h-0 h-[calc(100svh-56px)] flex-col items-center overflow-y-scroll overflow-x-hidden scrollbar-none px-0 pb-8">
+          <Form heightPx={FORM_HEIGHT} />
 
           {/* Fallback link */}
           <div className="px-4 py-3 text-center text-sm text-muted-foreground">
