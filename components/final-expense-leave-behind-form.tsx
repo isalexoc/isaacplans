@@ -164,8 +164,10 @@ export default function FinalExpenseLeaveBehindForm() {
       if (navigator.canShare?.({ files: [file] })) {
         await navigator.share({
           files: [file],
-          title: "Senior Life Quote",
-          text: prospectName.trim() ? `Quote prepared for ${prospectName.trim()}` : "Your Senior Life quote",
+          title: t("phase2.shareTitle"),
+          text: prospectName.trim()
+            ? t("phase2.shareTextPreparedFor", { name: prospectName.trim() })
+            : t("phase2.shareTextDefault"),
         });
       }
     } catch (error) {
