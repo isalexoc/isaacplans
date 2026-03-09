@@ -29,7 +29,13 @@
       "avoidHint": "Nombres de familiares o amigos que fallecieron sin planificación de gastos finales",
       "protectNames": "Familiares a proteger (separados por comas)",
       "protectNamesPlaceholder": "ej. Sara, Mike, Hijos",
-      "protectHint": "Cónyuge, hijos u otros seres queridos que quieren proteger"
+      "protectHint": "Cónyuge, hijos u otros seres queridos que quieren proteger",
+      "planType": "Tipo de plan",
+      "planTypeHint": "Selecciona si es un plan de beneficio limitado con Devolución de Prima",
+      "planStandard": "Estándar / Vida entera (sin ROP)",
+      "planModified": "Modificado – ROP + 10% primeros 2 años",
+      "planEasyIssue": "Easy Issue – ROP + 10% primeros 3 años",
+      "planGuaranteedIssue": "Emisión Garantizada – ROP + 10% primeros 3 años"
     },
     "phase2": {
       "title": "2. Vista Previa y Descargar",
@@ -50,7 +56,9 @@
       "plusAccidental": "más",
       "ifAccidental": "si muerte accidental",
       "avoidPrefix": "EVITA LO QUE PASÓ CON:",
-      "protectPrefix": "PROTEGE A TUS SERES QUERIDOS:"
+      "protectPrefix": "PROTEGE A TUS SERES QUERIDOS:",
+      "rop2Years": "Devolución de Prima más 10% durante los primeros 2 años de cobertura",
+      "rop3Years": "Devolución de Prima más 10% durante los primeros 3 años de cobertura"
     },
     "validation": {
       "naturalRequired": "El monto de muerte natural es requerido",

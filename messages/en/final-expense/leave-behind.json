@@ -29,7 +29,13 @@
       "avoidHint": "Names of family or friends who passed without final expense planning",
       "protectNames": "Family members to protect (comma-separated)",
       "protectNamesPlaceholder": "e.g. Sarah, Mike, Kids",
-      "protectHint": "Spouse, kids, or other loved ones they want to protect"
+      "protectHint": "Spouse, kids, or other loved ones they want to protect",
+      "planType": "Plan type",
+      "planTypeHint": "Select if this is a limited benefit plan with Return of Premium",
+      "planStandard": "Standard / Whole Life (no ROP)",
+      "planModified": "Modified – ROP + 10% first 2 years",
+      "planEasyIssue": "Easy Issue – ROP + 10% first 3 years",
+      "planGuaranteedIssue": "Guaranteed Issue – ROP + 10% first 3 years"
     },
     "phase2": {
       "title": "2. Preview & Download",
@@ -50,7 +56,9 @@
       "plusAccidental": "plus",
       "ifAccidental": "if accidental death",
       "avoidPrefix": "AVOID WHAT HAPPENED WITH:",
-      "protectPrefix": "PROTECT YOUR LOVED ONES:"
+      "protectPrefix": "PROTECT YOUR LOVED ONES:",
+      "rop2Years": "Return of Premium plus 10% during the first 2 years of coverage",
+      "rop3Years": "Return of Premium plus 10% during the first 3 years of coverage"
     },
     "validation": {
       "naturalRequired": "Natural death amount is required",

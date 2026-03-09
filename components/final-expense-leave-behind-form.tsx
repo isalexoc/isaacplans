@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FileImage, ArrowRight, Pencil, Share2 } from "lucide-react";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 // 2x resolution (560px) for crisp html2canvas capture at 280px display
 const SENIOR_LIFE_LOGO =
@@ -58,6 +59,7 @@ export default function FinalExpenseLeaveBehindForm() {
   const [monthlyPremium, setMonthlyPremium] = useState("");
   const [avoidNames, setAvoidNames] = useState("");
   const [protectNames, setProtectNames] = useState("");
+  const [planType, setPlanType] = useState<"standard" | "modified" | "easyIssue" | "guaranteedIssue">("standard");
 
   const imageRef = useRef<HTMLDivElement>(null);
 
@@ -278,6 +280,41 @@ export default function FinalExpenseLeaveBehindForm() {
               />
               <p className="text-sm text-gray-500">{t("phase1.protectHint")}</p>
             </div>
+
+            <div className="space-y-3">
+              <Label className="text-base">{t("phase1.planType")}</Label>
+              <p className="text-sm text-gray-500">{t("phase1.planTypeHint")}</p>
+              <RadioGroup
+                value={planType}
+                onValueChange={(v) => setPlanType(v as typeof planType)}
+                className="grid gap-3"
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="standard" id="plan-standard" />
+                  <Label htmlFor="plan-standard" className="font-normal cursor-pointer">
+                    {t("phase1.planStandard")}
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="modified" id="plan-modified" />
+                  <Label htmlFor="plan-modified" className="font-normal cursor-pointer">
+                    {t("phase1.planModified")}
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="easyIssue" id="plan-easy" />
+                  <Label htmlFor="plan-easy" className="font-normal cursor-pointer">
+                    {t("phase1.planEasyIssue")}
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="guaranteedIssue" id="plan-guaranteed" />
+                  <Label htmlFor="plan-guaranteed" className="font-normal cursor-pointer">
+                    {t("phase1.planGuaranteedIssue")}
+                  </Label>
+                </div>
+              </RadioGroup>
+            </div>
           </div>
 
           <Button
@@ -413,6 +450,14 @@ export default function FinalExpenseLeaveBehindForm() {
                   </span>{" "}
                   {t("phase2.ifAccidental")}
                 </p>
+                {(planType === "modified" || planType === "easyIssue" || planType === "guaranteedIssue") && (
+                  <p
+                    className="text-sm font-medium leading-relaxed mt-2"
+                    style={{ color: "#d4a84b", fontFamily: "system-ui, sans-serif" }}
+                  >
+                    {planType === "modified" ? t("phase2.rop2Years") : t("phase2.rop3Years")}
+                  </p>
+                )}
               </div>
 
               {avoidList.length > 0 && (
