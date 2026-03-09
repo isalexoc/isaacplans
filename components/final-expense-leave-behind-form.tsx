@@ -23,9 +23,11 @@ function formatCurrency(value: number): string {
   }).format(value);
 }
 
-/** Allow digits and one decimal point (e.g. 69.73) for mobile keyboard */
+/** Allow digits and one decimal point (e.g. 69.73 or 69,73) for mobile keyboard */
 function sanitizeDecimalInput(value: string): string {
-  const cleaned = value.replace(/[^\d.]/g, "");
+  // Normalize comma, middle dot, and other decimal separators to period
+  const normalized = value.replace(/[,·\u00B7\u2022]/g, ".");
+  const cleaned = normalized.replace(/[^\d.]/g, "");
   const parts = cleaned.split(".");
   if (parts.length <= 1) return parts[0] || "";
   return `${parts[0]}.${(parts[1] ?? "").slice(0, 2)}`;
