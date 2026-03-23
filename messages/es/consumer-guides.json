@@ -58,7 +58,12 @@
       "submit": "Descargar Ahora",
       "submitting": "Procesando...",
       "required": "Este campo es requerido",
-      "invalidEmail": "Correo electrónico inválido"
+      "invalidEmail": "Correo electrónico inválido",
+      "invalidPhone": "Por favor ingrese un número de teléfono válido de 10 dígitos (EE.UU.)",
+      "firstNameMinLength": "El nombre debe tener al menos 2 caracteres",
+      "lastNameMinLength": "El apellido debe tener al menos 2 caracteres",
+      "firstNameMaxLength": "El nombre es demasiado largo",
+      "lastNameMaxLength": "El apellido es demasiado largo"
     }
   }
 }

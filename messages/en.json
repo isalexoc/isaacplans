@@ -1301,6 +1301,10 @@
             "cta": {
               "label": "You can apply for coverage at the following link:"
             },
+            "ctaButton": {
+              "title": "Get a Quote",
+              "subtitle": "Fast, no-obligation guidance"
+            },
 
             "definition": {
               "title": "What is Short Term Medical?",

@@ -58,7 +58,12 @@
       "submit": "Download Now",
       "submitting": "Processing...",
       "required": "This field is required",
-      "invalidEmail": "Invalid email address"
+      "invalidEmail": "Invalid email address",
+      "invalidPhone": "Please enter a valid 10-digit US phone number",
+      "firstNameMinLength": "First name must be at least 2 characters",
+      "lastNameMinLength": "Last name must be at least 2 characters",
+      "firstNameMaxLength": "First name is too long",
+      "lastNameMaxLength": "Last name is too long"
     }
   }
 }

@@ -36,6 +36,7 @@ export const QuoteModal = ({ open, setOpen }: QuoteModalProps) => {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent
         forceMount
+        hideCloseButton
         className="max-w-[min(95vw,720px)] w-full max-h-[90svh] p-0 border-0 overflow-hidden flex flex-col data-[state=open]:!animate-none data-[state=closed]:!animate-none"
       >
         <div className="flex flex-col min-h-0 flex-1 w-full rounded-xl bg-background shadow-xl">

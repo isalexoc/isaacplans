@@ -29,7 +29,16 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { firstName, lastName, email, phone, iulLeadGenData, meta } = body;
+    const { firstName, lastName, email, phone, iulLeadGenData, shortTermMedicalData, meta } = body;
+
+    // [Workflow Debug] Log incoming lead type - helps trace why IUL workflow may be assigned
+    console.log("[create-contact] Incoming request lead type:", {
+      hasIulLeadGenData: !!iulLeadGenData,
+      hasShortTermMedicalData: !!shortTermMedicalData,
+      iulLeadGenDataKeys: iulLeadGenData ? Object.keys(iulLeadGenData) : [],
+      shortTermMedicalDataKeys: shortTermMedicalData ? Object.keys(shortTermMedicalData) : [],
+      leadSource: shortTermMedicalData ? "short_term_medical" : iulLeadGenData ? "iul_lead_gen" : "other",
+    });
 
     // Validate required fields
     if (!firstName || !lastName || !email || !phone) {
@@ -45,9 +54,11 @@ export async function POST(request: NextRequest) {
 
     const baseUrl = 'https://services.leadconnectorhq.com';
     
-    // First, fetch custom fields to get the IUL Lead Gen Data field ID
+    // First, fetch custom fields to get field IDs for IUL and Short Term Medical
     let iulLeadGenDataFieldId: string | null = null;
     let iulLeadGenDataFieldKey: string | null = null;
+    let shortTermMedicalFieldId: string | null = null;
+    let shortTermMedicalFieldKey: string | null = null;
     
     try {
       const customFieldsResponse = await fetch(`${baseUrl}/locations/${locationId}/customFields`, {
@@ -63,21 +74,34 @@ export async function POST(request: NextRequest) {
         const customFieldsData = await customFieldsResponse.json();
         const customFields = customFieldsData.customFields || customFieldsData;
         
-        // Find the iul_lead_gen_data custom field
         if (Array.isArray(customFields)) {
           for (const field of customFields) {
             const fieldName = field.name?.toLowerCase() || '';
             const fieldKey = field.key?.toLowerCase() || '';
             
             // Look for iul_lead_gen_data field
-            if (fieldKey === 'iul_lead_gen_data' || 
-                fieldKey.includes('iul') && fieldKey.includes('lead') && fieldKey.includes('gen') ||
-                fieldName.includes('iul') && fieldName.includes('lead') && fieldName.includes('gen')) {
+            if (!iulLeadGenDataFieldId && (
+              fieldKey === 'iul_lead_gen_data' || 
+              (fieldKey.includes('iul') && fieldKey.includes('lead') && fieldKey.includes('gen')) ||
+              (fieldName.includes('iul') && fieldName.includes('lead') && fieldName.includes('gen'))
+            )) {
               iulLeadGenDataFieldId = field.id;
               iulLeadGenDataFieldKey = field.key || field.name;
               console.log('Found iul_lead_gen_data field:', { id: field.id, key: field.key, name: field.name });
-              break;
             }
+            
+            // Look for short_term_medical_data field only (do NOT use product_interest - it may trigger IUL automation)
+            if (!shortTermMedicalFieldId && (
+              fieldKey === 'short_term_medical_data' ||
+              (fieldKey.includes('short') && fieldKey.includes('term') && fieldKey.includes('medical')) ||
+              (fieldName.includes('short') && fieldName.includes('term') && fieldName.includes('medical'))
+            )) {
+              shortTermMedicalFieldId = field.id;
+              shortTermMedicalFieldKey = field.key || field.name;
+              console.log('Found short_term_medical field:', { id: field.id, key: field.key, name: field.name });
+            }
+            
+            if (iulLeadGenDataFieldId && shortTermMedicalFieldId) break;
           }
         }
       }
@@ -124,18 +148,65 @@ export async function POST(request: NextRequest) {
       });
     }
     
-    // Create contact payload with customFields included
+    // Format Short Term Medical data (rich info for short_term_medical_data custom field)
+    if (shortTermMedicalData && shortTermMedicalFieldId) {
+      const languageDisplay = shortTermMedicalData.language === 'es' ? 'Spanish (Español)' : 
+                              shortTermMedicalData.language === 'en' ? 'English' : 
+                              shortTermMedicalData.language || 'Not provided';
+      const submittedAt = new Date().toLocaleString() + ' ' + (Intl.DateTimeFormat().resolvedOptions().timeZone || '');
+      
+      const stmDataText = [
+        'Short Term Medical Lead',
+        '======================',
+        '',
+        'Contact:',
+        `  Name: ${firstName} ${lastName}`,
+        `  Email: ${email}`,
+        `  Phone: ${phone}`,
+        '',
+        'Lead Details:',
+        `  Source: ${shortTermMedicalData.source || 'short_term_medical_page'}`,
+        `  Language: ${languageDisplay}`,
+        `  Source URL: ${meta?.eventSourceUrl || 'Not provided'}`,
+        '',
+        `Submitted: ${submittedAt}`,
+      ].join('\n');
+      
+      customFieldsArray.push({
+        id: shortTermMedicalFieldId,
+        key: shortTermMedicalFieldKey || undefined,
+        field_value: stmDataText
+      });
+    }
+    
+    // Build tags for Short Term Medical leads
+    const stmTags: string[] = [];
+    if (shortTermMedicalData) {
+      stmTags.push('Short Term Medical Lead');
+      stmTags.push(shortTermMedicalData.language === 'es' ? 'Spanish' : 'English');
+    }
+
+    // Determine lead source for CRM routing (prevents IUL workflow from auto-triggering on STM leads)
+    const leadSource = shortTermMedicalData ? "short_term_medical" : iulLeadGenData ? "iul_lead_gen" : "website";
+
+    // Create contact payload with customFields, tags, and source
     const contactPayload: any = {
       firstName,
       lastName,
       email,
       phone,
       locationId,
+      source: leadSource,
     };
     
     // Add customFields if we have any
     if (customFieldsArray.length > 0) {
       contactPayload.customFields = customFieldsArray;
+    }
+    
+    // Add tags for STM leads
+    if (stmTags.length > 0) {
+      contactPayload.tags = stmTags;
     }
     
     console.log('Creating contact with payload:', JSON.stringify(contactPayload, null, 2));
@@ -240,12 +311,19 @@ export async function POST(request: NextRequest) {
         }
         
         if (existingContactId) {
-          // Update the existing contact with custom fields
-          console.log('Found existing contact, updating with custom fields...');
+          // Update the existing contact with custom fields and tags (for STM leads)
+          console.log("[create-contact] Found existing contact, updating (no workflow enrollment - early return):", {
+            contactId: existingContactId,
+            hasShortTermMedicalData: !!shortTermMedicalData,
+            hasIulLeadGenData: !!iulLeadGenData,
+          });
           
           const updatePayload: any = {};
           if (customFieldsArray.length > 0) {
             updatePayload.customFields = customFieldsArray;
+          }
+          if (stmTags.length > 0) {
+            updatePayload.tags = stmTags;
           }
           
           try {
@@ -312,6 +390,10 @@ export async function POST(request: NextRequest) {
     const contactId = createResponseData.contact?.id || createResponseData.id;
     const isNewContact = true; // This is a new contact (we just created it)
 
+    if (shortTermMedicalData) {
+      console.log("[create-contact] STM lead created - will NOT add to IUL/Notification workflows (contactId:", contactId, ")");
+    }
+
     // Helper function to add contact to a workflow
     const addContactToWorkflow = async (workflowId: string, workflowName: string): Promise<void> => {
       if (!workflowId || !contactId) {
@@ -353,21 +435,49 @@ export async function POST(request: NextRequest) {
       }
     };
 
-    // Step 1: Activate notification workflow FIRST (if configured)
+    // Step 1: Activate notification workflow FIRST (if configured) - skip for STM leads
     const notificationWorkflowId = process.env.AGENT_CRM_WORKFLOW_NOTIFICATION;
-    if (notificationWorkflowId && contactId) {
+    const willAddNotification = !!(notificationWorkflowId && contactId && !shortTermMedicalData);
+    console.log("[create-contact] Notification workflow:", {
+      workflowId: notificationWorkflowId ?? "not configured",
+      willAdd: willAddNotification,
+      reason: !notificationWorkflowId ? "no env" : !contactId ? "no contactId" : shortTermMedicalData ? "STM lead - skipped" : "IUL/other lead",
+    });
+    if (willAddNotification) {
       await addContactToWorkflow(notificationWorkflowId, "Notification");
     }
 
-    // Step 2: Activate language-specific workflow (English or Spanish)
+    // Step 2: Activate language-specific workflow (IUL ONLY - must have iulLeadGenData explicitly)
+    // Short Term Medical leads: NEVER add to IUL workflows - require iulLeadGenData to prevent misassignment
     const workflowEnId = process.env.AGENT_CRM_WORKFLOW_EN;
     const workflowEsId = process.env.AGENT_CRM_WORKFLOW_ES;
-    const language = iulLeadGenData?.language || 'en'; // Default to English
-
-    // Determine which workflow to use
+    const language = iulLeadGenData?.language || shortTermMedicalData?.language || 'en';
+    const iulConditionMet = !!(iulLeadGenData && !shortTermMedicalData);
     const languageWorkflowId = language === 'es' ? workflowEsId : workflowEnId;
-    if (languageWorkflowId && contactId) {
-      await addContactToWorkflow(languageWorkflowId, language === 'es' ? 'Spanish' : 'English');
+    const willAddIul = !!(iulConditionMet && languageWorkflowId && contactId);
+
+    console.log("[create-contact] IUL workflow decision:", {
+      iulConditionMet,
+      hasIulLeadGenData: !!iulLeadGenData,
+      hasShortTermMedicalData: !!shortTermMedicalData,
+      language,
+      workflowEnId: workflowEnId ?? "not configured",
+      workflowEsId: workflowEsId ?? "not configured",
+      selectedWorkflowId: languageWorkflowId ?? "none",
+      willAddIul,
+      reason: !iulConditionMet
+        ? shortTermMedicalData
+          ? "STM lead - iulConditionMet is false (shortTermMedicalData present)"
+          : "no iulLeadGenData"
+        : !languageWorkflowId
+          ? "workflow not configured"
+          : "IUL lead - adding to workflow",
+    });
+
+    if (willAddIul) {
+      await addContactToWorkflow(languageWorkflowId!, language === 'es' ? 'Spanish' : 'English');
+    } else if (shortTermMedicalData) {
+      console.log("[create-contact] IUL workflow NOT added - STM lead (contactId:", contactId, ")");
     }
 
     // Send Meta Conversions API event (if configured and metadata provided)
@@ -393,9 +503,10 @@ export async function POST(request: NextRequest) {
         const xff = request.headers.get("x-forwarded-for") || "";
         const ip = xff.split(",")[0]?.trim(); // Best effort behind proxies
 
-        // Determine value - IUL lead gen is always 100
+        // Determine value and source based on lead type
         const value = 100;
-        const source = "iul_lead_gen";
+        const source = shortTermMedicalData ? "short_term_medical" : "iul_lead_gen";
+        const contentName = shortTermMedicalData ? "Short Term Medical Lead" : "IUL Lead Generation Campaign";
 
         console.log("[Meta CAPI] Sending event:", {
           eventId: meta.eventId,
@@ -420,7 +531,7 @@ export async function POST(request: NextRequest) {
           firstName,
           lastName,
           customData: {
-            content_name: "IUL Lead Generation Campaign",
+            content_name: contentName,
             currency: "USD",
             value: value,
             source: source,

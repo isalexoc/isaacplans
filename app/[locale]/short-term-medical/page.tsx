@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
-import HIButton from "@/components/HIButton";
+import ShortTermMedicalButton from "@/components/ShortTermMedicalButton";
 import { BackHome } from "@/components/back-home";
 import ServicePageTracker from "@/components/service-page-tracker";
 import ShortTermCarriersSection from "@/components/shortterm-carriers-section";
@@ -112,7 +112,7 @@ export default async function ShortTermMedicalPage() {
         imagePublicId="pexels-chokniti-khongchum-1197604-3938022_bujifm" /* your Cloudinary ID */
         imagePosition="left"
         /* CTA area: keep your CTA button AND the exact UHOne snippet with an accessible name */
-        cta={<HIButton />}
+        cta={<ShortTermMedicalButton />}
         testimonials={[
           {
             name: tem("hero.testimonials.0.name"),
@@ -134,7 +134,7 @@ export default async function ShortTermMedicalPage() {
         name={tem("about.name")}
         role={tem("about.role")}
         credential={tem("about.credential")}
-        cta={<HIButton />}
+        cta={<ShortTermMedicalButton />}
       />
 
       {/* WHAT IS STM (general) ---------------------------------------- */}
@@ -145,7 +145,7 @@ export default async function ShortTermMedicalPage() {
         description={tem("definition.description")}
         imagePublicId="pexels-thirdman-5327584_cfiman" /* your Cloudinary ID */
         imagePosition="right"
-        cta={<HIButton />}
+        cta={<ShortTermMedicalButton />}
       />
 
       {/* ELIGIBILITY --------------------------------------------------- */}

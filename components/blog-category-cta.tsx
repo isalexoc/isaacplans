@@ -6,6 +6,7 @@ import IULButton from "@/components/IULButton";
 import DentalButton from "@/components/DentalButton";
 import FEButton from "@/components/FEButton";
 import HIButton from "@/components/HIButton";
+import ShortTermMedicalButton from "@/components/ShortTermMedicalButton";
 import CTAButtonMain from "@/components/cta-button-main";
 
 interface BlogCategoryCTAProps {
@@ -34,7 +35,7 @@ export default function BlogCategoryCTA({ category }: BlogCategoryCTAProps) {
       case "aca":
         return <ACAButton />;
       case "short-term-medical":
-        return <HIButton />; // Short Term Medical uses Hospital Indemnity button
+        return <ShortTermMedicalButton />;
       case "dental-vision":
         return <DentalButton />;
       case "hospital-indemnity":
