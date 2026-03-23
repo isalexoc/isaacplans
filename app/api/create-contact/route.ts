@@ -155,6 +155,8 @@ export async function POST(request: NextRequest) {
                               shortTermMedicalData.language || 'Not provided';
       const submittedAt = new Date().toLocaleString() + ' ' + (Intl.DateTimeFormat().resolvedOptions().timeZone || '');
       
+      const smsConsent = shortTermMedicalData.smsConsent === true ? 'Yes' : 'No';
+      const marketingConsent = shortTermMedicalData.marketingConsent === true ? 'Yes' : 'No';
       const stmDataText = [
         'Short Term Medical Lead',
         '======================',
@@ -167,6 +169,8 @@ export async function POST(request: NextRequest) {
         'Lead Details:',
         `  Source: ${shortTermMedicalData.source || 'short_term_medical_page'}`,
         `  Language: ${languageDisplay}`,
+        `  SMS Consent: ${smsConsent}`,
+        `  Marketing Consent: ${marketingConsent}`,
         `  Source URL: ${meta?.eventSourceUrl || 'Not provided'}`,
         '',
         `Submitted: ${submittedAt}`,

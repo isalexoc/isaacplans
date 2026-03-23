@@ -59,8 +59,8 @@ export const ShortTermMedicalQuoteModal = ({
           {/* body - two-column on larger screens */}
           <div className="flex-1 min-h-0 overflow-y-scroll overflow-x-hidden overscroll-y-contain scrollbar-none">
             <div className="flex flex-col sm:flex-row min-h-0">
-              {/* left: image + trust signals (sidebar on sm+, horizontal strip on mobile) */}
-              <div className="flex flex-row sm:flex-col w-full sm:w-[220px] lg:w-[260px] flex-shrink-0 items-center justify-center sm:justify-start gap-4 sm:gap-0 pt-4 pb-4 sm:pt-8 sm:pb-6 px-4 sm:px-6 bg-gradient-to-b from-[hsl(var(--custom)/0.06)] to-transparent dark:from-[hsl(var(--custom)/0.12)] dark:to-transparent sm:border-r border-b sm:border-b-0 border-gray-100 dark:border-gray-800">
+              {/* left: image + trust signals - hidden on mobile, shown from md+ */}
+              <div className="hidden md:flex flex-col w-full sm:w-[220px] lg:w-[260px] flex-shrink-0 items-center justify-start gap-0 pt-8 pb-6 px-6 bg-gradient-to-b from-[hsl(var(--custom)/0.06)] to-transparent dark:from-[hsl(var(--custom)/0.12)] dark:to-transparent border-r border-gray-100 dark:border-gray-800">
                 <div className="relative w-14 h-14 sm:w-24 sm:h-24 lg:w-28 lg:h-28 rounded-full overflow-hidden ring-2 sm:ring-4 ring-white dark:ring-gray-800 shadow-lg shrink-0">
                   <Image
                     src={ISAAC_IMAGE}
@@ -97,12 +97,9 @@ export const ShortTermMedicalQuoteModal = ({
               {/* right: form */}
               <div className="flex-1 min-w-0 px-4 sm:px-6 py-6">
                 <div className="max-w-[400px] mx-auto">
-                  <p className="text-sm text-gray-700 dark:text-gray-300 text-center font-medium mb-4">
-                    {isES
-                      ? "Deje sus datos y le contactaré pronto con opciones personalizadas."
-                      : "Leave your details and I'll reach out soon with personalized options."}
-                  </p>
-                  <ShortTermMedicalLeadForm />
+                  <ShortTermMedicalLeadForm
+                    onCloseModal={() => setOpen(false)}
+                  />
                 </div>
               </div>
             </div>

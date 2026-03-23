@@ -1524,6 +1524,19 @@
       }
     }
   },
+  "shortTermMedicalPage": {
+    "calendar": {
+      "title": "Programe su consulta de seguro médico a corto plazo",
+      "backButton": "← Volver",
+      "meta": {
+        "title": "Calendario de citas - Seguro médico a corto plazo | Isaac Plans Insurance",
+        "description": "Programe su consulta de seguro médico a corto plazo con Isaac Plans Insurance. Obtenga orientación bilingüe y opciones personalizadas para cobertura temporal.",
+        "keywords": "seguro médico temporal, corto plazo, cita, programar, consulta, Virginia, bilingüe",
+        "image": "https://www.isaacplans.com/images/stm_es.png",
+        "imageAlt": "Calendario de citas - Seguro médico a corto plazo"
+      }
+    }
+  },
   "iulPage": {
     "hero": {
       "badge": "Vida Universal Indexada (IUL)",

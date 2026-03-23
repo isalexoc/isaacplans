@@ -63,7 +63,13 @@
       "firstNameMinLength": "El nombre debe tener al menos 2 caracteres",
       "lastNameMinLength": "El apellido debe tener al menos 2 caracteres",
       "firstNameMaxLength": "El nombre es demasiado largo",
-      "lastNameMaxLength": "El apellido es demasiado largo"
+      "lastNameMaxLength": "El apellido es demasiado largo",
+      "smsConsent": "Consiento recibir notificaciones y alertas por SMS de Isaac Plans Insurance. La frecuencia de mensajes varía. Pueden aplicarse tarifas de mensajes y datos. Envía HELP al (540) 426-1804 para ayuda. Responde STOP para cancelar en cualquier momento.",
+      "marketingConsent": "Al marcar esta casilla acepto recibir mensajes de marketing ocasionales de Isaac Plans Insurance.",
+      "privacyPolicy": "Política de Privacidad",
+      "termsAndConditions": "Términos y Condiciones",
+      "successClose": "Cerrar",
+      "successScheduleAppointment": "Programar una cita"
     }
   }
 }

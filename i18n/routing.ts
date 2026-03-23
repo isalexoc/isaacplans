@@ -63,6 +63,10 @@ export const routing = defineRouting({
       en: "/short-term-medical",
       es: "/cobertura-a-corto-plazo",
     },
+    "/short-term-medical/calendar": {
+      en: "/short-term-medical/calendar",
+      es: "/cobertura-a-corto-plazo/calendario",
+    },
     "/iul": {
       en: "/iul",
       es: "/iul",

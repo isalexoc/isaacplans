@@ -1536,6 +1536,19 @@
       }
     }
   },
+  "shortTermMedicalPage": {
+    "calendar": {
+      "title": "Schedule Your Short Term Medical Consultation",
+      "backButton": "← Go Back",
+      "meta": {
+        "title": "Short Term Medical Appointment Calendar | Isaac Plans Insurance",
+        "description": "Schedule your short term medical plan consultation with Isaac Plans Insurance. Get bilingual guidance and personalized options for temporary health coverage.",
+        "keywords": "short term medical, temporary health insurance, appointment, schedule, consultation, Virginia, bilingual",
+        "image": "https://www.isaacplans.com/images/stm.png",
+        "imageAlt": "Short Term Medical appointment calendar"
+      }
+    }
+  },
   "iulPage": {
     "hero": {
       "badge": "Indexed Universal Life (IUL)",

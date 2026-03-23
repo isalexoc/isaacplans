@@ -9,6 +9,7 @@ import {
 } from "@/app/actions/short-term-medical";
 import PhoneInput from "react-phone-number-input";
 import "react-phone-number-input/style.css";
+import { Link } from "@/i18n/navigation";
 
 const initialFormValues: FormValues = {
   firstName: "",
@@ -21,10 +22,12 @@ const initialState: ActionResult = { status: null };
 
 type Props = {
   onSubmitSuccess?: () => void;
+  onCloseModal?: () => void;
 };
 
 export default function ShortTermMedicalLeadForm({
   onSubmitSuccess,
+  onCloseModal,
 }: Props) {
   const locale = useLocale();
   const isES = locale.startsWith("es");
@@ -35,6 +38,8 @@ export default function ShortTermMedicalLeadForm({
   );
 
   const [formValues, setFormValues] = useState<FormValues>(initialFormValues);
+  const [smsConsent, setSmsConsent] = useState(false);
+  const [marketingConsent, setMarketingConsent] = useState(false);
 
   useEffect(() => {
     if (
@@ -85,6 +90,32 @@ export default function ShortTermMedicalLeadForm({
               ? "Me comunicaré con usted pronto para discutir sus opciones."
               : "I'll reach out shortly to discuss your options."}
           </p>
+          <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
+            {onCloseModal && (
+              <button
+                type="button"
+                onClick={onCloseModal}
+                className="px-5 py-2.5 rounded-lg border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 font-medium transition-colors"
+              >
+                {t("successClose")}
+              </button>
+            )}
+            <Link
+              href={
+                (formValues.firstName || formValues.lastName || formValues.email || formValues.phone
+                  ? `/short-term-medical/calendar?${new URLSearchParams({
+                      first_name: formValues.firstName,
+                      last_name: formValues.lastName,
+                      email: formValues.email,
+                      phone: formValues.phone,
+                    }).toString()}`
+                  : "/short-term-medical/calendar") as "/short-term-medical/calendar"
+              }
+              className="inline-flex items-center justify-center px-5 py-2.5 rounded-lg bg-gradient-to-r from-[hsl(var(--custom))] to-[hsl(var(--custom)/0.85)] text-white font-medium hover:from-[hsl(var(--custom)/0.9)] hover:to-[hsl(var(--custom)/0.75)] transition-all shadow-md hover:shadow-lg"
+            >
+              {t("successScheduleAppointment")}
+            </Link>
+          </div>
         </div>
       </div>
     );
@@ -218,6 +249,55 @@ export default function ShortTermMedicalLeadForm({
             ? "Enviar — Recibir mi cotización"
             : "Get My Free Quote"}
       </button>
+
+      <div className="space-y-3 pt-2 border-t border-gray-200 dark:border-gray-700">
+        <label className="flex gap-3 items-start cursor-pointer group">
+          <input
+            type="checkbox"
+            name="smsConsent"
+            checked={smsConsent}
+            onChange={(e) => setSmsConsent(e.target.checked)}
+            disabled={isPending}
+            className="mt-1 w-4 h-4 rounded border-2 border-gray-300 dark:border-gray-600 text-[hsl(var(--custom))] focus:ring-[hsl(var(--custom)/0.3)] shrink-0"
+          />
+          <span className="text-xs text-gray-600 dark:text-gray-400 group-hover:text-gray-800 dark:group-hover:text-gray-200 transition-colors">
+            {t("smsConsent")}
+          </span>
+        </label>
+        <label className="flex gap-3 items-start cursor-pointer group">
+          <input
+            type="checkbox"
+            name="marketingConsent"
+            checked={marketingConsent}
+            onChange={(e) => setMarketingConsent(e.target.checked)}
+            disabled={isPending}
+            className="mt-1 w-4 h-4 rounded border-2 border-gray-300 dark:border-gray-600 text-[hsl(var(--custom))] focus:ring-[hsl(var(--custom)/0.3)] shrink-0"
+          />
+          <span className="text-xs text-gray-600 dark:text-gray-400 group-hover:text-gray-800 dark:group-hover:text-gray-200 transition-colors">
+            {t("marketingConsent")}
+          </span>
+        </label>
+      </div>
+
+      <div className="flex flex-wrap justify-center gap-x-3 gap-y-1 text-xs text-gray-500 dark:text-gray-400 pt-2">
+        <Link
+          href="/privacy-policy"
+          className="underline hover:text-[hsl(var(--custom))] transition-colors"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {t("privacyPolicy")}
+        </Link>
+        <span aria-hidden>·</span>
+        <Link
+          href="/terms-of-service"
+          className="underline hover:text-[hsl(var(--custom))] transition-colors"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {t("termsAndConditions")}
+        </Link>
+      </div>
     </form>
   );
 }

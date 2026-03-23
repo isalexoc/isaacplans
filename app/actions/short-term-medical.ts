@@ -115,6 +115,8 @@ export async function submitShortTermMedicalForm(
         shortTermMedicalData: {
           language: isES ? "es" : "en",
           source: "short_term_medical_page",
+          smsConsent: formData.get("smsConsent") === "on",
+          marketingConsent: formData.get("marketingConsent") === "on",
         },
       }),
     });

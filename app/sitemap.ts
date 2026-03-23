@@ -77,6 +77,11 @@ const PAGES: Page[] = [
 
   // Short Term Medical
   { href: "/short-term-medical", changeFrequency: "monthly", priority: 0.8 },
+  {
+    href: "/short-term-medical/calendar",
+    changeFrequency: "monthly",
+    priority: 0.6,
+  },
   { href: "/carriers/uhone/shortterm", changeFrequency: "monthly", priority: 0.7 },
 
   // Resources
