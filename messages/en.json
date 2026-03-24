@@ -440,7 +440,42 @@
       },
       "form": {
         "heading": "Get Your Free Insurance Quote",
-        "sub": "Ready to find the perfect insurance coverage? Fill out the form below or call anytime."
+        "sub": "Ready to find the perfect insurance coverage? Fill out the form below or call anytime.",
+        "ctaButton": {
+          "title": "Get Free Quote",
+          "subtitle": "Fill out the form – no obligation"
+        },
+        "firstName": "First Name",
+        "lastName": "Last Name",
+        "email": "Email",
+        "phone": "Phone Number",
+        "submit": "Get My Free Quote",
+        "submitting": "Submitting...",
+        "required": "This field is required",
+        "invalidEmail": "Invalid email address",
+        "invalidPhone": "Please enter a valid 10-digit US phone number",
+        "firstNameMinLength": "First name must be at least 2 characters",
+        "lastNameMinLength": "Last name must be at least 2 characters",
+        "firstNameMaxLength": "First name is too long",
+        "lastNameMaxLength": "Last name is too long",
+        "smsConsent": "I consent to receive SMS notifications and alerts from Isaac Plans Insurance. Message frequency varies. Message & data rates may apply. Text HELP to (540) 426-1804 for assistance. Reply STOP to unsubscribe at any time.",
+        "marketingConsent": "By checking this box I agree to receive occasional marketing messages from Isaac Plans Insurance.",
+        "privacyPolicy": "Privacy Policy",
+        "termsAndConditions": "Terms & Conditions",
+        "successTitle": "Thank you!",
+        "successMessage": "We've received your information. I'll reach out shortly to discuss your options.",
+        "successScheduleAppointment": "Schedule an Appointment"
+      }
+    },
+    "calendar": {
+      "backButton": "← Go Back",
+      "title": "Schedule Your Free Consultation",
+      "meta": {
+        "title": "Schedule Appointment | Isaac Plans Insurance",
+        "description": "Schedule your free consultation with Isaac Plans Insurance. Get bilingual guidance on ACA, Medicare, life, and more.",
+        "keywords": "schedule appointment, insurance consultation, free quote, bilingual, Isaac Plans",
+        "image": "https://isaacplans.com/images/contact_isaacplans_en.png",
+        "imageAlt": "Isaac Plans Insurance – Schedule your consultation"
       }
     },
     "contactMetadata": {

@@ -2,7 +2,7 @@ import Image from "next/image";
 import type { Metadata } from "next";
 import { Facebook, Instagram, Linkedin, Youtube, Phone, Mail, MessageCircle, UserPlus, Globe, Calendar } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import ContactForm from "@/components/contact-form"; // client island
+import ContactLeadForm from "@/components/contact-lead-form";
 import { BackHome } from "@/components/back-home";
 import { getLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
@@ -345,9 +345,18 @@ export default async function ContactPage() {
         </div>
       </section>
 
-      {/* client island – form stays interactive */}
-      {/* @ts-expect-error - Next.js async server components are valid JSX */}
-      <ContactForm />
+      {/* Contact form - private integration (same as short-term) */}
+      <section id="contact-form" className="bg-gray-50 dark:bg-gray-900/50 py-16">
+        <div className="container max-w-3xl mx-auto px-4 text-center">
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+            {t("info.form.heading")}
+          </h2>
+          <p className="text-lg text-gray-700 dark:text-gray-300">{t("info.form.sub")}</p>
+        </div>
+        <div className="mx-auto mt-10 w-full max-w-md px-4 pb-8">
+          <ContactLeadForm />
+        </div>
+      </section>
 
       {/* JSON-LD (escaped) */}
       <script

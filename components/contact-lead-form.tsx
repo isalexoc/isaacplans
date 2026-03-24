@@ -3,10 +3,10 @@
 import { useActionState, useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import {
-  submitShortTermMedicalForm,
+  submitContactForm,
   type ActionResult,
   type FormValues,
-} from "@/app/actions/short-term-medical";
+} from "@/app/actions/contact";
 import PhoneInput, { parsePhoneNumber } from "react-phone-number-input";
 import "react-phone-number-input/style.css";
 
@@ -27,20 +27,12 @@ const initialFormValues: FormValues = {
 
 const initialState: ActionResult = { status: null };
 
-type Props = {
-  onSubmitSuccess?: () => void;
-  onCloseModal?: () => void;
-};
-
-export default function ShortTermMedicalLeadForm({
-  onSubmitSuccess,
-  onCloseModal,
-}: Props) {
+export default function ContactLeadForm() {
   const locale = useLocale();
   const isES = locale.startsWith("es");
-  const t = useTranslations("guideDetailPage.form");
+  const t = useTranslations("contactPage.info.form");
   const [state, formAction, isPending] = useActionState(
-    submitShortTermMedicalForm,
+    submitContactForm,
     initialState
   );
 
@@ -56,12 +48,6 @@ export default function ShortTermMedicalLeadForm({
       setFormValues(state.values);
     }
   }, [state.status, state.values]);
-
-  useEffect(() => {
-    if (state.status === "SUCCESS") {
-      onSubmitSuccess?.();
-    }
-  }, [state.status, onSubmitSuccess]);
 
   const inputBase =
     "w-full px-4 py-3 rounded-lg border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:border-[hsl(var(--custom))] focus:ring-2 focus:ring-[hsl(var(--custom)/0.2)] transition-all duration-200";
@@ -88,35 +74,25 @@ export default function ShortTermMedicalLeadForm({
             </svg>
           </div>
           <p className="text-lg font-semibold text-green-800 dark:text-green-200">
-            {isES
-              ? "¡Gracias! Hemos recibido su información."
-              : "Thank you! We've received your information."}
+            {t("successTitle")}
           </p>
           <p className="mt-2 text-sm text-green-700 dark:text-green-300">
-            {isES
-              ? "Me comunicaré con usted pronto para discutir sus opciones."
-              : "I'll reach out shortly to discuss your options."}
+            {t("successMessage")}
           </p>
-          <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
-            {onCloseModal && (
-              <button
-                type="button"
-                onClick={onCloseModal}
-                className="px-5 py-2.5 rounded-lg border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 font-medium transition-colors"
-              >
-                {t("successClose")}
-              </button>
-            )}
+          <div className="mt-6 flex justify-center">
             <Link
               href={
-                (formValues.firstName || formValues.lastName || formValues.email || formValues.phone
-                  ? `/short-term-medical/calendar?${new URLSearchParams({
+                (formValues.firstName ||
+                formValues.lastName ||
+                formValues.email ||
+                formValues.phone
+                  ? `/contact/calendar?${new URLSearchParams({
                       first_name: formValues.firstName,
                       last_name: formValues.lastName,
                       email: formValues.email,
                       phone: formValues.phone,
                     }).toString()}`
-                  : "/short-term-medical/calendar") as "/short-term-medical/calendar"
+                  : "/contact/calendar") as "/contact/calendar"
               }
               className="inline-flex items-center justify-center px-5 py-2.5 rounded-lg bg-gradient-to-r from-[hsl(var(--custom))] to-[hsl(var(--custom)/0.85)] text-white font-medium hover:from-[hsl(var(--custom)/0.9)] hover:to-[hsl(var(--custom)/0.75)] transition-all shadow-md hover:shadow-lg"
             >
@@ -130,7 +106,7 @@ export default function ShortTermMedicalLeadForm({
 
   return (
     <form
-      id="stm-lead-form"
+      id="contact-lead-form"
       action={formAction}
       className="space-y-4"
     >
@@ -144,14 +120,14 @@ export default function ShortTermMedicalLeadForm({
 
       <div>
         <label
-          htmlFor="stm-firstName"
+          htmlFor="contact-firstName"
           className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
         >
           {t("firstName")} <span className="text-red-500">*</span>
         </label>
         <input
           type="text"
-          id="stm-firstName"
+          id="contact-firstName"
           name="firstName"
           placeholder={isES ? "Ej: María" : "e.g. Maria"}
           value={formValues.firstName}
@@ -169,14 +145,14 @@ export default function ShortTermMedicalLeadForm({
 
       <div>
         <label
-          htmlFor="stm-lastName"
+          htmlFor="contact-lastName"
           className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
         >
           {t("lastName")} <span className="text-red-500">*</span>
         </label>
         <input
           type="text"
-          id="stm-lastName"
+          id="contact-lastName"
           name="lastName"
           placeholder={isES ? "Ej: García" : "e.g. Garcia"}
           value={formValues.lastName}
@@ -194,14 +170,14 @@ export default function ShortTermMedicalLeadForm({
 
       <div>
         <label
-          htmlFor="stm-email"
+          htmlFor="contact-email"
           className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
         >
           {t("email")} <span className="text-red-500">*</span>
         </label>
         <input
           type="email"
-          id="stm-email"
+          id="contact-email"
           name="email"
           placeholder={isES ? "tu@email.com" : "you@email.com"}
           value={formValues.email}
@@ -219,13 +195,13 @@ export default function ShortTermMedicalLeadForm({
 
       <div>
         <label
-          htmlFor="stm-phone"
+          htmlFor="contact-phone"
           className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
         >
           {t("phone")} <span className="text-red-500">*</span>
         </label>
         <PhoneInput
-          id="stm-phone"
+          id="contact-phone"
           name="phone"
           defaultCountry="US"
           countries={["US"]}
@@ -250,11 +226,7 @@ export default function ShortTermMedicalLeadForm({
         disabled={isPending}
         className="w-full bg-gradient-to-r from-[hsl(var(--custom))] to-[hsl(var(--custom)/0.85)] hover:from-[hsl(var(--custom)/0.9)] hover:to-[hsl(var(--custom)/0.75)] text-white font-semibold py-3.5 px-6 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-lg"
       >
-        {isPending
-          ? t("submitting", { default: "Submitting..." })
-          : isES
-            ? "Enviar — Recibir mi cotización"
-            : "Get My Free Quote"}
+        {isPending ? t("submitting") : t("submit")}
       </button>
 
       <div className="space-y-3 pt-2 border-t border-gray-200 dark:border-gray-700">

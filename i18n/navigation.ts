@@ -10,6 +10,7 @@ export type AppHref =
   | "/" // home
   | "/contact" // internal path (en)
   | "/contact#contact-form" // contact form
+  | "/contact/calendar" // contact calendar
   | "/aca"
   | "/dental-vision"
   | "/hospital-indemnity"

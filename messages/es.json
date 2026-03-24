@@ -429,7 +429,42 @@
       },
       "form": {
         "heading": "Obtenga Su Cotización Gratuita",
-        "sub": "¿Listo para encontrar la cobertura perfecta? Complete el formulario o llame cuando guste."
+        "sub": "¿Listo para encontrar la cobertura perfecta? Complete el formulario o llame cuando guste.",
+        "ctaButton": {
+          "title": "Cotización Gratis",
+          "subtitle": "Complete el formulario – sin compromiso"
+        },
+        "firstName": "Nombre",
+        "lastName": "Apellido",
+        "email": "Correo electrónico",
+        "phone": "Teléfono",
+        "submit": "Enviar — Recibir mi cotización",
+        "submitting": "Enviando...",
+        "required": "Este campo es obligatorio",
+        "invalidEmail": "Correo electrónico inválido",
+        "invalidPhone": "Ingrese un número de teléfono estadounidense válido de 10 dígitos",
+        "firstNameMinLength": "El nombre debe tener al menos 2 caracteres",
+        "lastNameMinLength": "El apellido debe tener al menos 2 caracteres",
+        "firstNameMaxLength": "El nombre es demasiado largo",
+        "lastNameMaxLength": "El apellido es demasiado largo",
+        "smsConsent": "Consiento recibir notificaciones SMS de Isaac Plans Insurance. La frecuencia de mensajes varía. Pueden aplicar cargos por mensajes y datos. Envíe HELP al (540) 426-1804 para asistencia. Responda STOP para cancelar en cualquier momento.",
+        "marketingConsent": "Al marcar esta casilla acepto recibir mensajes de marketing ocasionales de Isaac Plans Insurance.",
+        "privacyPolicy": "Política de Privacidad",
+        "termsAndConditions": "Términos y Condiciones",
+        "successTitle": "¡Gracias!",
+        "successMessage": "Hemos recibido su información. Me comunicaré con usted pronto para discutir sus opciones.",
+        "successScheduleAppointment": "Agendar una Cita"
+      }
+    },
+    "calendar": {
+      "backButton": "← Volver",
+      "title": "Agende Su Consulta Gratuita",
+      "meta": {
+        "title": "Agendar Cita | Isaac Plans Insurance",
+        "description": "Agende su consulta gratuita con Isaac Plans Insurance. Obtenga asesoría bilingüe sobre ACA, Medicare, vida y más.",
+        "keywords": "agendar cita, consulta de seguros, cotización gratis, bilingüe, Isaac Plans",
+        "image": "https://isaacplans.com/images/contact_isaacplans_es.png",
+        "imageAlt": "Isaac Plans Insurance – Agende su consulta"
       }
     },
     "contactMetadata": {
