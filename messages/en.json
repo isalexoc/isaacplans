@@ -990,6 +990,29 @@
       "title": "Request Information",
       "subtitle": "Fast, no-obligation estimates"
     },
+    "leadForm": {
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "email": "Email",
+      "phone": "Phone Number",
+      "submit": "Get My Free Quote",
+      "submitting": "Submitting...",
+      "required": "This field is required",
+      "invalidEmail": "Invalid email address",
+      "invalidPhone": "Please enter a valid 10-digit US phone number",
+      "firstNameMinLength": "First name must be at least 2 characters",
+      "lastNameMinLength": "Last name must be at least 2 characters",
+      "firstNameMaxLength": "First name is too long",
+      "lastNameMaxLength": "Last name is too long",
+      "smsConsent": "I consent to receive SMS notifications and alerts from Isaac Plans Insurance. Message frequency varies. Message & data rates may apply. Text HELP to (540) 426-1804 for assistance. Reply STOP to unsubscribe at any time.",
+      "marketingConsent": "By checking this box I agree to receive occasional marketing messages from Isaac Plans Insurance.",
+      "privacyPolicy": "Privacy Policy",
+      "termsAndConditions": "Terms & Conditions",
+      "successTitle": "Thank you!",
+      "successMessage": "We've received your information. I'll reach out shortly to discuss dental and vision options.",
+      "successScheduleAppointment": "Book a consultation",
+      "successClose": "Close"
+    },
 
     "about": {
       "badge": "About Me",
@@ -1124,6 +1147,29 @@
     "ctaButton": {
       "title": "Request Information",
       "subtitle": "Fast, no-obligation estimates"
+    },
+    "leadForm": {
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "email": "Email",
+      "phone": "Phone Number",
+      "submit": "Get My Free Quote",
+      "submitting": "Submitting...",
+      "required": "This field is required",
+      "invalidEmail": "Invalid email address",
+      "invalidPhone": "Please enter a valid 10-digit US phone number",
+      "firstNameMinLength": "First name must be at least 2 characters",
+      "lastNameMinLength": "Last name must be at least 2 characters",
+      "firstNameMaxLength": "First name is too long",
+      "lastNameMaxLength": "Last name is too long",
+      "smsConsent": "I consent to receive SMS notifications and alerts from Isaac Plans Insurance. Message frequency varies. Message & data rates may apply. Text HELP to (540) 426-1804 for assistance. Reply STOP to unsubscribe at any time.",
+      "marketingConsent": "By checking this box I agree to receive occasional marketing messages from Isaac Plans Insurance.",
+      "privacyPolicy": "Privacy Policy",
+      "termsAndConditions": "Terms & Conditions",
+      "successTitle": "Thank you!",
+      "successMessage": "We've received your information. I'll reach out shortly to discuss hospital indemnity options.",
+      "successScheduleAppointment": "Book a consultation",
+      "successClose": "Close"
     },
     "calendar": {
       "backButton": "← Go Back",
@@ -1633,6 +1679,29 @@
       "title": "Request Information",
       "subtitle": "Personalized, no obligation"
     },
+    "leadForm": {
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "email": "Email",
+      "phone": "Phone Number",
+      "submit": "Get My Free Quote",
+      "submitting": "Submitting...",
+      "required": "This field is required",
+      "invalidEmail": "Invalid email address",
+      "invalidPhone": "Please enter a valid 10-digit US phone number",
+      "firstNameMinLength": "First name must be at least 2 characters",
+      "lastNameMinLength": "Last name must be at least 2 characters",
+      "firstNameMaxLength": "First name is too long",
+      "lastNameMaxLength": "Last name is too long",
+      "smsConsent": "I consent to receive SMS notifications and alerts from Isaac Plans Insurance. Message frequency varies. Message & data rates may apply. Text HELP to (540) 426-1804 for assistance. Reply STOP to unsubscribe at any time.",
+      "marketingConsent": "By checking this box I agree to receive occasional marketing messages from Isaac Plans Insurance.",
+      "privacyPolicy": "Privacy Policy",
+      "termsAndConditions": "Terms & Conditions",
+      "successTitle": "Thank you!",
+      "successMessage": "We've received your information. I'll reach out shortly to discuss your IUL options.",
+      "successScheduleAppointment": "Book a consultation",
+      "successClose": "Close"
+    },
 
     "presentationButton": {
       "title": "Go to Presentation Mode"
@@ -1767,6 +1836,29 @@
     "ctaButton": {
       "title": "Request Information",
       "subtitle": "Fast, no-obligation estimate"
+    },
+    "leadForm": {
+      "firstName": "First name",
+      "lastName": "Last name",
+      "email": "Email",
+      "phone": "Phone",
+      "submit": "Get a free quote",
+      "submitting": "Sending...",
+      "required": "This field is required",
+      "invalidEmail": "Invalid email address",
+      "invalidPhone": "Enter a valid 10-digit US phone number",
+      "firstNameMinLength": "First name must be at least 2 characters",
+      "lastNameMinLength": "Last name must be at least 2 characters",
+      "firstNameMaxLength": "First name is too long",
+      "lastNameMaxLength": "Last name is too long",
+      "smsConsent": "I agree to receive SMS notifications and alerts from Isaac Plans Insurance. Message frequency may vary. Message and data rates may apply. Text HELP to (540) 426-1804 for help. Reply STOP to unsubscribe at any time.",
+      "marketingConsent": "By checking this box, I agree to receive occasional marketing messages from Isaac Plans Insurance.",
+      "privacyPolicy": "Privacy policy",
+      "termsAndConditions": "Terms and conditions",
+      "successTitle": "Thank you!",
+      "successMessage": "We received your information. We’ll reach out soon about final expense options.",
+      "successScheduleAppointment": "Schedule a call",
+      "successClose": "Close"
     },
     "presentationButton": {
       "title": "Go to Presentation Mode"

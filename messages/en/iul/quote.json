@@ -137,7 +137,8 @@
         "message": "We've received your information. Our team will contact you shortly to discuss your IUL options.",
         "redirectMessage": "You'll be redirected to schedule an appointment in a moment...",
         "redirectCountdown": "You'll be redirected to schedule an appointment in {seconds}...",
-        "scheduleNow": "Schedule Now"
+        "scheduleNow": "Schedule Now",
+        "closeModal": "Close"
       }
     }
   }

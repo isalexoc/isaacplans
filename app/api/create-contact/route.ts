@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { firstName, lastName, email, phone, iulLeadGenData, shortTermMedicalData, contactPageData, acaData, meta } = body;
+    const { firstName, lastName, email, phone, iulLeadGenData, shortTermMedicalData, contactPageData, acaData, dentalVisionData, hospitalIndemnityData, finalExpenseData, meta } = body;
 
     // [Workflow Debug] Log incoming lead type - helps trace why IUL workflow may be assigned
     console.log("[create-contact] Incoming request lead type:", {
@@ -37,19 +37,31 @@ export async function POST(request: NextRequest) {
       hasShortTermMedicalData: !!shortTermMedicalData,
       hasContactPageData: !!contactPageData,
       hasAcaData: !!acaData,
+      hasDentalVisionData: !!dentalVisionData,
+      hasHospitalIndemnityData: !!hospitalIndemnityData,
+      hasFinalExpenseData: !!finalExpenseData,
       iulLeadGenDataKeys: iulLeadGenData ? Object.keys(iulLeadGenData) : [],
       shortTermMedicalDataKeys: shortTermMedicalData ? Object.keys(shortTermMedicalData) : [],
       contactPageDataKeys: contactPageData ? Object.keys(contactPageData) : [],
       acaDataKeys: acaData ? Object.keys(acaData) : [],
+      dentalVisionDataKeys: dentalVisionData ? Object.keys(dentalVisionData) : [],
+      hospitalIndemnityDataKeys: hospitalIndemnityData ? Object.keys(hospitalIndemnityData) : [],
+      finalExpenseDataKeys: finalExpenseData ? Object.keys(finalExpenseData) : [],
       leadSource: shortTermMedicalData
         ? "short_term_medical"
         : contactPageData
           ? "contact_page"
           : acaData
             ? "aca"
-            : iulLeadGenData
-              ? "iul_lead_gen"
-              : "other",
+            : dentalVisionData
+              ? "dental_vision"
+              : hospitalIndemnityData
+                ? "hospital_indemnity"
+                : finalExpenseData
+                  ? "final_expense"
+                  : iulLeadGenData
+                    ? "iul_lead_gen"
+                    : "other",
     });
 
     // Validate required fields
@@ -115,21 +127,58 @@ export async function POST(request: NextRequest) {
         if (!investments || !Array.isArray(investments) || investments.length === 0) return 'None';
         return investments.join(', ');
       };
-      const languageDisplay = iulLeadGenData.language === 'es' ? 'Spanish (Español)' : 
-                              iulLeadGenData.language === 'en' ? 'English' : iulLeadGenData.language || 'Not provided';
-      leadDetailsText = [
-        'IUL Lead Generation Form Data',
-        '============================',
-        '',
-        `Language: ${languageDisplay}`,
-        `Retirement Timeline: ${iulLeadGenData.retirementTimeline || 'Not provided'}`,
-        `Current Investments: ${formatInvestments(iulLeadGenData.investments)}`,
-        `Monthly Savings: ${iulLeadGenData.monthlySavings || 'Not provided'}`,
-        `Age: ${iulLeadGenData.age || 'Not provided'}`,
-        `State: ${iulLeadGenData.state || 'Not provided'}`,
-        '',
-        `Submitted: ${new Date().toLocaleString()}`,
-      ].join('\n');
+      const langRaw = iulLeadGenData.language;
+      const languageDisplay =
+        typeof langRaw === 'string' && langRaw.toLowerCase().startsWith('es')
+          ? 'Spanish (Español)'
+          : typeof langRaw === 'string' && langRaw.toLowerCase().startsWith('en')
+            ? 'English'
+            : langRaw || 'Not provided';
+      const submittedAt = new Date().toLocaleString() + ' ' + (Intl.DateTimeFormat().resolvedOptions().timeZone || '');
+      const smsConsent = iulLeadGenData.smsConsent === true ? 'Yes' : 'No';
+      const marketingConsent = iulLeadGenData.marketingConsent === true ? 'Yes' : 'No';
+      const hasExtendedQuizFields = !!(
+        iulLeadGenData.retirementTimeline ||
+        (iulLeadGenData.investments && iulLeadGenData.investments.length > 0) ||
+        iulLeadGenData.monthlySavings ||
+        iulLeadGenData.state ||
+        iulLeadGenData.age
+      );
+
+      if (hasExtendedQuizFields) {
+        leadDetailsText = [
+          'IUL Lead Generation Form Data',
+          '============================',
+          '',
+          `Language: ${languageDisplay}`,
+          `Retirement Timeline: ${iulLeadGenData.retirementTimeline || 'Not provided'}`,
+          `Current Investments: ${formatInvestments(iulLeadGenData.investments)}`,
+          `Monthly Savings: ${iulLeadGenData.monthlySavings || 'Not provided'}`,
+          `Age: ${iulLeadGenData.age || 'Not provided'}`,
+          `State: ${iulLeadGenData.state || 'Not provided'}`,
+          '',
+          `Submitted: ${new Date().toLocaleString()}`,
+        ].join('\n');
+      } else {
+        leadDetailsText = [
+          'IUL Lead',
+          '========',
+          '',
+          'Contact:',
+          `  Name: ${firstName} ${lastName}`,
+          `  Email: ${email}`,
+          `  Phone: ${phone}`,
+          '',
+          'Lead Details:',
+          `  Source: ${iulLeadGenData.source || 'iul'}`,
+          `  Language: ${languageDisplay}`,
+          `  SMS Consent: ${smsConsent}`,
+          `  Marketing Consent: ${marketingConsent}`,
+          `  Source URL: ${meta?.eventSourceUrl || 'Not provided'}`,
+          '',
+          `Submitted: ${submittedAt}`,
+        ].join('\n');
+      }
     } else if (shortTermMedicalData) {
       const languageDisplay = shortTermMedicalData.language === 'es' ? 'Spanish (Español)' : 
                               shortTermMedicalData.language === 'en' ? 'English' : shortTermMedicalData.language || 'Not provided';
@@ -202,6 +251,78 @@ export async function POST(request: NextRequest) {
         '',
         `Submitted: ${submittedAt}`,
       ].join('\n');
+    } else if (dentalVisionData) {
+      const languageDisplay = dentalVisionData.language === 'es' ? 'Spanish (Español)' :
+                              dentalVisionData.language === 'en' ? 'English' : dentalVisionData.language || 'Not provided';
+      const submittedAt = new Date().toLocaleString() + ' ' + (Intl.DateTimeFormat().resolvedOptions().timeZone || '');
+      const smsConsent = dentalVisionData.smsConsent === true ? 'Yes' : 'No';
+      const marketingConsent = dentalVisionData.marketingConsent === true ? 'Yes' : 'No';
+      leadDetailsText = [
+        'Dental & Vision Lead',
+        '===================',
+        '',
+        'Contact:',
+        `  Name: ${firstName} ${lastName}`,
+        `  Email: ${email}`,
+        `  Phone: ${phone}`,
+        '',
+        'Lead Details:',
+        `  Source: ${dentalVisionData.source || 'dental_vision_page'}`,
+        `  Language: ${languageDisplay}`,
+        `  SMS Consent: ${smsConsent}`,
+        `  Marketing Consent: ${marketingConsent}`,
+        `  Source URL: ${meta?.eventSourceUrl || 'Not provided'}`,
+        '',
+        `Submitted: ${submittedAt}`,
+      ].join('\n');
+    } else if (hospitalIndemnityData) {
+      const languageDisplay = hospitalIndemnityData.language === 'es' ? 'Spanish (Español)' :
+                              hospitalIndemnityData.language === 'en' ? 'English' : hospitalIndemnityData.language || 'Not provided';
+      const submittedAt = new Date().toLocaleString() + ' ' + (Intl.DateTimeFormat().resolvedOptions().timeZone || '');
+      const smsConsent = hospitalIndemnityData.smsConsent === true ? 'Yes' : 'No';
+      const marketingConsent = hospitalIndemnityData.marketingConsent === true ? 'Yes' : 'No';
+      leadDetailsText = [
+        'Hospital Indemnity Lead',
+        '======================',
+        '',
+        'Contact:',
+        `  Name: ${firstName} ${lastName}`,
+        `  Email: ${email}`,
+        `  Phone: ${phone}`,
+        '',
+        'Lead Details:',
+        `  Source: ${hospitalIndemnityData.source || 'hospital_indemnity_page'}`,
+        `  Language: ${languageDisplay}`,
+        `  SMS Consent: ${smsConsent}`,
+        `  Marketing Consent: ${marketingConsent}`,
+        `  Source URL: ${meta?.eventSourceUrl || 'Not provided'}`,
+        '',
+        `Submitted: ${submittedAt}`,
+      ].join('\n');
+    } else if (finalExpenseData) {
+      const languageDisplay = finalExpenseData.language === 'es' ? 'Spanish (Español)' :
+                              finalExpenseData.language === 'en' ? 'English' : finalExpenseData.language || 'Not provided';
+      const submittedAt = new Date().toLocaleString() + ' ' + (Intl.DateTimeFormat().resolvedOptions().timeZone || '');
+      const smsConsent = finalExpenseData.smsConsent === true ? 'Yes' : 'No';
+      const marketingConsent = finalExpenseData.marketingConsent === true ? 'Yes' : 'No';
+      leadDetailsText = [
+        'Final Expense Lead',
+        '==================',
+        '',
+        'Contact:',
+        `  Name: ${firstName} ${lastName}`,
+        `  Email: ${email}`,
+        `  Phone: ${phone}`,
+        '',
+        'Lead Details:',
+        `  Source: ${finalExpenseData.source || 'final_expense_page'}`,
+        `  Language: ${languageDisplay}`,
+        `  SMS Consent: ${smsConsent}`,
+        `  Marketing Consent: ${marketingConsent}`,
+        `  Source URL: ${meta?.eventSourceUrl || 'Not provided'}`,
+        '',
+        `Submitted: ${submittedAt}`,
+      ].join('\n');
     }
     
     if (leadDetailsText && leadSourceDetailsFieldId) {
@@ -233,16 +354,50 @@ export async function POST(request: NextRequest) {
       acaTags.push(acaData.language === 'es' ? 'Spanish' : 'English');
     }
 
-    // Determine lead source for CRM routing (prevents IUL workflow from auto-triggering on STM/contact/ACA leads)
+    // Build tags for Dental & Vision page leads
+    const dentalVisionTags: string[] = [];
+    if (dentalVisionData) {
+      dentalVisionTags.push('Dental & Vision Lead');
+      dentalVisionTags.push(dentalVisionData.language === 'es' ? 'Spanish' : 'English');
+    }
+
+    // Build tags for Hospital Indemnity page leads
+    const hospitalIndemnityTags: string[] = [];
+    if (hospitalIndemnityData) {
+      hospitalIndemnityTags.push('Hospital Indemnity Lead');
+      hospitalIndemnityTags.push(hospitalIndemnityData.language === 'es' ? 'Spanish' : 'English');
+    }
+
+    // Build tags for IUL leads (modal CTA + /iul/quote) — CRM sequences branch on "Spanish" vs "English"
+    const iulLeadGenTags: string[] = [];
+    if (iulLeadGenData) {
+      iulLeadGenTags.push('IUL Lead');
+      iulLeadGenTags.push(iulLeadGenData.language === 'es' ? 'Spanish' : 'English');
+    }
+
+    // Build tags for Final Expense page CTA leads
+    const finalExpenseTags: string[] = [];
+    if (finalExpenseData) {
+      finalExpenseTags.push('Final Expense Lead');
+      finalExpenseTags.push(finalExpenseData.language === 'es' ? 'Spanish' : 'English');
+    }
+
+    // Determine lead source for CRM routing (prevents IUL workflow from auto-triggering on specialty page leads)
     const leadSource = shortTermMedicalData
       ? "short_term_medical"
       : contactPageData
         ? "contact_page"
         : acaData
           ? "aca"
-          : iulLeadGenData
-            ? "iul_lead_gen"
-            : "website";
+          : dentalVisionData
+            ? "dental_vision"
+            : hospitalIndemnityData
+              ? "hospital_indemnity"
+              : finalExpenseData
+                ? "final_expense"
+                : iulLeadGenData
+                  ? "iul_lead_gen"
+                  : "website";
 
     // Create contact payload with customFields, tags, and source
     const contactPayload: any = {
@@ -270,6 +425,22 @@ export async function POST(request: NextRequest) {
     // Add tags for ACA leads
     if (acaTags.length > 0) {
       contactPayload.tags = [...(contactPayload.tags || []), ...acaTags];
+    }
+    // Add tags for Dental & Vision leads
+    if (dentalVisionTags.length > 0) {
+      contactPayload.tags = [...(contactPayload.tags || []), ...dentalVisionTags];
+    }
+    // Add tags for Hospital Indemnity leads
+    if (hospitalIndemnityTags.length > 0) {
+      contactPayload.tags = [...(contactPayload.tags || []), ...hospitalIndemnityTags];
+    }
+    // Add tags for IUL lead gen
+    if (iulLeadGenTags.length > 0) {
+      contactPayload.tags = [...(contactPayload.tags || []), ...iulLeadGenTags];
+    }
+    // Add tags for Final Expense leads
+    if (finalExpenseTags.length > 0) {
+      contactPayload.tags = [...(contactPayload.tags || []), ...finalExpenseTags];
     }
     
     console.log('Creating contact with payload:', JSON.stringify(contactPayload, null, 2));
@@ -380,14 +551,17 @@ export async function POST(request: NextRequest) {
             hasShortTermMedicalData: !!shortTermMedicalData,
             hasContactPageData: !!contactPageData,
             hasAcaData: !!acaData,
+            hasDentalVisionData: !!dentalVisionData,
+            hasHospitalIndemnityData: !!hospitalIndemnityData,
             hasIulLeadGenData: !!iulLeadGenData,
+            hasFinalExpenseData: !!finalExpenseData,
           });
           
           const updatePayload: any = {};
           if (customFieldsArray.length > 0) {
             updatePayload.customFields = customFieldsArray;
           }
-          const allTags = [...stmTags, ...contactPageTags, ...acaTags];
+          const allTags = [...stmTags, ...contactPageTags, ...acaTags, ...dentalVisionTags, ...hospitalIndemnityTags, ...iulLeadGenTags, ...finalExpenseTags];
           if (allTags.length > 0) {
             updatePayload.tags = allTags;
           }
@@ -456,8 +630,8 @@ export async function POST(request: NextRequest) {
     const contactId = createResponseData.contact?.id || createResponseData.id;
     const isNewContact = true; // This is a new contact (we just created it)
 
-    if (shortTermMedicalData || contactPageData || acaData) {
-      console.log("[create-contact] STM/Contact/ACA lead created - will NOT add to IUL/Notification workflows (contactId:", contactId, ")");
+    if (shortTermMedicalData || contactPageData || acaData || dentalVisionData || hospitalIndemnityData || finalExpenseData) {
+      console.log("[create-contact] Specialty lead (incl. Final Expense) created - will NOT add to generic Notification / IUL where excluded (contactId:", contactId, ")");
     }
 
     // Helper function to add contact to a workflow
@@ -501,49 +675,69 @@ export async function POST(request: NextRequest) {
       }
     };
 
-    // Step 1: Activate notification workflow FIRST (if configured) - skip for STM, Contact Page, and ACA leads
+    // Step 1: Activate notification workflow FIRST (if configured) - skip for specialty page leads, IUL, and Final Expense (dedicated workflows)
     const notificationWorkflowId = process.env.AGENT_CRM_WORKFLOW_NOTIFICATION;
-    const willAddNotification = !!(notificationWorkflowId && contactId && !shortTermMedicalData && !contactPageData && !acaData);
+    const willAddNotification = !!(
+      notificationWorkflowId &&
+      contactId &&
+      !shortTermMedicalData &&
+      !contactPageData &&
+      !acaData &&
+      !dentalVisionData &&
+      !hospitalIndemnityData &&
+      !iulLeadGenData &&
+      !finalExpenseData
+    );
     console.log("[create-contact] Notification workflow:", {
       workflowId: notificationWorkflowId ?? "not configured",
       willAdd: willAddNotification,
-      reason: !notificationWorkflowId ? "no env" : !contactId ? "no contactId" : shortTermMedicalData || contactPageData || acaData ? "STM/Contact/ACA lead - skipped" : "IUL/other lead",
+      reason: !notificationWorkflowId
+        ? "no env"
+        : !contactId
+          ? "no contactId"
+          : iulLeadGenData
+            ? "IUL lead — use AGENT_CRM_WORKFLOW_IUL only"
+            : finalExpenseData
+              ? "Final Expense lead — use AGENT_CRM_WORKFLOW_FINALE only"
+              : shortTermMedicalData || contactPageData || acaData || dentalVisionData || hospitalIndemnityData
+                ? "specialty page lead - skipped"
+                : "generic website lead",
     });
     if (willAddNotification) {
       await addContactToWorkflow(notificationWorkflowId, "Notification");
     }
 
-    // Step 2: Activate language-specific workflow (IUL ONLY - must have iulLeadGenData explicitly)
-    // Short Term Medical leads: NEVER add to IUL workflows - require iulLeadGenData to prevent misassignment
-    const workflowEnId = process.env.AGENT_CRM_WORKFLOW_EN;
-    const workflowEsId = process.env.AGENT_CRM_WORKFLOW_ES;
-    const language = iulLeadGenData?.language || shortTermMedicalData?.language || acaData?.language || 'en';
-    const iulConditionMet = !!(iulLeadGenData && !shortTermMedicalData && !contactPageData && !acaData);
-    const languageWorkflowId = language === 'es' ? workflowEsId : workflowEnId;
-    const willAddIul = !!(iulConditionMet && languageWorkflowId && contactId);
+    // Step 2: IUL lead workflow — single workflow; CRM can branch EN/ES via language / tags inside the workflow
+    const iulWorkflowId = process.env.AGENT_CRM_WORKFLOW_IUL;
+    const language = iulLeadGenData?.language || shortTermMedicalData?.language || acaData?.language || dentalVisionData?.language || hospitalIndemnityData?.language || 'en';
+    const iulLangLabel =
+      typeof language === "string" && language.toLowerCase().startsWith("es")
+        ? "es"
+        : "en";
+    const iulConditionMet = !!(iulLeadGenData && !shortTermMedicalData && !contactPageData && !acaData && !dentalVisionData && !hospitalIndemnityData && !finalExpenseData);
+    const willAddIul = !!(iulConditionMet && iulWorkflowId && contactId);
 
     console.log("[create-contact] IUL workflow decision:", {
       iulConditionMet,
       hasIulLeadGenData: !!iulLeadGenData,
       hasShortTermMedicalData: !!shortTermMedicalData,
       language,
-      workflowEnId: workflowEnId ?? "not configured",
-      workflowEsId: workflowEsId ?? "not configured",
-      selectedWorkflowId: languageWorkflowId ?? "none",
+      iulLangLabel,
+      workflowId: iulWorkflowId ?? "not configured",
       willAddIul,
       reason: !iulConditionMet
-        ? shortTermMedicalData || contactPageData || acaData
-          ? "STM/Contact/ACA lead - iulConditionMet is false"
+        ? shortTermMedicalData || contactPageData || acaData || dentalVisionData || hospitalIndemnityData
+          ? "specialty page lead - iulConditionMet is false"
           : "no iulLeadGenData"
-        : !languageWorkflowId
-          ? "workflow not configured"
-          : "IUL lead - adding to workflow",
+        : !iulWorkflowId
+          ? "AGENT_CRM_WORKFLOW_IUL not set"
+          : "IUL lead — adding to workflow",
     });
 
     if (willAddIul) {
-      await addContactToWorkflow(languageWorkflowId!, language === 'es' ? 'Spanish' : 'English');
-    } else if (shortTermMedicalData || contactPageData || acaData) {
-      console.log("[create-contact] IUL workflow NOT added - STM/Contact/ACA lead (contactId:", contactId, ")");
+      await addContactToWorkflow(iulWorkflowId!, `IUL (${iulLangLabel})`);
+    } else if (shortTermMedicalData || contactPageData || acaData || dentalVisionData || hospitalIndemnityData) {
+      console.log("[create-contact] IUL workflow NOT added - specialty page lead (contactId:", contactId, ")");
     }
 
     // Step 3: Short Term Medical — one workflow; CRM branches EN/ES (e.g. via tags) inside that workflow
@@ -574,6 +768,8 @@ export async function POST(request: NextRequest) {
       contactPageData &&
       !shortTermMedicalData &&
       !acaData &&
+      !dentalVisionData &&
+      !hospitalIndemnityData &&
       contactId &&
       contactWorkflowId
     );
@@ -585,7 +781,7 @@ export async function POST(request: NextRequest) {
       willAddContactPage,
       reason: !contactPageData
         ? "not a contact-page lead"
-        : shortTermMedicalData || acaData
+        : shortTermMedicalData || acaData || dentalVisionData || hospitalIndemnityData
           ? "other lead type — skipped"
           : !contactWorkflowId
             ? "AGENT_CRM_WORKFLOW_CONTACT not set"
@@ -603,6 +799,8 @@ export async function POST(request: NextRequest) {
       acaData &&
       !shortTermMedicalData &&
       !contactPageData &&
+      !dentalVisionData &&
+      !hospitalIndemnityData &&
       contactId &&
       acaWorkflowId
     );
@@ -614,7 +812,7 @@ export async function POST(request: NextRequest) {
       willAddAca,
       reason: !acaData
         ? "not an ACA lead"
-        : shortTermMedicalData || contactPageData
+        : shortTermMedicalData || contactPageData || dentalVisionData || hospitalIndemnityData
           ? "other lead type — skipped"
           : !acaWorkflowId
             ? "AGENT_CRM_WORKFLOW_ACA not set"
@@ -623,6 +821,101 @@ export async function POST(request: NextRequest) {
 
     if (willAddAca) {
       await addContactToWorkflow(acaWorkflowId!, `ACA (${acaLanguage})`);
+    }
+
+    // Step 6: Dental & Vision — dedicated workflow
+    const dentalWorkflowId = process.env.AGENT_CRM_WORKFLOW_DENTAL;
+    const dentalLanguage = dentalVisionData?.language === "es" ? "es" : "en";
+    const willAddDentalVision = !!(
+      dentalVisionData &&
+      !shortTermMedicalData &&
+      !contactPageData &&
+      !acaData &&
+      !hospitalIndemnityData &&
+      contactId &&
+      dentalWorkflowId
+    );
+
+    console.log("[create-contact] Dental & Vision workflow decision:", {
+      hasDentalVisionData: !!dentalVisionData,
+      dentalLanguage,
+      workflowId: dentalWorkflowId ?? "not configured",
+      willAddDentalVision,
+      reason: !dentalVisionData
+        ? "not a Dental & Vision lead"
+        : shortTermMedicalData || contactPageData || acaData || hospitalIndemnityData
+          ? "other lead type — skipped"
+          : !dentalWorkflowId
+            ? "AGENT_CRM_WORKFLOW_DENTAL not set"
+            : "Dental & Vision lead — adding to workflow",
+    });
+
+    if (willAddDentalVision) {
+      await addContactToWorkflow(dentalWorkflowId!, `Dental & Vision (${dentalLanguage})`);
+    }
+
+    // Step 7: Hospital Indemnity — dedicated workflow
+    const hiWorkflowId = process.env.AGENT_CRM_WORKFLOW_HI;
+    const hiLanguage = hospitalIndemnityData?.language === "es" ? "es" : "en";
+    const willAddHospitalIndemnity = !!(
+      hospitalIndemnityData &&
+      !shortTermMedicalData &&
+      !contactPageData &&
+      !acaData &&
+      !dentalVisionData &&
+      contactId &&
+      hiWorkflowId
+    );
+
+    console.log("[create-contact] Hospital Indemnity workflow decision:", {
+      hasHospitalIndemnityData: !!hospitalIndemnityData,
+      hiLanguage,
+      workflowId: hiWorkflowId ?? "not configured",
+      willAddHospitalIndemnity,
+      reason: !hospitalIndemnityData
+        ? "not a Hospital Indemnity lead"
+        : shortTermMedicalData || contactPageData || acaData || dentalVisionData
+          ? "other lead type — skipped"
+          : !hiWorkflowId
+            ? "AGENT_CRM_WORKFLOW_HI not set"
+            : "Hospital Indemnity lead — adding to workflow",
+    });
+
+    if (willAddHospitalIndemnity) {
+      await addContactToWorkflow(hiWorkflowId!, `Hospital Indemnity (${hiLanguage})`);
+    }
+
+    // Step 8: Final Expense page CTA — dedicated workflow
+    const finalExpenseWorkflowId = process.env.AGENT_CRM_WORKFLOW_FINALE;
+    const feLanguage = finalExpenseData?.language === "es" ? "es" : "en";
+    const willAddFinalExpense = !!(
+      finalExpenseData &&
+      !shortTermMedicalData &&
+      !contactPageData &&
+      !acaData &&
+      !dentalVisionData &&
+      !hospitalIndemnityData &&
+      !iulLeadGenData &&
+      contactId &&
+      finalExpenseWorkflowId
+    );
+
+    console.log("[create-contact] Final Expense workflow decision:", {
+      hasFinalExpenseData: !!finalExpenseData,
+      feLanguage,
+      workflowId: finalExpenseWorkflowId ?? "not configured",
+      willAddFinalExpense,
+      reason: !finalExpenseData
+        ? "not a Final Expense CTA lead"
+        : shortTermMedicalData || contactPageData || acaData || dentalVisionData || hospitalIndemnityData || iulLeadGenData
+          ? "other lead type — skipped"
+          : !finalExpenseWorkflowId
+            ? "AGENT_CRM_WORKFLOW_FINALE not set"
+            : "Final Expense lead — adding to workflow",
+    });
+
+    if (willAddFinalExpense) {
+      await addContactToWorkflow(finalExpenseWorkflowId!, `Final Expense (${feLanguage})`);
     }
 
     // Send Meta Conversions API event (if configured and metadata provided)
@@ -656,14 +949,26 @@ export async function POST(request: NextRequest) {
             ? "aca"
             : contactPageData
               ? "contact_page"
-              : "iul_lead_gen";
+              : dentalVisionData
+                ? "dental_vision"
+                : hospitalIndemnityData
+                  ? "hospital_indemnity"
+                  : finalExpenseData
+                    ? "final_expense"
+                    : "iul_lead_gen";
         const contentName = shortTermMedicalData
           ? "Short Term Medical Lead"
           : acaData
             ? "ACA Lead"
             : contactPageData
               ? "Contact Page Lead"
-              : "IUL Lead Generation Campaign";
+              : dentalVisionData
+                ? "Dental & Vision Lead"
+                : hospitalIndemnityData
+                  ? "Hospital Indemnity Lead"
+                  : finalExpenseData
+                    ? "Final Expense Lead"
+                    : "IUL Lead Generation Campaign";
 
         console.log("[Meta CAPI] Sending event:", {
           eventId: meta.eventId,

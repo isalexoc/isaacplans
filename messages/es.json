@@ -979,6 +979,29 @@
       "title": "Solicitar Información",
       "subtitle": "Rápido y sin compromiso"
     },
+    "leadForm": {
+      "firstName": "Nombre",
+      "lastName": "Apellido",
+      "email": "Correo electrónico",
+      "phone": "Teléfono",
+      "submit": "Obtener cotización gratis",
+      "submitting": "Enviando...",
+      "required": "Este campo es obligatorio",
+      "invalidEmail": "Correo electrónico no válido",
+      "invalidPhone": "Ingrese un número de teléfono válido de 10 dígitos (EE. UU.)",
+      "firstNameMinLength": "El nombre debe tener al menos 2 caracteres",
+      "lastNameMinLength": "El apellido debe tener al menos 2 caracteres",
+      "firstNameMaxLength": "El nombre es demasiado largo",
+      "lastNameMaxLength": "El apellido es demasiado largo",
+      "smsConsent": "Acepto recibir notificaciones y alertas por SMS de Isaac Plans Insurance. La frecuencia de mensajes puede variar. Pueden aplicarse tarifas de mensajes y datos. Envíe HELP al (540) 426-1804 para ayuda. Responda STOP para cancelar la suscripción en cualquier momento.",
+      "marketingConsent": "Al marcar esta casilla acepto recibir mensajes de marketing ocasionales de Isaac Plans Insurance.",
+      "privacyPolicy": "Política de privacidad",
+      "termsAndConditions": "Términos y condiciones",
+      "successTitle": "¡Gracias!",
+      "successMessage": "Hemos recibido su información. Me comunicaré pronto para hablar de opciones dentales y de visión.",
+      "successScheduleAppointment": "Agendar consulta",
+      "successClose": "Cerrar"
+    },
 
     "about": {
       "badge": "Sobre Mí",
@@ -1114,6 +1137,29 @@
     "ctaButton": {
       "title": "Solicitar Información",
       "subtitle": "Rápido y sin compromiso"
+    },
+    "leadForm": {
+      "firstName": "Nombre",
+      "lastName": "Apellido",
+      "email": "Correo electrónico",
+      "phone": "Teléfono",
+      "submit": "Obtener cotización gratis",
+      "submitting": "Enviando...",
+      "required": "Este campo es obligatorio",
+      "invalidEmail": "Correo electrónico no válido",
+      "invalidPhone": "Ingrese un número de teléfono válido de 10 dígitos (EE. UU.)",
+      "firstNameMinLength": "El nombre debe tener al menos 2 caracteres",
+      "lastNameMinLength": "El apellido debe tener al menos 2 caracteres",
+      "firstNameMaxLength": "El nombre es demasiado largo",
+      "lastNameMaxLength": "El apellido es demasiado largo",
+      "smsConsent": "Acepto recibir notificaciones y alertas por SMS de Isaac Plans Insurance. La frecuencia de mensajes puede variar. Pueden aplicarse tarifas de mensajes y datos. Envíe HELP al (540) 426-1804 para ayuda. Responda STOP para cancelar la suscripción en cualquier momento.",
+      "marketingConsent": "Al marcar esta casilla acepto recibir mensajes de marketing ocasionales de Isaac Plans Insurance.",
+      "privacyPolicy": "Política de privacidad",
+      "termsAndConditions": "Términos y condiciones",
+      "successTitle": "¡Gracias!",
+      "successMessage": "Hemos recibido su información. Me comunicaré pronto para hablar de indemnización hospitalaria.",
+      "successScheduleAppointment": "Agendar consulta",
+      "successClose": "Cerrar"
     },
     "calendar": {
       "backButton": "← Volver",
@@ -1621,6 +1667,29 @@
       "title": "Solicitar Información",
       "subtitle": "Personalizado y sin compromiso"
     },
+    "leadForm": {
+      "firstName": "Nombre",
+      "lastName": "Apellido",
+      "email": "Correo electrónico",
+      "phone": "Teléfono",
+      "submit": "Obtener cotización gratis",
+      "submitting": "Enviando...",
+      "required": "Este campo es obligatorio",
+      "invalidEmail": "Correo electrónico no válido",
+      "invalidPhone": "Ingrese un número de teléfono válido de 10 dígitos (EE. UU.)",
+      "firstNameMinLength": "El nombre debe tener al menos 2 caracteres",
+      "lastNameMinLength": "El apellido debe tener al menos 2 caracteres",
+      "firstNameMaxLength": "El nombre es demasiado largo",
+      "lastNameMaxLength": "El apellido es demasiado largo",
+      "smsConsent": "Acepto recibir notificaciones y alertas por SMS de Isaac Plans Insurance. La frecuencia de mensajes puede variar. Pueden aplicarse tarifas de mensajes y datos. Envíe HELP al (540) 426-1804 para ayuda. Responda STOP para cancelar la suscripción en cualquier momento.",
+      "marketingConsent": "Al marcar esta casilla acepto recibir mensajes de marketing ocasionales de Isaac Plans Insurance.",
+      "privacyPolicy": "Política de privacidad",
+      "termsAndConditions": "Términos y condiciones",
+      "successTitle": "¡Gracias!",
+      "successMessage": "Hemos recibido su información. Me comunicaré pronto para hablar de sus opciones IUL.",
+      "successScheduleAppointment": "Agendar consulta",
+      "successClose": "Cerrar"
+    },
 
     "presentationButton": {
       "title": "Ir al Modo de Presentación"
@@ -1755,6 +1824,29 @@
     "ctaButton": {
       "title": "Solicitar Información",
       "subtitle": "Estimado rápido y sin compromiso"
+    },
+    "leadForm": {
+      "firstName": "Nombre",
+      "lastName": "Apellido",
+      "email": "Correo electrónico",
+      "phone": "Teléfono",
+      "submit": "Obtener cotización gratis",
+      "submitting": "Enviando...",
+      "required": "Este campo es obligatorio",
+      "invalidEmail": "Correo electrónico no válido",
+      "invalidPhone": "Ingrese un número de teléfono válido de 10 dígitos (EE. UU.)",
+      "firstNameMinLength": "El nombre debe tener al menos 2 caracteres",
+      "lastNameMinLength": "El apellido debe tener al menos 2 caracteres",
+      "firstNameMaxLength": "El nombre es demasiado largo",
+      "lastNameMaxLength": "El apellido es demasiado largo",
+      "smsConsent": "Acepto recibir notificaciones y alertas por SMS de Isaac Plans Insurance. La frecuencia de mensajes puede variar. Pueden aplicarse tarifas de mensajes y datos. Envíe HELP al (540) 426-1804 para ayuda. Responda STOP para cancelar la suscripción en cualquier momento.",
+      "marketingConsent": "Al marcar esta casilla acepto recibir mensajes de marketing ocasionales de Isaac Plans Insurance.",
+      "privacyPolicy": "Política de privacidad",
+      "termsAndConditions": "Términos y condiciones",
+      "successTitle": "¡Gracias!",
+      "successMessage": "Hemos recibido su información. Nos comunicaremos pronto sobre opciones de gastos finales.",
+      "successScheduleAppointment": "Agendar llamada",
+      "successClose": "Cerrar"
     },
     "presentationButton": {
       "title": "Ir al modo presentación"

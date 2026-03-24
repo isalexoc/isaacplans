@@ -137,7 +137,8 @@
         "message": "Hemos recibido tu información. Nuestro equipo se pondrá en contacto contigo pronto para discutir tus opciones de IUL.",
         "redirectMessage": "Serás redirigido para programar una cita en un momento...",
         "redirectCountdown": "Serás redirigido para programar una cita en {seconds}...",
-        "scheduleNow": "Programar Ahora"
+        "scheduleNow": "Programar Ahora",
+        "closeModal": "Cerrar"
       }
     }
   }

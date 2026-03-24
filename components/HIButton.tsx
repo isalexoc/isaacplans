@@ -2,12 +2,12 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { ScanEye } from "lucide-react";
+import { Hospital } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { QuoteModal } from "@/components/form-modal-hi";
 import { useTranslations } from "next-intl";
 
-export default function DentalButton() {
+export default function HIButton() {
   const [openModal, setOpenModal] = useState(false);
   const trans = useTranslations("HIpage.ctaButton");
 
@@ -36,7 +36,7 @@ export default function DentalButton() {
           "
         >
           <div className="flex items-center gap-2">
-            <ScanEye className="w-6 h-6 animate-pulse" />
+            <Hospital className="w-6 h-6 animate-pulse" />
             <span>{trans("title")}</span>
           </div>
           <span className="text-xs sm:text-sm font-normal text-white/90 sm:ml-2">

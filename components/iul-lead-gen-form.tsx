@@ -791,7 +791,7 @@ export default function IULLeadGenForm() {
   // Countdown and redirect to calendar page after 5 seconds when form is complete
   useEffect(() => {
     if (!isComplete) return;
-    
+
     setCountdown(5);
     const countdownInterval = setInterval(() => {
       setCountdown((prev) => {

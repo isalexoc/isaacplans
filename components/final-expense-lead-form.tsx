@@ -1,0 +1,300 @@
+"use client";
+
+import { useActionState, useEffect, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
+import {
+  submitFinalExpenseLeadForm,
+  type ActionResult,
+  type FormValues,
+} from "@/app/actions/final-expense";
+import PhoneInput, { parsePhoneNumber } from "react-phone-number-input";
+import "react-phone-number-input/style.css";
+import { Link } from "@/i18n/navigation";
+
+function toE164OrUndefined(phone: string | undefined): string | undefined {
+  if (!phone?.trim()) return undefined;
+  const parsed = parsePhoneNumber(phone, "US");
+  return parsed?.number;
+}
+
+const initialFormValues: FormValues = {
+  firstName: "",
+  lastName: "",
+  email: "",
+  phone: "",
+};
+
+const initialState: ActionResult = { status: null };
+
+type Props = {
+  onSubmitSuccess?: () => void;
+  onCloseModal?: () => void;
+};
+
+export default function FinalExpenseLeadForm({
+  onSubmitSuccess,
+  onCloseModal,
+}: Props) {
+  const locale = useLocale();
+  const isES = locale.startsWith("es");
+  const t = useTranslations("FEpage.leadForm");
+  const [state, formAction, isPending] = useActionState(
+    submitFinalExpenseLeadForm,
+    initialState
+  );
+
+  const [formValues, setFormValues] = useState<FormValues>(initialFormValues);
+  const [smsConsent, setSmsConsent] = useState(false);
+  const [marketingConsent, setMarketingConsent] = useState(false);
+
+  useEffect(() => {
+    if (
+      (state.status === "VALIDATION_ERROR" || state.status === "ERROR") &&
+      state.values
+    ) {
+      setFormValues(state.values);
+    }
+  }, [state.status, state.values]);
+
+  useEffect(() => {
+    if (state.status === "SUCCESS") {
+      onSubmitSuccess?.();
+    }
+  }, [state.status, onSubmitSuccess]);
+
+  const inputBase =
+    "w-full px-4 py-3 rounded-lg border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:border-[hsl(var(--custom))] focus:ring-2 focus:ring-[hsl(var(--custom)/0.2)] transition-all duration-200";
+
+  const inputError = "border-red-500 dark:border-red-600";
+
+  if (state.status === "SUCCESS") {
+    return (
+      <div className="py-4 text-center">
+        <div className="rounded-xl bg-gradient-to-br from-sky-50 to-blue-50 dark:from-sky-900/30 dark:to-blue-900/20 border-2 border-sky-200 dark:border-sky-800 p-6 shadow-sm">
+          <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-sky-500/20 dark:bg-sky-500/30 flex items-center justify-center">
+            <svg
+              className="w-8 h-8 text-sky-600 dark:text-sky-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M5 13l4 4L19 7"
+              />
+            </svg>
+          </div>
+          <p className="text-lg font-semibold text-sky-900 dark:text-sky-100">
+            {t("successTitle")}
+          </p>
+          <p className="mt-2 text-sm text-sky-800 dark:text-sky-200">
+            {t("successMessage")}
+          </p>
+          <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
+            {onCloseModal && (
+              <button
+                type="button"
+                onClick={onCloseModal}
+                className="px-5 py-2.5 rounded-lg border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 font-medium transition-colors"
+              >
+                {t("successClose")}
+              </button>
+            )}
+            <Link
+              href={
+                (formValues.firstName ||
+                formValues.lastName ||
+                formValues.email ||
+                formValues.phone
+                  ? `/final-expense/calendar?${new URLSearchParams({
+                      first_name: formValues.firstName,
+                      last_name: formValues.lastName,
+                      email: formValues.email,
+                      phone: formValues.phone,
+                    }).toString()}`
+                  : "/final-expense/calendar") as "/final-expense/calendar"
+              }
+              className="inline-flex items-center justify-center px-5 py-2.5 rounded-lg bg-gradient-to-r from-[hsl(var(--custom))] to-[hsl(var(--custom)/0.85)] text-white font-medium hover:from-[hsl(var(--custom)/0.9)] hover:to-[hsl(var(--custom)/0.75)] transition-colors shadow-md hover:shadow-lg"
+            >
+              {t("successScheduleAppointment")}
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <form id="final-expense-lead-form" action={formAction} className="space-y-4">
+      <input type="hidden" name="locale" value={locale} />
+
+      {state.status === "ERROR" && state.error && (
+        <div className="p-3 bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-800 rounded-lg">
+          <p className="text-sm text-red-600 dark:text-red-400">{state.error}</p>
+        </div>
+      )}
+
+      <div>
+        <label
+          htmlFor="fe-cta-firstName"
+          className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
+        >
+          {t("firstName")} <span className="text-red-500">*</span>
+        </label>
+        <input
+          type="text"
+          id="fe-cta-firstName"
+          name="firstName"
+          placeholder={isES ? "Ej: María" : "e.g. Maria"}
+          value={formValues.firstName}
+          onChange={(e) =>
+            setFormValues((v) => ({ ...v, firstName: e.target.value }))
+          }
+          className={`${inputBase} ${state.errors?.firstName ? inputError : ""}`}
+          disabled={isPending}
+          autoComplete="given-name"
+        />
+        {state.errors?.firstName && (
+          <p className="text-red-500 text-xs mt-1">{state.errors.firstName}</p>
+        )}
+      </div>
+
+      <div>
+        <label
+          htmlFor="fe-cta-lastName"
+          className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
+        >
+          {t("lastName")} <span className="text-red-500">*</span>
+        </label>
+        <input
+          type="text"
+          id="fe-cta-lastName"
+          name="lastName"
+          placeholder={isES ? "Ej: García" : "e.g. Garcia"}
+          value={formValues.lastName}
+          onChange={(e) =>
+            setFormValues((v) => ({ ...v, lastName: e.target.value }))
+          }
+          className={`${inputBase} ${state.errors?.lastName ? inputError : ""}`}
+          disabled={isPending}
+          autoComplete="family-name"
+        />
+        {state.errors?.lastName && (
+          <p className="text-red-500 text-xs mt-1">{state.errors.lastName}</p>
+        )}
+      </div>
+
+      <div>
+        <label
+          htmlFor="fe-cta-email"
+          className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
+        >
+          {t("email")} <span className="text-red-500">*</span>
+        </label>
+        <input
+          type="email"
+          id="fe-cta-email"
+          name="email"
+          placeholder={isES ? "tu@email.com" : "you@email.com"}
+          value={formValues.email}
+          onChange={(e) =>
+            setFormValues((v) => ({ ...v, email: e.target.value }))
+          }
+          className={`${inputBase} ${state.errors?.email ? inputError : ""}`}
+          disabled={isPending}
+          autoComplete="email"
+        />
+        {state.errors?.email && (
+          <p className="text-red-500 text-xs mt-1">{state.errors.email}</p>
+        )}
+      </div>
+
+      <div>
+        <label
+          htmlFor="fe-cta-phone"
+          className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
+        >
+          {t("phone")} <span className="text-red-500">*</span>
+        </label>
+        <PhoneInput
+          id="fe-cta-phone"
+          name="phone"
+          defaultCountry="US"
+          countries={["US"]}
+          addInternationalOption={false}
+          placeholder={isES ? "(555) 123-4567" : "(555) 123-4567"}
+          value={toE164OrUndefined(formValues.phone)}
+          onChange={(value) =>
+            setFormValues((v) => ({ ...v, phone: value || "" }))
+          }
+          className={`${inputBase} ${state.errors?.phone ? inputError : ""}`}
+          disabled={isPending}
+          autoComplete="tel"
+          limitMaxLength
+        />
+        {state.errors?.phone && (
+          <p className="text-red-500 text-xs mt-1">{state.errors.phone}</p>
+        )}
+      </div>
+
+      <button
+        type="submit"
+        disabled={isPending}
+        className="w-full bg-gradient-to-r from-sky-600 to-blue-700 hover:from-sky-700 hover:to-blue-800 text-white font-semibold py-3.5 px-6 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        {isPending ? t("submitting") : t("submit")}
+      </button>
+
+      <div className="space-y-3 pt-2 border-t border-gray-200 dark:border-gray-700">
+        <label className="flex gap-3 items-start cursor-pointer group">
+          <input
+            type="checkbox"
+            name="smsConsent"
+            checked={smsConsent}
+            onChange={(e) => setSmsConsent(e.target.checked)}
+            disabled={isPending}
+            className="mt-1 w-4 h-4 rounded border-2 border-gray-300 dark:border-gray-600 text-[hsl(var(--custom))] focus:ring-[hsl(var(--custom)/0.3)] shrink-0"
+          />
+          <span className="text-xs text-gray-600 dark:text-gray-400 group-hover:text-gray-800 dark:group-hover:text-gray-200 transition-colors">
+            {t("smsConsent")}
+          </span>
+        </label>
+        <label className="flex gap-3 items-start cursor-pointer group">
+          <input
+            type="checkbox"
+            name="marketingConsent"
+            checked={marketingConsent}
+            onChange={(e) => setMarketingConsent(e.target.checked)}
+            disabled={isPending}
+            className="mt-1 w-4 h-4 rounded border-2 border-gray-300 dark:border-gray-600 text-[hsl(var(--custom))] focus:ring-[hsl(var(--custom)/0.3)] shrink-0"
+          />
+          <span className="text-xs text-gray-600 dark:text-gray-400 group-hover:text-gray-800 dark:group-hover:text-gray-200 transition-colors">
+            {t("marketingConsent")}
+          </span>
+        </label>
+      </div>
+
+      <div className="flex flex-wrap justify-center gap-x-3 gap-y-1 text-xs text-gray-500 dark:text-gray-400 pt-2">
+        <Link
+          href="/privacy-policy"
+          className="underline hover:text-[hsl(var(--custom))] transition-colors"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {t("privacyPolicy")}
+        </Link>
+        <span aria-hidden>·</span>
+        <Link
+          href="/terms-of-service"
+          className="underline hover:text-[hsl(var(--custom))] transition-colors"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {t("termsAndConditions")}
+        </Link>
+      </div>
+    </form>
+  );
+}
