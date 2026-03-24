@@ -1,32 +1,23 @@
-// components/contact-form.tsx  – server component
-import { getTranslations, getLocale } from "next-intl/server";
+"use client";
 
-import ContactFormIFrameGeneral from "@/components/contact-form-iframe-general"; // EN
-import ContactFormIFrameGeneralSpanish from "@/components/contact-form-iframe-general-spanish"; // ES
+import { useTranslations } from "next-intl";
+import ContactLeadForm from "@/components/contact-lead-form";
 
-export default async function ContactForm() {
-  /* i18n ---------------------------------------------------------- */
-  const t = await getTranslations("contactPage.info.form");
-  const locale = await getLocale(); // 'en', 'es', …
+/** About page (and anywhere else): same contact form as /contact — private integration. */
+export default function ContactForm() {
+  const t = useTranslations("contactPage.info.form");
 
-  /* Pick the correct client iframe once on the server ------------- */
-  const Form = locale.startsWith("es")
-    ? ContactFormIFrameGeneralSpanish
-    : ContactFormIFrameGeneral;
-
-  /* Mark-up -------------------------------------------------------- */
   return (
-    <section id="contact-form" className="bg-gray-50 py-16">
+    <section id="contact-form" className="bg-gray-50 dark:bg-gray-900/50 py-16">
       <div className="container max-w-3xl mx-auto px-4 text-center">
-        <h2 className="text-3xl font-bold text-gray-900 mb-4">
+        <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
           {t("heading")}
         </h2>
-        <p className="text-lg  text-gray-700">{t("sub")}</p>
+        <p className="text-lg text-gray-700 dark:text-gray-300">{t("sub")}</p>
       </div>
 
-      {/* client-only iframe embed - centered, tall enough to scroll and submit */}
-      <div className="mx-auto mt-10 w-full max-w-[640px] px-4 pb-8">
-        <Form heightPx={1400} />
+      <div className="mx-auto mt-10 w-full max-w-md px-4 pb-8">
+        <ContactLeadForm />
       </div>
     </section>
   );

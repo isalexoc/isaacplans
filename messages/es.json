@@ -453,7 +453,8 @@
         "termsAndConditions": "Términos y Condiciones",
         "successTitle": "¡Gracias!",
         "successMessage": "Hemos recibido su información. Me comunicaré con usted pronto para discutir sus opciones.",
-        "successScheduleAppointment": "Agendar una Cita"
+        "successScheduleAppointment": "Agendar una Cita",
+        "successClose": "Cerrar"
       }
     },
     "calendar": {

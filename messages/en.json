@@ -464,7 +464,8 @@
         "termsAndConditions": "Terms & Conditions",
         "successTitle": "Thank you!",
         "successMessage": "We've received your information. I'll reach out shortly to discuss your options.",
-        "successScheduleAppointment": "Schedule an Appointment"
+        "successScheduleAppointment": "Schedule an Appointment",
+        "successClose": "Close"
       }
     },
     "calendar": {

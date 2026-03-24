@@ -1,14 +1,10 @@
 import Link from "next/link";
-import Image from "next/image";
-import { getLocale, getTranslations } from "next-intl/server";
+import { getLocale } from "next-intl/server";
 import type { Metadata } from "next";
 import { type SanityDocument } from "next-sanity";
 import { client } from "@/sanity/lib/client";
-import {
-  ogLocaleOf,
-  withLocalePrefix,
-  type SupportedLocale,
-} from "@/lib/seo/i18n";
+import { ogLocaleOf, type SupportedLocale } from "@/lib/seo/i18n";
+import { BlogCategoryCard } from "@/components/blog-category-card";
 
 const CATEGORIES_QUERY = `*[
   _type == "post"
@@ -146,7 +142,6 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function CategoriesPage() {
   const locale = (await getLocale()) as SupportedLocale;
-  const t = await getTranslations({ locale, namespace: "blogPage" });
 
   // Get all posts to count categories
   const posts = await client.fetch<SanityDocument[]>(
@@ -215,84 +210,22 @@ export default async function CategoriesPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
         {allCategories.map((category) => {
-            const imageUrl = category.image
-              ? `https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_400,h_250,c_fill,g_auto/${category.image}`
-              : null;
+          const imageUrl = category.image
+            ? `https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_600,h_400,c_fill,g_auto/${category.image}`
+            : null;
 
-            return (
-              <Link
-                key={category.id}
-                href={`/${locale}/blog/category/${category.id}`}
-                className="group"
-              >
-                <article className="h-full flex flex-col bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-                  {/* Category Image */}
-                  {imageUrl ? (
-                    <div className="relative w-full h-48 overflow-hidden">
-                      <Image
-                        src={imageUrl}
-                        alt={category.label}
-                        fill
-                        className="object-cover object-top group-hover:scale-110 transition-transform duration-300"
-                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-                    </div>
-                  ) : (
-                    <div className="relative w-full h-48 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-gray-700 dark:to-gray-600 flex items-center justify-center">
-                      <svg
-                        className="w-16 h-16 text-blue-300 dark:text-gray-500"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={1.5}
-                          d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
-                        />
-                      </svg>
-                    </div>
-                  )}
-
-                  <div className="flex-1 flex flex-col p-6">
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="inline-block px-3 py-1 text-sm font-medium bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full">
-                        {category.label}
-                      </span>
-                      <span className="text-sm text-gray-500 dark:text-gray-400">
-                        {category.count} {locale === "en" ? "posts" : "publicaciones"}
-                      </span>
-                    </div>
-                    {category.description && (
-                      <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-2 flex-1">
-                        {category.description}
-                      </p>
-                    )}
-                    <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors text-sm font-medium mt-auto">
-                      <span>
-                        {locale === "en" ? "View Posts" : "Ver Publicaciones"}
-                      </span>
-                      <svg
-                        className="w-4 h-4 transform group-hover:translate-x-1 transition-transform"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M9 5l7 7-7 7"
-                        />
-                      </svg>
-                    </div>
-                  </div>
-                </article>
-              </Link>
-            );
-          })}
+          return (
+            <BlogCategoryCard
+              key={category.id}
+              href={`/${locale}/blog/category/${category.id}`}
+              label={category.label}
+              description={category.description}
+              postCount={category.count}
+              imageUrl={imageUrl}
+              locale={locale}
+            />
+          );
+        })}
       </div>
     </main>
   );

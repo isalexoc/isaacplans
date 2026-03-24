@@ -2,20 +2,7 @@
 
 import { useRouter, usePathname } from "next/navigation";
 import { useLocale } from "next-intl";
-
-const CATEGORY_LABELS: Record<string, { en: string; es: string }> = {
-  'aca': { en: 'ACA / Obamacare', es: 'ACA / Obamacare' },
-  'short-term-medical': { en: 'Short Term Medical', es: 'Seguro Médico de Corto Plazo' },
-  'dental-vision': { en: 'Dental & Vision', es: 'Dental y Visión' },
-  'hospital-indemnity': { en: 'Hospital Indemnity', es: 'Indemnización Hospitalaria' },
-  'iul': { en: 'IUL', es: 'IUL' },
-  'final-expense': { en: 'Final Expense', es: 'Gastos Finales' },
-  'cancer-plans': { en: 'Cancer Plans', es: 'Planes de Cáncer' },
-  'heart-stroke': { en: 'Heart & Stroke', es: 'Corazón y Derrame' },
-  'general': { en: 'General Insurance', es: 'Seguro General' },
-  'tips-guides': { en: 'Tips & Guides', es: 'Consejos y Guías' },
-  'news': { en: 'Industry News', es: 'Noticias de la Industria' },
-};
+import { BLOG_CATEGORY_LABELS } from "@/lib/blog-category-labels";
 
 interface BlogCategoryFilterProps {
   categories: string[];
@@ -42,10 +29,10 @@ export function BlogCategoryFilter({ categories }: BlogCategoryFilterProps) {
   // Filter categories to only show those that have posts available
   // Sort them alphabetically by their label
   const availableCategories = categories
-    .filter((cat) => CATEGORY_LABELS[cat]) // Only include categories we have labels for
+    .filter((cat) => BLOG_CATEGORY_LABELS[cat]) // Only include categories we have labels for
     .sort((a, b) => {
-      const labelA = CATEGORY_LABELS[a]?.[locale as 'en' | 'es'] || a;
-      const labelB = CATEGORY_LABELS[b]?.[locale as 'en' | 'es'] || b;
+      const labelA = BLOG_CATEGORY_LABELS[a]?.[locale as 'en' | 'es'] || a;
+      const labelB = BLOG_CATEGORY_LABELS[b]?.[locale as 'en' | 'es'] || b;
       return labelA.localeCompare(labelB);
     });
 
@@ -66,7 +53,7 @@ export function BlogCategoryFilter({ categories }: BlogCategoryFilterProps) {
           </option>
           {availableCategories.map((category) => (
             <option key={category} value={category}>
-              {CATEGORY_LABELS[category]?.[locale as 'en' | 'es'] || category}
+              {BLOG_CATEGORY_LABELS[category]?.[locale as 'en' | 'es'] || category}
             </option>
           ))}
         </select>

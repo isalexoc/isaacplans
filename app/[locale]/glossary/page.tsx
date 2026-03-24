@@ -7,6 +7,7 @@ import HIButton from "@/components/HIButton";
 import DentalButton from "@/components/DentalButton";
 import IULButton from "@/components/IULButton";
 import FEButton from "@/components/FEButton";
+import ShortTermMedicalButton from "@/components/ShortTermMedicalButton";
 import {
   ogLocaleOf,
   localizedSlug,
@@ -109,7 +110,7 @@ export default async function GlossaryPage() {
       key: "shortTermMedical",
       title: t("categories.shortTermMedical.title"),
       description: t("categories.shortTermMedical.description"),
-      cta: <HIButton />,
+      cta: <ShortTermMedicalButton />,
       imagePublicId: "pexels-chokniti-khongchum-1197604-3938022_bujifm",
     },
   ];

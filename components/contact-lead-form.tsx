@@ -27,7 +27,12 @@ const initialFormValues: FormValues = {
 
 const initialState: ActionResult = { status: null };
 
-export default function ContactLeadForm() {
+type ContactLeadFormProps = {
+  /** When set (e.g. inside a modal), show a close control on success */
+  onCloseModal?: () => void;
+};
+
+export default function ContactLeadForm({ onCloseModal }: ContactLeadFormProps = {}) {
   const locale = useLocale();
   const isES = locale.startsWith("es");
   const t = useTranslations("contactPage.info.form");
@@ -79,7 +84,16 @@ export default function ContactLeadForm() {
           <p className="mt-2 text-sm text-green-700 dark:text-green-300">
             {t("successMessage")}
           </p>
-          <div className="mt-6 flex justify-center">
+          <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
+            {onCloseModal && (
+              <button
+                type="button"
+                onClick={onCloseModal}
+                className="px-5 py-2.5 rounded-lg border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 font-medium transition-colors"
+              >
+                {t("successClose")}
+              </button>
+            )}
             <Link
               href={
                 (formValues.firstName ||

@@ -9,6 +9,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { urlFor } from "@/sanity/lib/image";
 import type { SanityDocument } from "next-sanity";
+import { BLOG_CATEGORY_LABELS } from "@/lib/blog-category-labels";
 
 interface SearchResult {
   _id: string;
@@ -23,20 +24,6 @@ interface SearchResult {
 interface BlogSearchProps {
   locale: SupportedLocale;
 }
-
-const CATEGORY_LABELS: Record<string, { en: string; es: string }> = {
-  'aca': { en: 'ACA / Obamacare', es: 'ACA / Obamacare' },
-  'short-term-medical': { en: 'Short Term Medical', es: 'Seguro Médico de Corto Plazo' },
-  'dental-vision': { en: 'Dental & Vision', es: 'Dental y Visión' },
-  'hospital-indemnity': { en: 'Hospital Indemnity', es: 'Indemnización Hospitalaria' },
-  'iul': { en: 'IUL', es: 'IUL' },
-  'final-expense': { en: 'Final Expense', es: 'Gastos Finales' },
-  'cancer-plans': { en: 'Cancer Plans', es: 'Planes de Cáncer' },
-  'heart-stroke': { en: 'Heart & Stroke', es: 'Corazón y Derrame' },
-  'general': { en: 'General Insurance', es: 'Seguro General' },
-  'tips-guides': { en: 'Tips & Guides', es: 'Consejos y Guías' },
-  'news': { en: 'Industry News', es: 'Noticias de la Industria' },
-};
 
 export function BlogSearch({ locale }: BlogSearchProps) {
   const [query, setQuery] = useState("");
@@ -240,7 +227,7 @@ export function BlogSearch({ locale }: BlogSearchProps) {
                       : null;
                     const categoryLabel =
                       post.category
-                        ? CATEGORY_LABELS[post.category]?.[locale] || post.category
+                        ? BLOG_CATEGORY_LABELS[post.category]?.[locale] || post.category
                         : null;
 
                     return (
