@@ -5,7 +5,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { LifeBuoy } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { QuoteModal } from "@/components/form-modal";
+import { AcaQuoteModal } from "@/components/form-modal-aca";
 import { useTranslations } from "next-intl";
 
 export default function ACAButton() {
@@ -45,7 +45,7 @@ export default function ACAButton() {
           </span>
         </Button>
 
-        <QuoteModal open={openModal} setOpen={setOpenModal} />
+        <AcaQuoteModal open={openModal} setOpen={setOpenModal} />
       </motion.div>
     </motion.div>
   );

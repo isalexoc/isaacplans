@@ -12,6 +12,7 @@ export type AppHref =
   | "/contact#contact-form" // contact form
   | "/contact/calendar" // contact calendar
   | "/aca"
+  | "/aca/calendar"
   | "/dental-vision"
   | "/hospital-indemnity"
   | "/about"

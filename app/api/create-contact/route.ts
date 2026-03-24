@@ -29,17 +29,27 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { firstName, lastName, email, phone, iulLeadGenData, shortTermMedicalData, contactPageData, meta } = body;
+    const { firstName, lastName, email, phone, iulLeadGenData, shortTermMedicalData, contactPageData, acaData, meta } = body;
 
     // [Workflow Debug] Log incoming lead type - helps trace why IUL workflow may be assigned
     console.log("[create-contact] Incoming request lead type:", {
       hasIulLeadGenData: !!iulLeadGenData,
       hasShortTermMedicalData: !!shortTermMedicalData,
       hasContactPageData: !!contactPageData,
+      hasAcaData: !!acaData,
       iulLeadGenDataKeys: iulLeadGenData ? Object.keys(iulLeadGenData) : [],
       shortTermMedicalDataKeys: shortTermMedicalData ? Object.keys(shortTermMedicalData) : [],
       contactPageDataKeys: contactPageData ? Object.keys(contactPageData) : [],
-      leadSource: shortTermMedicalData ? "short_term_medical" : contactPageData ? "contact_page" : iulLeadGenData ? "iul_lead_gen" : "other",
+      acaDataKeys: acaData ? Object.keys(acaData) : [],
+      leadSource: shortTermMedicalData
+        ? "short_term_medical"
+        : contactPageData
+          ? "contact_page"
+          : acaData
+            ? "aca"
+            : iulLeadGenData
+              ? "iul_lead_gen"
+              : "other",
     });
 
     // Validate required fields
@@ -168,6 +178,30 @@ export async function POST(request: NextRequest) {
         '',
         `Submitted: ${submittedAt}`,
       ].join('\n');
+    } else if (acaData) {
+      const languageDisplay = acaData.language === 'es' ? 'Spanish (Español)' :
+                              acaData.language === 'en' ? 'English' : acaData.language || 'Not provided';
+      const submittedAt = new Date().toLocaleString() + ' ' + (Intl.DateTimeFormat().resolvedOptions().timeZone || '');
+      const smsConsent = acaData.smsConsent === true ? 'Yes' : 'No';
+      const marketingConsent = acaData.marketingConsent === true ? 'Yes' : 'No';
+      leadDetailsText = [
+        'ACA Lead',
+        '========',
+        '',
+        'Contact:',
+        `  Name: ${firstName} ${lastName}`,
+        `  Email: ${email}`,
+        `  Phone: ${phone}`,
+        '',
+        'Lead Details:',
+        `  Source: ${acaData.source || 'aca_page'}`,
+        `  Language: ${languageDisplay}`,
+        `  SMS Consent: ${smsConsent}`,
+        `  Marketing Consent: ${marketingConsent}`,
+        `  Source URL: ${meta?.eventSourceUrl || 'Not provided'}`,
+        '',
+        `Submitted: ${submittedAt}`,
+      ].join('\n');
     }
     
     if (leadDetailsText && leadSourceDetailsFieldId) {
@@ -192,8 +226,23 @@ export async function POST(request: NextRequest) {
       contactPageTags.push(contactPageData.language === 'es' ? 'Spanish' : 'English');
     }
 
-    // Determine lead source for CRM routing (prevents IUL workflow from auto-triggering on STM/contact leads)
-    const leadSource = shortTermMedicalData ? "short_term_medical" : contactPageData ? "contact_page" : iulLeadGenData ? "iul_lead_gen" : "website";
+    // Build tags for ACA page leads
+    const acaTags: string[] = [];
+    if (acaData) {
+      acaTags.push('ACA Lead');
+      acaTags.push(acaData.language === 'es' ? 'Spanish' : 'English');
+    }
+
+    // Determine lead source for CRM routing (prevents IUL workflow from auto-triggering on STM/contact/ACA leads)
+    const leadSource = shortTermMedicalData
+      ? "short_term_medical"
+      : contactPageData
+        ? "contact_page"
+        : acaData
+          ? "aca"
+          : iulLeadGenData
+            ? "iul_lead_gen"
+            : "website";
 
     // Create contact payload with customFields, tags, and source
     const contactPayload: any = {
@@ -217,6 +266,10 @@ export async function POST(request: NextRequest) {
     // Add tags for Contact Page leads
     if (contactPageTags.length > 0) {
       contactPayload.tags = [...(contactPayload.tags || []), ...contactPageTags];
+    }
+    // Add tags for ACA leads
+    if (acaTags.length > 0) {
+      contactPayload.tags = [...(contactPayload.tags || []), ...acaTags];
     }
     
     console.log('Creating contact with payload:', JSON.stringify(contactPayload, null, 2));
@@ -326,6 +379,7 @@ export async function POST(request: NextRequest) {
             contactId: existingContactId,
             hasShortTermMedicalData: !!shortTermMedicalData,
             hasContactPageData: !!contactPageData,
+            hasAcaData: !!acaData,
             hasIulLeadGenData: !!iulLeadGenData,
           });
           
@@ -333,7 +387,7 @@ export async function POST(request: NextRequest) {
           if (customFieldsArray.length > 0) {
             updatePayload.customFields = customFieldsArray;
           }
-          const allTags = [...stmTags, ...contactPageTags];
+          const allTags = [...stmTags, ...contactPageTags, ...acaTags];
           if (allTags.length > 0) {
             updatePayload.tags = allTags;
           }
@@ -402,8 +456,8 @@ export async function POST(request: NextRequest) {
     const contactId = createResponseData.contact?.id || createResponseData.id;
     const isNewContact = true; // This is a new contact (we just created it)
 
-    if (shortTermMedicalData || contactPageData) {
-      console.log("[create-contact] STM/Contact lead created - will NOT add to IUL/Notification workflows (contactId:", contactId, ")");
+    if (shortTermMedicalData || contactPageData || acaData) {
+      console.log("[create-contact] STM/Contact/ACA lead created - will NOT add to IUL/Notification workflows (contactId:", contactId, ")");
     }
 
     // Helper function to add contact to a workflow
@@ -447,13 +501,13 @@ export async function POST(request: NextRequest) {
       }
     };
 
-    // Step 1: Activate notification workflow FIRST (if configured) - skip for STM and Contact Page leads
+    // Step 1: Activate notification workflow FIRST (if configured) - skip for STM, Contact Page, and ACA leads
     const notificationWorkflowId = process.env.AGENT_CRM_WORKFLOW_NOTIFICATION;
-    const willAddNotification = !!(notificationWorkflowId && contactId && !shortTermMedicalData && !contactPageData);
+    const willAddNotification = !!(notificationWorkflowId && contactId && !shortTermMedicalData && !contactPageData && !acaData);
     console.log("[create-contact] Notification workflow:", {
       workflowId: notificationWorkflowId ?? "not configured",
       willAdd: willAddNotification,
-      reason: !notificationWorkflowId ? "no env" : !contactId ? "no contactId" : shortTermMedicalData || contactPageData ? "STM/Contact lead - skipped" : "IUL/other lead",
+      reason: !notificationWorkflowId ? "no env" : !contactId ? "no contactId" : shortTermMedicalData || contactPageData || acaData ? "STM/Contact/ACA lead - skipped" : "IUL/other lead",
     });
     if (willAddNotification) {
       await addContactToWorkflow(notificationWorkflowId, "Notification");
@@ -463,8 +517,8 @@ export async function POST(request: NextRequest) {
     // Short Term Medical leads: NEVER add to IUL workflows - require iulLeadGenData to prevent misassignment
     const workflowEnId = process.env.AGENT_CRM_WORKFLOW_EN;
     const workflowEsId = process.env.AGENT_CRM_WORKFLOW_ES;
-    const language = iulLeadGenData?.language || shortTermMedicalData?.language || 'en';
-    const iulConditionMet = !!(iulLeadGenData && !shortTermMedicalData && !contactPageData);
+    const language = iulLeadGenData?.language || shortTermMedicalData?.language || acaData?.language || 'en';
+    const iulConditionMet = !!(iulLeadGenData && !shortTermMedicalData && !contactPageData && !acaData);
     const languageWorkflowId = language === 'es' ? workflowEsId : workflowEnId;
     const willAddIul = !!(iulConditionMet && languageWorkflowId && contactId);
 
@@ -478,8 +532,8 @@ export async function POST(request: NextRequest) {
       selectedWorkflowId: languageWorkflowId ?? "none",
       willAddIul,
       reason: !iulConditionMet
-        ? shortTermMedicalData || contactPageData
-          ? "STM/Contact lead - iulConditionMet is false"
+        ? shortTermMedicalData || contactPageData || acaData
+          ? "STM/Contact/ACA lead - iulConditionMet is false"
           : "no iulLeadGenData"
         : !languageWorkflowId
           ? "workflow not configured"
@@ -488,8 +542,8 @@ export async function POST(request: NextRequest) {
 
     if (willAddIul) {
       await addContactToWorkflow(languageWorkflowId!, language === 'es' ? 'Spanish' : 'English');
-    } else if (shortTermMedicalData || contactPageData) {
-      console.log("[create-contact] IUL workflow NOT added - STM/Contact lead (contactId:", contactId, ")");
+    } else if (shortTermMedicalData || contactPageData || acaData) {
+      console.log("[create-contact] IUL workflow NOT added - STM/Contact/ACA lead (contactId:", contactId, ")");
     }
 
     // Step 3: Short Term Medical — one workflow; CRM branches EN/ES (e.g. via tags) inside that workflow
@@ -519,6 +573,7 @@ export async function POST(request: NextRequest) {
     const willAddContactPage = !!(
       contactPageData &&
       !shortTermMedicalData &&
+      !acaData &&
       contactId &&
       contactWorkflowId
     );
@@ -530,8 +585,8 @@ export async function POST(request: NextRequest) {
       willAddContactPage,
       reason: !contactPageData
         ? "not a contact-page lead"
-        : shortTermMedicalData
-          ? "STM payload present — skipped"
+        : shortTermMedicalData || acaData
+          ? "other lead type — skipped"
           : !contactWorkflowId
             ? "AGENT_CRM_WORKFLOW_CONTACT not set"
             : "contact-page lead — adding to workflow",
@@ -539,6 +594,35 @@ export async function POST(request: NextRequest) {
 
     if (willAddContactPage) {
       await addContactToWorkflow(contactWorkflowId!, `Contact page (${contactLanguage})`);
+    }
+
+    // Step 5: ACA page — dedicated workflow
+    const acaWorkflowId = process.env.AGENT_CRM_WORKFLOW_ACA;
+    const acaLanguage = acaData?.language === "es" ? "es" : "en";
+    const willAddAca = !!(
+      acaData &&
+      !shortTermMedicalData &&
+      !contactPageData &&
+      contactId &&
+      acaWorkflowId
+    );
+
+    console.log("[create-contact] ACA workflow decision:", {
+      hasAcaData: !!acaData,
+      acaLanguage,
+      workflowId: acaWorkflowId ?? "not configured",
+      willAddAca,
+      reason: !acaData
+        ? "not an ACA lead"
+        : shortTermMedicalData || contactPageData
+          ? "other lead type — skipped"
+          : !acaWorkflowId
+            ? "AGENT_CRM_WORKFLOW_ACA not set"
+            : "ACA lead — adding to workflow",
+    });
+
+    if (willAddAca) {
+      await addContactToWorkflow(acaWorkflowId!, `ACA (${acaLanguage})`);
     }
 
     // Send Meta Conversions API event (if configured and metadata provided)
@@ -566,8 +650,20 @@ export async function POST(request: NextRequest) {
 
         // Determine value and source based on lead type
         const value = 100;
-        const source = shortTermMedicalData ? "short_term_medical" : "iul_lead_gen";
-        const contentName = shortTermMedicalData ? "Short Term Medical Lead" : "IUL Lead Generation Campaign";
+        const source = shortTermMedicalData
+          ? "short_term_medical"
+          : acaData
+            ? "aca"
+            : contactPageData
+              ? "contact_page"
+              : "iul_lead_gen";
+        const contentName = shortTermMedicalData
+          ? "Short Term Medical Lead"
+          : acaData
+            ? "ACA Lead"
+            : contactPageData
+              ? "Contact Page Lead"
+              : "IUL Lead Generation Campaign";
 
         console.log("[Meta CAPI] Sending event:", {
           eventId: meta.eventId,
