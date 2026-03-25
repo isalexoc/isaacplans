@@ -1419,7 +1419,7 @@
                 "bold1": "no más de 3 meses",
                 "part2": "y a un",
                 "bold2": "máximo total de 4 meses",
-                "part3": "incluyendo renovaciones o extensiones. Las reglas estatales y presentaciones del asegurador varían; revise los detalles en la cotización antes de aplicar."
+                "part3": "incluyendo renovaciones o extensiones. Bajo el marco federal anterior de STLDI (reglas de 2018), la duración total podía alcanzar hasta 36 meses en muchos estados con renovaciones; eso quedó sustituido para ventas nuevas por la regla de septiembre de 2024. Las pólizas que comenzaron antes del 1 de septiembre de 2024 pueden seguir reglas anteriores hasta que terminen."
               }
             },
 
@@ -1478,7 +1478,7 @@
                 },
                 {
                   "q": "¿Cuánto tiempo puede durar?",
-                  "a": "Las reglas federales limitan el STLDI vendido desde el 1 de septiembre de 2024 a un periodo inicial de hasta 3 meses y un máximo total de 4 meses incluyendo renovaciones. Los estados pueden imponer límites adicionales."
+                  "a": "Para el STLDI vendido o emitido a partir del 1 de septiembre de 2024, las reglas federales limitan el periodo inicial a 3 meses y el máximo total a 4 meses incluyendo renovaciones. Antes (reglas federales de 2018), el corto plazo podía renovarse hasta un total de 36 meses en muchos estados—ese marco anterior ya no aplica a pólizas nuevas vendidas después de esa fecha. Los estados pueden añadir límites; confirme en la cotización."
                 },
                 {
                   "q": "¿Puedo seguir con mi médico?",
@@ -1553,88 +1553,142 @@
         }
       },
       "hero": {
-        "badge": "UnitedHealthOne® Seguro Médico de Corto Plazo",
-        "title": "Cobertura médica temporal — rápida, flexible y clara",
-        "description": {
-          "before": "Diseñada para cubrir un período temporal sin cobertura. Esto",
-          "bold": "no es Cobertura Esencial Mínima (ACA)",
-          "after": ", no cubre condiciones preexistentes y tiene limitaciones importantes. La disponibilidad y los términos varían según el estado y el plan."
-        }
+        "badge": "UnitedHealthOne® · Autoinscripción",
+        "title": "UnitedHealthOne® y UnitedHealthcare®—obtenga su cotización personalizada en minutos",
+        "lead": "UnitedHealthOne® le ayuda a explorar opciones de salud individual y familiar suscritas por Golden Rule Insurance Company—una compañía de UnitedHealthcare. Compare planes en línea, vea deducibles y redes para su código postal y solicite cuando esté listo. Esto no es Cobertura Esencial Mínima (ACA); beneficios, exclusiones y elegibilidad varían según el estado y el plan—confirme cada detalle en la cotización oficial antes de inscribirse."
+      },
+      "introVideo": {
+        "heading": "UnitedHealthcare y Golden Rule",
+        "description": "Breve presentación de las marcas detrás de muchos planes UnitedHealthOne® (audio en inglés).",
+        "captionNote": "Los subtítulos en español son un apoyo; el audio está en inglés. Puede activar o desactivar los subtítulos en el reproductor."
       },
       "cta": {
-        "label": "Puede solicitar cobertura usando el enlace seguro a continuación:"
+        "label": "Inicie su cotización segura—inscríbase en línea en minutos",
+        "eyebrow": "Mismo flujo que usan los agentes licenciados · Sin obligación de comprar"
       },
-      "cards": {
-        "temp": {
-          "title": "Cobertura temporal",
-          "body": "Pensada para brechas cortas—por ejemplo, entre empleos o mientras espera que inicie otra cobertura."
-        },
-        "notAca": {
-          "title": "No es ACA/MEC",
-          "body": "No cumple con los requisitos de la ACA. Las condiciones preexistentes están excluidas y los beneficios son limitados según la póliza."
-        },
-        "quote": {
-          "title": "Cotice en línea",
-          "body": "Use el enlace seguro de UHOne arriba para ver planes y precios en su estado."
-        }
+      "valueProps": {
+        "title": "Por qué muchos compradores empiezan con UnitedHealthOne®",
+        "items": [
+          {
+            "title": "Un portafolio pensado para usted",
+            "body": "UnitedHealthOne® representa una gama de productos de línea individual para que pueda comparar opciones—no un único plan de “tómalo o déjalo”."
+          },
+          {
+            "title": "Cotice, compare e inscríbase en línea",
+            "body": "Use el flujo seguro para ver precios, deducibles y avisos en su estado—y complete la solicitud cuando le convenga."
+          },
+          {
+            "title": "Respaldado por grandes aseguradoras",
+            "body": "Muchos planes están suscritos por Golden Rule Insurance Company, una compañía de UnitedHealthcare—marcas reconocidas."
+          },
+          {
+            "title": "Limitaciones claras desde el inicio",
+            "body": "Estos planes no son cobertura integral ACA. Verá qué incluye, qué no y cómo funciona la participación en costos antes de comprar."
+          }
+        ]
       },
-      "notice": {
-        "title": "Actualización importante sobre la duración:",
-        "body": {
-          "part1": "Para pólizas vendidas o emitidas a partir del 1 de septiembre de 2024, las reglas federales limitan el Seguro Médico de Duración Corta (STLDI) a un plazo inicial de",
-          "bold1": "no más de 3 meses",
-          "part2": "y a un",
-          "bold2": "máximo total de 4 meses",
-          "part3": "incluyendo renovaciones o extensiones. Históricamente algunos planes temporales ofrecían periodos más largos; la disponibilidad actual depende de las reglas estatales y de las presentaciones del asegurador. Revise siempre los detalles en la cotización antes de solicitar."
-        }
+      "steps": {
+        "title": "Autoinscripción en tres pasos",
+        "items": [
+          {
+            "title": "Ingrese sus datos",
+            "body": "Añada código postal, hogar y fecha de inicio para que la cotización coincida con su situación."
+          },
+          {
+            "title": "Compare opciones de plan",
+            "body": "Revise deducibles, redes y beneficios lado a lado—lea los avisos que correspondan a su estado."
+          },
+          {
+            "title": "Solicite y confirme",
+            "body": "Envíe su solicitud por el flujo seguro de UnitedHealthOne y guarde una copia de los avisos para sus registros."
+          }
+        ]
+      },
+      "flexibility": {
+        "title": "Flexibilidad visible",
+        "subtitle": "El diseño del plan varía según estado y formulario—su cotización muestra lo disponible para usted.",
+        "visualAria": "Ilustración comparando amplitud de opciones de plan frente a una opción genérica única.",
+        "barLabelA": "Opciones de plan y plazos en su estado",
+        "barLabelB": "Cobertura única (solo ilustrativo)",
+        "caption": "Comparación ilustrativa. Las opciones reales, la duración y las renovaciones dependen de su estado, formulario y presentaciones del asegurador—siga siempre la cotización y la póliza oficiales."
+      },
+      "trust": {
+        "title": "Fuerza nacional, cotización local",
+        "body": "Golden Rule Insurance Company suscribe muchos productos médicos individuales UnitedHealthOne®. Junto con UnitedHealthcare®, obtiene marcas reconocidas y avisos transparentes antes de inscribirse."
+      },
+      "complianceNote": {
+        "title": "Disponibilidad y reglas estatales",
+        "body": "Los nombres de producto, plazos, opciones de renovación y elegibilidad varían según el estado y el plan. Algunos estados pueden permitir periodos de cobertura más largos que otros; su cotización oficial UnitedHealthOne y la póliza emitida son la referencia final."
       },
       "guidance": {
+        "sectionTitle": "Orientación para inscribirse con criterio",
         "useCases": {
-          "title": "Cuándo suele usarse",
+          "title": "Cuándo suele encajar esta cobertura",
           "items": [
-            "Entre trabajos o periodos de espera de nuevo empleo",
+            "Entre trabajos o esperando que inicie la cobertura del empleador",
             "Perdió la Inscripción Abierta y no califica para un Período Especial",
-            "Recién graduados o pre-jubilados puenteando a otra cobertura"
+            "Necesita un puente asequible mientras evalúa opciones a largo plazo"
           ]
         },
         "notInclude": {
-          "title": "Lo que generalmente no incluye",
+          "title": "Lo que estos planes normalmente no cubren",
           "items": [
-            "Cobertura para condiciones preexistentes",
-            "Beneficios preventivos/maternidad integrales como los planes ACA",
-            "Renovación garantizada o continuidad a largo plazo"
+            "Condiciones preexistentes como los planes ACA",
+            "Beneficios esenciales integrales o renovación garantizada como un seguro mayor ACA",
+            "Protección ilimitada a largo plazo—lea su certificado con atención"
           ]
         },
         "beforeApply": {
-          "title": "Antes de solicitar",
+          "title": "Antes de hacer clic en “solicitar”",
           "items": [
-            "Confirme sus médicos y hospitales durante la cotización",
-            "Elija un deducible que realmente pueda pagar",
-            "Considere agregar cobertura suplementaria si es necesario"
+            "Confirme médicos e instalaciones en red para el plan que elija",
+            "Elija un deducible y un máximo de bolsillo que pueda pagar si necesita atención",
+            "Pregunte si la cobertura suplementaria tiene sentido en su caso"
           ]
         }
+      },
+      "faq": {
+        "title": "¿Preguntas antes de cotizar?",
+        "items": [
+          {
+            "q": "¿UnitedHealthOne es lo mismo que UnitedHealthcare?",
+            "a": "UnitedHealthOne® es una marca de productos de línea individual. Muchos planes están suscritos por Golden Rule Insurance Company, una compañía de UnitedHealthcare. Los nombres de producto y la disponibilidad varían por estado."
+          },
+          {
+            "q": "¿Es cobertura de la Ley de Cuidado de Salud Asequible (ACA)?",
+            "a": "No. Estos planes no son Cobertura Esencial Mínima. Tienen beneficios, exclusiones y protecciones distintas a las del Mercado. Revise todos los avisos en la cotización."
+          },
+          {
+            "q": "¿Cuánto tiempo puedo mantener un plan?",
+            "a": "Los plazos y las opciones de renovación dependen de su estado, formulario y fecha de vigencia. Su cotización y documentos de póliza describen la duración máxima y las reglas de renovación que le aplican."
+          },
+          {
+            "q": "¿Puedo usar esta página en el teléfono?",
+            "a": "Sí. El enlace de cotización y el video funcionan en navegadores móviles modernos. Para una mejor experiencia, use la última versión de Safari o Chrome."
+          }
+        ]
       },
       "disclosures": {
         "underwriter": {
           "label": "Aseguradora:",
-          "text": "La mayoría de los planes UnitedHealthOne® son emitidos por Golden Rule Insurance Company (una compañía de UnitedHealthcare). La disponibilidad varía por estado y formulario; no disponible en todos los estados."
+          "text": "La mayoría de los planes UnitedHealthOne® de corto plazo están suscritos por Golden Rule Insurance Company (una compañía de UnitedHealthcare) en los estados donde el producto está presentado y aprobado. Los nombres de los planes, beneficios y disponibilidad varían por estado y formulario; no disponible en todos los estados."
         },
         "notMEC": {
           "label": "No es Cobertura Esencial Mínima:",
-          "text": "El seguro de corto plazo no es cobertura ACA y puede tener límites, exclusiones y periodos de espera. Las condiciones preexistentes normalmente no están cubiertas."
+          "text": "La cobertura descrita aquí no es la Cobertura Esencial Mínima de la ACA y puede tener límites, exclusiones y periodos de espera. Las condiciones preexistentes normalmente no están cubiertas."
         },
         "linkUse": {
           "label": "Uso del enlace de cotización:",
           "text": "Los residentes de Carolina del Sur no pueden usar el enlace E-Store. El uso del enlace está sujeto a los términos del asegurador."
         },
-        "footer": "Esta página es solo informativa y no describe todas las limitaciones o términos. Revise siempre el folleto, avisos y póliza/certificado en su estado antes de solicitar."
+        "footer": "Esta página es información general y no sustituye folletos, solicitudes ni su póliza/certificado. Revise siempre los materiales de su estado antes de solicitar."
       },
       "stmMetadata": {
-        "title": "Seguro Médico de Corto Plazo (UnitedHealthOne) | Isaac Plans",
-        "description": "Resumen y cotización segura de cobertura temporal. La disponibilidad y la duración varían por estado.",
-        "keywords": "seguro médico temporal, corto plazo, no ACA, UHOne, Golden Rule",
+        "title": "UnitedHealthOne® Seguro Médico Temporal | Cotizar e Inscribirse | Isaac Plans",
+        "description": "Cotice planes UnitedHealthOne® suscritos por Golden Rule Insurance Company. Autoinscripción segura, apoyo bilingüe y avisos claros. La disponibilidad y los términos varían por estado.",
+        "keywords": "UnitedHealthOne, Golden Rule Insurance, seguro médico temporal, autoinscripción, cotización UHOne, no ACA",
         "image": "https://www.isaacplans.com/images/stm_es.png",
-        "imageAlt": "Vista previa de planes de corto plazo"
+        "imageAlt": "Vista previa de inscripción UnitedHealthOne corto plazo"
       }
     }
   },

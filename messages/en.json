@@ -1431,7 +1431,7 @@
                 "bold1": "no more than 3 months",
                 "part2": "and a",
                 "bold2": "maximum total duration of 4 months",
-                "part3": "including any renewals or extensions. State rules and carrier filings vary; review the quote details before applying."
+                "part3": "including any renewals or extensions. Under the prior 2018 federal STLDI framework, total duration could reach up to 36 months in many states with renewals; that was superseded for new sales by the September 2024 rule. Policies that started before Sept 1, 2024 may still follow earlier terms until they end."
               }
             },
 
@@ -1490,7 +1490,7 @@
                 },
                 {
                   "q": "How long can it last?",
-                  "a": "Federal rules limit STM sold on or after Sept 1, 2024 to an initial term of up to 3 months and a maximum total duration of 4 months including renewals. States may have additional limits."
+                  "a": "For STLDI sold or issued on or after Sept 1, 2024, federal rules cap the initial term at 3 months and total duration at 4 months including renewals. Previously (2018 federal rules), short-term coverage could be renewed up to 36 months total in many states—that older framework no longer applies to new policies sold after that date. States may add further limits; confirm in the quote flow."
                 },
                 {
                   "q": "Can I keep my current doctor?",
@@ -1565,88 +1565,141 @@
         }
       },
       "hero": {
-        "badge": "UnitedHealthOne® Short Term Medical",
-        "title": "Short Term Medical coverage — fast, flexible, and clearly explained",
-        "description": {
-          "before": "Designed to help bridge a gap in coverage for a limited time. This is",
-          "bold": "not Minimum Essential Coverage (ACA)",
-          "after": ", doesn’t cover preexisting conditions, and has other important limitations. Availability and terms vary by state and by plan."
-        }
+        "badge": "UnitedHealthOne® · Self-enrollment",
+        "title": "UnitedHealthOne® & UnitedHealthcare®—get your personalized quote in minutes",
+        "lead": "UnitedHealthOne® helps you explore individual and family health options underwritten by Golden Rule Insurance Company—a UnitedHealthcare company. Compare plans online, see deductibles and networks for your ZIP code, and apply when you’re ready. This is not Minimum Essential Coverage (ACA); benefits, exclusions, and eligibility vary by state and plan—confirm every detail in the official quote before you enroll."
+      },
+      "introVideo": {
+        "heading": "See UnitedHealthcare & Golden Rule",
+        "description": "Short overview of the brands behind many UnitedHealthOne® plans (English audio)."
       },
       "cta": {
-        "label": "You can apply for coverage using the secure link below:"
+        "label": "Start your secure quote—apply online in minutes",
+        "eyebrow": "Same enrollment path licensed agents use · No obligation to buy"
       },
-      "cards": {
-        "temp": {
-          "title": "Temporary coverage",
-          "body": "Intended for short gaps—like between jobs or while waiting for other coverage to begin."
-        },
-        "notAca": {
-          "title": "Not ACA/MEC",
-          "body": "Does not meet ACA requirements. Preexisting conditions are excluded and benefits are limited by the policy."
-        },
-        "quote": {
-          "title": "Quote online",
-          "body": "Use the secure UHOne link above to see plans and pricing for your state."
-        }
+      "valueProps": {
+        "title": "Why shoppers start with UnitedHealthOne®",
+        "items": [
+          {
+            "title": "A portfolio built around you",
+            "body": "UnitedHealthOne® represents a range of individual-line products so you can compare options—not a single take-it-or-leave-it plan."
+          },
+          {
+            "title": "Quote, compare, enroll online",
+            "body": "Use the secure flow to see pricing, deductibles, and disclosures for your state—then finish your application when it feels right."
+          },
+          {
+            "title": "Backed by major carriers",
+            "body": "Many plans are underwritten by Golden Rule Insurance Company, a UnitedHealthcare company—names consumers know and trust."
+          },
+          {
+            "title": "Clear limitations up front",
+            "body": "These plans are not comprehensive ACA coverage. You’ll see what’s included, what isn’t, and how cost-sharing works before you buy."
+          }
+        ]
       },
-      "notice": {
-        "title": "Important duration update:",
-        "body": {
-          "part1": "For policies sold or issued on or after Sept 1, 2024, federal rules limit Short-Term Limited-Duration Insurance (STLDI) to an initial term of",
-          "bold1": "no more than 3 months",
-          "part2": "and a",
-          "bold2": "maximum total duration of 4 months",
-          "part3": "including any renewals or extensions. Historically, some short-term offerings were available for longer periods; current availability and term lengths depend on state rules and carrier filings. Always review the details shown in the quote flow before applying."
-        }
+      "steps": {
+        "title": "Self-enroll in three quick steps",
+        "items": [
+          {
+            "title": "Enter your details",
+            "body": "Add your ZIP code, household, and effective date so the quote matches your situation."
+          },
+          {
+            "title": "Compare plan options",
+            "body": "Review deductibles, networks, and benefits side by side—read the notices shown for your state."
+          },
+          {
+            "title": "Apply and confirm",
+            "body": "Submit your application through the secure UnitedHealthOne flow and keep a copy of your disclosures for your records."
+          }
+        ]
+      },
+      "flexibility": {
+        "title": "Flexibility you can see",
+        "subtitle": "Plan design varies by state and form—your quote shows what’s available to you.",
+        "visualAria": "Illustration comparing breadth of plan options versus a single generic option.",
+        "barLabelA": "Plan options & term choices in your state",
+        "barLabelB": "One-size coverage (illustration only)",
+        "caption": "Illustrative comparison only. Actual options, term lengths, and renewal rules depend on your state, plan form, and carrier filings—always follow the official quote and policy documents."
+      },
+      "trust": {
+        "title": "National strength, local quoting",
+        "body": "Golden Rule Insurance Company underwrites many UnitedHealthOne® individual medical products. Together with the UnitedHealthcare® family of companies, you get recognizable brands plus transparent disclosures before you enroll."
+      },
+      "complianceNote": {
+        "title": "Availability & state rules",
+        "body": "Product names, term lengths, renewal options, and eligibility vary by state and plan. Some states may allow longer coverage periods than others; your official UnitedHealthOne quote and issued policy are the final word."
       },
       "guidance": {
+        "sectionTitle": "Guidance for smart enrollment",
         "useCases": {
-          "title": "Common use cases",
+          "title": "When this coverage often fits",
           "items": [
-            "Between jobs or new-hire waiting periods",
-            "Missed Open Enrollment and no Special Enrollment Period",
-            "Recent graduates or early retirees bridging to other coverage"
+            "Between jobs or waiting for employer coverage to start",
+            "You missed Open Enrollment and don’t qualify for a Special Enrollment Period",
+            "You need an affordable bridge while evaluating long-term options"
           ]
         },
         "notInclude": {
-          "title": "What it generally doesn’t include",
+          "title": "What these plans typically don’t cover",
           "items": [
-            "Coverage for preexisting conditions",
-            "Comprehensive preventive/maternity benefits like ACA plans",
-            "Guaranteed renewability or long-term continuation"
+            "Preexisting conditions the same way ACA plans do",
+            "Full essential health benefits or guaranteed renewability like ACA major medical",
+            "Unlimited long-term protection—read your certificate carefully"
           ]
         },
         "beforeApply": {
-          "title": "Before you apply",
+          "title": "Before you click “apply”",
           "items": [
-            "Confirm your doctors and facilities in the quote flow",
-            "Choose a deductible you can actually afford",
-            "Consider pairing with supplemental coverage if needed"
+            "Confirm providers and facilities in-network for the plan you select",
+            "Pick a deductible and out-of-pocket max you can afford if you need care",
+            "Ask whether supplemental coverage makes sense for your situation"
           ]
         }
+      },
+      "faq": {
+        "title": "Questions before you quote?",
+        "items": [
+          {
+            "q": "Is UnitedHealthOne the same as UnitedHealthcare?",
+            "a": "UnitedHealthOne® is a brand for individual-line products. Many plans are underwritten by Golden Rule Insurance Company, a UnitedHealthcare company. Product names and availability vary by state."
+          },
+          {
+            "q": "Is this Affordable Care Act (ACA) coverage?",
+            "a": "No. These plans are not Minimum Essential Coverage. They have different benefits, exclusions, and consumer protections than Marketplace plans. Review all notices in the quote flow."
+          },
+          {
+            "q": "How long can I keep a plan?",
+            "a": "Term lengths and renewal options depend on your state, plan form, and effective date. Your quote and policy documents describe the maximum duration and renewal rules that apply to you."
+          },
+          {
+            "q": "Can I use this page on a phone?",
+            "a": "Yes. The quote link and video work on modern mobile browsers. For the best experience, use the latest version of Safari or Chrome."
+          }
+        ]
       },
       "disclosures": {
         "underwriter": {
           "label": "Underwriter:",
-          "text": "Most UnitedHealthOne® plans are underwritten by Golden Rule Insurance Company (a UnitedHealthcare company). Product availability varies by state and form; not available in all states."
+          "text": "Most UnitedHealthOne® Short Term Medical plans are underwritten by Golden Rule Insurance Company (a UnitedHealthcare company) in states where the product is filed and approved. Product names, benefits, and availability vary by state and form; not available in all states."
         },
         "notMEC": {
           "label": "Not Minimum Essential Coverage:",
-          "text": "Short Term Medical is not ACA coverage and may have limits, exclusions, and waiting periods. Preexisting conditions are typically not covered."
+          "text": "Coverage discussed here is not ACA Minimum Essential Coverage and may have limits, exclusions, and waiting periods. Preexisting conditions are typically not covered."
         },
         "linkUse": {
           "label": "Quoting link use:",
           "text": "Residents of South Carolina cannot use the E-Store link. Use of the E-Store link is subject to carrier terms."
         },
-        "footer": "This page is for general information only and does not describe all limitations or terms. Always review the brochure, notices, and policy/certificate in your state before applying."
+        "footer": "This page is general information only and does not replace plan brochures, applications, or your policy/certificate. Always review materials for your state before applying."
       },
       "stmMetadata": {
-        "title": "Short Term Medical (UnitedHealthOne) | Isaac Plans",
-        "description": "Short Term Medical overview and secure quoting. Temporary coverage with clear limitations. Product availability and term lengths vary by state.",
-        "keywords": "short term medical, temporary coverage, non-ACA, UHOne, Golden Rule, short-term health insurance",
+        "title": "UnitedHealthOne® Short Term Medical | Quote & Self-Enroll | Isaac Plans",
+        "description": "Quote UnitedHealthOne® plans underwritten by Golden Rule Insurance Company. Secure self-enrollment, bilingual support, and clear disclosures. Availability and terms vary by state.",
+        "keywords": "UnitedHealthOne, Golden Rule Insurance, short term medical, temporary health insurance, self enrollment, UHOne quote, non-ACA",
         "image": "https://www.isaacplans.com/images/stm.png",
-        "imageAlt": "Short Term Medical plans preview"
+        "imageAlt": "UnitedHealthOne short term medical enrollment preview"
       }
     }
   },

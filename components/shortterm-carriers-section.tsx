@@ -44,6 +44,32 @@ function resolveLogoSrc(c: CarrierItem): string | null {
   return buildLegacyLogoUrl(c.logoPublicId);
 }
 
+/** Renders carrier display name with finance/insurance-style hierarchy (no copy changes). */
+function CarrierNameHeading({ name }: { name: string }) {
+  const match = name.match(/^(.+?)\s*(\([^)]+\))\s*$/);
+  const heading =
+    "mt-2 text-balance text-left text-[1.0625rem] font-bold leading-snug tracking-[-0.03em] text-slate-900 sm:text-xl sm:leading-tight md:mt-0 md:text-center dark:text-white";
+  const primary = "text-slate-900 dark:text-white";
+  const secondary =
+    "font-semibold text-slate-500 dark:text-slate-400 text-[0.9em] sm:text-[1.05rem]";
+
+  if (match) {
+    const [, main, paren] = match;
+    return (
+      <h3 className={heading}>
+        <span className={primary}>{main.trim()}</span>
+        <span className={secondary}> {paren}</span>
+      </h3>
+    );
+  }
+
+  return (
+    <h3 className={heading}>
+      <span className={primary}>{name}</span>
+    </h3>
+  );
+}
+
 export default function ShortTermCarriersSection({
   label,
   title,
@@ -191,9 +217,7 @@ export default function ShortTermCarriersSection({
                       )}
                     </div>
 
-                    <h3 className="mt-2 text-left text-base font-semibold leading-snug text-slate-900 dark:text-white md:mt-0 md:text-center">
-                      {c.name}
-                    </h3>
+                    <CarrierNameHeading name={c.name} />
                     <p className="mt-2 flex-1 text-left text-sm leading-relaxed text-slate-600 line-clamp-4 dark:text-slate-400 md:mt-3 md:text-center md:line-clamp-none">
                       {c.blurb}
                     </p>

@@ -443,6 +443,22 @@ export const getUhoneShortTermPageLd = (
   about: { "@id": `${BASE_URL}/#organization` },
 });
 
+/** UHOne Short Term Medical — FAQ JSON-LD (rich results) */
+export const getUhoneShortTermFaqLd = (
+  faqs: { question: string; answer: string }[]
+) => ({
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: faqs.map((f) => ({
+    "@type": "Question",
+    name: f.question,
+    acceptedAnswer: {
+      "@type": "Answer",
+      text: f.answer,
+    },
+  })),
+});
+
 /** UHOne Short Term Medical — breadcrumb JSON-LD (Home → Page) */
 export const getUhoneShortTermBreadcrumbLd = (
   locale: string,
