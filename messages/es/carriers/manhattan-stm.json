@@ -1,0 +1,15 @@
+{
+  "manhattan": {
+    "shortterm": {
+      "bottomCta": {
+        "button": "Abrir cotización Manhattan Life"
+      },
+      "disclosures": {
+        "linkUse": {
+          "label": "Enlace de cotización directa:",
+          "text": "Los botones Manhattan Life de esta página abren el sitio autorizado de cotización (direct.manhattanlife.com). Sale de IsaacPlans.com; aplican términos, privacidad y licencias de Manhattan Life."
+        }
+      }
+    }
+  }
+}

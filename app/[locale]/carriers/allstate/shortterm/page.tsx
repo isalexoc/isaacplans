@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
 import { BackHome } from "@/components/back-home";
-import UhoneCarrierLanding from "@/components/uhone-carrier-landing";
+import AllstateCarrierLanding from "@/components/allstate-carrier-landing";
 import {
-  getUhoneShortTermPageLd,
-  getUhoneShortTermBreadcrumbLd,
-  getUhoneShortTermFaqLd,
+  getAllstateShortTermPageLd,
+  getAllstateShortTermBreadcrumbLd,
+  getAllstateShortTermFaqLd,
 } from "@/lib/seo/jsonld";
+import { ALLSTATE_QUICK_QUOTE_URL } from "@/lib/allstate-quick-quote";
 
 import {
   ogLocaleOf,
@@ -28,7 +29,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const locale = (await getLocale()) as SupportedLocale;
   const t = await getTranslations({
     locale,
-    namespace: "uhone.shortterm.stmMetadata",
+    namespace: "allstate.shortterm.stmMetadata",
   });
 
   const title = t("title");
@@ -38,10 +39,10 @@ export async function generateMetadata(): Promise<Metadata> {
     default: "https://www.isaacplans.com/images/stm.png",
   }) as string;
   const alt = t("imageAlt", {
-    default: "UnitedHealthOne plan preview",
+    default: "Allstate Health Solutions short term medical preview",
   });
 
-  const routeKey = "/carriers/uhone/shortterm";
+  const routeKey = "/carriers/allstate/shortterm";
   const slug = localizedSlug(routeKey as any, locale);
   const canonical = withLocalePrefix(locale, slug);
   const languages = languageAlternatesPrefixed(routeKey as any);
@@ -75,37 +76,51 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function ShortTermMedicalPage() {
+export default async function AllstateShortTermPage() {
   const locale = (await getLocale()) as SupportedLocale;
-  const t = await getTranslations({ locale, namespace: "uhone.shortterm" });
+  const t = await getTranslations({ locale, namespace: "allstate.shortterm" });
 
   const tMeta = await getTranslations({
     locale,
-    namespace: "uhone.shortterm.stmMetadata",
+    namespace: "allstate.shortterm.stmMetadata",
   });
 
-  const pageLd = getUhoneShortTermPageLd(
+  const pageLd = getAllstateShortTermPageLd(
     locale,
     tMeta("title"),
     tMeta("description")
   );
-  const crumbLd = getUhoneShortTermBreadcrumbLd(
+  const crumbLd = getAllstateShortTermBreadcrumbLd(
     locale,
     locale.startsWith("es") ? "Inicio" : "Home",
     tMeta("title")
   );
 
-  const faqLd = getUhoneShortTermFaqLd(
+  const faqLd = getAllstateShortTermFaqLd(
     [0, 1, 2, 3].map((i) => ({
       question: t(`faq.items.${i}.q`),
       answer: t(`faq.items.${i}.a`),
     }))
   );
 
+  const skipLabel = locale.startsWith("es")
+    ? "Saltar al contenido principal"
+    : "Skip to main content";
+
   return (
-    <div className="min-h-screen relative">
+    <div className="relative min-h-screen">
+      <a
+        href="#allstate-stm-main"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[60] focus:rounded-md focus:bg-background focus:px-4 focus:py-2.5 focus:text-sm focus:font-medium focus:text-foreground focus:shadow-lg focus:outline-none focus:ring-2 focus:ring-[#0033A0] focus:ring-offset-2"
+      >
+        {skipLabel}
+      </a>
       <BackHome href={shortTermMedicalHref(locale)} label={t("backNav.label")} />
-      <UhoneCarrierLanding locale={locale} t={t} />
+      <AllstateCarrierLanding
+        locale={locale}
+        t={t}
+        quoteUrl={ALLSTATE_QUICK_QUOTE_URL}
+      />
 
       <script
         type="application/ld+json"
@@ -118,7 +133,6 @@ export default async function ShortTermMedicalPage() {
         }}
       />
 
-      {/* a11y patch for 3rd-party chat close button (labels the button if present) */}
       <script
         // eslint-disable-next-line react/no-danger
         dangerouslySetInnerHTML={{

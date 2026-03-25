@@ -1,0 +1,15 @@
+{
+  "manhattan": {
+    "shortterm": {
+      "bottomCta": {
+        "button": "Open Manhattan Life quote"
+      },
+      "disclosures": {
+        "linkUse": {
+          "label": "Direct quote link:",
+          "text": "The Manhattan Life buttons on this page open the carrier’s authorized quoting site (direct.manhattanlife.com). You leave IsaacPlans.com; Manhattan Life’s terms, privacy policy, and licensing apply."
+        }
+      }
+    }
+  }
+}

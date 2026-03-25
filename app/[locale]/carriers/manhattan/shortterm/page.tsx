@@ -1,12 +1,16 @@
 import type { Metadata } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
 import { BackHome } from "@/components/back-home";
-import UhoneCarrierLanding from "@/components/uhone-carrier-landing";
+import StmRequestInfoLanding, {
+  stmRequestInfoMainId,
+  stmRequestInfoSkipLinkRingClass,
+} from "@/components/stm-request-info-landing";
 import {
-  getUhoneShortTermPageLd,
-  getUhoneShortTermBreadcrumbLd,
-  getUhoneShortTermFaqLd,
+  getStmPartnerCarrierPageLd,
+  getStmPartnerCarrierBreadcrumbLd,
+  getStmPartnerCarrierFaqLd,
 } from "@/lib/seo/jsonld";
+import { MANHATTAN_DIRECT_QUOTE_URL } from "@/lib/manhattan-direct-quote";
 
 import {
   ogLocaleOf,
@@ -16,6 +20,8 @@ import {
   type SupportedLocale,
 } from "@/lib/seo/i18n";
 
+const CARRIER = "manhattan" as const;
+
 function shortTermMedicalHref(locale: SupportedLocale): string {
   return withLocalePrefix(
     locale,
@@ -23,12 +29,11 @@ function shortTermMedicalHref(locale: SupportedLocale): string {
   );
 }
 
-/* ───────── SEO ───────── */
 export async function generateMetadata(): Promise<Metadata> {
   const locale = (await getLocale()) as SupportedLocale;
   const t = await getTranslations({
     locale,
-    namespace: "uhone.shortterm.stmMetadata",
+    namespace: "manhattan.shortterm.stmMetadata",
   });
 
   const title = t("title");
@@ -38,10 +43,10 @@ export async function generateMetadata(): Promise<Metadata> {
     default: "https://www.isaacplans.com/images/stm.png",
   }) as string;
   const alt = t("imageAlt", {
-    default: "UnitedHealthOne plan preview",
+    default: "Manhattan Life short term medical preview",
   });
 
-  const routeKey = "/carriers/uhone/shortterm";
+  const routeKey = "/carriers/manhattan/shortterm";
   const slug = localizedSlug(routeKey as any, locale);
   const canonical = withLocalePrefix(locale, slug);
   const languages = languageAlternatesPrefixed(routeKey as any);
@@ -75,37 +80,57 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function ShortTermMedicalPage() {
+export default async function ManhattanShortTermPage() {
   const locale = (await getLocale()) as SupportedLocale;
-  const t = await getTranslations({ locale, namespace: "uhone.shortterm" });
+  const t = await getTranslations({ locale, namespace: "manhattan.shortterm" });
 
   const tMeta = await getTranslations({
     locale,
-    namespace: "uhone.shortterm.stmMetadata",
+    namespace: "manhattan.shortterm.stmMetadata",
   });
 
-  const pageLd = getUhoneShortTermPageLd(
+  const pageLd = getStmPartnerCarrierPageLd(
     locale,
+    CARRIER,
     tMeta("title"),
     tMeta("description")
   );
-  const crumbLd = getUhoneShortTermBreadcrumbLd(
+  const crumbLd = getStmPartnerCarrierBreadcrumbLd(
     locale,
+    CARRIER,
     locale.startsWith("es") ? "Inicio" : "Home",
     tMeta("title")
   );
 
-  const faqLd = getUhoneShortTermFaqLd(
+  const faqLd = getStmPartnerCarrierFaqLd(
     [0, 1, 2, 3].map((i) => ({
       question: t(`faq.items.${i}.q`),
       answer: t(`faq.items.${i}.a`),
     }))
   );
 
+  const skipLabel = locale.startsWith("es")
+    ? "Saltar al contenido principal"
+    : "Skip to main content";
+
+  const mainId = stmRequestInfoMainId(CARRIER);
+  const skipRing = stmRequestInfoSkipLinkRingClass(CARRIER);
+
   return (
-    <div className="min-h-screen relative">
+    <div className="relative min-h-screen">
+      <a
+        href={`#${mainId}`}
+        className={`sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[60] focus:rounded-md focus:bg-background focus:px-4 focus:py-2.5 focus:text-sm focus:font-medium focus:text-foreground focus:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 ${skipRing}`}
+      >
+        {skipLabel}
+      </a>
       <BackHome href={shortTermMedicalHref(locale)} label={t("backNav.label")} />
-      <UhoneCarrierLanding locale={locale} t={t} />
+      <StmRequestInfoLanding
+        t={t}
+        variant={CARRIER}
+        directQuoteUrl={MANHATTAN_DIRECT_QUOTE_URL}
+        locale={locale}
+      />
 
       <script
         type="application/ld+json"
@@ -118,7 +143,6 @@ export default async function ShortTermMedicalPage() {
         }}
       />
 
-      {/* a11y patch for 3rd-party chat close button (labels the button if present) */}
       <script
         // eslint-disable-next-line react/no-danger
         dangerouslySetInnerHTML={{

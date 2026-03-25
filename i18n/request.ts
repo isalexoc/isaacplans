@@ -2,6 +2,36 @@ import { getRequestConfig } from "next-intl/server";
 import { hasLocale } from "next-intl";
 import { routing } from "./routing";
 
+/** Deep-merge message trees so split files can patch nested keys without replacing whole namespaces. */
+function deepMergeMessages(
+  target: Record<string, unknown>,
+  source: Record<string, unknown>
+): Record<string, unknown> {
+  const out: Record<string, unknown> = { ...target };
+  for (const key of Object.keys(source)) {
+    const sVal = source[key];
+    const tVal = target[key];
+    if (Array.isArray(sVal) || Array.isArray(tVal)) {
+      if (sVal !== undefined) out[key] = sVal;
+      continue;
+    }
+    if (
+      sVal &&
+      typeof sVal === "object" &&
+      tVal &&
+      typeof tVal === "object"
+    ) {
+      out[key] = deepMergeMessages(
+        tVal as Record<string, unknown>,
+        sVal as Record<string, unknown>
+      );
+    } else if (sVal !== undefined) {
+      out[key] = sVal;
+    }
+  }
+  return out;
+}
+
 // Helper function to recursively load all JSON files from a directory
 async function loadSplitMessages(locale: string): Promise<Record<string, any>> {
   const splitMessages: Record<string, any> = {};
@@ -146,6 +176,15 @@ async function loadSplitMessages(locale: string): Promise<Record<string, any>> {
     } catch {
       // File doesn't exist, skip
     }
+
+    // Manhattan STM carrier page — nested patches (must merge deep; see deepMergeMessages)
+    try {
+      const manhattanStm = (await import(`@/messages/${locale}/carriers/manhattan-stm.json`))
+        .default;
+      Object.assign(splitMessages, manhattanStm);
+    } catch {
+      // File doesn't exist, skip
+    }
     
   } catch (error) {
     // If split folder doesn't exist, continue with main messages only
@@ -168,12 +207,12 @@ export default getRequestConfig(async ({ requestLocale }) => {
   // Load split messages from messages/{locale}/ folder (for new content)
   const splitMessages = await loadSplitMessages(locale);
 
-  // Merge: split messages override main messages if there are conflicts
-  // This way existing pages work, and new split files can extend/override
-  const messages = {
-    ...mainMessages,
-    ...splitMessages,
-  };
+  // Merge: split messages override main messages (deep merge so nested keys like
+  // manhattan.shortterm are patched, not replaced wholesale).
+  const messages = deepMergeMessages(
+    mainMessages as Record<string, unknown>,
+    splitMessages as Record<string, unknown>
+  ) as typeof mainMessages;
 
   return {
     locale,

@@ -83,6 +83,9 @@ const PAGES: Page[] = [
     priority: 0.6,
   },
   { href: "/carriers/uhone/shortterm", changeFrequency: "monthly", priority: 0.7 },
+  { href: "/carriers/allstate/shortterm", changeFrequency: "monthly", priority: 0.7 },
+  { href: "/carriers/pivot/shortterm", changeFrequency: "monthly", priority: 0.7 },
+  { href: "/carriers/manhattan/shortterm", changeFrequency: "monthly", priority: 0.7 },
 
   // Resources
   { href: "/subsidy-calculator", changeFrequency: "monthly", priority: 0.7 },

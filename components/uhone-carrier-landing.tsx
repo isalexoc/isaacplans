@@ -7,7 +7,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import UhoneIntroVideo from "@/components/uhone-intro-video";
-import HIButton from "@/components/HIButton";
+import ShortTermMedicalButton from "@/components/ShortTermMedicalButton";
 import { getTranslations } from "next-intl/server";
 import type { SupportedLocale } from "@/lib/seo/i18n";
 
@@ -63,6 +63,8 @@ export default function UhoneCarrierLanding({ locale, t }: UhoneCarrierLandingPr
             <p className="mt-1 text-xs text-muted-foreground">{t("cta.eyebrow")}</p>
             <a
               href="https://shop.uhone.com/en/quote/census/shortterm?brokerid=AA5607941"
+              target="_blank"
+              rel="noopener noreferrer"
               aria-labelledby="uhone-apply-label"
               className="mt-5 inline-block max-w-full rounded-xl shadow-[0_8px_30px_-12px_rgba(15,23,42,0.35)] ring-1 ring-black/5 transition hover:opacity-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--custom))] focus-visible:ring-offset-2"
             >
@@ -345,7 +347,7 @@ export default function UhoneCarrierLanding({ locale, t }: UhoneCarrierLandingPr
       {/* Help + disclosures */}
       <section className="border-t border-border/60 bg-muted/15 pb-16 pt-8">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-          <HIButton />
+          <ShortTermMedicalButton emphasize />
           <div className="mt-12 space-y-4 text-xs leading-relaxed text-muted-foreground">
             <p>
               <strong className="text-foreground">

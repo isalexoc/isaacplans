@@ -484,14 +484,12 @@
     "title": "Política de Privacidad",
     "lastUpdated": "Última actualización: 20 de junio de 2025",
     "back": "Volver al Inicio",
-
     "cta": {
       "headline": "¿Preguntas sobre su privacidad?",
       "body": "Si tiene alguna inquietud sobre cómo manejamos su información personal, comuníquese con nosotros.",
       "call": "Llamar ahora",
       "email": "Enviar email"
     },
-
     "sections": {
       "introduction": {
         "title": "1. Introducción",
@@ -580,7 +578,6 @@
         ]
       }
     },
-
     "metadata": {
       "title": "Política de Privacidad | Isaac Plans Insurance",
       "description": "Conozca cómo Isaac Plans Insurance recopila, utiliza y protege su información. Lea nuestras prácticas de privacidad, sus derechos y cómo contactarnos.",
@@ -593,16 +590,13 @@
     "title": "Términos y Condiciones",
     "lastUpdated": "Última actualización: 20 de junio de 2025",
     "back": "Volver al Inicio",
-
     "cta": {
       "headline": "¿Preguntas sobre los Términos?",
       "body": "Si tiene alguna pregunta sobre estos términos y condiciones, estamos aquí para ayudarle.",
       "call": "Llamar ahora",
       "email": "Enviar email"
     },
-
     "limitationsLabel": "Sin embargo, no somos responsables por:",
-
     "sections": {
       "sms": {
         "title": "1. Términos y Condiciones de SMS",
@@ -618,12 +612,10 @@
           "8 – Divulgaciones estándar: mensaje y datos pueden costar. Para ayuda envíe AYUDA al ({{PHONE_NUMBER}}). La frecuencia de mensajes puede variar."
         ]
       },
-
       "introduction": {
         "title": "2. Introducción y Aceptación",
         "content": "Bienvenido a Isaac Plans. Estos Términos y Condiciones (\"Términos\") gobiernan el uso de nuestros servicios de seguros y sitio web. Al utilizar nuestros servicios, usted acepta estos términos."
       },
-
       "services": {
         "title": "3. Descripción de Servicios",
         "content": "Isaac Plans Insurance proporciona los siguientes servicios:",
@@ -637,12 +629,10 @@
           "Optimización de costos y análisis de subsidios"
         ]
       },
-
       "eligibility": {
         "title": "4. Elegibilidad y Licencias",
         "content": "Nuestros servicios están disponibles para residentes de los estados donde Isaac Orraiz mantiene licencias activas. Actualmente contamos con licencias en más de 20 estados de EE.UU."
       },
-
       "responsibilities": {
         "title": "5. Responsabilidades del Cliente",
         "content": "Como cliente, usted se compromete a:",
@@ -655,7 +645,6 @@
           "Mantener la confidencialidad de la información de su cuenta"
         ]
       },
-
       "limitations": {
         "title": "6. Limitaciones de Responsabilidad",
         "content": "Isaac Plans actúa como intermediario entre usted y las compañías de seguros. Nuestras responsabilidades incluyen:",
@@ -672,7 +661,6 @@
           "Nuestra responsabilidad se limita a intermediación y asesoramiento"
         ]
       },
-
       "privacy": {
         "title": "7. Privacidad y Confidencialidad",
         "content": "Nos comprometemos a proteger su privacidad conforme a nuestra Política de Privacidad:",
@@ -683,17 +671,14 @@
           "Cumplimos con las normativas de protección de datos aplicables"
         ]
       },
-
       "fees": {
         "title": "8. Honorarios y Compensación",
         "content": "Nuestros servicios suelen ser gratuitos para el consumidor. Recibimos compensación de las aseguradoras, lo cual no afecta el costo de su prima."
       },
-
       "termination": {
         "title": "9. Terminación de Servicios",
         "content": "Cualquiera de las partes puede terminar esta relación con notificación por escrito. Las pólizas vigentes continúan según sus propios términos."
       },
-
       "compliance": {
         "title": "10. Cumplimiento Legal",
         "content": "Operamos en cumplimiento total con:",
@@ -705,12 +690,10 @@
           "Requisitos de licencias profesionales"
         ]
       },
-
       "modifications": {
         "title": "11. Modificaciones",
         "content": "Nos reservamos el derecho de actualizar estos términos en cualquier momento. Las modificaciones serán efectivas tras su publicación."
       },
-
       "contact": {
         "title": "12. Información de Contacto",
         "content": "Para preguntas sobre estos Términos:",
@@ -975,7 +958,6 @@
         "subtitle": "Más de 2,500 sonrisas y miradas saludables"
       }
     },
-
     "ctaButton": {
       "title": "Solicitar Información",
       "subtitle": "Rápido y sin compromiso"
@@ -1003,7 +985,6 @@
       "successScheduleAppointment": "Agendar consulta",
       "successClose": "Cerrar"
     },
-
     "about": {
       "badge": "Sobre Mí",
       "headline": "Comprometido con tu Salud Dental y Visual",
@@ -1012,19 +993,16 @@
       "role": "Agente de Seguros",
       "credential": "Agente de Seguros Licenciado"
     },
-
     "selfEnroll": {
       "title": "¿Prefiere inscribirse usted mismo?",
       "subtitle": "Utilice nuestro portal seguro para comparar planes dentales y de visión e inscribirse en minutos.",
       "cta": "Comenzar Auto-Inscripción",
       "disclaimer": "Solo 5 minutos—sin papeleo, confirmación instantánea."
     },
-
     "definition": {
       "title": "¿Por Qué Elegir Ameritas para Dental y Visión?",
       "description": "Ameritas se ubica constantemente entre los mejores proveedores de seguros dentales y de visión en Estados Unidos. Con amplias redes de dentistas y optómetras, máximos anuales generosos y cobertura al día siguiente para servicios preventivos, Ameritas facilita mantener tu sonrisa sana y tu vista nítida sin gastar de más.  Me enorgullece trabajar con Ameritas para ofrecerte planes que combinan economía, flexibilidad y un servicio al cliente galardonado."
     },
-
     "eligibility": {
       "headlineBeforeBold": "¿Quiénes",
       "headlineBold": "Pueden Inscribirse?",
@@ -1037,7 +1015,6 @@
       ],
       "note": "*CCobertura preventiva desde el primer día, una red PPO nacional, libertad para atenderse fuera de la red y cero cuotas de inscripción convierten a Ameritas en una excelente opción para proteger tu salud dental y visual."
     },
-
     "enroll": {
       "headlineBeforeBold": "Cómo Inscribirse en un",
       "headlineBold": "Plan Dental y de Visión de Ameritas",
@@ -1053,7 +1030,6 @@
       ],
       "note": "Sin cuotas de inscripción, sin preguntas médicas y sin periodos de espera en servicios preventivos. Una garantía de satisfacción de 30 días te brinda tranquilidad adicional."
     },
-
     "faqDental": {
       "label": "Ameritas Dental y Visión",
       "titleBeforeBold": "Preguntas sobre",
@@ -1089,7 +1065,6 @@
         }
       ]
     },
-
     "ctaBanner": {
       "message": "¿Busca un asesor Dental & Visión de primera clase?",
       "button": "Programar una consulta"
@@ -1106,7 +1081,6 @@
       }
     }
   },
-
   "layoutMetadata": {
     "title": "Isaac Plans Insurance | Seguros ACA, Medicare, Vida, Dental, Salud y Más",
     "description": "Agencia de seguros bilingüe que compara planes del Mercado ACA, Medicare, vida, dental y visión en estados de EE.UU. Cotización gratis con experto.",
@@ -1181,12 +1155,10 @@
       "role": "Agente de Seguros Licenciado",
       "credential": "Agente de Seguros de Salud Licenciado"
     },
-
     "definition": {
       "title": "¿Qué es un Seguro de Indemnización Hospitalaria?",
       "description": "Es un plan suplementario que le paga a USTED directamente—un monto por día o por evento—para cubrir deducibles, copagos y pérdida de ingresos durante su hospitalización."
     },
-
     "selfEnroll": {
       "cta": "Comenzar en línea",
       "disclaimer": "Pólizas emitidas por la aseguradora. Sujeto a aprobación.",
@@ -1199,7 +1171,6 @@
         "subtitle": "Cobertura accesible para cualquier presupuesto"
       }
     },
-
     "eligibility": {
       "headlineBeforeBold": "La mayoría de los adultos",
       "headlineBold": "ya califican",
@@ -1212,7 +1183,6 @@
       },
       "note": "Algunas condiciones preexistentes pueden afectar los pagos."
     },
-
     "enroll": {
       "headlineBeforeBold": "Tres pasos sencillos para",
       "headlineBold": "estar cubierto",
@@ -1230,7 +1200,6 @@
       },
       "note": "¡La aprobación suele ser instantánea!"
     },
-
     "faq": {
       "label": "Preguntas frecuentes",
       "titleBeforeBold": "Preguntas comunes sobre",
@@ -1406,12 +1375,10 @@
               "afterCarriersTrust": "Use el botón de cotización—el mismo proceso seguro y sin compromiso que usamos para orientar a cada cliente.",
               "stickyTrust": "Flujo seguro · Solo unos minutos · Sin compromiso"
             },
-
             "definition": {
               "title": "¿Qué es el Seguro Médico de Corto Plazo?",
               "description": "El STLDI es cobertura médica temporal que dura meses, no años. Puede ayudar con enfermedad o lesión inesperada durante un ‘hueco’ de cobertura, pero no es ACA y normalmente no cubre condiciones preexistentes, requisitos preventivos ni ciertos beneficios como maternidad o salud mental. Revise siempre los detalles en la cotización y en los documentos de su estado."
             },
-
             "notice": {
               "title": "Actualización importante sobre duración:",
               "body": {
@@ -1422,7 +1389,6 @@
                 "part3": "incluyendo renovaciones o extensiones. Bajo el marco federal anterior de STLDI (reglas de 2018), la duración total podía alcanzar hasta 36 meses en muchos estados con renovaciones; eso quedó sustituido para ventas nuevas por la regla de septiembre de 2024. Las pólizas que comenzaron antes del 1 de septiembre de 2024 pueden seguir reglas anteriores hasta que terminen."
               }
             },
-
             "about": {
               "badge": "Acerca de Isaac",
               "headline": "Su asesor de confianza para coberturas temporales",
@@ -1431,7 +1397,6 @@
               "role": "Agente de Seguros Licenciado",
               "credential": "Agente de Seguros de Salud Licenciado"
             },
-
             "eligibility": {
               "headlineBeforeBold": "¿Quiénes",
               "headlineBold": "pueden calificar?",
@@ -1444,7 +1409,6 @@
               ],
               "note": "El corto plazo no reemplaza la cobertura integral ACA. Lea cuidadosamente los avisos y términos de la póliza."
             },
-
             "enroll": {
               "headlineBeforeBold": "Cómo",
               "headlineBold": "inscribirse",
@@ -1462,7 +1426,6 @@
               ],
               "note": "La disponibilidad, periodos de espera y fechas de vigencia varían por estado."
             },
-
             "faq": {
               "label": "Más información",
               "titleBeforeBold": "Preguntas",
@@ -1498,13 +1461,12 @@
                 }
               ]
             },
-
-            "selfEnroll": { "cta": "Comenzar en línea" },
-
+            "selfEnroll": {
+              "cta": "Comenzar en línea"
+            },
             "ctaBanner": {
               "message": "¿No está seguro si le conviene el corto plazo? Obtenga asesoría rápida y objetiva."
             },
-
             "disclosures": {
               "underwriter": {
                 "label": "Aseguradora:",
@@ -1551,6 +1513,9 @@
             }
           }
         }
+      },
+      "backNav": {
+        "label": "Volver a cobertura a corto plazo"
       },
       "hero": {
         "badge": "UnitedHealthOne® · Autoinscripción",
@@ -1692,6 +1657,181 @@
       }
     }
   },
+  "allstate": {
+    "shortterm": {
+      "backNav": {
+        "label": "Volver a cobertura a corto plazo"
+      },
+      "hero": {
+        "badge": "Allstate Health Solutions · Autoinscripción",
+        "title": "Cotizaciones de seguro médico temporal con Allstate Health Solutions—seguras, rápidas y pensadas para los huecos entre coberturas",
+        "lead": "Explore opciones de cobertura temporal en una experiencia de inscripción guiada. Los productos, aseguradoras y nombres de plan varían por estado; esto no es Cobertura Esencial Mínima (ACA). Los beneficios, exclusiones y reglas de elegibilidad aparecen en la cotización y los documentos de la póliza—revíselos con atención antes de inscribirse.",
+        "cardTitle": "Qué encontrará en la cotización",
+        "cardBody": "Un flujo adaptado al móvil para comparar opciones según su código postal, con avisos antes de solicitar.",
+        "cardBullets": {
+          "0": "Vea productos y precios disponibles para su hogar",
+          "1": "Compare deducibles, participación en costos y limitaciones",
+          "2": "Complete la solicitud en línea cuando quiera—sin obligación de comprar"
+        }
+      },
+      "cta": {
+        "label": "Inicie su cotización e inscripción segura",
+        "eyebrow": "Sitio de inscripción National General · Mismo tipo de flujo que usan los agentes",
+        "primary": "Cotizar e inscribirse"
+      },
+      "introVideo": {
+        "heading": "Resumen del seguro médico temporal de Allstate Health Solutions",
+        "description": "Video de capacitación sobre diseños de plan, redes y beneficios (audio en inglés). Puede activar subtítulos en español en el reproductor (Español).",
+        "captionNote": "Los subtítulos en español son un apoyo; el audio está en inglés. Puede activarlos o desactivarlos en el reproductor."
+      },
+      "chart": {
+        "sectionTitle": "Panorama de duración a corto plazo",
+        "title": "Reglas federales de duración STLDI (ilustrativo)",
+        "subtitle": "Para pólizas vendidas o emitidas a partir del 1 de septiembre de 2024, las reglas federales limitan el plazo inicial y la duración total—incluidas renovaciones—del seguro médico de duración limitada a corto plazo.",
+        "ariaLabel": "Gráfico de barras que ilustra cuatro meses de cobertura STLDI, con el cuarto mes más corto para sugerir límites de renovación y duración total. Solo ilustrativo.",
+        "footnote": "Solo ilustrativo—no garantiza sus fechas de vigencia, renovaciones ni reglas estatales. La cotización y la póliza emitida describen lo que aplica en su caso.",
+        "months": {
+          "0": "Mes 1",
+          "1": "Mes 2",
+          "2": "Mes 3",
+          "3": "Mes 4+"
+        },
+        "yAxis": "Puente",
+        "calloutKicker": "Por qué importa",
+        "calloutTitle": "Los planes a corto plazo son un puente—no sustitutos de una cobertura ACA integral.",
+        "calloutBody": "Use el gráfico como modelo mental de cómo los límites federales de duración pueden afectar su planificación. Confirme siempre plazo, renovaciones y presentaciones estatales en sus materiales oficiales."
+      },
+      "valueProps": {
+        "title": "Por qué las familias usan este camino de inscripción",
+        "items": [
+          {
+            "title": "Marcas de salud reconocibles",
+            "body": "Allstate Health Solutions le conecta con productos respaldados por aseguradoras conocidas—para comparar con confianza mientras lee la letra pequeña."
+          },
+          {
+            "title": "Diseñado para autoservicio",
+            "body": "Ingrese algunos datos, compare lo disponible en su zona y avance a su ritmo—ideal si ya sabe que necesita un puente corto."
+          },
+          {
+            "title": "Transparencia en los trade-offs",
+            "body": "La cobertura temporal puede costar menos al inicio, pero no es seguro mayor ACA. La cotización destaca limitaciones para decidir con información clara."
+          },
+          {
+            "title": "Apoyo licenciado cuando lo desee",
+            "body": "¿Quiere una segunda opinión? Isaac Plans puede orientarle sobre el Mercado, cobertura del empleador o planes suplementarios."
+          }
+        ]
+      },
+      "steps": {
+        "title": "Inscríbase en tres pasos claros",
+        "items": [
+          {
+            "title": "Indique quién necesita cobertura",
+            "body": "Código postal, hogar y fecha de vigencia ayudan a emparejar productos presentados en su estado."
+          },
+          {
+            "title": "Compare planes y complementos",
+            "body": "Revise deducibles, redes y opciones adicionales. Lea cada aviso—especialmente si depende de atención continua."
+          },
+          {
+            "title": "Solicite y guarde sus documentos",
+            "body": "Envíe la solicitud por la experiencia segura National General y conserve copia de avisos y confirmación."
+          }
+        ]
+      },
+      "compare": {
+        "title": "Corto plazo frente a seguro mayor integral",
+        "subtitle": "Comparación ilustrativa—sus opciones reales dependen de las reglas estatales y de lo autorizado a la venta.",
+        "visualAria": "Ilustración que compara la flexibilidad de planes a corto plazo con la amplitud de beneficios esenciales ACA (Mercado).",
+        "barLabelA": "Velocidad y flexibilidad para una brecha definida",
+        "barLabelB": "Amplitud de beneficios esenciales ACA (Mercado)",
+        "caption": "Muchas personas usan STM cuando necesitan protección rápida por poco tiempo; otras requieren Mercado o empleador para protecciones a largo plazo y reglas de condiciones preexistentes. Esta página le ayuda a iniciar la conversación adecuada."
+      },
+      "trust": {
+        "title": "Una experiencia de inscripción pensada para claridad",
+        "body": "Allstate Health Solutions reúne aseguradoras de confianza y herramientas digitales para cotizar e inscribirse sin adivinar—leyendo cada aviso que corresponda a su estado."
+      },
+      "complianceNote": {
+        "title": "Disponibilidad y suscripción",
+        "body": "Los productos pueden estar suscritos por National General Insurance Company u otras compañías elegibles del grupo Allstate, según estado y plan. No todos los productos están en todos los estados; la elegibilidad y el precio están sujetos a suscripción."
+      },
+      "guidance": {
+        "sectionTitle": "Orientación para inscribirse",
+        "useCases": {
+          "title": "Cuándo suele encajar el corto plazo",
+          "items": [
+            "Está entre trabajos y necesita cobertura rápida",
+            "Perdió la Inscripción Abierta y no califica para un Periodo Especial",
+            "Quiere un puente temporal mientras evalúa opciones a largo plazo"
+          ]
+        },
+        "notInclude": {
+          "title": "Lo que STM normalmente no replica",
+          "items": [
+            "Protecciones ACA para condiciones preexistentes",
+            "Beneficios esenciales completos como maternidad o salud mental con la misma paridad que el Mercado",
+            "Renovación ilimitada como un seguro mayor con emisión garantizada"
+          ]
+        },
+        "beforeApply": {
+          "title": "Antes de enviar",
+          "items": [
+            "Confirme si sus médicos o centros participan en el plan elegido",
+            "Elija un deducible que podría pagar en un mal año",
+            "Pregunte si indemnización hospitalaria u otro suplemento debe acompañar al STM"
+          ]
+        }
+      },
+      "faq": {
+        "title": "¿Preguntas antes de empezar?",
+        "items": [
+          {
+            "q": "¿Es esto el Mercado de la Ley de Cuidado de Salud Asequible (ACA)?",
+            "a": "No. El enlace seguro abre la experiencia de inscripción National General para productos Allstate Health Solutions. Los planes a corto plazo no son Cobertura Esencial Mínima. Los planes del Mercado tienen reglas distintas, subsidios y protecciones al consumidor diferentes."
+          },
+          {
+            "q": "¿Se cubren las condiciones preexistentes?",
+            "a": "Los planes de corto plazo suelen usar suscripción médica y pueden excluir o limitar condiciones preexistentes. Lea las preguntas de la solicitud y las disposiciones de la póliza que aparecen en su cotización."
+          },
+          {
+            "q": "¿Por qué la URL menciona National General?",
+            "a": "Allstate Health Solutions aprovecha la tecnología de inscripción y socios aseguradores de National General. La aseguradora que figura en su cotización es la emisora legal de su póliza."
+          },
+          {
+            "q": "¿Puedo completarlo en el teléfono?",
+            "a": "Sí. Use un navegador actualizado. Si algo no queda claro, haga una pausa y contacte a Isaac Plans—podemos ayudarle a comparar STM con opciones del Mercado o del empleador."
+          }
+        ]
+      },
+      "bottomCta": {
+        "title": "¿Listo para ver precios según su código postal?",
+        "subtitle": "Sin cargos desde esta página—solo un acceso directo al mismo flujo seguro que usan los agentes.",
+        "button": "Abrir cotización e inscripción segura"
+      },
+      "disclosures": {
+        "carrier": {
+          "label": "Productos y emisores:",
+          "text": "La cobertura puede ser emitida por National General Insurance Company u otras compañías suscriptoras elegibles, según producto y estado. Los nombres de producto, beneficios y disponibilidad están sujetos a aprobación estatal y pueden cambiar."
+        },
+        "notMEC": {
+          "label": "No es Cobertura Esencial Mínima:",
+          "text": "La cobertura de duración limitada a corto plazo no es la Cobertura Esencial Mínima de la ACA. Puede excluir condiciones preexistentes, imponer periodos de espera e incluir límites anuales o de por vida en beneficios."
+        },
+        "linkUse": {
+          "label": "Enlace de inscripción:",
+          "text": "Al usar el enlace de inscripción sale de IsaacPlans.com y realiza la transacción directamente en el sitio autorizado del asegurador. Aplican los términos, políticas de privacidad y avisos de licencia del asegurador."
+        },
+        "footer": "Esta página es información general y no constituye oferta de seguro. Para asesoría sobre su situación específica, consulte a un agente licenciado y revise todos los materiales del plan."
+      },
+      "stmMetadata": {
+        "title": "Allstate Health Solutions Seguro Médico Temporal | Cotizar e Inscribirse | Isaac Plans",
+        "description": "Cotice seguro médico temporal con Allstate Health Solutions. Inscripción segura National General, avisos STLDI claros, apoyo bilingüe. Disponibilidad según estado.",
+        "keywords": "Allstate Health Solutions, National General, seguro médico temporal, STLDI, autoinscripción, no ACA, Isaac Plans",
+        "image": "https://www.isaacplans.com/images/stm_es.png",
+        "imageAlt": "Vista previa de inscripción Allstate Health Solutions corto plazo"
+      }
+    }
+  },
   "shortTermMedicalPage": {
     "calendar": {
       "title": "Programe su consulta de seguro médico a corto plazo",
@@ -1726,7 +1866,6 @@
         "subtitle": "Más de 3,000 pólizas asesoradas"
       }
     },
-
     "ctaButton": {
       "title": "Solicitar Información",
       "subtitle": "Personalizado y sin compromiso"
@@ -1754,11 +1893,9 @@
       "successScheduleAppointment": "Agendar consulta",
       "successClose": "Cerrar"
     },
-
     "presentationButton": {
       "title": "Ir al Modo de Presentación"
     },
-
     "about": {
       "badge": "Sobre Isaac",
       "headline": "Estrategias de vida a tu medida—según tus objetivos",
@@ -1767,12 +1904,10 @@
       "role": "Agente de Seguros Licenciado",
       "credential": "Agente de Seguros Licenciado"
     },
-
     "definition": {
       "title": "¿Qué es la Vida Universal Indexada?",
       "description": "IUL es un tipo de vida universal que acredita intereses al valor en efectivo según un índice (p. ej., S&P 500®) usando el método de acreditación de la póliza. Suele incluir un piso (p. ej., 0 %) que limita el interés acreditado a la baja y puede incluir topes y tasas de participación que limitan el alza. Aplican cargos y costo del seguro."
     },
-
     "eligibility": {
       "headlineBeforeBold": "¿Para",
       "headlineBold": "quién es?",
@@ -1785,7 +1920,6 @@
       ],
       "note": "Los préstamos y retiros reducen el valor en efectivo y el beneficio por fallecimiento y pueden causar caducidad. Los impuestos varían—consulte a un profesional tributario."
     },
-
     "enroll": {
       "headlineBeforeBold": "Cómo diseñamos tu",
       "headlineBold": "IUL a medida",
@@ -1803,7 +1937,6 @@
       ],
       "note": "Las ilustraciones son hipotéticas y no garantizan resultados futuros."
     },
-
     "faq": {
       "label": "Conceptos de IUL",
       "titleBeforeBold": "Preguntas",
@@ -1835,11 +1968,9 @@
         }
       ]
     },
-
     "ctaBanner": {
       "message": "¿Quieres ver una ilustración IUL personalizada? Agenda una llamada de 20 minutos."
     },
-
     "iulMetadata": {
       "title": "Seguro de Vida Universal Indexada (IUL) | Isaac Plans Insurance",
       "description": "Protección permanente con primas flexibles y valor en efectivo vinculado a un índice. Conoce topes, pisos, cargos y préstamos—y solicita una ilustración a tu medida.",
@@ -1863,7 +1994,6 @@
       }
     }
   },
-
   "FEpage": {
     "hero": {
       "badge": "Gastos Finales (Seguro Funerario)",
@@ -2008,7 +2138,10 @@
       "image": "https://www.isaacplans.com/images/fe_es.png",
       "imageAlt": "Tarjeta de vista previa: gastos finales de Isaac Plans Insurance",
       "keywords": "gastos finales, seguro funerario, vida entera, beneficio inmediato, beneficio gradual",
-      "breadcrumbs": { "home": "Inicio", "fe": "Gastos Finales" }
+      "breadcrumbs": {
+        "home": "Inicio",
+        "fe": "Gastos Finales"
+      }
     },
     "calendar": {
       "meta": {
@@ -2067,5 +2200,359 @@
       }
     },
     "privacy": "Respetamos tu privacidad. Tu correo electrónico solo se usará para enviarte nuestro boletín. Puedes cancelar tu suscripción en cualquier momento haciendo clic en el enlace en cualquier correo que te enviemos."
+  },
+  "pivot": {
+    "shortterm": {
+      "backNav": {
+        "label": "Volver a cobertura a corto plazo"
+      },
+      "hero": {
+        "badge": "Pivot Health · Seguro médico temporal (STLDI)",
+        "title": "Pivot Health STM—niveles flexibles, cotizaciones ágiles y cobertura de puente clara",
+        "lead": "Pivot Health distribuye planes STLDI en muchos estados, desde diseños económicos hasta formularios con copagos y farmacia más amplios. El STLDI no es Cobertura Esencial Mínima (ACA); beneficios, exclusiones y disponibilidad varían por estado y plan. Las reglas federales de duración máxima cambiaron en 2024—su agente licenciado confirma lo presentado en su código postal.",
+        "cardTitle": "Por qué preguntan por Pivot",
+        "cardBody": "Varios niveles de plan, telemedicina en muchos formularios y compra en línea—junto con avisos que explican cómo el STM difiere del seguro mayor.",
+        "cardBullets": {
+          "0": "Opciones desde Economy hasta diseños tipo Deluxe según presentaciones estatales",
+          "1": "Médico, urgencias, hospital y farmacia varían según el nivel de plan",
+          "2": "No se vende en todos los estados—Isaac verifica elegibilidad en su ZIP"
+        }
+      },
+      "cta": {
+        "label": "Solicite su cotización de seguro médico temporal",
+        "eyebrow": "El mismo flujo STM que Isaac usa con cada cliente—seguimiento bilingüe",
+        "helper": "No necesita iniciar sesión en la aseguradora aquí—nos comunicamos con opciones acordes a su situación."
+      },
+      "introVideo": {
+        "heading": "¿Qué es la cobertura temporal de Pivot Health?",
+        "description": "Resumen de las opciones STM de Pivot Health (audio en inglés). Puede activar subtítulos en español en el reproductor (Español).",
+        "captionNote": "Los subtítulos en español son un apoyo; el audio está en inglés. Puede activarlos o desactivarlos en el reproductor."
+      },
+      "chart": {
+        "sectionTitle": "Panorama de duración STLDI",
+        "title": "Reglas federales de duración STLDI (ilustrativo)",
+        "subtitle": "Para pólizas vendidas o emitidas a partir del 1 de septiembre de 2024, las reglas federales limitan el plazo inicial y la duración total—incluidas renovaciones. Los estados pueden añadir límites.",
+        "ariaLabel": "Gráfico de barras que ilustra cuatro meses de cobertura STLDI. Solo ilustrativo.",
+        "footnote": "Solo ilustrativo. Las pólizas anteriores al 1 de septiembre de 2024 pueden seguir reglas anteriores hasta que terminen. La aplicación y las elecciones estatales pueden evolucionar—confirme con su agente.",
+        "months": {
+          "0": "Mes 1",
+          "1": "Mes 2",
+          "2": "Mes 3",
+          "3": "Mes 4+"
+        },
+        "yAxis": "Puente",
+        "calloutKicker": "Planifique bien",
+        "calloutTitle": "El corto plazo cubre una ventana—no toda la vida.",
+        "calloutBody": "Combine el STM con un plan para cuando termine la póliza: Mercado (Inscripción Abierta/Especial), empleador u otra opción calificada."
+      },
+      "valueProps": {
+        "title": "Por qué las familias comparan opciones Pivot STM",
+        "items": [
+          {
+            "title": "Diseños por niveles",
+            "body": "Desde primas contenidas hasta copagos y farmacia más amplios—elija el equilibrio entre presupuesto y uso esperado de servicios."
+          },
+          {
+            "title": "Pensado para compra digital",
+            "body": "La experiencia Pivot facilita comparar rápido—Isaac revisa los avisos con usted para no pasar por alto exclusiones."
+          },
+          {
+            "title": "Telemedicina y conveniencia",
+            "body": "Muchos formularios incluyen telemedicina; redes y reembolsos aparecen en su cotización."
+          },
+          {
+            "title": "Honestidad con asesor",
+            "body": "El STM no replica protecciones ACA. Isaac explica suscripción, preexistencias y renovación antes de avanzar."
+          }
+        ]
+      },
+      "steps": {
+        "title": "Cómo le ayudamos a explorar Pivot STM",
+        "items": [
+          {
+            "title": "Indíquenos su ZIP y plazos",
+            "body": "Brechas de cobertura, fechas de vigencia y hogar determinan qué productos Pivot aplican."
+          },
+          {
+            "title": "Compare niveles lado a lado",
+            "body": "Recorremos deducibles, máximos de bolsillo y límites de beneficios—no solo la prima mensual."
+          },
+          {
+            "title": "Solicite con confianza",
+            "body": "Cuando esté listo, guiamos el flujo de solicitud de la aseguradora y guardamos sus avisos."
+          }
+        ]
+      },
+      "compare": {
+        "title": "Velocidad STM frente a profundidad ACA",
+        "subtitle": "Comparación ilustrativa—su cotización muestra cifras reales en su estado.",
+        "visualAria": "Ilustración que compara flexibilidad STM con seguro mayor ACA integral.",
+        "barLabelA": "Pivot STM: estrategia de brecha definida",
+        "barLabelB": "Mercado ACA: beneficios esenciales",
+        "caption": "¿Necesita subsidios o protección por preexistencias? El Mercado o el empleador pueden ser mejor opción—Isaac le ayuda a comparar ambos caminos."
+      },
+      "trust": {
+        "title": "Un distribuidor reconocido",
+        "body": "Pivot Health se enfoca en productos médicos de corta duración y servicios relacionados—con tecnología y avisos claros sobre lo que compra."
+      },
+      "complianceNote": {
+        "title": "Disponibilidad y suscripción",
+        "body": "Pivot Health comercializa planes suscritos por aseguradoras presentadas en cada estado; no todos los productos están en todos los estados. Elegibilidad, precio y renovación están sujetos a suscripción médica y aprobación estatal."
+      },
+      "guidance": {
+        "sectionTitle": "Orientación",
+        "useCases": {
+          "title": "Cuándo suele considerarse Pivot STM",
+          "items": [
+            "Entre trabajos con una breve interrupción de cobertura",
+            "Esperando cobertura del empleador o del Mercado",
+            "Hogares saludables que aceptan los trade-offs del STM por protección temporal"
+          ]
+        },
+        "notInclude": {
+          "title": "Lo que el STM aún puede no cubrir",
+          "items": [
+            "Preexistencias como los planes ACA",
+            "Renovación garantizada como el seguro mayor",
+            "Algunos mandatos preventivos o dental pediátrico como en el Mercado"
+          ]
+        },
+        "beforeApply": {
+          "title": "Antes de solicitar",
+          "items": [
+            "Liste medicamentos y médicos que no puede perder",
+            "Confirme duración máxima y renovaciones en su estado",
+            "Pregunte por indemnización hospitalaria o accidentes si desea efectivo adicional"
+          ]
+        }
+      },
+      "faq": {
+        "title": "Preguntas frecuentes Pivot STM",
+        "items": [
+          {
+            "q": "¿Pivot Health es la aseguradora?",
+            "a": "Pivot Health distribuye y da servicio a planes STM; las pólizas las emiten socios suscritores presentados. El certificado indica la aseguradora legal."
+          },
+          {
+            "q": "¿Pivot STM cumple el mandato individual de la ACA?",
+            "a": "No hay penalidad federal por falta de cobertura, pero el STM no es Cobertura Esencial Mínima ni ofrece las mismas protecciones que el Mercado."
+          },
+          {
+            "q": "¿Cuánto tiempo puedo mantener un plan Pivot STM?",
+            "a": "Los topes dependen de su estado, formulario y si la póliza es anterior o posterior a los cambios federales de 2024. Isaac consulta las presentaciones vigentes para su ZIP."
+          },
+          {
+            "q": "¿Por qué solicitar cotización en lugar de un enlace directo?",
+            "a": "Isaac no aloja aquí la inscripción directa de Pivot. El botón de cotización nos permite recopilar sus datos con seguridad y responder con opciones presentadas—y alternativas si el STM no encaja."
+          }
+        ]
+      },
+      "bottomCta": {
+        "title": "¿Quiere opciones Pivot para su código postal?",
+        "subtitle": "Pulse abajo—Isaac Plans le dará seguimiento bilingüe con los siguientes pasos."
+      },
+      "disclosures": {
+        "carrier": {
+          "label": "Distribución:",
+          "text": "Pivot Health comercializa STLDI suscrito por aseguradoras socias; nombres del emisor, formularios y beneficios varían por estado."
+        },
+        "notMEC": {
+          "label": "No es Cobertura Esencial Mínima:",
+          "text": "El STLDI no es la Cobertura Esencial Mínima de la ACA. Puede excluir preexistencias, usar suscripción e imponer límites o periodos de espera."
+        },
+        "infoRequest": {
+          "label": "Solicitudes de cotización:",
+          "text": "Enviar información a Isaac Plans no vincula cobertura. Un agente licenciado se comunicará para revisar disponibilidad, avisos y alternativas."
+        },
+        "footer": "Contenido educativo—no es oferta de seguro. La cobertura está sujeta a aprobación de suscripción; verifique siempre los materiales oficiales."
+      },
+      "stmMetadata": {
+        "title": "Pivot Health Seguro Médico Temporal | Cotización bajo solicitud | Isaac Plans",
+        "description": "Explore Pivot Health STM (STLDI) con Isaac Plans Insurance. Solicite cotización bilingüe, compare niveles de plan y revise reglas STLDI 2024 en su estado.",
+        "keywords": "Pivot Health, seguro médico temporal, STLDI, cobertura temporal, Isaac Plans, no ACA",
+        "image": "https://www.isaacplans.com/images/stm_es.png",
+        "imageAlt": "Información Pivot Health seguro médico temporal"
+      }
+    }
+  },
+  "manhattan": {
+    "shortterm": {
+      "backNav": {
+        "label": "Volver a cobertura a corto plazo"
+      },
+      "hero": {
+        "badge": "Manhattan Life · Estrategias a corto plazo",
+        "title": "Manhattan Life—aseguradora con historia, opciones modernas para brechas de cobertura",
+        "lead": "Manhattan Life atiende a asegurados desde 1850 con productos individuales y suplementarios en todo el país. El STM (STLDI) depende del estado y del formulario; Manhattan Life también ofrece indemnización hospitalaria y otros productos que complementan el seguro mayor. Esta página se centra en cubrir brechas—Isaac confirmará qué productos presentados encajan en su ZIP y perfil de salud.",
+        "cardTitle": "Qué esperar al consultar",
+        "cardBody": "Partimos de su calendario, presupuesto y médicos imprescindibles—luego alineamos opciones Manhattan Life (y alternativas) para que no se quede sin cobertura de la noche a la mañana.",
+        "cardBullets": {
+          "0": "Revisión licenciada de STM frente a indemnización u otros suplementos",
+          "1": "Explicación clara de suscripción y reglas de preexistencias",
+          "2": "Apoyo bilingüe desde la solicitud hasta la inscripción"
+        }
+      },
+      "cta": {
+        "label": "Inicie su cotización Manhattan Life",
+        "eyebrow": "Sitio oficial de la aseguradora · Enlace personalizado de agente",
+        "primary": "Abrir cotización personalizada",
+        "helper": "¿Prefiere comparar primero con Isaac? Use Obtenga una cotización al final—seguimos ayudándole a evaluar STM, indemnización y el Mercado."
+      },
+      "introVideo": {
+        "heading": "Historia de la marca Manhattan Life",
+        "description": "Video sobre la trayectoria y el portafolio de Manhattan Life (audio en inglés). Puede activar subtítulos en español en el reproductor (Español).",
+        "captionNote": "Los subtítulos en español son un apoyo; el audio está en inglés. Puede activarlos o desactivarlos en el reproductor."
+      },
+      "chart": {
+        "sectionTitle": "Panorama de duración STLDI",
+        "title": "Reglas federales de duración STLDI (ilustrativo)",
+        "subtitle": "Los planes médicos temporales están pensados para meses limitados. Las reglas federales de STLDI se endurecieron para muchas ventas nuevas después del 1 de septiembre de 2024; confirme qué aplica a su cotización.",
+        "ariaLabel": "Gráfico de barras ilustrativo de cuatro meses de STLDI. Solo ilustrativo.",
+        "footnote": "Solo ilustrativo. Su estado, presentación del asegurador y fecha de inicio determinan plazos y renovaciones reales.",
+        "months": {
+          "0": "Mes 1",
+          "1": "Mes 2",
+          "2": "Mes 3",
+          "3": "Mes 4+"
+        },
+        "yAxis": "Puente",
+        "calloutKicker": "Planifique el siguiente paso",
+        "calloutTitle": "Sepa qué pasa cuando termina el STM.",
+        "calloutBody": "Isaac le ayuda a alinear ACA, empleador o suplementos para no quedar sin cobertura al vencer el temporal."
+      },
+      "valueProps": {
+        "title": "Por qué los clientes preguntan por Manhattan Life",
+        "items": [
+          {
+            "title": "Más de 175 años",
+            "body": "Una aseguradora estable con licencias amplias—importante si desea respaldo al momento de dar servicio a la póliza."
+          },
+          {
+            "title": "Experiencia suplementaria + brechas",
+            "body": "Además del STM, Manhattan Life comercializa indemnización hospitalaria y otros beneficios en efectivo que Isaac puede combinar cuando corresponde."
+          },
+          {
+            "title": "Trade-offs transparentes",
+            "body": "Revisamos qué cubre el STM y qué no antes de invertir tiempo en suscripción."
+          },
+          {
+            "title": "Seguimiento personal",
+            "body": "Habla con un agente licenciado real, no un centro anónimo, para comparar presentaciones Manhattan Life con otras aseguradoras."
+          }
+        ]
+      },
+      "steps": {
+        "title": "Cómo Isaac navega opciones Manhattan Life",
+        "items": [
+          {
+            "title": "Aclare la brecha que resuelve",
+            "body": "Cambio de empleo, periodo de espera o Inscripción Abierta perdida—cada caso sugiere combinaciones distintas."
+          },
+          {
+            "title": "Empareje productos con prioridades",
+            "body": "STM para beneficios tipo mayor médico frente a planes de indemnización en efectivo pueden convivir; modelamos pros y contras."
+          },
+          {
+            "title": "Inscríbase con documentación",
+            "body": "Al elegir camino, ayudamos a completar solicitudes y conservar documentos de póliza."
+          }
+        ]
+      },
+      "compare": {
+        "title": "STM frente a suplementos en efectivo",
+        "subtitle": "Manhattan Life puede ofrecer ambos—cada uno resuelve un problema distinto.",
+        "visualAria": "Ilustración que compara reembolso tipo STM con indemnización por día o suma global.",
+        "barLabelA": "Beneficios tipo mayor médico STM (donde esté presentado)",
+        "barLabelB": "Indemnización hospitalaria en efectivo",
+        "caption": "Muchas familias combinan indemnización para deducibles mientras el STM cubre gastos elegibles más amplios—pregunte a Isaac si la estrategia aplica en su estado."
+      },
+      "trust": {
+        "title": "La estabilidad importa cuando la vida cambia rápido",
+        "body": "La trayectoria y el portafolio diversificado inspiran confianza—pero cada producto tiene límites. Leemos la letra pequeña juntos."
+      },
+      "complianceNote": {
+        "title": "Presentaciones y mix de productos",
+        "body": "Las compañías Manhattan Life ofrecen varias líneas; disponibilidad, suscripción y nombres comerciales varían por estado. La disponibilidad de STM no está garantizada en todas las jurisdicciones—su cotización solo lista lo presentado activamente."
+      },
+      "guidance": {
+        "sectionTitle": "Orientación",
+        "useCases": {
+          "title": "Cuándo suele mencionarse Manhattan Life",
+          "items": [
+            "Quiere un nombre reconocido para combinar STM con suplementos",
+            "Necesita separar STM de productos de cuidado a corto plazo con nombres parecidos",
+            "Valora apoyo de agente en inscripciones con varios pasos"
+          ]
+        },
+        "notInclude": {
+          "title": "Recuerde los límites",
+          "items": [
+            "El STM no sustituye cobertura ACA integral si necesita emisión garantizada",
+            "Los planes en efectivo pagan distinto al reembolso mayor médico—no los confunda",
+            "Los productos de cuidado a largo plazo son distintos del STLDI médico"
+          ]
+        },
+        "beforeApply": {
+          "title": "Antes de decidir",
+          "items": [
+            "Reúna medicamentos y proveedores actuales",
+            "Entienda periodos de eliminación en riders de indemnización",
+            "Defina el máximo de bolsillo que podría asumir"
+          ]
+        }
+      },
+      "faq": {
+        "title": "Preguntas frecuentes Manhattan Life STM",
+        "items": [
+          {
+            "q": "¿Manhattan Life solo ofrece STM?",
+            "a": "No. Manhattan Life tiene múltiples productos individuales y suplementarios. Esta página destaca brechas médicas; Isaac identificará si STM, indemnización u otra presentación es adecuada."
+          },
+          {
+            "q": "¿Es lo mismo STM que el cuidado a corto plazo de Manhattan Life?",
+            "a": "No. Los productos de cuidado a corto plazo cubren riesgos distintos (p. ej., estancias y ADL) al STLDI médico. Le ayudamos a elegir la categoría correcta."
+          },
+          {
+            "q": "¿Se cubren las preexistencias?",
+            "a": "El STM suele usar suscripción y puede excluir o limitar preexistencias. Las reglas aparecen en la solicitud y el resumen de cobertura—Isaac las revisa con usted."
+          },
+          {
+            "q": "¿Cómo obtengo precios?",
+            "a": "Use los botones de cotización Manhattan Life arriba para abrir su enlace directo personalizado. También puede pulsar Obtenga una cotización al final para hablar con Isaac Plans y comparar con otras aseguradoras."
+          }
+        ]
+      },
+      "bottomCta": {
+        "title": "¿Listo para opciones Manhattan Life a su medida?",
+        "subtitle": "Entre a su cotización directa—o pida a Isaac que revise alternativas para su código postal.",
+        "button": "Abrir cotización Manhattan Life"
+      },
+      "disclosures": {
+        "carrier": {
+          "label": "Información de la aseguradora:",
+          "text": "Las pólizas pueden ser emitidas por Manhattan Life Insurance Company u otras filiales según producto y estado. Nombres, beneficios y disponibilidad están sujetos a aprobación regulatoria."
+        },
+        "notMEC": {
+          "label": "No es Cobertura Esencial Mínima:",
+          "text": "El STLDI no es la Cobertura Esencial Mínima de la ACA salvo designación específica; aplican limitaciones y exclusiones."
+        },
+        "infoRequest": {
+          "label": "Solicitudes de cotización:",
+          "text": "La información enviada a Isaac Plans se usa para asistencia licenciada. No garantiza elegibilidad ni tarifas hasta completar la suscripción."
+        },
+        "linkUse": {
+          "label": "Enlace de cotización directa:",
+          "text": "Los botones Manhattan Life de esta página abren el sitio autorizado de cotización (direct.manhattanlife.com). Sale de IsaacPlans.com; aplican términos, privacidad y licencias de Manhattan Life."
+        },
+        "footer": "Información general—no es oferta de seguro. La disponibilidad varía; lea siempre el resumen de cobertura y la póliza oficiales."
+      },
+      "stmMetadata": {
+        "title": "Manhattan Life Seguro Médico Temporal | Cotización directa | Isaac Plans",
+        "description": "Abra su enlace personalizado de cotización Manhattan Life u obtenga ayuda bilingüe de Isaac Plans Insurance. Opciones STM y suplementarias—disponibilidad según estado.",
+        "keywords": "Manhattan Life, seguro médico temporal, STLDI, indemnización hospitalaria, Isaac Plans",
+        "image": "https://www.isaacplans.com/images/stm_es.png",
+        "imageAlt": "Información Manhattan Life seguro médico temporal"
+      }
+    }
   }
 }

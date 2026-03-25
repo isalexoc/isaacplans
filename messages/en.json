@@ -234,7 +234,6 @@
       }
     }
   },
-
   "header": {
     "nav": {
       "home": "Home",
@@ -495,14 +494,12 @@
     "title": "Privacy Policy",
     "lastUpdated": "Last updated: June 20, 2025",
     "back": "Back to Home",
-
     "cta": {
       "headline": "Questions About Your Privacy?",
       "body": "If you have any concerns about how we handle your personal information, feel free to reach out.",
       "call": "Call now",
       "email": "Send email"
     },
-
     "sections": {
       "introduction": {
         "title": "1. Introduction",
@@ -603,16 +600,13 @@
     "title": "Terms and Conditions",
     "lastUpdated": "Last updated: June 20, 2025",
     "back": "Back to Home",
-
     "cta": {
       "headline": "Questions About the Terms?",
       "body": "If you have any questions about these terms and conditions, we're here to help.",
       "call": "Call now",
       "email": "Send email"
     },
-
     "limitationsLabel": "However, we are not responsible for:",
-
     "sections": {
       "sms": {
         "title": "1. SMS Terms and Conditions",
@@ -628,12 +622,10 @@
           "8 – Standard Disclosure: message/data rates may apply. For help text HELP to ({{PHONE_NUMBER}}). Message frequency varies."
         ]
       },
-
       "introduction": {
         "title": "2. Introduction and Acceptance",
         "content": "Welcome to Isaac Plans. These Terms and Conditions (“Terms”) govern the use of our insurance services and website. By using our services, you agree to these terms."
       },
-
       "services": {
         "title": "3. Description of Services",
         "content": "Isaac Plans provides the following services:",
@@ -647,12 +639,10 @@
           "Cost-optimisation and subsidy analysis"
         ]
       },
-
       "eligibility": {
         "title": "4. Eligibility and Licenses",
         "content": "Our services are available in the states where Isaac Orraiz holds active licenses—currently {states}+ U.S. states."
       },
-
       "responsibilities": {
         "title": "5. Client Responsibilities",
         "content": "As a client, you agree to:",
@@ -665,7 +655,6 @@
           "Maintain confidentiality of your account information"
         ]
       },
-
       "limitations": {
         "title": "6. Liability Limitations",
         "content": "Isaac Plans acts as an intermediary between you and insurance companies. Our responsibilities include:",
@@ -682,7 +671,6 @@
           "Liability limited to intermediation and advisory services"
         ]
       },
-
       "privacy": {
         "title": "7. Privacy and Confidentiality",
         "content": "We are committed to protecting your privacy according to our Privacy Policy:",
@@ -693,17 +681,14 @@
           "We comply with all applicable data-protection regulations"
         ]
       },
-
       "fees": {
         "title": "8. Fees and Compensation",
         "content": "Our consulting services are generally free to consumers. We are compensated by insurers, which does not affect your premium."
       },
-
       "termination": {
         "title": "9. Service Termination",
         "content": "Either party may terminate this relationship with written notice. Policies in force remain subject to their own terms."
       },
-
       "compliance": {
         "title": "10. Legal Compliance",
         "content": "Isaac Plans operates in full compliance with:",
@@ -715,12 +700,10 @@
           "Professional licensing requirements"
         ]
       },
-
       "modifications": {
         "title": "11. Modifications",
         "content": "We reserve the right to update these terms at any time. Changes take effect once posted on this page."
       },
-
       "contact": {
         "title": "12. Contact Information",
         "content": "For questions about these Terms:",
@@ -927,7 +910,6 @@
     "calendar": {
       "title": "Book Your ACA Phone Appointment",
       "backButton": "← Go Back",
-
       "meta": {
         "title": "ACA Appointment Calendar | Isaac Plans Insurance",
         "description": "Schedule your ACA enrollment consultation with Isaac Plans Insurance. Get guidance and personalized help choosing the right coverage.",
@@ -986,7 +968,6 @@
         "subtitle": "2,500+ members with healthier teeth & eyes"
       }
     },
-
     "ctaButton": {
       "title": "Request Information",
       "subtitle": "Fast, no-obligation estimates"
@@ -1014,7 +995,6 @@
       "successScheduleAppointment": "Book a consultation",
       "successClose": "Close"
     },
-
     "about": {
       "badge": "About Me",
       "headline": "Committed to Your Dental & Vision Health",
@@ -1023,19 +1003,16 @@
       "role": "Insurance Agent",
       "credential": "Licensed Insurance Agent"
     },
-
     "selfEnroll": {
       "title": "Prefer to self-enroll?",
       "subtitle": "Use our secure portal to compare dental & vision plans and enroll in minutes.",
       "cta": "Start Self-Enrollment",
       "disclaimer": "Takes just 5 minutes—no paperwork, instant confirmation."
     },
-
     "definition": {
       "title": "Why Choose Ameritas for Dental & Vision?",
       "description": "Ameritas is consistently ranked among the nation’s top carriers for stand-alone dental and vision insurance. With broad provider networks, generous annual maximums, and next-day coverage on preventive services, Ameritas makes it easy to keep your smile bright and your vision clear—without breaking the bank.  I’m proud to partner with Ameritas to bring you plans that combine affordability, flexibility, and award-winning customer service."
     },
-
     "eligibility": {
       "headlineBeforeBold": "Who",
       "headlineBold": "Can Enroll?",
@@ -1048,7 +1025,6 @@
       ],
       "note": "*Day-one preventive coverage, a nationwide PPO network, optional out-of-network freedom, and zero enrollment fees make Ameritas a top choice for dental & vision protection."
     },
-
     "enroll": {
       "headlineBeforeBold": "How to Enroll in an",
       "headlineBold": "Ameritas Dental & Vision Plan",
@@ -1064,7 +1040,6 @@
       ],
       "note": "No enrollment fees, no health questions, and no waiting periods on preventive services. A 30-day customer satisfaction guarantee gives you extra peace of mind."
     },
-
     "faqDental": {
       "label": "Ameritas Dental & Vision",
       "titleBeforeBold": "Questions About",
@@ -1100,7 +1075,6 @@
         }
       ]
     },
-
     "ctaBanner": {
       "message": "Looking for a First-Class Dental & Vision Consultant?",
       "button": "Schedule A Consultation"
@@ -1191,12 +1165,10 @@
       "role": "Licensed Health Insurance Agent",
       "credential": "Licensed Health Insurance Agent"
     },
-
     "definition": {
       "title": "What is Hospital Indemnity Insurance?",
       "description": "It’s a supplemental plan that pays YOU directly—cash per day or per event—to offset deductibles, copays and lost income while you’re hospitalized."
     },
-
     "selfEnroll": {
       "cta": "Start Online",
       "disclaimer": "Policies issued by the carrier. Subject to underwriting approval.",
@@ -1209,7 +1181,6 @@
         "subtitle": "Affordable coverage for any budget"
       }
     },
-
     "eligibility": {
       "headlineBeforeBold": "Most adults are",
       "headlineBold": "already eligible",
@@ -1222,7 +1193,6 @@
       },
       "note": "Some pre-existing conditions may affect benefit payouts."
     },
-
     "enroll": {
       "headlineBeforeBold": "Three simple steps to",
       "headlineBold": "get covered",
@@ -1240,7 +1210,6 @@
       },
       "note": "Approval is usually instant!"
     },
-
     "faq": {
       "label": "FAQs",
       "titleBeforeBold": "Common questions about",
@@ -1276,7 +1245,6 @@
         }
       }
     },
-
     "ctaBanner": {
       "message": "Ready to guard your savings? Book a free 20-minute consultation with Isaac today."
     },
@@ -1361,7 +1329,6 @@
       "body": "Book a free consultation or send us your questions—we’ll get back within one business day."
     }
   },
-
   "NotFoundPage": {
     "title": "Page not found",
     "description": "Oops! The page you're looking for doesn't exist or has been moved.",
@@ -1418,12 +1385,10 @@
               "afterCarriersTrust": "Use the quote button—same secure, no-obligation path we use to guide every client.",
               "stickyTrust": "Secure flow · Just a few minutes · No obligation"
             },
-
             "definition": {
               "title": "What is Short Term Medical?",
               "description": "Short-Term Limited-Duration Insurance (STLDI) is temporary medical coverage meant to last months—not years. It can help with unexpected illness or injury during a gap, but it is not ACA coverage and typically doesn’t cover preexisting conditions, preventive care requirements, or certain benefits such as maternity or mental health. Always review details in the quote flow and policy documents for your state."
             },
-
             "notice": {
               "title": "Important duration update:",
               "body": {
@@ -1434,7 +1399,6 @@
                 "part3": "including any renewals or extensions. Under the prior 2018 federal STLDI framework, total duration could reach up to 36 months in many states with renewals; that was superseded for new sales by the September 2024 rule. Policies that started before Sept 1, 2024 may still follow earlier terms until they end."
               }
             },
-
             "about": {
               "badge": "About Isaac",
               "headline": "Your trusted advisor for gap coverage",
@@ -1443,7 +1407,6 @@
               "role": "Licensed Health-Insurance Agent",
               "credential": "Licensed Health Insurance Agent"
             },
-
             "eligibility": {
               "headlineBeforeBold": "Who",
               "headlineBold": "might qualify?",
@@ -1456,7 +1419,6 @@
               ],
               "note": "Short term medical is not a substitute for comprehensive ACA coverage. Read all notices and policy terms carefully."
             },
-
             "enroll": {
               "headlineBeforeBold": "How to",
               "headlineBold": "enroll",
@@ -1474,7 +1436,6 @@
               ],
               "note": "Availability, waiting periods, and effective dates vary by state."
             },
-
             "faq": {
               "label": "More Info",
               "titleBeforeBold": "Common",
@@ -1510,13 +1471,12 @@
                 }
               ]
             },
-
-            "selfEnroll": { "cta": "Start Online" },
-
+            "selfEnroll": {
+              "cta": "Start Online"
+            },
             "ctaBanner": {
               "message": "Not sure if short-term is right for you? Get quick, unbiased guidance."
             },
-
             "disclosures": {
               "underwriter": {
                 "label": "Underwriter:",
@@ -1563,6 +1523,9 @@
             }
           }
         }
+      },
+      "backNav": {
+        "label": "Back to Short Term Medical"
       },
       "hero": {
         "badge": "UnitedHealthOne® · Self-enrollment",
@@ -1703,6 +1666,181 @@
       }
     }
   },
+  "allstate": {
+    "shortterm": {
+      "backNav": {
+        "label": "Back to Short Term Medical"
+      },
+      "hero": {
+        "badge": "Allstate Health Solutions · Self-enrollment",
+        "title": "Short-term medical quotes through Allstate Health Solutions—secure, fast, and built for real life between plans",
+        "lead": "Explore temporary coverage options in a guided enrollment experience. Products, underwriting companies, and plan names vary by state; this is not Minimum Essential Coverage (ACA). Benefits, exclusions, and eligibility rules are shown in the official quote and policy documents—review them carefully before you enroll.",
+        "cardTitle": "What you get in the quote flow",
+        "cardBody": "A mobile-friendly path to compare options for your ZIP code, with disclosures displayed before you apply.",
+        "cardBullets": {
+          "0": "See available products and pricing for your household",
+          "1": "Review deductibles, cost-sharing, and limitations side by side",
+          "2": "Finish your application online when you are ready—no obligation to buy"
+        }
+      },
+      "cta": {
+        "label": "Start your secure quote & enrollment",
+        "eyebrow": "National General enrollment site · Same type of flow licensed agents use",
+        "primary": "Get a quote & enroll"
+      },
+      "introVideo": {
+        "heading": "Allstate Health Solutions short-term medical overview",
+        "description": "Training video on plan designs, networks, and benefits (English audio). Spanish subtitles are available in the player when you choose Español.",
+        "captionNote": ""
+      },
+      "chart": {
+        "sectionTitle": "Short-term duration overview",
+        "title": "Federal STLDI duration rules (illustrative)",
+        "subtitle": "For policies sold or issued on or after Sept 1, 2024, federal rules cap the initial term and total duration—including renewals—for Short-Term Limited-Duration Insurance.",
+        "ariaLabel": "Bar chart illustrating four months of short-term limited-duration coverage, with the fourth month shown shorter to suggest limits on renewals and total duration. Illustrative only.",
+        "footnote": "Illustration only—not a guarantee of your effective dates, renewals, or state-specific rules. Your quote and issued policy describe what applies to you.",
+        "months": {
+          "0": "Mo 1",
+          "1": "Mo 2",
+          "2": "Mo 3",
+          "3": "Mo 4+"
+        },
+        "yAxis": "Bridge",
+        "calloutKicker": "Why this matters",
+        "calloutTitle": "Short-term plans are designed as a bridge—not a substitute for comprehensive ACA coverage.",
+        "calloutBody": "Use the chart as a mental model for how federal duration limits can shape real-world planning. Always confirm term length, renewal options, and state filings in your official materials."
+      },
+      "valueProps": {
+        "title": "Why families use this enrollment path",
+        "items": [
+          {
+            "title": "Recognizable health brands",
+            "body": "Allstate Health Solutions connects you to products backed by carriers consumers know—so you can shop with confidence while you read the fine print."
+          },
+          {
+            "title": "Built for self-service",
+            "body": "Enter a few details, compare what is available in your area, and move at your own pace—ideal when you already know you need a short bridge."
+          },
+          {
+            "title": "Transparent trade-offs",
+            "body": "Short-term coverage can cost less up front, but it is not ACA major medical. The quote highlights limitations so you can decide with eyes open."
+          },
+          {
+            "title": "Licensed support when you want it",
+            "body": "Prefer a second opinion? Isaac Plans can walk through alternatives like Marketplace coverage or supplemental plans that pair with your main insurance."
+          }
+        ]
+      },
+      "steps": {
+        "title": "Enroll in three straightforward steps",
+        "items": [
+          {
+            "title": "Tell the system who needs coverage",
+            "body": "ZIP code, household, and effective date help match you to filed products in your state."
+          },
+          {
+            "title": "Compare plans and riders",
+            "body": "Review deductibles, networks, and optional add-ons. Read every notice—especially if you rely on ongoing care."
+          },
+          {
+            "title": "Apply and save your documents",
+            "body": "Submit through the secure National General enrollment experience and keep a copy of your disclosures and confirmation."
+          }
+        ]
+      },
+      "compare": {
+        "title": "Short-term vs. comprehensive major medical",
+        "subtitle": "Illustrative comparison—your actual choices depend on state rules and what is filed for sale.",
+        "visualAria": "Illustration comparing flexibility of short-term plans versus breadth of ACA major medical coverage.",
+        "barLabelA": "Speed & flexibility for a defined gap",
+        "barLabelB": "Breadth of ACA essential health benefits (Marketplace)",
+        "caption": "Many people use STM when they need fast protection for a short window; others need Marketplace or employer coverage for long-term protections and preexisting-condition rules. This page helps you start the right conversation."
+      },
+      "trust": {
+        "title": "A enrollment experience designed to be clear",
+        "body": "Allstate Health Solutions brings together trusted carriers and digital tools so you can quote and enroll without guesswork—while still reading every disclosure that applies to your state."
+      },
+      "complianceNote": {
+        "title": "Availability & underwriting",
+        "body": "Products may be underwritten by National General Insurance Company or other eligible companies in the Allstate family, depending on state and plan. Not all products are available in all states; eligibility and pricing are subject to underwriting."
+      },
+      "guidance": {
+        "sectionTitle": "Enrollment guidance",
+        "useCases": {
+          "title": "When short-term often fits",
+          "items": [
+            "You are between jobs and need coverage quickly",
+            "You missed Open Enrollment and do not qualify for a Special Enrollment Period",
+            "You want a temporary bridge while evaluating long-term options"
+          ]
+        },
+        "notInclude": {
+          "title": "What STM typically does not mirror",
+          "items": [
+            "ACA preexisting-condition protections",
+            "Full essential health benefits like long-term maternity or mental health parity in the same way as Marketplace plans",
+            "Unlimited renewability like guaranteed-issue major medical"
+          ]
+        },
+        "beforeApply": {
+          "title": "Before you submit",
+          "items": [
+            "Confirm whether your doctors or facilities participate for the plan you select",
+            "Choose a deductible you could pay if you had a bad year",
+            "Ask whether hospital indemnity or other supplemental coverage should sit alongside STM"
+          ]
+        }
+      },
+      "faq": {
+        "title": "Questions before you start?",
+        "items": [
+          {
+            "q": "Is this the Affordable Care Act (ACA) Marketplace?",
+            "a": "No. The secure link opens the National General enrollment experience for Allstate Health Solutions products. Short-term plans are not Minimum Essential Coverage. Marketplace plans have different rules, subsidies, and consumer protections."
+          },
+          {
+            "q": "Are preexisting conditions covered?",
+            "a": "Short-term medical plans typically use medical underwriting and may exclude or limit preexisting conditions. Read the specific application questions and policy provisions shown in your quote."
+          },
+          {
+            "q": "Why does the URL mention National General?",
+            "a": "Allstate Health Solutions leverages National General’s enrollment technology and carrier partners. The underwriting company shown in your quote is the legal issuer for your policy."
+          },
+          {
+            "q": "Can I complete this on a phone?",
+            "a": "Yes. Use an up-to-date browser. If anything looks unclear, pause and contact Isaac Plans—we can help you compare STM with Marketplace or employer options."
+          }
+        ]
+      },
+      "bottomCta": {
+        "title": "Ready to see pricing for your ZIP code?",
+        "subtitle": "No fees from this page—just a direct path into the same secure enrollment flow agents use.",
+        "button": "Open secure quote & enrollment"
+      },
+      "disclosures": {
+        "carrier": {
+          "label": "Products & issuers:",
+          "text": "Coverage may be issued by National General Insurance Company or other eligible underwriting companies, depending on product and state. All product names, benefits, and availability are subject to state approval and may change."
+        },
+        "notMEC": {
+          "label": "Not Minimum Essential Coverage:",
+          "text": "Short-term limited-duration coverage is not ACA Minimum Essential Coverage. It may exclude preexisting conditions, impose waiting periods, and include annual or lifetime dollar limits on benefits."
+        },
+        "linkUse": {
+          "label": "Enrollment link:",
+          "text": "By using the enrollment link you leave IsaacPlans.com and transact directly with the carrier’s authorized enrollment site. Carrier terms, privacy policies, and licensing disclosures apply."
+        },
+        "footer": "This page is general information and not an offer of insurance. For advice about your specific situation, consult a licensed agent and review all plan materials."
+      },
+      "stmMetadata": {
+        "title": "Allstate Health Solutions Short Term Medical | Quote & Enroll | Isaac Plans",
+        "description": "Quote short-term medical insurance through Allstate Health Solutions. Secure National General enrollment, clear STLDI disclosures, bilingual agent support. Availability varies by state.",
+        "keywords": "Allstate Health Solutions, National General, short term medical, STLDI, temporary health insurance, self enrollment, non-ACA, Isaac Plans",
+        "image": "https://www.isaacplans.com/images/stm.png",
+        "imageAlt": "Allstate Health Solutions short term medical enrollment preview"
+      }
+    }
+  },
   "shortTermMedicalPage": {
     "calendar": {
       "title": "Schedule Your Short Term Medical Consultation",
@@ -1737,7 +1875,6 @@
         "subtitle": "3,000+ policies guided"
       }
     },
-
     "ctaButton": {
       "title": "Request Information",
       "subtitle": "Personalized, no obligation"
@@ -1765,11 +1902,9 @@
       "successScheduleAppointment": "Book a consultation",
       "successClose": "Close"
     },
-
     "presentationButton": {
       "title": "Go to Presentation Mode"
     },
-
     "about": {
       "badge": "About Isaac",
       "headline": "Tailored life-insurance strategies—built around your goals",
@@ -1778,12 +1913,10 @@
       "role": "Licensed Insurance Agent",
       "credential": "Licensed Insurance Agent"
     },
-
     "definition": {
       "title": "What is Indexed Universal Life?",
       "description": "IUL is a type of universal life policy that credits interest to cash value based on an index (e.g., S&P 500®) using a policy’s crediting method. It typically includes a floor (e.g., 0%) that limits downside to the credited interest, and may include caps and participation rates that limit upside. Policy charges and the cost of insurance apply."
     },
-
     "eligibility": {
       "headlineBeforeBold": "Who",
       "headlineBold": "is it for?",
@@ -1796,7 +1929,6 @@
       ],
       "note": "Loans and withdrawals reduce cash value and death benefit and may cause a policy to lapse. Tax treatment can vary—consult a tax professional."
     },
-
     "enroll": {
       "headlineBeforeBold": "How we design your",
       "headlineBold": "custom IUL",
@@ -1814,7 +1946,6 @@
       ],
       "note": "Illustrations are hypothetical and not guarantees of future performance."
     },
-
     "faq": {
       "label": "IUL Basics",
       "titleBeforeBold": "Common",
@@ -1846,11 +1977,9 @@
         }
       ]
     },
-
     "ctaBanner": {
       "message": "Ready to see a personalized IUL illustration? Book a 20-minute call."
     },
-
     "iulMetadata": {
       "title": "Indexed Universal Life (IUL) Insurance | Isaac Plans Insurance",
       "description": "Permanent protection with flexible premiums and index-linked cash value. Learn how caps, floors, charges, and loans work—and get a tailored illustration.",
@@ -1874,7 +2003,6 @@
       }
     }
   },
-
   "FEpage": {
     "hero": {
       "badge": "Final Expense (Burial Insurance)",
@@ -2019,7 +2147,10 @@
       "image": "https://www.isaacplans.com/images/fe_en.png",
       "imageAlt": "Preview card: Final Expense insurance by Isaac Plans Insurance",
       "keywords": "final expense insurance, burial insurance, whole life, level benefit, graded benefit, small whole life policy",
-      "breadcrumbs": { "home": "Home", "fe": "Final Expense" }
+      "breadcrumbs": {
+        "home": "Home",
+        "fe": "Final Expense"
+      }
     },
     "calendar": {
       "meta": {
@@ -2078,5 +2209,359 @@
       }
     },
     "privacy": "We respect your privacy. Your email will only be used to send you our newsletter. You can unsubscribe at any time by clicking the link in any email we send you."
+  },
+  "pivot": {
+    "shortterm": {
+      "backNav": {
+        "label": "Back to Short Term Medical"
+      },
+      "hero": {
+        "badge": "Pivot Health · Short-Term Medical (STLDI)",
+        "title": "Pivot Health short-term medical—flexible tiers, fast quotes, and clear gap coverage",
+        "lead": "Pivot Health is a leading distributor of short-term limited-duration medical plans in many states, with options from budget-friendly designs to richer copay and prescription-friendly forms. STLDI is not Minimum Essential Coverage (ACA); benefits, exclusions, and availability vary by state and plan. Federal rules for maximum duration changed in 2024—your licensed agent confirms what is filed where you live.",
+        "cardTitle": "Why shoppers ask about Pivot",
+        "cardBody": "Multiple plan levels, telehealth-friendly designs, and online-friendly shopping—paired with disclosures that explain how STM differs from major medical.",
+        "cardBullets": {
+          "0": "Economy to Deluxe-style options depending on state filings",
+          "1": "Doctor, urgent care, hospital, and pharmacy benefits vary by plan tier",
+          "2": "Not sold in every state—Isaac verifies eligibility for your ZIP"
+        }
+      },
+      "cta": {
+        "label": "Request your short-term medical quote",
+        "eyebrow": "Same STM intake Isaac uses for every client—bilingual follow-up",
+        "helper": "No carrier login required here—we’ll reach out with options that match your situation."
+      },
+      "introVideo": {
+        "heading": "What is Pivot Health short-term coverage?",
+        "description": "Overview of Pivot Health STM options (English audio). Spanish subtitles are available in the player when you choose Español.",
+        "captionNote": ""
+      },
+      "chart": {
+        "sectionTitle": "STLDI duration overview",
+        "title": "Federal STLDI duration rules (illustrative)",
+        "subtitle": "For policies sold or issued on or after Sept 1, 2024, federal STLDI rules cap initial term length and total duration—including renewals. States may impose additional limits.",
+        "ariaLabel": "Bar chart illustrating four months of short-term limited-duration coverage. Illustrative only.",
+        "footnote": "Illustration only. Policies issued before Sept 1, 2024 may follow earlier rules until they end. Enforcement and state elections can evolve—confirm with your agent.",
+        "months": {
+          "0": "Mo 1",
+          "1": "Mo 2",
+          "2": "Mo 3",
+          "3": "Mo 4+"
+        },
+        "yAxis": "Bridge",
+        "calloutKicker": "Plan smart",
+        "calloutTitle": "Short-term fills a window—not a lifetime strategy.",
+        "calloutBody": "Pair STM with a plan for what happens when the policy ends: Marketplace Open/Special Enrollment, employer coverage, or another qualifying option."
+      },
+      "valueProps": {
+        "title": "Why families compare Pivot STM options",
+        "items": [
+          {
+            "title": "Tiered designs",
+            "body": "From lean premiums to richer copay and drug coverage—choose the trade-offs that match your budget and expected care needs."
+          },
+          {
+            "title": "Built for digital shopping",
+            "body": "Pivot’s experience is designed for consumers who want to compare quickly—Isaac still reviews disclosures with you so nothing is missed."
+          },
+          {
+            "title": "Telehealth & convenience",
+            "body": "Many filed forms include telemedicine or retail-friendly benefits; exact networks and reimbursement rules appear in your quote."
+          },
+          {
+            "title": "Agent-guided honesty",
+            "body": "STM won’t mirror ACA protections. Isaac explains underwriting, preexisting-condition rules, and renewability before you move forward."
+          }
+        ]
+      },
+      "steps": {
+        "title": "How we help you explore Pivot STM",
+        "items": [
+          {
+            "title": "Tell us your ZIP and timing",
+            "body": "Coverage gaps, effective dates, and household details determine which Pivot-filed products can apply."
+          },
+          {
+            "title": "Compare tiers side by side",
+            "body": "We walk through deductibles, out-of-pocket exposure, and benefit limits—not just the monthly premium."
+          },
+          {
+            "title": "Apply with confidence",
+            "body": "When you’re ready, we guide you through the carrier’s application flow and store your disclosures for future reference."
+          }
+        ]
+      },
+      "compare": {
+        "title": "STM speed vs. ACA depth",
+        "subtitle": "Illustrative comparison—your quote shows real numbers for your state.",
+        "visualAria": "Illustration comparing short-term flexibility with comprehensive ACA major medical.",
+        "barLabelA": "Pivot STM: defined gap strategy",
+        "barLabelB": "ACA Marketplace: essential health benefits",
+        "caption": "Need subsidies or preexisting-condition protections? Marketplace or employer coverage may be the better fit—Isaac helps you weigh both paths."
+      },
+      "trust": {
+        "title": "A distributor shoppers recognize",
+        "body": "Pivot Health focuses on short-duration medical products and related services—pairing technology with plain-language notices so you understand what you’re buying."
+      },
+      "complianceNote": {
+        "title": "Availability & underwriting",
+        "body": "Pivot Health markets plans underwritten by carriers filed in each state; not all products are available in all states. Eligibility, pricing, and renewability are subject to medical underwriting and state approval."
+      },
+      "guidance": {
+        "sectionTitle": "Guidance",
+        "useCases": {
+          "title": "When Pivot STM is commonly considered",
+          "items": [
+            "Between jobs with a short coverage gap",
+            "Waiting for employer or Marketplace coverage to start",
+            "Healthy households that accept STM trade-offs for temporary protection"
+          ]
+        },
+        "notInclude": {
+          "title": "What STM still may not cover",
+          "items": [
+            "Preexisting conditions the way ACA plans do",
+            "Guaranteed renewal like major medical",
+            "Full pediatric dental or certain preventive mandates like Marketplace plans"
+          ]
+        },
+        "beforeApply": {
+          "title": "Before you apply",
+          "items": [
+            "List prescriptions and doctors you cannot lose access to",
+            "Confirm maximum duration and renewal rules for your state",
+            "Ask about hospital indemnity or accident supplements if you want extra cash benefits"
+          ]
+        }
+      },
+      "faq": {
+        "title": "Pivot STM FAQs",
+        "items": [
+          {
+            "q": "Is Pivot Health the insurance company?",
+            "a": "Pivot Health distributes and services short-term medical plans; policies are issued by filed underwriting partners. Your policy/certificate names the legal insurer."
+          },
+          {
+            "q": "Does Pivot STM satisfy the ACA individual mandate?",
+            "a": "There is no federal tax penalty for lacking coverage, but STM is not Minimum Essential Coverage and does not provide the same consumer protections as Marketplace plans."
+          },
+          {
+            "q": "How long can I keep a Pivot STM plan?",
+            "a": "Duration caps depend on your state, plan form, and whether the policy was issued before or after the 2024 federal STLDI rule changes. Isaac references the latest filings for your ZIP."
+          },
+          {
+            "q": "Why request a quote instead of a direct link?",
+            "a": "Isaac does not host Pivot’s consumer enrollment on this page. The quote button lets us collect your details securely and follow up with filed options—including alternatives if STM is not the right fit."
+          }
+        ]
+      },
+      "bottomCta": {
+        "title": "Want Pivot options for your ZIP code?",
+        "subtitle": "Tap below—Isaac Plans will follow up with bilingual guidance and next steps."
+      },
+      "disclosures": {
+        "carrier": {
+          "label": "Distribution:",
+          "text": "Pivot Health markets short-term limited-duration medical coverage underwritten by partner carriers; issuer names, form numbers, and benefits vary by state."
+        },
+        "notMEC": {
+          "label": "Not Minimum Essential Coverage:",
+          "text": "STLDI is not ACA Minimum Essential Coverage. It may exclude preexisting conditions, use underwriting, and impose benefit limits or waiting periods."
+        },
+        "infoRequest": {
+          "label": "Quote requests:",
+          "text": "Submitting information through Isaac Plans does not bind coverage. A licensed agent will contact you to review availability, disclosures, and alternatives."
+        },
+        "footer": "Educational content only—not an offer of insurance. Coverage subject to underwriting approval; verify all details in official materials."
+      },
+      "stmMetadata": {
+        "title": "Pivot Health Short Term Medical | Quote by Request | Isaac Plans",
+        "description": "Explore Pivot Health short-term medical (STLDI) with Isaac Plans Insurance. Request a bilingual quote, compare tiered plan designs, and review 2024 STLDI rules for your state.",
+        "keywords": "Pivot Health, short term medical, STLDI, temporary health insurance, gap coverage, Isaac Plans, non-ACA",
+        "image": "https://www.isaacplans.com/images/stm.png",
+        "imageAlt": "Pivot Health short term medical information"
+      }
+    }
+  },
+  "manhattan": {
+    "shortterm": {
+      "backNav": {
+        "label": "Back to Short Term Medical"
+      },
+      "hero": {
+        "badge": "Manhattan Life · Short-term strategies",
+        "title": "Manhattan Life—time-tested carrier, modern gap coverage options",
+        "lead": "Manhattan Life has served policyholders since 1850 with individual and supplemental products nationwide. Short-term limited-duration medical coverage is state- and form-dependent; Manhattan Life may also offer hospital indemnity, supplemental, and other products that pair with major medical. This page focuses on bridging coverage gaps—Isaac will confirm which filed products fit your ZIP and health profile.",
+        "cardTitle": "What to expect when you inquire",
+        "cardBody": "We start with your timeline, budget, and must-keep providers—then map Manhattan Life options (and alternatives) so you don’t outgrow your coverage overnight.",
+        "cardBullets": {
+          "0": "Licensed review of STM versus hospital indemnity or other supplements",
+          "1": "Clear explanation of underwriting and preexisting-condition rules",
+          "2": "Bilingual support from quote request through enrollment"
+        }
+      },
+      "cta": {
+        "label": "Start your Manhattan Life quote",
+        "eyebrow": "Official carrier site · Personalized agent link",
+        "primary": "Open personalized quote",
+        "helper": "Prefer to compare options with Isaac first? Use Get a Quote at the bottom—we’ll still help you weigh STM, indemnity, and Marketplace alternatives."
+      },
+      "introVideo": {
+        "heading": "Manhattan Life brand story",
+        "description": "Video overview of Manhattan Life’s history and product portfolio (English audio). Spanish subtitles are available in the player when you choose Español.",
+        "captionNote": ""
+      },
+      "chart": {
+        "sectionTitle": "STLDI duration overview",
+        "title": "Federal STLDI duration rules (illustrative)",
+        "subtitle": "Short-term medical plans are designed for limited months—not years. Federal STLDI duration rules tightened for many new sales after Sept 1, 2024; confirm what applies to any quote you receive.",
+        "ariaLabel": "Bar chart illustrating four months of short-term limited-duration coverage. Illustrative only.",
+        "footnote": "Illustration only. Your state, carrier filing, and policy start date determine real term limits and renewal options.",
+        "months": {
+          "0": "Mo 1",
+          "1": "Mo 2",
+          "2": "Mo 3",
+          "3": "Mo 4+"
+        },
+        "yAxis": "Bridge",
+        "calloutKicker": "Plan the transition",
+        "calloutTitle": "Know what happens when the short-term policy ends.",
+        "calloutBody": "Isaac helps you line up ACA, employer, or supplemental strategies so you are not left uninsured when STM expires."
+      },
+      "valueProps": {
+        "title": "Why clients ask about Manhattan Life",
+        "items": [
+          {
+            "title": "175+ years in business",
+            "body": "A long-standing carrier with broad licensing—important when you want a partner that will be there if you need to service a policy."
+          },
+          {
+            "title": "Supplemental + gap expertise",
+            "body": "Beyond STM, Manhattan Life markets hospital indemnity and other cash-benefit designs Isaac can combine with short-term medical when it makes sense."
+          },
+          {
+            "title": "Transparent trade-offs",
+            "body": "We review what STM covers—and what it does not—before you invest time in underwriting."
+          },
+          {
+            "title": "Concierge follow-up",
+            "body": "You get a real licensed agent, not an anonymous call center, to compare Manhattan Life filings with other carriers on your short list."
+          }
+        ]
+      },
+      "steps": {
+        "title": "How Isaac navigates Manhattan Life options",
+        "items": [
+          {
+            "title": "Clarify the gap you’re solving",
+            "body": "Job change, waiting period, or missed Open Enrollment—each scenario points to different product combinations."
+          },
+          {
+            "title": "Match products to priorities",
+            "body": "STM for major medical-style benefits versus cash-benefit indemnity plans may both play a role; we model the pros and cons."
+          },
+          {
+            "title": "Enroll with documentation",
+            "body": "Once you choose a path, we help you complete applications and retain policy documents for your records."
+          }
+        ]
+      },
+      "compare": {
+        "title": "Short-term medical vs. cash-benefit supplements",
+        "subtitle": "Manhattan Life may offer both—each solves a different problem.",
+        "visualAria": "Illustration comparing short-term medical reimbursement style with lump-sum or per-day indemnity benefits.",
+        "barLabelA": "STM-style major-medical benefits (where filed)",
+        "barLabelB": "Hospital indemnity cash to you",
+        "caption": "Many households layer indemnity plans to cover deductibles while STM handles broader eligible expenses—ask Isaac if that strategy fits your state rules."
+      },
+      "trust": {
+        "title": "Stability matters when life changes fast",
+        "body": "Manhattan Life’s history and diversified portfolio give clients confidence—but every product still has limitations. We read the fine print together."
+      },
+      "complianceNote": {
+        "title": "Filings & product mix",
+        "body": "Manhattan Life companies offer multiple insurance lines; availability, underwriting, and marketing names differ by state. STM availability is not guaranteed in every jurisdiction—your quote results list only what is actively filed."
+      },
+      "guidance": {
+        "sectionTitle": "Guidance",
+        "useCases": {
+          "title": "When Manhattan Life often comes up",
+          "items": [
+            "You want a recognizable carrier for supplemental + STM combinations",
+            "You need help separating STM from short-term care or other similarly named products",
+            "You value agent support for multi-step enrollments"
+          ]
+        },
+        "notInclude": {
+          "title": "Remember the limits",
+          "items": [
+            "STM is not a substitute for comprehensive ACA coverage if you need guaranteed-issue protections",
+            "Cash-benefit plans pay differently than major medical reimbursement—don’t confuse the two",
+            "Long-term care products are separate from STLDI medical coverage"
+          ]
+        },
+        "beforeApply": {
+          "title": "Before you commit",
+          "items": [
+            "Gather a list of current medications and providers",
+            "Understand elimination periods or waiting days on any indemnity riders",
+            "Decide your maximum acceptable out-of-pocket exposure"
+          ]
+        }
+      },
+      "faq": {
+        "title": "Manhattan Life STM FAQs",
+        "items": [
+          {
+            "q": "Is Manhattan Life only short-term medical?",
+            "a": "No. Manhattan Life offers a range of individual and supplemental products. This page highlights gap medical strategies; Isaac will identify whether STM, indemnity, or another filing is appropriate."
+          },
+          {
+            "q": "Is short-term medical the same as Manhattan Life short-term care?",
+            "a": "No. Short-term care policies address different risks (such as facility stays and ADL triggers) than STLDI medical coverage. We help you pick the right product category for your goal."
+          },
+          {
+            "q": "Will my preexisting conditions be covered?",
+            "a": "STM generally uses underwriting and may exclude or limit preexisting conditions. Specific rules appear in applications and outline of coverage—Isaac reviews them with you."
+          },
+          {
+            "q": "How do I get pricing?",
+            "a": "Use the Manhattan Life quote buttons above to open your personalized direct link. You can also click Get a Quote at the bottom to reach Isaac Plans for bilingual guidance and comparisons with other carriers."
+          }
+        ]
+      },
+      "bottomCta": {
+        "title": "Ready for Manhattan Life options tailored to you?",
+        "subtitle": "Jump into your direct quote—or ask Isaac to walk you through alternatives for your ZIP.",
+        "button": "Open Manhattan Life quote"
+      },
+      "disclosures": {
+        "carrier": {
+          "label": "Carrier information:",
+          "text": "Policies may be issued by Manhattan Life Insurance Company or other Manhattan Life affiliates depending on product and state. All names, benefits, and availability are subject to regulatory approval."
+        },
+        "notMEC": {
+          "label": "Not Minimum Essential Coverage:",
+          "text": "Short-term limited-duration medical coverage is not ACA Minimum Essential Coverage unless specifically designated; limitations and exclusions apply."
+        },
+        "infoRequest": {
+          "label": "Quote requests:",
+          "text": "Information submitted to Isaac Plans is used to provide licensed assistance. It does not guarantee eligibility or rates until underwriting is complete."
+        },
+        "linkUse": {
+          "label": "Direct quote link:",
+          "text": "The Manhattan Life buttons on this page open the carrier’s authorized quoting site (direct.manhattanlife.com). You leave IsaacPlans.com; Manhattan Life’s terms, privacy policy, and licensing apply."
+        },
+        "footer": "General information only—not an offer of insurance. Product availability varies; always read the official outline of coverage and policy."
+      },
+      "stmMetadata": {
+        "title": "Manhattan Life Short Term Medical | Direct Quote | Isaac Plans",
+        "description": "Open your personalized Manhattan Life quote link or get bilingual help from Isaac Plans Insurance. Short-term medical and supplemental options—availability varies by state.",
+        "keywords": "Manhattan Life, short term medical, STLDI, hospital indemnity, gap health insurance, Isaac Plans",
+        "image": "https://www.isaacplans.com/images/stm.png",
+        "imageAlt": "Manhattan Life short term medical information"
+      }
+    }
   }
 }

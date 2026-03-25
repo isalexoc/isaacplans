@@ -23,7 +23,10 @@ export function getHeaderQuoteModalKind(pathname: string): HeaderQuoteModalKind 
   if (
     p.startsWith("/short-term-medical") ||
     p.startsWith("/cobertura-a-corto-plazo") ||
-    p.startsWith("/carriers/uhone/shortterm")
+    p.startsWith("/carriers/uhone/shortterm") ||
+    p.startsWith("/carriers/allstate/shortterm") ||
+    p.startsWith("/carriers/pivot/shortterm") ||
+    p.startsWith("/carriers/manhattan/shortterm")
   ) {
     return "stm";
   }

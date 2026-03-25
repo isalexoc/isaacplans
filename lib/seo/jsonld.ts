@@ -483,6 +483,123 @@ export const getUhoneShortTermBreadcrumbLd = (
   ],
 });
 
+/** Allstate Health Solutions (STM) — page JSON-LD */
+export const getAllstateShortTermPageLd = (
+  locale: string,
+  title: string,
+  description: string
+): WithContext<WebPage> => ({
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": `${BASE_URL}/${locale}/carriers/allstate/shortterm#webpage`,
+  url: `${BASE_URL}/${locale}/carriers/allstate/shortterm`,
+  name: title,
+  description,
+  inLanguage: locale,
+  about: { "@id": `${BASE_URL}/#organization` },
+});
+
+/** Allstate STM — FAQ JSON-LD */
+export const getAllstateShortTermFaqLd = (
+  faqs: { question: string; answer: string }[]
+) => ({
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: faqs.map((f) => ({
+    "@type": "Question",
+    name: f.question,
+    acceptedAnswer: {
+      "@type": "Answer",
+      text: f.answer,
+    },
+  })),
+});
+
+/** Allstate STM — breadcrumb JSON-LD */
+export const getAllstateShortTermBreadcrumbLd = (
+  locale: string,
+  homeLabel: string,
+  pageLabel: string
+): WithContext<BreadcrumbList> => ({
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    {
+      "@type": "ListItem",
+      position: 1,
+      name: homeLabel,
+      item: `${BASE_URL}/${locale}`,
+    },
+    {
+      "@type": "ListItem",
+      position: 2,
+      name: pageLabel,
+      item: `${BASE_URL}/${locale}/carriers/allstate/shortterm`,
+    },
+  ],
+});
+
+/** Pivot / Manhattan — STM partner landing (quote by request) */
+export type StmPartnerCarrierSlug = "pivot" | "manhattan";
+
+const stmPartnerPath = (carrier: StmPartnerCarrierSlug) =>
+  `carriers/${carrier}/shortterm`;
+
+export const getStmPartnerCarrierPageLd = (
+  locale: string,
+  carrier: StmPartnerCarrierSlug,
+  title: string,
+  description: string
+): WithContext<WebPage> => ({
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": `${BASE_URL}/${locale}/${stmPartnerPath(carrier)}#webpage`,
+  url: `${BASE_URL}/${locale}/${stmPartnerPath(carrier)}`,
+  name: title,
+  description,
+  inLanguage: locale,
+  about: { "@id": `${BASE_URL}/#organization` },
+});
+
+export const getStmPartnerCarrierFaqLd = (
+  faqs: { question: string; answer: string }[]
+) => ({
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: faqs.map((f) => ({
+    "@type": "Question",
+    name: f.question,
+    acceptedAnswer: {
+      "@type": "Answer",
+      text: f.answer,
+    },
+  })),
+});
+
+export const getStmPartnerCarrierBreadcrumbLd = (
+  locale: string,
+  carrier: StmPartnerCarrierSlug,
+  homeLabel: string,
+  pageLabel: string
+): WithContext<BreadcrumbList> => ({
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    {
+      "@type": "ListItem",
+      position: 1,
+      name: homeLabel,
+      item: `${BASE_URL}/${locale}`,
+    },
+    {
+      "@type": "ListItem",
+      position: 2,
+      name: pageLabel,
+      item: `${BASE_URL}/${locale}/${stmPartnerPath(carrier)}`,
+    },
+  ],
+});
+
 /** Short-Term Medical (main page) — locale-aware path helper */
 const shortTermPathFor = (locale: string) =>
   locale?.toLowerCase().startsWith("es")
