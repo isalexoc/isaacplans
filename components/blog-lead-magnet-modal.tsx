@@ -5,7 +5,21 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { X } from "lucide-react";
 import { useLocale } from "next-intl";
 import GuideUnlockFormCustom from "@/components/guide-unlock-form-custom";
+import type { GuideUnlockSubmitPayload } from "@/components/guide-unlock-form-custom";
 import { trackLead, trackDownload, updateAdvancedMatching } from "@/lib/facebook-pixel";
+import { parsePhoneNumber } from "react-phone-number-input";
+import { getFacebookCookies } from "@/lib/meta-capi";
+import {
+  buildGuideLeadCrmBody,
+  mapBlogCategoryToGuideCategory,
+} from "@/lib/consumer-guide-crm";
+
+function generateEventId(): string {
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
+    return crypto.randomUUID();
+  }
+  return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
 
 interface BlogLeadMagnetModalProps {
   open: boolean;
@@ -35,31 +49,56 @@ export const BlogLeadMagnetModal = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const handleFormSubmit = async (formData: any) => {
+  const crmCategory = mapBlogCategoryToGuideCategory(postCategory);
+
+  const handleFormSubmit = async (formData: GuideUnlockSubmitPayload) => {
+    const phoneE164 = parsePhoneNumber(formData.phone, "US")?.number;
+    if (!phoneE164) {
+      setSubmitError(
+        isES
+          ? "Por favor ingrese un número de teléfono válido."
+          : "Please enter a valid phone number."
+      );
+      return;
+    }
+
     setIsSubmitting(true);
     setSubmitError(null);
 
-    try {
-      // Store user info in localStorage for future visits
-      localStorage.setItem("blog_user_email", formData.email);
-      localStorage.setItem("blog_user_phone", formData.phone);
+    const guideId = `blog_${postSlug}`;
+    const guideName = leadMagnet.title || postTitle;
 
-      // Submit to Agent CRM
+    try {
+      localStorage.setItem("blog_user_email", formData.email);
+      localStorage.setItem("blog_user_phone", phoneE164);
+
+      const eventId = generateEventId();
+      const { fbp, fbc } = getFacebookCookies();
+
       const agentCrmResponse = await fetch("/api/create-contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          email: formData.email,
-          phone: formData.phone,
-          guideName: leadMagnet.title || postTitle,
-          leadMagnet: true,
-          source: "blog_post",
-          campaign: `blog_${postSlug}`,
-          postTitle,
-          postCategory,
-        }),
+        body: JSON.stringify(
+          buildGuideLeadCrmBody({
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            email: formData.email,
+            phoneE164,
+            locale,
+            guideId,
+            guideName,
+            category: crmCategory,
+            smsConsent: formData.smsConsent,
+            marketingConsent: formData.marketingConsent,
+            meta: {
+              eventId,
+              fbp,
+              fbc,
+              eventSourceUrl:
+                typeof window !== "undefined" ? window.location.href : "",
+            },
+          })
+        ),
       });
 
       if (!agentCrmResponse.ok) {
@@ -68,14 +107,14 @@ export const BlogLeadMagnetModal = ({
       }
 
       // Track the download
-      const analyticsResponse = await fetch("/api/guide-analytics", {
+      await fetch("/api/guide-analytics", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          guideId: `blog_${postSlug}`,
+          guideId,
           eventType: "download",
           email: formData.email,
-          phone: formData.phone,
+          phone: phoneE164,
           source: "blog_post",
           campaign: `blog_${postSlug}`,
           postTitle,
@@ -88,7 +127,7 @@ export const BlogLeadMagnetModal = ({
         em: formData.email?.toLowerCase().trim(),
         fn: formData.firstName?.toLowerCase().trim(),
         ln: formData.lastName?.toLowerCase().trim(),
-        ph: formData.phone?.replace(/\D/g, ""),
+        ph: phoneE164.replace(/\D/g, ""),
       };
       
       // Update advanced matching with user data
@@ -206,9 +245,10 @@ export const BlogLeadMagnetModal = ({
                   </div>
                 )}
                 <GuideUnlockFormCustom
-                  category={postCategory || "general"}
+                  category={crmCategory}
                   guideName={leadMagnet.title || postTitle}
                   guideId={`blog_${postSlug}`}
+                  isSubmitting={isSubmitting}
                   onSubmit={handleFormSubmit}
                 />
               </>

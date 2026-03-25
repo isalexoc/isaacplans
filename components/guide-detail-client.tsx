@@ -9,8 +9,19 @@ import { Download, ArrowLeft, CheckCircle2, ArrowDown } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import GuideUnlockFormCustom from "@/components/guide-unlock-form-custom";
+import type { GuideUnlockSubmitPayload } from "@/components/guide-unlock-form-custom";
 import type { Guide } from "@/components/guide-card";
 import { trackDownload, trackLead, updateAdvancedMatching } from "@/lib/facebook-pixel";
+import { parsePhoneNumber } from "react-phone-number-input";
+import { getFacebookCookies } from "@/lib/meta-capi";
+import { buildGuideLeadCrmBody } from "@/lib/consumer-guide-crm";
+
+function generateEventId(): string {
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
+    return crypto.randomUUID();
+  }
+  return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
 
 interface GuideDetailClientProps {
   guide: Guide & {
@@ -93,27 +104,53 @@ export default function GuideDetailClient({ guide }: GuideDetailClientProps) {
     checkUserUnlocks();
   }, [guide.id]);
 
-  const handleFormSubmit = async (formData: any) => {
+  const handleFormSubmit = async (formData: GuideUnlockSubmitPayload) => {
+    const phoneE164 = parsePhoneNumber(formData.phone, "US")?.number;
+    if (!phoneE164) {
+      setSubmitError(
+        isES
+          ? "Por favor ingrese un número de teléfono válido."
+          : "Please enter a valid phone number."
+      );
+      return;
+    }
+
     setIsSubmitting(true);
     setSubmitError(null);
     
     try {
       // Store user info in localStorage for future visits
       localStorage.setItem('guide_user_email', formData.email);
-      localStorage.setItem('guide_user_phone', formData.phone);
+      localStorage.setItem('guide_user_phone', phoneE164);
 
-      // Submit to Agent CRM
+      const eventId = generateEventId();
+      const { fbp, fbc } = getFacebookCookies();
+
+      // Submit to Agent CRM — specialty payload matches product pages (correct workflow per guide category)
       const agentCrmResponse = await fetch('/api/create-contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          email: formData.email,
-          phone: formData.phone,
-          guideName: formData.guideName,
-          leadMagnet: true
-        })
+        body: JSON.stringify(
+          buildGuideLeadCrmBody({
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            email: formData.email,
+            phoneE164,
+            locale,
+            guideId: guide.id,
+            guideName: formData.guideName,
+            category: guide.category,
+            smsConsent: formData.smsConsent,
+            marketingConsent: formData.marketingConsent,
+            meta: {
+              eventId,
+              fbp,
+              fbc,
+              eventSourceUrl:
+                typeof window !== "undefined" ? window.location.href : "",
+            },
+          })
+        ),
       });
 
       if (!agentCrmResponse.ok) {
@@ -128,7 +165,7 @@ export default function GuideDetailClient({ guide }: GuideDetailClientProps) {
         body: JSON.stringify({ 
           guideId: guide.id, 
           email: formData.email, 
-          phone: formData.phone,
+          phone: phoneE164,
           name: formData.firstName,
           lastName: formData.lastName,
           category: guide.category,
@@ -146,7 +183,7 @@ export default function GuideDetailClient({ guide }: GuideDetailClientProps) {
           em: formData.email?.toLowerCase().trim(),
           fn: formData.firstName?.toLowerCase().trim(),
           ln: formData.lastName?.toLowerCase().trim(),
-          ph: formData.phone?.replace(/\D/g, ""),
+          ph: phoneE164.replace(/\D/g, ""),
         };
         
         // Update advanced matching with user data
@@ -332,6 +369,7 @@ export default function GuideDetailClient({ guide }: GuideDetailClientProps) {
                       category={guide.category}
                       guideName={title}
                       guideId={guide.id}
+                      isSubmitting={isSubmitting}
                       onSubmit={handleFormSubmit}
                     />
                   )}

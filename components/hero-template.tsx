@@ -21,6 +21,8 @@ interface HeroWithTestimonialsProps {
   imagePosition?: "left" | "right";
   /** Pass any JSX (button, link, etc.) */
   cta: React.ReactNode;
+  /** Optional second control shown beside `cta` (e.g. anchor to an on-page section) */
+  ctaSecondary?: React.ReactNode;
   testimonials?: Testimonial[];
   happyClient?: HappyClient;
 }
@@ -33,6 +35,7 @@ const HeroWithTestimonialsGeneric: React.FC<HeroWithTestimonialsProps> = ({
   imagePublicId,
   imagePosition = "right",
   cta,
+  ctaSecondary,
   testimonials,
   happyClient,
 }) => {
@@ -97,8 +100,9 @@ const HeroWithTestimonialsGeneric: React.FC<HeroWithTestimonialsProps> = ({
             {description}
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-2">
+          <div className="flex flex-col gap-4 pt-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-center lg:justify-start">
             {cta}
+            {ctaSecondary}
           </div>
         </div>
 

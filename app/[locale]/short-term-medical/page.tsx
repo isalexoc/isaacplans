@@ -1,9 +1,14 @@
 import type { Metadata } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
 import ShortTermMedicalButton from "@/components/ShortTermMedicalButton";
+import { ShortTermMedicalCtaProvider } from "@/components/short-term-medical-cta-context";
+import { ShortTermEnrollmentBand } from "@/components/short-term-medical-enrollment-band";
+import { Button } from "@/components/ui/button";
 import { BackHome } from "@/components/back-home";
 import ServicePageTracker from "@/components/service-page-tracker";
-import ShortTermCarriersSection from "@/components/shortterm-carriers-section";
+import ShortTermCarriersSection, {
+  stmCarrierHeroUrl,
+} from "@/components/shortterm-carriers-section";
 
 import {
   ogLocaleOf,
@@ -20,6 +25,7 @@ import {
   getShortTermMainPageLd,
   getShortTermMainBreadcrumbLd,
 } from "@/lib/seo/jsonld";
+import { ArrowDown } from "lucide-react";
 
 /* ───────── SEO ───────── */
 export async function generateMetadata(): Promise<Metadata> {
@@ -100,7 +106,8 @@ export default async function ShortTermMedicalPage() {
   );
 
   return (
-    <div className="min-h-screen relative">
+    <ShortTermMedicalCtaProvider>
+      <div className="relative min-h-screen">
       <ServicePageTracker serviceName="Short Term Medical Insurance" serviceCategory="short-term-medical" />
       <BackHome />
       {/* HERO ----------------------------------------------------------- */}
@@ -123,6 +130,57 @@ export default async function ShortTermMedicalPage() {
           title: tem("hero.happyClient.title"),
           subtitle: tem("hero.happyClient.subtitle"),
         }}
+      />
+
+      {/* CARRIERS ------------------------------------------------------ */}
+      <ShortTermCarriersSection
+        label={tem("carriersSection.label")}
+        title={tem("carriersSection.title")}
+        subtitle={tem("carriersSection.subtitle")}
+        ctaLabel={tem("carriersSection.cta")}
+        ctaLabelMobile={tem("carriersSection.ctaMobile")}
+        carriers={[
+          {
+            id: "uhone",
+            name: tem("carriersSection.cards.uhone.name"),
+            blurb: tem("carriersSection.cards.uhone.blurb"),
+            href: tem("carriersSection.cards.uhone.href"),
+            heroSrc: stmCarrierHeroUrl(
+              "pexels-august-de-richelieu-4260639_qgzqnk"
+            ),
+            logoSrc:
+              "https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_400/v1774397412/uhone_logo_xbmein.jpg",
+          },
+          {
+            id: "pivot",
+            name: tem("carriersSection.cards.pivot.name"),
+            blurb: tem("carriersSection.cards.pivot.blurb"),
+            href: tem("carriersSection.cards.pivot.href"),
+            heroSrc: stmCarrierHeroUrl("pexels-pixabay-356040_kzryk7"),
+            logoSrc:
+              "https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_400/v1774397411/pivothealth_logo_sabqbm.jpg",
+          },
+          {
+            id: "manhattan",
+            name: tem("carriersSection.cards.manhattan.name"),
+            blurb: tem("carriersSection.cards.manhattan.blurb"),
+            href: tem("carriersSection.cards.manhattan.href"),
+            heroSrc: stmCarrierHeroUrl(
+              "pexels-gabby-k-7114420_ev9ryf"
+            ),
+            logoSrc:
+              "https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_400/v1774397411/manhatan_logo_g6cswk.jpg",
+          },
+          {
+            id: "allstate",
+            name: tem("carriersSection.cards.allstate.name"),
+            blurb: tem("carriersSection.cards.allstate.blurb"),
+            href: tem("carriersSection.cards.allstate.href"),
+            heroSrc: stmCarrierHeroUrl("pexels-shvetsa-4421496_ex5gi4"),
+            logoSrc:
+              "https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_400/v1774397414/allstate_logo_ungrkt.png",
+          },
+        ]}
       />
 
       {/* ABOUT ISAAC --------------------------------------------------- */}
@@ -168,39 +226,10 @@ export default async function ShortTermMedicalPage() {
         imagePosition="left"
       />
 
-      {/* CARRIERS ------------------------------------------------------ */}
-      <ShortTermCarriersSection
-        label={tem("carriersSection.label")}
-        title={tem("carriersSection.title")}
-        subtitle={tem("carriersSection.subtitle")}
-        ctaLabel={tem("carriersSection.cta")}
-        carriers={[
-          {
-            id: "uhone",
-            name: tem("carriersSection.cards.uhone.name"),
-            blurb: tem("carriersSection.cards.uhone.blurb"),
-            href: tem("carriersSection.cards.uhone.href"),
-          },
-          {
-            id: "pivot",
-            name: tem("carriersSection.cards.pivot.name"),
-            blurb: tem("carriersSection.cards.pivot.blurb"),
-            href: tem("carriersSection.cards.pivot.href"),
-          },
-          {
-            id: "manhattan",
-            name: tem("carriersSection.cards.manhattan.name"),
-            blurb: tem("carriersSection.cards.manhattan.blurb"),
-            href: tem("carriersSection.cards.manhattan.href"),
-          },
-          {
-            id: "allstate",
-            name: tem("carriersSection.cards.allstate.name"),
-            blurb: tem("carriersSection.cards.allstate.blurb"),
-            href: tem("carriersSection.cards.allstate.href"),
-          },
-        ]}
-      />
+      <ShortTermEnrollmentBand variant="afterEligibility" />
+
+      
+
 
       {/* FAQ ----------------------------------------------------------- */}
       <FaqSection
@@ -225,6 +254,7 @@ export default async function ShortTermMedicalPage() {
           __html: JSON.stringify([pageLd, crumbLd]).replace(/</g, "\\u003c"),
         }}
       />
-    </div>
+      </div>
+    </ShortTermMedicalCtaProvider>
   );
 }

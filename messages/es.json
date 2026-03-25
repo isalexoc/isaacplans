@@ -1378,6 +1378,7 @@
             "hero": {
               "badge": "Seguro Médico de Corto Plazo (STLDI)",
               "name": "Isaac Orraiz – Agente de Seguros",
+              "selfEnrollCta": "Autoinscribirse",
               "title": "Cobertura temporal para ‘puentes’—rápida, flexible y clara",
               "description": "Diseñada para periodos cortos—por ejemplo, entre empleos o mientras espera otra cobertura. No es Cobertura Esencial Mínima (ACA), excluye condiciones preexistentes y tiene limitaciones importantes que varían por estado.",
               "testimonials": [
@@ -1397,6 +1398,13 @@
             "ctaButton": {
               "title": "Obtener Cotización",
               "subtitle": "Orientación rápida y sin compromiso"
+            },
+            "enrollmentCta": {
+              "afterEligibilityTitle": "¿Listo para ver planes y precios?",
+              "afterEligibilityTrust": "Nuestro flujo de cotización seguro le muestra opciones en pocos minutos. Sin obligación de inscribirse.",
+              "afterCarriersTitle": "¿Quiere ayuda antes de elegir una compañía?",
+              "afterCarriersTrust": "Use el botón de cotización—el mismo proceso seguro y sin compromiso que usamos para orientar a cada cliente.",
+              "stickyTrust": "Flujo seguro · Solo unos minutos · Sin compromiso"
             },
 
             "definition": {
@@ -1513,10 +1521,11 @@
               "footer": "Esta página es solo informativa. Siempre revise los avisos y la póliza/certificado de su estado antes de aplicar."
             },
             "carriersSection": {
-              "label": "Inscríbete tú mismo",
-              "title": "Compañías de seguro médico a corto plazo",
-              "subtitle": "¿Prefieres inscribirte por tu cuenta? Elige una compañía abajo. Si necesitas ayuda en cualquier paso, con gusto te apoyo.",
-              "cta": "Ver planes",
+              "label": "Autoinscripción",
+              "title": "Elige una compañía y obtén cobertura rápido",
+              "subtitle": "Compara planes de socios de confianza e inscríbete en línea en minutos. ¿Prefieres ayuda? Estoy a un mensaje de distancia.",
+              "cta": "Ver planes e inscribirse",
+              "ctaMobile": "Ver planes",
               "cards": {
                 "uhone": {
                   "name": "UnitedHealthcare (UHOne)",

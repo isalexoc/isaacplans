@@ -1390,6 +1390,7 @@
             "hero": {
               "badge": "Short Term Medical (STLDI)",
               "name": "Isaac Orraiz – Insurance Agent",
+              "selfEnrollCta": "Self-enroll",
               "title": "Bridge a gap in coverage—fast, flexible, and clearly explained",
               "description": "Designed to help during short gaps—like between jobs or while waiting for other coverage to begin. This is not Minimum Essential Coverage (ACA), excludes preexisting conditions, and has important limitations that vary by state.",
               "testimonials": [
@@ -1409,6 +1410,13 @@
             "ctaButton": {
               "title": "Get a Quote",
               "subtitle": "Fast, no-obligation guidance"
+            },
+            "enrollmentCta": {
+              "afterEligibilityTitle": "Ready to see plans and pricing?",
+              "afterEligibilityTrust": "Our secure quote flow walks you through options in just a few minutes. No obligation to enroll.",
+              "afterCarriersTitle": "Want help before you pick a carrier?",
+              "afterCarriersTrust": "Use the quote button—same secure, no-obligation path we use to guide every client.",
+              "stickyTrust": "Secure flow · Just a few minutes · No obligation"
             },
 
             "definition": {
@@ -1525,10 +1533,11 @@
               "footer": "This page is for general information only. Always review the notices and policy/certificate for your state before applying."
             },
             "carriersSection": {
-              "label": "Apply yourself",
-              "title": "Short-term medical carriers",
-              "subtitle": "Prefer to self-enroll? Choose a carrier below. If you want guidance at any step, I’m here to help.",
-              "cta": "View plans",
+              "label": "Self-enrollment",
+              "title": "Pick a carrier and get covered fast",
+              "subtitle": "Compare plans from trusted short-term medical partners and enroll online in minutes. Prefer help? I’m one message away.",
+              "cta": "View plans & enroll",
+              "ctaMobile": "View plans",
               "cards": {
                 "uhone": {
                   "name": "UnitedHealthcare (UHOne)",

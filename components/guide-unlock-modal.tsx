@@ -5,6 +5,17 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { X } from "lucide-react";
 import { useLocale } from "next-intl";
 import GuideUnlockFormCustom from "@/components/guide-unlock-form-custom";
+import type { GuideUnlockSubmitPayload } from "@/components/guide-unlock-form-custom";
+import { parsePhoneNumber } from "react-phone-number-input";
+import { getFacebookCookies } from "@/lib/meta-capi";
+import { buildGuideLeadCrmBody } from "@/lib/consumer-guide-crm";
+
+function generateEventId(): string {
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
+    return crypto.randomUUID();
+  }
+  return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
 
 type GuideCategory = 'aca' | 'shortTerm' | 'dentalVision' | 'hospitalIndemnity' | 'iul' | 'finalExpense';
 
@@ -30,23 +41,48 @@ export const GuideUnlockModal = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const handleFormSubmit = async (formData: any) => {
+  const handleFormSubmit = async (formData: GuideUnlockSubmitPayload) => {
+    const phoneE164 = parsePhoneNumber(formData.phone, "US")?.number;
+    if (!phoneE164) {
+      setSubmitError(
+        isES
+          ? "Por favor ingrese un número de teléfono válido."
+          : "Please enter a valid phone number."
+      );
+      return;
+    }
+
     setIsSubmitting(true);
     setSubmitError(null);
     
     try {
-      // Submit to Agent CRM
+      const eventId = generateEventId();
+      const { fbp, fbc } = getFacebookCookies();
+
       const agentCrmResponse = await fetch('/api/create-contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          email: formData.email,
-          phone: formData.phone,
-          guideName: formData.guideName,
-          leadMagnet: true
-        })
+        body: JSON.stringify(
+          buildGuideLeadCrmBody({
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            email: formData.email,
+            phoneE164,
+            locale,
+            guideId,
+            guideName: formData.guideName,
+            category,
+            smsConsent: formData.smsConsent,
+            marketingConsent: formData.marketingConsent,
+            meta: {
+              eventId,
+              fbp,
+              fbc,
+              eventSourceUrl:
+                typeof window !== "undefined" ? window.location.href : "",
+            },
+          })
+        ),
       });
 
       if (!agentCrmResponse.ok) {
@@ -61,7 +97,7 @@ export const GuideUnlockModal = ({
         body: JSON.stringify({ 
           guideId, 
           email: formData.email, 
-          phone: formData.phone,
+          phone: phoneE164,
           name: formData.firstName,
           lastName: formData.lastName,
           category,
@@ -168,6 +204,7 @@ export const GuideUnlockModal = ({
                   category={category}
                   guideName={guideName}
                   guideId={guideId}
+                  isSubmitting={isSubmitting}
                   onSubmit={handleFormSubmit}
                 />
               </>

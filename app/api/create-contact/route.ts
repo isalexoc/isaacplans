@@ -324,6 +324,23 @@ export async function POST(request: NextRequest) {
         `Submitted: ${submittedAt}`,
       ].join('\n');
     }
+
+    if (leadDetailsText) {
+      const guideMetaSource =
+        acaData ||
+        shortTermMedicalData ||
+        contactPageData ||
+        dentalVisionData ||
+        hospitalIndemnityData ||
+        finalExpenseData ||
+        iulLeadGenData;
+      const gd = guideMetaSource as
+        | { guideName?: string; guideId?: string }
+        | undefined;
+      if (gd && (gd.guideName || gd.guideId)) {
+        leadDetailsText = `${leadDetailsText}\n\nConsumer guide download:\n${gd.guideName ? `  Guide: ${gd.guideName}\n` : ""}${gd.guideId ? `  Guide ID: ${gd.guideId}` : ""}`;
+      }
+    }
     
     if (leadDetailsText && leadSourceDetailsFieldId) {
       customFieldsArray.push({
@@ -441,6 +458,22 @@ export async function POST(request: NextRequest) {
     // Add tags for Final Expense leads
     if (finalExpenseTags.length > 0) {
       contactPayload.tags = [...(contactPayload.tags || []), ...finalExpenseTags];
+    }
+
+    const consumerGuideTagSources = [
+      acaData,
+      shortTermMedicalData,
+      contactPageData,
+      dentalVisionData,
+      hospitalIndemnityData,
+      finalExpenseData,
+      iulLeadGenData,
+    ];
+    const hasConsumerGuideDownload = consumerGuideTagSources.some(
+      (d) => d && ((d as { guideId?: string }).guideId || (d as { guideName?: string }).guideName)
+    );
+    if (hasConsumerGuideDownload) {
+      contactPayload.tags = [...(contactPayload.tags || []), "Consumer Guide Download"];
     }
     
     console.log('Creating contact with payload:', JSON.stringify(contactPayload, null, 2));

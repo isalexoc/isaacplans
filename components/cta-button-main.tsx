@@ -1,15 +1,28 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "./ui/button";
 import { QuoteModalGeneral } from "@/components/form-modal-general";
+import { AcaQuoteModal } from "@/components/form-modal-aca";
+import { IULQuoteModal } from "@/components/form-modal-iul";
+import { ShortTermMedicalQuoteModal } from "@/components/form-modal-short-term-medical";
+import { QuoteModal as DentalQuoteModal } from "@/components/form-modal-dental";
+import { QuoteModal as HospitalIndemnityQuoteModal } from "@/components/form-modal-hi";
+import { FEQuoteModal } from "@/components/form-modal-fe";
 import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
+import { usePathname } from "@/i18n/navigation";
+import { getHeaderQuoteModalKind } from "@/lib/header-quote-modal";
 
-const CTAButton = () => {
+const CTAButtonMain = () => {
   const [openModal, setOpenModal] = useState(false);
-  const trans = useTranslations("HomePage");
   const nav = useTranslations("header.nav");
+  const pathname = usePathname() ?? "/";
+  const quoteKind = getHeaderQuoteModalKind(pathname);
+
+  useEffect(() => {
+    setOpenModal(false);
+  }, [pathname]);
 
   return (
     <motion.div
@@ -41,10 +54,36 @@ const CTAButton = () => {
           </div>
         </Button>
 
-        <QuoteModalGeneral open={openModal} setOpen={setOpenModal} />
+        {quoteKind === "aca" && (
+          <AcaQuoteModal open={openModal} setOpen={setOpenModal} />
+        )}
+        {quoteKind === "iul" && (
+          <IULQuoteModal open={openModal} setOpen={setOpenModal} />
+        )}
+        {quoteKind === "stm" && (
+          <ShortTermMedicalQuoteModal
+            open={openModal}
+            setOpen={setOpenModal}
+          />
+        )}
+        {quoteKind === "dental" && (
+          <DentalQuoteModal open={openModal} setOpen={setOpenModal} />
+        )}
+        {quoteKind === "hi" && (
+          <HospitalIndemnityQuoteModal
+            open={openModal}
+            setOpen={setOpenModal}
+          />
+        )}
+        {quoteKind === "fe" && (
+          <FEQuoteModal open={openModal} setOpen={setOpenModal} />
+        )}
+        {quoteKind === "general" && (
+          <QuoteModalGeneral open={openModal} setOpen={setOpenModal} />
+        )}
       </motion.div>
     </motion.div>
   );
 };
 
-export default CTAButton;
+export default CTAButtonMain;
