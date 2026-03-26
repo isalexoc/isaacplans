@@ -1492,7 +1492,7 @@
                 "uhone": {
                   "name": "UnitedHealthcare (UHOne)",
                   "blurb": "Cobertura temporal flexible con redes amplias e inscripción rápida.",
-                  "href": "/es/carriers/uhone/shortterm"
+                  "href": "/es/carriers/uhone"
                 },
                 "pivot": {
                   "name": "Pivot Health",
@@ -2219,9 +2219,10 @@
         }
       },
       "cta": {
-        "label": "Solicite su cotización de seguro médico temporal",
-        "eyebrow": "El mismo flujo STM que Isaac usa con cada cliente—seguimiento bilingüe",
-        "helper": "No necesita iniciar sesión en la aseguradora aquí—nos comunicamos con opciones acordes a su situación."
+        "label": "Inicie su cotización e inscripción con Pivot Health",
+        "eyebrow": "Sitio oficial de Pivot Health · Enlace de agente Isaac Plans",
+        "primary": "Cotizar e inscribirse",
+        "helper": "¿Prefiere comparar primero con Isaac? Use Obtenga una cotización al final—seguimos ayudándole a evaluar STM, el Mercado y suplementos."
       },
       "introVideo": {
         "heading": "¿Qué es la cobertura temporal de Pivot Health?",
@@ -2342,14 +2343,15 @@
             "a": "Los topes dependen de su estado, formulario y si la póliza es anterior o posterior a los cambios federales de 2024. Isaac consulta las presentaciones vigentes para su ZIP."
           },
           {
-            "q": "¿Por qué solicitar cotización en lugar de un enlace directo?",
-            "a": "Isaac no aloja aquí la inscripción directa de Pivot. El botón de cotización nos permite recopilar sus datos con seguridad y responder con opciones presentadas—y alternativas si el STM no encaja."
+            "q": "¿Y si quiero ayuda antes de inscribirme?",
+            "a": "Los botones superiores abren el flujo autorizado de cotización de Pivot Health. Si desea que Isaac revise alternativas—Mercado, cobertura del empleador o suplementos—antes de solicitar, use Obtenga una cotización al final de la página."
           }
         ]
       },
       "bottomCta": {
         "title": "¿Quiere opciones Pivot para su código postal?",
-        "subtitle": "Pulse abajo—Isaac Plans le dará seguimiento bilingüe con los siguientes pasos."
+        "subtitle": "Abra el flujo seguro de Pivot Health abajo—o use Obtenga una cotización si desea que Isaac compare alternativas primero.",
+        "button": "Abrir cotización Pivot Health"
       },
       "disclosures": {
         "carrier": {
@@ -2364,11 +2366,15 @@
           "label": "Solicitudes de cotización:",
           "text": "Enviar información a Isaac Plans no vincula cobertura. Un agente licenciado se comunicará para revisar disponibilidad, avisos y alternativas."
         },
+        "linkUse": {
+          "label": "Enlace de cotización directa:",
+          "text": "Los botones de Pivot Health en esta página abren el sitio autorizado de cotización (pivothealth.com). Sale de IsaacPlans.com; aplican los términos, la política de privacidad y las licencias de Pivot Health."
+        },
         "footer": "Contenido educativo—no es oferta de seguro. La cobertura está sujeta a aprobación de suscripción; verifique siempre los materiales oficiales."
       },
       "stmMetadata": {
-        "title": "Pivot Health Seguro Médico Temporal | Cotización bajo solicitud | Isaac Plans",
-        "description": "Explore Pivot Health STM (STLDI) con Isaac Plans Insurance. Solicite cotización bilingüe, compare niveles de plan y revise reglas STLDI 2024 en su estado.",
+        "title": "Pivot Health Seguro Médico Temporal | Cotización directa | Isaac Plans",
+        "description": "Abra su cotización STM (STLDI) de Pivot Health con el enlace de agente de Isaac Plans Insurance, compare niveles de plan y revise reglas STLDI 2024 en su estado.",
         "keywords": "Pivot Health, seguro médico temporal, STLDI, cobertura temporal, Isaac Plans, no ACA",
         "image": "https://www.isaacplans.com/images/stm_es.png",
         "imageAlt": "Información Pivot Health seguro médico temporal"

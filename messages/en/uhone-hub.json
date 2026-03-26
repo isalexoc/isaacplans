@@ -1,0 +1,155 @@
+{
+  "uhone": {
+    "hub": {
+      "metadata": {
+        "title": "UnitedHealthOne (UHOne) Products | Quotes & Enrollment | Isaac Plans",
+        "description": "Explore UnitedHealthOne supplemental and short-term products—STM, TriTerm, hospital indemnity, dental, vision, accident, critical illness, and more. Official UHOne quoting links with Isaac Plans.",
+        "keywords": "UnitedHealthOne, UHOne, UHC, short term medical, TriTerm, hospital indemnity, dental, vision, Isaac Plans"
+      },
+      "backNav": {
+        "label": "Back to Short Term Medical hub"
+      },
+      "hero": {
+        "badge": "UnitedHealthOne · Official quoting paths",
+        "title": "UnitedHealthOne coverage—built for real life, priced for your budget",
+        "lead": "UnitedHealthOne (UHOne) offers a broad portfolio of supplemental health products: short-term medical, TriTerm, fixed indemnity, hospital indemnity, dental & vision, accident, critical illness, term life, telehealth, and more. Use the secure UHOne links below to quote and enroll—each opens in a new tab. Prefer a personal walkthrough? Isaac Plans is one message away.",
+        "allPlansLabel": "Browse all products on UHOne",
+        "allPlansAlt": "UnitedHealthOne — All plans — start a quote"
+      },
+      "trustStrip": {
+        "0": "National carrier-backed products with network access where applicable",
+        "1": "Clear plan designs with disclosures before you enroll",
+        "2": "Licensed guidance from Isaac Plans when you want a second opinion"
+      },
+      "sections": {
+        "medical": {
+          "title": "Medical & longer-term bridge coverage",
+          "subtitle": "Temporary major-medical-style options and enhanced fixed-benefit designs."
+        },
+        "hospital": {
+          "title": "Hospital cash & fixed indemnity",
+          "subtitle": "Cash benefits for hospital events—often paired with Medicare Advantage or high-deductible medical plans."
+        },
+        "criticalLife": {
+          "title": "Critical illness & life protection",
+          "subtitle": "Lump-sum cash for serious diagnoses and affordable term life with optional riders."
+        },
+        "dentalVision": {
+          "title": "Dental, vision & discount programs",
+          "subtitle": "Standalone coverage and discount options to round out your benefits."
+        },
+        "accident": {
+          "title": "Accident coverage",
+          "subtitle": "Cash benefits for accidental injury—simple structures for families and individuals."
+        },
+        "wellness": {
+          "title": "Wellness & telehealth",
+          "subtitle": "Virtual care and behavioral health access when you need it."
+        }
+      },
+      "labels": {
+        "ctaQuote": "Get quote on UHOne",
+        "ctaQuoteShort": "Quote",
+        "learnStm": "STM education & video on Isaac Plans",
+        "time": "Typical flow",
+        "opensNew": "Opens in a new tab"
+      },
+      "products": {
+        "shortTerm": {
+          "title": "Short Term Medical Plans",
+          "body": "More coverage and rate flexibility with simplified plan designs. No application fees on many plans; prescription coverage on nearly all plans.",
+          "time": "~25 minutes"
+        },
+        "triTerm": {
+          "title": "TriTerm Medical Plans",
+          "body": "Short-term health insurance with coverage durations of nearly three years in select states. More robust benefits than typical STM—available in 16 states.",
+          "time": "~25 minutes"
+        },
+        "healthProtector": {
+          "title": "Enhanced Health ProtectorGuard (Fixed Indemnity)",
+          "body": "Available in 35 states. Wellness, doctor visits, and Rx coverage on every plan—plus UnitedHealthcare Choice Plus network access and HealthiestYou telehealth (Teladoc Health).",
+          "time": "~20 minutes"
+        },
+        "advantageGuard": {
+          "title": "AdvantageGuard Plans",
+          "body": "Hospital indemnity for issue ages 60–90: fixed cash benefits for hospital-related events. Optional benefits designed to pair with Medicare Advantage when you pay out-of-pocket.",
+          "time": "~15 minutes"
+        },
+        "hospitalWise": {
+          "title": "HospitalWise Plans",
+          "body": "Guaranteed-issue hospital indemnity with straightforward cash benefits paid directly to your client for hospital services—no copays, deductibles, or network restrictions in the benefit design.",
+          "time": "~30 minutes"
+        },
+        "hospitalIndemnityGi": {
+          "title": "Hospital Indemnity (GI)",
+          "body": "Guaranteed-issue hospital indemnity options for clients who need simplified underwriting and cash benefits for hospital stays.",
+          "time": "Varies"
+        },
+        "hospitalGuard": {
+          "title": "Hospital Guard (Guaranteed Issue)",
+          "body": "Relief for high-deductible medical plans—fixed benefits for hospital services, some outpatient care, and accidental death benefits, with optional telehealth add-on.",
+          "time": "~25 minutes"
+        },
+        "hospitalSafeGuard": {
+          "title": "Hospital SafeGuard & Supplemental Indemnity",
+          "body": "Guaranteed-issue hospital indemnity products that complement major medical—cash benefits for hospital and related services. Use the supplemental indemnity path for SafeGuard-style enrollment.",
+          "time": "~25 minutes"
+        },
+        "criticalGuard": {
+          "title": "CriticalGuard Plans",
+          "body": "Critical illness coverage focused on what matters most—cancer, heart conditions, major conditions including Alzheimer’s—with guaranteed-issue options in many designs.",
+          "time": "~15 minutes"
+        },
+        "termLife": {
+          "title": "Term Life SafeGuard",
+          "body": "Term life with optional critical illness coverage—an important conversation for families who want protection during difficult times.",
+          "time": "Varies"
+        },
+        "dentalWise": {
+          "title": "DentalWise Max (DVH) & DentalWise",
+          "body": "DentalWise Max bundles dental, vision, and hearing in one plan; DentalWise is dental-only. Both use the UnitedHealthcare dental network and fit most budgets.",
+          "time": "~16 minutes"
+        },
+        "dentalDiscount": {
+          "title": "Dental Discount",
+          "body": "Discount program for dental savings—use when a full dental plan isn’t the right fit.",
+          "time": "Varies"
+        },
+        "visionWise": {
+          "title": "VisionWise (Vision standalone)",
+          "body": "Glasses and contacts coverage with no wait for an annual eye exam—simple, budget-friendly, and retail-friendly.",
+          "time": "~6 minutes"
+        },
+        "accidentWise": {
+          "title": "AccidentWise",
+          "body": "Lump-sum cash for accidental injury and treatment. Easy plan structure for primary insured ages 18–75.",
+          "time": "~15 minutes"
+        },
+        "accidentPro": {
+          "title": "Accident ProGuard Series",
+          "body": "Flexible accident coverage—including combinations with critical illness, hospital indemnity, and AD&D in select states. Availability varies by state.",
+          "time": "~6 minutes"
+        },
+        "healthiestYou": {
+          "title": "HealthiestYou (Telehealth)",
+          "body": "Virtual care access through the HealthiestYou path—convenient visits when you need a clinician quickly.",
+          "time": "Varies"
+        },
+        "mentalHealth": {
+          "title": "Mental Health",
+          "body": "Behavioral health quoting path on UHOne for eligible products and states.",
+          "time": "Varies"
+        }
+      },
+      "ctaBand": {
+        "title": "Want Isaac to compare UHOne with other carriers?",
+        "body": "Use the quote button—same secure, bilingual intake we use for every STM and supplemental client. We’ll help you weigh trade-offs before you enroll.",
+        "quoteButton": "Get a quote"
+      },
+      "disclaimer": {
+        "title": "Important",
+        "body": "Products, availability, underwriting, and benefits vary by state and plan. This page is educational and provides links to the carrier’s authorized quoting experience. Read all disclosures, certificates, and policy documents before you enroll. Isaac Plans Insurance is compensated when you enroll through applicable carrier programs."
+      }
+    }
+  }
+}

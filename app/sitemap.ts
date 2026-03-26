@@ -82,6 +82,7 @@ const PAGES: Page[] = [
     changeFrequency: "monthly",
     priority: 0.6,
   },
+  { href: "/carriers/uhone", changeFrequency: "monthly", priority: 0.75 },
   { href: "/carriers/uhone/shortterm", changeFrequency: "monthly", priority: 0.7 },
   { href: "/carriers/allstate/shortterm", changeFrequency: "monthly", priority: 0.7 },
   { href: "/carriers/pivot/shortterm", changeFrequency: "monthly", priority: 0.7 },

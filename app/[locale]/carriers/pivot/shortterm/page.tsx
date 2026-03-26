@@ -10,6 +10,7 @@ import {
   getStmPartnerCarrierBreadcrumbLd,
   getStmPartnerCarrierFaqLd,
 } from "@/lib/seo/jsonld";
+import { PIVOT_DIRECT_QUOTE_URL } from "@/lib/pivot-direct-quote";
 
 import {
   ogLocaleOf,
@@ -124,7 +125,12 @@ export default async function PivotShortTermPage() {
         {skipLabel}
       </a>
       <BackHome href={shortTermMedicalHref(locale)} label={t("backNav.label")} />
-      <StmRequestInfoLanding t={t} variant={CARRIER} locale={locale} />
+      <StmRequestInfoLanding
+        t={t}
+        variant={CARRIER}
+        locale={locale}
+        directQuoteUrl={PIVOT_DIRECT_QUOTE_URL}
+      />
 
       <script
         type="application/ld+json"

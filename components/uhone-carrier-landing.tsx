@@ -9,6 +9,7 @@ import {
 import UhoneIntroVideo from "@/components/uhone-intro-video";
 import ShortTermMedicalButton from "@/components/ShortTermMedicalButton";
 import { getTranslations } from "next-intl/server";
+import { uhoneShopCensusUrl } from "@/lib/uhone-broker";
 import type { SupportedLocale } from "@/lib/seo/i18n";
 
 export type UhoneCarrierLandingProps = {
@@ -62,7 +63,7 @@ export default function UhoneCarrierLanding({ locale, t }: UhoneCarrierLandingPr
             </p>
             <p className="mt-1 text-xs text-muted-foreground">{t("cta.eyebrow")}</p>
             <a
-              href="https://shop.uhone.com/en/quote/census/shortterm?brokerid=AA5607941"
+              href={uhoneShopCensusUrl("shortterm")}
               target="_blank"
               rel="noopener noreferrer"
               aria-labelledby="uhone-apply-label"

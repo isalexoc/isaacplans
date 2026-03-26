@@ -41,4 +41,6 @@ export type AppHref =
   | "/renewal-support"
   | "/consumer-guides"
   | "/blog"
-  | "/newsletter";
+  | "/newsletter"
+  | "/carriers/uhone"
+  | "/carriers/uhone/shortterm";

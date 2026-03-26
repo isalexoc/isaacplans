@@ -185,6 +185,13 @@ async function loadSplitMessages(locale: string): Promise<Record<string, any>> {
     } catch {
       // File doesn't exist, skip
     }
+
+    try {
+      const uhoneHub = (await import(`@/messages/${locale}/uhone-hub.json`)).default;
+      Object.assign(splitMessages, uhoneHub);
+    } catch {
+      // File doesn't exist, skip
+    }
     
   } catch (error) {
     // If split folder doesn't exist, continue with main messages only

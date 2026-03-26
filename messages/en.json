@@ -1502,7 +1502,7 @@
                 "uhone": {
                   "name": "UnitedHealthcare (UHOne)",
                   "blurb": "Flexible short-term coverage with broad networks and fast enrollment.",
-                  "href": "/en/carriers/uhone/shortterm"
+                  "href": "/en/carriers/uhone"
                 },
                 "pivot": {
                   "name": "Pivot Health",
@@ -2228,9 +2228,10 @@
         }
       },
       "cta": {
-        "label": "Request your short-term medical quote",
-        "eyebrow": "Same STM intake Isaac uses for every client—bilingual follow-up",
-        "helper": "No carrier login required here—we’ll reach out with options that match your situation."
+        "label": "Start your Pivot Health quote & enrollment",
+        "eyebrow": "Official Pivot Health site · Isaac Plans agent link",
+        "primary": "Get a quote & enroll",
+        "helper": "Prefer to compare options with Isaac first? Use Get a Quote at the bottom—we’ll still help you weigh STM, Marketplace, and supplemental alternatives."
       },
       "introVideo": {
         "heading": "What is Pivot Health short-term coverage?",
@@ -2351,14 +2352,15 @@
             "a": "Duration caps depend on your state, plan form, and whether the policy was issued before or after the 2024 federal STLDI rule changes. Isaac references the latest filings for your ZIP."
           },
           {
-            "q": "Why request a quote instead of a direct link?",
-            "a": "Isaac does not host Pivot’s consumer enrollment on this page. The quote button lets us collect your details securely and follow up with filed options—including alternatives if STM is not the right fit."
+            "q": "What if I want help before I enroll?",
+            "a": "The buttons above open Pivot Health’s authorized quoting flow. If you’d like Isaac to review alternatives—Marketplace, employer coverage, or supplements—before you apply, use Get a Quote at the bottom of the page."
           }
         ]
       },
       "bottomCta": {
         "title": "Want Pivot options for your ZIP code?",
-        "subtitle": "Tap below—Isaac Plans will follow up with bilingual guidance and next steps."
+        "subtitle": "Open the secure Pivot Health flow below—or use Get a Quote if you want Isaac to compare alternatives first.",
+        "button": "Open Pivot Health quote"
       },
       "disclosures": {
         "carrier": {
@@ -2373,11 +2375,15 @@
           "label": "Quote requests:",
           "text": "Submitting information through Isaac Plans does not bind coverage. A licensed agent will contact you to review availability, disclosures, and alternatives."
         },
+        "linkUse": {
+          "label": "Direct quote link:",
+          "text": "The Pivot Health buttons on this page open the carrier’s authorized quoting site (pivothealth.com). You leave IsaacPlans.com; Pivot Health’s terms, privacy policy, and licensing apply."
+        },
         "footer": "Educational content only—not an offer of insurance. Coverage subject to underwriting approval; verify all details in official materials."
       },
       "stmMetadata": {
-        "title": "Pivot Health Short Term Medical | Quote by Request | Isaac Plans",
-        "description": "Explore Pivot Health short-term medical (STLDI) with Isaac Plans Insurance. Request a bilingual quote, compare tiered plan designs, and review 2024 STLDI rules for your state.",
+        "title": "Pivot Health Short Term Medical | Direct Quote | Isaac Plans",
+        "description": "Open your Pivot Health short-term medical (STLDI) quote with Isaac Plans Insurance’s agent link, compare tiered plan designs, and review 2024 STLDI rules for your state.",
         "keywords": "Pivot Health, short term medical, STLDI, temporary health insurance, gap coverage, Isaac Plans, non-ACA",
         "image": "https://www.isaacplans.com/images/stm.png",
         "imageAlt": "Pivot Health short term medical information"
