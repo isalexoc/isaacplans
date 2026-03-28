@@ -42,5 +42,9 @@ export type AppHref =
   | "/consumer-guides"
   | "/blog"
   | "/newsletter"
+  | "/carriers"
   | "/carriers/uhone"
-  | "/carriers/uhone/shortterm";
+  | "/carriers/uhone/shortterm"
+  | "/carriers/pivot/shortterm"
+  | "/carriers/manhattan/shortterm"
+  | "/carriers/allstate/shortterm";

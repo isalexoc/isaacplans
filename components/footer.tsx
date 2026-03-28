@@ -56,6 +56,7 @@ export default async function Footer() {
       },
       { name: tServices("life.title"), href: "/iul" },
       { name: tServices("finalExpense.title"), href: "/final-expense" },
+      { name: tServices("carriers.title"), href: "/carriers" },
     ],
     resources: [
       { name: tRes("faq.title"), href: "/faq" },

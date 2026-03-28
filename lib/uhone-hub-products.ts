@@ -67,8 +67,6 @@ export const UHONE_HUB_SECTIONS: { id: UhoneHubSectionId; productIds: UhoneHubPr
 export type UhoneHubProductConfig = {
   /** shop.uhone.com census segment (omit = “all plans” root). */
   shopSegment?: string;
-  /** If set, show secondary link to Isaac’s STM education page. */
-  internalShortTermPage?: true;
   /** Optional banner under `/FileAttachment.ashx?FilePath=` */
   bannerFile?: string;
 };
@@ -76,7 +74,6 @@ export type UhoneHubProductConfig = {
 export const UHONE_HUB_PRODUCT_CONFIG: Record<UhoneHubProductId, UhoneHubProductConfig> = {
   shortTerm: {
     shopSegment: "shortterm",
-    internalShortTermPage: true,
     bannerFile: "/Short_Term_Banner_Btn.jpg",
   },
   triTerm: {

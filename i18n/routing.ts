@@ -59,6 +59,10 @@ export const routing = defineRouting({
       en: "/terms-of-service",
       es: "/terminos-y-condiciones",
     },
+    "/carriers": {
+      en: "/carriers",
+      es: "/carriers",
+    },
     "/carriers/uhone": {
       en: "/carriers/uhone",
       es: "/carriers/uhone",

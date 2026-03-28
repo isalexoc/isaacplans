@@ -1,0 +1,22 @@
+{
+  "header": {
+    "nav": {
+      "services": {
+        "links": {
+          "carriers": {
+            "title": "Carriers",
+            "description": "Partner enrollment for non-ACA plans—short-term medical, dental, vision, and more."
+          }
+        }
+      },
+      "resources": {
+        "links": {
+          "carriers": {
+            "title": "Carriers",
+            "description": "Partner enrollment for non-ACA plans—short-term medical, dental, vision, and more."
+          }
+        }
+      }
+    }
+  }
+}

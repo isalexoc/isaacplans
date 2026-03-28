@@ -266,6 +266,10 @@
             "title": "Final Expense (Burial)",
             "description": "Affordable, permanent coverage to help with funeral and final bills."
           },
+          "carriers": {
+            "title": "Carriers",
+            "description": "Partner enrollment for non-ACA plans—short-term medical, dental, vision, and more."
+          },
           "cancer": {
             "title": "Cancer Plans",
             "description": "Supplemental coverage to support cancer-related expenses."
@@ -338,6 +342,10 @@
           "renewalSupport": {
             "title": "Renewal Support",
             "description": "We help you renew your coverage year after year."
+          },
+          "carriers": {
+            "title": "Carriers",
+            "description": "Partner enrollment for non-ACA plans—short-term medical, dental, vision, and more."
           },
           "newUserGuides": {
             "title": "Guides for New Users",
@@ -1502,7 +1510,7 @@
                 "uhone": {
                   "name": "UnitedHealthcare (UHOne)",
                   "blurb": "Flexible short-term coverage with broad networks and fast enrollment.",
-                  "href": "/en/carriers/uhone"
+                  "href": "/en/carriers/uhone/shortterm"
                 },
                 "pivot": {
                   "name": "Pivot Health",
@@ -1838,6 +1846,41 @@
         "keywords": "Allstate Health Solutions, National General, short term medical, STLDI, temporary health insurance, self enrollment, non-ACA, Isaac Plans",
         "image": "https://www.isaacplans.com/images/stm.png",
         "imageAlt": "Allstate Health Solutions short term medical enrollment preview"
+      }
+    }
+  },
+  "carriersIndex": {
+    "metadata": {
+      "title": "Insurance Carriers | Partner Enrollment | Isaac Plans",
+      "description": "Choose a partner carrier for non-ACA enrollment—short-term medical, dental and vision, hospital indemnity, and supplemental products. Not Marketplace ACA plans.",
+      "keywords": "insurance carriers, UnitedHealthOne, Pivot Health, Manhattan Life, Allstate Health Solutions, short term medical, Isaac Plans"
+    },
+    "intro": {
+      "title": "Partner carriers",
+      "subtitle": "These paths connect you to authorized enrollment for products outside the Marketplace—short-term medical, dental and vision, hospital indemnity, and other supplemental options depending on the carrier. For subsidized ACA coverage, use ACA Health Plans under Services."
+    },
+    "section": {
+      "label": "Self-enrollment",
+      "title": "Choose a carrier",
+      "cta": "Continue",
+      "ctaMobile": "Continue"
+    },
+    "cards": {
+      "uhone": {
+        "name": "UnitedHealthcare (UHOne)",
+        "blurb": "Full shop: short-term medical, dental, vision, and more—start here for the broadest UnitedHealthOne enrollment options."
+      },
+      "pivot": {
+        "name": "Pivot Health",
+        "blurb": "Budget-friendly short-term options and multiple term lengths to bridge coverage gaps."
+      },
+      "manhattan": {
+        "name": "ManhattanLife",
+        "blurb": "Short-term medical and supplemental products—pair coverage when it makes sense for your situation."
+      },
+      "allstate": {
+        "name": "Allstate Health Solutions",
+        "blurb": "Short-term medical through Allstate Health Solutions with clear STLDI disclosures and secure enrollment."
       }
     }
   },

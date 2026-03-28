@@ -7,14 +7,16 @@
         "keywords": "UnitedHealthOne, UHOne, UHC, short term medical, TriTerm, hospital indemnity, dental, vision, Isaac Plans"
       },
       "backNav": {
-        "label": "Back to Short Term Medical hub"
+        "label": "Back to carriers"
       },
       "hero": {
         "badge": "UnitedHealthOne · Official quoting paths",
         "title": "UnitedHealthOne coverage—built for real life, priced for your budget",
         "lead": "UnitedHealthOne (UHOne) offers a broad portfolio of supplemental health products: short-term medical, TriTerm, fixed indemnity, hospital indemnity, dental & vision, accident, critical illness, term life, telehealth, and more. Use the secure UHOne links below to quote and enroll—each opens in a new tab. Prefer a personal walkthrough? Isaac Plans is one message away.",
         "allPlansLabel": "Browse all products on UHOne",
-        "allPlansAlt": "UnitedHealthOne — All plans — start a quote"
+        "allPlansAlt": "UnitedHealthOne — All plans — start a quote",
+        "imageAlt": "Warm, welcoming scene suggesting care and community",
+        "logoAlt": "UnitedHealthcare logo"
       },
       "trustStrip": {
         "0": "National carrier-backed products with network access where applicable",
@@ -50,7 +52,6 @@
       "labels": {
         "ctaQuote": "Get quote on UHOne",
         "ctaQuoteShort": "Quote",
-        "learnStm": "STM education & video on Isaac Plans",
         "time": "Typical flow",
         "opensNew": "Opens in a new tab"
       },

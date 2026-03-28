@@ -45,6 +45,7 @@ const serviceLinks = [
   { key: "hospitalIndemnity", href: "/hospital-indemnity", icon: "Hospital" },
   { key: "life", href: "/iul", icon: "HeartPulse" },
   { key: "finalExpense", href: "/gastos-finales", icon: "Shield" },
+  { key: "carriers", href: "/carriers", icon: "Building2" },
 ] as const satisfies ReadonlyArray<{
   key: string;
   href: AppHref | "";
@@ -62,6 +63,7 @@ const resourceLinks = [
   { key: "planComparison", href: "/plan-comparison", icon: "GitCompareArrows" },
   { key: "newsletter", href: "/newsletter", icon: "Mail" },
   { key: "renewalSupport", href: "/renewal-support", icon: "Repeat" },
+  { key: "carriers", href: "/carriers", icon: "Building2" },
 ] as const satisfies ReadonlyArray<{
   key: string;
   href: AppHref | "";

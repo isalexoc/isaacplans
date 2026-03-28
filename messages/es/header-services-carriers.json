@@ -1,0 +1,22 @@
+{
+  "header": {
+    "nav": {
+      "services": {
+        "links": {
+          "carriers": {
+            "title": "Aseguradoras",
+            "description": "Inscripción con socios para planes fuera del Mercado ACA—corto plazo, dental, visión y más."
+          }
+        }
+      },
+      "resources": {
+        "links": {
+          "carriers": {
+            "title": "Aseguradoras",
+            "description": "Inscripción con socios para planes fuera del Mercado ACA—corto plazo, dental, visión y más."
+          }
+        }
+      }
+    }
+  }
+}

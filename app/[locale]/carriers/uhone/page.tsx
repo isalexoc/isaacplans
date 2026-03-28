@@ -11,11 +11,8 @@ import {
   type SupportedLocale,
 } from "@/lib/seo/i18n";
 
-function shortTermMedicalHref(locale: SupportedLocale): string {
-  return withLocalePrefix(
-    locale,
-    localizedSlug("/short-term-medical", locale)
-  );
+function carriersIndexHref(locale: SupportedLocale): string {
+  return withLocalePrefix(locale, localizedSlug("/carriers", locale));
 }
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -76,7 +73,7 @@ export default async function UhoneCarrierHubPage() {
       >
         {skipLabel}
       </a>
-      <BackHome href={shortTermMedicalHref(locale)} label={t("backNav.label")} />
+      <BackHome href={carriersIndexHref(locale)} label={t("backNav.label")} />
       <UhoneCarrierHub t={t} />
     </div>
   );

@@ -192,7 +192,17 @@ async function loadSplitMessages(locale: string): Promise<Record<string, any>> {
     } catch {
       // File doesn't exist, skip
     }
-    
+
+    // Header Services → Carriers (merged deeply with main locale JSON)
+    try {
+      const headerCarriers = (
+        await import(`@/messages/${locale}/header-services-carriers.json`)
+      ).default;
+      Object.assign(splitMessages, headerCarriers);
+    } catch {
+      // File doesn't exist, skip
+    }
+
   } catch (error) {
     // If split folder doesn't exist, continue with main messages only
     console.warn(`No split messages found for locale ${locale}`);

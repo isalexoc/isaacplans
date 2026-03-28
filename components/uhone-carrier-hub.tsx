@@ -1,5 +1,4 @@
 import {
-  Activity,
   Brain,
   Cross,
   HeartPulse,
@@ -10,9 +9,9 @@ import {
   Stethoscope,
   Umbrella,
 } from "lucide-react";
+import Image from "next/image";
 import { getTranslations } from "next-intl/server";
 import ShortTermMedicalButton from "@/components/ShortTermMedicalButton";
-import { Link } from "@/i18n/navigation";
 import {
   uhoneMarketingAssetUrl,
   uhoneShopCensusUrl,
@@ -23,6 +22,14 @@ import {
   type UhoneHubProductId,
   type UhoneHubSectionId,
 } from "@/lib/uhone-hub-products";
+
+/** Cloudinary: f_auto, q_auto, bounded dimensions, smart crop for hero */
+const UHONE_HUB_HERO_IMAGE =
+  "https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_1600,h_1200,c_fill,g_auto/v1774717951/pexels-silverkblack-36729904_ulbsz4.jpg";
+
+/** UnitedHealthcare mark — f_auto, q_auto, capped width for crisp logos */
+const UHONE_HUB_UHC_LOGO =
+  "https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_480,c_limit/v1774718587/united-healthcare-logo_avzxnj.png";
 
 const SECTION_ICONS: Record<UhoneHubSectionId, typeof Stethoscope> = {
   medical: Stethoscope,
@@ -51,44 +58,33 @@ function ProductQuoteBlock({
     : null;
 
   return (
-    <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
-      <div className="flex min-w-0 flex-1 flex-col gap-2">
-        {cfg.internalShortTermPage ? (
-          <Link
-            href="/carriers/uhone/shortterm"
-            className="inline-flex w-fit items-center gap-2 text-sm font-semibold text-[hsl(var(--custom))] underline-offset-4 transition hover:underline"
-          >
-            <Activity className="h-4 w-4 shrink-0" aria-hidden />
-            {t("labels.learnStm")}
-          </Link>
-        ) : null}
-        <a
-          href={href}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="group inline-flex w-fit max-w-full flex-col gap-2 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--custom))] focus-visible:ring-offset-2"
-          aria-label={`${t(`products.${productId}.title`)} — ${t("labels.opensNew")}`}
-        >
-          {banner ? (
-            <span className="block overflow-hidden rounded-lg border border-border/80 bg-card shadow-sm ring-1 ring-black/5 transition group-hover:shadow-md">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={banner}
-                alt=""
-                width={400}
-                height={120}
-                className="h-auto w-full max-w-[min(100%,420px)] object-contain"
-                loading="lazy"
-                decoding="async"
-              />
-            </span>
-          ) : (
-            <span className="inline-flex min-h-[44px] items-center justify-center rounded-xl bg-gradient-to-r from-[hsl(var(--custom))] to-[hsl(var(--custom)/0.85)] px-5 py-3 text-sm font-semibold text-white shadow-md transition group-hover:brightness-110">
-              {t("labels.ctaQuote")}
-            </span>
-          )}
-        </a>
-      </div>
+    <div className="flex w-full min-w-0 flex-col gap-3">
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="group block w-full min-w-0 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--custom))] focus-visible:ring-offset-2"
+        aria-label={`${t(`products.${productId}.title`)} — ${t("labels.opensNew")}`}
+      >
+        {banner ? (
+          <span className="block w-full overflow-hidden rounded-xl bg-muted/40 shadow-sm ring-1 ring-border/60 transition group-hover:shadow-md group-hover:ring-border dark:bg-muted/25">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={banner}
+              alt=""
+              width={560}
+              height={140}
+              className="block h-auto w-full object-contain object-center"
+              loading="lazy"
+              decoding="async"
+            />
+          </span>
+        ) : (
+          <span className="flex min-h-[48px] w-full items-center justify-center rounded-xl bg-gradient-to-r from-[hsl(var(--custom))] to-[hsl(var(--custom)/0.85)] px-5 py-3 text-sm font-semibold text-white shadow-md transition group-hover:brightness-110">
+            {t("labels.ctaQuote")}
+          </span>
+        )}
+      </a>
     </div>
   );
 }
@@ -98,21 +94,38 @@ export default function UhoneCarrierHub({ t }: UhoneCarrierHubProps) {
     <main id="uhone-hub-main" className="text-foreground">
       {/* Hero */}
       <section
-        className="relative overflow-hidden border-b border-border/60 bg-gradient-to-b from-[hsl(var(--custom)/0.09)] via-background to-background"
+        className="relative overflow-hidden border-b border-border/60 bg-gradient-to-b from-[hsl(var(--custom)/0.1)] via-background to-background"
         aria-labelledby="uhone-hub-hero-heading"
       >
         <div
-          className="pointer-events-none absolute inset-0 opacity-[0.35] dark:opacity-[0.22]"
+          className="pointer-events-none absolute inset-0 opacity-[0.28] dark:opacity-[0.18]"
           aria-hidden
           style={{
             backgroundImage: `radial-gradient(circle at 1px 1px, rgb(148 163 184 / 0.35) 1px, transparent 0)`,
             backgroundSize: "30px 30px",
           }}
         />
-        <div className="relative mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-18 lg:px-8 lg:py-22">
-          <div className="grid gap-10 lg:grid-cols-[1fr_minmax(0,340px)] lg:items-start">
-            <div className="motion-safe:animate-fadeUp max-w-3xl">
-              <span className="inline-flex w-fit items-center gap-2 rounded-full border border-[hsl(var(--custom)/0.28)] bg-background/85 px-4 py-1.5 text-xs font-semibold tracking-wide text-[hsl(var(--custom))] shadow-sm backdrop-blur">
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-[hsl(var(--custom)/0.06)] via-transparent to-transparent" aria-hidden />
+
+        <div className="relative mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8 lg:py-20">
+          {/*
+            Mobile column order: badge+title → image → lead+trust → all-plans.
+            lg 2×2: [ title | image ] [ lead+trust | all-plans ]
+          */}
+          <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.02fr)] lg:items-start lg:gap-10 xl:gap-12">
+            <div className="motion-safe:animate-fadeUp min-w-0 max-w-3xl">
+              <div className="mb-5">
+                <Image
+                  src={UHONE_HUB_UHC_LOGO}
+                  alt={t("hero.logoAlt")}
+                  width={480}
+                  height={140}
+                  priority
+                  sizes="(max-width: 640px) 220px, 260px"
+                  className="h-10 w-auto max-w-[min(100%,260px)] object-contain object-left sm:h-12"
+                />
+              </div>
+              <span className="inline-flex w-fit items-center gap-2 rounded-full border border-[hsl(var(--custom)/0.28)] bg-background/90 px-4 py-1.5 text-xs font-semibold tracking-wide text-[hsl(var(--custom))] shadow-sm backdrop-blur-sm">
                 <Shield className="h-3.5 w-3.5 shrink-0" aria-hidden />
                 {t("hero.badge")}
               </span>
@@ -122,14 +135,36 @@ export default function UhoneCarrierHub({ t }: UhoneCarrierHubProps) {
               >
                 {t("hero.title")}
               </h1>
-              <p className="mt-4 text-pretty text-base leading-relaxed text-muted-foreground sm:text-lg">
+            </div>
+
+            <figure className="relative aspect-[4/3] w-full min-w-0 overflow-hidden rounded-2xl shadow-[0_25px_50px_-12px_rgba(15,23,42,0.25)] ring-1 ring-black/10 motion-safe:animate-fadeUp-d2 dark:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.45)] dark:ring-white/10">
+              <Image
+                src={UHONE_HUB_HERO_IMAGE}
+                alt={t("hero.imageAlt")}
+                fill
+                priority
+                sizes="(max-width: 1024px) 100vw, 42vw"
+                className="object-cover object-center"
+              />
+              <div
+                className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/35 via-black/5 to-transparent"
+                aria-hidden
+              />
+              <div
+                className="pointer-events-none absolute inset-0 bg-gradient-to-br from-[hsl(var(--custom)/0.15)] via-transparent to-transparent"
+                aria-hidden
+              />
+            </figure>
+
+            <div className="motion-safe:animate-fadeUp min-w-0 max-w-3xl lg:max-w-none">
+              <p className="text-pretty text-base leading-relaxed text-muted-foreground sm:text-lg">
                 {t("hero.lead")}
               </p>
               <ul className="mt-8 grid gap-3 sm:grid-cols-3">
                 {([0, 1, 2] as const).map((i) => (
                   <li
                     key={i}
-                    className="rounded-xl border border-border/70 bg-card/80 px-4 py-3 text-sm leading-snug text-muted-foreground shadow-sm ring-1 ring-black/5 backdrop-blur-sm"
+                    className="rounded-xl border border-border/70 bg-card/90 px-4 py-3 text-sm leading-snug text-muted-foreground shadow-sm ring-1 ring-black/5 backdrop-blur-sm dark:bg-card/70"
                   >
                     <span className="font-medium text-foreground">
                       {t(`trustStrip.${i}`)}
@@ -139,7 +174,7 @@ export default function UhoneCarrierHub({ t }: UhoneCarrierHubProps) {
               </ul>
             </div>
 
-            <aside className="motion-safe:animate-fadeUp-d2 rounded-2xl border border-border/80 bg-gradient-to-br from-card to-muted/30 p-6 shadow-lg ring-1 ring-black/5">
+            <aside className="rounded-2xl border border-border/80 bg-gradient-to-br from-card to-muted/30 p-5 shadow-lg ring-1 ring-black/5 motion-safe:animate-fadeUp-d2 sm:p-6">
               <p className="text-sm font-semibold text-foreground">
                 {t("hero.allPlansLabel")}
               </p>
@@ -150,15 +185,15 @@ export default function UhoneCarrierHub({ t }: UhoneCarrierHubProps) {
                 href={uhoneShopCensusUrl()}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mt-4 block overflow-hidden rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--custom))] focus-visible:ring-offset-2"
+                className="mt-4 block w-full min-w-0 overflow-hidden rounded-xl bg-muted/40 shadow-sm ring-1 ring-border/60 transition hover:shadow-md hover:ring-border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--custom))] focus-visible:ring-offset-2 dark:bg-muted/25"
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={uhoneMarketingAssetUrl("/allPlans_btn.jpg")}
                   alt={t("hero.allPlansAlt")}
-                  width={320}
-                  height={96}
-                  className="h-auto w-full object-contain"
+                  width={560}
+                  height={120}
+                  className="block h-auto w-full object-contain object-center"
                   loading="eager"
                   decoding="async"
                 />
@@ -211,9 +246,6 @@ export default function UhoneCarrierHub({ t }: UhoneCarrierHubProps) {
                     </h3>
                     <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">
                       {t(`products.${pid}.body`)}
-                    </p>
-                    <p className="mt-3 text-xs font-medium text-muted-foreground">
-                      {t("labels.time")}: {t(`products.${pid}.time`)}
                     </p>
                     <div className="mt-5 border-t border-border/60 pt-5">
                       <ProductQuoteBlock productId={pid} t={t} />

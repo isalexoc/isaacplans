@@ -256,6 +256,10 @@
             "title": "Gastos Finales",
             "description": "Cobertura permanente y asequible para ayudar con gastos funerarios y finales."
           },
+          "carriers": {
+            "title": "Aseguradoras",
+            "description": "Inscripción con socios para planes fuera del Mercado ACA—corto plazo, dental, visión y más."
+          },
           "cancer": {
             "title": "Planes contra el Cáncer",
             "description": "Cobertura adicional para gastos relacionados con el cáncer."
@@ -328,6 +332,10 @@
           "renewalSupport": {
             "title": "Apoyo en Renovaciones",
             "description": "Te ayudamos a renovar tu cobertura año tras año."
+          },
+          "carriers": {
+            "title": "Aseguradoras",
+            "description": "Inscripción con socios para planes fuera del Mercado ACA—corto plazo, dental, visión y más."
           },
           "newUserGuides": {
             "title": "Guías para Nuevos Usuarios",
@@ -1492,7 +1500,7 @@
                 "uhone": {
                   "name": "UnitedHealthcare (UHOne)",
                   "blurb": "Cobertura temporal flexible con redes amplias e inscripción rápida.",
-                  "href": "/es/carriers/uhone"
+                  "href": "/es/carriers/uhone/shortterm"
                 },
                 "pivot": {
                   "name": "Pivot Health",
@@ -1829,6 +1837,41 @@
         "keywords": "Allstate Health Solutions, National General, seguro médico temporal, STLDI, autoinscripción, no ACA, Isaac Plans",
         "image": "https://www.isaacplans.com/images/stm_es.png",
         "imageAlt": "Vista previa de inscripción Allstate Health Solutions corto plazo"
+      }
+    }
+  },
+  "carriersIndex": {
+    "metadata": {
+      "title": "Aseguradoras | Inscripción con socios | Isaac Plans",
+      "description": "Elija una aseguradora asociada para inscripción fuera del Mercado ACA—corto plazo, dental y visión, indemnización hospitalaria y productos complementarios. No son planes del Mercado.",
+      "keywords": "aseguradoras, UnitedHealthOne, Pivot Health, Manhattan Life, Allstate Health Solutions, seguro temporal, Isaac Plans"
+    },
+    "intro": {
+      "title": "Aseguradoras asociadas",
+      "subtitle": "Estas rutas lo llevan a la inscripción autorizada para productos fuera del Mercado—corto plazo, dental y visión, indemnización hospitalaria y otras opciones complementarias según la aseguradora. Para cobertura ACA con subsidios, use Planes ACA en Servicios."
+    },
+    "section": {
+      "label": "Autoinscripción",
+      "title": "Elija una aseguradora",
+      "cta": "Continuar",
+      "ctaMobile": "Continuar"
+    },
+    "cards": {
+      "uhone": {
+        "name": "UnitedHealthcare (UHOne)",
+        "blurb": "Tienda completa: corto plazo, dental, visión y más—empiece aquí para la gama más amplia de opciones UnitedHealthOne."
+      },
+      "pivot": {
+        "name": "Pivot Health",
+        "blurb": "Opciones de corto plazo económicas y varios periodos para cubrir brechas de cobertura."
+      },
+      "manhattan": {
+        "name": "ManhattanLife",
+        "blurb": "Corto plazo y productos complementarios—combine cobertura cuando tenga sentido para su situación."
+      },
+      "allstate": {
+        "name": "Allstate Health Solutions",
+        "blurb": "Corto plazo con Allstate Health Solutions, avisos STLDI claros e inscripción segura."
       }
     }
   },

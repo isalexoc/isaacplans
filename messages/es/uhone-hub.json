@@ -7,14 +7,16 @@
         "keywords": "UnitedHealthOne, UHOne, UHC, seguro médico temporal, TriTerm, indemnización hospitalaria, dental, visión, Isaac Plans"
       },
       "backNav": {
-        "label": "Volver al hub de cobertura a corto plazo"
+        "label": "Volver a aseguradoras"
       },
       "hero": {
         "badge": "UnitedHealthOne · Cotización oficial",
         "title": "Cobertura UnitedHealthOne—para la vida real y su presupuesto",
         "lead": "UnitedHealthOne (UHOne) ofrece un portafolio amplio de productos de salud suplementarios: seguro médico temporal, TriTerm, indemnización fija, indemnización hospitalaria, dental y visión, accidentes, enfermedad crítica, vida temporal, telesalud y más. Use los enlaces seguros de UHOne abajo para cotizar e inscribirse—cada uno se abre en una pestaña nueva. ¿Prefiere una guía personal? Isaac Plans está a un mensaje de distancia.",
         "allPlansLabel": "Ver todos los productos en UHOne",
-        "allPlansAlt": "UnitedHealthOne — Todos los planes — iniciar cotización"
+        "allPlansAlt": "UnitedHealthOne — Todos los planes — iniciar cotización",
+        "imageAlt": "Ambiente acogedor que sugiere cuidado y comunidad",
+        "logoAlt": "Logotipo de UnitedHealthcare"
       },
       "trustStrip": {
         "0": "Productos respaldados por aseguradoras nacionales con red cuando aplica",
@@ -50,7 +52,6 @@
       "labels": {
         "ctaQuote": "Cotizar en UHOne",
         "ctaQuoteShort": "Cotizar",
-        "learnStm": "Educación STM y video en Isaac Plans",
         "time": "Tiempo típico",
         "opensNew": "Se abre en una pestaña nueva"
       },
