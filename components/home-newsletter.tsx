@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { Mail, CheckCircle, AlertCircle, Loader2, Sparkles, TrendingUp, BookOpen, Shield } from "lucide-react";
+import { Mail, AlertCircle, Loader2, Sparkles, TrendingUp, BookOpen, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { trackSubscribe, trackCompleteRegistration, updateAdvancedMatching } from "@/lib/facebook-pixel";
+import { NewsletterSuccessPanel } from "@/components/newsletter-success-panel";
 
 export default function HomeNewsletter() {
   const locale = useLocale();
@@ -15,11 +16,13 @@ export default function HomeNewsletter() {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
+  const [subscriptionStatus, setSubscriptionStatus] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setStatus("loading");
     setMessage("");
+    setSubscriptionStatus(null);
 
     try {
       const response = await fetch("/api/newsletter/subscribe", {
@@ -33,6 +36,7 @@ export default function HomeNewsletter() {
       if (data.success) {
         setStatus("success");
         setMessage(data.message);
+        setSubscriptionStatus(data.status ?? null);
         
         // Prepare user data for advanced matching
         const userData = email ? { em: email.toLowerCase().trim() } : undefined;
@@ -146,19 +150,13 @@ export default function HomeNewsletter() {
                 {/* Form content with proper z-index */}
                 <div className="relative z-10">
                   {status === "success" ? (
-                    <div className="flex flex-col items-center justify-center h-full text-center space-y-4 py-8">
-                      <div className="relative">
-                        <div className="absolute inset-0 bg-green-500 rounded-full animate-ping opacity-20" />
-                        <div className="relative bg-green-100 rounded-full p-4">
-                          <CheckCircle className="w-12 h-12 text-green-600" />
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <h3 className="text-2xl font-bold text-gray-900">
-                          {isES ? "¡Gracias!" : "Thank You!"}
-                        </h3>
-                        <p className="text-gray-600">{message}</p>
-                      </div>
+                    <div className="flex flex-col justify-center min-h-[280px] lg:min-h-[320px] py-4">
+                      <NewsletterSuccessPanel
+                        isES={isES}
+                        message={message}
+                        apiStatus={subscriptionStatus}
+                        variant="featured"
+                      />
                     </div>
                   ) : (
                     <div className="space-y-6">

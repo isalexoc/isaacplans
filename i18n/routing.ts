@@ -71,13 +71,41 @@ export const routing = defineRouting({
       en: "/carriers/uhone/shortterm",
       es: "/carriers/uhone/shortterm",
     },
+    "/carriers/uhone/[product]": {
+      en: "/carriers/uhone/[product]",
+      es: "/carriers/uhone/[product]",
+    },
+    "/carriers/allstate": {
+      en: "/carriers/allstate",
+      es: "/carriers/allstate",
+    },
     "/carriers/allstate/shortterm": {
       en: "/carriers/allstate/shortterm",
       es: "/carriers/allstate/shortterm",
     },
+    "/carriers/allstate/seniors/[product]": {
+      en: "/carriers/allstate/seniors/[product]",
+      es: "/carriers/allstate/seniors/[product]",
+    },
+    "/carriers/allstate/individual/[product]": {
+      en: "/carriers/allstate/individual/[product]",
+      es: "/carriers/allstate/individual/[product]",
+    },
+    "/carriers/allstate/cancer-only": {
+      en: "/carriers/allstate/cancer-only",
+      es: "/carriers/allstate/cancer-only",
+    },
     "/carriers/pivot/shortterm": {
       en: "/carriers/pivot/shortterm",
       es: "/carriers/pivot/shortterm",
+    },
+    "/carriers/manhattan": {
+      en: "/carriers/manhattan",
+      es: "/carriers/manhattan",
+    },
+    "/carriers/manhattan/[product]": {
+      en: "/carriers/manhattan/[product]",
+      es: "/carriers/manhattan/[product]",
     },
     "/carriers/manhattan/shortterm": {
       en: "/carriers/manhattan/shortterm",

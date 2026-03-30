@@ -2,19 +2,20 @@
 import { MapPin, CheckCircle, Phone, Mail } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { getTranslations } from "next-intl/server";
+import { getLicensedStateCount } from "@/lib/licensed-states";
 
 const PHONE = process.env.NEXT_PUBLIC_PHONE_NUMBER ?? "540-426-1804";
-const STATES = process.env.NEXT_PUBLIC_STATES ?? "12";
 
 export default async function Coverage() {
   const t = await getTranslations("HomePage.coverage");
+  const states = String(await getLicensedStateCount());
 
   /* hydrate placeholders */
-  const subtitle = t("subtitle", { states: STATES });
+  const subtitle = t("subtitle", { states });
   const description = t("description");
   const featureLines = t
     .raw("features")
-    .map((f: string) => f.replace("{{states}}", STATES));
+    .map((f: string) => f.replace("{{states}}", states));
 
   return (
     <section

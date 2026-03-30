@@ -5,9 +5,10 @@ import { getTranslations } from "next-intl/server";
 import { Card } from "@/components/ui/card";
 import CTAButton from "@/components/cta-button"; // already client
 import HeroRotatingCards from "@/components/hero-rotating-cards";
+import { getLicensedStateCount } from "@/lib/licensed-states";
 
 export default async function Hero() {
-  const states = process.env.NEXT_PUBLIC_STATES ?? "12";
+  const states = String(await getLicensedStateCount());
   const t = await getTranslations("HomePage");
 
   return (

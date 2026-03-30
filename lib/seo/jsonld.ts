@@ -459,6 +459,55 @@ export const getUhoneShortTermFaqLd = (
   })),
 });
 
+/** UHOne product landing pages — WebPage JSON-LD */
+export const getUhoneProductPageLd = (
+  locale: string,
+  productSlug: string,
+  title: string,
+  description: string
+): WithContext<WebPage> => ({
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": `${BASE_URL}/${locale}/carriers/uhone/${productSlug}#webpage`,
+  url: `${BASE_URL}/${locale}/carriers/uhone/${productSlug}`,
+  name: title,
+  description,
+  inLanguage: locale,
+  about: { "@id": `${BASE_URL}/#organization` },
+});
+
+/** UHOne product — breadcrumb JSON-LD (Home → UHOne hub → Product) */
+export const getUhoneProductBreadcrumbLd = (
+  locale: string,
+  homeLabel: string,
+  hubLabel: string,
+  pageLabel: string,
+  productSlug: string
+): WithContext<BreadcrumbList> => ({
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    {
+      "@type": "ListItem",
+      position: 1,
+      name: homeLabel,
+      item: `${BASE_URL}/${locale}`,
+    },
+    {
+      "@type": "ListItem",
+      position: 2,
+      name: hubLabel,
+      item: `${BASE_URL}/${locale}/carriers/uhone`,
+    },
+    {
+      "@type": "ListItem",
+      position: 3,
+      name: pageLabel,
+      item: `${BASE_URL}/${locale}/carriers/uhone/${productSlug}`,
+    },
+  ],
+});
+
 /** UHOne Short Term Medical — breadcrumb JSON-LD (Home → Page) */
 export const getUhoneShortTermBreadcrumbLd = (
   locale: string,
@@ -537,6 +586,40 @@ export const getAllstateShortTermBreadcrumbLd = (
       item: `${BASE_URL}/${locale}/carriers/allstate/shortterm`,
     },
   ],
+});
+
+/** Allstate product landing — WebPage JSON-LD (`pathname` without leading slash, e.g. `carriers/allstate/seniors/all-products`) */
+export const getAllstateProductPageLd = (
+  locale: string,
+  pathname: string,
+  title: string,
+  description: string
+): WithContext<WebPage> => ({
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": `${BASE_URL}/${locale}/${pathname}#webpage`,
+  url: `${BASE_URL}/${locale}/${pathname}`,
+  name: title,
+  description,
+  inLanguage: locale,
+  about: { "@id": `${BASE_URL}/#organization` },
+});
+
+/** Allstate product — breadcrumb JSON-LD (`path` without leading slash; empty string = locale home) */
+export const getAllstateProductBreadcrumbLd = (
+  locale: string,
+  crumbs: { name: string; path: string }[]
+): WithContext<BreadcrumbList> => ({
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: crumbs.map((c, i) => ({
+    "@type": "ListItem",
+    position: i + 1,
+    name: c.name,
+    item: c.path
+      ? `${BASE_URL}/${locale}/${c.path}`
+      : `${BASE_URL}/${locale}`,
+  })),
 });
 
 /** Pivot / Manhattan — STM partner landing (quote by request) */

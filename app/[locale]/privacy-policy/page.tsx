@@ -10,6 +10,8 @@ import {
   type SupportedLocale,
 } from "@/lib/seo/i18n";
 import { Card, CardContent } from "@/components/ui/card";
+import { getLicensedStateCount } from "@/lib/licensed-states";
+import { interpolateLegalCopy } from "@/lib/legal-placeholders";
 
 const PHONE = process.env.NEXT_PUBLIC_PHONE_NUMBER ?? "540-426-1804";
 
@@ -63,6 +65,9 @@ export async function generateMetadata(): Promise<Metadata> {
 
 /* ────────────────────────────────────────────── */
 export default async function PrivacyPolicyPage() {
+  const statesStr = String(await getLicensedStateCount());
+  const legal = { phone: PHONE, states: statesStr };
+
   const t = await getTranslations("privacyPolicy");
   const sections = t.raw("sections") as Record<
     string,
@@ -126,11 +131,11 @@ export default async function PrivacyPolicyPage() {
                 </h2>
 
                 <div className="prose prose-gray dark:prose-invert md:prose-lg max-w-none">
-                  <p>{content}</p>
+                  <p>{interpolateLegalCopy(content, legal)}</p>
                   {items && (
                     <ul>
                       {items.map((li) => (
-                        <li key={li}>{replacePhone(li)}</li>
+                        <li key={li}>{interpolateLegalCopy(li, legal)}</li>
                       ))}
                     </ul>
                   )}
@@ -138,7 +143,7 @@ export default async function PrivacyPolicyPage() {
                     <ul className="!list-none space-y-1">
                       {details.map((d) => (
                         <li key={d} className="font-medium">
-                          {replacePhone(d)}
+                          {interpolateLegalCopy(d, legal)}
                         </li>
                       ))}
                     </ul>
@@ -251,4 +256,3 @@ const slug = (s: string) =>
     .trim()
     .replace(/\s+/g, "-");
 
-const replacePhone = (text: string) => text.replace("{{PHONE_NUMBER}}", PHONE);

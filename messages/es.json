@@ -148,7 +148,7 @@
     },
     "profile": {
       "title": "Su Profesional de Seguros Dedicado",
-      "description1": "Con experiencia en la industria de seguros de salud, me especializo en ayudar a individuos y familias a navegar el complejo mundo de los seguros. Estoy licenciado en seguros ACA, Vida, Dental y Visión en más de 12 estados.",
+      "description1": "Con experiencia en la industria de seguros de salud, me especializo en ayudar a individuos y familias a navegar el complejo mundo de los seguros. Estoy licenciado en seguros ACA, Vida, Dental y Visión en {states}+ estados.",
       "description2": "Estar licenciado en múltiples estados me permite atender clientes a nivel nacional y brindarle orientación experta sin importar su ubicación. Me mantengo actualizado con los cambios regulatorios y nuevas opciones de planes.",
       "certifications": "Estados donde poseo licencia válida",
       "certs": [
@@ -399,7 +399,7 @@
     }
   },
   "footer": {
-    "description": "Su socio de seguros de confianza especializado en cobertura ACA y Medicare en más de 12 estados. Servicio profesional y personalizado en el que puede confiar.",
+    "description": "Su socio de seguros de confianza especializado en cobertura ACA y Medicare en {states}+ estados. Servicio profesional y personalizado en el que puede confiar.",
     "services": "Servicios",
     "resources": "Recursos",
     "company": "Empresa",
@@ -582,7 +582,7 @@
         "details": [
           "Email: info@isaacplans.com",
           "Tel: {{PHONE_NUMBER}}",
-          "Agente: Isaac Orraiz, Licenciado en 20+ Estados"
+          "Agente: Isaac Orraiz, Licenciado en {states}+ Estados"
         ]
       }
     },
@@ -639,7 +639,7 @@
       },
       "eligibility": {
         "title": "4. Elegibilidad y Licencias",
-        "content": "Nuestros servicios están disponibles para residentes de los estados donde Isaac Orraiz mantiene licencias activas. Actualmente contamos con licencias en más de 20 estados de EE.UU."
+        "content": "Nuestros servicios están disponibles en los estados donde Isaac Orraiz mantiene licencias activas—actualmente en {states}+ estados de EE. UU."
       },
       "responsibilities": {
         "title": "5. Responsabilidades del Cliente",
@@ -1091,7 +1091,7 @@
   },
   "layoutMetadata": {
     "title": "Isaac Plans Insurance | Seguros ACA, Medicare, Vida, Dental, Salud y Más",
-    "description": "Agencia de seguros bilingüe que compara planes del Mercado ACA, Medicare, vida, dental y visión en estados de EE.UU. Cotización gratis con experto.",
+    "description": "Agencia de seguros bilingüe que compara planes del Mercado ACA, Medicare, vida, dental y visión en {states}+ estados de EE. UU. Cotización gratis con experto.",
     "image": "https://www.isaacplans.com/images/og_isaacplans.png",
     "imageAlt": "Logo de Isaac Plans Insurance sobre un fondo degradado azul",
     "keywords": "Seguros ACA, corredor de Medicare, agencia bilingüe de seguros, seguros de vida, planes dentales y de visión, agente de seguros"
@@ -1510,12 +1510,12 @@
                 "manhattan": {
                   "name": "ManhattanLife",
                   "blurb": "Planes a corto plazo sencillos que puedes complementar con beneficios adicionales.",
-                  "href": "/es/carriers/manhattan/shortterm"
+                  "href": "/es/carriers/manhattan"
                 },
                 "allstate": {
                   "name": "Allstate Health Solutions",
                   "blurb": "Opciones de corto plazo con complementos para personalizar tu protección.",
-                  "href": "/es/carriers/allstate/shortterm"
+                  "href": "/es/carriers/allstate"
                 }
               }
             }

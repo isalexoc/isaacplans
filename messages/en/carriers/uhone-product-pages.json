@@ -1,0 +1,1212 @@
+{
+  "uhone": {
+    "productPages": {
+      "labels": {
+        "quoteOnUhone": "Get quote on UHOne",
+        "learnMore": "Learn more on this page",
+        "breadcrumbHub": "UnitedHealthOne products"
+      },
+      "shared": {
+        "uhcLogoAlt": "UnitedHealthcare logo",
+        "enrollmentSteps": {
+          "title": "How enrollment works",
+          "subtitle": "Three simple steps from quote to coverage. Timing and requirements vary by state and plan.",
+          "step1Title": "Get your quote",
+          "step1Body": "Enter your ZIP and household details in UnitedHealthOne’s secure flow. Compare plans, premiums, and disclosures shown for your state.",
+          "step2Title": "Review and enroll",
+          "step2Body": "Read the certificate of coverage carefully, then complete the online application. You may need a payment method and your preferred effective date.",
+          "step3Title": "Confirm your coverage",
+          "step3Body": "Save your policy documents and member materials. You’ll receive confirmation from the carrier when your enrollment is processed—keep contact info up to date."
+        },
+        "contactClosing": {
+          "title": "Want a hand comparing options?",
+          "body": "Reach out for a personalized walkthrough—whether you already used the quote above or you want Isaac to review alternatives."
+        }
+      },
+      "triterm": {
+        "metadata": {
+          "title": "TriTerm Medical | UnitedHealthOne | Isaac Plans",
+          "description": "Learn about TriTerm Medical from UnitedHealthOne: a longer bridge than typical short-term medical in select states. Compare options and start a secure quote—availability and benefits vary by state.",
+          "keywords": "TriTerm Medical, UnitedHealthOne, UHOne, temporary health insurance, Golden Rule, Isaac Plans"
+        },
+        "backNav": {
+          "label": "Back to UnitedHealthOne products"
+        },
+        "hero": {
+          "badge": "UnitedHealthOne · TriTerm Medical",
+          "title": "TriTerm Medical—longer coverage than typical short-term plans in select states",
+          "lead": "TriTerm Medical is designed for people who need a more durable bridge than a few months of short-term coverage—where available, it can run for a much longer term than standard STLDI. It is not ACA minimum essential coverage; networks, underwriting, and plan design vary by state and form."
+        },
+        "sections": {
+          "what": {
+            "title": "What it is",
+            "body": "TriTerm Medical is a UnitedHealthOne individual medical product line offered in a limited set of states. It differs from classic short-term limited-duration insurance (STLDI) in duration and benefit design—think of it as a longer-term temporary option when you need time to reach Medicare, employer coverage, or an ACA plan. Always read the official policy materials in the quote path for your ZIP code."
+          },
+          "who": {
+            "title": "Who it may fit",
+            "body": "It may fit healthy applicants who expect a longer gap between jobs, early retirees waiting for Medicare, or others who need a defined bridge period with major-medical-style benefits. It is not for everyone—if you have preexisting conditions or need comprehensive ACA protections, compare with Marketplace plans and other options."
+          },
+          "confirm": {
+            "title": "What to confirm in the quote",
+            "body": "Check deductibles, out-of-pocket maximums, network (if applicable), prescription rules, exclusions, and how long coverage can remain in force in your state. Confirm whether the plan is considered creditable coverage for your situation and whether you have other minimum essential coverage available."
+          },
+          "more": {
+            "title": "More about TriTerm",
+            "body": "TriTerm is positioned for shoppers who need longer coverage than federal short-term rules allow for STLDI in many states. Plans may include network access similar to major medical designs; always compare total out-of-pocket exposure, exclusions, and renewal rules in the official quote. If you need ACA protections, maternity, or guaranteed issue for preexisting conditions, compare TriTerm side by side with Marketplace plans before you enroll."
+          }
+        },
+        "faq": {
+          "title": "Common questions",
+          "items": [
+            {
+              "q": "Is TriTerm Medical ACA-compliant?",
+              "a": "No. It is not Minimum Essential Coverage under the Affordable Care Act. It does not provide all essential health benefits or protections in the same way an ACA plan does. Review disclosures for your state and situation."
+            },
+            {
+              "q": "How is TriTerm different from short-term medical (STLDI)?",
+              "a": "TriTerm is designed for longer coverage durations in select states and generally has a different regulatory and product profile than federal STLDI. STLDI rules (including recent federal duration limits) apply to short-term products—not necessarily to TriTerm in the same way. Confirm details in the carrier materials."
+            },
+            {
+              "q": "Is TriTerm available in every state?",
+              "a": "No. Product availability and form filings vary by state. The official UnitedHealthOne quoting experience will show whether you can apply in your area."
+            },
+            {
+              "q": "Are preexisting conditions covered?",
+              "a": "Plans vary by state and form. Many temporary medical products have limitations on preexisting conditions. Read the application questions and policy certificate carefully."
+            },
+            {
+              "q": "Can Isaac Plans help me compare TriTerm with other options?",
+              "a": "Yes. We can help you weigh TriTerm against ACA Marketplace plans, short-term medical, and other coverage paths so you can choose what fits your budget and health needs."
+            }
+          ]
+        },
+        "ctaBand": {
+          "title": "Want a second opinion before you enroll?",
+          "body": "Use our quote button or reach out—we’ll help you compare UHOne TriTerm with other carriers and coverage types."
+        },
+        "disclaimer": {
+          "title": "Important",
+          "body": "Products, availability, underwriting, and benefits vary by state and plan. This page is educational and links to the carrier’s authorized quoting experience. Read all disclosures, certificates, and policy documents before you enroll. Isaac Plans Insurance is compensated when you enroll through applicable carrier programs."
+        },
+        "highlights": {
+          "title": "At a glance",
+          "items": [
+            "Longer bridge than typical STLDI where TriTerm is offered",
+            "Not Minimum Essential Coverage—review limitations carefully",
+            "Availability and forms vary—quote path shows your state options"
+          ]
+        }
+      },
+      "health-protector": {
+        "metadata": {
+          "title": "Enhanced Health ProtectorGuard (Fixed Indemnity) | UHOne | Isaac Plans",
+          "description": "Learn about Enhanced Health ProtectorGuard fixed indemnity from UnitedHealthOne—wellness, visits, Rx, and network options in many states. Start a secure quote; availability varies.",
+          "keywords": "Health ProtectorGuard, fixed indemnity, UnitedHealthOne, UHOne, Isaac Plans"
+        },
+        "backNav": {
+          "label": "Back to UnitedHealthOne products"
+        },
+        "hero": {
+          "badge": "UnitedHealthOne · Fixed indemnity",
+          "title": "Health ProtectorGuard—fixed cash benefits for everyday care",
+          "lead": "Enhanced Health ProtectorGuard is a fixed indemnity product that pays preset amounts for covered services, not a traditional major medical plan. It is not ACA minimum essential coverage. It may include wellness, doctor visits, and prescription benefits on many plans; network and telehealth options vary by state."
+        },
+        "sections": {
+          "what": {
+            "title": "What it is",
+            "body": "Fixed indemnity plans pay fixed dollar amounts when you receive covered services, up to plan limits. They are often used to supplement high-deductible health plans or other coverage. UnitedHealthOne’s ProtectorGuard path may include access to UnitedHealthcare networks and telehealth programs where available—see your quote for your state."
+          },
+          "who": {
+            "title": "Who it may fit",
+            "body": "People who want predictable cash benefits for covered office visits, wellness, and prescriptions—often alongside another medical plan—may find fixed indemnity useful. It is not a substitute for comprehensive major medical coverage if you need full protection for large claims."
+          },
+          "confirm": {
+            "title": "What to confirm in the quote",
+            "body": "Review benefit schedules (dollar amounts per service), annual limits, waiting periods, exclusions, and how benefits coordinate with other insurance. Confirm network access and whether your providers participate."
+          },
+          "more": {
+            "title": "More about fixed indemnity",
+            "body": "Fixed indemnity pays preset dollar amounts for covered services rather than paying after a deductible like traditional insurance. It can pair with high-deductible medical plans to create predictable cash flow for office visits and prescriptions. Coordination of benefits and tax treatment can be nuanced—read your certificate and consult a tax advisor for personal tax questions."
+          }
+        },
+        "faq": {
+          "title": "Common questions",
+          "items": [
+            {
+              "q": "Is this major medical insurance?",
+              "a": "No. Fixed indemnity pays set amounts for covered services; it does not work like a traditional deductible and coinsurance major medical plan. Read the benefit schedule for your plan."
+            },
+            {
+              "q": "Does it satisfy the ACA individual mandate?",
+              "a": "No. It is not Minimum Essential Coverage. You may still owe a penalty for not having MEC only if applicable law in your situation requires it—consult a tax advisor for personal tax questions."
+            },
+            {
+              "q": "Can I use it with my employer plan?",
+              "a": "Many people use supplemental products alongside other coverage; coordination rules vary by plan. Check the certificate and ask the carrier about coordination of benefits."
+            },
+            {
+              "q": "Is Health ProtectorGuard available in my state?",
+              "a": "Availability varies by state and form. The UHOne quote path will indicate if you can apply."
+            },
+            {
+              "q": "How is pricing determined?",
+              "a": "Premiums depend on age, location, plan options, and underwriting where applicable. See the official quote for your household."
+            }
+          ]
+        },
+        "ctaBand": {
+          "title": "Want help comparing fixed indemnity with other supplements?",
+          "body": "We can walk you through ProtectorGuard versus hospital indemnity, accident, and other UHOne products."
+        },
+        "disclaimer": {
+          "title": "Important",
+          "body": "Products, availability, underwriting, and benefits vary by state and plan. This page is educational and links to the carrier’s authorized quoting experience. Read all disclosures, certificates, and policy documents before you enroll. Isaac Plans Insurance is compensated when you enroll through applicable carrier programs."
+        },
+        "highlights": {
+          "title": "At a glance",
+          "items": [
+            "Cash benefits for covered services up to plan schedules",
+            "May include wellness, visits, and Rx on many designs",
+            "Not a substitute for comprehensive major medical coverage"
+          ]
+        }
+      },
+      "advantage-guard": {
+        "metadata": {
+          "title": "AdvantageGuard Hospital Indemnity | UHOne | Isaac Plans",
+          "description": "Learn about AdvantageGuard from UnitedHealthOne—hospital indemnity for ages 60–90 with cash benefits that can pair with Medicare Advantage. See if you can quote in your state.",
+          "keywords": "AdvantageGuard, hospital indemnity, Medicare Advantage, UnitedHealthOne, Isaac Plans"
+        },
+        "backNav": {
+          "label": "Back to UnitedHealthOne products"
+        },
+        "hero": {
+          "badge": "UnitedHealthOne · Hospital indemnity",
+          "title": "AdvantageGuard—cash benefits for hospital events after age 60",
+          "lead": "AdvantageGuard focuses on hospital-related events for issue ages 60–90. It pays fixed cash benefits for covered confinements and services—useful when Medicare Advantage leaves out-of-pocket costs you want to offset. Benefits, limits, and availability vary by state."
+        },
+        "sections": {
+          "what": {
+            "title": "What it is",
+            "body": "Hospital indemnity insurance pays you (or a provider, per policy terms) cash benefits when you have a covered hospital stay or related event, subject to policy limits. It is not a substitute for Medicare or Medicare Advantage; it is supplemental insurance."
+          },
+          "who": {
+            "title": "Who it may fit",
+            "body": "Medicare Advantage enrollees who want extra cash for hospital copays and related costs, or others in the eligible age band who want simplified hospital-focused protection, may consider this product. Review how benefits interact with Medicare and Medicare Advantage in your state."
+          },
+          "confirm": {
+            "title": "What to confirm in the quote",
+            "body": "Check benefit amounts per day or per stay, elimination periods, maximum benefit periods, and exclusions for preexisting conditions or specific diagnoses. Confirm issue age and residency rules."
+          },
+          "more": {
+            "title": "More about AdvantageGuard",
+            "body": "AdvantageGuard is built for older adults who want hospital-focused cash benefits—often alongside Medicare Advantage cost-sharing. Benefits are typically triggered by covered confinements and may include defined amounts per day or stay. Always confirm how benefits interact with Medicare, Medigap, or employer coverage before you rely on the policy for a large bill."
+          }
+        },
+        "faq": {
+          "title": "Common questions",
+          "items": [
+            {
+              "q": "Does AdvantageGuard replace Medicare?",
+              "a": "No. It is supplemental insurance. You remain enrolled in Medicare and any Medicare Advantage or Part D plans you choose."
+            },
+            {
+              "q": "Are preexisting conditions covered?",
+              "a": "Policies vary. Many hospital indemnity plans have waiting periods or exclusions for preexisting conditions. Read the certificate of coverage."
+            },
+            {
+              "q": "Can I choose any hospital?",
+              "a": "Indemnity plans typically pay fixed benefits regardless of network, but you should confirm policy language and any network requirements for related services."
+            },
+            {
+              "q": "How fast are benefits paid?",
+              "a": "Claims processes vary by carrier and claim type. The policy describes how and when benefits are paid."
+            },
+            {
+              "q": "Is Isaac Plans licensed to discuss Medicare Advantage pairings?",
+              "a": "We help you understand how supplemental products fit your overall picture; for Medicare-specific questions, we can coordinate with your needs and direct you to official Medicare resources."
+            }
+          ]
+        },
+        "ctaBand": {
+          "title": "Want help pairing Medicare Advantage with supplemental cash benefits?",
+          "body": "Reach out—we’ll help you compare AdvantageGuard with other hospital indemnity options."
+        },
+        "disclaimer": {
+          "title": "Important",
+          "body": "Products, availability, underwriting, and benefits vary by state and plan. This page is educational and links to the carrier’s authorized quoting experience. Read all disclosures, certificates, and policy documents before you enroll. Isaac Plans Insurance is compensated when you enroll through applicable carrier programs."
+        },
+        "highlights": {
+          "title": "At a glance",
+          "items": [
+            "Designed for issue ages 60–90 in eligible states",
+            "Supplemental—does not replace Medicare or Part D",
+            "Review elimination periods and preexisting condition rules"
+          ]
+        }
+      },
+      "hospital-wise": {
+        "metadata": {
+          "title": "HospitalWise Plans | UnitedHealthOne | Isaac Plans",
+          "description": "Learn about HospitalWise guaranteed-issue hospital indemnity from UnitedHealthOne—straightforward cash benefits for hospital stays. Start a secure quote; terms vary by state.",
+          "keywords": "HospitalWise, hospital indemnity, guaranteed issue, UnitedHealthOne, Isaac Plans"
+        },
+        "backNav": {
+          "label": "Back to UnitedHealthOne products"
+        },
+        "hero": {
+          "badge": "UnitedHealthOne · Hospital indemnity",
+          "title": "HospitalWise—guaranteed-issue cash benefits for hospital care",
+          "lead": "HospitalWise offers guaranteed-issue hospital indemnity with straightforward cash benefits paid for covered hospital services—often without network restrictions in the benefit design itself. Amounts, limits, and eligibility vary by state and plan—confirm everything in the official quote."
+        },
+        "sections": {
+          "what": {
+            "title": "What it is",
+            "body": "Hospital indemnity pays fixed cash amounts when you experience a covered hospitalization or related service, as defined in the policy. Guaranteed-issue means you may qualify without medical underwriting within the stated rules—still subject to state availability and policy terms."
+          },
+          "who": {
+            "title": "Who it may fit",
+            "body": "People who want predictable cash to help with hospital deductibles and copays from another plan, or who want simple hospital-focused protection, may consider HospitalWise. It does not replace major medical coverage."
+          },
+          "confirm": {
+            "title": "What to confirm in the quote",
+            "body": "Review benefit triggers (admission, ICU, etc.), daily benefit amounts, maximum days, benefit periods, and any exclusions. Confirm guaranteed-issue rules and renewal limits."
+          },
+          "more": {
+            "title": "More about HospitalWise",
+            "body": "Guaranteed-issue hospital indemnity can be attractive when you want simplified underwriting and clear cash benefits for hospital events. Policies pay based on covered triggers in the certificate—not on whether a provider is in network for your major medical plan. Use the quote flow to see benefit schedules, maximums, and any waiting periods that apply in your state."
+          }
+        },
+        "faq": {
+          "title": "Common questions",
+          "items": [
+            {
+              "q": "Is HospitalWise the same as health insurance?",
+              "a": "It is supplemental insurance that pays fixed benefits—it does not pay all medical bills like a comprehensive major medical plan."
+            },
+            {
+              "q": "Does it cover doctor visits outside the hospital?",
+              "a": "Hospital indemnity focuses on covered hospital events; outpatient care is usually limited or excluded unless the policy specifies otherwise."
+            },
+            {
+              "q": "Can I keep the plan if I move?",
+              "a": "Portability and state rules vary. Check the policy and ask the carrier if you change residency."
+            },
+            {
+              "q": "Are there waiting periods?",
+              "a": "Some benefits may have waiting periods. The certificate will show the schedule for your plan."
+            },
+            {
+              "q": "How is HospitalWise different from Hospital Guard?",
+              "a": "Both are supplemental hospital products with different forms and benefit designs. Compare benefit schedules and issue rules in the UHOne quote flow."
+            }
+          ]
+        },
+        "ctaBand": {
+          "title": "Want help comparing hospital indemnity options?",
+          "body": "We can help you compare HospitalWise with other UHOne hospital products."
+        },
+        "disclaimer": {
+          "title": "Important",
+          "body": "Products, availability, underwriting, and benefits vary by state and plan. This page is educational and links to the carrier’s authorized quoting experience. Read all disclosures, certificates, and policy documents before you enroll. Isaac Plans Insurance is compensated when you enroll through applicable carrier programs."
+        },
+        "highlights": {
+          "title": "At a glance",
+          "items": [
+            "Guaranteed-issue designs may be available where filed",
+            "Fixed benefits for covered hospital events—read triggers carefully",
+            "Pairs with—not replaces—comprehensive medical coverage"
+          ]
+        }
+      },
+      "hospital-indemnity-gi": {
+        "metadata": {
+          "title": "Hospital Indemnity (GI) | UnitedHealthOne | Isaac Plans",
+          "description": "Learn about guaranteed-issue hospital indemnity from UnitedHealthOne—simplified underwriting and cash benefits for hospital stays. Start a secure quote; availability varies.",
+          "keywords": "hospital indemnity, guaranteed issue, UnitedHealthOne, UHOne, Isaac Plans"
+        },
+        "backNav": {
+          "label": "Back to UnitedHealthOne products"
+        },
+        "hero": {
+          "badge": "UnitedHealthOne · Guaranteed issue",
+          "title": "Hospital Indemnity (GI)—simple underwriting, cash for hospital stays",
+          "lead": "This path offers guaranteed-issue hospital indemnity options for clients who need simplified underwriting and cash benefits tied to hospital stays. Benefit amounts, waiting periods, and state availability vary—review the official disclosures for your ZIP code."
+        },
+        "sections": {
+          "what": {
+            "title": "What it is",
+            "body": "Guaranteed-issue hospital indemnity means eligible applicants can obtain coverage without health questions within the product’s rules—subject to age, residency, and state approval. Benefits are typically fixed cash amounts for hospital confinement and related events."
+          },
+          "who": {
+            "title": "Who it may fit",
+            "body": "Individuals who may not qualify for underwritten products, or who want a simpler application path, may explore GI hospital indemnity. It is supplemental—not a replacement for comprehensive medical coverage."
+          },
+          "confirm": {
+            "title": "What to confirm in the quote",
+            "body": "Check which events trigger benefits, how benefits coordinate with other insurance, and any limitations on preexisting conditions despite guaranteed issue. Confirm renewal and rate change rules."
+          },
+          "more": {
+            "title": "More about GI hospital indemnity",
+            "body": "Guaranteed-issue products focus on simplified enrollment rules, but claims are still governed by policy language, waiting periods, and exclusions. If you have other insurance, ask how benefits coordinate and whether duplicate coverage rules apply. Keep copies of admissions and itemized bills to support timely claims."
+          }
+        },
+        "faq": {
+          "title": "Common questions",
+          "items": [
+            {
+              "q": "Does guaranteed issue mean every claim is covered?",
+              "a": "No. Guaranteed issue refers to underwriting at enrollment. Claims are still subject to policy terms, exclusions, and waiting periods."
+            },
+            {
+              "q": "How does GI hospital indemnity differ from HospitalWise?",
+              "a": "They are different product forms with different benefit schedules and rules. Compare both in the UHOne quote flow for your state."
+            },
+            {
+              "q": "Is there a waiting period for hospital benefits?",
+              "a": "Many plans impose waiting periods for certain conditions or services. Read the certificate."
+            },
+            {
+              "q": "Can I use it with Medicare?",
+              "a": "Often used as supplemental coverage; coordination rules depend on your policy. Verify with the certificate and carrier."
+            },
+            {
+              "q": "How do I get a quote?",
+              "a": "Use the secure UnitedHealthOne link on this page to enter your state and demographic information."
+            }
+          ]
+        },
+        "ctaBand": {
+          "title": "Want help comparing GI hospital indemnity options?",
+          "body": "We can help you compare Hospital Indemnity GI with other UHOne hospital products."
+        },
+        "disclaimer": {
+          "title": "Important",
+          "body": "Products, availability, underwriting, and benefits vary by state and plan. This page is educational and links to the carrier’s authorized quoting experience. Read all disclosures, certificates, and policy documents before you enroll. Isaac Plans Insurance is compensated when you enroll through applicable carrier programs."
+        },
+        "highlights": {
+          "title": "At a glance",
+          "items": [
+            "Simplified underwriting at enrollment—claims follow policy terms",
+            "Compare daily benefits, maximums, and benefit periods",
+            "Medicare coordination rules vary—read disclosures"
+          ]
+        }
+      },
+      "hospital-guard": {
+        "metadata": {
+          "title": "Hospital Guard (Guaranteed Issue) | UnitedHealthOne | Isaac Plans",
+          "description": "Learn about Hospital Guard from UnitedHealthOne—fixed benefits for hospital services and optional telehealth for high-deductible planholders. Quote in your state.",
+          "keywords": "Hospital Guard, hospital indemnity, guaranteed issue, UnitedHealthOne, Isaac Plans"
+        },
+        "backNav": {
+          "label": "Back to UnitedHealthOne products"
+        },
+        "hero": {
+          "badge": "UnitedHealthOne · Hospital indemnity",
+          "title": "Hospital Guard—relief for high-deductible medical plans",
+          "lead": "Hospital Guard (Guaranteed Issue) pays fixed benefits for covered hospital services and may include some outpatient and accidental death benefits, with optional telehealth in many designs. It supplements—not replaces—major medical coverage."
+        },
+        "sections": {
+          "what": {
+            "title": "What it is",
+            "body": "Hospital Guard is a hospital indemnity-style product designed to pair with high-deductible health plans by paying fixed cash amounts for covered admissions and services. Optional telehealth riders may be available where approved."
+          },
+          "who": {
+            "title": "Who it may fit",
+            "body": "People with high deductibles who want a cushion for hospital stays, or those who prefer simplified underwriting under GU rules, may consider Hospital Guard. Review how benefits overlap with your primary plan."
+          },
+          "confirm": {
+            "title": "What to confirm in the quote",
+            "body": "Check inpatient vs outpatient benefit amounts, accidental death benefits, telehealth add-on terms, and any exclusions. Confirm guaranteed-issue eligibility rules."
+          },
+          "more": {
+            "title": "More about Hospital Guard",
+            "body": "Hospital Guard is structured to complement high-deductible plans by paying fixed amounts when covered hospital events occur. Optional telehealth riders can add convenience for minor issues, but they are not a substitute for emergency care. Review accidental death benefits and any outpatient riders in your specific form."
+          }
+        },
+        "faq": {
+          "title": "Common questions",
+          "items": [
+            {
+              "q": "Will Hospital Guard pay my deductible?",
+              "a": "It pays fixed benefits per covered events; you may use cash benefits toward out-of-pocket costs, subject to policy terms."
+            },
+            {
+              "q": "Is telehealth included?",
+              "a": "Optional telehealth may be available on some plans. Confirm in the quote and certificate."
+            },
+            {
+              "q": "Can I use any hospital?",
+              "a": "Indemnity benefits are often fixed regardless of network, but you should confirm policy language and any network requirements for related services."
+            },
+            {
+              "q": "How does this compare to Hospital SafeGuard?",
+              "a": "Different forms and benefit schedules—compare both in the UHOne quote flow for your state."
+            },
+            {
+              "q": "Is accidental death coverage included?",
+              "a": "Many designs include a benefit rider. See the certificate for your plan."
+            }
+          ]
+        },
+        "ctaBand": {
+          "title": "Want help pairing Hospital Guard with your primary plan?",
+          "body": "We can help you compare Hospital Guard with other hospital indemnity options."
+        },
+        "disclaimer": {
+          "title": "Important",
+          "body": "Products, availability, underwriting, and benefits vary by state and plan. This page is educational and links to the carrier’s authorized quoting experience. Read all disclosures, certificates, and policy documents before you enroll. Isaac Plans Insurance is compensated when you enroll through applicable carrier programs."
+        },
+        "highlights": {
+          "title": "At a glance",
+          "items": [
+            "Fixed cash benefits for covered admissions and related services",
+            "Optional telehealth on some plans—confirm in the certificate",
+            "Designed to cushion deductibles and cost-sharing"
+          ]
+        }
+      },
+      "hospital-safeguard": {
+        "metadata": {
+          "title": "Hospital SafeGuard & Supplemental Indemnity | UHOne | Isaac Plans",
+          "description": "Learn about Hospital SafeGuard and supplemental indemnity from UnitedHealthOne—cash benefits that complement major medical. Start a secure quote; terms vary by state.",
+          "keywords": "Hospital SafeGuard, supplemental indemnity, UnitedHealthOne, Isaac Plans"
+        },
+        "backNav": {
+          "label": "Back to UnitedHealthOne products"
+        },
+        "hero": {
+          "badge": "UnitedHealthOne · Supplemental indemnity",
+          "title": "Hospital SafeGuard—cash benefits when hospital bills stack up",
+          "lead": "Hospital SafeGuard and supplemental indemnity products pay fixed cash benefits for hospital and related covered services—designed to complement major medical, not replace it. Benefits and availability vary by state; the supplemental indemnity quoting path may apply to specific SafeGuard-style enrollment."
+        },
+        "sections": {
+          "what": {
+            "title": "What it is",
+            "body": "Supplemental indemnity plans pay preset amounts when you have covered events—such as hospital admissions, surgery, or related services—depending on the policy. These products help offset out-of-pocket costs from your primary insurance."
+          },
+          "who": {
+            "title": "Who it may fit",
+            "body": "Families and individuals with major medical who want extra cash for hospital-related costs may consider supplemental indemnity. It is especially relevant when you expect cost-sharing from a hospital stay."
+          },
+          "confirm": {
+            "title": "What to confirm in the quote",
+            "body": "Review the benefit schedule for each type of service, maximum benefits, and coordination with other coverage. Confirm which UHOne path matches your enrollment needs (SafeGuard vs supplemental indemnity)."
+          },
+          "more": {
+            "title": "More about supplemental indemnity",
+            "body": "Supplemental indemnity helps with out-of-pocket exposure from your primary plan by paying cash for covered events like admissions or surgery, depending on the policy. The right path on UHOne may differ by state—use the quote experience that matches your enrollment intent and read benefit maximums for each service category."
+          }
+        },
+        "faq": {
+          "title": "Common questions",
+          "items": [
+            {
+              "q": "Is this major medical insurance?",
+              "a": "No. It is supplemental insurance. You should maintain other coverage appropriate for your needs."
+            },
+            {
+              "q": "Why are there different quoting paths?",
+              "a": "UnitedHealthOne may route certain forms by product line. Use the path that matches your enrollment and state."
+            },
+            {
+              "q": "Are benefits paid to me or the hospital?",
+              "a": "Policies specify payee rules; many indemnity plans pay the policyholder directly."
+            },
+            {
+              "q": "How do I know if I’m on the right plan?",
+              "a": "Compare benefit schedules, premiums, and exclusions in the official quote. We can help you interpret the trade-offs."
+            },
+            {
+              "q": "Does it cover outpatient surgery?",
+              "a": "Coverage depends on the policy. Read the certificate for covered events and amounts."
+            }
+          ]
+        },
+        "ctaBand": {
+          "title": "Quote and enroll now",
+          "body": "Use the button below to open UnitedHealthOne’s secure quoting flow—compare Hospital SafeGuard and related supplemental indemnity options for your ZIP, review benefits, then enroll online when you’re ready."
+        },
+        "disclaimer": {
+          "title": "Important",
+          "body": "Products, availability, underwriting, and benefits vary by state and plan. This page is educational and links to the carrier’s authorized quoting experience. Read all disclosures, certificates, and policy documents before you enroll. Isaac Plans Insurance is compensated when you enroll through applicable carrier programs."
+        },
+        "highlights": {
+          "title": "At a glance",
+          "items": [
+            "Cash benefits for defined events—check schedules and caps",
+            "Keep major medical for comprehensive protection",
+            "Confirm which UHOne quoting path matches your product"
+          ]
+        }
+      },
+      "critical-guard": {
+        "metadata": {
+          "title": "CriticalGuard Critical Illness | UnitedHealthOne | Isaac Plans",
+          "description": "Learn about CriticalGuard from UnitedHealthOne—lump-sum cash for serious diagnoses such as cancer and heart conditions. Start a secure quote; availability varies.",
+          "keywords": "CriticalGuard, critical illness insurance, UnitedHealthOne, Isaac Plans"
+        },
+        "backNav": {
+          "label": "Back to UnitedHealthOne products"
+        },
+        "hero": {
+          "badge": "UnitedHealthOne · Critical illness",
+          "title": "CriticalGuard—lump-sum cash when a serious diagnosis hits",
+          "lead": "Critical illness insurance pays a lump-sum benefit when you are diagnosed with a covered critical condition—often cancer, heart attack, stroke, and other specified illnesses—subject to policy definitions. It is not health insurance for everyday care; it is financial protection for a defined list of events."
+        },
+        "sections": {
+          "what": {
+            "title": "What it is",
+            "body": "Critical illness coverage provides a lump-sum payment when you meet policy definitions for covered diagnoses. You may use the money for medical bills, lost income, household expenses, or anything else—subject to policy terms. Guaranteed-issue options may exist in some designs."
+          },
+          "who": {
+            "title": "Who it may fit",
+            "body": "People who want extra cash protection beyond major medical—especially if you have a family history of serious illness—may consider critical illness. It is not a substitute for comprehensive major medical coverage."
+          },
+          "confirm": {
+            "title": "What to confirm in the quote",
+            "body": "Review the list of covered conditions, definitions, survival periods, waiting periods, and exclusions. Confirm benefit amounts and whether multiple payouts are possible."
+          },
+          "more": {
+            "title": "More about critical illness",
+            "body": "Critical illness insurance is about liquidity after a serious diagnosis: the lump sum can help with deductibles, travel for care, or time off work. Definitions matter—two policies may cover “cancer” differently. Review survival periods, recurrence benefits, and whether you can purchase multiple policies or riders for heart attack and stroke."
+          }
+        },
+        "faq": {
+          "title": "Common questions",
+          "items": [
+            {
+              "q": "Is critical illness the same as health insurance?",
+              "a": "No. It pays a lump sum for specified diagnoses; it does not pay ongoing medical bills like a major medical plan."
+            },
+            {
+              "q": "Are preexisting conditions covered?",
+              "a": "Policies often exclude or limit preexisting conditions. Read the certificate of coverage."
+            },
+            {
+              "q": "Can I buy critical illness with Medicare?",
+              "a": "Eligibility varies by state and product. The quote path will show available options."
+            },
+            {
+              "q": "How is CriticalGuard different from accident insurance?",
+              "a": "Critical illness covers specified sickness diagnoses; accident insurance covers accidental injury. Some people carry both."
+            },
+            {
+              "q": "How fast is the benefit paid after diagnosis?",
+              "a": "Claims procedures and timing vary. The policy describes documentation and payment timelines."
+            }
+          ]
+        },
+        "ctaBand": {
+          "title": "Want help comparing critical illness with other supplements?",
+          "body": "We can help you compare CriticalGuard with accident, hospital indemnity, and life options."
+        },
+        "disclaimer": {
+          "title": "Important",
+          "body": "Products, availability, underwriting, and benefits vary by state and plan. This page is educational and links to the carrier’s authorized quoting experience. Read all disclosures, certificates, and policy documents before you enroll. Isaac Plans Insurance is compensated when you enroll through applicable carrier programs."
+        },
+        "highlights": {
+          "title": "At a glance",
+          "items": [
+            "Lump-sum payment for defined diagnoses—read definitions closely",
+            "Not a substitute for major medical or disability insurance",
+            "Guaranteed-issue may be available on some forms"
+          ]
+        }
+      },
+      "term-life": {
+        "metadata": {
+          "title": "Term Life SafeGuard | UnitedHealthOne | Isaac Plans",
+          "description": "Learn about Term Life SafeGuard from UnitedHealthOne—affordable term life with optional riders. Start a secure quote; underwriting and availability vary.",
+          "keywords": "term life, Term Life SafeGuard, UnitedHealthOne, Isaac Plans"
+        },
+        "backNav": {
+          "label": "Back to UnitedHealthOne products"
+        },
+        "hero": {
+          "badge": "UnitedHealthOne · Term life",
+          "title": "Term Life SafeGuard—protection for the years that matter most",
+          "lead": "Term life insurance pays a death benefit to your beneficiaries if you pass away during the term—often a cost-effective way to protect income, mortgage, and family goals. UnitedHealthOne’s Term Life SafeGuard path may offer optional riders such as critical illness coverage where available."
+        },
+        "sections": {
+          "what": {
+            "title": "What it is",
+            "body": "Term life provides coverage for a set period (the term) with a level death benefit in many designs. It is not permanent life insurance; when the term ends, coverage may lapse unless you renew or convert per policy."
+          },
+          "who": {
+            "title": "Who it may fit",
+            "body": "Parents, homeowners, and anyone with dependents who depend on their income may consider term life. Health and underwriting affect eligibility and rates."
+          },
+          "confirm": {
+            "title": "What to confirm in the quote",
+            "body": "Review benefit amount, term length, premium guarantees, riders (including critical illness), conversion options, and exclusions. Confirm beneficiary designations."
+          },
+          "more": {
+            "title": "More about term life",
+            "body": "Term life is often the most affordable way to protect a mortgage or replace income during working years. Compare level-premium periods, conversion privileges to permanent coverage, and optional riders such as accelerated benefit or child term. Beneficiary designations should be kept current after major life events."
+          }
+        },
+        "faq": {
+          "title": "Common questions",
+          "items": [
+            {
+              "q": "Is term life an investment?",
+              "a": "No. Term life is pure protection; it does not build cash value like some permanent policies."
+            },
+            {
+              "q": "How much coverage do I need?",
+              "a": "Depends on income replacement, debts, and goals. We can help you think through a reasonable range before you apply."
+            },
+            {
+              "q": "What happens when the term ends?",
+              "a": "Coverage may end unless you renew or convert per policy terms. Review renewal and conversion options in the certificate."
+            },
+            {
+              "q": "Can I add critical illness to a term life policy?",
+              "a": "Some UHOne designs offer optional riders. Check the quote for your state."
+            },
+            {
+              "q": "Do I need a medical exam?",
+              "a": "Underwriting requirements vary by product and face amount. The application may include health questions or exams."
+            }
+          ]
+        },
+        "ctaBand": {
+          "title": "Want help comparing term life with other protection options?",
+          "body": "We can help you compare Term Life SafeGuard with other carriers and product types."
+        },
+        "disclaimer": {
+          "title": "Important",
+          "body": "Products, availability, underwriting, and benefits vary by state and plan. This page is educational and links to the carrier’s authorized quoting experience. Read all disclosures, certificates, and policy documents before you enroll. Isaac Plans Insurance is compensated when you enroll through applicable carrier programs."
+        },
+        "highlights": {
+          "title": "At a glance",
+          "items": [
+            "Pure protection for a defined term—no cash value",
+            "Underwriting may include health questions or exams",
+            "Review conversion and renewal options before you buy"
+          ]
+        }
+      },
+      "dental-wise": {
+        "metadata": {
+          "title": "DentalWise & DentalWise Max (DVH) | UnitedHealthOne | Isaac Plans",
+          "description": "Learn about DentalWise and DentalWise Max from UnitedHealthOne—dental, vision, and hearing in one plan or dental-only. Start a secure quote; networks vary.",
+          "keywords": "DentalWise, dental insurance, vision, hearing, UnitedHealthOne, Isaac Plans"
+        },
+        "backNav": {
+          "label": "Back to UnitedHealthOne products"
+        },
+        "hero": {
+          "badge": "UnitedHealthOne · Dental & vision",
+          "title": "DentalWise—coverage built around dental, vision, and hearing",
+          "lead": "DentalWise Max bundles dental, vision, and hearing in one plan; DentalWise focuses on dental-only coverage. Both use the UnitedHealthcare dental network where applicable and are designed to fit many budgets—benefit levels, waiting periods, and availability vary by state."
+        },
+        "sections": {
+          "what": {
+            "title": "What it is",
+            "body": "Dental insurance plans typically cover preventive services (cleanings, exams) and share costs for basic and major services subject to annual maximums and waiting periods. DentalWise Max adds vision and hearing benefits in one product design."
+          },
+          "who": {
+            "title": "Who it may fit",
+            "body": "Individuals and families without employer dental benefits, or anyone who wants predictable costs for routine and restorative care, may consider DentalWise. Compare annual maximums and network access to your needs."
+          },
+          "confirm": {
+            "title": "What to confirm in the quote",
+            "body": "Check annual maximums, coinsurance percentages, waiting periods for major services, orthodontic coverage, and network dentist lists. For DVH, confirm vision and hearing benefit details."
+          },
+          "more": {
+            "title": "More about DentalWise",
+            "body": "DentalWise and DentalWise Max (DVH) help budget for preventive care and reduce surprises on basic and major services. Annual maximums, waiting periods, and orthodontic coverage vary—if you expect major work soon, compare plans with shorter waiting periods and higher maximums, even if the premium is higher."
+          }
+        },
+        "faq": {
+          "title": "Common questions",
+          "items": [
+            {
+              "q": "Is DentalWise ACA-compliant health insurance?",
+              "a": "Dental plans are separate from major medical ACA coverage. They are not a substitute for comprehensive medical insurance."
+            },
+            {
+              "q": "Can I see any dentist?",
+              "a": "You usually save more with in-network dentists. Verify network participation before your visit."
+            },
+            {
+              "q": "How long are waiting periods for major work?",
+              "a": "Waiting periods vary by plan. The certificate shows the schedule for your policy."
+            },
+            {
+              "q": "What is DentalWise Max?",
+              "a": "It bundles dental, vision, and hearing benefits in one plan. Compare with dental-only DentalWise in the quote."
+            },
+            {
+              "q": "Does it cover orthodontics?",
+              "a": "Orthodontic coverage varies by plan. Check the benefit summary."
+            }
+          ]
+        },
+        "ctaBand": {
+          "title": "Want help comparing dental plans?",
+          "body": "We can help you compare DentalWise with other UHOne and carrier dental options."
+        },
+        "disclaimer": {
+          "title": "Important",
+          "body": "Products, availability, underwriting, and benefits vary by state and plan. This page is educational and links to the carrier’s authorized quoting experience. Read all disclosures, certificates, and policy documents before you enroll. Isaac Plans Insurance is compensated when you enroll through applicable carrier programs."
+        },
+        "highlights": {
+          "title": "At a glance",
+          "items": [
+            "DVH bundles dental, vision, and hearing in one product line",
+            "Save more by staying in the UnitedHealthcare dental network",
+            "Orthodontia and implants vary—check the benefit summary"
+          ]
+        }
+      },
+      "dental-discount": {
+        "metadata": {
+          "title": "Dental Discount Program | UnitedHealthOne | Isaac Plans",
+          "description": "Learn about the UnitedHealthOne dental discount program—save on dental services when a full insurance plan is not the right fit. Availability varies.",
+          "keywords": "dental discount, UnitedHealthOne, UHOne, Isaac Plans"
+        },
+        "backNav": {
+          "label": "Back to UnitedHealthOne products"
+        },
+        "hero": {
+          "badge": "UnitedHealthOne · Dental & savings",
+          "title": "Dental Discount—savings when insurance isn’t the right fit",
+          "lead": "Discount programs provide reduced fees on dental services through participating providers—they are not insurance and do not pay benefits. They can be a budget-friendly option when you want savings without traditional plan maximums and waiting periods. Program design varies by state."
+        },
+        "sections": {
+          "what": {
+            "title": "What it is",
+            "body": "A dental discount program (sometimes called a discount plan) gives you access to negotiated rates with participating dentists. You pay the dentist directly at the discounted rate; there is no claims process like insurance."
+          },
+          "who": {
+            "title": "Who it may fit",
+            "body": "People who want predictable savings on routine care, or who do not qualify for or need a full dental insurance plan, may consider a discount program. It is not a substitute for insurance if you need major coverage."
+          },
+          "confirm": {
+            "title": "What to confirm in the quote",
+            "body": "Review participating provider networks, fee schedules, and program fees. Confirm what is and is not included compared to a dental insurance plan."
+          },
+          "more": {
+            "title": "More about dental discount programs",
+            "body": "Discount programs reduce fees at participating dentists but do not pay claims like insurance. They can be a fit for people who primarily need cleanings and fillings at predictable savings. If you anticipate major restorative work, compare total out-of-pocket under a discount plan versus a traditional dental insurance plan with an annual maximum."
+          }
+        },
+        "faq": {
+          "title": "Common questions",
+          "items": [
+            {
+              "q": "Is a discount program insurance?",
+              "a": "No. It is not insurance and does not pay claims. You receive reduced fees from participating providers."
+            },
+            {
+              "q": "Can I combine it with dental insurance?",
+              "a": "Rules vary. Ask providers and review program terms."
+            },
+            {
+              "q": "How do I find a dentist?",
+              "a": "Use the program’s provider directory to find participating dentists near you."
+            },
+            {
+              "q": "Is there a waiting period?",
+              "a": "Discount programs typically do not have insurance-style waiting periods, but availability varies."
+            },
+            {
+              "q": "How does this compare to DentalWise?",
+              "a": "DentalWise is insurance with benefits and limits; discount programs are savings programs. Compare total cost and expected use of services."
+            }
+          ]
+        },
+        "ctaBand": {
+          "title": "Want help choosing between discount and insurance?",
+          "body": "We can help you compare dental discount with DentalWise and other options."
+        },
+        "disclaimer": {
+          "title": "Important",
+          "body": "Products, availability, underwriting, and benefits vary by state and plan. This page is educational and links to the carrier’s authorized quoting experience. Read all disclosures, certificates, and policy documents before you enroll. Isaac Plans Insurance is compensated when you enroll through applicable carrier programs."
+        },
+        "highlights": {
+          "title": "At a glance",
+          "items": [
+            "Reduced fees—not insurance payments",
+            "No traditional annual maximum in the insurance sense",
+            "Verify participating dentists near you before you join"
+          ]
+        }
+      },
+      "vision-wise": {
+        "metadata": {
+          "title": "VisionWise (Vision) | UnitedHealthOne | Isaac Plans",
+          "description": "Learn about VisionWise standalone vision coverage from UnitedHealthOne—eye exams, glasses, and contacts. Start a secure quote; benefits vary by state.",
+          "keywords": "VisionWise, vision insurance, UnitedHealthOne, Isaac Plans"
+        },
+        "backNav": {
+          "label": "Back to UnitedHealthOne products"
+        },
+        "hero": {
+          "badge": "UnitedHealthOne · Vision",
+          "title": "VisionWise—simple vision benefits for exams and eyewear",
+          "lead": "VisionWise offers standalone vision coverage for annual eye exams, glasses, and contacts—often with no wait for a routine exam in many designs. Networks and retail allowances vary by plan and state."
+        },
+        "sections": {
+          "what": {
+            "title": "What it is",
+            "body": "Vision insurance plans typically cover routine eye exams and provide allowances or discounts for lenses, frames, and contacts. VisionWise is designed as a standalone product when you do not need dental bundled in."
+          },
+          "who": {
+            "title": "Who it may fit",
+            "body": "Anyone who needs regular eye exams and eyewear updates, or who wants predictable vision costs separate from major medical, may consider VisionWise."
+          },
+          "confirm": {
+            "title": "What to confirm in the quote",
+            "body": "Check exam copays, frame and lens allowances, contact lens benefits, network optical retailers, and frequency limits."
+          },
+          "more": {
+            "title": "More about vision coverage",
+            "body": "Standalone vision plans focus on routine exams and materials allowances for glasses or contacts. Medical eye disease is often covered under major medical—vision plans are for refractive care and materials. Compare lens options, frame allowances, and whether contact lens benefits replace eyeglass benefits in the same benefit year."
+          }
+        },
+        "faq": {
+          "title": "Common questions",
+          "items": [
+            {
+              "q": "Is VisionWise part of medical insurance?",
+              "a": "It is a separate vision product. Major medical may cover eye injury or disease differently—read both plans."
+            },
+            {
+              "q": "Can I use it at any optical store?",
+              "a": "You usually maximize value by using in-network providers. Check the directory for your plan."
+            },
+            {
+              "q": "Does it cover LASIK?",
+              "a": "Discounts or limited benefits may apply; full coverage is uncommon. Review the certificate."
+            },
+            {
+              "q": "How often can I get glasses?",
+              "a": "Plans specify frequency limits for frames and lenses. See the benefit summary."
+            },
+            {
+              "q": "How does VisionWise compare to DentalWise Max?",
+              "a": "DentalWise Max bundles dental, vision, and hearing; VisionWise is vision-only. Choose based on what benefits you need."
+            }
+          ]
+        },
+        "ctaBand": {
+          "title": "Want help comparing vision plans?",
+          "body": "We can help you compare VisionWise with bundled DVH and other carriers."
+        },
+        "disclaimer": {
+          "title": "Important",
+          "body": "Products, availability, underwriting, and benefits vary by state and plan. This page is educational and links to the carrier’s authorized quoting experience. Read all disclosures, certificates, and policy documents before you enroll. Isaac Plans Insurance is compensated when you enroll through applicable carrier programs."
+        },
+        "highlights": {
+          "title": "At a glance",
+          "items": [
+            "Routine exams and materials allowances—read frequency limits",
+            "Maximize value with in-network optical retailers",
+            "LASIK is often a discount—not full insurance coverage"
+          ]
+        }
+      },
+      "accident-wise": {
+        "metadata": {
+          "title": "AccidentWise | UnitedHealthOne | Isaac Plans",
+          "description": "Learn about AccidentWise from UnitedHealthOne—lump-sum cash for accidental injury and treatment. Start a secure quote; availability varies.",
+          "keywords": "AccidentWise, accident insurance, UnitedHealthOne, Isaac Plans"
+        },
+        "backNav": {
+          "label": "Back to UnitedHealthOne products"
+        },
+        "hero": {
+          "badge": "UnitedHealthOne · Accident",
+          "title": "AccidentWise—cash when accidental injury happens",
+          "lead": "Accident insurance pays lump-sum or scheduled benefits for covered accidental injuries and related treatment—helpful for families managing deductibles and unexpected costs. It does not cover illness or replace major medical coverage."
+        },
+        "sections": {
+          "what": {
+            "title": "What it is",
+            "body": "Accident insurance pays benefits when you have a covered accident—such as fractures, burns, or emergency care—according to a schedule of benefits. AccidentWise targets primary insured ages 18–75 in many designs."
+          },
+          "who": {
+            "title": "Who it may fit",
+            "body": "Active individuals, families with kids in sports, or anyone with a high-deductible health plan who wants extra cash for accidental injuries may consider accident coverage."
+          },
+          "confirm": {
+            "title": "What to confirm in the quote",
+            "body": "Review the benefit schedule for each injury type, maximums, exclusions (e.g., professional sports), and coverage for follow-up care."
+          },
+          "more": {
+            "title": "More about accident coverage",
+            "body": "Accident insurance pays for accidental injuries on a schedule—think fractures, lacerations, or ER visits—not illness. It can pair well with high-deductible health plans for families with active lifestyles. Review exclusions for organized sports, aviation, or hazardous activities if they apply to you."
+          }
+        },
+        "faq": {
+          "title": "Common questions",
+          "items": [
+            {
+              "q": "Does accident insurance cover sickness?",
+              "a": "No. It covers accidental injuries as defined in the policy—not illness."
+            },
+            {
+              "q": "How is AccidentWise different from Accident ProGuard?",
+              "a": "ProGuard may bundle combinations with other products in select states. Compare options in the UHOne quote flow."
+            },
+            {
+              "q": "Are sports injuries covered?",
+              "a": "Some activities may be excluded or limited. Read the certificate."
+            },
+            {
+              "q": "Can I have accident insurance with other coverage?",
+              "a": "Yes; it is often supplemental. Coordination rules may apply."
+            },
+            {
+              "q": "How fast are benefits paid?",
+              "a": "Claims processes vary. Submit documentation as described in the policy."
+            }
+          ]
+        },
+        "ctaBand": {
+          "title": "Want help comparing accident coverage?",
+          "body": "We can help you compare AccidentWise with Accident ProGuard and other accident products."
+        },
+        "disclaimer": {
+          "title": "Important",
+          "body": "Products, availability, underwriting, and benefits vary by state and plan. This page is educational and links to the carrier’s authorized quoting experience. Read all disclosures, certificates, and policy documents before you enroll. Isaac Plans Insurance is compensated when you enroll through applicable carrier programs."
+        },
+        "highlights": {
+          "title": "At a glance",
+          "items": [
+            "Accidental injuries only—illness is excluded",
+            "Schedule-based benefits—compare amounts per injury type",
+            "Often used as supplemental to medical coverage"
+          ]
+        }
+      },
+      "accident-pro": {
+        "metadata": {
+          "title": "Accident ProGuard Series | UnitedHealthOne | Isaac Plans",
+          "description": "Learn about Accident ProGuard from UnitedHealthOne—flexible accident coverage with optional combinations in select states. Start a secure quote.",
+          "keywords": "Accident ProGuard, accident insurance, UnitedHealthOne, Isaac Plans"
+        },
+        "backNav": {
+          "label": "Back to UnitedHealthOne products"
+        },
+        "hero": {
+          "badge": "UnitedHealthOne · Accident",
+          "title": "Accident ProGuard—flexible accident protection in select states",
+          "lead": "The Accident ProGuard Series offers flexible accident coverage that may combine with critical illness, hospital indemnity, and accidental death & dismemberment in select states. Availability and plan designs vary—confirm in the official quote."
+        },
+        "sections": {
+          "what": {
+            "title": "What it is",
+            "body": "ProGuard is a product series that may bundle or combine accident-related benefits with other supplemental coverages depending on state and form. It is designed for shoppers who want more than a single accident-only schedule."
+          },
+          "who": {
+            "title": "Who it may fit",
+            "body": "People who want layered protection—accident plus hospital or critical illness components—may explore ProGuard where available. Compare premiums and benefit schedules to standalone accident plans."
+          },
+          "confirm": {
+            "title": "What to confirm in the quote",
+            "body": "Check which modules are available in your state, benefit amounts, exclusions, and whether the combined package fits your budget versus buying separate policies."
+          },
+          "more": {
+            "title": "More about Accident ProGuard",
+            "body": "ProGuard bundles can combine accident coverage with other supplemental lines where state filings allow. Bundles may simplify billing, but compare the package premium to buying standalone policies if you only need one type of protection. Read each module’s exclusions and maximums independently."
+          }
+        },
+        "faq": {
+          "title": "Common questions",
+          "items": [
+            {
+              "q": "Is ProGuard available in every state?",
+              "a": "No. Availability varies by state and form. The UHOne quote path will show options."
+            },
+            {
+              "q": "Can I buy only accident coverage within ProGuard?",
+              "a": "Plan options depend on state filings. Review available modules in the quote."
+            },
+            {
+              "q": "How does ProGuard compare to AccidentWise?",
+              "a": "AccidentWise is simpler accident coverage; ProGuard may bundle additional benefits. Compare schedules and premiums."
+            },
+            {
+              "q": "Does it cover critical illness?",
+              "a": "Some designs may include critical illness modules. Confirm the certificate."
+            },
+            {
+              "q": "Can Isaac Plans help me compare bundles?",
+              "a": "Yes—we can help you weigh ProGuard bundles versus separate policies."
+            }
+          ]
+        },
+        "ctaBand": {
+          "title": "Want help comparing ProGuard options?",
+          "body": "We can help you compare Accident ProGuard with AccidentWise and other supplements."
+        },
+        "disclaimer": {
+          "title": "Important",
+          "body": "Products, availability, underwriting, and benefits vary by state and plan. This page is educational and links to the carrier’s authorized quoting experience. Read all disclosures, certificates, and policy documents before you enroll. Isaac Plans Insurance is compensated when you enroll through applicable carrier programs."
+        },
+        "highlights": {
+          "title": "At a glance",
+          "items": [
+            "Modular designs—availability varies by state",
+            "Compare bundle pricing vs. standalone policies",
+            "Confirm which riders are included in your quote"
+          ]
+        }
+      },
+      "healthiest-you": {
+        "metadata": {
+          "title": "HealthiestYou (Telehealth) | UnitedHealthOne | Isaac Plans",
+          "description": "Learn about HealthiestYou from UnitedHealthOne—virtual care access via Teladoc Health where available. Start a secure quote; benefits vary.",
+          "keywords": "HealthiestYou, telehealth, Teladoc, UnitedHealthOne, Isaac Plans"
+        },
+        "backNav": {
+          "label": "Back to UnitedHealthOne products"
+        },
+        "hero": {
+          "badge": "UnitedHealthOne · Telehealth",
+          "title": "HealthiestYou—virtual care when you need a clinician fast",
+          "lead": "HealthiestYou provides access to telehealth services through the HealthiestYou path—often including 24/7 virtual visits for common non-emergency conditions. It is not a substitute for emergency care; call 911 for emergencies."
+        },
+        "sections": {
+          "what": {
+            "title": "What it is",
+            "body": "Telehealth programs connect you to licensed clinicians by phone or video for many routine care needs. HealthiestYou may be bundled with other UHOne products or sold as a standalone path depending on state and enrollment."
+          },
+          "who": {
+            "title": "Who it may fit",
+            "body": "Busy families, frequent travelers, or anyone who wants convenient access to care for minor illnesses may benefit from telehealth. It does not replace in-person care when needed."
+          },
+          "confirm": {
+            "title": "What to confirm in the quote",
+            "body": "Review visit fees (if any), hours of operation, which conditions are covered, prescription policies, and how to access behavioral health if included."
+          },
+          "more": {
+            "title": "More about telehealth",
+            "body": "Telehealth is convenient for many non-emergency issues, but it is not appropriate for chest pain, stroke symptoms, severe bleeding, or other emergencies. Program rules vary for behavioral health visits and prescribing controlled substances. Register before you need care so you’re not troubleshooting login issues when you feel ill."
+          }
+        },
+        "faq": {
+          "title": "Common questions",
+          "items": [
+            {
+              "q": "Is telehealth the same as emergency care?",
+              "a": "No. For emergencies, call 911 or go to the ER. Telehealth is for non-emergency issues when appropriate."
+            },
+            {
+              "q": "Can telehealth prescribe medication?",
+              "a": "Clinicians may prescribe when appropriate per state law and telehealth rules. Not all medications can be prescribed virtually."
+            },
+            {
+              "q": "Is HealthiestYou included with my medical plan?",
+              "a": "Sometimes it is bundled; other times it is a separate enrollment. Check your quote and certificate."
+            },
+            {
+              "q": "Does it work outside the U.S.?",
+              "a": "Coverage and access rules vary. Review program terms."
+            },
+            {
+              "q": "How do I start a visit?",
+              "a": "The program materials describe how to register and request a visit."
+            }
+          ]
+        },
+        "ctaBand": {
+          "title": "Want help comparing telehealth options?",
+          "body": "We can help you compare HealthiestYou with other virtual care and major medical options."
+        },
+        "disclaimer": {
+          "title": "Important",
+          "body": "Products, availability, underwriting, and benefits vary by state and plan. This page is educational and links to the carrier’s authorized quoting experience. Read all disclosures, certificates, and policy documents before you enroll. Isaac Plans Insurance is compensated when you enroll through applicable carrier programs."
+        },
+        "highlights": {
+          "title": "At a glance",
+          "items": [
+            "24/7 access on many programs for common illnesses",
+            "Not for emergencies—call 911 or go to the ER",
+            "May be bundled or sold separately—check your enrollment path"
+          ]
+        }
+      },
+      "mental-health": {
+        "metadata": {
+          "title": "Mental Health Coverage | UnitedHealthOne | Isaac Plans",
+          "description": "Learn about UnitedHealthOne behavioral health quoting paths—mental health support where products are available. Start a secure quote; coverage varies by state.",
+          "keywords": "mental health insurance, behavioral health, UnitedHealthOne, Isaac Plans"
+        },
+        "backNav": {
+          "label": "Back to UnitedHealthOne products"
+        },
+        "hero": {
+          "badge": "UnitedHealthOne · Behavioral health",
+          "title": "Mental health—behavioral health options through UHOne",
+          "lead": "UnitedHealthOne offers behavioral health quoting paths for eligible products and states—helping you access counseling, therapy, or related benefits where available. Benefits, networks, and parity rules vary by plan and state. If you are in crisis, contact emergency services or local crisis lines."
+        },
+        "sections": {
+          "what": {
+            "title": "What it is",
+            "body": "Behavioral health coverage may include outpatient visits, teletherapy, or other services depending on the product. UHOne routes you to the appropriate quoting experience for mental health benefits tied to your enrollment."
+          },
+          "who": {
+            "title": "Who it may fit",
+            "body": "Anyone seeking mental health support as part of a broader health plan or supplemental product may explore options. If you need immediate help, use crisis resources—not a web quote."
+          },
+          "confirm": {
+            "title": "What to confirm in the quote",
+            "body": "Review visit limits, copays, network providers, teletherapy access, and parity with medical benefits where applicable."
+          },
+          "more": {
+            "title": "More about behavioral health benefits",
+            "body": "Behavioral health benefits depend on the underlying product—ACA-compliant major medical has different parity rules than supplemental lines. Network access, visit limits, and teletherapy options vary. If you are in crisis, call 988 in the U.S. or your local emergency number; this page is not a crisis service."
+          }
+        },
+        "faq": {
+          "title": "Common questions",
+          "items": [
+            {
+              "q": "Is mental health coverage the same as ACA coverage?",
+              "a": "It depends on the underlying product. ACA-compliant plans follow different rules than supplemental products. Read the certificate."
+            },
+            {
+              "q": "Can I see any therapist?",
+              "a": "You usually need network providers for covered benefits. Check the directory."
+            },
+            {
+              "q": "Are preexisting mental health conditions covered?",
+              "a": "Rules vary by plan type and state. Major medical plans have different protections than supplemental products."
+            },
+            {
+              "q": "What if I’m in crisis?",
+              "a": "Call 988 (Suicide & Crisis Lifeline) in the U.S. or your local emergency number. This website is not a crisis service."
+            },
+            {
+              "q": "Can Isaac Plans help me choose a plan?",
+              "a": "Yes—we can help you compare mental health benefits across UHOne products and other carriers."
+            }
+          ]
+        },
+        "ctaBand": {
+          "title": "Want help comparing behavioral health benefits?",
+          "body": "Reach out—we’ll help you compare UHOne mental health options with other coverage."
+        },
+        "disclaimer": {
+          "title": "Important",
+          "body": "Products, availability, underwriting, and benefits vary by state and plan. This page is educational and links to the carrier’s authorized quoting experience. Read all disclosures, certificates, and policy documents before you enroll. Isaac Plans Insurance is compensated when you enroll through applicable carrier programs."
+        },
+        "highlights": {
+          "title": "At a glance",
+          "items": [
+            "Network and visit limits vary—check your certificate",
+            "Teletherapy may be included—confirm cost-sharing",
+            "For emergencies, use crisis lines—not a web quote"
+          ]
+        }
+      }
+    }
+  }
+}

@@ -11,8 +11,10 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { getTranslations } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
 import ShortTermMedicalButton from "@/components/ShortTermMedicalButton";
 import {
+  UHONE_UHC_LOGO_URL,
   uhoneMarketingAssetUrl,
   uhoneShopCensusUrl,
 } from "@/lib/uhone-broker";
@@ -22,6 +24,7 @@ import {
   type UhoneHubProductId,
   type UhoneHubSectionId,
 } from "@/lib/uhone-hub-products";
+import { getUhoneLearnMoreHref } from "@/lib/uhone-product-slugs";
 
 /** Cloudinary: f_auto, q_auto, bounded dimensions, smart crop for hero */
 const UHONE_HUB_HERO_IMAGE =
@@ -57,14 +60,22 @@ function ProductQuoteBlock({
     ? uhoneMarketingAssetUrl(cfg.bannerFile)
     : null;
 
+  const learnMoreHref = getUhoneLearnMoreHref(productId);
+
   return (
     <div className="flex w-full min-w-0 flex-col gap-3">
+      <Link
+        href={learnMoreHref as never}
+        className="text-center text-sm font-semibold text-[hsl(var(--custom))] underline-offset-4 transition hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--custom))] focus-visible:ring-offset-2"
+      >
+        {t("labels.learnMoreProductPage")}
+      </Link>
       <a
         href={href}
         target="_blank"
         rel="noopener noreferrer"
         className="group block w-full min-w-0 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--custom))] focus-visible:ring-offset-2"
-        aria-label={`${t(`products.${productId}.title`)} — ${t("labels.opensNew")}`}
+        aria-label={`${t(`products.${productId}.title`)} — ${t("labels.ctaQuote")}`}
       >
         {banner ? (
           <span className="block w-full overflow-hidden rounded-xl bg-muted/40 shadow-sm ring-1 ring-border/60 transition group-hover:shadow-md group-hover:ring-border dark:bg-muted/25">
@@ -116,7 +127,7 @@ export default function UhoneCarrierHub({ t }: UhoneCarrierHubProps) {
             <div className="motion-safe:animate-fadeUp min-w-0 max-w-3xl">
               <div className="mb-5">
                 <Image
-                  src={UHONE_HUB_UHC_LOGO}
+                  src={UHONE_UHC_LOGO_URL}
                   alt={t("hero.logoAlt")}
                   width={480}
                   height={140}
@@ -177,9 +188,6 @@ export default function UhoneCarrierHub({ t }: UhoneCarrierHubProps) {
             <aside className="rounded-2xl border border-border/80 bg-gradient-to-br from-card to-muted/30 p-5 shadow-lg ring-1 ring-black/5 motion-safe:animate-fadeUp-d2 sm:p-6">
               <p className="text-sm font-semibold text-foreground">
                 {t("hero.allPlansLabel")}
-              </p>
-              <p className="mt-1 text-xs text-muted-foreground">
-                {t("labels.opensNew")}
               </p>
               <a
                 href={uhoneShopCensusUrl()}

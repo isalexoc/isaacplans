@@ -10,6 +10,8 @@ import {
 } from "@/lib/seo/i18n";
 import type { Metadata } from "next";
 import { Card, CardContent } from "@/components/ui/card";
+import { getLicensedStateCount } from "@/lib/licensed-states";
+import { interpolateLegalCopy } from "@/lib/legal-placeholders";
 
 const PHONE = process.env.NEXT_PUBLIC_PHONE_NUMBER ?? "540-426-1804";
 
@@ -67,6 +69,9 @@ export async function generateMetadata(): Promise<Metadata> {
 
 /* ───────────────────────────────────────────── */
 export default async function TermsOfServicePage() {
+  const statesStr = String(await getLicensedStateCount());
+  const legal = { phone: PHONE, states: statesStr };
+
   const t = await getTranslations("termsPage");
 
   /* pull structured sections */
@@ -140,12 +145,12 @@ export default async function TermsOfServicePage() {
                   </h2>
 
                   <div className="prose prose-gray dark:prose-invert md:prose-lg max-w-none">
-                    <p>{content}</p>
+                    <p>{interpolateLegalCopy(content, legal)}</p>
 
                     {items && (
                       <ul>
                         {items.map((li) => (
-                          <li key={li}>{subPhone(li)}</li>
+                          <li key={li}>{interpolateLegalCopy(li, legal)}</li>
                         ))}
                       </ul>
                     )}
@@ -157,7 +162,7 @@ export default async function TermsOfServicePage() {
                         </p>
                         <ul className="list-disc pl-5">
                           {limitations.map((l) => (
-                            <li key={l}>{l}</li>
+                            <li key={l}>{interpolateLegalCopy(l, legal)}</li>
                           ))}
                         </ul>
                       </>
@@ -167,7 +172,7 @@ export default async function TermsOfServicePage() {
                       <ul className="!list-none space-y-1 mt-4">
                         {details.map((d) => (
                           <li key={d} className="font-medium">
-                            {subPhone(d)}
+                            {interpolateLegalCopy(d, legal)}
                           </li>
                         ))}
                       </ul>
@@ -280,4 +285,3 @@ const slugify = (s: string) =>
     .trim()
     .replace(/\s+/g, "-");
 
-const subPhone = (txt: string) => txt.replace("{{PHONE_NUMBER}}", PHONE);

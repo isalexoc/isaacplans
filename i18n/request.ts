@@ -188,9 +188,53 @@ async function loadSplitMessages(locale: string): Promise<Record<string, any>> {
 
     try {
       const uhoneHub = (await import(`@/messages/${locale}/uhone-hub.json`)).default;
-      Object.assign(splitMessages, uhoneHub);
+      let uhoneMerged: Record<string, unknown> = {
+        ...(uhoneHub as Record<string, unknown>),
+      };
+      try {
+        const uhoneProductPages = (
+          await import(`@/messages/${locale}/carriers/uhone-product-pages.json`)
+        ).default;
+        uhoneMerged = deepMergeMessages(
+          uhoneMerged,
+          uhoneProductPages as Record<string, unknown>
+        );
+      } catch {
+        /* product pages optional */
+      }
+      Object.assign(splitMessages, uhoneMerged);
     } catch {
       // File doesn't exist, skip
+    }
+
+    try {
+      const allstateProductPages = (
+        await import(`@/messages/${locale}/carriers/allstate-product-pages.json`)
+      ).default;
+      const mergedAllstate = deepMergeMessages(
+        splitMessages as Record<string, unknown>,
+        allstateProductPages as Record<string, unknown>
+      );
+      for (const k of Object.keys(mergedAllstate)) {
+        splitMessages[k] = mergedAllstate[k];
+      }
+    } catch {
+      /* Allstate product pages optional */
+    }
+
+    try {
+      const manhattanProductPages = (
+        await import(`@/messages/${locale}/carriers/manhattan-product-pages.json`)
+      ).default;
+      const mergedManhattan = deepMergeMessages(
+        splitMessages as Record<string, unknown>,
+        manhattanProductPages as Record<string, unknown>
+      );
+      for (const k of Object.keys(mergedManhattan)) {
+        splitMessages[k] = mergedManhattan[k];
+      }
+    } catch {
+      /* Manhattan product pages optional */
     }
 
     // Header Services → Carriers (merged deeply with main locale JSON)

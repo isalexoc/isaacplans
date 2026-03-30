@@ -1,0 +1,1212 @@
+{
+  "uhone": {
+    "productPages": {
+      "labels": {
+        "quoteOnUhone": "Cotizar en UHOne",
+        "learnMore": "Más información en esta página",
+        "breadcrumbHub": "Productos UnitedHealthOne"
+      },
+      "shared": {
+        "uhcLogoAlt": "Logotipo de UnitedHealthcare",
+        "enrollmentSteps": {
+          "title": "Cómo funciona la inscripción",
+          "subtitle": "Tres pasos simples desde la cotización hasta la cobertura. Los plazos y requisitos varían según el estado y el plan.",
+          "step1Title": "Obtenga su cotización",
+          "step1Body": "Ingrese su código postal y datos del hogar en el flujo seguro de UnitedHealthOne. Compare planes, primas y avisos mostrados para su estado.",
+          "step2Title": "Revise e inscríbase",
+          "step2Body": "Lea con atención el certificado de cobertura y complete la solicitud en línea. Puede necesitar método de pago y la fecha de inicio deseada.",
+          "step3Title": "Confirme su cobertura",
+          "step3Body": "Guarde los documentos de la póliza y materiales de miembro. Recibirá confirmación de la aseguradora cuando se procese su inscripción—mantenga actualizado su contacto."
+        },
+        "contactClosing": {
+          "title": "¿Quiere ayuda para comparar opciones?",
+          "body": "Contáctenos para una guía personalizada—ya haya usado la cotización de arriba o quiera que Isaac revise alternativas."
+        }
+      },
+      "triterm": {
+        "metadata": {
+          "title": "TriTerm Medical | UnitedHealthOne | Isaac Plans",
+          "description": "Conozca TriTerm Medical de UnitedHealthOne: un puente más largo que el seguro médico temporal típico en ciertos estados. Compare opciones e inicie una cotización segura—la disponibilidad y los beneficios varían según el estado.",
+          "keywords": "TriTerm Medical, UnitedHealthOne, UHOne, seguro médico temporal, Golden Rule, Isaac Plans"
+        },
+        "backNav": {
+          "label": "Volver a productos UnitedHealthOne"
+        },
+        "hero": {
+          "badge": "UnitedHealthOne · TriTerm Medical",
+          "title": "TriTerm Medical—cobertura más prolongada que los planes temporales típicos en ciertos estados",
+          "lead": "TriTerm Medical está pensado para quienes necesitan un puente más sólido que unos pocos meses de cobertura temporal—donde esté disponible, puede mantenerse mucho más tiempo que el STLDI estándar. No es cobertura mínima esencial (ACA); redes, suscripción y diseño del plan varían según estado y forma."
+        },
+        "sections": {
+          "what": {
+            "title": "Qué es",
+            "body": "TriTerm Medical es una línea de productos médicos individuales UnitedHealthOne ofrecida en un conjunto limitado de estados. Se diferencia del seguro temporal clásico (STLDI) en duración y diseño de beneficios—piénselo como una opción temporal más larga mientras llega Medicare, cobertura del empleador o un plan ACA. Lea siempre los materiales oficiales de la póliza en la ruta de cotización para su código postal."
+          },
+          "who": {
+            "title": "Para quién puede ser",
+            "body": "Puede encajar en solicitantes sanos que esperan un lapso más largo entre empleos, jubilados anticipados que esperan Medicare u otras personas que necesitan un periodo puente definido con beneficios tipo mayor médico. No es para todos—si tiene condiciones preexistentes o necesita protecciones integrales del ACA, compárelo con planes del Mercado y otras opciones."
+          },
+          "confirm": {
+            "title": "Qué confirmar en la cotización",
+            "body": "Revise deducibles, máximos de bolsillo, red (si aplica), reglas de recetas, exclusiones y cuánto tiempo puede permanecer vigente la cobertura en su estado. Confirme si el plan se considera cobertura acreditable para su situación y si cuenta con otra cobertura mínima esencial."
+          },
+          "more": {
+            "title": "Más sobre TriTerm",
+            "body": "TriTerm está orientado a quienes necesitan cobertura más prolongada que la que permiten las reglas federales del STLDI en muchos estados. Los planes pueden incluir acceso a red similar a diseños de mayor médico; compare siempre el gasto de bolsillo total, exclusiones y renovación en la cotización oficial. Si necesita protecciones del ACA, maternidad o emisión garantizada por preexistencias, compare TriTerm con planes del Mercado antes de inscribirse."
+          }
+        },
+        "faq": {
+          "title": "Preguntas frecuentes",
+          "items": [
+            {
+              "q": "¿TriTerm Medical cumple con el ACA?",
+              "a": "No. No es cobertura mínima esencial bajo la Ley del Cuidado de Salud Asequible. No ofrece todos los beneficios esenciales ni protecciones igual que un plan ACA. Revise los avisos para su estado y situación."
+            },
+            {
+              "q": "¿En qué se diferencia TriTerm del seguro médico temporal (STLDI)?",
+              "a": "TriTerm está diseñado para duraciones más largas en ciertos estados y suele tener un perfil regulatorio distinto al STLDI federal. Las reglas del STLDI (incluidos límites federales recientes) aplican a productos temporales—no necesariamente a TriTerm de la misma manera. Confirme en los materiales de la aseguradora."
+            },
+            {
+              "q": "¿TriTerm está disponible en todos los estados?",
+              "a": "No. La disponibilidad y las formas presentadas varían. La experiencia oficial de cotización UnitedHealthOne mostrará si puede solicitar en su zona."
+            },
+            {
+              "q": "¿Se cubren condiciones preexistentes?",
+              "a": "Los planes varían según estado y forma. Muchos productos médicos temporales limitan condiciones preexistentes. Lea las preguntas de la solicitud y el certificado de la póliza con cuidado."
+            },
+            {
+              "q": "¿Puede Isaac Plans ayudarme a comparar TriTerm con otras opciones?",
+              "a": "Sí. Le ayudamos a comparar TriTerm con planes del Mercado ACA, seguro temporal y otras rutas de cobertura para elegir lo que encaje con su presupuesto y salud."
+            }
+          ]
+        },
+        "ctaBand": {
+          "title": "¿Quiere una segunda opinión antes de inscribirse?",
+          "body": "Use nuestro botón de cotización o escríbanos—le ayudamos a comparar UHOne TriTerm con otras aseguradoras y tipos de cobertura."
+        },
+        "disclaimer": {
+          "title": "Importante",
+          "body": "Los productos, la disponibilidad, la suscripción y los beneficios varían según el estado y el plan. Esta página es educativa y enlaza a la experiencia de cotización autorizada por la aseguradora. Lea todos los avisos, certificados y documentos de la póliza antes de inscribirse. Isaac Plans Insurance recibe compensación cuando se inscribe mediante programas aplicables de la aseguradora."
+        },
+        "highlights": {
+          "title": "En resumen",
+          "items": [
+            "Puente más largo que el STLDI típico donde se ofrece TriTerm",
+            "No es cobertura mínima esencial—revise limitaciones",
+            "La disponibilidad y formas varían—la cotización muestra su estado"
+          ]
+        }
+      },
+      "health-protector": {
+        "metadata": {
+          "title": "Health ProtectorGuard mejorado (indemnización fija) | UHOne | Isaac Plans",
+          "description": "Conozca Health ProtectorGuard de indemnización fija de UnitedHealthOne—bienestar, consultas, medicamentos y opciones de red en muchos estados. Inicie una cotización segura; la disponibilidad varía.",
+          "keywords": "Health ProtectorGuard, indemnización fija, UnitedHealthOne, UHOne, Isaac Plans"
+        },
+        "backNav": {
+          "label": "Volver a productos UnitedHealthOne"
+        },
+        "hero": {
+          "badge": "UnitedHealthOne · Indemnización fija",
+          "title": "Health ProtectorGuard—beneficios en efectivo fijos para el día a día",
+          "lead": "Health ProtectorGuard mejorado es un producto de indemnización fija que paga montos preestablecidos por servicios cubiertos; no es un plan mayor médico tradicional. No es cobertura mínima esencial (ACA). Puede incluir bienestar, consultas y medicamentos en muchos planes; la red y la telesalud varían según el estado."
+        },
+        "sections": {
+          "what": {
+            "title": "Qué es",
+            "body": "Los planes de indemnización fija pagan montos fijos al recibir servicios cubiertos, hasta los límites del plan. Suele usarse para complementar planes con deducible alto u otra cobertura. La ruta ProtectorGuard de UnitedHealthOne puede incluir redes UnitedHealthcare y programas de telesalud donde aplique—vea su cotización para su estado."
+          },
+          "who": {
+            "title": "Para quién puede ser",
+            "body": "Quienes desean beneficios predecibles en consultas, bienestar y medicamentos—a menudo junto a otro plan médico—pueden encontrar útil la indemnización fija. No sustituye una cobertura mayor médica integral si necesita protección amplia para reclamos grandes."
+          },
+          "confirm": {
+            "title": "Qué confirmar en la cotización",
+            "body": "Revise tablas de beneficios (montos por servicio), límites anuales, periodos de carencia, exclusiones y coordinación con otros seguros. Confirme acceso a red y si sus proveedores participan."
+          },
+          "more": {
+            "title": "Más sobre indemnización fija",
+            "body": "La indemnización fija paga montos fijos por servicios cubiertos en lugar de pagar tras un deducible como el seguro tradicional. Puede complementar planes con deducible alto. La coordinación de beneficios y el tratamiento fiscal pueden ser complejos—lea su certificado y consulte a un asesor fiscal para su caso."
+          }
+        },
+        "faq": {
+          "title": "Preguntas frecuentes",
+          "items": [
+            {
+              "q": "¿Es un seguro mayor médico?",
+              "a": "No. La indemnización fija paga montos fijos por servicios cubiertos; no funciona como un plan mayor médico clásico con deducible y coseguro. Lea la tabla de beneficios de su plan."
+            },
+            {
+              "q": "¿Cumple el mandato individual del ACA?",
+              "a": "No. No es cobertura mínima esencial. Las sanciones por no tener MEC dependen de la ley aplicable—consulte a un asesor fiscal para su caso."
+            },
+            {
+              "q": "¿Puedo usarlo con el plan del empleador?",
+              "a": "Muchas personas combinan productos suplementarios con otras coberturas; las reglas de coordinación varían. Revise el certificado y pregunte a la aseguradora por coordinación de beneficios."
+            },
+            {
+              "q": "¿Health ProtectorGuard está en mi estado?",
+              "a": "La disponibilidad varía según estado y forma. La cotización UHOne indicará si puede solicitar."
+            },
+            {
+              "q": "¿Cómo se fija el precio?",
+              "a": "Las primas dependen de edad, ubicación, opciones del plan y suscripción cuando aplique. Vea la cotización oficial para su hogar."
+            }
+          ]
+        },
+        "ctaBand": {
+          "title": "¿Ayuda para comparar indemnización fija con otros suplementos?",
+          "body": "Le guiamos entre ProtectorGuard, indemnización hospitalaria, accidentes y otros productos UHOne."
+        },
+        "disclaimer": {
+          "title": "Importante",
+          "body": "Los productos, la disponibilidad, la suscripción y los beneficios varían según el estado y el plan. Esta página es educativa y enlaza a la experiencia de cotización autorizada por la aseguradora. Lea todos los avisos, certificados y documentos de la póliza antes de inscribirse. Isaac Plans Insurance recibe compensación cuando se inscribe mediante programas aplicables de la aseguradora."
+        },
+        "highlights": {
+          "title": "En resumen",
+          "items": [
+            "Beneficios en efectivo según tablas de servicios cubiertos",
+            "Puede incluir bienestar, consultas y medicamentos en muchos diseños",
+            "No sustituye cobertura mayor médica integral"
+          ]
+        }
+      },
+      "advantage-guard": {
+        "metadata": {
+          "title": "AdvantageGuard indemnización hospitalaria | UHOne | Isaac Plans",
+          "description": "Conozca AdvantageGuard de UnitedHealthOne—indemnización hospitalaria para edades 60–90 con beneficios en efectivo que pueden complementar Medicare Advantage. Vea si puede cotizar en su estado.",
+          "keywords": "AdvantageGuard, indemnización hospitalaria, Medicare Advantage, UnitedHealthOne, Isaac Plans"
+        },
+        "backNav": {
+          "label": "Volver a productos UnitedHealthOne"
+        },
+        "hero": {
+          "badge": "UnitedHealthOne · Indemnización hospitalaria",
+          "title": "AdvantageGuard—beneficios en efectivo por eventos hospitalarios después de los 60",
+          "lead": "AdvantageGuard se centra en eventos hospitalarios para edades de emisión 60–90. Paga beneficios fijos en efectivo por internaciones y servicios cubiertos—útil cuando Medicare Advantage deja gastos de bolsillo que desea compensar. Los beneficios, límites y disponibilidad varían según el estado."
+        },
+        "sections": {
+          "what": {
+            "title": "Qué es",
+            "body": "La indemnización hospitalaria paga beneficios en efectivo a usted (o al proveedor, según la póliza) por estancia hospitalaria u otra cobertura, hasta los límites. No sustituye Medicare ni Medicare Advantage; es suplemento."
+          },
+          "who": {
+            "title": "Para quién puede ser",
+            "body": "Inscritos en Medicare Advantage que quieren efectivo extra para copagos hospitalarios u otros en la banda de edad elegible que buscan protección hospitalaria simplificada. Revise cómo interactúan los beneficios con Medicare y Medicare Advantage en su estado."
+          },
+          "confirm": {
+            "title": "Qué confirmar en la cotización",
+            "body": "Revise montos por día o estancia, periodos de eliminación, máximos de beneficio y exclusiones por condiciones preexistentes o diagnósticos. Confirme edad de emisión y residencia."
+          },
+          "more": {
+            "title": "Más sobre AdvantageGuard",
+            "body": "AdvantageGuard está pensado para adultos mayores que quieren beneficios en efectivo centrados en hospital—a menudo junto a copagos de Medicare Advantage. Los beneficios suelen activarse por internaciones cubiertas; confirme cómo interactúan con Medicare, Medigap o cobertura del empleador antes de depender de la póliza para una factura grande."
+          }
+        },
+        "faq": {
+          "title": "Preguntas frecuentes",
+          "items": [
+            {
+              "q": "¿AdvantageGuard reemplaza Medicare?",
+              "a": "No. Es seguro suplementario. Sigue inscrito en Medicare y en Medicare Advantage o Parte D según elija."
+            },
+            {
+              "q": "¿Se cubren condiciones preexistentes?",
+              "a": "Las pólizas varían. Muchas indemnizaciones hospitalarias tienen carencias o exclusiones. Lea el certificado."
+            },
+            {
+              "q": "¿Puedo elegir cualquier hospital?",
+              "a": "Suele pagar beneficios fijos sin red, pero confirme el lenguaje de la póliza y requisitos de red para servicios relacionados."
+            },
+            {
+              "q": "¿Qué tan rápido se pagan los beneficios?",
+              "a": "Los procesos de reclamación varían. La póliza describe el pago."
+            },
+            {
+              "q": "¿Isaac Plans puede orientar sobre Medicare Advantage?",
+              "a": "Le ayudamos a entender cómo encajan los suplementos; para preguntas específicas de Medicare le orientamos a recursos oficiales."
+            }
+          ]
+        },
+        "ctaBand": {
+          "title": "¿Ayuda para combinar Medicare Advantage con beneficios en efectivo?",
+          "body": "Escríbanos—le ayudamos a comparar AdvantageGuard con otras indemnizaciones hospitalarias."
+        },
+        "disclaimer": {
+          "title": "Importante",
+          "body": "Los productos, la disponibilidad, la suscripción y los beneficios varían según el estado y el plan. Esta página es educativa y enlaza a la experiencia de cotización autorizada por la aseguradora. Lea todos los avisos, certificados y documentos de la póliza antes de inscribirse. Isaac Plans Insurance recibe compensación cuando se inscribe mediante programas aplicables de la aseguradora."
+        },
+        "highlights": {
+          "title": "En resumen",
+          "items": [
+            "Diseñado para edades de emisión 60–90 en estados elegibles",
+            "Suplemento—no reemplaza Medicare ni Parte D",
+            "Revise carencias y reglas de preexistencias"
+          ]
+        }
+      },
+      "hospital-wise": {
+        "metadata": {
+          "title": "Planes HospitalWise | UnitedHealthOne | Isaac Plans",
+          "description": "Conozca HospitalWise de indemnización hospitalaria con emisión garantizada de UnitedHealthOne—beneficios en efectivo claros por estancias hospitalarias. Inicie una cotización segura; los términos varían según el estado.",
+          "keywords": "HospitalWise, indemnización hospitalaria, emisión garantizada, UnitedHealthOne, Isaac Plans"
+        },
+        "backNav": {
+          "label": "Volver a productos UnitedHealthOne"
+        },
+        "hero": {
+          "badge": "UnitedHealthOne · Indemnización hospitalaria",
+          "title": "HospitalWise—beneficios en efectivo con emisión garantizada",
+          "lead": "HospitalWise ofrece indemnización hospitalaria con emisión garantizada y beneficios en efectivo por servicios hospitalarios cubiertos—a menudo sin restricciones de red en el diseño del beneficio. Montos, límites y elegibilidad varían—confirme todo en la cotización oficial."
+        },
+        "sections": {
+          "what": {
+            "title": "Qué es",
+            "body": "La indemnización hospitalaria paga montos fijos ante hospitalización o servicio relacionado cubierto. Emisión garantizada significa que puede calificar sin suscripción médica según las reglas—sujeto a disponibilidad en el estado y términos de la póliza."
+          },
+          "who": {
+            "title": "Para quién puede ser",
+            "body": "Quienes desean efectivo predecible para deducibles y copagos hospitalarios de otro plan, o protección simple centrada en hospital, pueden considerar HospitalWise. No reemplaza cobertura mayor médica."
+          },
+          "confirm": {
+            "title": "Qué confirmar en la cotización",
+            "body": "Revise activadores de beneficio (ingreso, UCI, etc.), montos diarios, máximo de días, periodos de beneficio y exclusiones. Confirme reglas de emisión garantizada y renovación."
+          },
+          "more": {
+            "title": "Más sobre HospitalWise",
+            "body": "La indemnización hospitalaria con emisión garantizada puede ser atractiva cuando busca suscripción simplificada y beneficios claros por eventos hospitalarios. Las pólizas pagan según activadores cubiertos en el certificado. Use la cotización para ver tablas, máximos y carencias en su estado."
+          }
+        },
+        "faq": {
+          "title": "Preguntas frecuentes",
+          "items": [
+            {
+              "q": "¿HospitalWise es igual que seguro de salud?",
+              "a": "Es suplemento que paga beneficios fijos; no cubre todas las facturas médicas como un plan mayor médico integral."
+            },
+            {
+              "q": "¿Cubre consultas fuera del hospital?",
+              "a": "Se centra en eventos hospitalarios; lo ambulatorio suele estar limitado o excluido salvo que la póliza indique lo contrario."
+            },
+            {
+              "q": "¿Puedo conservar el plan si me mudo?",
+              "a": "La portabilidad y reglas estatales varían. Consulte a la aseguradora si cambia de residencia."
+            },
+            {
+              "q": "¿Hay periodos de carencia?",
+              "a": "Algunos beneficios pueden tener carencia. El certificado muestra el calendario."
+            },
+            {
+              "q": "¿En qué se diferencia de Hospital Guard?",
+              "a": "Son productos distintos con formas y tablas de beneficios diferentes. Compárelos en la cotización UHOne."
+            }
+          ]
+        },
+        "ctaBand": {
+          "title": "¿Ayuda para comparar indemnización hospitalaria?",
+          "body": "Le ayudamos a comparar HospitalWise con otros productos hospitalarios UHOne."
+        },
+        "disclaimer": {
+          "title": "Importante",
+          "body": "Los productos, la disponibilidad, la suscripción y los beneficios varían según el estado y el plan. Esta página es educativa y enlaza a la experiencia de cotización autorizada por la aseguradora. Lea todos los avisos, certificados y documentos de la póliza antes de inscribirse. Isaac Plans Insurance recibe compensación cuando se inscribe mediante programas aplicables de la aseguradora."
+        },
+        "highlights": {
+          "title": "En resumen",
+          "items": [
+            "Diseños de emisión garantizada donde estén presentados",
+            "Beneficios fijos por eventos hospitalarios—lea activadores",
+            "Complementa—no reemplaza—cobertura médica integral"
+          ]
+        }
+      },
+      "hospital-indemnity-gi": {
+        "metadata": {
+          "title": "Indemnización hospitalaria (GI) | UnitedHealthOne | Isaac Plans",
+          "description": "Conozca la indemnización hospitalaria con emisión garantizada de UnitedHealthOne—suscripción simplificada y beneficios en efectivo por estancias. Inicie una cotización segura; la disponibilidad varía.",
+          "keywords": "indemnización hospitalaria, emisión garantizada, UnitedHealthOne, UHOne, Isaac Plans"
+        },
+        "backNav": {
+          "label": "Volver a productos UnitedHealthOne"
+        },
+        "hero": {
+          "badge": "UnitedHealthOne · Emisión garantizada",
+          "title": "Indemnización hospitalaria (GI)—suscripción simple, efectivo por hospitalización",
+          "lead": "Esta ruta ofrece opciones de indemnización hospitalaria con emisión garantizada para quienes necesitan suscripción simplificada y beneficios ligados a hospitalización. Montos, carencias y disponibilidad estatal varían—revise los avisos oficiales para su código postal."
+        },
+        "sections": {
+          "what": {
+            "title": "Qué es",
+            "body": "La indemnización hospitalaria GI permite obtener cobertura sin preguntas de salud según las reglas del producto—sujeto a edad, residencia y aprobación estatal. Los beneficios suelen ser montos fijos por internación y eventos relacionados."
+          },
+          "who": {
+            "title": "Para quién puede ser",
+            "body": "Personas que no califican para productos con suscripción o que prefieren una solicitud más simple. Es suplemento, no reemplazo de cobertura médica integral."
+          },
+          "confirm": {
+            "title": "Qué confirmar en la cotización",
+            "body": "Revise qué eventos activan beneficios, coordinación con otros seguros y limitaciones a preexistencias pese a emisión garantizada. Confirme renovación y cambios de tarifa."
+          },
+          "more": {
+            "title": "Más sobre indemnización hospitalaria GI",
+            "body": "Los productos de emisión garantizada simplifican reglas al inscribirse, pero los reclamos siguen el lenguaje de la póliza, carencias y exclusiones. Si tiene otro seguro, pregunte por coordinación de beneficios. Guarde copias de ingresos y facturas detalladas para reclamos oportunos."
+          }
+        },
+        "faq": {
+          "title": "Preguntas frecuentes",
+          "items": [
+            {
+              "q": "¿Emisión garantizada significa que todo reclamo se paga?",
+              "a": "No. Se refiere a la suscripción al inscribirse. Los reclamos siguen sujetos a términos, exclusiones y carencias."
+            },
+            {
+              "q": "¿En qué difiere de HospitalWise?",
+              "a": "Son formas distintas con tablas y reglas diferentes. Compárelas en la cotización UHOne."
+            },
+            {
+              "q": "¿Hay carencia para beneficios hospitalarios?",
+              "a": "Muchos planes imponen carencias. Lea el certificado."
+            },
+            {
+              "q": "¿Puedo usarlo con Medicare?",
+              "a": "A menudo como suplemento; la coordinación depende de la póliza. Verifique con certificado y aseguradora."
+            },
+            {
+              "q": "¿Cómo obtengo una cotización?",
+              "a": "Use el enlace seguro UnitedHealthOne de esta página para ingresar estado y datos."
+            }
+          ]
+        },
+        "ctaBand": {
+          "title": "¿Ayuda para comparar indemnización hospitalaria GI?",
+          "body": "Le ayudamos a comparar Indemnización GI con otros productos hospitalarios UHOne."
+        },
+        "disclaimer": {
+          "title": "Importante",
+          "body": "Los productos, la disponibilidad, la suscripción y los beneficios varían según el estado y el plan. Esta página es educativa y enlaza a la experiencia de cotización autorizada por la aseguradora. Lea todos los avisos, certificados y documentos de la póliza antes de inscribirse. Isaac Plans Insurance recibe compensación cuando se inscribe mediante programas aplicables de la aseguradora."
+        },
+        "highlights": {
+          "title": "En resumen",
+          "items": [
+            "Suscripción simplificada—los reclamos siguen la póliza",
+            "Compare beneficios diarios, máximos y periodos de beneficio",
+            "Las reglas con Medicare varían—lea avisos"
+          ]
+        }
+      },
+      "hospital-guard": {
+        "metadata": {
+          "title": "Hospital Guard (emisión garantizada) | UnitedHealthOne | Isaac Plans",
+          "description": "Conozca Hospital Guard de UnitedHealthOne—beneficios fijos por servicios hospitalarios y telesalud opcional para quienes tienen deducible alto. Cotice en su estado.",
+          "keywords": "Hospital Guard, indemnización hospitalaria, emisión garantizada, UnitedHealthOne, Isaac Plans"
+        },
+        "backNav": {
+          "label": "Volver a productos UnitedHealthOne"
+        },
+        "hero": {
+          "badge": "UnitedHealthOne · Indemnización hospitalaria",
+          "title": "Hospital Guard—alivio para planes médicos con deducible alto",
+          "lead": "Hospital Guard (emisión garantizada) paga beneficios fijos por servicios hospitalarios cubiertos y puede incluir beneficios ambulatorios y por muerte accidental, con telesalud opcional en muchos diseños. Complementa—no reemplaza—cobertura mayor médica."
+        },
+        "sections": {
+          "what": {
+            "title": "Qué es",
+            "body": "Hospital Guard es un producto tipo indemnización hospitalaria para acompañar planes con deducible alto, pagando montos fijos por ingresos y servicios cubiertos. Pueden existir riders de telesalud donde esté aprobado."
+          },
+          "who": {
+            "title": "Para quién puede ser",
+            "body": "Personas con deducibles altos que quieren colchón para hospitalizaciones o que prefieren emisión garantizada. Revise la superposición con su plan primario."
+          },
+          "confirm": {
+            "title": "Qué confirmar en la cotización",
+            "body": "Revise montos hospitalarios vs ambulatorios, muerte accidental, términos de telesalud y exclusiones. Confirme elegibilidad de emisión garantizada."
+          },
+          "more": {
+            "title": "Más sobre Hospital Guard",
+            "body": "Hospital Guard complementa planes con deducible alto pagando montos fijos ante eventos hospitalarios cubiertos. Los riders de telesalud añaden comodidad para problemas menores, pero no sustituyen emergencias. Revise beneficios por muerte accidental y cobertura ambulatoria en su forma."
+          }
+        },
+        "faq": {
+          "title": "Preguntas frecuentes",
+          "items": [
+            {
+              "q": "¿Hospital Guard paga mi deducible?",
+              "a": "Paga beneficios fijos por eventos cubiertos; puede usar el efectivo hacia gastos de bolsillo según la póliza."
+            },
+            {
+              "q": "¿Incluye telesalud?",
+              "a": "Puede ser opcional en algunos planes. Confirme en cotización y certificado."
+            },
+            {
+              "q": "¿Puedo usar cualquier hospital?",
+              "a": "Los beneficios suelen ser fijos; confirme la póliza y requisitos de red."
+            },
+            {
+              "q": "¿Cómo se compara con Hospital SafeGuard?",
+              "a": "Formas y tablas distintas—compárelas en la cotización UHOne."
+            },
+            {
+              "q": "¿Incluye muerte accidental?",
+              "a": "Muchos diseños incluyen un rider. Vea el certificado."
+            }
+          ]
+        },
+        "ctaBand": {
+          "title": "¿Ayuda para combinar Hospital Guard con su plan primario?",
+          "body": "Le ayudamos a comparar Hospital Guard con otras indemnizaciones hospitalarias."
+        },
+        "disclaimer": {
+          "title": "Importante",
+          "body": "Los productos, la disponibilidad, la suscripción y los beneficios varían según el estado y el plan. Esta página es educativa y enlaza a la experiencia de cotización autorizada por la aseguradora. Lea todos los avisos, certificados y documentos de la póliza antes de inscribirse. Isaac Plans Insurance recibe compensación cuando se inscribe mediante programas aplicables de la aseguradora."
+        },
+        "highlights": {
+          "title": "En resumen",
+          "items": [
+            "Efectivo fijo por ingresos y servicios cubiertos",
+            "Telesalud opcional en algunos planes—confirme en el certificado",
+            "Ayuda a amortiguar deducibles y participación en costos"
+          ]
+        }
+      },
+      "hospital-safeguard": {
+        "metadata": {
+          "title": "Hospital SafeGuard e indemnización suplementaria | UHOne | Isaac Plans",
+          "description": "Conozca Hospital SafeGuard e indemnización suplementaria de UnitedHealthOne—beneficios en efectivo que complementan el mayor médico. Inicie una cotización segura; los términos varían.",
+          "keywords": "Hospital SafeGuard, indemnización suplementaria, UnitedHealthOne, Isaac Plans"
+        },
+        "backNav": {
+          "label": "Volver a productos UnitedHealthOne"
+        },
+        "hero": {
+          "badge": "UnitedHealthOne · Indemnización suplementaria",
+          "title": "Hospital SafeGuard—efectivo cuando se acumulan facturas hospitalarias",
+          "lead": "Hospital SafeGuard y productos de indemnización suplementaria pagan beneficios fijos por servicios hospitalarios y relacionados—complementan el mayor médico, no lo sustituyen. La disponibilidad varía; la ruta de indemnización suplementaria puede aplicar a ciertas inscripciones estilo SafeGuard."
+        },
+        "sections": {
+          "what": {
+            "title": "Qué es",
+            "body": "Los planes de indemnización suplementaria pagan montos preestablecidos por eventos cubiertos—ingresos, cirugía u otros según la póliza. Ayudan a cubrir gastos de bolsillo del seguro primario."
+          },
+          "who": {
+            "title": "Para quién puede ser",
+            "body": "Familias e individuos con mayor médico que quieren efectivo extra para costos hospitalarios, especialmente si espera participación en costos por una estancia."
+          },
+          "confirm": {
+            "title": "Qué confirmar en la cotización",
+            "body": "Revise la tabla por tipo de servicio, máximos y coordinación con otra cobertura. Confirme qué ruta UHOne corresponde a su inscripción (SafeGuard vs indemnización suplementaria)."
+          },
+          "more": {
+            "title": "Más sobre indemnización suplementaria",
+            "body": "La indemnización suplementaria ayuda con gastos de bolsillo del plan primario pagando efectivo por eventos cubiertos como ingresos o cirugía, según la póliza. La ruta correcta en UHOne puede variar por estado—use la cotización que coincida con su intención de inscripción y revise máximos por categoría de servicio."
+          }
+        },
+        "faq": {
+          "title": "Preguntas frecuentes",
+          "items": [
+            {
+              "q": "¿Es seguro mayor médico?",
+              "a": "No. Es suplemento. Mantenga la cobertura adecuada a sus necesidades."
+            },
+            {
+              "q": "¿Por qué hay distintas rutas de cotización?",
+              "a": "UHOne puede enrutar formularios por línea de producto. Use la que coincida con su estado e inscripción."
+            },
+            {
+              "q": "¿El pago es a mí o al hospital?",
+              "a": "La póliza define al beneficiario; muchas indemnidades pagan al asegurado."
+            },
+            {
+              "q": "¿Cómo sé si es el plan correcto?",
+              "a": "Compare tablas, primas y exclusiones en la cotización oficial. Le ayudamos a interpretar."
+            },
+            {
+              "q": "¿Cubre cirugía ambulatoria?",
+              "a": "Depende de la póliza. Lea el certificado."
+            }
+          ]
+        },
+        "ctaBand": {
+          "title": "Cotice e inscríbase ahora",
+          "body": "Use el botón de abajo para abrir el flujo seguro de cotización de UnitedHealthOne: compare Hospital SafeGuard y opciones de indemnización suplementaria para su código postal, revise beneficios e inscríbase en línea cuando esté listo."
+        },
+        "disclaimer": {
+          "title": "Importante",
+          "body": "Los productos, la disponibilidad, la suscripción y los beneficios varían según el estado y el plan. Esta página es educativa y enlaza a la experiencia de cotización autorizada por la aseguradora. Lea todos los avisos, certificados y documentos de la póliza antes de inscribirse. Isaac Plans Insurance recibe compensación cuando se inscribe mediante programas aplicables de la aseguradora."
+        },
+        "highlights": {
+          "title": "En resumen",
+          "items": [
+            "Beneficios en efectivo por eventos definidos—revise tablas y topes",
+            "Mantenga mayor médico para protección amplia",
+            "Confirme qué ruta de cotización UHOne corresponde a su producto"
+          ]
+        }
+      },
+      "critical-guard": {
+        "metadata": {
+          "title": "CriticalGuard enfermedad crítica | UnitedHealthOne | Isaac Plans",
+          "description": "Conozca CriticalGuard de UnitedHealthOne—suma global en efectivo por diagnósticos graves como cáncer y afecciones cardíacas. Inicie una cotización segura; la disponibilidad varía.",
+          "keywords": "CriticalGuard, seguro de enfermedad crítica, UnitedHealthOne, Isaac Plans"
+        },
+        "backNav": {
+          "label": "Volver a productos UnitedHealthOne"
+        },
+        "hero": {
+          "badge": "UnitedHealthOne · Enfermedad crítica",
+          "title": "CriticalGuard—efectivo global ante un diagnóstico grave",
+          "lead": "El seguro de enfermedad crítica paga una suma global al diagnosticarse una condición cubierta—cáncer, infarto, ACV y otras—según definiciones de la póliza. No es seguro de salud para el día a día; es protección financiera por eventos definidos."
+        },
+        "sections": {
+          "what": {
+            "title": "Qué es",
+            "body": "Paga una suma global al cumplir las definiciones de diagnósticos cubiertos. Puede usar el dinero en facturas médicas, ingresos perdidos u otros gastos según la póliza. Puede existir emisión garantizada en algunos diseños."
+          },
+          "who": {
+            "title": "Para quién puede ser",
+            "body": "Quienes desean protección en efectivo además del mayor médico—especialmente con antecedentes familiares—pueden considerarlo. No sustituye cobertura mayor médica integral."
+          },
+          "confirm": {
+            "title": "Qué confirmar en la cotización",
+            "body": "Revise condiciones cubiertas, definiciones, periodos de supervivencia, carencias y exclusiones. Confirme montos y si hay múltiples pagos."
+          },
+          "more": {
+            "title": "Más sobre enfermedad crítica",
+            "body": "El seguro de enfermedad crítica aporta liquidez tras un diagnóstico grave: la suma puede ayudar con deducibles, viajes o tiempo fuera del trabajo. Las definiciones importan—dos pólizas pueden definir “cáncer” distinto. Revise periodos de supervivencia, recurrencia y si puede comprar varias pólizas o riders."
+          }
+        },
+        "faq": {
+          "title": "Preguntas frecuentes",
+          "items": [
+            {
+              "q": "¿Es lo mismo que seguro de salud?",
+              "a": "No. Paga una suma por diagnósticos; no cubre facturas médicas continuas como un mayor médico."
+            },
+            {
+              "q": "¿Se cubren preexistencias?",
+              "a": "A menudo se excluyen o limitan. Lea el certificado."
+            },
+            {
+              "q": "¿Puedo comprarlo con Medicare?",
+              "a": "La elegibilidad varía. La cotización mostrará opciones."
+            },
+            {
+              "q": "¿En qué difiere del seguro de accidentes?",
+              "a": "Enfermedad crítica cubre diagnósticos de enfermedad; accidentes cubre lesiones accidentales. Algunas personas tienen ambos."
+            },
+            {
+              "q": "¿Qué tan rápido se paga después del diagnóstico?",
+              "a": "Los plazos y reclamaciones varían. La póliza describe la documentación."
+            }
+          ]
+        },
+        "ctaBand": {
+          "title": "¿Ayuda para comparar enfermedad crítica con otros suplementos?",
+          "body": "Le ayudamos a comparar CriticalGuard con accidentes, indemnización hospitalaria y vida."
+        },
+        "disclaimer": {
+          "title": "Importante",
+          "body": "Los productos, la disponibilidad, la suscripción y los beneficios varían según el estado y el plan. Esta página es educativa y enlaza a la experiencia de cotización autorizada por la aseguradora. Lea todos los avisos, certificados y documentos de la póliza antes de inscribirse. Isaac Plans Insurance recibe compensación cuando se inscribe mediante programas aplicables de la aseguradora."
+        },
+        "highlights": {
+          "title": "En resumen",
+          "items": [
+            "Pago global por diagnósticos definidos—lea definiciones",
+            "No sustituye mayor médico ni seguro de incapacidad",
+            "La emisión garantizada puede existir en algunas formas"
+          ]
+        }
+      },
+      "term-life": {
+        "metadata": {
+          "title": "Term Life SafeGuard | UnitedHealthOne | Isaac Plans",
+          "description": "Conozca Term Life SafeGuard de UnitedHealthOne—vida temporal asequible con riders opcionales. Inicie una cotización segura; la suscripción y disponibilidad varían.",
+          "keywords": "vida temporal, Term Life SafeGuard, UnitedHealthOne, Isaac Plans"
+        },
+        "backNav": {
+          "label": "Volver a productos UnitedHealthOne"
+        },
+        "hero": {
+          "badge": "UnitedHealthOne · Vida temporal",
+          "title": "Term Life SafeGuard—protección en los años que más importan",
+          "lead": "El seguro de vida temporal paga un beneficio por muerte a sus beneficiarios si fallece durante el plazo—forma rentable de proteger ingresos, hipoteca y objetivos familiares. La ruta Term Life SafeGuard puede ofrecer riders opcionales como enfermedad crítica donde aplique."
+        },
+        "sections": {
+          "what": {
+            "title": "Qué es",
+            "body": "La vida temporal cubre un periodo definido con beneficio por muerte a nivel en muchos diseños. No es vida permanente; al terminar el plazo puede vencer la cobertura salvo renovación o conversión según la póliza."
+          },
+          "who": {
+            "title": "Para quién puede ser",
+            "body": "Padres, propietarios y quienes tienen dependientes del ingreso pueden considerarla. La salud y la suscripción afectan elegibilidad y tarifas."
+          },
+          "confirm": {
+            "title": "Qué confirmar en la cotización",
+            "body": "Revise monto, duración del plazo, garantía de primas, riders (incl. enfermedad crítica), conversión y exclusiones. Confirme beneficiarios."
+          },
+          "more": {
+            "title": "Más sobre vida temporal",
+            "body": "La vida temporal suele ser la forma más asequible de proteger hipoteca o ingresos en años de trabajo. Compare periodos de prima nivel, privilegios de conversión a permanente y riders opcionales. Mantenga actualizados a los beneficiarios tras cambios importantes."
+          }
+        },
+        "faq": {
+          "title": "Preguntas frecuentes",
+          "items": [
+            {
+              "q": "¿La vida temporal es una inversión?",
+              "a": "No. Es protección pura; no acumula valor como algunas permanentes."
+            },
+            {
+              "q": "¿Cuánta cobertura necesito?",
+              "a": "Depende de reemplazo de ingresos, deudas y metas. Le ayudamos a estimar un rango razonable."
+            },
+            {
+              "q": "¿Qué pasa al terminar el plazo?",
+              "a": "Puede terminar la cobertura salvo renovación o conversión. Revise el certificado."
+            },
+            {
+              "q": "¿Puedo añadir enfermedad crítica?",
+              "a": "Algunos diseños UHOne ofrecen riders. Vea la cotización."
+            },
+            {
+              "q": "¿Necesito examen médico?",
+              "a": "Los requisitos varían según producto y capital. La solicitud puede incluir preguntas o exámenes."
+            }
+          ]
+        },
+        "ctaBand": {
+          "title": "¿Ayuda para comparar vida temporal con otras protecciones?",
+          "body": "Le ayudamos a comparar Term Life SafeGuard con otras aseguradoras y tipos de producto."
+        },
+        "disclaimer": {
+          "title": "Importante",
+          "body": "Los productos, la disponibilidad, la suscripción y los beneficios varían según el estado y el plan. Esta página es educativa y enlaza a la experiencia de cotización autorizada por la aseguradora. Lea todos los avisos, certificados y documentos de la póliza antes de inscribirse. Isaac Plans Insurance recibe compensación cuando se inscribe mediante programas aplicables de la aseguradora."
+        },
+        "highlights": {
+          "title": "En resumen",
+          "items": [
+            "Protección pura por plazo definido—sin valor en efectivo",
+            "La suscripción puede incluir preguntas de salud o exámenes",
+            "Revise conversión y renovación antes de comprar"
+          ]
+        }
+      },
+      "dental-wise": {
+        "metadata": {
+          "title": "DentalWise y DentalWise Max (DVH) | UnitedHealthOne | Isaac Plans",
+          "description": "Conozca DentalWise y DentalWise Max de UnitedHealthOne—dental, visión y audición en un plan o solo dental. Inicie una cotización segura; las redes varían.",
+          "keywords": "DentalWise, seguro dental, visión, audición, UnitedHealthOne, Isaac Plans"
+        },
+        "backNav": {
+          "label": "Volver a productos UnitedHealthOne"
+        },
+        "hero": {
+          "badge": "UnitedHealthOne · Dental y visión",
+          "title": "DentalWise—cobertura centrada en dental, visión y audición",
+          "lead": "DentalWise Max agrupa dental, visión y audición; DentalWise es solo dental. Ambos usan la red dental UnitedHealthcare donde aplique—niveles de beneficio, carencias y disponibilidad varían según el estado."
+        },
+        "sections": {
+          "what": {
+            "title": "Qué es",
+            "body": "Los planes dentales suelen cubrir preventivo (limpiezas, exámenes) y comparten costos de servicios básicos y mayores con máximos anuales y carencias. DentalWise Max añade visión y audición en un diseño."
+          },
+          "who": {
+            "title": "Para quién puede ser",
+            "body": "Familias sin dental del empleador o quienes buscan costos predecibles para rutina y restauraciones. Compare máximos anuales y red."
+          },
+          "confirm": {
+            "title": "Qué confirmar en la cotización",
+            "body": "Revise máximos anuales, coseguros, carencias para trabajo mayor, ortodoncia y lista de dentistas en red. En DVH confirme visión y audición."
+          },
+          "more": {
+            "title": "Más sobre DentalWise",
+            "body": "DentalWise y DentalWise Max (DVH) ayudan a presupuestar preventivo y reducir sorpresas en servicios básicos y mayores. Los máximos anuales, carencias y ortodoncia varían—si espera trabajo mayor pronto, compare planes con carencias más cortas y máximos más altos."
+          }
+        },
+        "faq": {
+          "title": "Preguntas frecuentes",
+          "items": [
+            {
+              "q": "¿DentalWise es seguro de salud ACA?",
+              "a": "El dental es distinto del mayor médico ACA. No sustituye seguro médico integral."
+            },
+            {
+              "q": "¿Puedo ir a cualquier dentista?",
+              "a": "Suele ahorrar más en red. Verifique antes de la visita."
+            },
+            {
+              "q": "¿Cuánto duran las carencias para trabajo mayor?",
+              "a": "Varían por plan. El certificado muestra el calendario."
+            },
+            {
+              "q": "¿Qué es DentalWise Max?",
+              "a": "Agrupa dental, visión y audición. Compárelo con DentalWise solo dental."
+            },
+            {
+              "q": "¿Cubre ortodoncia?",
+              "a": "Varía por plan. Revise el resumen de beneficios."
+            }
+          ]
+        },
+        "ctaBand": {
+          "title": "¿Ayuda para comparar planes dentales?",
+          "body": "Le ayudamos a comparar DentalWise con otras opciones UHOne y de otras aseguradoras."
+        },
+        "disclaimer": {
+          "title": "Importante",
+          "body": "Los productos, la disponibilidad, la suscripción y los beneficios varían según el estado y el plan. Esta página es educativa y enlaza a la experiencia de cotización autorizada por la aseguradora. Lea todos los avisos, certificados y documentos de la póliza antes de inscribirse. Isaac Plans Insurance recibe compensación cuando se inscribe mediante programas aplicables de la aseguradora."
+        },
+        "highlights": {
+          "title": "En resumen",
+          "items": [
+            "DVH agrupa dental, visión y audición en una línea",
+            "Ahorre más permaneciendo en la red dental UnitedHealthcare",
+            "Ortodoncia e implantes varían—revise el resumen de beneficios"
+          ]
+        }
+      },
+      "dental-discount": {
+        "metadata": {
+          "title": "Programa de descuento dental | UnitedHealthOne | Isaac Plans",
+          "description": "Conozca el programa de descuento dental UnitedHealthOne—ahorre en servicios cuando un plan completo no encaja. La disponibilidad varía.",
+          "keywords": "descuento dental, UnitedHealthOne, UHOne, Isaac Plans"
+        },
+        "backNav": {
+          "label": "Volver a productos UnitedHealthOne"
+        },
+        "hero": {
+          "badge": "UnitedHealthOne · Dental y ahorro",
+          "title": "Descuento dental—ahorro cuando el seguro completo no encaja",
+          "lead": "Los programas de descuento ofrecen tarifas reducidas con proveedores participantes—no son seguro ni pagan reclamos. Pueden ser económicos si busca ahorro sin máximos y carencias típicos de seguro. El diseño varía por estado."
+        },
+        "sections": {
+          "what": {
+            "title": "Qué es",
+            "body": "Un programa de descuento dental le da acceso a tarifas negociadas con dentistas participantes. Paga directamente al dentista a la tarifa reducida; no hay proceso de reclamos como en el seguro."
+          },
+          "who": {
+            "title": "Para quién puede ser",
+            "body": "Quienes buscan ahorro en rutina o no necesitan un plan dental completo. No sustituye al seguro si necesita cobertura mayor."
+          },
+          "confirm": {
+            "title": "Qué confirmar en la cotización",
+            "body": "Revise red participante, tarifas y cuotas del programa. Compare con un plan dental de seguro tradicional."
+          },
+          "more": {
+            "title": "Más sobre descuento dental",
+            "body": "Los programas de descuento reducen tarifas con dentistas participantes pero no pagan reclamos como el seguro. Pueden encajar si principalmente necesita limpiezas y empastes con ahorro predecible. Si anticipa trabajo restaurador mayor, compare el gasto total bajo descuento frente a un plan dental tradicional con máximo anual."
+          }
+        },
+        "faq": {
+          "title": "Preguntas frecuentes",
+          "items": [
+            {
+              "q": "¿Un descuento es seguro?",
+              "a": "No. No paga reclamos; obtiene tarifas reducidas en red."
+            },
+            {
+              "q": "¿Puedo combinarlo con seguro dental?",
+              "a": "Las reglas varían. Pregunte al proveedor y revise términos."
+            },
+            {
+              "q": "¿Cómo encuentro dentista?",
+              "a": "Use el directorio del programa para participantes cercanos."
+            },
+            {
+              "q": "¿Hay carencia?",
+              "a": "Suelen no tener carencias estilo seguro; la disponibilidad varía."
+            },
+            {
+              "q": "¿Cómo se compara con DentalWise?",
+              "a": "DentalWise es seguro con límites; el descuento es ahorro. Compare costo total y uso esperado."
+            }
+          ]
+        },
+        "ctaBand": {
+          "title": "¿Ayuda para elegir entre descuento y seguro?",
+          "body": "Le ayudamos a comparar descuento dental con DentalWise y otras opciones."
+        },
+        "disclaimer": {
+          "title": "Importante",
+          "body": "Los productos, la disponibilidad, la suscripción y los beneficios varían según el estado y el plan. Esta página es educativa y enlaza a la experiencia de cotización autorizada por la aseguradora. Lea todos los avisos, certificados y documentos de la póliza antes de inscribirse. Isaac Plans Insurance recibe compensación cuando se inscribe mediante programas aplicables de la aseguradora."
+        },
+        "highlights": {
+          "title": "En resumen",
+          "items": [
+            "Tarifas reducidas—no pagos de seguro",
+            "Sin máximo anual de seguro en el sentido tradicional",
+            "Verifique dentistas participantes antes de unirse"
+          ]
+        }
+      },
+      "vision-wise": {
+        "metadata": {
+          "title": "VisionWise (visión) | UnitedHealthOne | Isaac Plans",
+          "description": "Conozca VisionWise de cobertura de visión independiente de UnitedHealthOne—exámenes, gafas y lentes de contacto. Inicie una cotización segura; los beneficios varían.",
+          "keywords": "VisionWise, seguro de visión, UnitedHealthOne, Isaac Plans"
+        },
+        "backNav": {
+          "label": "Volver a productos UnitedHealthOne"
+        },
+        "hero": {
+          "badge": "UnitedHealthOne · Visión",
+          "title": "VisionWise—beneficios de visión claros para exámenes y anteojos",
+          "lead": "VisionWise ofrece cobertura de visión independiente para exámenes anuales, gafas y contactos—a menudo sin carencia para el examen de rutina. Redes y montos varían según plan y estado."
+        },
+        "sections": {
+          "what": {
+            "title": "Qué es",
+            "body": "Los planes de visión suelen cubrir exámenes de rutina y ofrecen montos o descuentos para lentes, monturas y contactos. VisionWise es un producto independiente cuando no necesita dental agrupado."
+          },
+          "who": {
+            "title": "Para quién puede ser",
+            "body": "Quienes necesitan exámenes regulares y actualizar anteojos, o costos de visión predecibles aparte del mayor médico."
+          },
+          "confirm": {
+            "title": "Qué confirmar en la cotización",
+            "body": "Revise copagos de examen, montos para monturas y lentes, beneficios de contactos, ópticas en red y límites de frecuencia."
+          },
+          "more": {
+            "title": "Más sobre cobertura de visión",
+            "body": "Los planes de visión independientes se centran en exámenes de rutina y montos para gafas o contactos. Las enfermedades oculares médicas suelen ir al mayor médico. Compare opciones de lentes, monturas y si los beneficios de contactos sustituyen a los de anteojos en el mismo año de beneficio."
+          }
+        },
+        "faq": {
+          "title": "Preguntas frecuentes",
+          "items": [
+            {
+              "q": "¿VisionWise es parte del seguro médico?",
+              "a": "Es un producto de visión aparte. El mayor médico puede cubrir lesión o enfermedad ocular distinto—lea ambos planes."
+            },
+            {
+              "q": "¿Puedo usar cualquier óptica?",
+              "a": "Suele maximizar valor en red. Consulte el directorio."
+            },
+            {
+              "q": "¿Cubre LASIK?",
+              "a": "Pueden aplicar descuentos o beneficios limitados; cobertura total es poco común."
+            },
+            {
+              "q": "¿Con qué frecuencia puedo obtener gafas?",
+              "a": "Los planes fijan límites de frecuencia. Vea el resumen."
+            },
+            {
+              "q": "¿Cómo se compara con DentalWise Max?",
+              "a": "DentalWise Max agrupa dental, visión y audición; VisionWise es solo visión. Elija según necesite."
+            }
+          ]
+        },
+        "ctaBand": {
+          "title": "¿Ayuda para comparar planes de visión?",
+          "body": "Le ayudamos a comparar VisionWise con DVH agrupado y otras aseguradoras."
+        },
+        "disclaimer": {
+          "title": "Importante",
+          "body": "Los productos, la disponibilidad, la suscripción y los beneficios varían según el estado y el plan. Esta página es educativa y enlaza a la experiencia de cotización autorizada por la aseguradora. Lea todos los avisos, certificados y documentos de la póliza antes de inscribirse. Isaac Plans Insurance recibe compensación cuando se inscribe mediante programas aplicables de la aseguradora."
+        },
+        "highlights": {
+          "title": "En resumen",
+          "items": [
+            "Exámenes de rutina y montos para materiales—vea límites de frecuencia",
+            "Más valor con ópticas en red",
+            "LASIK suele ser descuento—no cobertura plena"
+          ]
+        }
+      },
+      "accident-wise": {
+        "metadata": {
+          "title": "AccidentWise | UnitedHealthOne | Isaac Plans",
+          "description": "Conozca AccidentWise de UnitedHealthOne—efectivo global o programado por lesión accidental y tratamiento. Inicie una cotización segura; la disponibilidad varía.",
+          "keywords": "AccidentWise, seguro de accidentes, UnitedHealthOne, Isaac Plans"
+        },
+        "backNav": {
+          "label": "Volver a productos UnitedHealthOne"
+        },
+        "hero": {
+          "badge": "UnitedHealthOne · Accidentes",
+          "title": "AccidentWise—efectivo cuando ocurre una lesión accidental",
+          "lead": "El seguro de accidentes paga beneficios globales o según tabla por lesiones accidentales cubiertas—útil para familias con deducibles y gastos imprevistos. No cubre enfermedad ni reemplaza el mayor médico."
+        },
+        "sections": {
+          "what": {
+            "title": "Qué es",
+            "body": "Paga beneficios ante un accidente cubierto—fracturas, quemaduras, urgencias—según tabla. AccidentWise suele orientarse a edades 18–75 del asegurado principal en muchos diseños."
+          },
+          "who": {
+            "title": "Para quién puede ser",
+            "body": "Personas activas, familias con niños en deportes o quienes tienen deducible alto y quieren efectivo extra por accidentes."
+          },
+          "confirm": {
+            "title": "Qué confirmar en la cotización",
+            "body": "Revise tabla por tipo de lesión, máximos, exclusiones (p. ej. deporte profesional) y seguimiento."
+          },
+          "more": {
+            "title": "Más sobre cobertura de accidentes",
+            "body": "El seguro de accidentes paga lesiones accidentales según tabla—fracturas, cortes o urgencias—no enfermedad. Puede combinar bien con deducible alto para familias activas. Revise exclusiones por deportes organizados, aviación o actividades de riesgo si aplican."
+          }
+        },
+        "faq": {
+          "title": "Preguntas frecuentes",
+          "items": [
+            {
+              "q": "¿Cubre enfermedad?",
+              "a": "No. Cubre lesiones accidentales según la póliza—no enfermedad."
+            },
+            {
+              "q": "¿En qué difiere de Accident ProGuard?",
+              "a": "ProGuard puede combinar otros productos en ciertos estados. Compare en la cotización UHOne."
+            },
+            {
+              "q": "¿Cubre lesiones deportivas?",
+              "a": "Algunas actividades pueden excluirse o limitarse. Lea el certificado."
+            },
+            {
+              "q": "¿Puedo tenerlo con otra cobertura?",
+              "a": "Sí; suele ser suplemento. Pueden aplicar reglas de coordinación."
+            },
+            {
+              "q": "¿Qué tan rápido se paga?",
+              "a": "Los reclamos varían. Envíe la documentación según la póliza."
+            }
+          ]
+        },
+        "ctaBand": {
+          "title": "¿Ayuda para comparar cobertura de accidentes?",
+          "body": "Le ayudamos a comparar AccidentWise con Accident ProGuard y otros productos de accidentes."
+        },
+        "disclaimer": {
+          "title": "Importante",
+          "body": "Los productos, la disponibilidad, la suscripción y los beneficios varían según el estado y el plan. Esta página es educativa y enlaza a la experiencia de cotización autorizada por la aseguradora. Lea todos los avisos, certificados y documentos de la póliza antes de inscribirse. Isaac Plans Insurance recibe compensación cuando se inscribe mediante programas aplicables de la aseguradora."
+        },
+        "highlights": {
+          "title": "En resumen",
+          "items": [
+            "Solo lesiones accidentales—excluye enfermedad",
+            "Beneficios por tabla—compare montos por tipo de lesión",
+            "Suele usarse como suplemento al médico"
+          ]
+        }
+      },
+      "accident-pro": {
+        "metadata": {
+          "title": "Serie Accident ProGuard | UnitedHealthOne | Isaac Plans",
+          "description": "Conozca Accident ProGuard de UnitedHealthOne—cobertura flexible de accidentes con combinaciones opcionales en ciertos estados. Inicie una cotización segura.",
+          "keywords": "Accident ProGuard, seguro de accidentes, UnitedHealthOne, Isaac Plans"
+        },
+        "backNav": {
+          "label": "Volver a productos UnitedHealthOne"
+        },
+        "hero": {
+          "badge": "UnitedHealthOne · Accidentes",
+          "title": "Accident ProGuard—protección flexible de accidentes en ciertos estados",
+          "lead": "La serie Accident ProGuard ofrece cobertura flexible que puede combinarse con enfermedad crítica, indemnización hospitalaria y muerte accidental y desmembramiento en ciertos estados. La disponibilidad y los diseños varían—confirme en la cotización oficial."
+        },
+        "sections": {
+          "what": {
+            "title": "Qué es",
+            "body": "ProGuard es una serie que puede agrupar beneficios de accidente con otros suplementos según estado y forma. Es para quien busca más que una sola tabla de accidentes."
+          },
+          "who": {
+            "title": "Para quién puede ser",
+            "body": "Quienes quieren capas de protección—accidente más hospital o enfermedad crítica—pueden explorar ProGuard donde exista. Compare primas y tablas con planes solo accidente."
+          },
+          "confirm": {
+            "title": "Qué confirmar en la cotización",
+            "body": "Revise módulos disponibles en su estado, montos, exclusiones y si el paquete encaja en su presupuesto frente a pólizas separadas."
+          },
+          "more": {
+            "title": "Más sobre Accident ProGuard",
+            "body": "ProGuard puede combinar accidentes con otras líneas suplementarias donde las presentaciones estatales lo permitan. Los paquetes pueden simplificar facturación, pero compare la prima del paquete con pólizas independientes si solo necesita un tipo de protección. Lea exclusiones y máximos de cada módulo."
+          }
+        },
+        "faq": {
+          "title": "Preguntas frecuentes",
+          "items": [
+            {
+              "q": "¿ProGuard está en todos los estados?",
+              "a": "No. Varía por estado y forma. La cotización UHOne mostrará opciones."
+            },
+            {
+              "q": "¿Puedo comprar solo accidentes dentro de ProGuard?",
+              "a": "Las opciones dependen de las presentaciones estatales. Revise módulos en la cotización."
+            },
+            {
+              "q": "¿Cómo se compara con AccidentWise?",
+              "a": "AccidentWise es más simple; ProGuard puede agrupar beneficios adicionales. Compare tablas y primas."
+            },
+            {
+              "q": "¿Cubre enfermedad crítica?",
+              "a": "Algunos diseños incluyen módulos. Confirme en el certificado."
+            },
+            {
+              "q": "¿Isaac Plans ayuda a comparar paquetes?",
+              "a": "Sí—le ayudamos a comparar paquetes ProGuard con pólizas separadas."
+            }
+          ]
+        },
+        "ctaBand": {
+          "title": "¿Ayuda para comparar opciones ProGuard?",
+          "body": "Le ayudamos a comparar Accident ProGuard con AccidentWise y otros suplementos."
+        },
+        "disclaimer": {
+          "title": "Importante",
+          "body": "Los productos, la disponibilidad, la suscripción y los beneficios varían según el estado y el plan. Esta página es educativa y enlaza a la experiencia de cotización autorizada por la aseguradora. Lea todos los avisos, certificados y documentos de la póliza antes de inscribirse. Isaac Plans Insurance recibe compensación cuando se inscribe mediante programas aplicables de la aseguradora."
+        },
+        "highlights": {
+          "title": "En resumen",
+          "items": [
+            "Diseños modulares—la disponibilidad varía por estado",
+            "Compare precio de paquete vs. pólizas separadas",
+            "Confirme qué riders incluye su cotización"
+          ]
+        }
+      },
+      "healthiest-you": {
+        "metadata": {
+          "title": "HealthiestYou (telesalud) | UnitedHealthOne | Isaac Plans",
+          "description": "Conozca HealthiestYou de UnitedHealthOne—acceso a atención virtual vía Teladoc Health donde aplique. Inicie una cotización segura; los beneficios varían.",
+          "keywords": "HealthiestYou, telesalud, Teladoc, UnitedHealthOne, Isaac Plans"
+        },
+        "backNav": {
+          "label": "Volver a productos UnitedHealthOne"
+        },
+        "hero": {
+          "badge": "UnitedHealthOne · Telesalud",
+          "title": "HealthiestYou—atención virtual cuando necesita un clínico rápido",
+          "lead": "HealthiestYou brinda acceso a telesalud—muchas veces visitas virtuales 24/7 para condiciones comunes no urgentes. No sustituye emergencias; llame al 911 ante emergencias."
+        },
+        "sections": {
+          "what": {
+            "title": "Qué es",
+            "body": "La telesalud conecta con profesionales licenciados por teléfono o video para necesidades rutinarias. HealthiestYou puede ir agrupado con otros productos UHOne o venderse solo según estado e inscripción."
+          },
+          "who": {
+            "title": "Para quién puede ser",
+            "body": "Familias ocupadas, viajeros frecuentes o quienes buscan comodidad para dolencias menores. No reemplaza atención presencial cuando sea necesaria."
+          },
+          "confirm": {
+            "title": "Qué confirmar en la cotización",
+            "body": "Revise costos de visita, horarios, condiciones cubiertas, política de recetas y acceso a salud conductual si aplica."
+          },
+          "more": {
+            "title": "Más sobre telesalud",
+            "body": "La telesalud es conveniente para muchos casos no urgentes, pero no para dolor torácico, síntomas de ACV, sangrado grave u otras emergencias. Las reglas varían para salud conductual y prescripción de sustancias controladas. Regístrese antes de necesitar atención."
+          }
+        },
+        "faq": {
+          "title": "Preguntas frecuentes",
+          "items": [
+            {
+              "q": "¿La telesalud es igual que emergencias?",
+              "a": "No. En emergencias llame al 911 o vaya a urgencias. La telesalud es para casos no urgentes cuando corresponda."
+            },
+            {
+              "q": "¿Pueden recetar por telesalud?",
+              "a": "Puede recetarse según ley estatal y reglas de telesalud. No todos los medicamentos se prescriben virtualmente."
+            },
+            {
+              "q": "¿HealthiestYou viene con mi plan médico?",
+              "a": "A veces va incluido; otras veces es inscripción aparte. Revise cotización y certificado."
+            },
+            {
+              "q": "¿Funciona fuera de EE. UU.?",
+              "a": "Las reglas de acceso varían. Revise términos del programa."
+            },
+            {
+              "q": "¿Cómo inicio una visita?",
+              "a": "Los materiales del programa describen registro y solicitud de visita."
+            }
+          ]
+        },
+        "ctaBand": {
+          "title": "¿Ayuda para comparar opciones de telesalud?",
+          "body": "Le ayudamos a comparar HealthiestYou con otra atención virtual y mayor médico."
+        },
+        "disclaimer": {
+          "title": "Importante",
+          "body": "Los productos, la disponibilidad, la suscripción y los beneficios varían según el estado y el plan. Esta página es educativa y enlaza a la experiencia de cotización autorizada por la aseguradora. Lea todos los avisos, certificados y documentos de la póliza antes de inscribirse. Isaac Plans Insurance recibe compensación cuando se inscribe mediante programas aplicables de la aseguradora."
+        },
+        "highlights": {
+          "title": "En resumen",
+          "items": [
+            "Acceso 24/7 en muchos programas para dolencias comunes",
+            "No es para emergencias—llame al 911 o vaya a urgencias",
+            "Puede ir agrupado o vendido por separado—verifique su ruta"
+          ]
+        }
+      },
+      "mental-health": {
+        "metadata": {
+          "title": "Cobertura de salud mental | UnitedHealthOne | Isaac Plans",
+          "description": "Conozca las rutas de cotización de salud conductual de UnitedHealthOne—apoyo en salud mental donde haya productos. Inicie una cotización segura; la cobertura varía.",
+          "keywords": "seguro salud mental, salud conductual, UnitedHealthOne, Isaac Plans"
+        },
+        "backNav": {
+          "label": "Volver a productos UnitedHealthOne"
+        },
+        "hero": {
+          "badge": "UnitedHealthOne · Salud conductual",
+          "title": "Salud mental—opciones de salud conductual con UHOne",
+          "lead": "UnitedHealthOne ofrece rutas de cotización de salud conductual para productos y estados elegibles—acceso a consejería, terapia u otros beneficios donde existan. Redes y reglas de paridad varían. Si está en crisis, contacte servicios de emergencia o líneas de crisis."
+        },
+        "sections": {
+          "what": {
+            "title": "Qué es",
+            "body": "La cobertura de salud conductual puede incluir visitas ambulatorias, terapia por video u otros servicios según el producto. UHOne le dirige a la cotización adecuada para beneficios de salud mental ligados a su inscripción."
+          },
+          "who": {
+            "title": "Para quién puede ser",
+            "body": "Quien busca apoyo en salud mental como parte de un plan amplio o suplemento puede explorar opciones. Si necesita ayuda inmediata, use recursos de crisis—no una cotización web."
+          },
+          "confirm": {
+            "title": "Qué confirmar en la cotización",
+            "body": "Revise límites de visitas, copagos, red, telesalud y paridad con beneficios médicos cuando aplique."
+          },
+          "more": {
+            "title": "Más sobre salud conductual",
+            "body": "Los beneficios de salud conductual dependen del producto subyacente—el mayor médico compatible con ACA tiene reglas de paridad distintas a las líneas suplementarias. Acceso a red, límites de visitas y telesalud varían. En crisis, llame al 988 en EE. UU. o al número de emergencia local; esta página no es servicio de crisis."
+          }
+        },
+        "faq": {
+          "title": "Preguntas frecuentes",
+          "items": [
+            {
+              "q": "¿Es lo mismo que cobertura ACA?",
+              "a": "Depende del producto subyacente. Los planes compatibles con ACA siguen reglas distintas a los suplementos. Lea el certificado."
+            },
+            {
+              "q": "¿Puedo ver cualquier terapeuta?",
+              "a": "Suele requerirse red para beneficios cubiertos. Consulte el directorio."
+            },
+            {
+              "q": "¿Se cubren condiciones mentales preexistentes?",
+              "a": "Las reglas varían por tipo de plan y estado. El mayor médico tiene otras protecciones que los suplementos."
+            },
+            {
+              "q": "¿Y si estoy en crisis?",
+              "a": "Llame al 988 (línea de crisis en EE. UU.) o al número de emergencia local. Este sitio no es servicio de crisis."
+            },
+            {
+              "q": "¿Isaac Plans ayuda a elegir plan?",
+              "a": "Sí—comparamos beneficios de salud mental en UHOne y otras aseguradoras."
+            }
+          ]
+        },
+        "ctaBand": {
+          "title": "¿Ayuda para comparar beneficios de salud conductual?",
+          "body": "Escríbanos—le ayudamos a comparar opciones UHOne de salud mental con otras coberturas."
+        },
+        "disclaimer": {
+          "title": "Importante",
+          "body": "Los productos, la disponibilidad, la suscripción y los beneficios varían según el estado y el plan. Esta página es educativa y enlaza a la experiencia de cotización autorizada por la aseguradora. Lea todos los avisos, certificados y documentos de la póliza antes de inscribirse. Isaac Plans Insurance recibe compensación cuando se inscribe mediante programas aplicables de la aseguradora."
+        },
+        "highlights": {
+          "title": "En resumen",
+          "items": [
+            "Red y límites de visitas varían—revise el certificado",
+            "La telesalud puede incluirse—confirme costos",
+            "En emergencias use líneas de crisis—no una cotización web"
+          ]
+        }
+      }
+    }
+  }
+}

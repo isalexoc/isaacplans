@@ -1,0 +1,1319 @@
+{
+  "manhattan": {
+    "productPages": {
+      "labels": {
+        "quoteCta": "Get quote & enroll",
+        "learnMore": "Learn more",
+        "breadcrumbHub": "Manhattan Life"
+      },
+      "shared": {
+        "logoAlt": "Manhattan Life",
+        "contactClosing": {
+          "title": "Want help comparing options?",
+          "body": "Reach out for a personalized walkthrough—whether you already used the direct links or want Isaac to review alternatives."
+        },
+        "enrollmentSteps": {
+          "title": "How enrollment works",
+          "subtitle": "Three simple steps. Timing and requirements vary by state and product.",
+          "step1Title": "Open your direct link",
+          "step1Body": "Use the Manhattan Life button to launch the authorized enrollment experience for the product you chose.",
+          "step2Title": "Review and apply",
+          "step2Body": "Read plan materials carefully, then complete the application when you are ready.",
+          "step3Title": "Confirm your coverage",
+          "step3Body": "Save documents and follow Manhattan Life’s instructions for payment and effective date."
+        }
+      },
+      "hub": {
+        "metadata": {
+          "title": "Manhattan Life | Products & enrollment | Isaac Plans",
+          "description": "Explore Manhattan Life products—short-term medical, indemnity, dental, and more. Start secure direct enrollment or get personalized help from Isaac Plans.",
+          "keywords": "Manhattan Life, supplemental insurance, short term medical, Isaac Plans"
+        },
+        "backNav": {
+          "label": "Back to carriers"
+        },
+        "hero": {
+          "badge": "Manhattan Life",
+          "title": "Manhattan Life products—quote the plan that fits",
+          "lead": "Browse supplemental, indemnity, and short-term strategies filed by Manhattan Life. Each card opens your authorized direct enrollment link; short-term medical has its own guided page."
+        },
+        "stm": {
+          "badge": "Popular",
+          "title": "Short-term medical (STLDI)",
+          "body": "Bridge coverage between major medical plans with Manhattan Life’s STM experience—state- and form-dependent.",
+          "cta": "View short-term medical"
+        },
+        "productsSection": {
+          "title": "All direct enrollment products",
+          "subtitle": "Choose a product to read more, or jump straight to enrollment."
+        },
+        "disclaimer": {
+          "title": "Important",
+          "body": "Products, availability, underwriting, and benefits vary by state and plan. This hub links to Manhattan Life’s authorized quoting site (direct.manhattanlife.com). You leave IsaacPlans.com; carrier terms and licensing apply. Isaac Plans Insurance may be compensated when you enroll through applicable programs."
+        }
+      },
+      "products": {
+        "all-products": {
+          "metadata": {
+            "title": "All Manhattan Life plans | Manhattan Life | Isaac Plans",
+            "description": "Learn about All Manhattan Life plans through Manhattan Life. Open the secure direct link; availability and benefits vary by state.",
+            "keywords": "Manhattan Life, direct enrollment, Isaac Plans"
+          },
+          "backNav": {
+            "label": "Back to Manhattan Life"
+          },
+          "hero": {
+            "badge": "Manhattan Life",
+            "title": "All Manhattan Life plans",
+            "lead": "Start from the full product catalog on Manhattan Life’s direct enrollment site. Availability, underwriting, and benefits vary by state—confirm details in the official flow."
+          },
+          "sections": {
+            "what": {
+              "title": "What it is",
+              "body": "This Manhattan Life product is accessed through the carrier’s authorized direct enrollment site. Benefits, underwriting, and availability depend on your state and plan—read all official materials before you apply."
+            },
+            "who": {
+              "title": "Who it may fit",
+              "body": "Individuals exploring supplemental or specified-benefit coverage who want a licensed carrier path with transparent online enrollment."
+            },
+            "confirm": {
+              "title": "What to confirm in the quote",
+              "body": "Premiums, benefit schedules, exclusions, waiting periods, and any coordination rules shown for your ZIP code."
+            },
+            "more": {
+              "title": "More to know",
+              "body": "Manhattan Life companies may issue policies under different legal entities by product and state. Marketing names can differ—your policy documents control."
+            }
+          },
+          "faq": {
+            "title": "Common questions",
+            "items": [
+              {
+                "q": "Is this the same as ACA major medical?",
+                "a": "Not necessarily. These products are often supplemental or limited-benefit designs. Read how your plan is classified in the official quote."
+              },
+              {
+                "q": "Where do I enroll?",
+                "a": "Use the secure Manhattan Life direct link on this page to open the authorized enrollment experience."
+              },
+              {
+                "q": "Is every product available in my state?",
+                "a": "No. Availability varies by state and product. The enrollment path will reflect what you can apply for."
+              },
+              {
+                "q": "Can Isaac Plans help me compare?",
+                "a": "Yes—reach out if you want a second opinion before you enroll."
+              }
+            ]
+          },
+          "ctaBand": {
+            "title": "Quote and enroll",
+            "body": "Open the secure Manhattan Life direct link for this product."
+          },
+          "disclaimer": {
+            "title": "Important",
+            "body": "Products, availability, underwriting, and benefits vary by state and plan. This page is educational and links to Manhattan Life’s authorized site. Isaac Plans Insurance may be compensated when you enroll through applicable carrier programs."
+          },
+          "highlights": {
+            "title": "At a glance",
+            "items": [
+              "Secure online enrollment through direct.manhattanlife.com",
+              "Read state- and plan-specific disclosures in the flow",
+              "Ask Isaac Plans if you want help comparing options"
+            ]
+          }
+        },
+        "24-hour-accident": {
+          "metadata": {
+            "title": "24 Hour Accident Insurance | Manhattan Life | Isaac Plans",
+            "description": "Learn about 24 Hour Accident Insurance through Manhattan Life. Open the secure direct link; availability and benefits vary by state.",
+            "keywords": "24 hour accident insurance, Manhattan Life, Isaac Plans"
+          },
+          "backNav": {
+            "label": "Back to Manhattan Life"
+          },
+          "hero": {
+            "badge": "Manhattan Life",
+            "title": "24 Hour Accident Insurance",
+            "lead": "Accident-focused coverage designed for quick access to benefits after a covered accident. Review triggers, limits, and exclusions in the quote."
+          },
+          "sections": {
+            "what": {
+              "title": "What it is",
+              "body": "This Manhattan Life product is accessed through the carrier’s authorized direct enrollment site. Benefits, underwriting, and availability depend on your state and plan—read all official materials before you apply."
+            },
+            "who": {
+              "title": "Who it may fit",
+              "body": "Individuals exploring supplemental or specified-benefit coverage who want a licensed carrier path with transparent online enrollment."
+            },
+            "confirm": {
+              "title": "What to confirm in the quote",
+              "body": "Premiums, benefit schedules, exclusions, waiting periods, and any coordination rules shown for your ZIP code."
+            },
+            "more": {
+              "title": "More to know",
+              "body": "Manhattan Life companies may issue policies under different legal entities by product and state. Marketing names can differ—your policy documents control."
+            }
+          },
+          "faq": {
+            "title": "Common questions",
+            "items": [
+              {
+                "q": "Is this the same as ACA major medical?",
+                "a": "Not necessarily. These products are often supplemental or limited-benefit designs. Read how your plan is classified in the official quote."
+              },
+              {
+                "q": "Where do I enroll?",
+                "a": "Use the secure Manhattan Life direct link on this page to open the authorized enrollment experience."
+              },
+              {
+                "q": "Is every product available in my state?",
+                "a": "No. Availability varies by state and product. The enrollment path will reflect what you can apply for."
+              },
+              {
+                "q": "Can Isaac Plans help me compare?",
+                "a": "Yes—reach out if you want a second opinion before you enroll."
+              }
+            ]
+          },
+          "ctaBand": {
+            "title": "Quote and enroll",
+            "body": "Open the secure Manhattan Life direct link for this product."
+          },
+          "disclaimer": {
+            "title": "Important",
+            "body": "Products, availability, underwriting, and benefits vary by state and plan. This page is educational and links to Manhattan Life’s authorized site. Isaac Plans Insurance may be compensated when you enroll through applicable carrier programs."
+          },
+          "highlights": {
+            "title": "At a glance",
+            "items": [
+              "Secure online enrollment through direct.manhattanlife.com",
+              "Read state- and plan-specific disclosures in the flow",
+              "Ask Isaac Plans if you want help comparing options"
+            ]
+          }
+        },
+        "accident": {
+          "metadata": {
+            "title": "Accident Insurance | Manhattan Life | Isaac Plans",
+            "description": "Learn about Accident Insurance through Manhattan Life. Open the secure direct link; availability and benefits vary by state.",
+            "keywords": "accident insurance, Manhattan Life, Isaac Plans"
+          },
+          "backNav": {
+            "label": "Back to Manhattan Life"
+          },
+          "hero": {
+            "badge": "Manhattan Life",
+            "title": "Accident Insurance",
+            "lead": "Helps with out-of-pocket costs tied to covered accidents. Read the benefit schedule and limitations before you enroll."
+          },
+          "sections": {
+            "what": {
+              "title": "What it is",
+              "body": "This Manhattan Life product is accessed through the carrier’s authorized direct enrollment site. Benefits, underwriting, and availability depend on your state and plan—read all official materials before you apply."
+            },
+            "who": {
+              "title": "Who it may fit",
+              "body": "Individuals exploring supplemental or specified-benefit coverage who want a licensed carrier path with transparent online enrollment."
+            },
+            "confirm": {
+              "title": "What to confirm in the quote",
+              "body": "Premiums, benefit schedules, exclusions, waiting periods, and any coordination rules shown for your ZIP code."
+            },
+            "more": {
+              "title": "More to know",
+              "body": "Manhattan Life companies may issue policies under different legal entities by product and state. Marketing names can differ—your policy documents control."
+            }
+          },
+          "faq": {
+            "title": "Common questions",
+            "items": [
+              {
+                "q": "Is this the same as ACA major medical?",
+                "a": "Not necessarily. These products are often supplemental or limited-benefit designs. Read how your plan is classified in the official quote."
+              },
+              {
+                "q": "Where do I enroll?",
+                "a": "Use the secure Manhattan Life direct link on this page to open the authorized enrollment experience."
+              },
+              {
+                "q": "Is every product available in my state?",
+                "a": "No. Availability varies by state and product. The enrollment path will reflect what you can apply for."
+              },
+              {
+                "q": "Can Isaac Plans help me compare?",
+                "a": "Yes—reach out if you want a second opinion before you enroll."
+              }
+            ]
+          },
+          "ctaBand": {
+            "title": "Quote and enroll",
+            "body": "Open the secure Manhattan Life direct link for this product."
+          },
+          "disclaimer": {
+            "title": "Important",
+            "body": "Products, availability, underwriting, and benefits vary by state and plan. This page is educational and links to Manhattan Life’s authorized site. Isaac Plans Insurance may be compensated when you enroll through applicable carrier programs."
+          },
+          "highlights": {
+            "title": "At a glance",
+            "items": [
+              "Secure online enrollment through direct.manhattanlife.com",
+              "Read state- and plan-specific disclosures in the flow",
+              "Ask Isaac Plans if you want help comparing options"
+            ]
+          }
+        },
+        "affordable-choice": {
+          "metadata": {
+            "title": "Affordable Choice | Manhattan Life | Isaac Plans",
+            "description": "Learn about Affordable Choice through Manhattan Life. Open the secure direct link; availability and benefits vary by state.",
+            "keywords": "Affordable Choice, Manhattan Life, Isaac Plans"
+          },
+          "backNav": {
+            "label": "Back to Manhattan Life"
+          },
+          "hero": {
+            "badge": "Manhattan Life",
+            "title": "Affordable Choice",
+            "lead": "A streamlined option to explore when you want predictable supplemental value—confirm what’s filed in your state in the quote."
+          },
+          "sections": {
+            "what": {
+              "title": "What it is",
+              "body": "This Manhattan Life product is accessed through the carrier’s authorized direct enrollment site. Benefits, underwriting, and availability depend on your state and plan—read all official materials before you apply."
+            },
+            "who": {
+              "title": "Who it may fit",
+              "body": "Individuals exploring supplemental or specified-benefit coverage who want a licensed carrier path with transparent online enrollment."
+            },
+            "confirm": {
+              "title": "What to confirm in the quote",
+              "body": "Premiums, benefit schedules, exclusions, waiting periods, and any coordination rules shown for your ZIP code."
+            },
+            "more": {
+              "title": "More to know",
+              "body": "Manhattan Life companies may issue policies under different legal entities by product and state. Marketing names can differ—your policy documents control."
+            }
+          },
+          "faq": {
+            "title": "Common questions",
+            "items": [
+              {
+                "q": "Is this the same as ACA major medical?",
+                "a": "Not necessarily. These products are often supplemental or limited-benefit designs. Read how your plan is classified in the official quote."
+              },
+              {
+                "q": "Where do I enroll?",
+                "a": "Use the secure Manhattan Life direct link on this page to open the authorized enrollment experience."
+              },
+              {
+                "q": "Is every product available in my state?",
+                "a": "No. Availability varies by state and product. The enrollment path will reflect what you can apply for."
+              },
+              {
+                "q": "Can Isaac Plans help me compare?",
+                "a": "Yes—reach out if you want a second opinion before you enroll."
+              }
+            ]
+          },
+          "ctaBand": {
+            "title": "Quote and enroll",
+            "body": "Open the secure Manhattan Life direct link for this product."
+          },
+          "disclaimer": {
+            "title": "Important",
+            "body": "Products, availability, underwriting, and benefits vary by state and plan. This page is educational and links to Manhattan Life’s authorized site. Isaac Plans Insurance may be compensated when you enroll through applicable carrier programs."
+          },
+          "highlights": {
+            "title": "At a glance",
+            "items": [
+              "Secure online enrollment through direct.manhattanlife.com",
+              "Read state- and plan-specific disclosures in the flow",
+              "Ask Isaac Plans if you want help comparing options"
+            ]
+          }
+        },
+        "cancer-care-plus": {
+          "metadata": {
+            "title": "Cancer Care Plus | Manhattan Life | Isaac Plans",
+            "description": "Learn about Cancer Care Plus through Manhattan Life. Open the secure direct link; availability and benefits vary by state.",
+            "keywords": "Cancer Care Plus, Manhattan Life, Isaac Plans"
+          },
+          "backNav": {
+            "label": "Back to Manhattan Life"
+          },
+          "hero": {
+            "badge": "Manhattan Life",
+            "title": "Cancer Care Plus",
+            "lead": "Focused on cancer-related benefits—review waiting periods, benefit triggers, and coordination with other coverage."
+          },
+          "sections": {
+            "what": {
+              "title": "What it is",
+              "body": "This Manhattan Life product is accessed through the carrier’s authorized direct enrollment site. Benefits, underwriting, and availability depend on your state and plan—read all official materials before you apply."
+            },
+            "who": {
+              "title": "Who it may fit",
+              "body": "Individuals exploring supplemental or specified-benefit coverage who want a licensed carrier path with transparent online enrollment."
+            },
+            "confirm": {
+              "title": "What to confirm in the quote",
+              "body": "Premiums, benefit schedules, exclusions, waiting periods, and any coordination rules shown for your ZIP code."
+            },
+            "more": {
+              "title": "More to know",
+              "body": "Manhattan Life companies may issue policies under different legal entities by product and state. Marketing names can differ—your policy documents control."
+            }
+          },
+          "faq": {
+            "title": "Common questions",
+            "items": [
+              {
+                "q": "Is this the same as ACA major medical?",
+                "a": "Not necessarily. These products are often supplemental or limited-benefit designs. Read how your plan is classified in the official quote."
+              },
+              {
+                "q": "Where do I enroll?",
+                "a": "Use the secure Manhattan Life direct link on this page to open the authorized enrollment experience."
+              },
+              {
+                "q": "Is every product available in my state?",
+                "a": "No. Availability varies by state and product. The enrollment path will reflect what you can apply for."
+              },
+              {
+                "q": "Can Isaac Plans help me compare?",
+                "a": "Yes—reach out if you want a second opinion before you enroll."
+              }
+            ]
+          },
+          "ctaBand": {
+            "title": "Quote and enroll",
+            "body": "Open the secure Manhattan Life direct link for this product."
+          },
+          "disclaimer": {
+            "title": "Important",
+            "body": "Products, availability, underwriting, and benefits vary by state and plan. This page is educational and links to Manhattan Life’s authorized site. Isaac Plans Insurance may be compensated when you enroll through applicable carrier programs."
+          },
+          "highlights": {
+            "title": "At a glance",
+            "items": [
+              "Secure online enrollment through direct.manhattanlife.com",
+              "Read state- and plan-specific disclosures in the flow",
+              "Ask Isaac Plans if you want help comparing options"
+            ]
+          }
+        },
+        "cancer-heart-attack-stroke-mac": {
+          "metadata": {
+            "title": "Cancer, Heart Attack & Stroke (CHASMAC) | Manhattan Life | Isaac Plans",
+            "description": "Learn about Cancer, Heart Attack & Stroke (CHASMAC) through Manhattan Life. Open the secure direct link; availability and benefits vary by state.",
+            "keywords": "CHASMAC, cancer heart attack stroke, Manhattan Life, Isaac Plans"
+          },
+          "backNav": {
+            "label": "Back to Manhattan Life"
+          },
+          "hero": {
+            "badge": "Manhattan Life",
+            "title": "Cancer, Heart Attack & Stroke (CHASMAC)",
+            "lead": "Specified-disease style benefits—one of Manhattan Life’s CHAS product filings. Compare materials in the quote to see exact covered conditions."
+          },
+          "sections": {
+            "what": {
+              "title": "What it is",
+              "body": "This Manhattan Life product is accessed through the carrier’s authorized direct enrollment site. Benefits, underwriting, and availability depend on your state and plan—read all official materials before you apply."
+            },
+            "who": {
+              "title": "Who it may fit",
+              "body": "Individuals exploring supplemental or specified-benefit coverage who want a licensed carrier path with transparent online enrollment."
+            },
+            "confirm": {
+              "title": "What to confirm in the quote",
+              "body": "Premiums, benefit schedules, exclusions, waiting periods, and any coordination rules shown for your ZIP code."
+            },
+            "more": {
+              "title": "More to know",
+              "body": "Manhattan Life companies may issue policies under different legal entities by product and state. Marketing names can differ—your policy documents control."
+            }
+          },
+          "faq": {
+            "title": "Common questions",
+            "items": [
+              {
+                "q": "Is this the same as ACA major medical?",
+                "a": "Not necessarily. These products are often supplemental or limited-benefit designs. Read how your plan is classified in the official quote."
+              },
+              {
+                "q": "Where do I enroll?",
+                "a": "Use the secure Manhattan Life direct link on this page to open the authorized enrollment experience."
+              },
+              {
+                "q": "Is every product available in my state?",
+                "a": "No. Availability varies by state and product. The enrollment path will reflect what you can apply for."
+              },
+              {
+                "q": "Can Isaac Plans help me compare?",
+                "a": "Yes—reach out if you want a second opinion before you enroll."
+              }
+            ]
+          },
+          "ctaBand": {
+            "title": "Quote and enroll",
+            "body": "Open the secure Manhattan Life direct link for this product."
+          },
+          "disclaimer": {
+            "title": "Important",
+            "body": "Products, availability, underwriting, and benefits vary by state and plan. This page is educational and links to Manhattan Life’s authorized site. Isaac Plans Insurance may be compensated when you enroll through applicable carrier programs."
+          },
+          "highlights": {
+            "title": "At a glance",
+            "items": [
+              "Secure online enrollment through direct.manhattanlife.com",
+              "Read state- and plan-specific disclosures in the flow",
+              "Ask Isaac Plans if you want help comparing options"
+            ]
+          }
+        },
+        "cancer-heart-attack-stroke-lac": {
+          "metadata": {
+            "title": "Cancer, Heart Attack & Stroke (CHASLAC) | Manhattan Life | Isaac Plans",
+            "description": "Learn about Cancer, Heart Attack & Stroke (CHASLAC) through Manhattan Life. Open the secure direct link; availability and benefits vary by state.",
+            "keywords": "CHASLAC, cancer heart attack stroke, Manhattan Life, Isaac Plans"
+          },
+          "backNav": {
+            "label": "Back to Manhattan Life"
+          },
+          "hero": {
+            "badge": "Manhattan Life",
+            "title": "Cancer, Heart Attack & Stroke (CHASLAC)",
+            "lead": "Alternate CHAS filing with its own benefit design—always read the official summary in the enrollment path."
+          },
+          "sections": {
+            "what": {
+              "title": "What it is",
+              "body": "This Manhattan Life product is accessed through the carrier’s authorized direct enrollment site. Benefits, underwriting, and availability depend on your state and plan—read all official materials before you apply."
+            },
+            "who": {
+              "title": "Who it may fit",
+              "body": "Individuals exploring supplemental or specified-benefit coverage who want a licensed carrier path with transparent online enrollment."
+            },
+            "confirm": {
+              "title": "What to confirm in the quote",
+              "body": "Premiums, benefit schedules, exclusions, waiting periods, and any coordination rules shown for your ZIP code."
+            },
+            "more": {
+              "title": "More to know",
+              "body": "Manhattan Life companies may issue policies under different legal entities by product and state. Marketing names can differ—your policy documents control."
+            }
+          },
+          "faq": {
+            "title": "Common questions",
+            "items": [
+              {
+                "q": "Is this the same as ACA major medical?",
+                "a": "Not necessarily. These products are often supplemental or limited-benefit designs. Read how your plan is classified in the official quote."
+              },
+              {
+                "q": "Where do I enroll?",
+                "a": "Use the secure Manhattan Life direct link on this page to open the authorized enrollment experience."
+              },
+              {
+                "q": "Is every product available in my state?",
+                "a": "No. Availability varies by state and product. The enrollment path will reflect what you can apply for."
+              },
+              {
+                "q": "Can Isaac Plans help me compare?",
+                "a": "Yes—reach out if you want a second opinion before you enroll."
+              }
+            ]
+          },
+          "ctaBand": {
+            "title": "Quote and enroll",
+            "body": "Open the secure Manhattan Life direct link for this product."
+          },
+          "disclaimer": {
+            "title": "Important",
+            "body": "Products, availability, underwriting, and benefits vary by state and plan. This page is educational and links to Manhattan Life’s authorized site. Isaac Plans Insurance may be compensated when you enroll through applicable carrier programs."
+          },
+          "highlights": {
+            "title": "At a glance",
+            "items": [
+              "Secure online enrollment through direct.manhattanlife.com",
+              "Read state- and plan-specific disclosures in the flow",
+              "Ask Isaac Plans if you want help comparing options"
+            ]
+          }
+        },
+        "critical-protection-recovery": {
+          "metadata": {
+            "title": "Critical Protection and Recovery | Manhattan Life | Isaac Plans",
+            "description": "Learn about Critical Protection and Recovery through Manhattan Life. Open the secure direct link; availability and benefits vary by state.",
+            "keywords": "Critical Protection and Recovery, Manhattan Life, Isaac Plans"
+          },
+          "backNav": {
+            "label": "Back to Manhattan Life"
+          },
+          "hero": {
+            "badge": "Manhattan Life",
+            "title": "Critical Protection and Recovery",
+            "lead": "Critical illness style coverage with defined benefits—confirm diagnoses and payout rules in carrier materials."
+          },
+          "sections": {
+            "what": {
+              "title": "What it is",
+              "body": "This Manhattan Life product is accessed through the carrier’s authorized direct enrollment site. Benefits, underwriting, and availability depend on your state and plan—read all official materials before you apply."
+            },
+            "who": {
+              "title": "Who it may fit",
+              "body": "Individuals exploring supplemental or specified-benefit coverage who want a licensed carrier path with transparent online enrollment."
+            },
+            "confirm": {
+              "title": "What to confirm in the quote",
+              "body": "Premiums, benefit schedules, exclusions, waiting periods, and any coordination rules shown for your ZIP code."
+            },
+            "more": {
+              "title": "More to know",
+              "body": "Manhattan Life companies may issue policies under different legal entities by product and state. Marketing names can differ—your policy documents control."
+            }
+          },
+          "faq": {
+            "title": "Common questions",
+            "items": [
+              {
+                "q": "Is this the same as ACA major medical?",
+                "a": "Not necessarily. These products are often supplemental or limited-benefit designs. Read how your plan is classified in the official quote."
+              },
+              {
+                "q": "Where do I enroll?",
+                "a": "Use the secure Manhattan Life direct link on this page to open the authorized enrollment experience."
+              },
+              {
+                "q": "Is every product available in my state?",
+                "a": "No. Availability varies by state and product. The enrollment path will reflect what you can apply for."
+              },
+              {
+                "q": "Can Isaac Plans help me compare?",
+                "a": "Yes—reach out if you want a second opinion before you enroll."
+              }
+            ]
+          },
+          "ctaBand": {
+            "title": "Quote and enroll",
+            "body": "Open the secure Manhattan Life direct link for this product."
+          },
+          "disclaimer": {
+            "title": "Important",
+            "body": "Products, availability, underwriting, and benefits vary by state and plan. This page is educational and links to Manhattan Life’s authorized site. Isaac Plans Insurance may be compensated when you enroll through applicable carrier programs."
+          },
+          "highlights": {
+            "title": "At a glance",
+            "items": [
+              "Secure online enrollment through direct.manhattanlife.com",
+              "Read state- and plan-specific disclosures in the flow",
+              "Ask Isaac Plans if you want help comparing options"
+            ]
+          }
+        },
+        "dental-vision-hearing-select": {
+          "metadata": {
+            "title": "Dental, Vision & Hearing Select | Manhattan Life | Isaac Plans",
+            "description": "Learn about Dental, Vision & Hearing Select through Manhattan Life. Open the secure direct link; availability and benefits vary by state.",
+            "keywords": "dental vision hearing, Manhattan Life, Isaac Plans"
+          },
+          "backNav": {
+            "label": "Back to Manhattan Life"
+          },
+          "hero": {
+            "badge": "Manhattan Life",
+            "title": "Dental, Vision & Hearing Select",
+            "lead": "Supplemental dental, vision, and hearing benefits—networks and annual maximums vary; review the quote for your ZIP."
+          },
+          "sections": {
+            "what": {
+              "title": "What it is",
+              "body": "This Manhattan Life product is accessed through the carrier’s authorized direct enrollment site. Benefits, underwriting, and availability depend on your state and plan—read all official materials before you apply."
+            },
+            "who": {
+              "title": "Who it may fit",
+              "body": "Individuals exploring supplemental or specified-benefit coverage who want a licensed carrier path with transparent online enrollment."
+            },
+            "confirm": {
+              "title": "What to confirm in the quote",
+              "body": "Premiums, benefit schedules, exclusions, waiting periods, and any coordination rules shown for your ZIP code."
+            },
+            "more": {
+              "title": "More to know",
+              "body": "Manhattan Life companies may issue policies under different legal entities by product and state. Marketing names can differ—your policy documents control."
+            }
+          },
+          "faq": {
+            "title": "Common questions",
+            "items": [
+              {
+                "q": "Is this the same as ACA major medical?",
+                "a": "Not necessarily. These products are often supplemental or limited-benefit designs. Read how your plan is classified in the official quote."
+              },
+              {
+                "q": "Where do I enroll?",
+                "a": "Use the secure Manhattan Life direct link on this page to open the authorized enrollment experience."
+              },
+              {
+                "q": "Is every product available in my state?",
+                "a": "No. Availability varies by state and product. The enrollment path will reflect what you can apply for."
+              },
+              {
+                "q": "Can Isaac Plans help me compare?",
+                "a": "Yes—reach out if you want a second opinion before you enroll."
+              }
+            ]
+          },
+          "ctaBand": {
+            "title": "Quote and enroll",
+            "body": "Open the secure Manhattan Life direct link for this product."
+          },
+          "disclaimer": {
+            "title": "Important",
+            "body": "Products, availability, underwriting, and benefits vary by state and plan. This page is educational and links to Manhattan Life’s authorized site. Isaac Plans Insurance may be compensated when you enroll through applicable carrier programs."
+          },
+          "highlights": {
+            "title": "At a glance",
+            "items": [
+              "Secure online enrollment through direct.manhattanlife.com",
+              "Read state- and plan-specific disclosures in the flow",
+              "Ask Isaac Plans if you want help comparing options"
+            ]
+          }
+        },
+        "dental-vision-hearing": {
+          "metadata": {
+            "title": "Dental, Vision and Hearing Insurance | Manhattan Life | Isaac Plans",
+            "description": "Learn about Dental, Vision and Hearing Insurance through Manhattan Life. Open the secure direct link; availability and benefits vary by state.",
+            "keywords": "dental vision hearing insurance, Manhattan Life, Isaac Plans"
+          },
+          "backNav": {
+            "label": "Back to Manhattan Life"
+          },
+          "hero": {
+            "badge": "Manhattan Life",
+            "title": "Dental, Vision and Hearing Insurance",
+            "lead": "Standalone dental, vision, and hearing coverage options—compare plan tiers and exclusions before enrolling."
+          },
+          "sections": {
+            "what": {
+              "title": "What it is",
+              "body": "This Manhattan Life product is accessed through the carrier’s authorized direct enrollment site. Benefits, underwriting, and availability depend on your state and plan—read all official materials before you apply."
+            },
+            "who": {
+              "title": "Who it may fit",
+              "body": "Individuals exploring supplemental or specified-benefit coverage who want a licensed carrier path with transparent online enrollment."
+            },
+            "confirm": {
+              "title": "What to confirm in the quote",
+              "body": "Premiums, benefit schedules, exclusions, waiting periods, and any coordination rules shown for your ZIP code."
+            },
+            "more": {
+              "title": "More to know",
+              "body": "Manhattan Life companies may issue policies under different legal entities by product and state. Marketing names can differ—your policy documents control."
+            }
+          },
+          "faq": {
+            "title": "Common questions",
+            "items": [
+              {
+                "q": "Is this the same as ACA major medical?",
+                "a": "Not necessarily. These products are often supplemental or limited-benefit designs. Read how your plan is classified in the official quote."
+              },
+              {
+                "q": "Where do I enroll?",
+                "a": "Use the secure Manhattan Life direct link on this page to open the authorized enrollment experience."
+              },
+              {
+                "q": "Is every product available in my state?",
+                "a": "No. Availability varies by state and product. The enrollment path will reflect what you can apply for."
+              },
+              {
+                "q": "Can Isaac Plans help me compare?",
+                "a": "Yes—reach out if you want a second opinion before you enroll."
+              }
+            ]
+          },
+          "ctaBand": {
+            "title": "Quote and enroll",
+            "body": "Open the secure Manhattan Life direct link for this product."
+          },
+          "disclaimer": {
+            "title": "Important",
+            "body": "Products, availability, underwriting, and benefits vary by state and plan. This page is educational and links to Manhattan Life’s authorized site. Isaac Plans Insurance may be compensated when you enroll through applicable carrier programs."
+          },
+          "highlights": {
+            "title": "At a glance",
+            "items": [
+              "Secure online enrollment through direct.manhattanlife.com",
+              "Read state- and plan-specific disclosures in the flow",
+              "Ask Isaac Plans if you want help comparing options"
+            ]
+          }
+        },
+        "first-choice-blue-ribbon": {
+          "metadata": {
+            "title": "First Choice Blue Ribbon Series | Manhattan Life | Isaac Plans",
+            "description": "Learn about First Choice Blue Ribbon Series through Manhattan Life. Open the secure direct link; availability and benefits vary by state.",
+            "keywords": "First Choice Blue Ribbon, Manhattan Life, Isaac Plans"
+          },
+          "backNav": {
+            "label": "Back to Manhattan Life"
+          },
+          "hero": {
+            "badge": "Manhattan Life",
+            "title": "First Choice Blue Ribbon Series",
+            "lead": "A bundled series offering from Manhattan Life—read the series-specific disclosures for your state."
+          },
+          "sections": {
+            "what": {
+              "title": "What it is",
+              "body": "This Manhattan Life product is accessed through the carrier’s authorized direct enrollment site. Benefits, underwriting, and availability depend on your state and plan—read all official materials before you apply."
+            },
+            "who": {
+              "title": "Who it may fit",
+              "body": "Individuals exploring supplemental or specified-benefit coverage who want a licensed carrier path with transparent online enrollment."
+            },
+            "confirm": {
+              "title": "What to confirm in the quote",
+              "body": "Premiums, benefit schedules, exclusions, waiting periods, and any coordination rules shown for your ZIP code."
+            },
+            "more": {
+              "title": "More to know",
+              "body": "Manhattan Life companies may issue policies under different legal entities by product and state. Marketing names can differ—your policy documents control."
+            }
+          },
+          "faq": {
+            "title": "Common questions",
+            "items": [
+              {
+                "q": "Is this the same as ACA major medical?",
+                "a": "Not necessarily. These products are often supplemental or limited-benefit designs. Read how your plan is classified in the official quote."
+              },
+              {
+                "q": "Where do I enroll?",
+                "a": "Use the secure Manhattan Life direct link on this page to open the authorized enrollment experience."
+              },
+              {
+                "q": "Is every product available in my state?",
+                "a": "No. Availability varies by state and product. The enrollment path will reflect what you can apply for."
+              },
+              {
+                "q": "Can Isaac Plans help me compare?",
+                "a": "Yes—reach out if you want a second opinion before you enroll."
+              }
+            ]
+          },
+          "ctaBand": {
+            "title": "Quote and enroll",
+            "body": "Open the secure Manhattan Life direct link for this product."
+          },
+          "disclaimer": {
+            "title": "Important",
+            "body": "Products, availability, underwriting, and benefits vary by state and plan. This page is educational and links to Manhattan Life’s authorized site. Isaac Plans Insurance may be compensated when you enroll through applicable carrier programs."
+          },
+          "highlights": {
+            "title": "At a glance",
+            "items": [
+              "Secure online enrollment through direct.manhattanlife.com",
+              "Read state- and plan-specific disclosures in the flow",
+              "Ask Isaac Plans if you want help comparing options"
+            ]
+          }
+        },
+        "home-health-care": {
+          "metadata": {
+            "title": "Home Health Care | Manhattan Life | Isaac Plans",
+            "description": "Learn about Home Health Care through Manhattan Life. Open the secure direct link; availability and benefits vary by state.",
+            "keywords": "home health care, Manhattan Life, Isaac Plans"
+          },
+          "backNav": {
+            "label": "Back to Manhattan Life"
+          },
+          "hero": {
+            "badge": "Manhattan Life",
+            "title": "Home Health Care",
+            "lead": "Benefits that may help with eligible home health expenses—confirm visit limits and definitions in the policy summary."
+          },
+          "sections": {
+            "what": {
+              "title": "What it is",
+              "body": "This Manhattan Life product is accessed through the carrier’s authorized direct enrollment site. Benefits, underwriting, and availability depend on your state and plan—read all official materials before you apply."
+            },
+            "who": {
+              "title": "Who it may fit",
+              "body": "Individuals exploring supplemental or specified-benefit coverage who want a licensed carrier path with transparent online enrollment."
+            },
+            "confirm": {
+              "title": "What to confirm in the quote",
+              "body": "Premiums, benefit schedules, exclusions, waiting periods, and any coordination rules shown for your ZIP code."
+            },
+            "more": {
+              "title": "More to know",
+              "body": "Manhattan Life companies may issue policies under different legal entities by product and state. Marketing names can differ—your policy documents control."
+            }
+          },
+          "faq": {
+            "title": "Common questions",
+            "items": [
+              {
+                "q": "Is this the same as ACA major medical?",
+                "a": "Not necessarily. These products are often supplemental or limited-benefit designs. Read how your plan is classified in the official quote."
+              },
+              {
+                "q": "Where do I enroll?",
+                "a": "Use the secure Manhattan Life direct link on this page to open the authorized enrollment experience."
+              },
+              {
+                "q": "Is every product available in my state?",
+                "a": "No. Availability varies by state and product. The enrollment path will reflect what you can apply for."
+              },
+              {
+                "q": "Can Isaac Plans help me compare?",
+                "a": "Yes—reach out if you want a second opinion before you enroll."
+              }
+            ]
+          },
+          "ctaBand": {
+            "title": "Quote and enroll",
+            "body": "Open the secure Manhattan Life direct link for this product."
+          },
+          "disclaimer": {
+            "title": "Important",
+            "body": "Products, availability, underwriting, and benefits vary by state and plan. This page is educational and links to Manhattan Life’s authorized site. Isaac Plans Insurance may be compensated when you enroll through applicable carrier programs."
+          },
+          "highlights": {
+            "title": "At a glance",
+            "items": [
+              "Secure online enrollment through direct.manhattanlife.com",
+              "Read state- and plan-specific disclosures in the flow",
+              "Ask Isaac Plans if you want help comparing options"
+            ]
+          }
+        },
+        "home-health-care-select": {
+          "metadata": {
+            "title": "Home Health Care Select | Manhattan Life | Isaac Plans",
+            "description": "Learn about Home Health Care Select through Manhattan Life. Open the secure direct link; availability and benefits vary by state.",
+            "keywords": "Home Health Care Select, Manhattan Life, Isaac Plans"
+          },
+          "backNav": {
+            "label": "Back to Manhattan Life"
+          },
+          "hero": {
+            "badge": "Manhattan Life",
+            "title": "Home Health Care Select",
+            "lead": "Select-tier home health benefits—compare this filing with other Manhattan Life home health options in the quote."
+          },
+          "sections": {
+            "what": {
+              "title": "What it is",
+              "body": "This Manhattan Life product is accessed through the carrier’s authorized direct enrollment site. Benefits, underwriting, and availability depend on your state and plan—read all official materials before you apply."
+            },
+            "who": {
+              "title": "Who it may fit",
+              "body": "Individuals exploring supplemental or specified-benefit coverage who want a licensed carrier path with transparent online enrollment."
+            },
+            "confirm": {
+              "title": "What to confirm in the quote",
+              "body": "Premiums, benefit schedules, exclusions, waiting periods, and any coordination rules shown for your ZIP code."
+            },
+            "more": {
+              "title": "More to know",
+              "body": "Manhattan Life companies may issue policies under different legal entities by product and state. Marketing names can differ—your policy documents control."
+            }
+          },
+          "faq": {
+            "title": "Common questions",
+            "items": [
+              {
+                "q": "Is this the same as ACA major medical?",
+                "a": "Not necessarily. These products are often supplemental or limited-benefit designs. Read how your plan is classified in the official quote."
+              },
+              {
+                "q": "Where do I enroll?",
+                "a": "Use the secure Manhattan Life direct link on this page to open the authorized enrollment experience."
+              },
+              {
+                "q": "Is every product available in my state?",
+                "a": "No. Availability varies by state and product. The enrollment path will reflect what you can apply for."
+              },
+              {
+                "q": "Can Isaac Plans help me compare?",
+                "a": "Yes—reach out if you want a second opinion before you enroll."
+              }
+            ]
+          },
+          "ctaBand": {
+            "title": "Quote and enroll",
+            "body": "Open the secure Manhattan Life direct link for this product."
+          },
+          "disclaimer": {
+            "title": "Important",
+            "body": "Products, availability, underwriting, and benefits vary by state and plan. This page is educational and links to Manhattan Life’s authorized site. Isaac Plans Insurance may be compensated when you enroll through applicable carrier programs."
+          },
+          "highlights": {
+            "title": "At a glance",
+            "items": [
+              "Secure online enrollment through direct.manhattanlife.com",
+              "Read state- and plan-specific disclosures in the flow",
+              "Ask Isaac Plans if you want help comparing options"
+            ]
+          }
+        },
+        "home-health-care-select-mac": {
+          "metadata": {
+            "title": "Home Health Care Select (MAC) | Manhattan Life | Isaac Plans",
+            "description": "Learn about Home Health Care Select (MAC) through Manhattan Life. Open the secure direct link; availability and benefits vary by state.",
+            "keywords": "Home Health Care Select MAC, Manhattan Life, Isaac Plans"
+          },
+          "backNav": {
+            "label": "Back to Manhattan Life"
+          },
+          "hero": {
+            "badge": "Manhattan Life",
+            "title": "Home Health Care Select (MAC)",
+            "lead": "Another Home Health Care Select filing—verify benefit schedules and eligibility in the official materials."
+          },
+          "sections": {
+            "what": {
+              "title": "What it is",
+              "body": "This Manhattan Life product is accessed through the carrier’s authorized direct enrollment site. Benefits, underwriting, and availability depend on your state and plan—read all official materials before you apply."
+            },
+            "who": {
+              "title": "Who it may fit",
+              "body": "Individuals exploring supplemental or specified-benefit coverage who want a licensed carrier path with transparent online enrollment."
+            },
+            "confirm": {
+              "title": "What to confirm in the quote",
+              "body": "Premiums, benefit schedules, exclusions, waiting periods, and any coordination rules shown for your ZIP code."
+            },
+            "more": {
+              "title": "More to know",
+              "body": "Manhattan Life companies may issue policies under different legal entities by product and state. Marketing names can differ—your policy documents control."
+            }
+          },
+          "faq": {
+            "title": "Common questions",
+            "items": [
+              {
+                "q": "Is this the same as ACA major medical?",
+                "a": "Not necessarily. These products are often supplemental or limited-benefit designs. Read how your plan is classified in the official quote."
+              },
+              {
+                "q": "Where do I enroll?",
+                "a": "Use the secure Manhattan Life direct link on this page to open the authorized enrollment experience."
+              },
+              {
+                "q": "Is every product available in my state?",
+                "a": "No. Availability varies by state and product. The enrollment path will reflect what you can apply for."
+              },
+              {
+                "q": "Can Isaac Plans help me compare?",
+                "a": "Yes—reach out if you want a second opinion before you enroll."
+              }
+            ]
+          },
+          "ctaBand": {
+            "title": "Quote and enroll",
+            "body": "Open the secure Manhattan Life direct link for this product."
+          },
+          "disclaimer": {
+            "title": "Important",
+            "body": "Products, availability, underwriting, and benefits vary by state and plan. This page is educational and links to Manhattan Life’s authorized site. Isaac Plans Insurance may be compensated when you enroll through applicable carrier programs."
+          },
+          "highlights": {
+            "title": "At a glance",
+            "items": [
+              "Secure online enrollment through direct.manhattanlife.com",
+              "Read state- and plan-specific disclosures in the flow",
+              "Ask Isaac Plans if you want help comparing options"
+            ]
+          }
+        },
+        "hospital-indemnity-select": {
+          "metadata": {
+            "title": "Hospital Indemnity Select | Manhattan Life | Isaac Plans",
+            "description": "Learn about Hospital Indemnity Select through Manhattan Life. Open the secure direct link; availability and benefits vary by state.",
+            "keywords": "hospital indemnity, Manhattan Life, Isaac Plans"
+          },
+          "backNav": {
+            "label": "Back to Manhattan Life"
+          },
+          "hero": {
+            "badge": "Manhattan Life",
+            "title": "Hospital Indemnity Select",
+            "lead": "Fixed cash benefits for covered hospital stays—this is not a substitute for major medical; read limitations carefully."
+          },
+          "sections": {
+            "what": {
+              "title": "What it is",
+              "body": "This Manhattan Life product is accessed through the carrier’s authorized direct enrollment site. Benefits, underwriting, and availability depend on your state and plan—read all official materials before you apply."
+            },
+            "who": {
+              "title": "Who it may fit",
+              "body": "Individuals exploring supplemental or specified-benefit coverage who want a licensed carrier path with transparent online enrollment."
+            },
+            "confirm": {
+              "title": "What to confirm in the quote",
+              "body": "Premiums, benefit schedules, exclusions, waiting periods, and any coordination rules shown for your ZIP code."
+            },
+            "more": {
+              "title": "More to know",
+              "body": "Manhattan Life companies may issue policies under different legal entities by product and state. Marketing names can differ—your policy documents control."
+            }
+          },
+          "faq": {
+            "title": "Common questions",
+            "items": [
+              {
+                "q": "Is this the same as ACA major medical?",
+                "a": "Not necessarily. These products are often supplemental or limited-benefit designs. Read how your plan is classified in the official quote."
+              },
+              {
+                "q": "Where do I enroll?",
+                "a": "Use the secure Manhattan Life direct link on this page to open the authorized enrollment experience."
+              },
+              {
+                "q": "Is every product available in my state?",
+                "a": "No. Availability varies by state and product. The enrollment path will reflect what you can apply for."
+              },
+              {
+                "q": "Can Isaac Plans help me compare?",
+                "a": "Yes—reach out if you want a second opinion before you enroll."
+              }
+            ]
+          },
+          "ctaBand": {
+            "title": "Quote and enroll",
+            "body": "Open the secure Manhattan Life direct link for this product."
+          },
+          "disclaimer": {
+            "title": "Important",
+            "body": "Products, availability, underwriting, and benefits vary by state and plan. This page is educational and links to Manhattan Life’s authorized site. Isaac Plans Insurance may be compensated when you enroll through applicable carrier programs."
+          },
+          "highlights": {
+            "title": "At a glance",
+            "items": [
+              "Secure online enrollment through direct.manhattanlife.com",
+              "Read state- and plan-specific disclosures in the flow",
+              "Ask Isaac Plans if you want help comparing options"
+            ]
+          }
+        },
+        "omniflex-short-term-care": {
+          "metadata": {
+            "title": "OmniFlex Short-Term Care | Manhattan Life | Isaac Plans",
+            "description": "Learn about OmniFlex Short-Term Care through Manhattan Life. Open the secure direct link; availability and benefits vary by state.",
+            "keywords": "short-term care, OmniFlex, Manhattan Life, Isaac Plans"
+          },
+          "backNav": {
+            "label": "Back to Manhattan Life"
+          },
+          "hero": {
+            "badge": "Manhattan Life",
+            "title": "OmniFlex Short-Term Care",
+            "lead": "Short-term care coverage for qualifying situations—different from STM medical; confirm benefit periods in the quote."
+          },
+          "sections": {
+            "what": {
+              "title": "What it is",
+              "body": "This Manhattan Life product is accessed through the carrier’s authorized direct enrollment site. Benefits, underwriting, and availability depend on your state and plan—read all official materials before you apply."
+            },
+            "who": {
+              "title": "Who it may fit",
+              "body": "Individuals exploring supplemental or specified-benefit coverage who want a licensed carrier path with transparent online enrollment."
+            },
+            "confirm": {
+              "title": "What to confirm in the quote",
+              "body": "Premiums, benefit schedules, exclusions, waiting periods, and any coordination rules shown for your ZIP code."
+            },
+            "more": {
+              "title": "More to know",
+              "body": "Manhattan Life companies may issue policies under different legal entities by product and state. Marketing names can differ—your policy documents control."
+            }
+          },
+          "faq": {
+            "title": "Common questions",
+            "items": [
+              {
+                "q": "Is this the same as ACA major medical?",
+                "a": "Not necessarily. These products are often supplemental or limited-benefit designs. Read how your plan is classified in the official quote."
+              },
+              {
+                "q": "Where do I enroll?",
+                "a": "Use the secure Manhattan Life direct link on this page to open the authorized enrollment experience."
+              },
+              {
+                "q": "Is every product available in my state?",
+                "a": "No. Availability varies by state and product. The enrollment path will reflect what you can apply for."
+              },
+              {
+                "q": "Can Isaac Plans help me compare?",
+                "a": "Yes—reach out if you want a second opinion before you enroll."
+              }
+            ]
+          },
+          "ctaBand": {
+            "title": "Quote and enroll",
+            "body": "Open the secure Manhattan Life direct link for this product."
+          },
+          "disclaimer": {
+            "title": "Important",
+            "body": "Products, availability, underwriting, and benefits vary by state and plan. This page is educational and links to Manhattan Life’s authorized site. Isaac Plans Insurance may be compensated when you enroll through applicable carrier programs."
+          },
+          "highlights": {
+            "title": "At a glance",
+            "items": [
+              "Secure online enrollment through direct.manhattanlife.com",
+              "Read state- and plan-specific disclosures in the flow",
+              "Ask Isaac Plans if you want help comparing options"
+            ]
+          }
+        },
+        "out-of-pocket-protection": {
+          "metadata": {
+            "title": "Out-of-Pocket Protection Plan | Manhattan Life | Isaac Plans",
+            "description": "Learn about Out-of-Pocket Protection Plan through Manhattan Life. Open the secure direct link; availability and benefits vary by state.",
+            "keywords": "out of pocket protection, Manhattan Life, Isaac Plans"
+          },
+          "backNav": {
+            "label": "Back to Manhattan Life"
+          },
+          "hero": {
+            "badge": "Manhattan Life",
+            "title": "Out-of-Pocket Protection Plan",
+            "lead": "Designed to help with eligible out-of-pocket exposure—review coordination with major medical and plan caps."
+          },
+          "sections": {
+            "what": {
+              "title": "What it is",
+              "body": "This Manhattan Life product is accessed through the carrier’s authorized direct enrollment site. Benefits, underwriting, and availability depend on your state and plan—read all official materials before you apply."
+            },
+            "who": {
+              "title": "Who it may fit",
+              "body": "Individuals exploring supplemental or specified-benefit coverage who want a licensed carrier path with transparent online enrollment."
+            },
+            "confirm": {
+              "title": "What to confirm in the quote",
+              "body": "Premiums, benefit schedules, exclusions, waiting periods, and any coordination rules shown for your ZIP code."
+            },
+            "more": {
+              "title": "More to know",
+              "body": "Manhattan Life companies may issue policies under different legal entities by product and state. Marketing names can differ—your policy documents control."
+            }
+          },
+          "faq": {
+            "title": "Common questions",
+            "items": [
+              {
+                "q": "Is this the same as ACA major medical?",
+                "a": "Not necessarily. These products are often supplemental or limited-benefit designs. Read how your plan is classified in the official quote."
+              },
+              {
+                "q": "Where do I enroll?",
+                "a": "Use the secure Manhattan Life direct link on this page to open the authorized enrollment experience."
+              },
+              {
+                "q": "Is every product available in my state?",
+                "a": "No. Availability varies by state and product. The enrollment path will reflect what you can apply for."
+              },
+              {
+                "q": "Can Isaac Plans help me compare?",
+                "a": "Yes—reach out if you want a second opinion before you enroll."
+              }
+            ]
+          },
+          "ctaBand": {
+            "title": "Quote and enroll",
+            "body": "Open the secure Manhattan Life direct link for this product."
+          },
+          "disclaimer": {
+            "title": "Important",
+            "body": "Products, availability, underwriting, and benefits vary by state and plan. This page is educational and links to Manhattan Life’s authorized site. Isaac Plans Insurance may be compensated when you enroll through applicable carrier programs."
+          },
+          "highlights": {
+            "title": "At a glance",
+            "items": [
+              "Secure online enrollment through direct.manhattanlife.com",
+              "Read state- and plan-specific disclosures in the flow",
+              "Ask Isaac Plans if you want help comparing options"
+            ]
+          }
+        },
+        "secure-advantage-final-expense": {
+          "metadata": {
+            "title": "Secure Advantage — Final Expense | Manhattan Life | Isaac Plans",
+            "description": "Learn about Secure Advantage — Final Expense through Manhattan Life. Open the secure direct link; availability and benefits vary by state.",
+            "keywords": "final expense, Secure Advantage, Manhattan Life, Isaac Plans"
+          },
+          "backNav": {
+            "label": "Back to Manhattan Life"
+          },
+          "hero": {
+            "badge": "Manhattan Life",
+            "title": "Secure Advantage — Final Expense",
+            "lead": "Final expense / burial insurance positioning—confirm face amounts, age bands, and underwriting in the flow."
+          },
+          "sections": {
+            "what": {
+              "title": "What it is",
+              "body": "This Manhattan Life product is accessed through the carrier’s authorized direct enrollment site. Benefits, underwriting, and availability depend on your state and plan—read all official materials before you apply."
+            },
+            "who": {
+              "title": "Who it may fit",
+              "body": "Individuals exploring supplemental or specified-benefit coverage who want a licensed carrier path with transparent online enrollment."
+            },
+            "confirm": {
+              "title": "What to confirm in the quote",
+              "body": "Premiums, benefit schedules, exclusions, waiting periods, and any coordination rules shown for your ZIP code."
+            },
+            "more": {
+              "title": "More to know",
+              "body": "Manhattan Life companies may issue policies under different legal entities by product and state. Marketing names can differ—your policy documents control."
+            }
+          },
+          "faq": {
+            "title": "Common questions",
+            "items": [
+              {
+                "q": "Is this the same as ACA major medical?",
+                "a": "Not necessarily. These products are often supplemental or limited-benefit designs. Read how your plan is classified in the official quote."
+              },
+              {
+                "q": "Where do I enroll?",
+                "a": "Use the secure Manhattan Life direct link on this page to open the authorized enrollment experience."
+              },
+              {
+                "q": "Is every product available in my state?",
+                "a": "No. Availability varies by state and product. The enrollment path will reflect what you can apply for."
+              },
+              {
+                "q": "Can Isaac Plans help me compare?",
+                "a": "Yes—reach out if you want a second opinion before you enroll."
+              }
+            ]
+          },
+          "ctaBand": {
+            "title": "Quote and enroll",
+            "body": "Open the secure Manhattan Life direct link for this product."
+          },
+          "disclaimer": {
+            "title": "Important",
+            "body": "Products, availability, underwriting, and benefits vary by state and plan. This page is educational and links to Manhattan Life’s authorized site. Isaac Plans Insurance may be compensated when you enroll through applicable carrier programs."
+          },
+          "highlights": {
+            "title": "At a glance",
+            "items": [
+              "Secure online enrollment through direct.manhattanlife.com",
+              "Read state- and plan-specific disclosures in the flow",
+              "Ask Isaac Plans if you want help comparing options"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

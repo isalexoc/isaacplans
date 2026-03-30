@@ -1,0 +1,1319 @@
+{
+  "manhattan": {
+    "productPages": {
+      "labels": {
+        "quoteCta": "Cotizar e inscribirse",
+        "learnMore": "Más información",
+        "breadcrumbHub": "Manhattan Life"
+      },
+      "shared": {
+        "logoAlt": "Manhattan Life",
+        "contactClosing": {
+          "title": "¿Quiere ayuda para comparar?",
+          "body": "Escríbanos para una guía personalizada—ya haya usado los enlaces o quiera que Isaac revise alternativas."
+        },
+        "enrollmentSteps": {
+          "title": "Cómo funciona la inscripción",
+          "subtitle": "Tres pasos sencillos. Plazos y requisitos varían por estado y producto.",
+          "step1Title": "Abra su enlace directo",
+          "step1Body": "Use el botón de Manhattan Life para abrir la experiencia autorizada del producto elegido.",
+          "step2Title": "Revise y solicite",
+          "step2Body": "Lea los materiales con atención y complete la solicitud cuando esté listo.",
+          "step3Title": "Confirme su cobertura",
+          "step3Body": "Guarde documentos y siga las instrucciones de Manhattan Life para pago y vigencia."
+        }
+      },
+      "hub": {
+        "metadata": {
+          "title": "Manhattan Life | Productos e inscripción | Isaac Plans",
+          "description": "Explore productos Manhattan Life—STM, indemnización, dental y más. Inicie inscripción directa segura o reciba ayuda personalizada de Isaac Plans.",
+          "keywords": "Manhattan Life, seguro suplementario, cobertura a corto plazo, Isaac Plans"
+        },
+        "backNav": {
+          "label": "Volver a aseguradoras"
+        },
+        "hero": {
+          "badge": "Manhattan Life",
+          "title": "Productos Manhattan Life—cotice el plan adecuado",
+          "lead": "Explore opciones suplementarias, de indemnización y a corto plazo presentadas por Manhattan Life. Cada tarjeta abre su enlace de inscripción directa; el STM tiene su propia página."
+        },
+        "stm": {
+          "badge": "Popular",
+          "title": "Seguro médico temporal (STLDI)",
+          "body": "Cubra brechas entre planes mayores con la experiencia STM de Manhattan Life—depende del estado y formulario.",
+          "cta": "Ver seguro médico temporal"
+        },
+        "productsSection": {
+          "title": "Todos los productos de inscripción directa",
+          "subtitle": "Elija un producto para leer más o vaya directo a la inscripción."
+        },
+        "disclaimer": {
+          "title": "Importante",
+          "body": "Productos, disponibilidad, suscripción y beneficios varían por estado y plan. Este hub enlaza al sitio autorizado (direct.manhattanlife.com). Sale de IsaacPlans.com; aplican términos y licencias. Isaac Plans Insurance puede recibir compensación al inscribirse."
+        }
+      },
+      "products": {
+        "all-products": {
+          "metadata": {
+            "title": "Todos los planes Manhattan Life | Manhattan Life | Isaac Plans",
+            "description": "Información sobre Todos los planes Manhattan Life con Manhattan Life. Abra el enlace directo seguro; disponibilidad y beneficios varían por estado.",
+            "keywords": "Manhattan Life, inscripción directa, Isaac Plans"
+          },
+          "backNav": {
+            "label": "Volver a Manhattan Life"
+          },
+          "hero": {
+            "badge": "Manhattan Life",
+            "title": "Todos los planes Manhattan Life",
+            "lead": "Comience desde el catálogo completo en el sitio de inscripción directa de Manhattan Life. Disponibilidad, suscripción y beneficios varían según el estado—confirme en el flujo oficial."
+          },
+          "sections": {
+            "what": {
+              "title": "Qué es",
+              "body": "Este producto Manhattan Life se accede por el sitio de inscripción directa autorizado. Beneficios, suscripción y disponibilidad dependen de su estado y plan—lea todos los materiales oficiales antes de solicitar."
+            },
+            "who": {
+              "title": "Para quién puede ser",
+              "body": "Personas que exploran cobertura suplementaria o de beneficios específicos con una compañía autorizada e inscripción en línea clara."
+            },
+            "confirm": {
+              "title": "Qué confirmar en la cotización",
+              "body": "Primas, calendarios de beneficios, exclusiones, periodos de espera y reglas de coordinación para su código postal."
+            },
+            "more": {
+              "title": "Más información",
+              "body": "Las compañías Manhattan Life pueden emitir pólizas bajo distintas entidades según producto y estado. Los documentos de la póliza prevalecen."
+            }
+          },
+          "faq": {
+            "title": "Preguntas frecuentes",
+            "items": [
+              {
+                "q": "¿Es lo mismo que un seguro mayor ACA?",
+                "a": "No necesariamente. Suele ser suplementario o de beneficios limitados. Lea cómo se clasifica su plan en la cotización oficial."
+              },
+              {
+                "q": "¿Dónde me inscribo?",
+                "a": "Use el enlace directo seguro de Manhattan Life en esta página para abrir la experiencia autorizada."
+              },
+              {
+                "q": "¿Todo está disponible en mi estado?",
+                "a": "No. La disponibilidad varía por estado y producto. El flujo mostrará lo que puede solicitar."
+              },
+              {
+                "q": "¿Isaac Plans puede ayudarme a comparar?",
+                "a": "Sí—escríbanos si desea una segunda opinión antes de inscribirse."
+              }
+            ]
+          },
+          "ctaBand": {
+            "title": "Cotizar e inscribirse",
+            "body": "Abra el enlace directo seguro de Manhattan Life para este producto."
+          },
+          "disclaimer": {
+            "title": "Importante",
+            "body": "Productos, disponibilidad, suscripción y beneficios varían por estado y plan. Esta página es educativa y enlaza al sitio autorizado de Manhattan Life. Isaac Plans Insurance puede recibir compensación al inscribirse en programas aplicables."
+          },
+          "highlights": {
+            "title": "De un vistazo",
+            "items": [
+              "Inscripción en línea segura en direct.manhattanlife.com",
+              "Lea las divulgaciones específicas de estado y plan en el flujo",
+              "Pregunte a Isaac Plans si desea ayuda para comparar"
+            ]
+          }
+        },
+        "24-hour-accident": {
+          "metadata": {
+            "title": "Seguro de accidentes 24 horas | Manhattan Life | Isaac Plans",
+            "description": "Información sobre Seguro de accidentes 24 horas con Manhattan Life. Abra el enlace directo seguro; disponibilidad y beneficios varían por estado.",
+            "keywords": "seguro de accidentes 24 horas, Manhattan Life, Isaac Plans"
+          },
+          "backNav": {
+            "label": "Volver a Manhattan Life"
+          },
+          "hero": {
+            "badge": "Manhattan Life",
+            "title": "Seguro de accidentes 24 horas",
+            "lead": "Cobertura centrada en accidentes con acceso rápido a beneficios tras un accidente cubierto. Revise activadores, límites y exclusiones en la cotización."
+          },
+          "sections": {
+            "what": {
+              "title": "Qué es",
+              "body": "Este producto Manhattan Life se accede por el sitio de inscripción directa autorizado. Beneficios, suscripción y disponibilidad dependen de su estado y plan—lea todos los materiales oficiales antes de solicitar."
+            },
+            "who": {
+              "title": "Para quién puede ser",
+              "body": "Personas que exploran cobertura suplementaria o de beneficios específicos con una compañía autorizada e inscripción en línea clara."
+            },
+            "confirm": {
+              "title": "Qué confirmar en la cotización",
+              "body": "Primas, calendarios de beneficios, exclusiones, periodos de espera y reglas de coordinación para su código postal."
+            },
+            "more": {
+              "title": "Más información",
+              "body": "Las compañías Manhattan Life pueden emitir pólizas bajo distintas entidades según producto y estado. Los documentos de la póliza prevalecen."
+            }
+          },
+          "faq": {
+            "title": "Preguntas frecuentes",
+            "items": [
+              {
+                "q": "¿Es lo mismo que un seguro mayor ACA?",
+                "a": "No necesariamente. Suele ser suplementario o de beneficios limitados. Lea cómo se clasifica su plan en la cotización oficial."
+              },
+              {
+                "q": "¿Dónde me inscribo?",
+                "a": "Use el enlace directo seguro de Manhattan Life en esta página para abrir la experiencia autorizada."
+              },
+              {
+                "q": "¿Todo está disponible en mi estado?",
+                "a": "No. La disponibilidad varía por estado y producto. El flujo mostrará lo que puede solicitar."
+              },
+              {
+                "q": "¿Isaac Plans puede ayudarme a comparar?",
+                "a": "Sí—escríbanos si desea una segunda opinión antes de inscribirse."
+              }
+            ]
+          },
+          "ctaBand": {
+            "title": "Cotizar e inscribirse",
+            "body": "Abra el enlace directo seguro de Manhattan Life para este producto."
+          },
+          "disclaimer": {
+            "title": "Importante",
+            "body": "Productos, disponibilidad, suscripción y beneficios varían por estado y plan. Esta página es educativa y enlaza al sitio autorizado de Manhattan Life. Isaac Plans Insurance puede recibir compensación al inscribirse en programas aplicables."
+          },
+          "highlights": {
+            "title": "De un vistazo",
+            "items": [
+              "Inscripción en línea segura en direct.manhattanlife.com",
+              "Lea las divulgaciones específicas de estado y plan en el flujo",
+              "Pregunte a Isaac Plans si desea ayuda para comparar"
+            ]
+          }
+        },
+        "accident": {
+          "metadata": {
+            "title": "Seguro de accidentes | Manhattan Life | Isaac Plans",
+            "description": "Información sobre Seguro de accidentes con Manhattan Life. Abra el enlace directo seguro; disponibilidad y beneficios varían por estado.",
+            "keywords": "seguro de accidentes, Manhattan Life, Isaac Plans"
+          },
+          "backNav": {
+            "label": "Volver a Manhattan Life"
+          },
+          "hero": {
+            "badge": "Manhattan Life",
+            "title": "Seguro de accidentes",
+            "lead": "Ayuda con gastos de bolsillo por accidentes cubiertos. Lea el calendario de beneficios y limitaciones antes de inscribirse."
+          },
+          "sections": {
+            "what": {
+              "title": "Qué es",
+              "body": "Este producto Manhattan Life se accede por el sitio de inscripción directa autorizado. Beneficios, suscripción y disponibilidad dependen de su estado y plan—lea todos los materiales oficiales antes de solicitar."
+            },
+            "who": {
+              "title": "Para quién puede ser",
+              "body": "Personas que exploran cobertura suplementaria o de beneficios específicos con una compañía autorizada e inscripción en línea clara."
+            },
+            "confirm": {
+              "title": "Qué confirmar en la cotización",
+              "body": "Primas, calendarios de beneficios, exclusiones, periodos de espera y reglas de coordinación para su código postal."
+            },
+            "more": {
+              "title": "Más información",
+              "body": "Las compañías Manhattan Life pueden emitir pólizas bajo distintas entidades según producto y estado. Los documentos de la póliza prevalecen."
+            }
+          },
+          "faq": {
+            "title": "Preguntas frecuentes",
+            "items": [
+              {
+                "q": "¿Es lo mismo que un seguro mayor ACA?",
+                "a": "No necesariamente. Suele ser suplementario o de beneficios limitados. Lea cómo se clasifica su plan en la cotización oficial."
+              },
+              {
+                "q": "¿Dónde me inscribo?",
+                "a": "Use el enlace directo seguro de Manhattan Life en esta página para abrir la experiencia autorizada."
+              },
+              {
+                "q": "¿Todo está disponible en mi estado?",
+                "a": "No. La disponibilidad varía por estado y producto. El flujo mostrará lo que puede solicitar."
+              },
+              {
+                "q": "¿Isaac Plans puede ayudarme a comparar?",
+                "a": "Sí—escríbanos si desea una segunda opinión antes de inscribirse."
+              }
+            ]
+          },
+          "ctaBand": {
+            "title": "Cotizar e inscribirse",
+            "body": "Abra el enlace directo seguro de Manhattan Life para este producto."
+          },
+          "disclaimer": {
+            "title": "Importante",
+            "body": "Productos, disponibilidad, suscripción y beneficios varían por estado y plan. Esta página es educativa y enlaza al sitio autorizado de Manhattan Life. Isaac Plans Insurance puede recibir compensación al inscribirse en programas aplicables."
+          },
+          "highlights": {
+            "title": "De un vistazo",
+            "items": [
+              "Inscripción en línea segura en direct.manhattanlife.com",
+              "Lea las divulgaciones específicas de estado y plan en el flujo",
+              "Pregunte a Isaac Plans si desea ayuda para comparar"
+            ]
+          }
+        },
+        "affordable-choice": {
+          "metadata": {
+            "title": "Affordable Choice | Manhattan Life | Isaac Plans",
+            "description": "Información sobre Affordable Choice con Manhattan Life. Abra el enlace directo seguro; disponibilidad y beneficios varían por estado.",
+            "keywords": "Affordable Choice, Manhattan Life, Isaac Plans"
+          },
+          "backNav": {
+            "label": "Volver a Manhattan Life"
+          },
+          "hero": {
+            "badge": "Manhattan Life",
+            "title": "Affordable Choice",
+            "lead": "Una opción ágil cuando busca valor suplementario predecible—confirme lo presentado en su estado en la cotización."
+          },
+          "sections": {
+            "what": {
+              "title": "Qué es",
+              "body": "Este producto Manhattan Life se accede por el sitio de inscripción directa autorizado. Beneficios, suscripción y disponibilidad dependen de su estado y plan—lea todos los materiales oficiales antes de solicitar."
+            },
+            "who": {
+              "title": "Para quién puede ser",
+              "body": "Personas que exploran cobertura suplementaria o de beneficios específicos con una compañía autorizada e inscripción en línea clara."
+            },
+            "confirm": {
+              "title": "Qué confirmar en la cotización",
+              "body": "Primas, calendarios de beneficios, exclusiones, periodos de espera y reglas de coordinación para su código postal."
+            },
+            "more": {
+              "title": "Más información",
+              "body": "Las compañías Manhattan Life pueden emitir pólizas bajo distintas entidades según producto y estado. Los documentos de la póliza prevalecen."
+            }
+          },
+          "faq": {
+            "title": "Preguntas frecuentes",
+            "items": [
+              {
+                "q": "¿Es lo mismo que un seguro mayor ACA?",
+                "a": "No necesariamente. Suele ser suplementario o de beneficios limitados. Lea cómo se clasifica su plan en la cotización oficial."
+              },
+              {
+                "q": "¿Dónde me inscribo?",
+                "a": "Use el enlace directo seguro de Manhattan Life en esta página para abrir la experiencia autorizada."
+              },
+              {
+                "q": "¿Todo está disponible en mi estado?",
+                "a": "No. La disponibilidad varía por estado y producto. El flujo mostrará lo que puede solicitar."
+              },
+              {
+                "q": "¿Isaac Plans puede ayudarme a comparar?",
+                "a": "Sí—escríbanos si desea una segunda opinión antes de inscribirse."
+              }
+            ]
+          },
+          "ctaBand": {
+            "title": "Cotizar e inscribirse",
+            "body": "Abra el enlace directo seguro de Manhattan Life para este producto."
+          },
+          "disclaimer": {
+            "title": "Importante",
+            "body": "Productos, disponibilidad, suscripción y beneficios varían por estado y plan. Esta página es educativa y enlaza al sitio autorizado de Manhattan Life. Isaac Plans Insurance puede recibir compensación al inscribirse en programas aplicables."
+          },
+          "highlights": {
+            "title": "De un vistazo",
+            "items": [
+              "Inscripción en línea segura en direct.manhattanlife.com",
+              "Lea las divulgaciones específicas de estado y plan en el flujo",
+              "Pregunte a Isaac Plans si desea ayuda para comparar"
+            ]
+          }
+        },
+        "cancer-care-plus": {
+          "metadata": {
+            "title": "Cancer Care Plus | Manhattan Life | Isaac Plans",
+            "description": "Información sobre Cancer Care Plus con Manhattan Life. Abra el enlace directo seguro; disponibilidad y beneficios varían por estado.",
+            "keywords": "Cancer Care Plus, Manhattan Life, Isaac Plans"
+          },
+          "backNav": {
+            "label": "Volver a Manhattan Life"
+          },
+          "hero": {
+            "badge": "Manhattan Life",
+            "title": "Cancer Care Plus",
+            "lead": "Enfocado en beneficios relacionados con cáncer—revise periodos de espera, activadores y coordinación con otra cobertura."
+          },
+          "sections": {
+            "what": {
+              "title": "Qué es",
+              "body": "Este producto Manhattan Life se accede por el sitio de inscripción directa autorizado. Beneficios, suscripción y disponibilidad dependen de su estado y plan—lea todos los materiales oficiales antes de solicitar."
+            },
+            "who": {
+              "title": "Para quién puede ser",
+              "body": "Personas que exploran cobertura suplementaria o de beneficios específicos con una compañía autorizada e inscripción en línea clara."
+            },
+            "confirm": {
+              "title": "Qué confirmar en la cotización",
+              "body": "Primas, calendarios de beneficios, exclusiones, periodos de espera y reglas de coordinación para su código postal."
+            },
+            "more": {
+              "title": "Más información",
+              "body": "Las compañías Manhattan Life pueden emitir pólizas bajo distintas entidades según producto y estado. Los documentos de la póliza prevalecen."
+            }
+          },
+          "faq": {
+            "title": "Preguntas frecuentes",
+            "items": [
+              {
+                "q": "¿Es lo mismo que un seguro mayor ACA?",
+                "a": "No necesariamente. Suele ser suplementario o de beneficios limitados. Lea cómo se clasifica su plan en la cotización oficial."
+              },
+              {
+                "q": "¿Dónde me inscribo?",
+                "a": "Use el enlace directo seguro de Manhattan Life en esta página para abrir la experiencia autorizada."
+              },
+              {
+                "q": "¿Todo está disponible en mi estado?",
+                "a": "No. La disponibilidad varía por estado y producto. El flujo mostrará lo que puede solicitar."
+              },
+              {
+                "q": "¿Isaac Plans puede ayudarme a comparar?",
+                "a": "Sí—escríbanos si desea una segunda opinión antes de inscribirse."
+              }
+            ]
+          },
+          "ctaBand": {
+            "title": "Cotizar e inscribirse",
+            "body": "Abra el enlace directo seguro de Manhattan Life para este producto."
+          },
+          "disclaimer": {
+            "title": "Importante",
+            "body": "Productos, disponibilidad, suscripción y beneficios varían por estado y plan. Esta página es educativa y enlaza al sitio autorizado de Manhattan Life. Isaac Plans Insurance puede recibir compensación al inscribirse en programas aplicables."
+          },
+          "highlights": {
+            "title": "De un vistazo",
+            "items": [
+              "Inscripción en línea segura en direct.manhattanlife.com",
+              "Lea las divulgaciones específicas de estado y plan en el flujo",
+              "Pregunte a Isaac Plans si desea ayuda para comparar"
+            ]
+          }
+        },
+        "cancer-heart-attack-stroke-mac": {
+          "metadata": {
+            "title": "Cáncer, infarto y accidente cerebrovascular (CHASMAC) | Manhattan Life | Isaac Plans",
+            "description": "Información sobre Cáncer, infarto y accidente cerebrovascular (CHASMAC) con Manhattan Life. Abra el enlace directo seguro; disponibilidad y beneficios varían por estado.",
+            "keywords": "CHASMAC, Manhattan Life, Isaac Plans"
+          },
+          "backNav": {
+            "label": "Volver a Manhattan Life"
+          },
+          "hero": {
+            "badge": "Manhattan Life",
+            "title": "Cáncer, infarto y accidente cerebrovascular (CHASMAC)",
+            "lead": "Beneficios por enfermedades específicas—una presentación CHAS de Manhattan Life. Compare en la cotización las condiciones cubiertas."
+          },
+          "sections": {
+            "what": {
+              "title": "Qué es",
+              "body": "Este producto Manhattan Life se accede por el sitio de inscripción directa autorizado. Beneficios, suscripción y disponibilidad dependen de su estado y plan—lea todos los materiales oficiales antes de solicitar."
+            },
+            "who": {
+              "title": "Para quién puede ser",
+              "body": "Personas que exploran cobertura suplementaria o de beneficios específicos con una compañía autorizada e inscripción en línea clara."
+            },
+            "confirm": {
+              "title": "Qué confirmar en la cotización",
+              "body": "Primas, calendarios de beneficios, exclusiones, periodos de espera y reglas de coordinación para su código postal."
+            },
+            "more": {
+              "title": "Más información",
+              "body": "Las compañías Manhattan Life pueden emitir pólizas bajo distintas entidades según producto y estado. Los documentos de la póliza prevalecen."
+            }
+          },
+          "faq": {
+            "title": "Preguntas frecuentes",
+            "items": [
+              {
+                "q": "¿Es lo mismo que un seguro mayor ACA?",
+                "a": "No necesariamente. Suele ser suplementario o de beneficios limitados. Lea cómo se clasifica su plan en la cotización oficial."
+              },
+              {
+                "q": "¿Dónde me inscribo?",
+                "a": "Use el enlace directo seguro de Manhattan Life en esta página para abrir la experiencia autorizada."
+              },
+              {
+                "q": "¿Todo está disponible en mi estado?",
+                "a": "No. La disponibilidad varía por estado y producto. El flujo mostrará lo que puede solicitar."
+              },
+              {
+                "q": "¿Isaac Plans puede ayudarme a comparar?",
+                "a": "Sí—escríbanos si desea una segunda opinión antes de inscribirse."
+              }
+            ]
+          },
+          "ctaBand": {
+            "title": "Cotizar e inscribirse",
+            "body": "Abra el enlace directo seguro de Manhattan Life para este producto."
+          },
+          "disclaimer": {
+            "title": "Importante",
+            "body": "Productos, disponibilidad, suscripción y beneficios varían por estado y plan. Esta página es educativa y enlaza al sitio autorizado de Manhattan Life. Isaac Plans Insurance puede recibir compensación al inscribirse en programas aplicables."
+          },
+          "highlights": {
+            "title": "De un vistazo",
+            "items": [
+              "Inscripción en línea segura en direct.manhattanlife.com",
+              "Lea las divulgaciones específicas de estado y plan en el flujo",
+              "Pregunte a Isaac Plans si desea ayuda para comparar"
+            ]
+          }
+        },
+        "cancer-heart-attack-stroke-lac": {
+          "metadata": {
+            "title": "Cáncer, infarto y accidente cerebrovascular (CHASLAC) | Manhattan Life | Isaac Plans",
+            "description": "Información sobre Cáncer, infarto y accidente cerebrovascular (CHASLAC) con Manhattan Life. Abra el enlace directo seguro; disponibilidad y beneficios varían por estado.",
+            "keywords": "CHASLAC, Manhattan Life, Isaac Plans"
+          },
+          "backNav": {
+            "label": "Volver a Manhattan Life"
+          },
+          "hero": {
+            "badge": "Manhattan Life",
+            "title": "Cáncer, infarto y accidente cerebrovascular (CHASLAC)",
+            "lead": "Presentación CHAS alternativa con su propio diseño de beneficios—lea el resumen oficial en el flujo de inscripción."
+          },
+          "sections": {
+            "what": {
+              "title": "Qué es",
+              "body": "Este producto Manhattan Life se accede por el sitio de inscripción directa autorizado. Beneficios, suscripción y disponibilidad dependen de su estado y plan—lea todos los materiales oficiales antes de solicitar."
+            },
+            "who": {
+              "title": "Para quién puede ser",
+              "body": "Personas que exploran cobertura suplementaria o de beneficios específicos con una compañía autorizada e inscripción en línea clara."
+            },
+            "confirm": {
+              "title": "Qué confirmar en la cotización",
+              "body": "Primas, calendarios de beneficios, exclusiones, periodos de espera y reglas de coordinación para su código postal."
+            },
+            "more": {
+              "title": "Más información",
+              "body": "Las compañías Manhattan Life pueden emitir pólizas bajo distintas entidades según producto y estado. Los documentos de la póliza prevalecen."
+            }
+          },
+          "faq": {
+            "title": "Preguntas frecuentes",
+            "items": [
+              {
+                "q": "¿Es lo mismo que un seguro mayor ACA?",
+                "a": "No necesariamente. Suele ser suplementario o de beneficios limitados. Lea cómo se clasifica su plan en la cotización oficial."
+              },
+              {
+                "q": "¿Dónde me inscribo?",
+                "a": "Use el enlace directo seguro de Manhattan Life en esta página para abrir la experiencia autorizada."
+              },
+              {
+                "q": "¿Todo está disponible en mi estado?",
+                "a": "No. La disponibilidad varía por estado y producto. El flujo mostrará lo que puede solicitar."
+              },
+              {
+                "q": "¿Isaac Plans puede ayudarme a comparar?",
+                "a": "Sí—escríbanos si desea una segunda opinión antes de inscribirse."
+              }
+            ]
+          },
+          "ctaBand": {
+            "title": "Cotizar e inscribirse",
+            "body": "Abra el enlace directo seguro de Manhattan Life para este producto."
+          },
+          "disclaimer": {
+            "title": "Importante",
+            "body": "Productos, disponibilidad, suscripción y beneficios varían por estado y plan. Esta página es educativa y enlaza al sitio autorizado de Manhattan Life. Isaac Plans Insurance puede recibir compensación al inscribirse en programas aplicables."
+          },
+          "highlights": {
+            "title": "De un vistazo",
+            "items": [
+              "Inscripción en línea segura en direct.manhattanlife.com",
+              "Lea las divulgaciones específicas de estado y plan en el flujo",
+              "Pregunte a Isaac Plans si desea ayuda para comparar"
+            ]
+          }
+        },
+        "critical-protection-recovery": {
+          "metadata": {
+            "title": "Protección crítica y recuperación | Manhattan Life | Isaac Plans",
+            "description": "Información sobre Protección crítica y recuperación con Manhattan Life. Abra el enlace directo seguro; disponibilidad y beneficios varían por estado.",
+            "keywords": "Manhattan Life, Isaac Plans"
+          },
+          "backNav": {
+            "label": "Volver a Manhattan Life"
+          },
+          "hero": {
+            "badge": "Manhattan Life",
+            "title": "Protección crítica y recuperación",
+            "lead": "Cobertura tipo enfermedad crítica con beneficios definidos—confirme diagnósticos y reglas de pago en los materiales."
+          },
+          "sections": {
+            "what": {
+              "title": "Qué es",
+              "body": "Este producto Manhattan Life se accede por el sitio de inscripción directa autorizado. Beneficios, suscripción y disponibilidad dependen de su estado y plan—lea todos los materiales oficiales antes de solicitar."
+            },
+            "who": {
+              "title": "Para quién puede ser",
+              "body": "Personas que exploran cobertura suplementaria o de beneficios específicos con una compañía autorizada e inscripción en línea clara."
+            },
+            "confirm": {
+              "title": "Qué confirmar en la cotización",
+              "body": "Primas, calendarios de beneficios, exclusiones, periodos de espera y reglas de coordinación para su código postal."
+            },
+            "more": {
+              "title": "Más información",
+              "body": "Las compañías Manhattan Life pueden emitir pólizas bajo distintas entidades según producto y estado. Los documentos de la póliza prevalecen."
+            }
+          },
+          "faq": {
+            "title": "Preguntas frecuentes",
+            "items": [
+              {
+                "q": "¿Es lo mismo que un seguro mayor ACA?",
+                "a": "No necesariamente. Suele ser suplementario o de beneficios limitados. Lea cómo se clasifica su plan en la cotización oficial."
+              },
+              {
+                "q": "¿Dónde me inscribo?",
+                "a": "Use el enlace directo seguro de Manhattan Life en esta página para abrir la experiencia autorizada."
+              },
+              {
+                "q": "¿Todo está disponible en mi estado?",
+                "a": "No. La disponibilidad varía por estado y producto. El flujo mostrará lo que puede solicitar."
+              },
+              {
+                "q": "¿Isaac Plans puede ayudarme a comparar?",
+                "a": "Sí—escríbanos si desea una segunda opinión antes de inscribirse."
+              }
+            ]
+          },
+          "ctaBand": {
+            "title": "Cotizar e inscribirse",
+            "body": "Abra el enlace directo seguro de Manhattan Life para este producto."
+          },
+          "disclaimer": {
+            "title": "Importante",
+            "body": "Productos, disponibilidad, suscripción y beneficios varían por estado y plan. Esta página es educativa y enlaza al sitio autorizado de Manhattan Life. Isaac Plans Insurance puede recibir compensación al inscribirse en programas aplicables."
+          },
+          "highlights": {
+            "title": "De un vistazo",
+            "items": [
+              "Inscripción en línea segura en direct.manhattanlife.com",
+              "Lea las divulgaciones específicas de estado y plan en el flujo",
+              "Pregunte a Isaac Plans si desea ayuda para comparar"
+            ]
+          }
+        },
+        "dental-vision-hearing-select": {
+          "metadata": {
+            "title": "Dental, visión y audición Select | Manhattan Life | Isaac Plans",
+            "description": "Información sobre Dental, visión y audición Select con Manhattan Life. Abra el enlace directo seguro; disponibilidad y beneficios varían por estado.",
+            "keywords": "dental visión audición, Manhattan Life, Isaac Plans"
+          },
+          "backNav": {
+            "label": "Volver a Manhattan Life"
+          },
+          "hero": {
+            "badge": "Manhattan Life",
+            "title": "Dental, visión y audición Select",
+            "lead": "Beneficios suplementarios de dental, visión y audición—redes y máximos anuales varían; revise la cotización para su código postal."
+          },
+          "sections": {
+            "what": {
+              "title": "Qué es",
+              "body": "Este producto Manhattan Life se accede por el sitio de inscripción directa autorizado. Beneficios, suscripción y disponibilidad dependen de su estado y plan—lea todos los materiales oficiales antes de solicitar."
+            },
+            "who": {
+              "title": "Para quién puede ser",
+              "body": "Personas que exploran cobertura suplementaria o de beneficios específicos con una compañía autorizada e inscripción en línea clara."
+            },
+            "confirm": {
+              "title": "Qué confirmar en la cotización",
+              "body": "Primas, calendarios de beneficios, exclusiones, periodos de espera y reglas de coordinación para su código postal."
+            },
+            "more": {
+              "title": "Más información",
+              "body": "Las compañías Manhattan Life pueden emitir pólizas bajo distintas entidades según producto y estado. Los documentos de la póliza prevalecen."
+            }
+          },
+          "faq": {
+            "title": "Preguntas frecuentes",
+            "items": [
+              {
+                "q": "¿Es lo mismo que un seguro mayor ACA?",
+                "a": "No necesariamente. Suele ser suplementario o de beneficios limitados. Lea cómo se clasifica su plan en la cotización oficial."
+              },
+              {
+                "q": "¿Dónde me inscribo?",
+                "a": "Use el enlace directo seguro de Manhattan Life en esta página para abrir la experiencia autorizada."
+              },
+              {
+                "q": "¿Todo está disponible en mi estado?",
+                "a": "No. La disponibilidad varía por estado y producto. El flujo mostrará lo que puede solicitar."
+              },
+              {
+                "q": "¿Isaac Plans puede ayudarme a comparar?",
+                "a": "Sí—escríbanos si desea una segunda opinión antes de inscribirse."
+              }
+            ]
+          },
+          "ctaBand": {
+            "title": "Cotizar e inscribirse",
+            "body": "Abra el enlace directo seguro de Manhattan Life para este producto."
+          },
+          "disclaimer": {
+            "title": "Importante",
+            "body": "Productos, disponibilidad, suscripción y beneficios varían por estado y plan. Esta página es educativa y enlaza al sitio autorizado de Manhattan Life. Isaac Plans Insurance puede recibir compensación al inscribirse en programas aplicables."
+          },
+          "highlights": {
+            "title": "De un vistazo",
+            "items": [
+              "Inscripción en línea segura en direct.manhattanlife.com",
+              "Lea las divulgaciones específicas de estado y plan en el flujo",
+              "Pregunte a Isaac Plans si desea ayuda para comparar"
+            ]
+          }
+        },
+        "dental-vision-hearing": {
+          "metadata": {
+            "title": "Seguro dental, de visión y audición | Manhattan Life | Isaac Plans",
+            "description": "Información sobre Seguro dental, de visión y audición con Manhattan Life. Abra el enlace directo seguro; disponibilidad y beneficios varían por estado.",
+            "keywords": "Manhattan Life, Isaac Plans"
+          },
+          "backNav": {
+            "label": "Volver a Manhattan Life"
+          },
+          "hero": {
+            "badge": "Manhattan Life",
+            "title": "Seguro dental, de visión y audición",
+            "lead": "Opciones independientes de dental, visión y audición—compare niveles y exclusiones antes de inscribirse."
+          },
+          "sections": {
+            "what": {
+              "title": "Qué es",
+              "body": "Este producto Manhattan Life se accede por el sitio de inscripción directa autorizado. Beneficios, suscripción y disponibilidad dependen de su estado y plan—lea todos los materiales oficiales antes de solicitar."
+            },
+            "who": {
+              "title": "Para quién puede ser",
+              "body": "Personas que exploran cobertura suplementaria o de beneficios específicos con una compañía autorizada e inscripción en línea clara."
+            },
+            "confirm": {
+              "title": "Qué confirmar en la cotización",
+              "body": "Primas, calendarios de beneficios, exclusiones, periodos de espera y reglas de coordinación para su código postal."
+            },
+            "more": {
+              "title": "Más información",
+              "body": "Las compañías Manhattan Life pueden emitir pólizas bajo distintas entidades según producto y estado. Los documentos de la póliza prevalecen."
+            }
+          },
+          "faq": {
+            "title": "Preguntas frecuentes",
+            "items": [
+              {
+                "q": "¿Es lo mismo que un seguro mayor ACA?",
+                "a": "No necesariamente. Suele ser suplementario o de beneficios limitados. Lea cómo se clasifica su plan en la cotización oficial."
+              },
+              {
+                "q": "¿Dónde me inscribo?",
+                "a": "Use el enlace directo seguro de Manhattan Life en esta página para abrir la experiencia autorizada."
+              },
+              {
+                "q": "¿Todo está disponible en mi estado?",
+                "a": "No. La disponibilidad varía por estado y producto. El flujo mostrará lo que puede solicitar."
+              },
+              {
+                "q": "¿Isaac Plans puede ayudarme a comparar?",
+                "a": "Sí—escríbanos si desea una segunda opinión antes de inscribirse."
+              }
+            ]
+          },
+          "ctaBand": {
+            "title": "Cotizar e inscribirse",
+            "body": "Abra el enlace directo seguro de Manhattan Life para este producto."
+          },
+          "disclaimer": {
+            "title": "Importante",
+            "body": "Productos, disponibilidad, suscripción y beneficios varían por estado y plan. Esta página es educativa y enlaza al sitio autorizado de Manhattan Life. Isaac Plans Insurance puede recibir compensación al inscribirse en programas aplicables."
+          },
+          "highlights": {
+            "title": "De un vistazo",
+            "items": [
+              "Inscripción en línea segura en direct.manhattanlife.com",
+              "Lea las divulgaciones específicas de estado y plan en el flujo",
+              "Pregunte a Isaac Plans si desea ayuda para comparar"
+            ]
+          }
+        },
+        "first-choice-blue-ribbon": {
+          "metadata": {
+            "title": "Serie First Choice Blue Ribbon | Manhattan Life | Isaac Plans",
+            "description": "Información sobre Serie First Choice Blue Ribbon con Manhattan Life. Abra el enlace directo seguro; disponibilidad y beneficios varían por estado.",
+            "keywords": "Manhattan Life, Isaac Plans"
+          },
+          "backNav": {
+            "label": "Volver a Manhattan Life"
+          },
+          "hero": {
+            "badge": "Manhattan Life",
+            "title": "Serie First Choice Blue Ribbon",
+            "lead": "Una oferta serie de Manhattan Life—lea las divulgaciones específicas de la serie para su estado."
+          },
+          "sections": {
+            "what": {
+              "title": "Qué es",
+              "body": "Este producto Manhattan Life se accede por el sitio de inscripción directa autorizado. Beneficios, suscripción y disponibilidad dependen de su estado y plan—lea todos los materiales oficiales antes de solicitar."
+            },
+            "who": {
+              "title": "Para quién puede ser",
+              "body": "Personas que exploran cobertura suplementaria o de beneficios específicos con una compañía autorizada e inscripción en línea clara."
+            },
+            "confirm": {
+              "title": "Qué confirmar en la cotización",
+              "body": "Primas, calendarios de beneficios, exclusiones, periodos de espera y reglas de coordinación para su código postal."
+            },
+            "more": {
+              "title": "Más información",
+              "body": "Las compañías Manhattan Life pueden emitir pólizas bajo distintas entidades según producto y estado. Los documentos de la póliza prevalecen."
+            }
+          },
+          "faq": {
+            "title": "Preguntas frecuentes",
+            "items": [
+              {
+                "q": "¿Es lo mismo que un seguro mayor ACA?",
+                "a": "No necesariamente. Suele ser suplementario o de beneficios limitados. Lea cómo se clasifica su plan en la cotización oficial."
+              },
+              {
+                "q": "¿Dónde me inscribo?",
+                "a": "Use el enlace directo seguro de Manhattan Life en esta página para abrir la experiencia autorizada."
+              },
+              {
+                "q": "¿Todo está disponible en mi estado?",
+                "a": "No. La disponibilidad varía por estado y producto. El flujo mostrará lo que puede solicitar."
+              },
+              {
+                "q": "¿Isaac Plans puede ayudarme a comparar?",
+                "a": "Sí—escríbanos si desea una segunda opinión antes de inscribirse."
+              }
+            ]
+          },
+          "ctaBand": {
+            "title": "Cotizar e inscribirse",
+            "body": "Abra el enlace directo seguro de Manhattan Life para este producto."
+          },
+          "disclaimer": {
+            "title": "Importante",
+            "body": "Productos, disponibilidad, suscripción y beneficios varían por estado y plan. Esta página es educativa y enlaza al sitio autorizado de Manhattan Life. Isaac Plans Insurance puede recibir compensación al inscribirse en programas aplicables."
+          },
+          "highlights": {
+            "title": "De un vistazo",
+            "items": [
+              "Inscripción en línea segura en direct.manhattanlife.com",
+              "Lea las divulgaciones específicas de estado y plan en el flujo",
+              "Pregunte a Isaac Plans si desea ayuda para comparar"
+            ]
+          }
+        },
+        "home-health-care": {
+          "metadata": {
+            "title": "Cuidado de salud en el hogar | Manhattan Life | Isaac Plans",
+            "description": "Información sobre Cuidado de salud en el hogar con Manhattan Life. Abra el enlace directo seguro; disponibilidad y beneficios varían por estado.",
+            "keywords": "Manhattan Life, Isaac Plans"
+          },
+          "backNav": {
+            "label": "Volver a Manhattan Life"
+          },
+          "hero": {
+            "badge": "Manhattan Life",
+            "title": "Cuidado de salud en el hogar",
+            "lead": "Beneficios que pueden ayudar con gastos elegibles de salud en el hogar—confirme límites de visitas en el resumen."
+          },
+          "sections": {
+            "what": {
+              "title": "Qué es",
+              "body": "Este producto Manhattan Life se accede por el sitio de inscripción directa autorizado. Beneficios, suscripción y disponibilidad dependen de su estado y plan—lea todos los materiales oficiales antes de solicitar."
+            },
+            "who": {
+              "title": "Para quién puede ser",
+              "body": "Personas que exploran cobertura suplementaria o de beneficios específicos con una compañía autorizada e inscripción en línea clara."
+            },
+            "confirm": {
+              "title": "Qué confirmar en la cotización",
+              "body": "Primas, calendarios de beneficios, exclusiones, periodos de espera y reglas de coordinación para su código postal."
+            },
+            "more": {
+              "title": "Más información",
+              "body": "Las compañías Manhattan Life pueden emitir pólizas bajo distintas entidades según producto y estado. Los documentos de la póliza prevalecen."
+            }
+          },
+          "faq": {
+            "title": "Preguntas frecuentes",
+            "items": [
+              {
+                "q": "¿Es lo mismo que un seguro mayor ACA?",
+                "a": "No necesariamente. Suele ser suplementario o de beneficios limitados. Lea cómo se clasifica su plan en la cotización oficial."
+              },
+              {
+                "q": "¿Dónde me inscribo?",
+                "a": "Use el enlace directo seguro de Manhattan Life en esta página para abrir la experiencia autorizada."
+              },
+              {
+                "q": "¿Todo está disponible en mi estado?",
+                "a": "No. La disponibilidad varía por estado y producto. El flujo mostrará lo que puede solicitar."
+              },
+              {
+                "q": "¿Isaac Plans puede ayudarme a comparar?",
+                "a": "Sí—escríbanos si desea una segunda opinión antes de inscribirse."
+              }
+            ]
+          },
+          "ctaBand": {
+            "title": "Cotizar e inscribirse",
+            "body": "Abra el enlace directo seguro de Manhattan Life para este producto."
+          },
+          "disclaimer": {
+            "title": "Importante",
+            "body": "Productos, disponibilidad, suscripción y beneficios varían por estado y plan. Esta página es educativa y enlaza al sitio autorizado de Manhattan Life. Isaac Plans Insurance puede recibir compensación al inscribirse en programas aplicables."
+          },
+          "highlights": {
+            "title": "De un vistazo",
+            "items": [
+              "Inscripción en línea segura en direct.manhattanlife.com",
+              "Lea las divulgaciones específicas de estado y plan en el flujo",
+              "Pregunte a Isaac Plans si desea ayuda para comparar"
+            ]
+          }
+        },
+        "home-health-care-select": {
+          "metadata": {
+            "title": "Home Health Care Select | Manhattan Life | Isaac Plans",
+            "description": "Información sobre Home Health Care Select con Manhattan Life. Abra el enlace directo seguro; disponibilidad y beneficios varían por estado.",
+            "keywords": "Manhattan Life, Isaac Plans"
+          },
+          "backNav": {
+            "label": "Volver a Manhattan Life"
+          },
+          "hero": {
+            "badge": "Manhattan Life",
+            "title": "Home Health Care Select",
+            "lead": "Beneficios Select de salud en el hogar—compare esta presentación con otras opciones en la cotización."
+          },
+          "sections": {
+            "what": {
+              "title": "Qué es",
+              "body": "Este producto Manhattan Life se accede por el sitio de inscripción directa autorizado. Beneficios, suscripción y disponibilidad dependen de su estado y plan—lea todos los materiales oficiales antes de solicitar."
+            },
+            "who": {
+              "title": "Para quién puede ser",
+              "body": "Personas que exploran cobertura suplementaria o de beneficios específicos con una compañía autorizada e inscripción en línea clara."
+            },
+            "confirm": {
+              "title": "Qué confirmar en la cotización",
+              "body": "Primas, calendarios de beneficios, exclusiones, periodos de espera y reglas de coordinación para su código postal."
+            },
+            "more": {
+              "title": "Más información",
+              "body": "Las compañías Manhattan Life pueden emitir pólizas bajo distintas entidades según producto y estado. Los documentos de la póliza prevalecen."
+            }
+          },
+          "faq": {
+            "title": "Preguntas frecuentes",
+            "items": [
+              {
+                "q": "¿Es lo mismo que un seguro mayor ACA?",
+                "a": "No necesariamente. Suele ser suplementario o de beneficios limitados. Lea cómo se clasifica su plan en la cotización oficial."
+              },
+              {
+                "q": "¿Dónde me inscribo?",
+                "a": "Use el enlace directo seguro de Manhattan Life en esta página para abrir la experiencia autorizada."
+              },
+              {
+                "q": "¿Todo está disponible en mi estado?",
+                "a": "No. La disponibilidad varía por estado y producto. El flujo mostrará lo que puede solicitar."
+              },
+              {
+                "q": "¿Isaac Plans puede ayudarme a comparar?",
+                "a": "Sí—escríbanos si desea una segunda opinión antes de inscribirse."
+              }
+            ]
+          },
+          "ctaBand": {
+            "title": "Cotizar e inscribirse",
+            "body": "Abra el enlace directo seguro de Manhattan Life para este producto."
+          },
+          "disclaimer": {
+            "title": "Importante",
+            "body": "Productos, disponibilidad, suscripción y beneficios varían por estado y plan. Esta página es educativa y enlaza al sitio autorizado de Manhattan Life. Isaac Plans Insurance puede recibir compensación al inscribirse en programas aplicables."
+          },
+          "highlights": {
+            "title": "De un vistazo",
+            "items": [
+              "Inscripción en línea segura en direct.manhattanlife.com",
+              "Lea las divulgaciones específicas de estado y plan en el flujo",
+              "Pregunte a Isaac Plans si desea ayuda para comparar"
+            ]
+          }
+        },
+        "home-health-care-select-mac": {
+          "metadata": {
+            "title": "Home Health Care Select (MAC) | Manhattan Life | Isaac Plans",
+            "description": "Información sobre Home Health Care Select (MAC) con Manhattan Life. Abra el enlace directo seguro; disponibilidad y beneficios varían por estado.",
+            "keywords": "Manhattan Life, Isaac Plans"
+          },
+          "backNav": {
+            "label": "Volver a Manhattan Life"
+          },
+          "hero": {
+            "badge": "Manhattan Life",
+            "title": "Home Health Care Select (MAC)",
+            "lead": "Otra presentación Home Health Care Select—verifique calendarios de beneficios en los materiales oficiales."
+          },
+          "sections": {
+            "what": {
+              "title": "Qué es",
+              "body": "Este producto Manhattan Life se accede por el sitio de inscripción directa autorizado. Beneficios, suscripción y disponibilidad dependen de su estado y plan—lea todos los materiales oficiales antes de solicitar."
+            },
+            "who": {
+              "title": "Para quién puede ser",
+              "body": "Personas que exploran cobertura suplementaria o de beneficios específicos con una compañía autorizada e inscripción en línea clara."
+            },
+            "confirm": {
+              "title": "Qué confirmar en la cotización",
+              "body": "Primas, calendarios de beneficios, exclusiones, periodos de espera y reglas de coordinación para su código postal."
+            },
+            "more": {
+              "title": "Más información",
+              "body": "Las compañías Manhattan Life pueden emitir pólizas bajo distintas entidades según producto y estado. Los documentos de la póliza prevalecen."
+            }
+          },
+          "faq": {
+            "title": "Preguntas frecuentes",
+            "items": [
+              {
+                "q": "¿Es lo mismo que un seguro mayor ACA?",
+                "a": "No necesariamente. Suele ser suplementario o de beneficios limitados. Lea cómo se clasifica su plan en la cotización oficial."
+              },
+              {
+                "q": "¿Dónde me inscribo?",
+                "a": "Use el enlace directo seguro de Manhattan Life en esta página para abrir la experiencia autorizada."
+              },
+              {
+                "q": "¿Todo está disponible en mi estado?",
+                "a": "No. La disponibilidad varía por estado y producto. El flujo mostrará lo que puede solicitar."
+              },
+              {
+                "q": "¿Isaac Plans puede ayudarme a comparar?",
+                "a": "Sí—escríbanos si desea una segunda opinión antes de inscribirse."
+              }
+            ]
+          },
+          "ctaBand": {
+            "title": "Cotizar e inscribirse",
+            "body": "Abra el enlace directo seguro de Manhattan Life para este producto."
+          },
+          "disclaimer": {
+            "title": "Importante",
+            "body": "Productos, disponibilidad, suscripción y beneficios varían por estado y plan. Esta página es educativa y enlaza al sitio autorizado de Manhattan Life. Isaac Plans Insurance puede recibir compensación al inscribirse en programas aplicables."
+          },
+          "highlights": {
+            "title": "De un vistazo",
+            "items": [
+              "Inscripción en línea segura en direct.manhattanlife.com",
+              "Lea las divulgaciones específicas de estado y plan en el flujo",
+              "Pregunte a Isaac Plans si desea ayuda para comparar"
+            ]
+          }
+        },
+        "hospital-indemnity-select": {
+          "metadata": {
+            "title": "Indemnización hospitalaria Select | Manhattan Life | Isaac Plans",
+            "description": "Información sobre Indemnización hospitalaria Select con Manhattan Life. Abra el enlace directo seguro; disponibilidad y beneficios varían por estado.",
+            "keywords": "indemnización hospitalaria, Manhattan Life, Isaac Plans"
+          },
+          "backNav": {
+            "label": "Volver a Manhattan Life"
+          },
+          "hero": {
+            "badge": "Manhattan Life",
+            "title": "Indemnización hospitalaria Select",
+            "lead": "Beneficios en efectivo por estancias hospitalarias cubiertas—no sustituye seguro mayor; lea las limitaciones."
+          },
+          "sections": {
+            "what": {
+              "title": "Qué es",
+              "body": "Este producto Manhattan Life se accede por el sitio de inscripción directa autorizado. Beneficios, suscripción y disponibilidad dependen de su estado y plan—lea todos los materiales oficiales antes de solicitar."
+            },
+            "who": {
+              "title": "Para quién puede ser",
+              "body": "Personas que exploran cobertura suplementaria o de beneficios específicos con una compañía autorizada e inscripción en línea clara."
+            },
+            "confirm": {
+              "title": "Qué confirmar en la cotización",
+              "body": "Primas, calendarios de beneficios, exclusiones, periodos de espera y reglas de coordinación para su código postal."
+            },
+            "more": {
+              "title": "Más información",
+              "body": "Las compañías Manhattan Life pueden emitir pólizas bajo distintas entidades según producto y estado. Los documentos de la póliza prevalecen."
+            }
+          },
+          "faq": {
+            "title": "Preguntas frecuentes",
+            "items": [
+              {
+                "q": "¿Es lo mismo que un seguro mayor ACA?",
+                "a": "No necesariamente. Suele ser suplementario o de beneficios limitados. Lea cómo se clasifica su plan en la cotización oficial."
+              },
+              {
+                "q": "¿Dónde me inscribo?",
+                "a": "Use el enlace directo seguro de Manhattan Life en esta página para abrir la experiencia autorizada."
+              },
+              {
+                "q": "¿Todo está disponible en mi estado?",
+                "a": "No. La disponibilidad varía por estado y producto. El flujo mostrará lo que puede solicitar."
+              },
+              {
+                "q": "¿Isaac Plans puede ayudarme a comparar?",
+                "a": "Sí—escríbanos si desea una segunda opinión antes de inscribirse."
+              }
+            ]
+          },
+          "ctaBand": {
+            "title": "Cotizar e inscribirse",
+            "body": "Abra el enlace directo seguro de Manhattan Life para este producto."
+          },
+          "disclaimer": {
+            "title": "Importante",
+            "body": "Productos, disponibilidad, suscripción y beneficios varían por estado y plan. Esta página es educativa y enlaza al sitio autorizado de Manhattan Life. Isaac Plans Insurance puede recibir compensación al inscribirse en programas aplicables."
+          },
+          "highlights": {
+            "title": "De un vistazo",
+            "items": [
+              "Inscripción en línea segura en direct.manhattanlife.com",
+              "Lea las divulgaciones específicas de estado y plan en el flujo",
+              "Pregunte a Isaac Plans si desea ayuda para comparar"
+            ]
+          }
+        },
+        "omniflex-short-term-care": {
+          "metadata": {
+            "title": "OmniFlex cuidado a corto plazo | Manhattan Life | Isaac Plans",
+            "description": "Información sobre OmniFlex cuidado a corto plazo con Manhattan Life. Abra el enlace directo seguro; disponibilidad y beneficios varían por estado.",
+            "keywords": "cuidado a corto plazo, Manhattan Life, Isaac Plans"
+          },
+          "backNav": {
+            "label": "Volver a Manhattan Life"
+          },
+          "hero": {
+            "badge": "Manhattan Life",
+            "title": "OmniFlex cuidado a corto plazo",
+            "lead": "Cobertura de cuidado a corto plazo para situaciones elegibles—distinta del STM médico; confirme periodos en la cotización."
+          },
+          "sections": {
+            "what": {
+              "title": "Qué es",
+              "body": "Este producto Manhattan Life se accede por el sitio de inscripción directa autorizado. Beneficios, suscripción y disponibilidad dependen de su estado y plan—lea todos los materiales oficiales antes de solicitar."
+            },
+            "who": {
+              "title": "Para quién puede ser",
+              "body": "Personas que exploran cobertura suplementaria o de beneficios específicos con una compañía autorizada e inscripción en línea clara."
+            },
+            "confirm": {
+              "title": "Qué confirmar en la cotización",
+              "body": "Primas, calendarios de beneficios, exclusiones, periodos de espera y reglas de coordinación para su código postal."
+            },
+            "more": {
+              "title": "Más información",
+              "body": "Las compañías Manhattan Life pueden emitir pólizas bajo distintas entidades según producto y estado. Los documentos de la póliza prevalecen."
+            }
+          },
+          "faq": {
+            "title": "Preguntas frecuentes",
+            "items": [
+              {
+                "q": "¿Es lo mismo que un seguro mayor ACA?",
+                "a": "No necesariamente. Suele ser suplementario o de beneficios limitados. Lea cómo se clasifica su plan en la cotización oficial."
+              },
+              {
+                "q": "¿Dónde me inscribo?",
+                "a": "Use el enlace directo seguro de Manhattan Life en esta página para abrir la experiencia autorizada."
+              },
+              {
+                "q": "¿Todo está disponible en mi estado?",
+                "a": "No. La disponibilidad varía por estado y producto. El flujo mostrará lo que puede solicitar."
+              },
+              {
+                "q": "¿Isaac Plans puede ayudarme a comparar?",
+                "a": "Sí—escríbanos si desea una segunda opinión antes de inscribirse."
+              }
+            ]
+          },
+          "ctaBand": {
+            "title": "Cotizar e inscribirse",
+            "body": "Abra el enlace directo seguro de Manhattan Life para este producto."
+          },
+          "disclaimer": {
+            "title": "Importante",
+            "body": "Productos, disponibilidad, suscripción y beneficios varían por estado y plan. Esta página es educativa y enlaza al sitio autorizado de Manhattan Life. Isaac Plans Insurance puede recibir compensación al inscribirse en programas aplicables."
+          },
+          "highlights": {
+            "title": "De un vistazo",
+            "items": [
+              "Inscripción en línea segura en direct.manhattanlife.com",
+              "Lea las divulgaciones específicas de estado y plan en el flujo",
+              "Pregunte a Isaac Plans si desea ayuda para comparar"
+            ]
+          }
+        },
+        "out-of-pocket-protection": {
+          "metadata": {
+            "title": "Plan de protección de gastos de bolsillo | Manhattan Life | Isaac Plans",
+            "description": "Información sobre Plan de protección de gastos de bolsillo con Manhattan Life. Abra el enlace directo seguro; disponibilidad y beneficios varían por estado.",
+            "keywords": "Manhattan Life, Isaac Plans"
+          },
+          "backNav": {
+            "label": "Volver a Manhattan Life"
+          },
+          "hero": {
+            "badge": "Manhattan Life",
+            "title": "Plan de protección de gastos de bolsillo",
+            "lead": "Pensado para ayudar con gastos elegibles de bolsillo—revise coordinación con seguro mayor y topes del plan."
+          },
+          "sections": {
+            "what": {
+              "title": "Qué es",
+              "body": "Este producto Manhattan Life se accede por el sitio de inscripción directa autorizado. Beneficios, suscripción y disponibilidad dependen de su estado y plan—lea todos los materiales oficiales antes de solicitar."
+            },
+            "who": {
+              "title": "Para quién puede ser",
+              "body": "Personas que exploran cobertura suplementaria o de beneficios específicos con una compañía autorizada e inscripción en línea clara."
+            },
+            "confirm": {
+              "title": "Qué confirmar en la cotización",
+              "body": "Primas, calendarios de beneficios, exclusiones, periodos de espera y reglas de coordinación para su código postal."
+            },
+            "more": {
+              "title": "Más información",
+              "body": "Las compañías Manhattan Life pueden emitir pólizas bajo distintas entidades según producto y estado. Los documentos de la póliza prevalecen."
+            }
+          },
+          "faq": {
+            "title": "Preguntas frecuentes",
+            "items": [
+              {
+                "q": "¿Es lo mismo que un seguro mayor ACA?",
+                "a": "No necesariamente. Suele ser suplementario o de beneficios limitados. Lea cómo se clasifica su plan en la cotización oficial."
+              },
+              {
+                "q": "¿Dónde me inscribo?",
+                "a": "Use el enlace directo seguro de Manhattan Life en esta página para abrir la experiencia autorizada."
+              },
+              {
+                "q": "¿Todo está disponible en mi estado?",
+                "a": "No. La disponibilidad varía por estado y producto. El flujo mostrará lo que puede solicitar."
+              },
+              {
+                "q": "¿Isaac Plans puede ayudarme a comparar?",
+                "a": "Sí—escríbanos si desea una segunda opinión antes de inscribirse."
+              }
+            ]
+          },
+          "ctaBand": {
+            "title": "Cotizar e inscribirse",
+            "body": "Abra el enlace directo seguro de Manhattan Life para este producto."
+          },
+          "disclaimer": {
+            "title": "Importante",
+            "body": "Productos, disponibilidad, suscripción y beneficios varían por estado y plan. Esta página es educativa y enlaza al sitio autorizado de Manhattan Life. Isaac Plans Insurance puede recibir compensación al inscribirse en programas aplicables."
+          },
+          "highlights": {
+            "title": "De un vistazo",
+            "items": [
+              "Inscripción en línea segura en direct.manhattanlife.com",
+              "Lea las divulgaciones específicas de estado y plan en el flujo",
+              "Pregunte a Isaac Plans si desea ayuda para comparar"
+            ]
+          }
+        },
+        "secure-advantage-final-expense": {
+          "metadata": {
+            "title": "Secure Advantage — gastos finales | Manhattan Life | Isaac Plans",
+            "description": "Información sobre Secure Advantage — gastos finales con Manhattan Life. Abra el enlace directo seguro; disponibilidad y beneficios varían por estado.",
+            "keywords": "gastos finales, Manhattan Life, Isaac Plans"
+          },
+          "backNav": {
+            "label": "Volver a Manhattan Life"
+          },
+          "hero": {
+            "badge": "Manhattan Life",
+            "title": "Secure Advantage — gastos finales",
+            "lead": "Enfoque de seguro de gastos finales / sepelio—confirme montos, rangos de edad y suscripción en el flujo."
+          },
+          "sections": {
+            "what": {
+              "title": "Qué es",
+              "body": "Este producto Manhattan Life se accede por el sitio de inscripción directa autorizado. Beneficios, suscripción y disponibilidad dependen de su estado y plan—lea todos los materiales oficiales antes de solicitar."
+            },
+            "who": {
+              "title": "Para quién puede ser",
+              "body": "Personas que exploran cobertura suplementaria o de beneficios específicos con una compañía autorizada e inscripción en línea clara."
+            },
+            "confirm": {
+              "title": "Qué confirmar en la cotización",
+              "body": "Primas, calendarios de beneficios, exclusiones, periodos de espera y reglas de coordinación para su código postal."
+            },
+            "more": {
+              "title": "Más información",
+              "body": "Las compañías Manhattan Life pueden emitir pólizas bajo distintas entidades según producto y estado. Los documentos de la póliza prevalecen."
+            }
+          },
+          "faq": {
+            "title": "Preguntas frecuentes",
+            "items": [
+              {
+                "q": "¿Es lo mismo que un seguro mayor ACA?",
+                "a": "No necesariamente. Suele ser suplementario o de beneficios limitados. Lea cómo se clasifica su plan en la cotización oficial."
+              },
+              {
+                "q": "¿Dónde me inscribo?",
+                "a": "Use el enlace directo seguro de Manhattan Life en esta página para abrir la experiencia autorizada."
+              },
+              {
+                "q": "¿Todo está disponible en mi estado?",
+                "a": "No. La disponibilidad varía por estado y producto. El flujo mostrará lo que puede solicitar."
+              },
+              {
+                "q": "¿Isaac Plans puede ayudarme a comparar?",
+                "a": "Sí—escríbanos si desea una segunda opinión antes de inscribirse."
+              }
+            ]
+          },
+          "ctaBand": {
+            "title": "Cotizar e inscribirse",
+            "body": "Abra el enlace directo seguro de Manhattan Life para este producto."
+          },
+          "disclaimer": {
+            "title": "Importante",
+            "body": "Productos, disponibilidad, suscripción y beneficios varían por estado y plan. Esta página es educativa y enlaza al sitio autorizado de Manhattan Life. Isaac Plans Insurance puede recibir compensación al inscribirse en programas aplicables."
+          },
+          "highlights": {
+            "title": "De un vistazo",
+            "items": [
+              "Inscripción en línea segura en direct.manhattanlife.com",
+              "Lea las divulgaciones específicas de estado y plan en el flujo",
+              "Pregunte a Isaac Plans si desea ayuda para comparar"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

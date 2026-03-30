@@ -15,6 +15,7 @@ import { Link } from "@/i18n/navigation"; // locale‑aware wrappers
 import { getTranslations } from "next-intl/server";
 import { Separator } from "@/components/ui/separator";
 import { NewsletterFooter } from "@/components/newsletter-footer";
+import { getLicensedStateCount } from "@/lib/licensed-states";
 
 /* ──────────────────────────────────────────────
    Site constants (could live in /lib/siteConfig)
@@ -37,7 +38,7 @@ export default async function Footer() {
   const tServices = await getTranslations("header.nav.services.links");
   const tRes = await getTranslations("header.nav.resources.links");
   const tContact = await getTranslations("footer.contact");
-  const states = process.env.NEXT_PUBLIC_STATES ?? "12";
+  const states = String(await getLicensedStateCount());
 
   /* Root‑relative hash links let next‑intl inject the locale prefix */
   const toSection = (hash: string) => `/#${hash}`;

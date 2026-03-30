@@ -16,13 +16,15 @@ import { esES, enUS } from '@clerk/localizations';
 import { SanityLive } from '@/sanity/lib/live';
 import MetaPixelWrapper from "@/components/meta-pixel-wrapper";
 import { GoogleAnalytics } from '@next/third-parties/google'
+import { getLicensedStateCount } from "@/lib/licensed-states";
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
 
+  const states = String(await getLicensedStateCount());
   const t = await getTranslations({ locale, namespace: "layoutMetadata" });
   const title = t("title");
-  const description = t("description");
+  const description = t("description", { states });
   const image = t("image");
   const alt = t("imageAlt", {
     default: "Isaac Plans Insurance logo on a blue gradient background",

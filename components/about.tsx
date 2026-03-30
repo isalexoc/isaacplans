@@ -8,6 +8,10 @@ import { getTranslations } from "next-intl/server";
 import { sanityFetch } from "@/sanity/lib/live";
 import { type SanityDocument } from "next-sanity";
 import StatesMap from "@/components/states-map";
+import {
+  LICENSED_STATES_LIST_QUERY,
+  statesSanityFetchOptions,
+} from "@/lib/licensed-states";
 
 /* Achievements + icons map --------------------------------------------- */
 const ACHIEVEMENTS = [
@@ -17,38 +21,19 @@ const ACHIEVEMENTS = [
   { slug: "education", Icon: GraduationCap },
 ] as const;
 
-/* States query ---------------------------------------------------------- */
-const STATES_QUERY = `*[
-  _type == "state"
-  && active == true
-]|order(order asc, name asc){
-  _id,
-  name,
-  code,
-  order
-}`;
-
-// ISR with 1 hour fallback - on-demand revalidation via webhook is preferred
-const statesOptions = { 
-  next: { 
-    revalidate: 3600, // 1 hour fallback
-    tags: ['states'] // Allows granular revalidation
-  } 
-};
-
 /* ---------------------------------------------------------------------- */
 export default async function About() {
   const t = await getTranslations("HomePage.profile");
   
   // Fetch states from Sanity
-  const statesResult = await sanityFetch({ 
-    query: STATES_QUERY, 
-    ...statesOptions 
+  const statesResult = await sanityFetch({
+    query: LICENSED_STATES_LIST_QUERY,
+    ...statesSanityFetchOptions,
   });
-  
+
   const states: SanityDocument[] = statesResult.data || [];
   const statesCount = states.length;
-  const statesDisplay = process.env.NEXT_PUBLIC_STATES ?? String(statesCount);
+  const statesDisplay = String(statesCount);
 
   // Extract state names for display, with fallback to translations if Sanity is empty
   let certs: string[];

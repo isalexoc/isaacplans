@@ -12,7 +12,7 @@
       "hero": {
         "badge": "UnitedHealthOne · Official quoting paths",
         "title": "UnitedHealthOne coverage—built for real life, priced for your budget",
-        "lead": "UnitedHealthOne (UHOne) offers a broad portfolio of supplemental health products: short-term medical, TriTerm, fixed indemnity, hospital indemnity, dental & vision, accident, critical illness, term life, telehealth, and more. Use the secure UHOne links below to quote and enroll—each opens in a new tab. Prefer a personal walkthrough? Isaac Plans is one message away.",
+        "lead": "UnitedHealthOne (UHOne) offers a broad portfolio of supplemental health products: short-term medical, TriTerm, fixed indemnity, hospital indemnity, dental & vision, accident, critical illness, term life, telehealth, and more. Use the secure UHOne links below to quote and enroll. Prefer a personal walkthrough? Isaac Plans is one message away.",
         "allPlansLabel": "Browse all products on UHOne",
         "allPlansAlt": "UnitedHealthOne — All plans — start a quote",
         "imageAlt": "Warm, welcoming scene suggesting care and community",
@@ -53,7 +53,7 @@
         "ctaQuote": "Get quote on UHOne",
         "ctaQuoteShort": "Quote",
         "time": "Typical flow",
-        "opensNew": "Opens in a new tab"
+        "learnMoreProductPage": "Learn more"
       },
       "products": {
         "shortTerm": {

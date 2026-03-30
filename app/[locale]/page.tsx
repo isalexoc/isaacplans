@@ -14,9 +14,11 @@ import {
   languageAlternatesPrefixed,
   xDefaultHref,
 } from "@/lib/seo/i18n";
+import { getLicensedStateCount } from "@/lib/licensed-states";
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = (await getLocale()) as SupportedLocale;
+  const states = String(await getLicensedStateCount());
   // keep using your existing namespace if that's where your strings live
   const t = await getTranslations({ locale, namespace: "layoutMetadata" });
 
@@ -24,6 +26,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const description = t("description", {
     default:
       "Get affordable health insurance guidance in English and Spanish. Free quotes and expert help.",
+    states,
   });
   const keywords = t("keywords", {
     default:

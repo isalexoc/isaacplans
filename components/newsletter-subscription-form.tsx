@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useLocale } from "next-intl";
 import { Mail, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { NewsletterSuccessPanel } from "@/components/newsletter-success-panel";
 import { trackSubscribe, trackCompleteRegistration, updateAdvancedMatching } from "@/lib/facebook-pixel";
 
 interface NewsletterSubscriptionFormProps {
@@ -205,84 +206,65 @@ export function NewsletterSubscriptionForm({
   // Show normal subscription form
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-8 shadow-lg">
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label
-            htmlFor="email"
-            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-          >
-            {isES ? "Correo electrónico" : "Email Address"}
-          </label>
-          <div className="relative">
-            <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-            <input
-              type="email"
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder={
-                isES ? "tu@correo.com" : "your@email.com"
-              }
-              required
-              disabled={status === "loading"}
-              className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            />
-          </div>
-        </div>
-
-        <Button
-          type="submit"
-          disabled={status === "loading" || !email.trim()}
-          className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-3 rounded-lg shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {status === "loading" ? (
-            <>
-              <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-              {isES ? "Procesando..." : "Processing..."}
-            </>
-          ) : (
-            <>
-              <Mail className="w-5 h-5 mr-2" />
-              {isES ? "Suscribirse" : "Subscribe"}
-            </>
-          )}
-        </Button>
-
-        {/* Status Messages */}
-        {message && (
-          <div
-            className={`flex items-start gap-3 p-4 rounded-lg ${
-              status === "error"
-                ? "bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800"
-                : "bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800"
-            }`}
-          >
-            {status === "error" ? (
-              <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
-            ) : (
-              <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5" />
-            )}
-            <p
-              className={`text-sm ${
-                status === "error"
-                  ? "text-red-800 dark:text-red-200"
-                  : "text-green-800 dark:text-green-200"
-              }`}
+      {status === "success" && message ? (
+        <NewsletterSuccessPanel
+          isES={isES}
+          message={message}
+          apiStatus={statusType}
+          variant="default"
+        />
+      ) : (
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
             >
-              {message}
-            </p>
+              {isES ? "Correo electrónico" : "Email Address"}
+            </label>
+            <div className="relative">
+              <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input
+                type="email"
+                id="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder={
+                  isES ? "tu@correo.com" : "your@email.com"
+                }
+                required
+                disabled={status === "loading"}
+                className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              />
+            </div>
           </div>
-        )}
 
-        {/* Additional info for pending status */}
-        {statusType === "pending" && (
-          <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
-            {isES
-              ? "No olvides revisar tu carpeta de spam si no recibes el correo."
-              : "Don't forget to check your spam folder if you don't receive the email."}
-          </p>
-        )}
-      </form>
+          <Button
+            type="submit"
+            disabled={status === "loading" || !email.trim()}
+            className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-3 rounded-lg shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {status === "loading" ? (
+              <>
+                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                {isES ? "Procesando..." : "Processing..."}
+              </>
+            ) : (
+              <>
+                <Mail className="w-5 h-5 mr-2" />
+                {isES ? "Suscribirse" : "Subscribe"}
+              </>
+            )}
+          </Button>
+
+          {message && status === "error" && (
+            <div className="flex items-start gap-3 p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+              <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-red-800 dark:text-red-200">{message}</p>
+            </div>
+          )}
+        </form>
+      )}
     </div>
   );
 }

@@ -58,8 +58,14 @@ export default async function CarriersIndexPage() {
   const locale = (await getLocale()) as SupportedLocale;
   const t = await getTranslations({ locale, namespace: "carriersIndex" });
 
-  const hub = (routeKey: "/carriers/uhone" | "/carriers/pivot/shortterm" | "/carriers/manhattan/shortterm" | "/carriers/allstate/shortterm") =>
-    withLocalePrefix(locale, localizedSlug(routeKey as any, locale));
+  const hub = (
+    routeKey:
+      | "/carriers/uhone"
+      | "/carriers/pivot/shortterm"
+      | "/carriers/manhattan"
+      | "/carriers/manhattan/shortterm"
+      | "/carriers/allstate"
+  ) => withLocalePrefix(locale, localizedSlug(routeKey as any, locale));
 
   return (
     <div className="relative min-h-screen">
@@ -101,7 +107,7 @@ export default async function CarriersIndexPage() {
             id: "manhattan",
             name: t("cards.manhattan.name"),
             blurb: t("cards.manhattan.blurb"),
-            href: hub("/carriers/manhattan/shortterm"),
+            href: hub("/carriers/manhattan"),
             heroSrc: stmCarrierHeroUrl("pexels-gabby-k-7114420_ev9ryf"),
             logoSrc:
               "https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_400/v1774397411/manhatan_logo_g6cswk.jpg",
@@ -110,7 +116,7 @@ export default async function CarriersIndexPage() {
             id: "allstate",
             name: t("cards.allstate.name"),
             blurb: t("cards.allstate.blurb"),
-            href: hub("/carriers/allstate/shortterm"),
+            href: hub("/carriers/allstate"),
             heroSrc: stmCarrierHeroUrl("pexels-shvetsa-4421496_ex5gi4"),
             logoSrc:
               "https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_400/v1774397414/allstate_logo_ungrkt.png",

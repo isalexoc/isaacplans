@@ -3,6 +3,12 @@ import type { MetadataRoute } from "next";
 import type { Locale } from "next-intl";
 import { routing } from "@/i18n/routing";
 import { getPathname } from "@/i18n/navigation";
+import {
+  ALLSTATE_INDIVIDUAL_PRODUCT_SLUGS,
+  ALLSTATE_SENIOR_PRODUCT_SLUGS,
+} from "@/lib/allstate-product-routes";
+import { MANHATTAN_PRODUCT_SLUGS } from "@/lib/manhattan-product-routes";
+import { UHONE_PRODUCT_PAGE_SLUGS } from "@/lib/uhone-product-slugs";
 import { sanityFetch } from "@/sanity/lib/live";
 import type { SanityDocument } from "next-sanity";
 
@@ -85,7 +91,9 @@ const PAGES: Page[] = [
   { href: "/carriers", changeFrequency: "monthly", priority: 0.75 },
   { href: "/carriers/uhone", changeFrequency: "monthly", priority: 0.75 },
   { href: "/carriers/uhone/shortterm", changeFrequency: "monthly", priority: 0.7 },
+  { href: "/carriers/allstate", changeFrequency: "monthly", priority: 0.72 },
   { href: "/carriers/allstate/shortterm", changeFrequency: "monthly", priority: 0.7 },
+  { href: "/carriers/allstate/cancer-only", changeFrequency: "monthly", priority: 0.68 },
   { href: "/carriers/pivot/shortterm", changeFrequency: "monthly", priority: 0.7 },
   { href: "/carriers/manhattan/shortterm", changeFrequency: "monthly", priority: 0.7 },
 
@@ -197,5 +205,81 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }));
   });
 
-  return [...staticEntries, ...blogEntries, ...categoryEntries];
+  const uhoneProductEntries: MetadataRoute.Sitemap =
+    UHONE_PRODUCT_PAGE_SLUGS.flatMap((product) =>
+      routing.locales.map((locale) => {
+        const href = {
+          pathname: "/carriers/uhone/[product]",
+          params: { product },
+        } as Href;
+        return {
+          url: urlFor(href, locale),
+          lastModified: now,
+          changeFrequency: "monthly" as const,
+          priority: 0.68,
+          alternates: alternatesFor(href),
+        };
+      })
+    );
+
+  const allstateSeniorEntries: MetadataRoute.Sitemap =
+    ALLSTATE_SENIOR_PRODUCT_SLUGS.flatMap((product) =>
+      routing.locales.map((locale) => {
+        const href = {
+          pathname: "/carriers/allstate/seniors/[product]",
+          params: { product },
+        } as Href;
+        return {
+          url: urlFor(href, locale),
+          lastModified: now,
+          changeFrequency: "monthly" as const,
+          priority: 0.67,
+          alternates: alternatesFor(href),
+        };
+      })
+    );
+
+  const allstateIndividualEntries: MetadataRoute.Sitemap =
+    ALLSTATE_INDIVIDUAL_PRODUCT_SLUGS.flatMap((product) =>
+      routing.locales.map((locale) => {
+        const href = {
+          pathname: "/carriers/allstate/individual/[product]",
+          params: { product },
+        } as Href;
+        return {
+          url: urlFor(href, locale),
+          lastModified: now,
+          changeFrequency: "monthly" as const,
+          priority: 0.67,
+          alternates: alternatesFor(href),
+        };
+      })
+    );
+
+  const manhattanProductEntries: MetadataRoute.Sitemap =
+    MANHATTAN_PRODUCT_SLUGS.flatMap((product) =>
+      routing.locales.map((locale) => {
+        const href = {
+          pathname: "/carriers/manhattan/[product]",
+          params: { product },
+        } as Href;
+        return {
+          url: urlFor(href, locale),
+          lastModified: now,
+          changeFrequency: "monthly" as const,
+          priority: 0.67,
+          alternates: alternatesFor(href),
+        };
+      })
+    );
+
+  return [
+    ...staticEntries,
+    ...blogEntries,
+    ...categoryEntries,
+    ...uhoneProductEntries,
+    ...allstateSeniorEntries,
+    ...allstateIndividualEntries,
+    ...manhattanProductEntries,
+  ];
 }

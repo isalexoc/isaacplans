@@ -18,3 +18,7 @@ export function uhoneMarketingAssetUrl(filePath: string): string {
   const path = filePath.startsWith("/") ? filePath : `/${filePath}`;
   return `https://www.uhone.com/ContentManagement/FileAttachment.ashx?FilePath=${encodeURIComponent(path)}`;
 }
+
+/** UnitedHealthcare mark — Cloudinary f_auto, q_auto, capped width for crisp logos */
+export const UHONE_UHC_LOGO_URL =
+  "https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_480,c_limit/v1774718587/united-healthcare-logo_avzxnj.png";
