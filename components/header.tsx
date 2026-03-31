@@ -13,6 +13,7 @@ import type { AppHref } from "@/i18n/navigation";
 import { usePathname, useRouter } from "@/i18n/navigation";
 
 import { cn } from "@/lib/utils";
+import { isAdsLandingPath } from "@/lib/ads-landing";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import {
@@ -105,6 +106,32 @@ const Header = () => {
       router.push(href as any);
     }
   };
+
+  /** Paid ads landing: logo + phone + locale only (no nav / quote CTA). */
+  if (isAdsLandingPath(pathname)) {
+    return (
+      <Headroom style={{ zIndex: 50 }}>
+        <header className="border-b border-gray-100 bg-white shadow-sm transition-shadow duration-300">
+          <div className="container mx-auto px-4 sm:px-6">
+            <div className="flex h-16 items-center justify-between md:h-20">
+              <Logo />
+              <div className="flex items-center gap-3 sm:gap-5">
+                <a
+                  href={`tel:${nav("phone")}`}
+                  className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm font-medium text-gray-700 transition-colors duration-200 hover:text-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/20 focus-visible:ring-offset-2"
+                  aria-label={`Call us at ${nav("phone")}`}
+                >
+                  <Lucide.Phone className="h-4 w-4 shrink-0" aria-hidden="true" />
+                  <span className="hidden sm:inline">{nav("phone")}</span>
+                </a>
+                <LocaleSwitcher />
+              </div>
+            </div>
+          </div>
+        </header>
+      </Headroom>
+    );
+  }
 
   return (
     <Headroom style={{ zIndex: 50 }}>

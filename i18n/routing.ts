@@ -123,6 +123,10 @@ export const routing = defineRouting({
       en: "/get-covered-fast",
       es: "/cobertura-rapida",
     },
+    "/get-health-coverage-fast": {
+      en: "/get-health-coverage-fast",
+      es: "/cobertura-salud-rapida",
+    },
     "/short-term-medical": {
       en: "/short-term-medical",
       es: "/cobertura-a-corto-plazo",

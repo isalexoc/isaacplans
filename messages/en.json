@@ -436,6 +436,10 @@
       "emailLabel": "Email",
       "licensedStates": "Licensed in {states}+ States"
     },
+    "adsMinimal": {
+      "copyright": "© {year} Isaac Plans Insurance. All rights reserved.",
+      "fullSite": "Full website"
+    },
     "links": {
       "guide": "Insurance Guide",
       "faq": "FAQ",
@@ -2181,6 +2185,15 @@
         "invalidEmail": "Invalid email",
         "invalidPhone": "Enter a valid 10-digit U.S. phone number"
       }
+    }
+  },
+  "getHealthCoverageFastAdsPage": {
+    "metadata": {
+      "title": "Get health coverage fast | Isaac Plans Insurance",
+      "description": "Answer a few quick questions to find coverage options that may fit your situation—ACA, short-term, dental & vision, and more. Licensed bilingual guidance.",
+      "keywords": "health insurance quiz, get health coverage fast, ACA marketplace, short-term insurance, Isaac Plans",
+      "imageAlt": "Calm healthcare setting representing trusted coverage guidance",
+      "breadcrumbPage": "Get health coverage fast"
     }
   },
   "shortTermMedicalPage": {

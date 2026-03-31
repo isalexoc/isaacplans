@@ -1114,11 +1114,13 @@ export default function GetCoveredFastFunnel({ licensedStateCount }: Props) {
         {/* Quiz column */}
         <div className="flex min-w-0 flex-1 flex-col px-4 pb-16 pt-6 sm:px-6 sm:pb-20 sm:pt-8 lg:justify-center lg:px-10 lg:py-12 xl:px-14">
           <div className="mx-auto w-full max-w-lg">
-            <div className="mb-1 flex items-center justify-between gap-2">
+            {/* One page title for mobile; desktop hero column has the visible h1 */}
+            <h1 className="sr-only lg:hidden">{tHero("title")}</h1>
+            <div className="mb-1 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
               <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400 sm:text-xs">
                 {t("intro.progress", { current: step + 1, total: TOTAL_STEPS })}
               </p>
-              <p className="hidden items-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-400 sm:flex sm:text-xs">
+              <p className="flex items-center gap-1.5 text-[11px] leading-snug text-slate-500 dark:text-slate-400 sm:text-xs">
                 <Shield className="h-3.5 w-3.5 shrink-0 text-emerald-600 dark:text-emerald-400" aria-hidden />
                 {t("layout.secureNote")}
               </p>
@@ -1158,11 +1160,6 @@ export default function GetCoveredFastFunnel({ licensedStateCount }: Props) {
                 />
               </div>
             </div>
-
-            <p className="mt-3 flex items-start gap-1.5 text-[11px] leading-snug text-slate-500 dark:text-slate-400 sm:hidden">
-              <Shield className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-600" aria-hidden />
-              {t("layout.secureNote")}
-            </p>
 
             <div className="mt-7 rounded-2xl border border-slate-200/80 bg-white/95 p-5 shadow-[0_4px_40px_-12px_rgba(15,23,42,0.12),0_0_0_1px_rgba(255,255,255,0.6)_inset] backdrop-blur-sm dark:border-slate-700/80 dark:bg-slate-900/85 dark:shadow-[0_4px_40px_-12px_rgba(0,0,0,0.35)] sm:p-7 sm:px-8">
               {step === 0 && !zipLoading && (
@@ -1206,20 +1203,6 @@ export default function GetCoveredFastFunnel({ licensedStateCount }: Props) {
                   </Button>
                 </div>
               )}
-            </div>
-
-            {/* Mobile / tablet: marketing after the form (desktop uses left hero column) */}
-            <div className="mt-10 border-t border-slate-200/90 pt-8 lg:hidden dark:border-slate-700/80">
-              <p className="mb-3 inline-flex w-fit items-center gap-2 rounded-full border border-slate-200/90 bg-white px-3 py-1 text-[11px] font-medium uppercase tracking-wider text-slate-600 shadow-sm dark:border-slate-600 dark:bg-slate-800/80 dark:text-slate-300 sm:text-xs">
-                <Shield className="h-3.5 w-3.5 shrink-0 text-emerald-600 dark:text-emerald-400" aria-hidden />
-                {t("layout.heroBadge")}
-              </p>
-              <h1 className="text-2xl font-bold leading-tight tracking-tight text-slate-900 dark:text-white sm:text-3xl">
-                {tHero("title")}
-              </h1>
-              <p className="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-400 sm:text-[15px]">
-                {tHero("subtitle")}
-              </p>
             </div>
           </div>
         </div>

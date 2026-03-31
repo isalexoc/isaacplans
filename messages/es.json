@@ -426,6 +426,10 @@
       "emailLabel": "Correo electrónico",
       "licensedStates": "Licenciado en {states}+ Estados"
     },
+    "adsMinimal": {
+      "copyright": "© {year} Isaac Plans Insurance. Todos los derechos reservados.",
+      "fullSite": "Sitio web completo"
+    },
     "links": {
       "guide": "Guía de Seguros",
       "faq": "Preguntas Frecuentes",
@@ -2172,6 +2176,15 @@
         "invalidEmail": "Correo no válido",
         "invalidPhone": "Ingrese un teléfono válido de 10 dígitos en EE. UU."
       }
+    }
+  },
+  "getHealthCoverageFastAdsPage": {
+    "metadata": {
+      "title": "Obtenga cobertura de salud rápido | Isaac Plans Insurance",
+      "description": "Responda unas preguntas breves para ver opciones que puedan encajar—ACA, temporal, dental y visión, y más. Asesoría bilingüe con licencia.",
+      "keywords": "cuestionario seguro de salud, cobertura rápida, Mercado ACA, seguro temporal, Isaac Plans",
+      "imageAlt": "Ambiente de salud sereno que representa orientación confiable en cobertura",
+      "breadcrumbPage": "Cobertura de salud rápida"
     }
   },
   "shortTermMedicalPage": {

@@ -1,5 +1,6 @@
 // components/Footer.tsx – server component (zero JS on client)
 
+import { headers } from "next/headers";
 import {
   Phone as PhoneIcon,
   Mail as MailIcon,
@@ -12,6 +13,7 @@ import {
 
 import Image from "next/image";
 import { Link } from "@/i18n/navigation"; // locale‑aware wrappers
+import Logo from "@/components/logo";
 import { getTranslations } from "next-intl/server";
 import { Separator } from "@/components/ui/separator";
 import { NewsletterFooter } from "@/components/newsletter-footer";
@@ -28,10 +30,40 @@ const SITE_NAME = "Isaac Plans";
 const LOGO_URL =
   "https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_40,h_40,c_fill,g_auto/isaacplanslogo_tkraak.png";
 
+/** Slim footer for paid-ads landing pages (minimal exits). */
+async function MinimalAdsFooter() {
+  const t = await getTranslations("footer.adsMinimal");
+  const year = new Date().getFullYear();
+  return (
+    <footer
+      className="border-t border-gray-200 bg-gray-50 py-8 dark:border-gray-800 dark:bg-gray-950"
+      aria-label="Footer"
+    >
+      <div className="container mx-auto flex flex-col items-center justify-between gap-6 px-4 sm:flex-row sm:px-6 lg:px-8">
+        <Logo />
+        <p className="order-3 text-center text-sm text-gray-600 dark:text-gray-400 sm:order-none">
+          {t("copyright", { year })}
+        </p>
+        <Link
+          href="/"
+          className="text-sm font-semibold text-[hsl(var(--custom))] transition hover:underline"
+        >
+          {t("fullSite")}
+        </Link>
+      </div>
+    </footer>
+  );
+}
+
 /* ──────────────────────────────────────────────
    Footer – rendered on the server only
 ────────────────────────────────────────────── */
 export default async function Footer() {
+  const headerList = await headers();
+  if (headerList.get("x-is-ads-landing") === "1") {
+    return await MinimalAdsFooter();
+  }
+
   /* Translations */
   const tFooter = await getTranslations("footer");
   const tNav = await getTranslations("header.nav");

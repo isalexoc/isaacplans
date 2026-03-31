@@ -39,7 +39,15 @@ export default clerkMiddleware(async (auth, req) => {
   
   // All other routes are public for now - no auth.protect() call
   // Just pass through to next-intl middleware for locale handling
-  return intlMiddleware(req);
+  const response = intlMiddleware(req);
+  const pathname = req.nextUrl.pathname;
+  if (
+    pathname.includes("/get-health-coverage-fast") ||
+    pathname.includes("/cobertura-salud-rapida")
+  ) {
+    response.headers.set("x-is-ads-landing", "1");
+  }
+  return response;
 });
 
 export const config = {

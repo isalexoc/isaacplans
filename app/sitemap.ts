@@ -92,6 +92,7 @@ const PAGES: Page[] = [
   { href: "/iul/referrals", changeFrequency: "monthly", priority: 0.7 },
 
   { href: "/get-covered-fast", changeFrequency: "weekly", priority: 0.82 },
+  { href: "/get-health-coverage-fast", changeFrequency: "weekly", priority: 0.82 },
 
   // Short Term Medical
   { href: "/short-term-medical", changeFrequency: "monthly", priority: 0.8 },
