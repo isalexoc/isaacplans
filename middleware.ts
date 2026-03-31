@@ -1,4 +1,5 @@
 // middleware.ts
+import { NextResponse } from "next/server";
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import createMiddleware from "next-intl/middleware";
 import { routing } from "./i18n/routing";
@@ -14,6 +15,16 @@ const isProtectedRoute = createRouteMatcher([
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
+  // Legacy blog category slug → renamed category
+  const legacyCategory = req.nextUrl.pathname.match(
+    /^\/(en|es)\/blog\/category\/short-term-medical\/?$/
+  );
+  if (legacyCategory) {
+    const url = req.nextUrl.clone();
+    url.pathname = `/${legacyCategory[1]}/blog/category/temporary-health-insurance`;
+    return NextResponse.redirect(url, 308);
+  }
+
   // Handle API routes that need auth
   if (req.nextUrl.pathname.startsWith('/api/blog')) {
     // API routes are handled by the route handlers themselves

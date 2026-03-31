@@ -111,6 +111,10 @@ export const routing = defineRouting({
       en: "/carriers/manhattan/shortterm",
       es: "/carriers/manhattan/shortterm",
     },
+    "/get-covered-fast": {
+      en: "/get-covered-fast",
+      es: "/cobertura-rapida",
+    },
     "/short-term-medical": {
       en: "/short-term-medical",
       es: "/cobertura-a-corto-plazo",

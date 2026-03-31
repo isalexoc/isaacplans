@@ -18,7 +18,7 @@ export const presentationScriptType = defineType({
           { title: 'Dental & Vision', value: 'dentalVision' },
           { title: 'Hospital Indemnity', value: 'hospitalIndemnity' },
           { title: 'Final Expense / Burial', value: 'finalExpense' },
-          { title: 'Short Term Medical', value: 'shortTermMedical' },
+          { title: 'Temporary health insurance', value: 'shortTermMedical' },
         ],
       },
       validation: (rule) => rule.required(),
@@ -774,7 +774,7 @@ export const presentationScriptType = defineType({
         'dentalVision': 'Dental & Vision',
         'hospitalIndemnity': 'Hospital Indemnity',
         'finalExpense': 'Final Expense',
-        'shortTermMedical': 'Short Term Medical',
+        'shortTermMedical': 'Temporary health insurance',
       };
       const lobLabel = lobLabels[lineOfBusiness] || lineOfBusiness;
       return {

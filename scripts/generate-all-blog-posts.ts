@@ -2883,7 +2883,7 @@ Elegir entre COBRA y Seguro Médico de Corto Plazo es una decisión significativ
 - Te ayudaré a inscribirte en tu cobertura elegida
 
 **No hay costo para trabajar conmigo, y no hay obligación.** Asegurémonos de que elijas la cobertura que protege tu salud sin arruinar tu presupuesto. Comunícate hoy—estoy aquí para ayudarte a tomar la decisión correcta.`,
-      category: "short-term-medical",
+      category: "temporary-health-insurance",
       tags: [
         "Short Term Medical vs COBRA",
         "COBRA insurance",
@@ -3512,7 +3512,7 @@ El seguro médico de corto plazo puede ser una excelente solución para situacio
 - Recomendaré la mejor solución para ti
 
 **No hay costo para trabajar conmigo, y no hay obligación.** Determinemos si el Seguro Médico de Corto Plazo puede proporcionar la cobertura temporal que necesitas. Comunícate hoy—estoy aquí para ayudarte a tomar la decisión correcta.`,
-      category: "short-term-medical",
+      category: "temporary-health-insurance",
       tags: [
         "who needs short term medical",
         "short term medical eligibility",
@@ -4530,7 +4530,7 @@ Los costos del seguro médico de corto plazo incluyen mucho más que solo las pr
 - Recomendaré el mejor valor para tu presupuesto
 
 **No hay costo para trabajar conmigo, y no hay obligación.** Asegurémonos de que entiendas todos los costos antes de inscribirte. Comunícate hoy—estoy aquí para ayudarte a tomar una decisión financiera informada.`,
-      category: "short-term-medical",
+      category: "temporary-health-insurance",
       tags: [
         "short term medical costs",
         "temporary health insurance costs",

@@ -54,7 +54,7 @@ const linesOfBusiness: LineOfBusiness[] = [
   },
   {
     id: "shortTermMedical",
-    name: "Short Term Medical",
+    name: "Temporary health insurance",
     icon: Heart,
     description: "Temporary health insurance coverage",
   },

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
 import { BackHome } from "@/components/back-home";
 import ShortTermCarriersSection, {
   stmCarrierHeroUrl,
@@ -79,6 +80,43 @@ export default async function CarriersIndexPage() {
         </p>
       </div>
 
+      <div className="mx-auto max-w-3xl px-4 pb-10 sm:px-6">
+        <div className="rounded-2xl border border-slate-200/90 bg-white/90 p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900/60">
+          <h2 className="text-center text-lg font-bold text-slate-900 dark:text-white">
+            {t("guided.title")}
+          </h2>
+          <p className="mt-2 text-center text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+            {t("guided.body")}
+          </p>
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+            <Link
+              href="/get-covered-fast"
+              className="inline-flex rounded-full bg-[hsl(var(--custom))] px-4 py-2 text-sm font-semibold text-white shadow hover:opacity-95"
+            >
+              {t("guided.linkMatch")}
+            </Link>
+            <Link
+              href="/short-term-medical"
+              className="inline-flex rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
+            >
+              {t("guided.linkStm")}
+            </Link>
+            <Link
+              href="/aca"
+              className="inline-flex rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
+            >
+              {t("guided.linkAca")}
+            </Link>
+            <Link
+              href="/contact"
+              className="inline-flex rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
+            >
+              {t("guided.linkContact")}
+            </Link>
+          </div>
+        </div>
+      </div>
+
       <ShortTermCarriersSection
         label={t("section.label")}
         title={t("section.title")}
@@ -89,6 +127,9 @@ export default async function CarriersIndexPage() {
             id: "uhone",
             name: t("cards.uhone.name"),
             blurb: t("cards.uhone.blurb"),
+            bestFor: t("cards.uhone.bestFor"),
+            notIdeal: t("cards.uhone.notIdeal"),
+            timeNote: t("cards.uhone.timeNote"),
             href: hub("/carriers/uhone"),
             heroSrc: stmCarrierHeroUrl("pexels-august-de-richelieu-4260639_qgzqnk"),
             logoSrc:
@@ -98,6 +139,9 @@ export default async function CarriersIndexPage() {
             id: "pivot",
             name: t("cards.pivot.name"),
             blurb: t("cards.pivot.blurb"),
+            bestFor: t("cards.pivot.bestFor"),
+            notIdeal: t("cards.pivot.notIdeal"),
+            timeNote: t("cards.pivot.timeNote"),
             href: hub("/carriers/pivot/shortterm"),
             heroSrc: stmCarrierHeroUrl("pexels-pixabay-356040_kzryk7"),
             logoSrc:
@@ -107,6 +151,9 @@ export default async function CarriersIndexPage() {
             id: "manhattan",
             name: t("cards.manhattan.name"),
             blurb: t("cards.manhattan.blurb"),
+            bestFor: t("cards.manhattan.bestFor"),
+            notIdeal: t("cards.manhattan.notIdeal"),
+            timeNote: t("cards.manhattan.timeNote"),
             href: hub("/carriers/manhattan"),
             heroSrc: stmCarrierHeroUrl("pexels-gabby-k-7114420_ev9ryf"),
             logoSrc:
@@ -116,6 +163,9 @@ export default async function CarriersIndexPage() {
             id: "allstate",
             name: t("cards.allstate.name"),
             blurb: t("cards.allstate.blurb"),
+            bestFor: t("cards.allstate.bestFor"),
+            notIdeal: t("cards.allstate.notIdeal"),
+            timeNote: t("cards.allstate.timeNote"),
             href: hub("/carriers/allstate"),
             heroSrc: stmCarrierHeroUrl("pexels-shvetsa-4421496_ex5gi4"),
             logoSrc:

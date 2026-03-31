@@ -30,7 +30,7 @@
         },
         "hospital": {
           "title": "Indemnización hospitalaria y efectivo fijo",
-          "subtitle": "Beneficios en efectivo para eventos hospitalarios—a menudo combinados con Medicare Advantage o planes con deducible alto."
+          "subtitle": "Beneficios en efectivo para eventos hospitalarios—a menudo combinados con planes con deducible alto u otra cobertura que ya tenga."
         },
         "criticalLife": {
           "title": "Enfermedad crítica y protección de vida",
@@ -63,7 +63,7 @@
         },
         "triTerm": {
           "title": "TriTerm Medical",
-          "body": "Seguro temporal con duraciones de casi tres años en estados seleccionados. Beneficios más amplios que el STM típico—disponible en 16 estados.",
+          "body": "TriTerm es una línea médica puente más larga de UnitedHealthOne—no es lo mismo que el STLDI clásico. En estados elegibles, el tiempo total en vigor puede acercarse a unos tres años donde el producto esté presentado y vendido (los materiales del asegurador suelen citar alrededor de 16 estados—la lista viva puede cambiar; úsela como guía). Los topes federales STLDI (sept 2024) aplican a ventas clase STLDI; TriTerm sigue sus propias formas y aprobaciones estatales. Confirme siempre elegibilidad, diseño de beneficios y duraciones exactas en la ruta de cotización oficial UHOne para su código postal.",
           "time": "~25 minutos"
         },
         "healthProtector": {
@@ -73,7 +73,7 @@
         },
         "advantageGuard": {
           "title": "AdvantageGuard",
-          "body": "Indemnización hospitalaria para edades de emisión 60–90: beneficios fijos en efectivo por eventos hospitalarios. Opciones complementarias para Medicare Advantage cuando paga de su bolsillo.",
+          "body": "Indemnización hospitalaria para edades de emisión 60–90: beneficios fijos en efectivo por eventos hospitalarios. Suele usarse cuando aún tiene gastos hospitalarios de bolsillo junto a su cobertura médica principal—confirme reglas de coordinación en la cotización.",
           "time": "~15 minutos"
         },
         "hospitalWise": {

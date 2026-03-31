@@ -13,9 +13,12 @@ export default async function Coverage() {
   /* hydrate placeholders */
   const subtitle = t("subtitle", { states });
   const description = t("description");
-  const featureLines = t
-    .raw("features")
-    .map((f: string) => f.replace("{{states}}", states));
+  const featureLines = (t.raw("features") as string[]).map((f: string) =>
+    f
+      .replace("{{states}}", states)
+      // Legacy copy (incl. curly apostrophe) — keep UI consistent if cache/old bundle serves old messages
+      .replace(/Over\s+8\s+years['\u2019]\s+experience/gi, "10 years of experience")
+  );
 
   return (
     <section

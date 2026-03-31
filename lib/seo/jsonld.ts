@@ -62,7 +62,7 @@ export const getAgencyLd = (locale: string = "en"): WithContext<InsuranceAgency>
   legalName: "Ominvestments, LLC",
   slogan: "Coverage made simple",
   description:
-    "Bilingual insurance agency helping families compare ACA marketplace, Medicare, life, dental and vision plans across the United States.",
+    "Bilingual insurance agency helping families compare ACA Marketplace, health, dental, vision, life, and supplemental plans across the United States.",
   url: BASE_URL,
   logo: LOGO_URL,
   image: LOGO_URL,
@@ -139,10 +139,6 @@ export const getAgencyLd = (locale: string = "en"): WithContext<InsuranceAgency>
         "@type": "Offer",
         itemOffered: { "@type": "Service", name: "Vision Insurance Plans" },
       },
-      {
-        "@type": "Offer",
-        itemOffered: { "@type": "Service", name: "Medicare Plan Comparison" },
-      },
     ],
   },
   };
@@ -157,7 +153,7 @@ export const siteLd: WithContext<WebSite> = {
   name: "Isaac Plans Insurance",
   alternateName: "IsaacPlans.com",
   description:
-    "Bilingual insurance agency specializing in ACA, Medicare, life, dental and vision plans across the United States.",
+    "Bilingual insurance agency specializing in ACA Marketplace, health, dental, vision, life, and supplemental insurance across the United States.",
   inLanguage: ["en", "es"],
   publisher: { "@id": `${BASE_URL}/#organization` },
   // If you add an on-site search, uncomment this:

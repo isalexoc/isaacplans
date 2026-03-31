@@ -43,7 +43,7 @@ export async function generateMetadata(): Promise<Metadata> {
     default: "https://www.isaacplans.com/images/stmain.png",
   }) as string;
   const alt = t("imageAlt", {
-    default: "Short Term Medical overview preview",
+    default: "Temporary health insurance overview preview",
   });
 
   const routeKey = "/short-term-medical";
@@ -108,7 +108,7 @@ export default async function ShortTermMedicalPage() {
   return (
     <ShortTermMedicalCtaProvider>
       <div className="relative min-h-screen">
-      <ServicePageTracker serviceName="Short Term Medical Insurance" serviceCategory="short-term-medical" />
+      <ServicePageTracker serviceName="Temporary health insurance" serviceCategory="temporary-health-insurance" />
       <BackHome />
       {/* HERO ----------------------------------------------------------- */}
       <HeroWithTestimonialsGeneric

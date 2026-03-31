@@ -852,7 +852,7 @@ El seguro médico de corto plazo puede ser una herramienta valiosa para llenar b
 - Proporcionaré recomendaciones personalizadas basadas en tu línea de tiempo
 
 **No hay costo para trabajar conmigo, y no hay obligación.** Determinemos si el seguro médico de corto plazo puede proporcionar la cobertura temporal que necesitas. Comunícate hoy—estoy aquí para ayudarte a tomar decisiones informadas sobre tu seguro de salud.`,
-      category: "short-term-medical" as const,
+      category: "temporary-health-insurance" as const,
       tags: [
         "short term medical insurance",
         "temporary health insurance",

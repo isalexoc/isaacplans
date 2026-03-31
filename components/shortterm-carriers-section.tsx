@@ -6,6 +6,10 @@ export type CarrierItem = {
   id: string;
   name: string;
   blurb: string;
+  /** Optional routing hints (shown under blurb). */
+  bestFor?: string;
+  notIdeal?: string;
+  timeNote?: string;
   href: string;
   /** Full URL to hero / background image (e.g. Cloudinary). */
   heroSrc?: string;
@@ -221,6 +225,13 @@ export default function ShortTermCarriersSection({
                     <p className="mt-2 flex-1 text-left text-sm leading-relaxed text-slate-600 line-clamp-4 dark:text-slate-400 md:mt-3 md:text-center md:line-clamp-none">
                       {c.blurb}
                     </p>
+                    {(c.bestFor || c.notIdeal || c.timeNote) && (
+                      <ul className="mt-3 space-y-1.5 text-left text-xs leading-snug text-slate-500 dark:text-slate-400 md:text-center">
+                        {c.bestFor && <li>{c.bestFor}</li>}
+                        {c.notIdeal && <li>{c.notIdeal}</li>}
+                        {c.timeNote && <li className="text-slate-500">{c.timeNote}</li>}
+                      </ul>
+                    )}
 
                     <div className="mt-4 md:mt-6">
                       <Button

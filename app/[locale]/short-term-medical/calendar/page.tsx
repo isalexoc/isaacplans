@@ -118,7 +118,7 @@ export default async function ShortTermMedicalCalendarPage({
 
       <iframe
         src={iframeSrc}
-        title="Short Term Medical Appointment Calendar"
+        title={t("meta.imageAlt")}
         className="w-full max-w-4xl h-[80vh] md:rounded-lg border-none shadow-lg"
       />
     </main>

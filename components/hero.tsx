@@ -107,8 +107,8 @@ export default async function Hero() {
               aria-label={t("hero.stats.label")}
             >
               <Stat value={`${states}+`} label={t("hero.stats.states")} />
-              <Stat value="100%" label={t("hero.stats.clients")} />
-              <Stat value="100%" label={t("hero.stats.satisfaction")} />
+              <Stat value={t("hero.stats.experienceValue")} label={t("hero.stats.experience")} />
+              <Stat value={t("hero.stats.bilingualValue")} label={t("hero.stats.bilingual")} />
             </div>
           </div>
 

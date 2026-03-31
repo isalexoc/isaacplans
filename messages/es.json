@@ -30,7 +30,7 @@
           "desc": "Cobertura permanente y simple para entierro"
         },
         "shortTermMedical": {
-          "title": "Seguro Médico de Corto Plazo",
+          "title": "Seguro médico temporal",
           "desc": "Cobertura temporal para brechas"
         }
       },
@@ -45,8 +45,10 @@
       "stats": {
         "label": "Estadísticas",
         "states": "Estados con Licencia",
-        "clients": "Clientes Atendidos",
-        "satisfaction": "Tasa de Satisfacción"
+        "experienceValue": "10+",
+        "experience": "Años en la industria aseguradora",
+        "bilingualValue": "EN · ES",
+        "bilingual": "Atención bilingüe"
       },
       "onPicUp": {
         "title": "ACA Certificado",
@@ -118,7 +120,7 @@
           ]
         },
         "shortTermMedical": {
-          "title": "Seguro Médico a Corto Plazo",
+          "title": "Seguro médico temporal",
           "description": "Seguro médico temporal diseñado para cubrir brechas en la cobertura—ideal para períodos entre trabajos o espera.",
           "features": [
             "Cobertura temporal para brechas en la cobertura",
@@ -148,7 +150,7 @@
     },
     "profile": {
       "title": "Su Profesional de Seguros Dedicado",
-      "description1": "Con experiencia en la industria de seguros de salud, me especializo en ayudar a individuos y familias a navegar el complejo mundo de los seguros. Estoy licenciado en seguros ACA, Vida, Dental y Visión en {states}+ estados.",
+      "description1": "Con experiencia en la industria aseguradora, me especializo en ayudar a individuos y familias a evaluar opciones de cobertura. Estoy licenciado en seguros ACA, Vida, Dental y Visión en {states}+ estados.",
       "description2": "Estar licenciado en múltiples estados me permite atender clientes a nivel nacional y brindarle orientación experta sin importar su ubicación. Me mantengo actualizado con los cambios regulatorios y nuevas opciones de planes.",
       "certifications": "Estados donde poseo licencia válida",
       "certs": [
@@ -176,7 +178,7 @@
         },
         "experience": {
           "title": "Experiencia",
-          "description": "Más de una década de experiencia en seguros de salud"
+          "description": "Más de 10 años de experiencia en la industria aseguradora"
         },
         "education": {
           "title": "Educación Continua",
@@ -196,7 +198,7 @@
         "Seguros de vida",
         "Seguro dental",
         "Seguro de visión",
-        "Más de 8 años de experiencia",
+        "Más de 10 años de experiencia",
         "Servicio personalizado en español",
         "Consultas gratuitas",
         "Soporte continuo"
@@ -237,7 +239,7 @@
             "description": "Cobertura médica asequible bajo el Mercado de Seguros ACA."
           },
           "shortTermMedical": {
-            "title": "Seguro Médico a Corto Plazo",
+            "title": "Seguro médico temporal",
             "description": "Seguro médico temporal para cubrir brechas inesperadas en la cobertura."
           },
           "dentalVision": {
@@ -398,8 +400,12 @@
       }
     }
   },
+  "statesMap": {
+    "licensedLegend": "Estados con licencia",
+    "otherLegend": "Otros estados"
+  },
   "footer": {
-    "description": "Su socio de seguros de confianza especializado en cobertura ACA y Medicare en {states}+ estados. Servicio profesional y personalizado en el que puede confiar.",
+    "description": "Su agente independiente de confianza para el Mercado ACA, salud, dental, visión, vida y suplementos en {states}+ estados. Servicio profesional y personalizado en el que puede confiar.",
     "services": "Servicios",
     "resources": "Recursos",
     "company": "Empresa",
@@ -470,7 +476,7 @@
       "title": "Agende Su Consulta Gratuita",
       "meta": {
         "title": "Agendar Cita | Isaac Plans Insurance",
-        "description": "Agende su consulta gratuita con Isaac Plans Insurance. Obtenga asesoría bilingüe sobre ACA, Medicare, vida y más.",
+        "description": "Agende su consulta gratuita con Isaac Plans Insurance. Obtenga asesoría bilingüe sobre ACA, salud, dental, visión, vida y más.",
         "keywords": "agendar cita, consulta de seguros, cotización gratis, bilingüe, Isaac Plans",
         "image": "https://isaacplans.com/images/contact_isaacplans_es.png",
         "imageAlt": "Isaac Plans Insurance – Agende su consulta"
@@ -478,10 +484,10 @@
     },
     "contactMetadata": {
       "title": "Contacto Isaac Plans Insurance | Consulta Bilingüe Gratis",
-      "description": "Llama, envía correo o WhatsApp a Isaac Plans Insurance para planes ACA, Medicare y vida. Cotización gratuita en español e inglés.",
+      "description": "Llama, envía correo o WhatsApp a Isaac Plans Insurance para planes ACA, salud, dental, visión, vida y suplementos. Cotización gratuita en español e inglés.",
       "image": "https://isaacplans.com/images/contact_isaacplans_es.png",
       "imageAlt": "Isaac Orraiz – Tarjeta de contacto de Isaac Plans Insurance",
-      "keywords": "contacto seguros, Isaac Plans, agente de seguros, consulta gratuita, seguros ACA, Medicare, seguros de vida, asesoría bilingüe",
+      "keywords": "contacto seguros, Isaac Plans, agente de seguros, consulta gratuita, seguros ACA, seguros de vida, asesoría bilingüe, dental visión",
       "breadcrumbs": {
         "home": "Inicio",
         "contact": "Contacto"
@@ -490,7 +496,7 @@
   },
   "privacyPolicy": {
     "title": "Política de Privacidad",
-    "lastUpdated": "Última actualización: 20 de junio de 2025",
+    "lastUpdated": "Última actualización: 30 de marzo de 2026",
     "back": "Volver al Inicio",
     "cta": {
       "headline": "¿Preguntas sobre su privacidad?",
@@ -596,7 +602,7 @@
   },
   "termsPage": {
     "title": "Términos y Condiciones",
-    "lastUpdated": "Última actualización: 20 de junio de 2025",
+    "lastUpdated": "Última actualización: 30 de marzo de 2026",
     "back": "Volver al Inicio",
     "cta": {
       "headline": "¿Preguntas sobre los Términos?",
@@ -629,7 +635,7 @@
         "content": "Isaac Plans Insurance proporciona los siguientes servicios:",
         "items": [
           "Consultoría y asesoramiento en seguros ACA (Obamacare)",
-          "Servicios de seguros Medicare (Partes A, B, C y D)",
+          "Seguro médico temporal, indemnización hospitalaria y productos suplementarios (disponibilidad según estado)",
           "Seguros de vida, dental y visión",
           "Comparación y análisis de planes de seguros",
           "Asistencia con inscripciones y renovaciones",
@@ -693,7 +699,7 @@
         "items": [
           "Regulaciones estatales de seguros",
           "Ley de Cuidado de Salud Asequible (ACA)",
-          "Regulaciones de Medicare y Medicaid",
+          "Medicaid y otras normativas federales y estatales de seguros de salud cuando apliquen",
           "Leyes de protección al consumidor",
           "Requisitos de licencias profesionales"
         ]
@@ -1090,11 +1096,11 @@
     }
   },
   "layoutMetadata": {
-    "title": "Isaac Plans Insurance | Seguros ACA, Medicare, Vida, Dental, Salud y Más",
-    "description": "Agencia de seguros bilingüe que compara planes del Mercado ACA, Medicare, vida, dental y visión en {states}+ estados de EE. UU. Cotización gratis con experto.",
+    "title": "Isaac Plans Insurance | ACA, Salud, Dental y Vida",
+    "description": "Agencia de seguros bilingüe que compara planes del Mercado ACA, salud, dental, visión, vida y suplementos en {states}+ estados de EE. UU. Cotización gratis con experto.",
     "image": "https://www.isaacplans.com/images/og_isaacplans.png",
     "imageAlt": "Logo de Isaac Plans Insurance sobre un fondo degradado azul",
-    "keywords": "Seguros ACA, corredor de Medicare, agencia bilingüe de seguros, seguros de vida, planes dentales y de visión, agente de seguros"
+    "keywords": "Seguros ACA, agencia bilingüe de seguros, seguros de vida, planes dentales y de visión, seguro temporal, indemnización hospitalaria, agente de seguros"
   },
   "HIpage": {
     "hero": {
@@ -1324,7 +1330,7 @@
     },
     "support": {
       "heading": "¿Necesitas ayuda ahora?",
-      "body": "Agenda una consulta gratuita o envíanos tus preguntas; responderemos en un día hábil."
+      "body": "Agenda una consulta gratuita o envíanos tus preguntas; responderemos en un día hábil. Isaac está licenciado para los productos de salud y vida que presenta; la cobertura y disponibilidad dependen de su estado y situación."
     }
   },
   "NotFoundPage": {
@@ -1373,7 +1379,7 @@
               "label": "Puede solicitar cobertura en el siguiente enlace:"
             },
             "ctaButton": {
-              "title": "Obtener Cotización",
+              "title": "Cotizar seguro médico temporal",
               "subtitle": "Orientación rápida y sin compromiso"
             },
             "enrollmentCta": {
@@ -1850,41 +1856,94 @@
       "title": "Aseguradoras asociadas",
       "subtitle": "Estas rutas lo llevan a la inscripción autorizada para productos fuera del Mercado—corto plazo, dental y visión, indemnización hospitalaria y otras opciones complementarias según la aseguradora. Para cobertura ACA con subsidios, use Planes ACA en Servicios."
     },
+    "guided": {
+      "title": "¿No sabe cuál aseguradora le conviene?",
+      "body": "Empiece con una orientación breve y luego elija un socio cuando esté listo. También puede autoinscribirse directamente desde las tarjetas abajo.",
+      "linkMatch": "Orientarse primero",
+      "linkStm": "Resumen de seguro temporal",
+      "linkAca": "Planes del Mercado ACA",
+      "linkContact": "Hablar con Isaac"
+    },
     "section": {
       "label": "Autoinscripción",
-      "title": "Elija una aseguradora",
-      "cta": "Continuar",
-      "ctaMobile": "Continuar"
+      "title": "Compare y continúe",
+      "cta": "Ver planes e inscribirse",
+      "ctaMobile": "Ver e inscribirse"
     },
     "cards": {
       "uhone": {
         "name": "UnitedHealthcare (UHOne)",
-        "blurb": "Tienda completa: corto plazo, dental, visión y más—empiece aquí para la gama más amplia de opciones UnitedHealthOne."
+        "blurb": "Tienda completa: corto plazo, dental, visión y más—empiece aquí para la gama más amplia de opciones UnitedHealthOne.",
+        "bestFor": "Ideal si: quiere la gama más amplia y puentes tipo TriTerm donde estén presentados en su estado.",
+        "notIdeal": "Evite si: necesita protecciones garantizadas del ACA o medicamentos recurrentes—compare con el Mercado.",
+        "timeNote": "Flujo típico: ~15–25 minutos en el sitio del asegurador"
       },
       "pivot": {
         "name": "Pivot Health",
-        "blurb": "Opciones de corto plazo económicas y varios periodos para cubrir brechas de cobertura."
+        "blurb": "Opciones de corto plazo económicas y varios periodos para cubrir brechas de cobertura.",
+        "bestFor": "Ideal si: busca STM directo con mensaje claro de cobertura puente.",
+        "notIdeal": "Evite si: espera preventivos integrales o cobertura de preexistencias.",
+        "timeNote": "Flujo típico: ~15–25 minutos en el sitio del asegurador"
       },
       "manhattan": {
         "name": "ManhattanLife",
-        "blurb": "Corto plazo y productos complementarios—combine cobertura cuando tenga sentido para su situación."
+        "blurb": "Corto plazo y productos complementarios—combine cobertura cuando tenga sentido para su situación.",
+        "bestFor": "Ideal si: quiere combinar STM con indemnización u otros suplementos según su estado.",
+        "notIdeal": "Evite si: busca un solo plan ACA integral—use la ruta ACA.",
+        "timeNote": "Flujo típico: varía por producto—confirme en la cotización"
       },
       "allstate": {
         "name": "Allstate Health Solutions",
-        "blurb": "Corto plazo con Allstate Health Solutions, avisos STLDI claros e inscripción segura."
+        "blurb": "Corto plazo con Allstate Health Solutions, avisos STLDI claros e inscripción segura.",
+        "bestFor": "Ideal si: prefiere STM con avisos STLDI claros y marca reconocida.",
+        "notIdeal": "Evite si: necesita maternidad, paridad de salud mental o preexistencias como en ACA.",
+        "timeNote": "Flujo típico: ~15–25 minutos en el sitio del asegurador"
+      }
+    }
+  },
+  "getCoveredFastPage": {
+    "metadata": {
+      "title": "Cobertura rápida | Isaac Plans Insurance",
+      "description": "Rutas rápidas al Mercado ACA, seguro temporal, autoinscripción con socios o una llamada bilingüe gratuita.",
+      "keywords": "seguro de salud rápido, seguro temporal, Mercado ACA, Isaac Plans"
+    },
+    "hero": {
+      "title": "Obtenga cobertura—empiece por el camino correcto",
+      "subtitle": "Nada obligatorio aquí: elija cómo prefiere comprar. Si no está seguro, lea el resumen de seguro temporal o reserve una llamada."
+    },
+    "cards": {
+      "aca": {
+        "title": "ACA / Mercado",
+        "body": "Subsidios y protecciones de inscripción garantizada—mejor cuando califica y quiere cobertura integral.",
+        "cta": "Ir a ACA"
+      },
+      "stm": {
+        "title": "Seguro médico temporal (STLDI)",
+        "body": "Cobertura médica temporal para brechas—reglas, duraciones y disponibilidad varían por estado y producto. Lea los avisos antes de inscribirse.",
+        "cta": "Resumen STM"
+      },
+      "carriers": {
+        "title": "Autoinscripción con socios",
+        "body": "Continúe con UnitedHealthOne, Pivot, Manhattan Life o Allstate Health Solutions para productos elegibles fuera del Mercado.",
+        "cta": "Hub de aseguradoras"
+      },
+      "contact": {
+        "title": "Hablar con Isaac",
+        "body": "WhatsApp, teléfono o cita—ayuda bilingüe para comparar antes de hacer clic en inscribirse.",
+        "cta": "Contacto"
       }
     }
   },
   "shortTermMedicalPage": {
     "calendar": {
-      "title": "Programe su consulta de seguro médico a corto plazo",
+      "title": "Programe su consulta de seguro médico temporal",
       "backButton": "← Volver",
       "meta": {
-        "title": "Calendario de citas - Seguro médico a corto plazo | Isaac Plans Insurance",
-        "description": "Programe su consulta de seguro médico a corto plazo con Isaac Plans Insurance. Obtenga orientación bilingüe y opciones personalizadas para cobertura temporal.",
+        "title": "Calendario de citas — seguro médico temporal | Isaac Plans Insurance",
+        "description": "Programe su consulta de seguro médico temporal con Isaac Plans Insurance. Obtenga orientación bilingüe y opciones personalizadas para cobertura temporal.",
         "keywords": "seguro médico temporal, corto plazo, cita, programar, consulta, Virginia, bilingüe",
         "image": "https://www.isaacplans.com/images/stm_es.png",
-        "imageAlt": "Calendario de citas - Seguro médico a corto plazo"
+        "imageAlt": "Calendario de citas — seguro médico temporal"
       }
     }
   },

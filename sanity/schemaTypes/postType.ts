@@ -42,7 +42,7 @@ export const postType = defineType({
       options: {
         list: [
           { title: 'ACA / Obamacare', value: 'aca' },
-          { title: 'Short Term Medical', value: 'short-term-medical' },
+          { title: 'Temporary health insurance', value: 'temporary-health-insurance' },
           { title: 'Dental & Vision', value: 'dental-vision' },
           { title: 'Hospital Indemnity', value: 'hospital-indemnity' },
           { title: 'IUL (Indexed Universal Life)', value: 'iul' },

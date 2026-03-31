@@ -30,7 +30,7 @@
         },
         "hospital": {
           "title": "Hospital cash & fixed indemnity",
-          "subtitle": "Cash benefits for hospital events—often paired with Medicare Advantage or high-deductible medical plans."
+          "subtitle": "Cash benefits for hospital events—often paired with high-deductible medical plans or other coverage you may already have."
         },
         "criticalLife": {
           "title": "Critical illness & life protection",
@@ -63,7 +63,7 @@
         },
         "triTerm": {
           "title": "TriTerm Medical Plans",
-          "body": "Short-term health insurance with coverage durations of nearly three years in select states. More robust benefits than typical STM—available in 16 states.",
+          "body": "TriTerm is a longer-bridge medical line from UnitedHealthOne—not the same as classic STLDI. In eligible states, total time in force can run up to roughly three years where the product is filed and sold (carrier materials often cite on the order of 16 states—the live list can change, so treat that as a guide). Federal STLDI caps (Sept 2024) apply to STLDI-class sales; TriTerm follows its own forms and state approvals. Always confirm state eligibility, benefit design, and exact durations in the official UHOne quote flow for your ZIP.",
           "time": "~25 minutes"
         },
         "healthProtector": {
@@ -73,7 +73,7 @@
         },
         "advantageGuard": {
           "title": "AdvantageGuard Plans",
-          "body": "Hospital indemnity for issue ages 60–90: fixed cash benefits for hospital-related events. Optional benefits designed to pair with Medicare Advantage when you pay out-of-pocket.",
+          "body": "Hospital indemnity for issue ages 60–90: fixed cash benefits for hospital-related events. Often used when you still have out-of-pocket hospital costs alongside your primary medical coverage—confirm coordination rules in the quote flow.",
           "time": "~15 minutes"
         },
         "hospitalWise": {

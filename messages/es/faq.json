@@ -80,11 +80,11 @@
       "questions": [
         {
           "question": "¿Qué es el seguro médico a corto plazo?",
-          "answer": "El seguro médico a corto plazo (STM) proporciona cobertura de salud temporal por períodos que generalmente van de 30 días a 12 meses, con algunos planes que permiten renovaciones de hasta 36 meses. Está diseñado para llenar brechas de cobertura cuando está entre trabajos, esperando la inscripción de ACA, o en otras situaciones transitorias."
+          "answer": "El STM suele referirse a seguro de duración limitada a corto plazo (STLDI) y productos médicos temporales similares. Para STLDI vendido o emitido a partir del 1 de septiembre de 2024, las reglas federales suelen limitar el periodo inicial del contrato a 3 meses y la duración total (incluidas renovaciones o extensiones) a 4 meses—pero las reglas estatales y las líneas de producto específicas varían. Algunos estados y aseguradoras ofrecen puentes o diseños de duración limitada distintos al STLDI clásico (por ejemplo, opciones plurianuales donde estén presentados). Las pólizas anteriores al 1 de septiembre de 2024 pueden seguir reglas anteriores hasta que terminen. Confirme siempre duraciones, renovaciones y avisos en los materiales oficiales de cotización y póliza de su estado."
         },
         {
           "question": "¿Para quién es mejor el seguro médico a corto plazo?",
-          "answer": "STM es ideal para personas saludables que necesitan cobertura temporal durante transiciones de vida como cambios de trabajo, recién graduados universitarios esperando cobertura del empleador, jubilados anticipados antes de la elegibilidad de Medicare, o aquellos esperando la Inscripción Abierta de ACA. No es adecuado para aquellos con condiciones preexistentes o que necesitan atención preventiva integral."
+          "answer": "STM es ideal para personas saludables que necesitan cobertura temporal durante transiciones como cambios de trabajo, recién graduados esperando cobertura del empleador, jubilados anticipados antes de que comience otra cobertura a largo plazo, o quienes esperan la Inscripción Abierta de ACA. No es adecuado para quienes tienen condiciones preexistentes o necesitan atención preventiva integral."
         },
         {
           "question": "¿Qué tan rápido puedo obtener cobertura con seguro médico a corto plazo?",
@@ -100,7 +100,7 @@
         },
         {
           "question": "¿Por cuánto tiempo puedo mantener el seguro médico a corto plazo?",
-          "answer": "Los planes de seguro médico a corto plazo típicamente duran de 30 días a 12 meses, dependiendo de las regulaciones estatales y el plan específico. Algunos estados permiten renovaciones o extensiones de hasta 36 meses en total. Sin embargo, los términos de cobertura varían por estado, así que verifique sus regulaciones locales."
+          "answer": "Depende del producto, el estado y la fecha de emisión. El STLDI clásico bajo el marco federal de septiembre de 2024 para ventas nuevas tiene los límites de periodo inicial y duración total indicados arriba. Otros estados y líneas de producto—incluidas algunas opciones puente—pueden permitir un tiempo total mayor (en algunos casos opciones plurianuales disponibles en 2026). Las pólizas anteriores pueden seguir reglas previas hasta que terminen o se renueven. Verifique siempre el plazo exacto, reglas de renovación y avisos en la ruta de cotización de su aseguradora para su código postal."
         },
         {
           "question": "¿Es el seguro médico a corto plazo más barato que los planes ACA?",
@@ -219,8 +219,8 @@
           "answer": "La Indemnización Hospitalaria paga beneficios diarios por cada día que está hospitalizado, independientemente de la razón. El seguro de Enfermedad Crítica paga un beneficio de suma global (a menudo $10,000-$100,000+) cuando es diagnosticado con una enfermedad crítica específica como cáncer, ataque cardíaco o accidente cerebrovascular. Ambos son complementarios y pueden trabajar juntos para proporcionar protección integral."
         },
         {
-          "question": "¿Puedo obtener seguro de indemnización hospitalaria si estoy en Medicare?",
-          "answer": "Sí, el seguro de indemnización hospitalaria puede complementar la cobertura de Medicare. Puede ayudar a cubrir deducibles de Medicare, copagos y otros costos de bolsillo. Sin embargo, tenga en cuenta que algunos planes de Indemnización Hospitalaria pueden tener restricciones o beneficios diferentes para beneficiarios de Medicare, así que revise los detalles del plan cuidadosamente."
+          "question": "¿Puede la indemnización hospitalaria funcionar junto a otra cobertura principal?",
+          "answer": "A menudo sí: la indemnización hospitalaria paga beneficios fijos en efectivo según la póliza y puede convivir con otra cobertura que tenga. Los beneficios, reglas de coordinación y elegibilidad varían por aseguradora y estado; lea siempre el resumen de póliza y los avisos en la cotización, y consulte a un agente licenciado si no está seguro de cómo interactúan los beneficios con su cobertura actual."
         },
         {
           "question": "¿Por cuánto tiempo duran los beneficios de Indemnización Hospitalaria?",

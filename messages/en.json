@@ -30,7 +30,7 @@
           "desc": "Simple, permanent burial coverage"
         },
         "shortTermMedical": {
-          "title": "Short Term Medical",
+          "title": "Temporary health insurance",
           "desc": "Temporary coverage for gaps"
         }
       },
@@ -45,8 +45,10 @@
       "stats": {
         "label": "Statistics",
         "states": "Licensed States",
-        "clients": "Clients Served",
-        "satisfaction": "Satisfaction Rate"
+        "experienceValue": "10+",
+        "experience": "Years in the insurance industry",
+        "bilingualValue": "EN · ES",
+        "bilingual": "Fully bilingual service"
       },
       "onPicUp": {
         "title": "ACA Certified",
@@ -128,7 +130,7 @@
           ]
         },
         "shortTermMedical": {
-          "title": "Short Term Medical",
+          "title": "Temporary health insurance",
           "description": "Temporary health insurance designed to bridge gaps in coverage—ideal for between jobs or waiting periods.",
           "features": [
             "Temporary coverage for gaps in coverage",
@@ -158,7 +160,7 @@
     },
     "profile": {
       "title": "Your Dedicated Insurance Professional",
-      "description1": "With experience in the health-insurance industry, I specialise in helping individuals and families navigate the complex world of insurance. I am licensed in ACA, Life, Dental and Vision insurance across {states}+ states.",
+      "description1": "With experience in the insurance industry, I specialise in helping individuals and families navigate coverage options. I am licensed in ACA, Life, Dental and Vision insurance across {states}+ states.",
       "description2": "Being licensed in multiple states allows me to serve clients nationwide, ensuring you receive expert guidance wherever you are. I stay up to date with regulatory changes and new plan offerings to provide the most current options.",
       "certifications": "States I Hold a Valid Licence",
       "certs": [
@@ -186,7 +188,7 @@
         },
         "experience": {
           "title": "Experience",
-          "description": "Over a decade of expertise in health-insurance"
+          "description": "10 years of experience in the insurance industry"
         },
         "education": {
           "title": "Continuous Education",
@@ -206,7 +208,7 @@
         "Life-insurance plans",
         "Dental insurance",
         "Vision insurance",
-        "Over 8 years' experience",
+        "10 years of experience",
         "Personalised service in Spanish",
         "Free consultations",
         "Ongoing support"
@@ -247,7 +249,7 @@
             "description": "Affordable health coverage under the ACA Marketplace."
           },
           "shortTermMedical": {
-            "title": "Short Term Medical",
+            "title": "Temporary health insurance",
             "description": "Temporary health insurance for unexpected gaps in coverage."
           },
           "dentalVision": {
@@ -408,8 +410,12 @@
       }
     }
   },
+  "statesMap": {
+    "licensedLegend": "Licensed states",
+    "otherLegend": "Other states"
+  },
   "footer": {
-    "description": "Your trusted insurance partner specializing in ACA and Medicare coverage across {states}+ states. Professional, personalized service you can count on.",
+    "description": "Your trusted independent agent for ACA Marketplace, health, dental, vision, life, and supplemental coverage across {states}+ states. Professional, personalized service you can count on.",
     "services": "Services",
     "resources": "Resources",
     "company": "Company",
@@ -480,7 +486,7 @@
       "title": "Schedule Your Free Consultation",
       "meta": {
         "title": "Schedule Appointment | Isaac Plans Insurance",
-        "description": "Schedule your free consultation with Isaac Plans Insurance. Get bilingual guidance on ACA, Medicare, life, and more.",
+        "description": "Schedule your free consultation with Isaac Plans Insurance. Get bilingual guidance on ACA, health, dental, vision, life, and more.",
         "keywords": "schedule appointment, insurance consultation, free quote, bilingual, Isaac Plans",
         "image": "https://isaacplans.com/images/contact_isaacplans_en.png",
         "imageAlt": "Isaac Plans Insurance – Schedule your consultation"
@@ -488,10 +494,10 @@
     },
     "contactMetadata": {
       "title": "Contact Isaac Plans Insurance | Free Bilingual Consultation",
-      "description": "Call, email or WhatsApp Isaac Plans Insurance for ACA, Medicare and life coverage. Free expert quote—English & Spanish.",
+      "description": "Call, email or WhatsApp Isaac Plans Insurance for ACA, health, dental, vision, life, and supplemental coverage. Free expert quote—English & Spanish.",
       "image": "https://isaacplans.com/images/contact_isaacplans_en.png",
       "imageAlt": "Isaac Orraiz – Isaac Plans Insurance contact card preview",
-      "keywords": "contact Isaac Plans, ACA insurance contact, Medicare broker contact, bilingual insurance agent, free insurance quote, insurance agent",
+      "keywords": "contact Isaac Plans, ACA insurance contact, bilingual insurance agent, free insurance quote, insurance agent, dental vision life",
       "breadcrumbs": {
         "home": "Home",
         "contact": "Contact"
@@ -500,7 +506,7 @@
   },
   "privacyPolicy": {
     "title": "Privacy Policy",
-    "lastUpdated": "Last updated: June 20, 2025",
+    "lastUpdated": "Last updated: March 30, 2026",
     "back": "Back to Home",
     "cta": {
       "headline": "Questions About Your Privacy?",
@@ -606,7 +612,7 @@
   },
   "termsPage": {
     "title": "Terms and Conditions",
-    "lastUpdated": "Last updated: June 20, 2025",
+    "lastUpdated": "Last updated: March 30, 2026",
     "back": "Back to Home",
     "cta": {
       "headline": "Questions About the Terms?",
@@ -639,7 +645,7 @@
         "content": "Isaac Plans provides the following services:",
         "items": [
           "ACA (Obamacare) insurance consulting and advisory",
-          "Medicare insurance services (Parts A, B, C and D)",
+          "Short-term medical, hospital indemnity, and supplemental products (availability varies by state)",
           "Life, dental and vision insurance",
           "Plan comparison and analysis",
           "Enrollment and renewal assistance",
@@ -703,7 +709,7 @@
         "items": [
           "State insurance regulations",
           "Affordable Care Act (ACA)",
-          "Medicare and Medicaid regulations",
+          "Medicaid and other applicable federal and state health-insurance regulations where relevant",
           "Federal and state consumer-protection laws",
           "Professional licensing requirements"
         ]
@@ -1100,11 +1106,11 @@
     }
   },
   "layoutMetadata": {
-    "title": "Isaac Plans Insurance | ACA, Medicare & Life Coverage",
-    "description": "Bilingual insurance agency helping families compare ACA Marketplace, Medicare, life, dental & vision plans in {states}+ U.S. states. Free expert enrollment.",
+    "title": "Isaac Plans Insurance | ACA, Health, Dental & Life",
+    "description": "Bilingual insurance agency helping families compare ACA Marketplace, health, dental, vision, life, and supplemental plans in {states}+ U.S. states. Free expert enrollment.",
     "image": "https://www.isaacplans.com/images/og_isaacplans.png",
     "imageAlt": "Isaac Plans Insurance logo on a blue gradient background",
-    "keywords": "ACA health insurance, Medicare broker, bilingual insurance agency, life insurance, vision dental plans, Virginia insurance agent"
+    "keywords": "ACA health insurance, bilingual insurance agency, life insurance, dental vision plans, short term medical, hospital indemnity, Virginia insurance agent"
   },
   "HIpage": {
     "hero": {
@@ -1334,7 +1340,7 @@
     },
     "support": {
       "heading": "Need help right now?",
-      "body": "Book a free consultation or send us your questions—we’ll get back within one business day."
+      "body": "Book a free consultation or send us your questions—we’ll get back within one business day. Isaac is licensed for the health and life products he presents; coverage and availability depend on your state and situation."
     }
   },
   "NotFoundPage": {
@@ -1383,7 +1389,7 @@
               "label": "You can apply for coverage at the following link:"
             },
             "ctaButton": {
-              "title": "Get a Quote",
+              "title": "Quote temporary health insurance",
               "subtitle": "Fast, no-obligation guidance"
             },
             "enrollmentCta": {
@@ -1859,41 +1865,94 @@
       "title": "Partner carriers",
       "subtitle": "These paths connect you to authorized enrollment for products outside the Marketplace—short-term medical, dental and vision, hospital indemnity, and other supplemental options depending on the carrier. For subsidized ACA coverage, use ACA Health Plans under Services."
     },
+    "guided": {
+      "title": "Not sure which carrier fits?",
+      "body": "Start with a quick orientation—then pick a partner when you’re ready. You can also self-enroll directly from the cards below.",
+      "linkMatch": "Get oriented first",
+      "linkStm": "Short Term Medical overview",
+      "linkAca": "ACA Marketplace plans",
+      "linkContact": "Talk to Isaac"
+    },
     "section": {
       "label": "Self-enrollment",
-      "title": "Choose a carrier",
-      "cta": "Continue",
-      "ctaMobile": "Continue"
+      "title": "Compare carriers, then continue",
+      "cta": "View plans & enroll",
+      "ctaMobile": "View & enroll"
     },
     "cards": {
       "uhone": {
         "name": "UnitedHealthcare (UHOne)",
-        "blurb": "Full shop: short-term medical, dental, vision, and more—start here for the broadest UnitedHealthOne enrollment options."
+        "blurb": "Full shop: short-term medical, dental, vision, and more—start here for the broadest UnitedHealthOne enrollment options.",
+        "bestFor": "Best for: broad product choice and TriTerm-style longer bridges where filed in your state.",
+        "notIdeal": "Not ideal if: you need guaranteed-issue ACA protections or heavy ongoing prescriptions—compare Marketplace options.",
+        "timeNote": "Typical flow: ~15–25 minutes on the carrier site"
       },
       "pivot": {
         "name": "Pivot Health",
-        "blurb": "Budget-friendly short-term options and multiple term lengths to bridge coverage gaps."
+        "blurb": "Budget-friendly short-term options and multiple term lengths to bridge coverage gaps.",
+        "bestFor": "Best for: straightforward STM shopping with clear gap-coverage positioning.",
+        "notIdeal": "Not ideal if: you expect comprehensive preventive care or preexisting-condition coverage.",
+        "timeNote": "Typical flow: ~15–25 minutes on the carrier site"
       },
       "manhattan": {
         "name": "ManhattanLife",
-        "blurb": "Short-term medical and supplemental products—pair coverage when it makes sense for your situation."
+        "blurb": "Short-term medical and supplemental products—pair coverage when it makes sense for your situation.",
+        "bestFor": "Best for: mixing STM with hospital indemnity or other supplements when it fits your state and profile.",
+        "notIdeal": "Not ideal if: you want one all-in ACA plan—use the ACA path instead.",
+        "timeNote": "Typical flow: varies by product—confirm in the quote flow"
       },
       "allstate": {
         "name": "Allstate Health Solutions",
-        "blurb": "Short-term medical through Allstate Health Solutions with clear STLDI disclosures and secure enrollment."
+        "blurb": "Short-term medical through Allstate Health Solutions with clear STLDI disclosures and secure enrollment.",
+        "bestFor": "Best for: STM with transparent STLDI notices and familiar carrier branding.",
+        "notIdeal": "Not ideal if: you need maternity, mental health parity, or preexisting coverage like ACA.",
+        "timeNote": "Typical flow: ~15–25 minutes on the carrier site"
+      }
+    }
+  },
+  "getCoveredFastPage": {
+    "metadata": {
+      "title": "Get covered fast | Isaac Plans Insurance",
+      "description": "Quick paths to ACA Marketplace, short-term medical, partner self-enrollment, or a free bilingual call—pick what matches your situation.",
+      "keywords": "get health insurance fast, short term medical, ACA marketplace, Isaac Plans"
+    },
+    "hero": {
+      "title": "Get covered—start with the right path",
+      "subtitle": "Answer nothing mandatory here: choose the lane that matches how you shop. If you’re unsure, read Short Term Medical or book a quick call."
+    },
+    "cards": {
+      "aca": {
+        "title": "ACA / Marketplace",
+        "body": "Subsidies and guaranteed-issue protections—best when you qualify and want comprehensive coverage.",
+        "cta": "Go to ACA"
+      },
+      "stm": {
+        "title": "Short Term Medical (STLDI)",
+        "body": "Temporary medical for gaps—rules, durations, and availability vary by state and product. Read disclosures before you enroll.",
+        "cta": "STM overview"
+      },
+      "carriers": {
+        "title": "Partner self-enrollment",
+        "body": "Continue to UnitedHealthOne, Pivot, Manhattan Life, or Allstate Health Solutions for eligible products outside the Marketplace.",
+        "cta": "Carrier hub"
+      },
+      "contact": {
+        "title": "Talk to Isaac",
+        "body": "WhatsApp, phone, or schedule—bilingual help to compare options before you click enroll.",
+        "cta": "Contact"
       }
     }
   },
   "shortTermMedicalPage": {
     "calendar": {
-      "title": "Schedule Your Short Term Medical Consultation",
+      "title": "Schedule your temporary health insurance consultation",
       "backButton": "← Go Back",
       "meta": {
-        "title": "Short Term Medical Appointment Calendar | Isaac Plans Insurance",
-        "description": "Schedule your short term medical plan consultation with Isaac Plans Insurance. Get bilingual guidance and personalized options for temporary health coverage.",
-        "keywords": "short term medical, temporary health insurance, appointment, schedule, consultation, Virginia, bilingual",
+        "title": "Temporary health insurance appointment calendar | Isaac Plans Insurance",
+        "description": "Schedule your temporary health insurance consultation with Isaac Plans Insurance. Get bilingual guidance and personalized options for temporary health coverage.",
+        "keywords": "temporary health insurance, short term medical, appointment, schedule, consultation, Virginia, bilingual",
         "image": "https://www.isaacplans.com/images/stm.png",
-        "imageAlt": "Short Term Medical appointment calendar"
+        "imageAlt": "Temporary health insurance appointment calendar"
       }
     }
   },

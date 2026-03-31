@@ -1,8 +1,13 @@
 export const BLOG_CATEGORY_LABELS: Record<string, { en: string; es: string }> = {
   aca: { en: "ACA / Obamacare", es: "ACA / Obamacare" },
+  "temporary-health-insurance": {
+    en: "Temporary health insurance",
+    es: "Seguro médico temporal",
+  },
+  /** @deprecated Legacy Sanity value — same display as temporary-health-insurance */
   "short-term-medical": {
-    en: "Short Term Medical",
-    es: "Seguro Médico de Corto Plazo",
+    en: "Temporary health insurance",
+    es: "Seguro médico temporal",
   },
   "dental-vision": { en: "Dental & Vision", es: "Dental y Visión" },
   "hospital-indemnity": {

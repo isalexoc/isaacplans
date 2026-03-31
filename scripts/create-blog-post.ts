@@ -292,7 +292,7 @@ interface BlogPostData {
   bodyEs: string; // Plain text - will be converted to blocks
   category:
     | "aca"
-    | "short-term-medical"
+    | "temporary-health-insurance"
     | "dental-vision"
     | "hospital-indemnity"
     | "iul"

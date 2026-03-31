@@ -34,6 +34,7 @@ export default function BlogCategoryCTA({ category }: BlogCategoryCTAProps) {
     switch (category) {
       case "aca":
         return <ACAButton />;
+      case "temporary-health-insurance":
       case "short-term-medical":
         return <ShortTermMedicalButton />;
       case "dental-vision":

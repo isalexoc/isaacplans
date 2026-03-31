@@ -8,6 +8,7 @@ export function mapBlogCategoryToGuideCategory(raw?: string): GuideCategory {
   const k = raw.trim().toLowerCase().replace(/_/g, "-");
   const map: Record<string, GuideCategory> = {
     aca: "aca",
+    "temporary-health-insurance": "shortTerm",
     "short-term-medical": "shortTerm",
     shortterm: "shortTerm",
     "dental-vision": "dentalVision",

@@ -80,11 +80,11 @@
       "questions": [
         {
           "question": "What is Short Term Medical insurance?",
-          "answer": "Short Term Medical (STM) insurance provides temporary health coverage for periods typically ranging from 30 days to 12 months, with some plans allowing renewals up to 36 months. It's designed to fill coverage gaps when you're between jobs, waiting for ACA enrollment, or in other transitional situations."
+          "answer": "Short Term Medical (STM) usually refers to Short-Term Limited-Duration Insurance (STLDI) and similar temporary medical products. For STLDI sold or issued on or after September 1, 2024, federal rules generally cap the initial contract period at 3 months and total duration (including renewals or extensions) at 4 months—but state rules and specific product lines differ. Some states and carriers offer longer bridge or limited-duration designs that are not the same as classic STLDI (for example, certain multi-year options where filed). Policies that started before September 1, 2024 may still follow earlier terms until they end. Always confirm durations, renewals, and disclosures in your state’s official quote and policy materials."
         },
         {
           "question": "Who is Short Term Medical insurance best for?",
-          "answer": "STM is ideal for healthy individuals who need temporary coverage during life transitions such as job changes, recent college graduates waiting for employer coverage, early retirees before Medicare eligibility, or those waiting for ACA Open Enrollment. It's not suitable for those with pre-existing conditions or who need comprehensive preventive care."
+          "answer": "STM is ideal for healthy individuals who need temporary coverage during life transitions such as job changes, recent graduates waiting for employer coverage, early retirees before other long-term coverage begins, or those waiting for ACA Open Enrollment. It is not suitable for those with pre-existing conditions or who need comprehensive preventive care."
         },
         {
           "question": "How quickly can I get coverage with Short Term Medical?",
@@ -100,7 +100,7 @@
         },
         {
           "question": "How long can I keep Short Term Medical insurance?",
-          "answer": "Short Term Medical plans typically last from 30 days to 12 months, depending on state regulations and the specific plan. Some states allow renewals or extensions up to 36 months total. However, coverage terms vary by state, so check your local regulations."
+          "answer": "It depends on the product, state, and issue date. Classic STLDI under the September 2024 federal framework for new sales has the initial and total-duration limits described above. Other states and product lines—including some bridge offerings—may allow longer total time in force (in some cases multi-year options where available in 2026). Older policies may still run on prior rules until they end or renew. Always verify the exact term, renewal rules, and notices in your carrier’s quote flow for your ZIP code."
         },
         {
           "question": "Is Short Term Medical cheaper than ACA plans?",
@@ -219,8 +219,8 @@
           "answer": "Hospital Indemnity pays daily benefits for each day you're hospitalized, regardless of the reason. Critical Illness insurance pays a lump-sum benefit (often $10,000-$100,000+) when you're diagnosed with a specific critical illness like cancer, heart attack, or stroke. Both are supplemental and can work together to provide comprehensive protection."
         },
         {
-          "question": "Can I get Hospital Indemnity insurance if I'm on Medicare?",
-          "answer": "Yes, Hospital Indemnity insurance can complement Medicare coverage. It can help cover Medicare deductibles, copays, and other out-of-pocket costs. However, be aware that some Hospital Indemnity plans may have restrictions or different benefits for Medicare beneficiaries, so review plan details carefully."
+          "question": "Can Hospital Indemnity work alongside other primary coverage?",
+          "answer": "Often yes—hospital indemnity pays fixed cash benefits based on the policy and can sit beside other coverage you may have. Benefits, coordination rules, and eligibility vary by carrier and state; always read the policy summary and disclosures in the quote flow, and ask a licensed agent if you are unsure how benefits interact with your existing coverage."
         },
         {
           "question": "How long do Hospital Indemnity benefits last?",

@@ -28,9 +28,19 @@ const CATEGORY_LABELS: Record<string, { en: string; es: string; description: { e
     },
     image: "aca_obamacare_w1tive",
   },
+  "temporary-health-insurance": {
+    en: "Temporary health insurance",
+    es: "Seguro médico temporal",
+    description: {
+      en: "Temporary health coverage for gaps between major medical plans",
+      es: "Cobertura de salud temporal para brechas entre planes médicos principales",
+    },
+    image: "short-term-medical_zfopfc",
+  },
+  /** Legacy posts still categorized with this slug in Sanity */
   "short-term-medical": {
-    en: "Short Term Medical",
-    es: "Seguro Médico de Corto Plazo",
+    en: "Temporary health insurance",
+    es: "Seguro médico temporal",
     description: {
       en: "Temporary health coverage for gaps between major medical plans",
       es: "Cobertura de salud temporal para brechas entre planes médicos principales",

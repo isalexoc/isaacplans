@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   ComposableMap,
   Geographies,
@@ -74,6 +75,7 @@ const STATE_NAME_TO_CODE: Record<string, string> = {
 };
 
 export default function StatesMap({ states }: StatesMapProps) {
+  const t = useTranslations("statesMap");
   const [hoveredState, setHoveredState] = useState<{
     name: string;
     code: string;
@@ -323,11 +325,11 @@ export default function StatesMap({ states }: StatesMapProps) {
       <div className="absolute bottom-4 left-4 right-4 flex flex-wrap gap-4 items-center justify-center bg-white/95 backdrop-blur-sm rounded-lg p-3 shadow-lg border border-gray-200/60">
         <div className="flex items-center gap-2">
           <div className="w-4 h-4 rounded bg-[hsl(var(--custom))]" />
-          <span className="text-sm font-medium text-gray-700">Licensed States</span>
+          <span className="text-sm font-medium text-gray-700">{t("licensedLegend")}</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-4 h-4 rounded bg-gray-200" />
-          <span className="text-sm font-medium text-gray-700">Other States</span>
+          <span className="text-sm font-medium text-gray-700">{t("otherLegend")}</span>
         </div>
       </div>
     </div>

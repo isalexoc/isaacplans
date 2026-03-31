@@ -44,8 +44,8 @@ export const ShortTermMedicalQuoteModal = ({
             </div>
             <div className="font-semibold flex-1 text-center text-gray-900 dark:text-white text-sm sm:text-base">
               {isES
-                ? "Cotiza Seguro Médico de Corto Plazo"
-                : "Short Term Medical Quote"}
+                ? "Cotización de seguro médico temporal"
+                : "Temporary health insurance quote"}
             </div>
             <button
               onClick={() => setOpen(false)}
