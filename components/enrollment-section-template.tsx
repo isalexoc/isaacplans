@@ -2,7 +2,8 @@ import Image from "next/image";
 import clsx from "clsx";
 import { CheckCircle } from "lucide-react";
 import { Button } from "./ui/button";
-import { ExternalLink } from "lucide-react";
+import { ChevronRight, ExternalLink } from "lucide-react";
+import { Link } from "@/i18n/navigation";
 
 interface EnrollmentSectionProps {
   title: React.ReactNode;
@@ -32,6 +33,8 @@ export default function EnrollmentSectionGeneric({
 }: EnrollmentSectionProps) {
   const imgUrl = `https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_600,c_fill,g_auto/${imagePublicId}.png`;
   const isLeft = imagePosition === "left";
+  const externalHref =
+    href.startsWith("http://") || href.startsWith("https://");
 
   return (
     <section
@@ -141,16 +144,27 @@ export default function EnrollmentSectionGeneric({
                          transition-all duration-300 hover:-translate-y-0.5
                          focus-visible:ring-2 focus-visible:ring-[hsl(var(--custom))] focus-visible:ring-offset-2"
             >
-              <a
-                href={href}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={`${cta} (opens in new tab)`}
-                className="inline-flex items-center gap-2"
-              >
-                {cta}
-                <ExternalLink className="w-4 h-4" aria-hidden="true" />
-              </a>
+              {externalHref ? (
+                <a
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={`${cta} (opens in new tab)`}
+                  className="inline-flex items-center gap-2"
+                >
+                  {cta}
+                  <ExternalLink className="w-4 h-4" aria-hidden="true" />
+                </a>
+              ) : (
+                <Link
+                  href={href as never}
+                  aria-label={typeof cta === "string" ? `${cta}` : undefined}
+                  className="inline-flex items-center gap-2"
+                >
+                  {cta}
+                  <ChevronRight className="w-4 h-4" aria-hidden="true" />
+                </Link>
+              )}
             </Button>
           </div>
         </div>

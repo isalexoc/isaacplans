@@ -29,11 +29,14 @@ const initialState: ActionResult = { status: null };
 type Props = {
   onSubmitSuccess?: () => void;
   onCloseModal?: () => void;
+  /** Passed to create-contact as dentalVisionData.source */
+  source?: string;
 };
 
 export default function DentalVisionLeadForm({
   onSubmitSuccess,
   onCloseModal,
+  source = "dental_vision_page",
 }: Props) {
   const locale = useLocale();
   const isES = locale.startsWith("es");
@@ -129,6 +132,7 @@ export default function DentalVisionLeadForm({
   return (
     <form id="dental-vision-lead-form" action={formAction} className="space-y-4">
       <input type="hidden" name="locale" value={locale} />
+      <input type="hidden" name="source" value={source} />
 
       {state.status === "ERROR" && state.error && (
         <div className="p-3 bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-800 rounded-lg">

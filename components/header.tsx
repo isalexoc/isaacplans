@@ -40,6 +40,7 @@ import LocaleSwitcher from "./LocaleSwitcher";
 
 const serviceLinks = [
   { key: "aca", href: "/aca", icon: "Stethoscope" },
+  { key: "getCoveredFast", href: "/get-covered-fast", icon: "Zap" },
   { key: "shortTermMedical", href: "/short-term-medical", icon: "Activity" },
   { key: "dentalVision", href: "/dental-vision", icon: "Eye" },
   { key: "hospitalIndemnity", href: "/hospital-indemnity", icon: "Hospital" },

@@ -26,6 +26,25 @@ body {
   .hide-scrollbar::-webkit-scrollbar {
     display: none; /* Chrome, Safari, Opera */
   }
+
+  /* Get Covered Fast — infinite carrier logo strip */
+  @keyframes gcf-logo-marquee {
+    from {
+      transform: translate3d(0, 0, 0);
+    }
+    to {
+      transform: translate3d(-50%, 0, 0);
+    }
+  }
+  .animate-gcf-logo-marquee {
+    animation: gcf-logo-marquee 50s linear infinite;
+    will-change: transform;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .animate-gcf-logo-marquee {
+      animation: none;
+    }
+  }
 }
 
 @layer base {

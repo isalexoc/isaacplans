@@ -1,7 +1,8 @@
 // components/hero/Hero.tsx
 import Image from "next/image";
-import { Shield, Users, Award } from "lucide-react";
+import { Shield, Users, Award, Sparkles, ChevronRight } from "lucide-react";
 import { getTranslations } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
 import { Card } from "@/components/ui/card";
 import CTAButton from "@/components/cta-button"; // already client
 import HeroRotatingCards from "@/components/hero-rotating-cards";
@@ -68,6 +69,45 @@ export default async function Hero() {
             {/* CTA island (client) */}
             <div className="animate-fadeLeft-d4 pt-2">
               <CTAButton />
+            </div>
+
+            <div className="animate-fadeLeft-d4 pt-6">
+              <div
+                className="relative max-w-xl overflow-hidden rounded-2xl border border-[hsl(var(--custom)/0.22)] bg-gradient-to-br from-white via-white/95 to-[hsl(var(--custom)/0.07)] p-5 shadow-[0_8px_30px_-8px_rgba(14,165,233,0.2),0_0_0_1px_rgba(255,255,255,0.8)_inset] backdrop-blur-sm transition-shadow duration-300 hover:shadow-[0_12px_40px_-10px_rgba(14,165,233,0.28)] dark:border-[hsl(var(--custom)/0.28)] dark:from-slate-900/95 dark:via-slate-900/85 dark:to-[hsl(var(--custom)/0.12)] dark:shadow-[0_8px_30px_-8px_rgba(0,0,0,0.35)] sm:p-6"
+              >
+                <div
+                  className="pointer-events-none absolute inset-y-3 left-0 w-1 rounded-full bg-gradient-to-b from-[hsl(var(--custom))] via-sky-500 to-blue-600 opacity-90"
+                  aria-hidden
+                />
+                <div className="relative flex flex-col gap-4 pl-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:pl-5">
+                  <div className="flex gap-4">
+                    <span
+                      className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[hsl(var(--custom)/0.15)] to-[hsl(var(--custom)/0.06)] text-[hsl(var(--custom))] shadow-inner ring-1 ring-[hsl(var(--custom)/0.15)] dark:from-[hsl(var(--custom)/0.22)] dark:to-[hsl(var(--custom)/0.08)] dark:ring-[hsl(var(--custom)/0.2)]"
+                      aria-hidden
+                    >
+                      <Sparkles className="h-6 w-6" strokeWidth={1.75} />
+                    </span>
+                    <div className="min-w-0 pt-0.5">
+                      <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[hsl(var(--custom))] sm:text-xs">
+                        {t("hero.getCoveredFast.kicker")}
+                      </p>
+                      <p className="mt-1.5 text-base font-medium leading-snug text-gray-800 dark:text-gray-100 sm:text-lg">
+                        {t("hero.getCoveredFast.label")}
+                      </p>
+                    </div>
+                  </div>
+                  <Link
+                    href="/get-covered-fast"
+                    className="group/cta inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[hsl(var(--custom))] to-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-md shadow-[hsl(var(--custom)/0.25)] transition-all duration-200 hover:from-[hsl(var(--custom)/0.92)] hover:to-blue-600/95 hover:shadow-lg hover:shadow-[hsl(var(--custom)/0.3)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--custom))] focus-visible:ring-offset-2 sm:w-auto sm:min-w-[11rem]"
+                  >
+                    {t("hero.getCoveredFast.cta")}
+                    <ChevronRight
+                      className="h-4 w-4 transition-transform duration-200 group-hover/cta:translate-x-0.5"
+                      aria-hidden
+                    />
+                  </Link>
+                </div>
+              </div>
             </div>
 
             {/* mobile portrait & feature cards */}

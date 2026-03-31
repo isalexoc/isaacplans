@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
-import { Link } from "@/i18n/navigation";
 import { BackHome } from "@/components/back-home";
 import ShortTermCarriersSection, {
   stmCarrierHeroUrl,
@@ -12,6 +11,11 @@ import {
   languageAlternatesPrefixed,
   type SupportedLocale,
 } from "@/lib/seo/i18n";
+import {
+  gcfCarriersDirectHref,
+  isGcfCarriersHubQuery,
+  type CarriersHubCardId,
+} from "@/lib/carriers-gcf-direct-quote-urls";
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = (await getLocale()) as SupportedLocale;
@@ -55,9 +59,27 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function CarriersIndexPage() {
+type CarriersPageProps = {
+  searchParams: Promise<{ from?: string; path?: string }>;
+};
+
+function firstQueryString(
+  v: string | string[] | undefined
+): string | undefined {
+  if (v === undefined) return undefined;
+  return Array.isArray(v) ? v[0] : v;
+}
+
+export default async function CarriersIndexPage({
+  searchParams,
+}: CarriersPageProps) {
   const locale = (await getLocale()) as SupportedLocale;
   const t = await getTranslations({ locale, namespace: "carriersIndex" });
+  const sp = await searchParams;
+  const useGcfDirectQuotes = isGcfCarriersHubQuery(
+    firstQueryString(sp.from),
+    firstQueryString(sp.path)
+  );
 
   const hub = (
     routeKey:
@@ -67,6 +89,9 @@ export default async function CarriersIndexPage() {
       | "/carriers/manhattan/shortterm"
       | "/carriers/allstate"
   ) => withLocalePrefix(locale, localizedSlug(routeKey as any, locale));
+
+  const carrierHref = (id: CarriersHubCardId, landing: string) =>
+    useGcfDirectQuotes ? gcfCarriersDirectHref(id) : landing;
 
   return (
     <div className="relative min-h-screen">
@@ -78,43 +103,6 @@ export default async function CarriersIndexPage() {
         <p className="mt-4 text-pretty text-lg leading-relaxed text-slate-600 dark:text-slate-300">
           {t("intro.subtitle")}
         </p>
-      </div>
-
-      <div className="mx-auto max-w-3xl px-4 pb-10 sm:px-6">
-        <div className="rounded-2xl border border-slate-200/90 bg-white/90 p-5 shadow-sm dark:border-slate-700 dark:bg-slate-900/60">
-          <h2 className="text-center text-lg font-bold text-slate-900 dark:text-white">
-            {t("guided.title")}
-          </h2>
-          <p className="mt-2 text-center text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-            {t("guided.body")}
-          </p>
-          <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
-            <Link
-              href="/get-covered-fast"
-              className="inline-flex rounded-full bg-[hsl(var(--custom))] px-4 py-2 text-sm font-semibold text-white shadow hover:opacity-95"
-            >
-              {t("guided.linkMatch")}
-            </Link>
-            <Link
-              href="/short-term-medical"
-              className="inline-flex rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
-            >
-              {t("guided.linkStm")}
-            </Link>
-            <Link
-              href="/aca"
-              className="inline-flex rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
-            >
-              {t("guided.linkAca")}
-            </Link>
-            <Link
-              href="/contact"
-              className="inline-flex rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-800 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
-            >
-              {t("guided.linkContact")}
-            </Link>
-          </div>
-        </div>
       </div>
 
       <ShortTermCarriersSection
@@ -130,7 +118,7 @@ export default async function CarriersIndexPage() {
             bestFor: t("cards.uhone.bestFor"),
             notIdeal: t("cards.uhone.notIdeal"),
             timeNote: t("cards.uhone.timeNote"),
-            href: hub("/carriers/uhone"),
+            href: carrierHref("uhone", hub("/carriers/uhone")),
             heroSrc: stmCarrierHeroUrl("pexels-august-de-richelieu-4260639_qgzqnk"),
             logoSrc:
               "https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_400/v1774397412/uhone_logo_xbmein.jpg",
@@ -142,7 +130,7 @@ export default async function CarriersIndexPage() {
             bestFor: t("cards.pivot.bestFor"),
             notIdeal: t("cards.pivot.notIdeal"),
             timeNote: t("cards.pivot.timeNote"),
-            href: hub("/carriers/pivot/shortterm"),
+            href: carrierHref("pivot", hub("/carriers/pivot/shortterm")),
             heroSrc: stmCarrierHeroUrl("pexels-pixabay-356040_kzryk7"),
             logoSrc:
               "https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_400/v1774397411/pivothealth_logo_sabqbm.jpg",
@@ -154,7 +142,7 @@ export default async function CarriersIndexPage() {
             bestFor: t("cards.manhattan.bestFor"),
             notIdeal: t("cards.manhattan.notIdeal"),
             timeNote: t("cards.manhattan.timeNote"),
-            href: hub("/carriers/manhattan"),
+            href: carrierHref("manhattan", hub("/carriers/manhattan")),
             heroSrc: stmCarrierHeroUrl("pexels-gabby-k-7114420_ev9ryf"),
             logoSrc:
               "https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_400/v1774397411/manhatan_logo_g6cswk.jpg",
@@ -166,7 +154,7 @@ export default async function CarriersIndexPage() {
             bestFor: t("cards.allstate.bestFor"),
             notIdeal: t("cards.allstate.notIdeal"),
             timeNote: t("cards.allstate.timeNote"),
-            href: hub("/carriers/allstate"),
+            href: carrierHref("allstate", hub("/carriers/allstate")),
             heroSrc: stmCarrierHeroUrl("pexels-shvetsa-4421496_ex5gi4"),
             logoSrc:
               "https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_400/v1774397414/allstate_logo_ungrkt.png",

@@ -34,6 +34,9 @@ export async function submitShortTermMedicalForm(
   const logPrefix = LOCALE_LOG[isES ? "es" : "en"];
 
   try {
+    const leadSource =
+      String(formData.get("source") ?? "").trim() || "short_term_medical_page";
+
     const raw = {
       firstName: String(formData.get("firstName") ?? ""),
       lastName: String(formData.get("lastName") ?? ""),
@@ -114,7 +117,7 @@ export async function submitShortTermMedicalForm(
         phone,
         shortTermMedicalData: {
           language: isES ? "es" : "en",
-          source: "short_term_medical_page",
+          source: leadSource,
           smsConsent: formData.get("smsConsent") === "on",
           marketingConsent: formData.get("marketingConsent") === "on",
         },

@@ -8,7 +8,9 @@ import EnrollmentSection from "@/components/enrollment-section-template";
 import FaqSection from "@/components/FaqSection";
 import CTABanner from "@/components/CTABanner-template";
 import { BackHome } from "@/components/back-home";
+import ShortTermCarriersSection from "@/components/shortterm-carriers-section";
 import ServicePageTracker from "@/components/service-page-tracker";
+import { buildDentalEnrollmentCarriers } from "@/lib/dental-enrollment-carriers";
 import type { Metadata } from "next";
 import {
   getDentalVisionPageLd,
@@ -107,6 +109,8 @@ export default async function DentalVisionPage() {
     t("dentalVisionMetadata.breadcrumbs.dentalVision")
   );
 
+  const dentalCarriers = buildDentalEnrollmentCarriers((key) => t(key));
+
   return (
     <>
       <ServicePageTracker serviceName="Dental & Vision Plans" serviceCategory="dental-vision" />
@@ -127,6 +131,15 @@ export default async function DentalVisionPage() {
           title: t("hero.happyClient.title"),
           subtitle: t("hero.happyClient.subtitle"),
         }}
+      />
+
+      <ShortTermCarriersSection
+        label={t("carriersSection.label")}
+        title={t("carriersSection.title")}
+        subtitle={t("carriersSection.subtitle")}
+        ctaLabel={t("carriersSection.cta")}
+        ctaLabelMobile={t("carriersSection.ctaMobile")}
+        carriers={dentalCarriers}
       />
 
       {/* ABOUT */}
@@ -157,7 +170,7 @@ export default async function DentalVisionPage() {
         title={t("selfEnroll.title")}
         subtitle={t("selfEnroll.subtitle")}
         cta={t("selfEnroll.cta")}
-        link="https://myplan.ameritas.com/id/010A1380"
+        link="/dental-vision/self-enrollment"
         imageUrl="https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_96,dpr_auto/ameritas-transparent_1_bbjb2f.png"
         disclaimer={t("selfEnroll.disclaimer")}
         className="max-w-3xl mx-auto mt-24"
@@ -204,7 +217,7 @@ export default async function DentalVisionPage() {
         imagePublicId="tmph9wnbhil_wts4sf"
         imagePosition="right"
         cta={t("selfEnroll.cta")}
-        href="https://myplan.ameritas.com/id/010A1380"
+        href="/dental-vision/self-enrollment"
       />
 
       {/* FAQ */}

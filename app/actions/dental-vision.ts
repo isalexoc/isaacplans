@@ -34,6 +34,9 @@ export async function submitDentalVisionForm(
   const logPrefix = LOCALE_LOG[isES ? "es" : "en"];
 
   try {
+    const leadSource =
+      String(formData.get("source") ?? "").trim() || "dental_vision_page";
+
     const raw = {
       firstName: String(formData.get("firstName") ?? ""),
       lastName: String(formData.get("lastName") ?? ""),
@@ -113,7 +116,7 @@ export async function submitDentalVisionForm(
         phone,
         dentalVisionData: {
           language: isES ? "es" : "en",
-          source: "dental_vision_page",
+          source: leadSource,
           smsConsent: formData.get("smsConsent") === "on",
           marketingConsent: formData.get("marketingConsent") === "on",
         },

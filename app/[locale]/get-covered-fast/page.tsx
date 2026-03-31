@@ -1,7 +1,13 @@
 import type { Metadata } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
-import { Link } from "@/i18n/navigation";
-import { BackHome } from "@/components/back-home";
+import GetCoveredFastFunnel from "@/components/get-covered-fast/get-covered-fast-funnel";
+import ServicePageTracker from "@/components/service-page-tracker";
+import { GET_COVERED_FAST_OG_IMAGE } from "@/lib/get-covered-fast/constants";
+import { getLicensedStateCount } from "@/lib/licensed-states";
+import {
+  getGetCoveredFastBreadcrumbLd,
+  getGetCoveredFastPageLd,
+} from "@/lib/seo/jsonld";
 import {
   ogLocaleOf,
   localizedSlug,
@@ -9,7 +15,6 @@ import {
   languageAlternatesPrefixed,
   type SupportedLocale,
 } from "@/lib/seo/i18n";
-import { ArrowRight } from "lucide-react";
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = (await getLocale()) as SupportedLocale;
@@ -18,6 +23,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const title = t("title");
   const description = t("description");
   const keywords = t("keywords", { default: "" });
+  const imageAlt = t("imageAlt");
   const routeKey = "/get-covered-fast";
   const slug = localizedSlug(routeKey, locale);
   const canonical = withLocalePrefix(locale, slug);
@@ -33,6 +39,11 @@ export async function generateMetadata(): Promise<Metadata> {
       canonical,
       languages: { ...languages, "x-default": xDefault },
     },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: { index: true, follow: true },
+    },
     openGraph: {
       title,
       description,
@@ -41,62 +52,53 @@ export async function generateMetadata(): Promise<Metadata> {
       locale: ogLocale,
       alternateLocale: ogLocale === "en_US" ? ["es_ES"] : ["en_US"],
       type: "website",
+      images: [
+        {
+          url: GET_COVERED_FAST_OG_IMAGE,
+          width: 1200,
+          height: 630,
+          alt: imageAlt,
+        },
+      ],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
+      images: [{ url: GET_COVERED_FAST_OG_IMAGE, alt: imageAlt }],
     },
   };
 }
 
 export default async function GetCoveredFastPage() {
-  const t = await getTranslations("getCoveredFastPage");
+  const locale = (await getLocale()) as SupportedLocale;
+  const licensedStateCount = await getLicensedStateCount();
+  const tMeta = await getTranslations({ locale, namespace: "getCoveredFastPage.metadata" });
 
-  const cards = ["aca", "stm", "carriers", "contact"] as const;
+  const pageLd = getGetCoveredFastPageLd(
+    locale,
+    tMeta("title"),
+    tMeta("description")
+  );
+  const crumbLd = getGetCoveredFastBreadcrumbLd(
+    locale,
+    locale.startsWith("es") ? "Inicio" : "Home",
+    tMeta("breadcrumbPage")
+  );
 
   return (
     <div className="relative min-h-screen">
-      <BackHome />
-      <div className="mx-auto max-w-3xl px-4 pt-20 pb-8 text-center sm:px-6 md:pt-24">
-        <h1 className="text-balance text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-4xl">
-          {t("hero.title")}
-        </h1>
-        <p className="mt-4 text-pretty text-lg leading-relaxed text-slate-600 dark:text-slate-300">
-          {t("hero.subtitle")}
-        </p>
-      </div>
-
-      <div className="mx-auto grid max-w-3xl grid-cols-1 gap-4 px-4 pb-20 sm:px-6 md:grid-cols-2">
-        {cards.map((key) => {
-          const href =
-            key === "aca"
-              ? "/aca"
-              : key === "stm"
-                ? "/short-term-medical"
-                : key === "carriers"
-                  ? "/carriers"
-                  : "/contact";
-          return (
-            <Link
-              key={key}
-              href={href}
-              className="group flex flex-col rounded-2xl border border-slate-200/90 bg-white p-6 text-left shadow-sm transition hover:border-[hsl(var(--custom)/0.35)] hover:shadow-md dark:border-slate-700 dark:bg-slate-900/70"
-            >
-              <h2 className="text-lg font-bold text-slate-900 dark:text-white">
-                {t(`cards.${key}.title`)}
-              </h2>
-              <p className="mt-2 flex-1 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-                {t(`cards.${key}.body`)}
-              </p>
-              <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-[hsl(var(--custom))]">
-                {t(`cards.${key}.cta`)}
-                <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" aria-hidden />
-              </span>
-            </Link>
-          );
-        })}
-      </div>
+      <ServicePageTracker
+        serviceName="Get covered fast"
+        serviceCategory="get-covered-fast"
+      />
+      <GetCoveredFastFunnel licensedStateCount={licensedStateCount} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify([pageLd, crumbLd]).replace(/</g, "\\u003c"),
+        }}
+      />
     </div>
   );
 }

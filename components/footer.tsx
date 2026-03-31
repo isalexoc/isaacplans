@@ -46,6 +46,7 @@ export default async function Footer() {
   const footerLinks = {
     services: [
       { name: tServices("aca.title"), href: "/aca" },
+      { name: tServices("getCoveredFast.title"), href: "/get-covered-fast" },
       {
         name: tServices("shortTermMedical.title"),
         href: "/short-term-medical",

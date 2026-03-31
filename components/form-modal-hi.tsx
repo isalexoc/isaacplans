@@ -17,9 +17,11 @@ const LOGO_URL =
 interface QuoteModalProps {
   open: boolean;
   setOpen: (v: boolean) => void;
+  /** Passed to `HospitalIndemnityLeadForm` as `source` (e.g. get_covered_fast). */
+  source?: string;
 }
 
-export const QuoteModal = ({ open, setOpen }: QuoteModalProps) => {
+export const QuoteModal = ({ open, setOpen, source }: QuoteModalProps) => {
   const isES = useLocale().startsWith("es");
 
   useEffect(() => {
@@ -100,7 +102,10 @@ export const QuoteModal = ({ open, setOpen }: QuoteModalProps) => {
 
               <div className="flex-1 min-w-0 px-4 sm:px-6 py-6">
                 <div className="max-w-[400px] mx-auto">
-                  <HospitalIndemnityLeadForm onCloseModal={() => setOpen(false)} />
+                  <HospitalIndemnityLeadForm
+                    source={source}
+                    onCloseModal={() => setOpen(false)}
+                  />
                 </div>
               </div>
             </div>

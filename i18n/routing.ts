@@ -31,6 +31,10 @@ export const routing = defineRouting({
       en: "/dental-vision/calendar",
       es: "/dental-vision/calendario",
     },
+    "/dental-vision/self-enrollment": {
+      en: "/dental-vision/self-enrollment",
+      es: "/dental-vision/autoinscripcion",
+    },
     "/hospital-indemnity": {
       en: "/hospital-indemnity",
       es: "/indemnizacion-hospitalaria",
@@ -38,6 +42,10 @@ export const routing = defineRouting({
     "/hospital-indemnity/calendar": {
       en: "/hospital-indemnity/calendar",
       es: "/indemnizacion-hospitalaria/calendario",
+    },
+    "/hospital-indemnity/self-enrollment": {
+      en: "/hospital-indemnity/self-enrollment",
+      es: "/indemnizacion-hospitalaria/autoinscripcion",
     },
     "/aca": {
       en: "/aca",

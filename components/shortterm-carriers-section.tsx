@@ -32,6 +32,10 @@ interface ShortTermCarriersSectionProps {
   label?: string;
   title: string | React.ReactNode;
   subtitle?: string;
+  /** Section `id` for anchor links (default `stm-carriers`). */
+  sectionId?: string;
+  /** Use `h1` when this section is the sole page hero (e.g. dental self-enrollment). Default `h2`. */
+  titleHeading?: "h1" | "h2";
   ctaLabel: string;
   /** Shorter label for small screens (e.g. “View plans” vs “View plans & enroll”). */
   ctaLabelMobile?: string;
@@ -78,15 +82,18 @@ export default function ShortTermCarriersSection({
   label,
   title,
   subtitle,
+  sectionId = "stm-carriers",
+  titleHeading = "h2",
   ctaLabel,
   ctaLabelMobile,
   carriers,
 }: ShortTermCarriersSectionProps) {
-  const headingId = "stm-carriers-heading";
+  const headingId = `${sectionId}-heading`;
+  const TitleTag = titleHeading === "h1" ? "h1" : "h2";
 
   return (
     <section
-      id="stm-carriers"
+      id={sectionId}
       className="scroll-mt-20 relative overflow-hidden border-y border-slate-200/80 bg-gradient-to-b from-slate-50 via-white to-slate-50/90 py-16 dark:border-slate-800/80 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 md:py-24 md:scroll-mt-24 lg:py-28"
       aria-labelledby={headingId}
     >
@@ -112,12 +119,12 @@ export default function ShortTermCarriersSection({
               <span>{label}</span>
             </div>
           )}
-          <h2
+          <TitleTag
             id={headingId}
             className="text-balance text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-4xl lg:text-[2.35rem] lg:leading-tight"
           >
             {title}
-          </h2>
+          </TitleTag>
           {subtitle && (
             <p className="mt-4 text-pretty text-lg leading-relaxed text-slate-600 dark:text-slate-300 lg:text-xl">
               {subtitle}

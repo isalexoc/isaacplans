@@ -5,7 +5,8 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ExternalLink } from "lucide-react";
+import { ChevronRight, ExternalLink } from "lucide-react";
+import { Link } from "@/i18n/navigation";
 
 // Declare gtag on the Window interface for TypeScript
 declare global {
@@ -24,6 +25,10 @@ interface PlanEnrollCardProps {
   className?: string;
 }
 
+function isExternalHref(link: string) {
+  return link.startsWith("http://") || link.startsWith("https://");
+}
+
 export default function PlanEnrollCard({
   title,
   subtitle,
@@ -33,6 +38,8 @@ export default function PlanEnrollCard({
   imageUrl,
   className,
 }: PlanEnrollCardProps) {
+  const external = isExternalHref(link);
+
   return (
     <Card
       className={cn(
@@ -99,16 +106,27 @@ export default function PlanEnrollCard({
             })
           }
         >
-          <a
-            href={link}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label={`${cta} - ${title} (opens in new tab)`}
-            className="inline-flex items-center gap-2"
-          >
-            {cta}
-            <ExternalLink className="w-4 h-4" aria-hidden="true" />
-          </a>
+          {external ? (
+            <a
+              href={link}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`${cta} - ${title} (opens in new tab)`}
+              className="inline-flex items-center gap-2"
+            >
+              {cta}
+              <ExternalLink className="w-4 h-4" aria-hidden="true" />
+            </a>
+          ) : (
+            <Link
+              href={link as never}
+              aria-label={`${cta} - ${title}`}
+              className="inline-flex items-center gap-2"
+            >
+              {cta}
+              <ChevronRight className="w-4 h-4" aria-hidden="true" />
+            </Link>
+          )}
         </Button>
 
         {disclaimer && (

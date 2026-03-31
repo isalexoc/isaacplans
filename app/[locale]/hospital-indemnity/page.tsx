@@ -8,6 +8,8 @@ import PlanEnrollCard from "@/components/SelfEnrollSection";
 import AboutSectionGeneric from "@/components/about-section-template";
 import { BackHome } from "@/components/back-home";
 import ServicePageTracker from "@/components/service-page-tracker";
+import ShortTermCarriersSection from "@/components/shortterm-carriers-section";
+import { buildHospitalIndemnityEnrollmentCarriers } from "@/lib/hospital-indemnity-enrollment-carriers";
 import type { Metadata } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
 import { getHiPageLd, getHiBreadcrumbLd } from "@/lib/seo/jsonld";
@@ -79,6 +81,8 @@ export default async function HospitalIndemnityPage() {
     t("hiMetadata.breadcrumbs.hi")
   );
 
+  const hiCarriers = buildHospitalIndemnityEnrollmentCarriers((key) => t(key));
+
   return (
     <>
       <ServicePageTracker serviceName="Hospital Indemnity Insurance" serviceCategory="hospital-indemnity" />
@@ -104,6 +108,17 @@ export default async function HospitalIndemnityPage() {
           subtitle: t("hero.happyClient.subtitle"),
         }}
       />
+
+      <ShortTermCarriersSection
+        sectionId="hi-carriers"
+        label={t("carriersSection.label")}
+        title={t("carriersSection.title")}
+        subtitle={t("carriersSection.subtitle")}
+        ctaLabel={t("carriersSection.cta")}
+        ctaLabelMobile={t("carriersSection.ctaMobile")}
+        carriers={hiCarriers}
+      />
+
       {/* ABOUT ISAAC ---------------------------------------------------- */}
       <AboutSectionGeneric
         badge={t("about.badge")}
@@ -178,8 +193,8 @@ export default async function HospitalIndemnityPage() {
         note={t("enroll.note")}
         imagePublicId="tmph9wnbhil_wts4sf"
         imagePosition="right"
-        cta={t("selfEnroll.cta")}
-        href="https://customer.enroll.natgenhealth.com/quick-quote/?agent=CfDJ8JkkUhL7-q1LjFdip3ceampdxm7xpscBkQtjIAz_HchUER8Pocs95dR73rAoRokouSmOgpIQZluR9A-Iz9qO2uNUPQ&product=all-products" /* optional: direct link */
+        cta={t("carriersSection.cta")}
+        href="/hospital-indemnity/self-enrollment"
       />
 
       {/* FAQ ------------------------------------------------------------ */}

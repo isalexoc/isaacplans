@@ -15,11 +15,14 @@ const LOGO_URL =
 interface ShortTermMedicalQuoteModalProps {
   open: boolean;
   setOpen: (v: boolean) => void;
+  /** Passed to `ShortTermMedicalLeadForm` as `source` (e.g. get_covered_fast). */
+  source?: string;
 }
 
 export const ShortTermMedicalQuoteModal = ({
   open,
   setOpen,
+  source,
 }: ShortTermMedicalQuoteModalProps) => {
   const isES = useLocale().startsWith("es");
 
@@ -98,6 +101,7 @@ export const ShortTermMedicalQuoteModal = ({
               <div className="flex-1 min-w-0 px-4 sm:px-6 py-6">
                 <div className="max-w-[400px] mx-auto">
                   <ShortTermMedicalLeadForm
+                    source={source}
                     onCloseModal={() => setOpen(false)}
                   />
                 </div>

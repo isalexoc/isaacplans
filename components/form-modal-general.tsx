@@ -5,7 +5,8 @@ import Image from "next/image";
 import { useEffect, useState, useCallback } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { X, Shield, Clock, CheckCircle2 } from "lucide-react";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import AcaLeadForm from "@/components/aca-lead-form";
 import ContactLeadForm from "@/components/contact-lead-form";
 import { trackInitiateCheckout } from "@/lib/facebook-pixel";
 
@@ -17,15 +18,22 @@ const LOGO_URL =
 interface QuoteModalProps {
   open?: boolean;
   setOpen?: (v: boolean) => void;
+  /** ACA lead form (e.g. Get Covered Fast when quiz → ACA); default is contact form. */
+  formVariant?: "contact" | "aca";
 }
 
 /** Modal for site-wide “Get in touch” — same lead capture as /contact (create-contact). */
-export const QuoteModalGeneral = ({ open, setOpen }: QuoteModalProps = {}) => {
+export const QuoteModalGeneral = ({
+  open,
+  setOpen,
+  formVariant = "contact",
+}: QuoteModalProps = {}) => {
   const [internalOpen, setInternalOpen] = useState(false);
   const actualOpen = open ?? internalOpen;
   const actualSetOpen = setOpen ?? setInternalOpen;
 
   const isES = useLocale().startsWith("es");
+  const tGcfResult = useTranslations("getCoveredFastPage.funnel.result");
 
   const handleOpenChange = useCallback(
     (next: boolean) => {
@@ -36,9 +44,21 @@ export const QuoteModalGeneral = ({ open, setOpen }: QuoteModalProps = {}) => {
 
   useEffect(() => {
     if (actualOpen) {
-      trackInitiateCheckout({ contentName: "General Quote Request" });
+      trackInitiateCheckout({
+        contentName:
+          formVariant === "aca"
+            ? "ACA Quote Request"
+            : "General Quote Request",
+      });
     }
-  }, [actualOpen]);
+  }, [actualOpen, formVariant]);
+
+  const headerTitle =
+    formVariant === "aca"
+      ? tGcfResult("acaContactTitle")
+      : isES
+        ? "Contáctanos"
+        : "Get in touch";
 
   return (
     <Dialog open={actualOpen} onOpenChange={handleOpenChange}>
@@ -59,7 +79,7 @@ export const QuoteModalGeneral = ({ open, setOpen }: QuoteModalProps = {}) => {
               />
             </div>
             <div className="font-semibold flex-1 text-center text-gray-900 dark:text-white text-sm sm:text-base">
-              {isES ? "Contáctanos" : "Get in touch"}
+              {headerTitle}
             </div>
             <button
               type="button"
@@ -109,9 +129,16 @@ export const QuoteModalGeneral = ({ open, setOpen }: QuoteModalProps = {}) => {
 
               <div className="flex-1 min-w-0 px-4 sm:px-6 py-6">
                 <div className="max-w-[400px] mx-auto">
-                  <ContactLeadForm
-                    onCloseModal={() => actualSetOpen(false)}
-                  />
+                  {formVariant === "aca" ? (
+                    <AcaLeadForm
+                      source="get_covered_fast"
+                      onCloseModal={() => actualSetOpen(false)}
+                    />
+                  ) : (
+                    <ContactLeadForm
+                      onCloseModal={() => actualSetOpen(false)}
+                    />
+                  )}
                 </div>
               </div>
             </div>

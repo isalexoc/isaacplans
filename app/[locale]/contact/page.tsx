@@ -348,6 +348,30 @@ export default async function ContactPage() {
       {/* Contact form - private integration (same as short-term) */}
       <section id="contact-form" className="bg-gray-50 dark:bg-gray-900/50 py-16">
         <div className="container max-w-3xl mx-auto px-4 text-center">
+          <div
+            className="mb-10 rounded-2xl border-2 border-[hsl(var(--custom)/0.35)] bg-white/95 p-6 text-left shadow-sm dark:border-[hsl(var(--custom)/0.25)] dark:bg-gray-900/90 sm:p-8"
+            role="region"
+            aria-labelledby="contact-quiz-banner-title"
+          >
+            <h3
+              id="contact-quiz-banner-title"
+              className="text-lg font-bold text-gray-900 dark:text-white sm:text-xl"
+            >
+              {t("quizBanner.title")}
+            </h3>
+            <p className="mt-2 text-sm leading-relaxed text-gray-600 dark:text-gray-400 sm:text-base">
+              {t("quizBanner.body")}
+            </p>
+            <div className="mt-4">
+              <Link
+                href="/get-covered-fast"
+                className="inline-flex items-center justify-center rounded-lg bg-gradient-to-r from-[hsl(var(--custom))] to-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md transition hover:from-[hsl(var(--custom)/0.92)] hover:to-blue-600/95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--custom))] focus-visible:ring-offset-2"
+              >
+                {t("quizBanner.cta")}
+              </Link>
+            </div>
+          </div>
+
           <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
             {t("info.form.heading")}
           </h2>

@@ -34,6 +34,9 @@ export async function submitHospitalIndemnityForm(
   const logPrefix = LOCALE_LOG[isES ? "es" : "en"];
 
   try {
+    const leadSource =
+      String(formData.get("source") ?? "").trim() || "hospital_indemnity_page";
+
     const raw = {
       firstName: String(formData.get("firstName") ?? ""),
       lastName: String(formData.get("lastName") ?? ""),
@@ -113,7 +116,7 @@ export async function submitHospitalIndemnityForm(
         phone,
         hospitalIndemnityData: {
           language: isES ? "es" : "en",
-          source: "hospital_indemnity_page",
+          source: leadSource,
           smsConsent: formData.get("smsConsent") === "on",
           marketingConsent: formData.get("marketingConsent") === "on",
         },

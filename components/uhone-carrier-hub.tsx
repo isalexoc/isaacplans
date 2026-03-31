@@ -14,6 +14,8 @@ import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import ShortTermMedicalButton from "@/components/ShortTermMedicalButton";
 import {
+  UHONE_ALL_PLANS_BUTTON_IMAGE_URL,
+  UHONE_ALL_PLANS_CENSUS_URL,
   UHONE_UHC_LOGO_URL,
   uhoneMarketingAssetUrl,
   uhoneShopCensusUrl,
@@ -190,14 +192,14 @@ export default function UhoneCarrierHub({ t }: UhoneCarrierHubProps) {
                 {t("hero.allPlansLabel")}
               </p>
               <a
-                href={uhoneShopCensusUrl()}
+                href={UHONE_ALL_PLANS_CENSUS_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="mt-4 block w-full min-w-0 overflow-hidden rounded-xl bg-muted/40 shadow-sm ring-1 ring-border/60 transition hover:shadow-md hover:ring-border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--custom))] focus-visible:ring-offset-2 dark:bg-muted/25"
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={uhoneMarketingAssetUrl("/allPlans_btn.jpg")}
+                  src={UHONE_ALL_PLANS_BUTTON_IMAGE_URL}
                   alt={t("hero.allPlansAlt")}
                   width={560}
                   height={120}

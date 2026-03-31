@@ -8,6 +8,11 @@
       "title": "Your Trusted",
       "subtitle": "Insurance Agent",
       "description": "Comprehensive insurance solutions including ACA (Affordable Care Act) health plans, dental & vision coverage, hospital indemnity, Indexed Universal Life (IUL), final expense insurance, short-term medical, and more. Expert guidance in English and Spanish.",
+      "getCoveredFast": {
+        "kicker": "Quick path",
+        "label": "Prefer a quick quiz first?",
+        "cta": "Get covered fast"
+      },
       "services": {
         "aca": {
           "title": "ACA Health Plans",
@@ -248,6 +253,10 @@
             "title": "ACA – Affordable Care Act",
             "description": "Affordable health coverage under the ACA Marketplace."
           },
+          "getCoveredFast": {
+            "title": "Get covered fast",
+            "description": "Quick quiz to see which coverage may fit—ACA, short-term, dental & vision, and more."
+          },
           "shortTermMedical": {
             "title": "Temporary health insurance",
             "description": "Temporary health insurance for unexpected gaps in coverage."
@@ -480,6 +489,11 @@
         "successScheduleAppointment": "Schedule an Appointment",
         "successClose": "Close"
       }
+    },
+    "quizBanner": {
+      "title": "Not sure where to start?",
+      "body": "Take a short quiz to see whether ACA, temporary health coverage, dental & vision, or supplemental options might fit—then reach out here anytime.",
+      "cta": "Start quick quiz"
     },
     "calendar": {
       "backButton": "← Go Back",
@@ -1023,6 +1037,51 @@
       "cta": "Start Self-Enrollment",
       "disclaimer": "Takes just 5 minutes—no paperwork, instant confirmation."
     },
+    "selfEnrollmentPage": {
+      "metadata": {
+        "title": "Dental & vision self-enrollment — pick a carrier | Isaac Plans Insurance",
+        "description": "Choose a partner carrier and start a secure dental or vision quote with Isaac Plans’ dedicated enrollment links—Ameritas, UnitedHealthOne, Manhattan Life, Allstate Health Solutions, and more.",
+        "keywords": "dental insurance self enrollment, vision insurance, online enrollment, Ameritas, UnitedHealthOne, Isaac Plans",
+        "image": "https://www.isaacplans.com/images/dental.png",
+        "imageAlt": "Dental and vision carrier self-enrollment"
+      },
+      "introTitle": "Self-enrollment",
+      "introSubtitle": "Pick a carrier below and start a secure quote. Product availability, networks, and benefits vary by state—read each carrier’s disclosures before you enroll.",
+      "sectionSubtitle": "Pick a carrier below and start a secure quote. Product availability, networks, and benefits vary by state—read each carrier’s disclosures before you enroll. Each button opens that carrier’s official quote or enrollment flow—compare options, then enroll when you’re ready."
+    },
+    "carriersSection": {
+      "label": "Self-enrollment",
+      "title": "Pick a carrier and get covered fast",
+      "subtitle": "Each button opens that carrier’s official quote or enrollment flow (not our product landing pages). Compare options, then enroll when you’re ready.",
+      "cta": "View plans & enroll",
+      "ctaMobile": "View plans",
+      "cards": {
+        "ameritas": {
+          "name": "Ameritas (Dental & vision)",
+          "blurb": "Stand-alone dental and vision with broad networks—use Isaac’s Ameritas portal to quote and enroll year-round."
+        },
+        "uhoneDentalWise": {
+          "name": "UnitedHealthOne — Dental Wise",
+          "blurb": "Dental insurance through UnitedHealthOne’s Dental Wise path—start a secure quote on the UHOne flow we host for your state."
+        },
+        "uhoneDentalDiscount": {
+          "name": "UnitedHealthOne — Dental Discount",
+          "blurb": "Discount dental program option when a traditional plan isn’t the right fit—see what’s available in your ZIP."
+        },
+        "uhoneVisionWise": {
+          "name": "UnitedHealthOne — Vision Wise",
+          "blurb": "Vision coverage through Vision Wise—compare lens and exam benefits in the UHOne quote experience."
+        },
+        "manhattanDvh": {
+          "name": "Manhattan Life — Dental, vision & hearing",
+          "blurb": "Bundle-style dental, vision, and hearing benefits from Manhattan Life—use our dedicated product page to quote."
+        },
+        "allstateDental": {
+          "name": "Allstate Health Solutions — Dental",
+          "blurb": "Individual dental options from Allstate Health Solutions (NatGen)—review plan designs and enroll through our carrier page."
+        }
+      }
+    },
     "definition": {
       "title": "Why Choose Ameritas for Dental & Vision?",
       "description": "Ameritas is consistently ranked among the nation’s top carriers for stand-alone dental and vision insurance. With broad provider networks, generous annual maximums, and next-day coverage on preventive services, Ameritas makes it easy to keep your smile bright and your vision clear—without breaking the bank.  I’m proud to partner with Ameritas to bring you plans that combine affordability, flexibility, and award-winning customer service."
@@ -1182,6 +1241,47 @@
     "definition": {
       "title": "What is Hospital Indemnity Insurance?",
       "description": "It’s a supplemental plan that pays YOU directly—cash per day or per event—to offset deductibles, copays and lost income while you’re hospitalized."
+    },
+    "carriersSection": {
+      "label": "Self-enrollment",
+      "title": "Pick a carrier and get covered fast",
+      "subtitle": "Choose a partner below—each button opens that carrier’s authorized hospital-indemnity quoting flow (same links we use across Isaac Plans).",
+      "cta": "View plans & enroll",
+      "ctaMobile": "View plans",
+      "cards": {
+        "uhoneHi": {
+          "name": "UnitedHealthcare (UHOne) Hospital Indemnity",
+          "blurb": "Hospital indemnity through the UHOne shop—compare benefit levels and enroll online when you’re ready."
+        },
+        "uhoneHiGi": {
+          "name": "UnitedHealthcare (UHOne) Hospital Indemnity (GI)",
+          "blurb": "Guaranteed-issue hospital indemnity path on the UHOne census—no medical questions for eligible applicants in supported states."
+        },
+        "manhattanHi": {
+          "name": "Manhattan Life Hospital Indemnity",
+          "blurb": "Hospital indemnity select product via Manhattan Life’s direct enrollment link for Isaac Plans."
+        },
+        "allstateHi": {
+          "name": "Allstate Health Solutions (National General)",
+          "blurb": "Fixed-benefit indemnity quoting through NatGen’s quick-quote experience—pick benefits that fit your budget."
+        }
+      }
+    },
+    "selfEnrollmentPage": {
+      "metadata": {
+        "title": "Hospital indemnity self-enrollment | Isaac Plans Insurance",
+        "description": "Pick a carrier and self-enroll in hospital indemnity—authorized quoting links for UHOne, Manhattan Life, and National General.",
+        "keywords": "hospital indemnity self enrollment, UHOne hospital indemnity, Manhattan Life hospital indemnity, National General fixed benefit",
+        "image": "https://www.isaacplans.com/images/hi.png",
+        "imageAlt": "Hospital indemnity carrier options"
+      },
+      "sectionSubtitle": "Same carrier links as our main hospital indemnity page—choose a partner to quote and enroll on the carrier site."
+    },
+    "selfEnrollPicker": {
+      "title": "Want the full carrier list on one page?",
+      "subtitle": "Open the dedicated self-enrollment page with every partner link in one place.",
+      "cta": "Open self-enrollment page",
+      "disclaimer": "You’ll leave IsaacPlans.com for the carrier’s site; their terms and privacy policy apply."
     },
     "selfEnroll": {
       "cta": "Start Online",
@@ -1865,14 +1965,6 @@
       "title": "Partner carriers",
       "subtitle": "These paths connect you to authorized enrollment for products outside the Marketplace—short-term medical, dental and vision, hospital indemnity, and other supplemental options depending on the carrier. For subsidized ACA coverage, use ACA Health Plans under Services."
     },
-    "guided": {
-      "title": "Not sure which carrier fits?",
-      "body": "Start with a quick orientation—then pick a partner when you’re ready. You can also self-enroll directly from the cards below.",
-      "linkMatch": "Get oriented first",
-      "linkStm": "Short Term Medical overview",
-      "linkAca": "ACA Marketplace plans",
-      "linkContact": "Talk to Isaac"
-    },
     "section": {
       "label": "Self-enrollment",
       "title": "Compare carriers, then continue",
@@ -1912,34 +2004,182 @@
   },
   "getCoveredFastPage": {
     "metadata": {
-      "title": "Get covered fast | Isaac Plans Insurance",
-      "description": "Quick paths to ACA Marketplace, short-term medical, partner self-enrollment, or a free bilingual call—pick what matches your situation.",
-      "keywords": "get health insurance fast, short term medical, ACA marketplace, Isaac Plans"
+      "title": "Get covered fast — health insurance quiz | Isaac Plans Insurance",
+      "description": "Answer a few questions to see if ACA Marketplace, short-term medical, dental & vision, or supplemental coverage may fit. Licensed bilingual guidance—not all carriers or plans are available in every state.",
+      "keywords": "health insurance quiz, get health insurance fast, ACA marketplace, short-term health insurance, temporary health insurance, dental and vision insurance, hospital indemnity, Molina Healthcare, Pivot Health, Manhattan Life, UnitedHealthcare, licensed health insurance agent, bilingual health insurance, compare health plans by state, Isaac Plans",
+      "imageAlt": "Calm healthcare setting representing trusted coverage guidance",
+      "breadcrumbPage": "Get covered fast"
     },
     "hero": {
-      "title": "Get covered—start with the right path",
-      "subtitle": "Answer nothing mandatory here: choose the lane that matches how you shop. If you’re unsure, read Short Term Medical or book a quick call."
+      "title": "Get covered fast—in as little as 60 seconds",
+      "subtitle": "Answer a few quick questions to see whether ACA, temporary health coverage, dental & vision, or supplemental coverage may fit your needs. Availability and benefits vary by state."
     },
-    "cards": {
-      "aca": {
-        "title": "ACA / Marketplace",
-        "body": "Subsidies and guaranteed-issue protections—best when you qualify and want comprehensive coverage.",
-        "cta": "Go to ACA"
+    "funnel": {
+      "layout": {
+        "banner": "Licensed health insurance guidance — bilingual support",
+        "phoneLabel": "Speak with a licensed agent",
+        "logosCaption": "Compare options from carriers you may know — availability varies by state and plan.",
+        "heroBadge": "Licensed guidance · Isaac Plans Insurance",
+        "secureNote": "Secure · No obligation · Your data stays private"
       },
-      "stm": {
-        "title": "Short Term Medical (STLDI)",
-        "body": "Temporary medical for gaps—rules, durations, and availability vary by state and product. Read disclosures before you enroll.",
-        "cta": "STM overview"
+      "trust": {
+        "licensed": "Licensed in {states}+ states",
+        "bilingual": "Bilingual support",
+        "selfEnroll": "Self-enrollment for eligible products"
       },
-      "carriers": {
-        "title": "Partner self-enrollment",
-        "body": "Continue to UnitedHealthOne, Pivot, Manhattan Life, or Allstate Health Solutions for eligible products outside the Marketplace.",
-        "cta": "Carrier hub"
+      "intro": {
+        "primaryCta": "Start now",
+        "secondaryCta": "Talk to Isaac",
+        "progress": "Step {current} of {total}"
       },
-      "contact": {
-        "title": "Talk to Isaac",
-        "body": "WhatsApp, phone, or schedule—bilingual help to compare options before you click enroll.",
-        "cta": "Contact"
+      "steps": {
+        "intent": {
+          "title": "What are you looking for today?",
+          "subtitle": "Choose the option that fits best—you can change course anytime."
+        },
+        "zip": {
+          "title": "What is your ZIP code?",
+          "subtitle": "Enter your ZIP so we can match options in your area. We’ll determine your state automatically.",
+          "placeholder": "ZIP code",
+          "invalid": "Please enter a valid 5-digit ZIP code.",
+          "lookupFailed": "We couldn’t verify that ZIP. Check the number and try again.",
+          "resolved": "{place} · {state} · ZIP {zip}",
+          "searchingTitle": "Searching for plans in your area",
+          "searchingLine1": "Verifying your ZIP and state…",
+          "searchingLine2": "Checking carriers available near you…",
+          "searchingLine3": "Almost ready—preparing your next step…",
+          "searchingButton": "Searching…"
+        },
+        "who": {
+          "title": "Who needs coverage?",
+          "subtitle": "This helps us tailor next steps."
+        },
+        "timing": {
+          "title": "When do you want coverage to start?",
+          "subtitle": "Rough timing is fine."
+        },
+        "preference": {
+          "title": "How do you prefer to move forward?",
+          "subtitle": "Self-enrollment lets you compare plans and enroll online when eligible—the fastest path for many people. You can talk with a licensed agent first if you prefer."
+        }
+      },
+      "options": {
+        "intent": {
+          "aca": "Major medical / ACA Marketplace",
+          "temporary": "Temporary health insurance",
+          "dentalVision": "Dental & vision",
+          "hospitalIndemnity": "Hospital cash / indemnity benefits",
+          "unsure": "I’m not sure yet"
+        },
+        "who": {
+          "self": "Just me",
+          "family": "Me and my family",
+          "other": "Someone else"
+        },
+        "timing": {
+          "asap": "As soon as possible",
+          "thisMonth": "Within the next month",
+          "exploring": "I’m still exploring"
+        },
+        "preference": {
+          "selfEnroll": "I want to review plans and enroll online myself",
+          "helpFirst": "I want to talk with someone before I enroll"
+        }
+      },
+      "nav": {
+        "back": "Back",
+        "next": "Next",
+        "continue": "Continue",
+        "seeResults": "See my recommendation"
+      },
+      "result": {
+        "title": "Here’s your best next step",
+        "subtitle": "Based on your answers—always confirm details in the official quote or policy materials for your area.",
+        "primaryCta": "View plans & enroll",
+        "secondaryCta": "Browse partner carriers",
+        "contactCta": "Talk to Isaac first",
+        "tempCoverageTitle": "Prefer temporary coverage instead?",
+        "tempCoverageSubtitle": "Short-term and other non-ACA options are listed with our partner carriers—they’re not the same as ACA Marketplace major medical.",
+        "acaContactTitle": "Questions before you enroll?",
+        "acaContactSubtitle": "The same ACA quote form we use across our site—we’ll follow up about subsidies, documents, or enrollment.",
+        "acaPrimaryHint": "Opens HealthSherpa in a new tab—your official Marketplace enrollment path.",
+        "acaNextStepLabel": "Next step",
+        "richSecondary": {
+          "majorMedicalTitle": "Considering major medical (ACA) instead?",
+          "majorMedicalSubtitle": "Compare Marketplace subsidies and comprehensive protections—then decide what fits alongside any other coverage you’re reviewing.",
+          "majorMedicalCta": "Explore ACA Marketplace",
+          "wantGuidanceTitle": "Want help choosing a path?",
+          "wantGuidanceSubtitle": "Reach out—we can help you compare partner carriers and enrollment options for your situation.",
+          "browseCarriersTitle": "Prefer to browse carriers on your own?",
+          "browseCarriersSubtitle": "See self-enrollment routes from partner carriers—availability varies by state and plan.",
+          "hospitalAltTitle": "Considering temporary health coverage instead?",
+          "hospitalAltSubtitle": "Short-term medical can bridge gaps between other plans—it’s different from hospital indemnity cash benefits. Review STLDI rules for your state on our temporary coverage page.",
+          "hospitalAltCta": "Explore temporary health coverage"
+        },
+        "leadFormIntro": {
+          "aca": {
+            "title": "Get help with your ACA options",
+            "subtitle": "Our ACA quote form matches the rest of the site—same fields, consents, and follow-up for subsidies and enrollment."
+          },
+          "temporary": {
+            "title": "Temporary health insurance quote",
+            "subtitle": "Use our short-term medical form—the same one on our temporary coverage page."
+          },
+          "dentalVision": {
+            "title": "Dental & vision quote",
+            "subtitle": "Use our dental & vision lead form—identical to the standalone product page."
+          },
+          "hospitalIndemnity": {
+            "title": "Hospital indemnity quote",
+            "subtitle": "Use our hospital indemnity form—same workflow as our dedicated page."
+          },
+          "carriers": {
+            "title": "Talk with Isaac about partner options",
+            "subtitle": "Send a message with our standard contact form—we’ll route it like a contact page inquiry."
+          },
+          "contact": {
+            "title": "Get in touch",
+            "subtitle": "Use our main contact form to reach the team about next steps."
+          }
+        },
+        "restart": "Start over",
+        "disclaimer": "Not all products are available in all states. Coverage rules, durations, and exclusions vary by plan and state. This tool does not guarantee eligibility.",
+        "rationale": {
+          "aca": "You indicated interest in comprehensive ACA Marketplace coverage. Review subsidies and plan options, then enroll if it fits.",
+          "temporary": "You indicated a temporary health insurance path. Review STLDI disclosures and state rules before enrolling—they differ from ACA plans.",
+          "dentalVision": "You indicated dental & vision. Compare plan designs and networks before enrolling.",
+          "hospitalIndemnity": "You indicated hospital indemnity / cash benefits. These pay fixed benefits and are not a substitute for major medical—review the policy carefully.",
+          "unsureSoon": "You want coverage soon but aren’t sure which product—start with partner carriers for temporary options, then explore ACA Marketplace major medical for subsidies and comprehensive protections.",
+          "unsureGap": "You’re planning within the next month—browse partner carriers for self-enrollment paths that may fit between other coverage.",
+          "unsureExplore": "You’re still exploring—talk with a licensed agent or use contact options when you’re ready."
+        },
+        "pathTitles": {
+          "aca": "ACA / Marketplace",
+          "temporary": "Temporary health insurance",
+          "dentalVision": "Dental & vision",
+          "hospitalIndemnity": "Hospital indemnity",
+          "carriers": "Partner carriers",
+          "contact": "Contact Isaac Plans"
+        }
+      },
+      "form": {
+        "title": "Have Isaac reach out",
+        "subtitle": "Same details we’ll use to follow up about your quiz results.",
+        "firstName": "First name",
+        "lastName": "Last name",
+        "email": "Email",
+        "phone": "Phone",
+        "submit": "Send my request",
+        "submitting": "Sending…",
+        "successTitle": "You’re all set",
+        "successMessage": "We received your information and will reach out shortly.",
+        "errorGeneric": "Something went wrong. Please try again.",
+        "smsConsent": "I consent to receive SMS notifications from Isaac Plans Insurance. Message frequency varies. Reply STOP to unsubscribe.",
+        "marketingConsent": "I agree to receive occasional marketing messages from Isaac Plans Insurance.",
+        "privacy": "Privacy Policy",
+        "required": "Required",
+        "invalidEmail": "Invalid email",
+        "invalidPhone": "Enter a valid 10-digit U.S. phone number"
       }
     }
   },

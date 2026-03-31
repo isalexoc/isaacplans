@@ -8,6 +8,11 @@
       "title": "Su Agente de Seguros",
       "subtitle": "de Confianza",
       "description": "Soluciones integrales de seguros que incluyen planes de salud ACA (Affordable Care Act), cobertura dental y visión, indemnización hospitalaria, Seguro Universal Indexado (IUL), seguro de gastos finales, seguro médico de corto plazo y más. Orientación experta en inglés y español.",
+      "getCoveredFast": {
+        "kicker": "Opción rápida",
+        "label": "¿Prefiere un cuestionario breve primero?",
+        "cta": "Cobertura rápida"
+      },
       "services": {
         "aca": {
           "title": "Planes de Salud ACA",
@@ -237,6 +242,10 @@
           "aca": {
             "title": "ACA Obamacare",
             "description": "Cobertura médica asequible bajo el Mercado de Seguros ACA."
+          },
+          "getCoveredFast": {
+            "title": "Cobertura rápida",
+            "description": "Cuestionario breve para ver qué cobertura puede encajar—ACA, temporal, dental y visión, y más."
           },
           "shortTermMedical": {
             "title": "Seguro médico temporal",
@@ -470,6 +479,11 @@
         "successScheduleAppointment": "Agendar una Cita",
         "successClose": "Cerrar"
       }
+    },
+    "quizBanner": {
+      "title": "¿No sabe por dónde empezar?",
+      "body": "Haga un cuestionario breve para ver si ACA, cobertura temporal, dental y visión u opciones suplementarias pueden encajar—luego contáctenos aquí cuando quiera.",
+      "cta": "Iniciar cuestionario rápido"
     },
     "calendar": {
       "backButton": "← Volver",
@@ -1013,6 +1027,51 @@
       "cta": "Comenzar Auto-Inscripción",
       "disclaimer": "Solo 5 minutos—sin papeleo, confirmación instantánea."
     },
+    "selfEnrollmentPage": {
+      "metadata": {
+        "title": "Autoinscripción dental y visión — elija aseguradora | Isaac Plans Insurance",
+        "description": "Elija una aseguradora asociada e inicie una cotización segura de dental o visión con los enlaces de Isaac Plans: Ameritas, UnitedHealthOne, Manhattan Life, Allstate Health Solutions y más.",
+        "keywords": "autoinscripción dental, seguro de visión, cotización en línea, Ameritas, UnitedHealthOne, Isaac Plans",
+        "image": "https://www.isaacplans.com/images/dental_es.png",
+        "imageAlt": "Opciones de autoinscripción dental y visión"
+      },
+      "introTitle": "Autoinscripción",
+      "introSubtitle": "Elija una aseguradora abajo e inicie una cotización segura. La disponibilidad de productos, redes y beneficios varía según el estado—lea las divulgaciones de cada aseguradora antes de inscribirse.",
+      "sectionSubtitle": "Elija una aseguradora abajo e inicie una cotización segura. La disponibilidad de productos, redes y beneficios varía según el estado—lea las divulgaciones de cada aseguradora antes de inscribirse. Cada botón abre la cotización o inscripción oficial de esa aseguradora—compare opciones e inscríbase cuando esté listo."
+    },
+    "carriersSection": {
+      "label": "Autoinscripción",
+      "title": "Elija una aseguradora y obtenga cobertura rápido",
+      "subtitle": "Cada tarjeta abre la ruta de cotización autorizada de Isaac para esa aseguradora—compare opciones e inscríbase cuando esté listo.",
+      "cta": "Ver planes e inscribirse",
+      "ctaMobile": "Ver planes",
+      "cards": {
+        "ameritas": {
+          "name": "Ameritas (Dental y visión)",
+          "blurb": "Dental y visión independientes con redes amplias—use el portal Ameritas de Isaac para cotizar e inscribirse durante todo el año."
+        },
+        "uhoneDentalWise": {
+          "name": "UnitedHealthOne — Dental Wise",
+          "blurb": "Seguro dental a través de Dental Wise de UnitedHealthOne—inicie una cotización segura en el flujo UHOne que hospedamos para su estado."
+        },
+        "uhoneDentalDiscount": {
+          "name": "UnitedHealthOne — Descuento dental",
+          "blurb": "Programa de descuento dental cuando un plan tradicional no encaja—vea qué hay disponible en su código postal."
+        },
+        "uhoneVisionWise": {
+          "name": "UnitedHealthOne — Vision Wise",
+          "blurb": "Cobertura de visión con Vision Wise—compare beneficios de lentes y exámenes en la experiencia de cotización UHOne."
+        },
+        "manhattanDvh": {
+          "name": "Manhattan Life — Dental, visión y audición",
+          "blurb": "Beneficios tipo paquete de dental, visión y audición de Manhattan Life—use nuestra página de producto para cotizar."
+        },
+        "allstateDental": {
+          "name": "Allstate Health Solutions — Dental",
+          "blurb": "Opciones dentales individuales de Allstate Health Solutions (NatGen)—revise diseños de plan e inscríbase por nuestra página de aseguradora."
+        }
+      }
+    },
     "definition": {
       "title": "¿Por Qué Elegir Ameritas para Dental y Visión?",
       "description": "Ameritas se ubica constantemente entre los mejores proveedores de seguros dentales y de visión en Estados Unidos. Con amplias redes de dentistas y optómetras, máximos anuales generosos y cobertura al día siguiente para servicios preventivos, Ameritas facilita mantener tu sonrisa sana y tu vista nítida sin gastar de más.  Me enorgullece trabajar con Ameritas para ofrecerte planes que combinan economía, flexibilidad y un servicio al cliente galardonado."
@@ -1172,6 +1231,47 @@
     "definition": {
       "title": "¿Qué es un Seguro de Indemnización Hospitalaria?",
       "description": "Es un plan suplementario que le paga a USTED directamente—un monto por día o por evento—para cubrir deducibles, copagos y pérdida de ingresos durante su hospitalización."
+    },
+    "carriersSection": {
+      "label": "Autoinscripción",
+      "title": "Elija una aseguradora y obtenga cobertura rápido",
+      "subtitle": "Elija un socio abajo—cada botón abre el flujo autorizado de cotización de indemnización hospitalaria (los mismos enlaces que usamos en Isaac Plans).",
+      "cta": "Ver planes e inscribirse",
+      "ctaMobile": "Ver planes",
+      "cards": {
+        "uhoneHi": {
+          "name": "UnitedHealthcare (UHOne) indemnización hospitalaria",
+          "blurb": "Indemnización hospitalaria en la tienda UHOne—compare niveles de beneficio e inscríbase en línea."
+        },
+        "uhoneHiGi": {
+          "name": "UnitedHealthcare (UHOne) indemnización hospitalaria (GI)",
+          "blurb": "Ruta de indemnización hospitalaria de emisión garantizada en el censo UHOne—sin preguntas médicas para solicitantes elegibles."
+        },
+        "manhattanHi": {
+          "name": "Manhattan Life indemnización hospitalaria",
+          "blurb": "Producto select de indemnización hospitalaria por el enlace directo de Manhattan Life para Isaac Plans."
+        },
+        "allstateHi": {
+          "name": "Allstate Health Solutions (National General)",
+          "blurb": "Cotización de indemnización de beneficio fijo por la experiencia rápida de NatGen—elija beneficios según su presupuesto."
+        }
+      }
+    },
+    "selfEnrollmentPage": {
+      "metadata": {
+        "title": "Autoinscripción indemnización hospitalaria | Isaac Plans Insurance",
+        "description": "Elija aseguradora y autoinscríbase en indemnización hospitalaria—enlaces autorizados para UHOne, Manhattan Life y National General.",
+        "keywords": "autoinscripción indemnización hospitalaria, UHOne indemnización hospitalaria, Manhattan Life, National General beneficio fijo",
+        "image": "https://www.isaacplans.com/images/hi_es.png",
+        "imageAlt": "Opciones de aseguradoras de indemnización hospitalaria"
+      },
+      "sectionSubtitle": "Los mismos enlaces que en la página principal de indemnización hospitalaria—elija un socio para cotizar e inscribirse en el sitio de la aseguradora."
+    },
+    "selfEnrollPicker": {
+      "title": "¿Quiere la lista completa en una sola página?",
+      "subtitle": "Abra la página dedicada de autoinscripción con todos los enlaces de socios.",
+      "cta": "Abrir página de autoinscripción",
+      "disclaimer": "Saldrá de IsaacPlans.com hacia el sitio de la aseguradora; aplican sus términos y política de privacidad."
     },
     "selfEnroll": {
       "cta": "Comenzar en línea",
@@ -1856,14 +1956,6 @@
       "title": "Aseguradoras asociadas",
       "subtitle": "Estas rutas lo llevan a la inscripción autorizada para productos fuera del Mercado—corto plazo, dental y visión, indemnización hospitalaria y otras opciones complementarias según la aseguradora. Para cobertura ACA con subsidios, use Planes ACA en Servicios."
     },
-    "guided": {
-      "title": "¿No sabe cuál aseguradora le conviene?",
-      "body": "Empiece con una orientación breve y luego elija un socio cuando esté listo. También puede autoinscribirse directamente desde las tarjetas abajo.",
-      "linkMatch": "Orientarse primero",
-      "linkStm": "Resumen de seguro temporal",
-      "linkAca": "Planes del Mercado ACA",
-      "linkContact": "Hablar con Isaac"
-    },
     "section": {
       "label": "Autoinscripción",
       "title": "Compare y continúe",
@@ -1903,34 +1995,182 @@
   },
   "getCoveredFastPage": {
     "metadata": {
-      "title": "Cobertura rápida | Isaac Plans Insurance",
-      "description": "Rutas rápidas al Mercado ACA, seguro temporal, autoinscripción con socios o una llamada bilingüe gratuita.",
-      "keywords": "seguro de salud rápido, seguro temporal, Mercado ACA, Isaac Plans"
+      "title": "Cobertura rápida — cuestionario de seguro de salud | Isaac Plans Insurance",
+      "description": "Responda unas preguntas para ver si el Mercado ACA, seguro temporal, dental y visión o cobertura suplementaria puede encajar. Asesoría bilingüe con licencia—no todos los planes o aseguradoras están en cada estado.",
+      "keywords": "cuestionario seguro de salud, seguro de salud rápido, Mercado ACA, seguro de salud temporal, seguro dental y de visión, indemnización hospitalaria, Molina Healthcare, Pivot Health, Manhattan Life, UnitedHealthcare, agente de seguros licenciado, seguro de salud en español, comparar planes de salud por estado, Isaac Plans",
+      "imageAlt": "Ambiente de salud sereno que representa orientación confiable en cobertura",
+      "breadcrumbPage": "Cobertura rápida"
     },
     "hero": {
-      "title": "Obtenga cobertura—empiece por el camino correcto",
-      "subtitle": "Nada obligatorio aquí: elija cómo prefiere comprar. Si no está seguro, lea el resumen de seguro temporal o reserve una llamada."
+      "title": "Obtenga cobertura rápido—en menos de 60 segundos",
+      "subtitle": "Responda unas preguntas breves para ver si ACA, cobertura temporal, dental y visión o suplementos pueden encajar. La disponibilidad y los beneficios varían según el estado."
     },
-    "cards": {
-      "aca": {
-        "title": "ACA / Mercado",
-        "body": "Subsidios y protecciones de inscripción garantizada—mejor cuando califica y quiere cobertura integral.",
-        "cta": "Ir a ACA"
+    "funnel": {
+      "layout": {
+        "banner": "Orientación de seguro de salud con licencia — atención bilingüe",
+        "phoneLabel": "Hable con un agente licenciado",
+        "logosCaption": "Compare opciones de aseguradoras reconocidas — la disponibilidad varía según estado y plan.",
+        "heroBadge": "Asesoría licenciada · Isaac Plans Insurance",
+        "secureNote": "Seguro · Sin compromiso · Sus datos permanecen privados"
       },
-      "stm": {
-        "title": "Seguro médico temporal (STLDI)",
-        "body": "Cobertura médica temporal para brechas—reglas, duraciones y disponibilidad varían por estado y producto. Lea los avisos antes de inscribirse.",
-        "cta": "Resumen STM"
+      "trust": {
+        "licensed": "Licenciado en {states}+ estados",
+        "bilingual": "Atención bilingüe",
+        "selfEnroll": "Autoinscripción en productos elegibles"
       },
-      "carriers": {
-        "title": "Autoinscripción con socios",
-        "body": "Continúe con UnitedHealthOne, Pivot, Manhattan Life o Allstate Health Solutions para productos elegibles fuera del Mercado.",
-        "cta": "Hub de aseguradoras"
+      "intro": {
+        "primaryCta": "Empezar",
+        "secondaryCta": "Hablar con Isaac",
+        "progress": "Paso {current} de {total}"
       },
-      "contact": {
-        "title": "Hablar con Isaac",
-        "body": "WhatsApp, teléfono o cita—ayuda bilingüe para comparar antes de hacer clic en inscribirse.",
-        "cta": "Contacto"
+      "steps": {
+        "intent": {
+          "title": "¿Qué busca hoy?",
+          "subtitle": "Elija la opción que mejor encaje—puede cambiar en cualquier momento."
+        },
+        "zip": {
+          "title": "¿Cuál es su código postal?",
+          "subtitle": "Ingrese su código postal para ver opciones en su zona. Determinaremos el estado automáticamente.",
+          "placeholder": "Código postal",
+          "invalid": "Ingrese un código postal válido de 5 dígitos.",
+          "lookupFailed": "No pudimos verificar ese código postal. Revise el número e inténtelo de nuevo.",
+          "resolved": "{place} · {state} · CP {zip}",
+          "searchingTitle": "Buscando planes en su zona",
+          "searchingLine1": "Verificando su código postal y estado…",
+          "searchingLine2": "Revisando aseguradoras disponibles cerca de usted…",
+          "searchingLine3": "Casi listo—preparando el siguiente paso…",
+          "searchingButton": "Buscando…"
+        },
+        "who": {
+          "title": "¿Quién necesita cobertura?",
+          "subtitle": "Nos ayuda a orientar los siguientes pasos."
+        },
+        "timing": {
+          "title": "¿Cuándo quiere que empiece la cobertura?",
+          "subtitle": "Una referencia aproximada está bien."
+        },
+        "preference": {
+          "title": "¿Cómo prefiere continuar?",
+          "subtitle": "La inscripción en línea le permite comparar planes e inscribirse cuando aplique; es la vía más rápida para muchas personas. Si lo prefiere, puede hablar con un agente autorizado primero."
+        }
+      },
+      "options": {
+        "intent": {
+          "aca": "Seguro médico principal / Mercado ACA",
+          "temporary": "Seguro médico temporal",
+          "dentalVision": "Dental y visión",
+          "hospitalIndemnity": "Beneficios en efectivo / indemnización hospitalaria",
+          "unsure": "Aún no estoy seguro"
+        },
+        "who": {
+          "self": "Solo yo",
+          "family": "Mi familia y yo",
+          "other": "Otra persona"
+        },
+        "timing": {
+          "asap": "Lo antes posible",
+          "thisMonth": "En el próximo mes",
+          "exploring": "Todavía estoy explorando"
+        },
+        "preference": {
+          "selfEnroll": "Quiero revisar planes e inscribirme en línea yo mismo",
+          "helpFirst": "Quiero hablar con alguien antes de inscribirme"
+        }
+      },
+      "nav": {
+        "back": "Atrás",
+        "next": "Siguiente",
+        "continue": "Continuar",
+        "seeResults": "Ver recomendación"
+      },
+      "result": {
+        "title": "Su mejor siguiente paso",
+        "subtitle": "Según sus respuestas—confirme siempre en la cotización o póliza oficial de su zona.",
+        "primaryCta": "Ver planes e inscribirse",
+        "secondaryCta": "Ver aseguradoras socias",
+        "contactCta": "Hablar primero con Isaac",
+        "tempCoverageTitle": "¿Prefiere cobertura temporal?",
+        "tempCoverageSubtitle": "Las opciones de corto plazo y otras que no son ACA están con nuestros aseguradores asociados—no equivalen al seguro médico principal del Mercado.",
+        "acaContactTitle": "¿Preguntas antes de inscribirse?",
+        "acaContactSubtitle": "El mismo formulario de cotización ACA que usamos en el sitio—le seguiremos sobre subsidios, documentos o inscripción.",
+        "acaPrimaryHint": "Se abre HealthSherpa en una pestaña nueva—su vía oficial de inscripción en el Mercado.",
+        "acaNextStepLabel": "Siguiente paso",
+        "richSecondary": {
+          "majorMedicalTitle": "¿Considera seguro médico principal (ACA)?",
+          "majorMedicalSubtitle": "Compare subsidios del Mercado y protecciones integrales—luego decida qué encaja con otras coberturas que esté evaluando.",
+          "majorMedicalCta": "Explorar el Mercado ACA",
+          "wantGuidanceTitle": "¿Quiere ayuda para elegir?",
+          "wantGuidanceSubtitle": "Escríbanos o llame—le ayudamos a comparar aseguradoras socias y opciones de inscripción según su caso.",
+          "browseCarriersTitle": "¿Prefiere explorar aseguradoras por su cuenta?",
+          "browseCarriersSubtitle": "Vea rutas de autoinscripción de aseguradores asociados—la disponibilidad varía según estado y plan.",
+          "hospitalAltTitle": "¿Considera cobertura de salud temporal en su lugar?",
+          "hospitalAltSubtitle": "El seguro médico de corto plazo puede servir de puente entre otras coberturas—es distinto de la indemnización hospitalaria en efectivo. Revise las reglas STLDI de su estado en nuestra página de cobertura temporal.",
+          "hospitalAltCta": "Explorar cobertura temporal"
+        },
+        "leadFormIntro": {
+          "aca": {
+            "title": "Ayuda con sus opciones ACA",
+            "subtitle": "Usamos el mismo formulario de cotización ACA que en el resto del sitio—mismos campos, consentimientos y seguimiento para subsidios e inscripción."
+          },
+          "temporary": {
+            "title": "Cotización de seguro médico temporal",
+            "subtitle": "Use el formulario de cobertura temporal—el mismo de nuestra página de STM."
+          },
+          "dentalVision": {
+            "title": "Cotización dental y visión",
+            "subtitle": "Use el formulario de dental y visión—idéntico al de la página del producto."
+          },
+          "hospitalIndemnity": {
+            "title": "Cotización de indemnización hospitalaria",
+            "subtitle": "Use el formulario de indemnización hospitalaria—el mismo flujo que en la página dedicada."
+          },
+          "carriers": {
+            "title": "Hable con Isaac sobre aseguradoras asociadas",
+            "subtitle": "Envíe un mensaje con nuestro formulario de contacto—lo tratamos como una consulta habitual."
+          },
+          "contact": {
+            "title": "Contáctenos",
+            "subtitle": "Use nuestro formulario principal para comunicarse con el equipo sobre los siguientes pasos."
+          }
+        },
+        "restart": "Empezar de nuevo",
+        "disclaimer": "No todos los productos están disponibles en todos los estados. Las reglas de cobertura, duraciones y exclusiones varían. Esta herramienta no garantiza elegibilidad.",
+        "rationale": {
+          "aca": "Indicó interés en cobertura integral del Mercado ACA. Revise subsidios y opciones, e inscríbase si encaja.",
+          "temporary": "Indicó seguro médico temporal. Revise avisos STLDI y reglas estatales antes de inscribirse—son distintos a los planes ACA.",
+          "dentalVision": "Indicó dental y visión. Compare diseños de plan y redes antes de inscribirse.",
+          "hospitalIndemnity": "Indicó indemnización hospitalaria / beneficios en efectivo. No sustituyen el seguro médico principal—lea la póliza con atención.",
+          "unsureSoon": "Quiere cobertura pronto pero no está seguro del producto—empiece por las aseguradoras socias para opciones temporales y luego explore el Mercado ACA para subsidios y protecciones integrales.",
+          "unsureGap": "Planea dentro del próximo mes—explore aseguradoras socias con rutas de autoinscripción que puedan servir como puente.",
+          "unsureExplore": "Todavía está explorando—hable con un agente licenciado o use el contacto cuando esté listo."
+        },
+        "pathTitles": {
+          "aca": "ACA / Mercado",
+          "temporary": "Seguro médico temporal",
+          "dentalVision": "Dental y visión",
+          "hospitalIndemnity": "Indemnización hospitalaria",
+          "carriers": "Aseguradoras socias",
+          "contact": "Contactar Isaac Plans"
+        }
+      },
+      "form": {
+        "title": "Que Isaac se comunique",
+        "subtitle": "Usaremos estos datos para dar seguimiento a su cuestionario.",
+        "firstName": "Nombre",
+        "lastName": "Apellido",
+        "email": "Correo electrónico",
+        "phone": "Teléfono",
+        "submit": "Enviar solicitud",
+        "submitting": "Enviando…",
+        "successTitle": "Listo",
+        "successMessage": "Recibimos su información y nos comunicaremos pronto.",
+        "errorGeneric": "Algo salió mal. Inténtelo de nuevo.",
+        "smsConsent": "Acepto recibir SMS de Isaac Plans Insurance. La frecuencia puede variar. Responda STOP para cancelar.",
+        "marketingConsent": "Acepto recibir mensajes de marketing ocasionales de Isaac Plans Insurance.",
+        "privacy": "Política de privacidad",
+        "required": "Obligatorio",
+        "invalidEmail": "Correo no válido",
+        "invalidPhone": "Ingrese un teléfono válido de 10 dígitos en EE. UU."
       }
     }
   },

@@ -304,6 +304,22 @@ export const getDentalVisionBreadcrumbLd = (
   ],
 });
 
+export const getDentalVisionSelfEnrollmentPageLd = (
+  canonicalUrl: string,
+  title: string,
+  description: string,
+  locale: string
+): WithContext<WebPage> => ({
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": `${canonicalUrl}#webpage`,
+  url: canonicalUrl,
+  name: title,
+  description,
+  inLanguage: locale,
+  about: { "@id": `${BASE_URL}/#organization` },
+});
+
 export const getHiPageLd = (
   locale: string,
   title: string,
@@ -313,6 +329,22 @@ export const getHiPageLd = (
   "@type": "WebPage",
   "@id": `${BASE_URL}/${locale}/hospital-indemnity#webpage`,
   url: `${BASE_URL}/${locale}/hospital-indemnity`,
+  name: title,
+  description,
+  inLanguage: locale,
+  about: { "@id": `${BASE_URL}/#organization` },
+});
+
+export const getHospitalIndemnitySelfEnrollmentPageLd = (
+  canonicalUrl: string,
+  title: string,
+  description: string,
+  locale: string
+): WithContext<WebPage> => ({
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": `${canonicalUrl}#webpage`,
+  url: canonicalUrl,
   name: title,
   description,
   inLanguage: locale,
@@ -775,6 +807,57 @@ export const getFeBreadcrumbLd = (
         "@type": "ListItem",
         position: 2,
         name: feLabel,
+        item: `${BASE_URL}/${locale}/${path}`,
+      },
+    ],
+  };
+};
+
+/** Get Covered Fast quiz funnel — locale slug from `routing.pathnames["/get-covered-fast"]`. */
+const getCoveredFastPathFor = (locale: string) =>
+  locale?.toLowerCase().startsWith("es") ? "cobertura-rapida" : "get-covered-fast";
+
+/** WebPage JSON-LD for Get Covered Fast */
+export const getGetCoveredFastPageLd = (
+  locale: string,
+  title: string,
+  description: string
+): WithContext<WebPage> => {
+  const path = getCoveredFastPathFor(locale);
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "@id": `${BASE_URL}/${locale}/${path}#webpage`,
+    url: `${BASE_URL}/${locale}/${path}`,
+    name: title,
+    description,
+    inLanguage: locale,
+    about: { "@id": `${BASE_URL}/#organization` },
+    isPartOf: { "@id": `${BASE_URL}/#website` },
+  };
+};
+
+/** BreadcrumbList JSON-LD for Get Covered Fast (Home → page) */
+export const getGetCoveredFastBreadcrumbLd = (
+  locale: string,
+  homeLabel: string,
+  pageLabel: string
+): WithContext<BreadcrumbList> => {
+  const path = getCoveredFastPathFor(locale);
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: homeLabel,
+        item: `${BASE_URL}/${locale}`,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: pageLabel,
         item: `${BASE_URL}/${locale}/${path}`,
       },
     ],

@@ -34,6 +34,8 @@ export async function submitAcaForm(
   const logPrefix = LOCALE_LOG[isES ? "es" : "en"];
 
   try {
+    const leadSource = String(formData.get("source") ?? "").trim() || "aca_page";
+
     const raw = {
       firstName: String(formData.get("firstName") ?? ""),
       lastName: String(formData.get("lastName") ?? ""),
@@ -113,7 +115,7 @@ export async function submitAcaForm(
         phone,
         acaData: {
           language: isES ? "es" : "en",
-          source: "aca_page",
+          source: leadSource,
           smsConsent: formData.get("smsConsent") === "on",
           marketingConsent: formData.get("marketingConsent") === "on",
         },

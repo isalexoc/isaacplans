@@ -52,6 +52,11 @@ const PAGES: Page[] = [
   // Dental & Vision
   { href: "/dental-vision", changeFrequency: "monthly", priority: 0.8 },
   {
+    href: "/dental-vision/self-enrollment",
+    changeFrequency: "monthly",
+    priority: 0.75,
+  },
+  {
     href: "/dental-vision/calendar",
     changeFrequency: "monthly",
     priority: 0.6,
@@ -59,6 +64,11 @@ const PAGES: Page[] = [
 
   // Hospital Indemnity
   { href: "/hospital-indemnity", changeFrequency: "monthly", priority: 0.8 },
+  {
+    href: "/hospital-indemnity/self-enrollment",
+    changeFrequency: "monthly",
+    priority: 0.75,
+  },
   {
     href: "/hospital-indemnity/calendar",
     changeFrequency: "monthly",
@@ -81,7 +91,7 @@ const PAGES: Page[] = [
   { href: "/iul/application", changeFrequency: "monthly", priority: 0.7 },
   { href: "/iul/referrals", changeFrequency: "monthly", priority: 0.7 },
 
-  { href: "/get-covered-fast", changeFrequency: "monthly", priority: 0.78 },
+  { href: "/get-covered-fast", changeFrequency: "weekly", priority: 0.82 },
 
   // Short Term Medical
   { href: "/short-term-medical", changeFrequency: "monthly", priority: 0.8 },

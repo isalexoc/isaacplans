@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { firstName, lastName, email, phone, iulLeadGenData, shortTermMedicalData, contactPageData, acaData, dentalVisionData, hospitalIndemnityData, finalExpenseData, meta } = body;
+    const { firstName, lastName, email, phone, iulLeadGenData, shortTermMedicalData, contactPageData, acaData, dentalVisionData, hospitalIndemnityData, finalExpenseData, getCoveredFastData, meta } = body;
 
     // [Workflow Debug] Log incoming lead type - helps trace why IUL workflow may be assigned
     console.log("[create-contact] Incoming request lead type:", {
@@ -40,6 +40,7 @@ export async function POST(request: NextRequest) {
       hasDentalVisionData: !!dentalVisionData,
       hasHospitalIndemnityData: !!hospitalIndemnityData,
       hasFinalExpenseData: !!finalExpenseData,
+      hasGetCoveredFastData: !!getCoveredFastData,
       iulLeadGenDataKeys: iulLeadGenData ? Object.keys(iulLeadGenData) : [],
       shortTermMedicalDataKeys: shortTermMedicalData ? Object.keys(shortTermMedicalData) : [],
       contactPageDataKeys: contactPageData ? Object.keys(contactPageData) : [],
@@ -59,9 +60,11 @@ export async function POST(request: NextRequest) {
                 ? "hospital_indemnity"
                 : finalExpenseData
                   ? "final_expense"
-                  : iulLeadGenData
-                    ? "iul_lead_gen"
-                    : "other",
+                  : getCoveredFastData
+                    ? "get_covered_fast"
+                    : iulLeadGenData
+                      ? "iul_lead_gen"
+                      : "other",
     });
 
     // Validate required fields
@@ -323,6 +326,44 @@ export async function POST(request: NextRequest) {
         '',
         `Submitted: ${submittedAt}`,
       ].join('\n');
+    } else if (getCoveredFastData) {
+      const languageDisplay = getCoveredFastData.language === 'es' ? 'Spanish (Español)' :
+                              getCoveredFastData.language === 'en' ? 'English' : getCoveredFastData.language || 'Not provided';
+      const submittedAt = new Date().toLocaleString() + ' ' + (Intl.DateTimeFormat().resolvedOptions().timeZone || '');
+      const smsConsent = getCoveredFastData.smsConsent === true ? 'Yes' : 'No';
+      const marketingConsent = getCoveredFastData.marketingConsent === true ? 'Yes' : 'No';
+      const answersLines = getCoveredFastData.answers && typeof getCoveredFastData.answers === 'object'
+        ? Object.entries(getCoveredFastData.answers as Record<string, string>)
+            .map(([k, v]) => `  ${k}: ${v}`)
+            .join('\n')
+        : '  (none)';
+      leadDetailsText = [
+        'Get Covered Fast funnel',
+        '=======================',
+        '',
+        'Contact:',
+        `  Name: ${firstName} ${lastName}`,
+        `  Email: ${email}`,
+        `  Phone: ${phone}`,
+        '',
+        'Quiz answers:',
+        answersLines,
+        '',
+        'Routing:',
+        `  Recommended primary: ${getCoveredFastData.recommendedRoute || 'Not provided'}`,
+        `  Recommended secondary: ${getCoveredFastData.recommendedSecondary || 'Not provided'}`,
+        `  ZIP: ${getCoveredFastData.zip || 'Not provided'}`,
+        `  State: ${getCoveredFastData.state || 'Not provided'}`,
+        '',
+        'Lead Details:',
+        `  Source: ${getCoveredFastData.source || 'get_covered_fast'}`,
+        `  Language: ${languageDisplay}`,
+        `  SMS Consent: ${smsConsent}`,
+        `  Marketing Consent: ${marketingConsent}`,
+        `  Source URL: ${meta?.eventSourceUrl || 'Not provided'}`,
+        '',
+        `Submitted: ${submittedAt}`,
+      ].join('\n');
     }
 
     if (leadDetailsText) {
@@ -333,6 +374,7 @@ export async function POST(request: NextRequest) {
         dentalVisionData ||
         hospitalIndemnityData ||
         finalExpenseData ||
+        getCoveredFastData ||
         iulLeadGenData;
       const gd = guideMetaSource as
         | { guideName?: string; guideId?: string }
@@ -399,6 +441,13 @@ export async function POST(request: NextRequest) {
       finalExpenseTags.push(finalExpenseData.language === 'es' ? 'Spanish' : 'English');
     }
 
+    // Build tags for Get Covered Fast funnel leads
+    const getCoveredFastTags: string[] = [];
+    if (getCoveredFastData) {
+      getCoveredFastTags.push('Get Covered Fast Lead');
+      getCoveredFastTags.push(getCoveredFastData.language === 'es' ? 'Spanish' : 'English');
+    }
+
     // Determine lead source for CRM routing (prevents IUL workflow from auto-triggering on specialty page leads)
     const leadSource = shortTermMedicalData
       ? "short_term_medical"
@@ -412,9 +461,11 @@ export async function POST(request: NextRequest) {
               ? "hospital_indemnity"
               : finalExpenseData
                 ? "final_expense"
-                : iulLeadGenData
-                  ? "iul_lead_gen"
-                  : "website";
+                : getCoveredFastData
+                  ? "get_covered_fast"
+                  : iulLeadGenData
+                    ? "iul_lead_gen"
+                    : "website";
 
     // Create contact payload with customFields, tags, and source
     const contactPayload: any = {
@@ -459,6 +510,10 @@ export async function POST(request: NextRequest) {
     if (finalExpenseTags.length > 0) {
       contactPayload.tags = [...(contactPayload.tags || []), ...finalExpenseTags];
     }
+    // Add tags for Get Covered Fast funnel
+    if (getCoveredFastTags.length > 0) {
+      contactPayload.tags = [...(contactPayload.tags || []), ...getCoveredFastTags];
+    }
 
     const consumerGuideTagSources = [
       acaData,
@@ -467,6 +522,7 @@ export async function POST(request: NextRequest) {
       dentalVisionData,
       hospitalIndemnityData,
       finalExpenseData,
+      getCoveredFastData,
       iulLeadGenData,
     ];
     const hasConsumerGuideDownload = consumerGuideTagSources.some(
@@ -663,8 +719,8 @@ export async function POST(request: NextRequest) {
     const contactId = createResponseData.contact?.id || createResponseData.id;
     const isNewContact = true; // This is a new contact (we just created it)
 
-    if (shortTermMedicalData || contactPageData || acaData || dentalVisionData || hospitalIndemnityData || finalExpenseData) {
-      console.log("[create-contact] Specialty lead (incl. Final Expense) created - will NOT add to generic Notification / IUL where excluded (contactId:", contactId, ")");
+    if (shortTermMedicalData || contactPageData || acaData || dentalVisionData || hospitalIndemnityData || finalExpenseData || getCoveredFastData) {
+      console.log("[create-contact] Specialty lead (incl. Final Expense / Get Covered Fast) created - will NOT add to generic Notification / IUL where excluded (contactId:", contactId, ")");
     }
 
     // Helper function to add contact to a workflow
@@ -719,7 +775,8 @@ export async function POST(request: NextRequest) {
       !dentalVisionData &&
       !hospitalIndemnityData &&
       !iulLeadGenData &&
-      !finalExpenseData
+      !finalExpenseData &&
+      !getCoveredFastData
     );
     console.log("[create-contact] Notification workflow:", {
       workflowId: notificationWorkflowId ?? "not configured",
@@ -747,7 +804,7 @@ export async function POST(request: NextRequest) {
       typeof language === "string" && language.toLowerCase().startsWith("es")
         ? "es"
         : "en";
-    const iulConditionMet = !!(iulLeadGenData && !shortTermMedicalData && !contactPageData && !acaData && !dentalVisionData && !hospitalIndemnityData && !finalExpenseData);
+    const iulConditionMet = !!(iulLeadGenData && !shortTermMedicalData && !contactPageData && !acaData && !dentalVisionData && !hospitalIndemnityData && !finalExpenseData && !getCoveredFastData);
     const willAddIul = !!(iulConditionMet && iulWorkflowId && contactId);
 
     console.log("[create-contact] IUL workflow decision:", {
@@ -803,6 +860,7 @@ export async function POST(request: NextRequest) {
       !acaData &&
       !dentalVisionData &&
       !hospitalIndemnityData &&
+      !getCoveredFastData &&
       contactId &&
       contactWorkflowId
     );
@@ -823,6 +881,33 @@ export async function POST(request: NextRequest) {
 
     if (willAddContactPage) {
       await addContactToWorkflow(contactWorkflowId!, `Contact page (${contactLanguage})`);
+    }
+
+    // Get Covered Fast funnel — same contact workflow as /contact (tags differentiate the lead)
+    const gcfLanguage = getCoveredFastData?.language === "es" ? "es" : "en";
+    const willAddGetCoveredFast = !!(
+      getCoveredFastData &&
+      contactId &&
+      contactWorkflowId &&
+      !contactPageData
+    );
+
+    console.log("[create-contact] Get Covered Fast workflow decision:", {
+      hasGetCoveredFastData: !!getCoveredFastData,
+      gcfLanguage,
+      workflowId: contactWorkflowId ?? "not configured",
+      willAddGetCoveredFast,
+      reason: !getCoveredFastData
+        ? "not a Get Covered Fast lead"
+        : contactPageData
+          ? "contact-page payload also present — skipped"
+          : !contactWorkflowId
+            ? "AGENT_CRM_WORKFLOW_CONTACT not set"
+            : "Get Covered Fast — adding to contact workflow",
+    });
+
+    if (willAddGetCoveredFast) {
+      await addContactToWorkflow(contactWorkflowId!, `Get covered fast (${gcfLanguage})`);
     }
 
     // Step 5: ACA page — dedicated workflow
@@ -988,7 +1073,9 @@ export async function POST(request: NextRequest) {
                   ? "hospital_indemnity"
                   : finalExpenseData
                     ? "final_expense"
-                    : "iul_lead_gen";
+                    : getCoveredFastData
+                      ? "get_covered_fast"
+                      : "iul_lead_gen";
         const contentName = shortTermMedicalData
           ? "Short Term Medical Lead"
           : acaData
@@ -1001,7 +1088,9 @@ export async function POST(request: NextRequest) {
                   ? "Hospital Indemnity Lead"
                   : finalExpenseData
                     ? "Final Expense Lead"
-                    : "IUL Lead Generation Campaign";
+                    : getCoveredFastData
+                      ? "Get Covered Fast funnel"
+                      : "IUL Lead Generation Campaign";
 
         console.log("[Meta CAPI] Sending event:", {
           eventId: meta.eventId,
