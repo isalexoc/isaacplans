@@ -21,6 +21,17 @@ import {
   HEALTH_SHERPA_AGENT_URL,
 } from "@/lib/get-covered-fast/constants";
 import {
+  getGcfPrimaryDestination,
+  trackGcfAcaHealthsherpaEnrollClick,
+  trackGcfFunnelBack,
+  trackGcfFunnelRestart,
+  trackGcfPostResultClick,
+  trackGcfResultViewed,
+  trackGcfStepComplete,
+  type GcfAnalyticsSurface,
+  type GcfPostResultDestination,
+} from "@/lib/analytics/get-covered-fast-ga";
+import {
   DENTAL_VISION_SELF_ENROLL_PATHNAME,
   HOSPITAL_INDEMNITY_SELF_ENROLL_PATHNAME,
   getRecommendation,
@@ -88,11 +99,26 @@ const PREF_OPTIONS: { key: (typeof PREF_KEYS)[number]; Icon: LucideIcon }[] = [
   { key: "helpFirst", Icon: MessageCircle },
 ];
 
+const STEP_IDS = [
+  "zip",
+  "intent",
+  "who",
+  "timing",
+  "preference",
+] as const;
+
 type Props = {
   licensedStateCount: number;
+  /** Segment GA events: organic funnel vs paid landing */
+  analyticsSurface?: GcfAnalyticsSurface;
 };
 
-export default function GetCoveredFastFunnel({ licensedStateCount }: Props) {
+export default function GetCoveredFastFunnel({
+  licensedStateCount,
+  analyticsSurface: analyticsSurfaceProp,
+}: Props) {
+  const analyticsSurface: GcfAnalyticsSurface =
+    analyticsSurfaceProp ?? "get_covered_fast";
   const t = useTranslations("getCoveredFastPage.funnel");
   const tHero = useTranslations("getCoveredFastPage.hero");
   const locale = useLocale();
@@ -108,6 +134,7 @@ export default function GetCoveredFastFunnel({ licensedStateCount }: Props) {
   const [contactModalOpen, setContactModalOpen] = useState(false);
   const [isAdvancingStep, setIsAdvancingStep] = useState(false);
   const quizAdvanceTimeoutRef = useRef<number | null>(null);
+  const resultViewedTrackedRef = useRef(false);
 
   const clearQuizAdvanceTimer = useCallback(() => {
     if (quizAdvanceTimeoutRef.current) {
@@ -156,6 +183,48 @@ export default function GetCoveredFastFunnel({ licensedStateCount }: Props) {
   const recommendation = useMemo(
     () => (phase === "result" ? getRecommendation(answers) : null),
     [phase, answers]
+  );
+
+  useEffect(() => {
+    if (phase !== "result" || !recommendation) return;
+    if (resultViewedTrackedRef.current) return;
+    resultViewedTrackedRef.current = true;
+
+    const leadFormPath =
+      answers.intent === "aca" ||
+      (answers.intent === "unsure" && answers.timing === "asap")
+        ? "aca"
+        : recommendation.primaryPath;
+
+    trackGcfResultViewed(analyticsSurface, {
+      primary_path: recommendation.primaryPath,
+      secondary_path: recommendation.secondaryPath ?? "",
+      rationale_id: recommendation.rationaleId,
+      intent: answers.intent ?? "",
+      preference: answers.preference ?? "",
+      lead_form_path: leadFormPath,
+    });
+  }, [phase, recommendation, answers, analyticsSurface]);
+
+  const trackPostResultClick = useCallback(
+    (
+      cta_role: "primary" | "secondary",
+      destination: GcfPostResultDestination,
+      destination_detail?: string
+    ) => {
+      if (phase !== "result") return;
+      const rec = getRecommendation(answers);
+      trackGcfPostResultClick(analyticsSurface, {
+        primary_path: rec.primaryPath,
+        secondary_path: rec.secondaryPath ?? "",
+        rationale_id: rec.rationaleId,
+        intent: answers.intent ?? "",
+        cta_role,
+        destination,
+        destination_detail,
+      });
+    },
+    [analyticsSurface, phase, answers]
   );
 
   const progressPct = ((step + 1) / TOTAL_STEPS) * 100;
@@ -212,6 +281,11 @@ export default function GetCoveredFastFunnel({ licensedStateCount }: Props) {
           stateName: data.stateName,
           placeName: data.placeName,
         }));
+        trackGcfStepComplete(analyticsSurface, {
+          step_index: 0,
+          step_id: "zip",
+          choice: data.state ?? "unknown",
+        });
         setStep(1);
       } catch {
         setZipError(t("steps.zip.lookupFailed"));
@@ -231,6 +305,10 @@ export default function GetCoveredFastFunnel({ licensedStateCount }: Props) {
   const goBack = () => {
     clearQuizAdvanceTimer();
     if (step > 0) {
+      trackGcfFunnelBack(analyticsSurface, {
+        from_step_index: step,
+        from_step_id: STEP_IDS[step],
+      });
       setStep((s) => s - 1);
       if (step === 1) {
         setZipError(null);
@@ -240,6 +318,8 @@ export default function GetCoveredFastFunnel({ licensedStateCount }: Props) {
 
   const restart = () => {
     clearQuizAdvanceTimer();
+    resultViewedTrackedRef.current = false;
+    trackGcfFunnelRestart(analyticsSurface);
     setPhase("quiz");
     setStep(0);
     setAnswers({});
@@ -389,7 +469,14 @@ export default function GetCoveredFastFunnel({ licensedStateCount }: Props) {
                   type="button"
                   onClick={() => {
                     setAnswers((a) => ({ ...a, intent: key }));
-                    scheduleAfterSelection(() => setStep(2));
+                    scheduleAfterSelection(() => {
+                      trackGcfStepComplete(analyticsSurface, {
+                        step_index: 1,
+                        step_id: "intent",
+                        choice: key,
+                      });
+                      setStep(2);
+                    });
                   }}
                   className={cn(
                     "w-full rounded-xl border-2 px-4 py-3.5 text-left text-sm font-medium transition-all duration-200",
@@ -426,7 +513,14 @@ export default function GetCoveredFastFunnel({ licensedStateCount }: Props) {
                     type="button"
                     onClick={() => {
                       setAnswers((a) => ({ ...a, who: key }));
-                      scheduleAfterSelection(() => setStep(3));
+                      scheduleAfterSelection(() => {
+                        trackGcfStepComplete(analyticsSurface, {
+                          step_index: 2,
+                          step_id: "who",
+                          choice: key,
+                        });
+                        setStep(3);
+                      });
                     }}
                     className={cn(
                       "group relative flex flex-col items-center gap-3 rounded-2xl border-2 px-4 py-5 text-center transition-all duration-200",
@@ -487,7 +581,14 @@ export default function GetCoveredFastFunnel({ licensedStateCount }: Props) {
                         ...a,
                         timing: key as GetCoveredFastAnswers["timing"],
                       }));
-                      scheduleAfterSelection(() => setStep(4));
+                      scheduleAfterSelection(() => {
+                        trackGcfStepComplete(analyticsSurface, {
+                          step_index: 3,
+                          step_id: "timing",
+                          choice: key,
+                        });
+                        setStep(4);
+                      });
                     }}
                     className={cn(
                       "group relative flex flex-col items-center gap-3 rounded-2xl border-2 px-4 py-5 text-center transition-all duration-200",
@@ -550,6 +651,11 @@ export default function GetCoveredFastFunnel({ licensedStateCount }: Props) {
                         preference: key as "selfEnroll" | "helpFirst",
                       }));
                       scheduleAfterSelection(() => {
+                        trackGcfStepComplete(analyticsSurface, {
+                          step_index: 4,
+                          step_id: "preference",
+                          choice: key,
+                        });
                         setPhase("result");
                         if (key === "helpFirst") {
                           setContactModalOpen(true);
@@ -620,19 +726,31 @@ export default function GetCoveredFastFunnel({ licensedStateCount }: Props) {
       helpModalDental ||
       helpModalTemporary;
 
+    const gcfQueryOpts = {
+      healthCoverageFastAds:
+        analyticsSurface === "get_health_coverage_fast_ads",
+    };
+
     const primaryHref = withGcfQuery(
       pathToPathname(recommendation.primaryPath),
-      recommendation.primaryPath
+      recommendation.primaryPath,
+      gcfQueryOpts
     );
 
-    const carriersHref = withGcfQuery(pathToPathname("carriers"), "carriers");
+    const carriersHref = withGcfQuery(
+      pathToPathname("carriers"),
+      "carriers",
+      gcfQueryOpts
+    );
     const dentalSelfEnrollHref = withGcfQuery(
       DENTAL_VISION_SELF_ENROLL_PATHNAME,
-      "dentalVision"
+      "dentalVision",
+      gcfQueryOpts
     );
     const hospitalIndemnitySelfEnrollHref = withGcfQuery(
       HOSPITAL_INDEMNITY_SELF_ENROLL_PATHNAME,
-      "hospitalIndemnity"
+      "hospitalIndemnity",
+      gcfQueryOpts
     );
     /** Temporary → carriers hub; dental & vision / hospital indemnity → carrier self-enrollment picker. */
     const primaryResultHref =
@@ -645,14 +763,24 @@ export default function GetCoveredFastFunnel({ licensedStateCount }: Props) {
             : primaryHref;
     const temporaryPageHref = withGcfQuery(
       pathToPathname("temporary"),
-      "temporary"
+      "temporary",
+      gcfQueryOpts
     );
-    const contactPageHref = withGcfQuery(pathToPathname("contact"), "contact");
+    const contactPageHref = withGcfQuery(
+      pathToPathname("contact"),
+      "contact",
+      gcfQueryOpts
+    );
 
     const primaryCtaLabel =
       recommendation.primaryPath === "contact"
         ? t("result.contactCta")
         : t("result.primaryCta");
+
+    const primaryDestination = getGcfPrimaryDestination(
+      showPrimaryAcaHero,
+      recommendation.primaryPath
+    );
 
     const renderRichSecondaryBlock = () => {
       const p = recommendation.primaryPath;
@@ -679,6 +807,13 @@ export default function GetCoveredFastFunnel({ licensedStateCount }: Props) {
                   <Link
                     href={carriersHref as never}
                     className="inline-flex w-full items-center justify-center gap-2.5 px-4"
+                    onClick={() =>
+                      trackPostResultClick(
+                        "secondary",
+                        "carriers",
+                        "aca_temp_alternative"
+                      )
+                    }
                   >
                     <Building2
                       className="h-5 w-5 shrink-0 text-[hsl(var(--custom))]"
@@ -722,6 +857,13 @@ export default function GetCoveredFastFunnel({ licensedStateCount }: Props) {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex w-full items-center justify-center gap-2.5 px-4"
+                    onClick={() =>
+                      trackPostResultClick(
+                        "secondary",
+                        "healthsherpa",
+                        "temporary_aca_secondary"
+                      )
+                    }
                   >
                     {t("result.primaryCta")}
                     <ExternalLink
@@ -764,6 +906,13 @@ export default function GetCoveredFastFunnel({ licensedStateCount }: Props) {
                   <Link
                     href={temporaryPageHref as never}
                     className="inline-flex w-full items-center justify-center gap-2.5 px-4"
+                    onClick={() =>
+                      trackPostResultClick(
+                        "secondary",
+                        "temporary",
+                        "hospital_stm_alt"
+                      )
+                    }
                   >
                     <span>{t("result.richSecondary.hospitalAltCta")}</span>
                     <ChevronRight
@@ -800,6 +949,13 @@ export default function GetCoveredFastFunnel({ licensedStateCount }: Props) {
                   <Link
                     href={contactPageHref as never}
                     className="inline-flex w-full items-center justify-center gap-2.5 px-4"
+                    onClick={() =>
+                      trackPostResultClick(
+                        "secondary",
+                        "contact",
+                        "carriers_guidance"
+                      )
+                    }
                   >
                     <span>{t("result.contactCta")}</span>
                     <ChevronRight
@@ -836,6 +992,13 @@ export default function GetCoveredFastFunnel({ licensedStateCount }: Props) {
                   <Link
                     href={carriersHref as never}
                     className="inline-flex w-full items-center justify-center gap-2.5 px-4"
+                    onClick={() =>
+                      trackPostResultClick(
+                        "secondary",
+                        "carriers",
+                        "contact_browse_carriers"
+                      )
+                    }
                   >
                     <span>{t("result.secondaryCta")}</span>
                     <ChevronRight
@@ -932,6 +1095,11 @@ export default function GetCoveredFastFunnel({ licensedStateCount }: Props) {
                               target="_blank"
                               rel="noopener noreferrer"
                               className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-[hsl(var(--custom))] to-blue-600 hover:from-[hsl(var(--custom)/0.92)] hover:to-blue-600/95"
+                              onClick={() =>
+                                trackGcfAcaHealthsherpaEnrollClick(
+                                  analyticsSurface
+                                )
+                              }
                             >
                               {t("result.primaryCta")}
                               <ExternalLink className="h-5 w-5 opacity-90" aria-hidden />
@@ -951,6 +1119,13 @@ export default function GetCoveredFastFunnel({ licensedStateCount }: Props) {
                             <Link
                               href={primaryResultHref as never}
                               className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-[hsl(var(--custom))] to-blue-600 hover:from-[hsl(var(--custom)/0.92)] hover:to-blue-600/95"
+                              onClick={() =>
+                                trackPostResultClick(
+                                  "primary",
+                                  primaryDestination,
+                                  "hero_primary"
+                                )
+                              }
                             >
                               {primaryCtaLabel}
                               <ChevronRight className="h-5 w-5 opacity-90" aria-hidden />

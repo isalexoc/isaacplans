@@ -4,6 +4,7 @@ import { BackHome } from "@/components/back-home";
 import ServicePageTracker from "@/components/service-page-tracker";
 import ShortTermCarriersSection from "@/components/shortterm-carriers-section";
 import { buildHospitalIndemnityEnrollmentCarriers } from "@/lib/hospital-indemnity-enrollment-carriers";
+import { isGcfHealthCoverageFastAdsCarrierPage } from "@/lib/get-covered-fast/gcf-attribution";
 import { getHospitalIndemnitySelfEnrollmentPageLd } from "@/lib/seo/jsonld";
 import {
   ogLocaleOf,
@@ -60,9 +61,36 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function HospitalIndemnitySelfEnrollmentPage() {
+function firstQueryString(
+  v: string | string[] | undefined
+): string | undefined {
+  if (v === undefined) return undefined;
+  return Array.isArray(v) ? v[0] : v;
+}
+
+type SelfEnrollmentPageProps = {
+  searchParams: Promise<{
+    from?: string;
+    path?: string;
+    gcf_channel?: string;
+  }>;
+};
+
+export default async function HospitalIndemnitySelfEnrollmentPage({
+  searchParams,
+}: SelfEnrollmentPageProps) {
   const locale = (await getLocale()) as SupportedLocale;
   const t = await getTranslations({ locale, namespace: "HIpage" });
+
+  const sp = await searchParams;
+  const gcfAdsCarrierConversionEnabled = isGcfHealthCoverageFastAdsCarrierPage(
+    {
+      from: firstQueryString(sp.from),
+      path: firstQueryString(sp.path),
+      gcf_channel: firstQueryString(sp.gcf_channel),
+    },
+    "hospitalIndemnity"
+  );
 
   const carriers = buildHospitalIndemnityEnrollmentCarriers((key) => t(key));
 
@@ -93,6 +121,8 @@ export default async function HospitalIndemnitySelfEnrollmentPage() {
           subtitle={t("selfEnrollmentPage.sectionSubtitle")}
           ctaLabel={t("carriersSection.cta")}
           ctaLabelMobile={t("carriersSection.ctaMobile")}
+          gcfAdsCarrierConversionEnabled={gcfAdsCarrierConversionEnabled}
+          carrierHubContext="hospital_self_enrollment"
           carriers={carriers}
         />
       </div>

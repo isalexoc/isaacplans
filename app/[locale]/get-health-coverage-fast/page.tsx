@@ -99,7 +99,10 @@ export default async function GetHealthCoverageFastAdsPage() {
         serviceName="Get health coverage fast (ads)"
         serviceCategory="get-health-coverage-fast-ads"
       />
-      <GetCoveredFastFunnel licensedStateCount={licensedStateCount} />
+      <GetCoveredFastFunnel
+        licensedStateCount={licensedStateCount}
+        analyticsSurface="get_health_coverage_fast_ads"
+      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{

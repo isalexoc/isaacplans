@@ -16,6 +16,7 @@ import {
   isGcfCarriersHubQuery,
   type CarriersHubCardId,
 } from "@/lib/carriers-gcf-direct-quote-urls";
+import { isGcfHealthCoverageFastAdsCarrierPage } from "@/lib/get-covered-fast/gcf-attribution";
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = (await getLocale()) as SupportedLocale;
@@ -60,7 +61,11 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 type CarriersPageProps = {
-  searchParams: Promise<{ from?: string; path?: string }>;
+  searchParams: Promise<{
+    from?: string;
+    path?: string;
+    gcf_channel?: string;
+  }>;
 };
 
 function firstQueryString(
@@ -76,9 +81,15 @@ export default async function CarriersIndexPage({
   const locale = (await getLocale()) as SupportedLocale;
   const t = await getTranslations({ locale, namespace: "carriersIndex" });
   const sp = await searchParams;
-  const useGcfDirectQuotes = isGcfCarriersHubQuery(
-    firstQueryString(sp.from),
-    firstQueryString(sp.path)
+  const from = firstQueryString(sp.from);
+  const path = firstQueryString(sp.path);
+  const gcfChannel = firstQueryString(sp.gcf_channel);
+
+  const useGcfDirectQuotes = isGcfCarriersHubQuery(from, path);
+
+  const gcfAdsCarrierConversionEnabled = isGcfHealthCoverageFastAdsCarrierPage(
+    { from, path, gcf_channel: gcfChannel },
+    "carriers"
   );
 
   const hub = (
@@ -110,6 +121,8 @@ export default async function CarriersIndexPage({
         title={t("section.title")}
         ctaLabel={t("section.cta")}
         ctaLabelMobile={t("section.ctaMobile")}
+        gcfAdsCarrierConversionEnabled={gcfAdsCarrierConversionEnabled}
+        carrierHubContext="carriers_index"
         carriers={[
           {
             id: "uhone",

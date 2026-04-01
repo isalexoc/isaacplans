@@ -106,12 +106,16 @@ export function pathToPathname(path: RecommendationPath): string {
 /** Analytics-friendly query on internal links. */
 export function withGcfQuery(
   pathname: string,
-  primaryPath: RecommendationPath
+  primaryPath: RecommendationPath,
+  options?: { healthCoverageFastAds?: boolean }
 ): string {
   const params = new URLSearchParams({
     from: "gcf",
     path: primaryPath,
   });
+  if (options?.healthCoverageFastAds) {
+    params.set("gcf_channel", "health_coverage_fast_ads");
+  }
   return `${pathname}?${params.toString()}`;
 }
 

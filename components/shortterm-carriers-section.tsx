@@ -1,6 +1,7 @@
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
-import { ArrowRight, ExternalLink, Sparkles } from "lucide-react";
+import ShortTermCarrierCtaLink from "@/components/shortterm-carrier-cta-link";
+import { Sparkles } from "lucide-react";
+import type { GcfCarrierConversionHub } from "@/lib/get-covered-fast/gcf-attribution";
 
 export type CarrierItem = {
   id: string;
@@ -40,6 +41,10 @@ interface ShortTermCarriersSectionProps {
   /** Shorter label for small screens (e.g. “View plans” vs “View plans & enroll”). */
   ctaLabelMobile?: string;
   carriers: CarrierItem[];
+  /** Paid ads GCF hub only: fire `gcf_ads_carrier_enroll_click` on carrier CTA. */
+  gcfAdsCarrierConversionEnabled?: boolean;
+  /** Required when conversion tracking is enabled. */
+  carrierHubContext?: GcfCarrierConversionHub;
 }
 
 function buildLegacyLogoUrl(publicId?: string): string | null {
@@ -87,6 +92,8 @@ export default function ShortTermCarriersSection({
   ctaLabel,
   ctaLabelMobile,
   carriers,
+  gcfAdsCarrierConversionEnabled,
+  carrierHubContext,
 }: ShortTermCarriersSectionProps) {
   const headingId = `${sectionId}-heading`;
   const TitleTag = titleHeading === "h1" ? "h1" : "h2";
@@ -241,32 +248,18 @@ export default function ShortTermCarriersSection({
                     )}
 
                     <div className="mt-4 md:mt-6">
-                      <Button
-                        asChild
-                        size="lg"
-                        className="w-full gap-2 rounded-xl bg-[hsl(var(--custom))] font-semibold text-white shadow-md transition hover:bg-[hsl(var(--custom)/0.92)] hover:shadow-lg"
-                      >
-                        <a
-                          href={c.href}
-                          className="inline-flex items-center justify-center"
-                          {...(isExternal && {
-                            target: "_blank",
-                            rel: "noopener noreferrer",
-                          })}
-                        >
-                          <span className="sr-only">{c.name}: </span>
-                          <span className="md:hidden">{ctaShort}</span>
-                          <span className="hidden md:inline">{ctaLabel}</span>
-                          {isExternal ? (
-                            <ExternalLink className="h-4 w-4 shrink-0" aria-hidden />
-                          ) : (
-                            <ArrowRight
-                              className="h-4 w-4 shrink-0 transition-transform group-hover:translate-x-0.5"
-                              aria-hidden
-                            />
-                          )}
-                        </a>
-                      </Button>
+                      <ShortTermCarrierCtaLink
+                        href={c.href}
+                        isExternal={isExternal}
+                        carrierId={c.id}
+                        carrierName={c.name}
+                        ctaLabel={ctaLabel}
+                        ctaShort={ctaShort}
+                        gcfAdsCarrierConversionEnabled={
+                          gcfAdsCarrierConversionEnabled
+                        }
+                        carrierHubContext={carrierHubContext}
+                      />
                     </div>
                   </div>
                 </article>

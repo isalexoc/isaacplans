@@ -4,6 +4,7 @@ import { BackHome } from "@/components/back-home";
 import ShortTermCarriersSection from "@/components/shortterm-carriers-section";
 import ServicePageTracker from "@/components/service-page-tracker";
 import { buildDentalEnrollmentCarriers } from "@/lib/dental-enrollment-carriers";
+import { isGcfHealthCoverageFastAdsCarrierPage } from "@/lib/get-covered-fast/gcf-attribution";
 import { getDentalVisionSelfEnrollmentPageLd } from "@/lib/seo/jsonld";
 import {
   ogLocaleOf,
@@ -60,9 +61,36 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function DentalVisionSelfEnrollmentPage() {
+function firstQueryString(
+  v: string | string[] | undefined
+): string | undefined {
+  if (v === undefined) return undefined;
+  return Array.isArray(v) ? v[0] : v;
+}
+
+type SelfEnrollmentPageProps = {
+  searchParams: Promise<{
+    from?: string;
+    path?: string;
+    gcf_channel?: string;
+  }>;
+};
+
+export default async function DentalVisionSelfEnrollmentPage({
+  searchParams,
+}: SelfEnrollmentPageProps) {
   const locale = (await getLocale()) as SupportedLocale;
   const t = await getTranslations({ locale, namespace: "dentalVisionPage" });
+
+  const sp = await searchParams;
+  const gcfAdsCarrierConversionEnabled = isGcfHealthCoverageFastAdsCarrierPage(
+    {
+      from: firstQueryString(sp.from),
+      path: firstQueryString(sp.path),
+      gcf_channel: firstQueryString(sp.gcf_channel),
+    },
+    "dentalVision"
+  );
 
   const dentalCarriers = buildDentalEnrollmentCarriers((key) => t(key));
 
@@ -92,6 +120,8 @@ export default async function DentalVisionSelfEnrollmentPage() {
           subtitle={t("selfEnrollmentPage.sectionSubtitle")}
           ctaLabel={t("carriersSection.cta")}
           ctaLabelMobile={t("carriersSection.ctaMobile")}
+          gcfAdsCarrierConversionEnabled={gcfAdsCarrierConversionEnabled}
+          carrierHubContext="dental_self_enrollment"
           carriers={dentalCarriers}
         />
       </div>
