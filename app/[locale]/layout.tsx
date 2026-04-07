@@ -75,7 +75,7 @@ const CHAT_CONFIG: Record<
   es: {
     src: "https://beta.leadconnectorhq.com/loader.js",
     resourcesUrl: "https://beta.leadconnectorhq.com/chat-widget/loader.js",
-    widgetId: "68b65604b832ccbc42830f29",
+    widgetId: "69d4000b6ddd01f306170b54",
   },
 };
 
