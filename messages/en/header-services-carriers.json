@@ -11,12 +11,21 @@
       },
       "resources": {
         "links": {
+          "bookAppointment": {
+            "title": "Book an appointment",
+            "description": "Schedule a call anytime—pick the topic and open the right calendar."
+          },
           "carriers": {
             "title": "Carriers",
             "description": "Partner enrollment for non-ACA plans—short-term medical, dental, vision, and more."
           }
         }
       }
+    }
+  },
+  "footer": {
+    "links": {
+      "bookAppointment": "Book an appointment"
     }
   }
 }

@@ -39,6 +39,7 @@ const PAGES: Page[] = [
   // Top-level
   { href: "/about", changeFrequency: "monthly", priority: 0.8 },
   { href: "/contact", changeFrequency: "monthly", priority: 0.8 },
+  { href: "/book-appointment", changeFrequency: "monthly", priority: 0.75 },
   { href: "/privacy-policy", changeFrequency: "yearly", priority: 0.6 },
   { href: "/terms-of-service", changeFrequency: "yearly", priority: 0.6 },
   { href: "/faq", changeFrequency: "monthly", priority: 0.7 },

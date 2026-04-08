@@ -294,6 +294,10 @@
       "resources": {
         "label": "Resources",
         "links": {
+          "bookAppointment": {
+            "title": "Book an appointment",
+            "description": "Schedule a call anytime—pick the topic and open the right calendar."
+          },
           "faq": {
             "title": "Frequently Asked Questions",
             "description": "Answers to the most common questions about our services."
@@ -441,6 +445,7 @@
       "fullSite": "Full website"
     },
     "links": {
+      "bookAppointment": "Book an appointment",
       "guide": "Insurance Guide",
       "faq": "FAQ",
       "blog": "Blog",
@@ -2003,6 +2008,51 @@
         "bestFor": "Best for: STM with transparent STLDI notices and familiar carrier branding.",
         "notIdeal": "Not ideal if: you need maternity, mental health parity, or preexisting coverage like ACA.",
         "timeNote": "Typical flow: ~15–25 minutes on the carrier site"
+      }
+    }
+  },
+  "bookAppointmentPage": {
+    "metadata": {
+      "title": "Book an appointment | Isaac Plans Insurance",
+      "description": "Choose what you need help with—ACA health insurance, dental and vision, hospital indemnity, final expense, life (IUL), temporary health insurance, or general consultation—then open the right scheduling calendar.",
+      "keywords": "book appointment, schedule insurance consultation, ACA appointment, dental vision appointment, IUL consultation, Isaac Plans",
+      "image": "https://isaacplans.com/images/contact_isaacplans_en.png",
+      "imageAlt": "Isaac Plans Insurance – book an appointment"
+    },
+    "hero": {
+      "title": "Book an appointment",
+      "subtitle": "Pick the topic that best matches what you need. You’ll go to the scheduling calendar for that area—the booking flow will ask for your contact details."
+    },
+    "prompt": "What do you need help with?",
+    "footnote": "Each calendar connects to the same bilingual team; choosing a topic helps route your request.",
+    "options": {
+      "aca": {
+        "title": "ACA / Marketplace health insurance",
+        "description": "Subsidized plans, enrollment windows, and plan comparison."
+      },
+      "dentalVision": {
+        "title": "Dental and vision insurance",
+        "description": "Checkups, glasses, and oral health coverage options."
+      },
+      "hospitalIndemnity": {
+        "title": "Hospital indemnity",
+        "description": "Cash benefits that can help during hospital stays."
+      },
+      "finalExpense": {
+        "title": "Final expense (burial) insurance",
+        "description": "Simple permanent coverage for end-of-life expenses."
+      },
+      "iul": {
+        "title": "Life insurance — IUL",
+        "description": "Indexed Universal Life: protection and cash value strategies."
+      },
+      "shortTermMedical": {
+        "title": "Temporary health insurance",
+        "description": "Short-term medical coverage for gaps between major medical plans."
+      },
+      "notSure": {
+        "title": "Not sure / general consultation",
+        "description": "Talk through your situation and we’ll point you in the right direction."
       }
     }
   },

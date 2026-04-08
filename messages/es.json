@@ -284,6 +284,10 @@
       "resources": {
         "label": "Recursos",
         "links": {
+          "bookAppointment": {
+            "title": "Agendar una cita",
+            "description": "Programe una llamada en cualquier momento: elija el tema y abra el calendario adecuado."
+          },
           "faq": {
             "title": "Preguntas Frecuentes",
             "description": "Respuestas a las preguntas más comunes sobre nuestros servicios."
@@ -431,6 +435,7 @@
       "fullSite": "Sitio web completo"
     },
     "links": {
+      "bookAppointment": "Agendar una cita",
       "guide": "Guía de Seguros",
       "faq": "Preguntas Frecuentes",
       "blog": "Blog",
@@ -1994,6 +1999,51 @@
         "bestFor": "Ideal si: prefiere STM con avisos STLDI claros y marca reconocida.",
         "notIdeal": "Evite si: necesita maternidad, paridad de salud mental o preexistencias como en ACA.",
         "timeNote": "Flujo típico: ~15–25 minutos en el sitio del asegurador"
+      }
+    }
+  },
+  "bookAppointmentPage": {
+    "metadata": {
+      "title": "Agendar una cita | Isaac Plans Insurance",
+      "description": "Elija con qué necesita ayuda—seguro de salud ACA, dental y de la vista, indemnización hospitalaria, gastos finales, vida (IUL), seguro de salud temporal o consulta general—y abra el calendario correcto.",
+      "keywords": "agendar cita, consulta de seguros, cita ACA, cita dental visión, consulta IUL, Isaac Plans",
+      "image": "https://isaacplans.com/images/contact_isaacplans_en.png",
+      "imageAlt": "Isaac Plans Insurance – agendar una cita"
+    },
+    "hero": {
+      "title": "Agendar una cita",
+      "subtitle": "Elija el tema que mejor coincida con lo que necesita. Irá al calendario de esa área; el flujo de reserva pedirá sus datos de contacto."
+    },
+    "prompt": "¿Con qué necesita ayuda?",
+    "footnote": "Cada calendario conecta con el mismo equipo bilingüe; elegir un tema ayuda a orientar su solicitud.",
+    "options": {
+      "aca": {
+        "title": "Seguro de salud ACA / Mercado",
+        "description": "Planes con subsidios, períodos de inscripción y comparación de planes."
+      },
+      "dentalVision": {
+        "title": "Seguro dental y de la vista",
+        "description": "Revisiones, lentes y opciones para salud bucal y visual."
+      },
+      "hospitalIndemnity": {
+        "title": "Indemnización hospitalaria",
+        "description": "Beneficios en efectivo que pueden ayudar durante hospitalizaciones."
+      },
+      "finalExpense": {
+        "title": "Gastos finales (sepelio)",
+        "description": "Cobertura permanente sencilla para gastos al final de la vida."
+      },
+      "iul": {
+        "title": "Seguro de vida — IUL",
+        "description": "Vida indexada universal: protección y estrategias de valor en efectivo."
+      },
+      "shortTermMedical": {
+        "title": "Seguro de salud temporal",
+        "description": "Cobertura médica a corto plazo para brechas entre planes mayores."
+      },
+      "notSure": {
+        "title": "No estoy seguro / consulta general",
+        "description": "Hablemos de su situación y le indicamos el mejor camino."
       }
     }
   },

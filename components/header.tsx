@@ -55,6 +55,7 @@ const serviceLinks = [
 }>;
 
 const resourceLinks = [
+  { key: "bookAppointment", href: "/book-appointment", icon: "CalendarDays" },
   { key: "faq", href: "/faq", icon: "HelpCircle" },
   { key: "blog", href: "/blog", icon: "BookOpen" },
   { key: "testimonials", href: "/testimonials", icon: "MessageCircle" },

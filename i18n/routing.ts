@@ -23,6 +23,10 @@ export const routing = defineRouting({
       en: "/contact-me/calendar",
       es: "/contacto/calendario",
     },
+    "/book-appointment": {
+      en: "/book-appointment",
+      es: "/agendar-cita",
+    },
     "/dental-vision": {
       en: "/dental-vision",
       es: "/dental-vision",

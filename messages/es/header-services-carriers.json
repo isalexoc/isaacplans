@@ -11,12 +11,21 @@
       },
       "resources": {
         "links": {
+          "bookAppointment": {
+            "title": "Agendar una cita",
+            "description": "Programe una llamada en cualquier momento: elija el tema y abra el calendario adecuado."
+          },
           "carriers": {
             "title": "Aseguradoras",
             "description": "Inscripción con socios para planes fuera del Mercado ACA—corto plazo, dental, visión y más."
           }
         }
       }
+    }
+  },
+  "footer": {
+    "links": {
+      "bookAppointment": "Agendar una cita"
     }
   }
 }

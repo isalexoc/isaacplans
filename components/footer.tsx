@@ -93,6 +93,7 @@ export default async function Footer() {
       { name: tServices("carriers.title"), href: "/carriers" },
     ],
     resources: [
+      { name: tFooter("links.bookAppointment"), href: "/book-appointment" },
       { name: tRes("faq.title"), href: "/faq" },
       { name: tRes("blog.title"), href: "/blog" },
       { name: tRes("testimonials.title"), href: "/testimonials" },
