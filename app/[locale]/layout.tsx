@@ -97,6 +97,19 @@ export default async function LocaleLayout({
   // Get Facebook Pixel ID from environment variable
   const facebookPixelId = process.env.NEXT_PUBLIC_FACEBOOK_PIXEL_ID;
 
+  // Agent CRM external page view + form tracking (Settings → External Tracking).
+  // Set NEXT_PUBLIC_AGENT_CRM_TRACKING_ID="" to disable; omit env to use the default id below.
+  const envAgentCrmTrackingId = process.env.NEXT_PUBLIC_AGENT_CRM_TRACKING_ID;
+  const agentCrmTrackingId =
+    envAgentCrmTrackingId !== undefined
+      ? envAgentCrmTrackingId.trim() || null
+      : "tk_4df021e9555846009a2051074c72000d";
+  const agentCrmTrackingSrc =
+    process.env.NEXT_PUBLIC_AGENT_CRM_EXTERNAL_TRACKING_URL ??
+    "https://link.agent-crm.com/js/external-tracking.js";
+  const agentCrmTrackingDebug =
+    process.env.NEXT_PUBLIC_AGENT_CRM_TRACKING_DEBUG === "true";
+
   // Map your locale to Clerk's localization
   const clerkLocale = locale === "es" ? esES : enUS;
 
@@ -130,6 +143,15 @@ export default async function LocaleLayout({
             data-resources-url={chat.resourcesUrl}
             data-widget-id={chat.widgetId}
           />
+          {agentCrmTrackingId ? (
+            <Script
+              id="agentcrm-external-tracking"
+              src={agentCrmTrackingSrc}
+              strategy="afterInteractive"
+              data-tracking-id={agentCrmTrackingId}
+              {...(agentCrmTrackingDebug ? { "data-debug": "true" } : {})}
+            />
+          ) : null}
         </NextIntlClientProvider>
         <script
           type="application/ld+json"
