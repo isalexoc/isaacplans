@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { newsletterSubscribers } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { sendNewsletterEmail } from "@/lib/email/notifications";
+import { agentCrmRemoveNewsletterTag } from "@/lib/agent-crm-newsletter-sync";
 
 // Configure max duration for Vercel serverless functions
 export const maxDuration = 30; // 30 seconds should be enough for email connection
@@ -56,7 +57,7 @@ export async function GET(request: NextRequest) {
       })
       .where(eq(newsletterSubscribers.id, subscriber.id));
 
-    // Send unsubscribe confirmation email using after() to prevent Vercel timeouts
+    // Send unsubscribe confirmation + remove Agent CRM newsletter tag
     after(async () => {
       try {
         await sendNewsletterEmail({
@@ -68,6 +69,14 @@ export async function GET(request: NextRequest) {
         console.log(`[NEWSLETTER] Unsubscribe confirmation email sent successfully to ${subscriber.email}`);
       } catch (error) {
         console.error(`[NEWSLETTER] Error sending unsubscribe confirmation email to ${subscriber.email}:`, error);
+      }
+      try {
+        await agentCrmRemoveNewsletterTag({ email: subscriber.email });
+      } catch (error) {
+        console.error(
+          `[NEWSLETTER] Error removing newsletter tag in Agent CRM for ${subscriber.email}:`,
+          error
+        );
       }
     });
 

@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { newsletterSubscribers } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { sendNewsletterEmail } from "@/lib/email/notifications";
+import { agentCrmApplyNewsletterTag } from "@/lib/agent-crm-newsletter-sync";
 
 // Configure max duration for Vercel serverless functions
 export const maxDuration = 30; // 30 seconds should be enough for email connection
@@ -57,7 +58,7 @@ export async function GET(request: NextRequest) {
       })
       .where(eq(newsletterSubscribers.id, subscriber.id));
 
-    // Send welcome email using after() to prevent Vercel timeouts
+    // Send welcome email + Agent CRM tag (non-blocking for the redirect)
     after(async () => {
       try {
         await sendNewsletterEmail({
@@ -69,6 +70,17 @@ export async function GET(request: NextRequest) {
         console.log(`[NEWSLETTER] Welcome email sent successfully to ${subscriber.email}`);
       } catch (error) {
         console.error(`[NEWSLETTER] Error sending welcome email to ${subscriber.email}:`, error);
+      }
+      try {
+        await agentCrmApplyNewsletterTag({
+          email: subscriber.email,
+          locale: subscriber.locale,
+        });
+      } catch (error) {
+        console.error(
+          `[NEWSLETTER] Error syncing newsletter tag to Agent CRM for ${subscriber.email}:`,
+          error
+        );
       }
     });
 

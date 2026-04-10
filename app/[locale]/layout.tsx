@@ -124,7 +124,16 @@ export default async function LocaleLayout({
     >
       <body
         className={`${inter.className} flex min-h-screen flex-col bg-white text-gray-900 overflow-x-hidden`}
+        suppressHydrationWarning
       >
+        {/* Strip extension-injected attrs (e.g. fdprocessedid from password managers) before React hydrates */}
+        <Script
+          id="strip-extension-hydration-attrs"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `(function(){function strip(){document.querySelectorAll("[fdprocessedid]").forEach(function(el){el.removeAttribute("fdprocessedid");});}var scheduled=false;function schedule(){if(scheduled)return;scheduled=true;requestAnimationFrame(function(){scheduled=false;strip();});}strip();if(typeof MutationObserver!=="undefined"){try{new MutationObserver(schedule).observe(document.documentElement,{subtree:true,childList:true,attributes:true,attributeFilter:["fdprocessedid"]});}catch(e){}}})();`,
+          }}
+        />
         <NextIntlClientProvider locale={locale}>
           <SanityLive />
           <Header />
