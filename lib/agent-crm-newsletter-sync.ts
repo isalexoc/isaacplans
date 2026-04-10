@@ -54,25 +54,127 @@ function normalizeContactTags(tags: unknown): string[] {
   return out;
 }
 
+type LcContact = { id?: string; email?: string; tags?: unknown };
+
+function parseContactsSearchResponse(data: unknown): LcContact[] {
+  if (!data || typeof data !== "object") return [];
+  const d = data as Record<string, unknown>;
+  const contacts = d.contacts ?? (d.data as Record<string, unknown> | undefined)?.contacts;
+  if (Array.isArray(contacts)) return contacts as LcContact[];
+  return [];
+}
+
+/** GET /contacts/:id — load tags for merge/remove */
+async function fetchContactById(
+  contactId: string,
+  locationId: string,
+  token: string
+): Promise<{ id: string; tags: string[] } | null> {
+  const q = new URLSearchParams({ locationId });
+  const res = await fetch(`${BASE_URL}/contacts/${contactId}?${q}`, {
+    method: "GET",
+    headers: authHeaders(token),
+  });
+  if (!res.ok) {
+    console.warn("[AGENT_CRM_NEWSLETTER] Get contact failed:", res.status, await res.text());
+    return null;
+  }
+  const data = await res.json();
+  const c = (data.contact ?? data) as LcContact;
+  if (!c?.id) return null;
+  return { id: c.id, tags: normalizeContactTags(c.tags) };
+}
+
+/**
+ * LeadConnector no longer accepts GET /contacts/?email= (422 "property email should not exist").
+ * Use POST /contacts/search with filters.
+ */
 async function findContactByEmail(
   email: string,
   locationId: string,
   token: string
 ): Promise<{ id: string; tags: string[] } | null> {
-  const url = `${BASE_URL}/contacts/?email=${encodeURIComponent(email)}&locationId=${encodeURIComponent(locationId)}`;
-  const res = await fetch(url, { method: "GET", headers: authHeaders(token) });
-  if (!res.ok) {
-    console.warn("[AGENT_CRM_NEWSLETTER] Contact search failed:", res.status, await res.text());
-    return null;
+  const lower = email.toLowerCase().trim();
+  const searchBodies: Record<string, unknown>[] = [
+    {
+      locationId,
+      page: 1,
+      pageLimit: 20,
+      filters: [{ field: "email", operator: "eq", value: lower }],
+    },
+    {
+      locationId,
+      page: 1,
+      pageLimit: 20,
+      filters: [
+        {
+          group: "AND",
+          filters: [{ field: "email", operator: "eq", value: lower }],
+        },
+      ],
+    },
+    {
+      locationId,
+      page: 1,
+      pageLimit: 20,
+      query: lower,
+    },
+  ];
+
+  for (const body of searchBodies) {
+    const res = await fetch(`${BASE_URL}/contacts/search`, {
+      method: "POST",
+      headers: jsonHeaders(token),
+      body: JSON.stringify(body),
+    });
+    const text = await res.text();
+    if (!res.ok) {
+      console.warn("[AGENT_CRM_NEWSLETTER] Contact search failed:", res.status, text);
+      continue;
+    }
+    let data: unknown;
+    try {
+      data = JSON.parse(text);
+    } catch {
+      continue;
+    }
+    const list = parseContactsSearchResponse(data);
+    if (list.length === 0) continue;
+    const match =
+      list.find((c) => c.email?.toLowerCase() === lower) ??
+      list.find((c) => c.email?.toLowerCase().includes(lower)) ??
+      list[0];
+    if (!match?.id) continue;
+    // Search hits may omit tags; PUT replaces tags — load full contact before merge.
+    const full = await fetchContactById(match.id, locationId, token);
+    if (full) return full;
+    return { id: match.id, tags: normalizeContactTags(match.tags) };
   }
-  const data = await res.json();
-  const contacts = data.contacts ?? data;
-  if (!Array.isArray(contacts) || contacts.length === 0) return null;
-  const lower = email.toLowerCase();
-  const match =
-    contacts.find((c: { email?: string }) => c.email?.toLowerCase() === lower) ?? contacts[0];
-  if (!match?.id) return null;
-  return { id: match.id, tags: normalizeContactTags(match.tags) };
+
+  return null;
+}
+
+type CreateContactErrorBody = {
+  message?: string | string[];
+  statusCode?: number;
+  meta?: { contactId?: string; matchingField?: string };
+};
+
+function errorMessageString(err: CreateContactErrorBody): string {
+  const m = err.message;
+  if (typeof m === "string") return m;
+  if (Array.isArray(m)) return m.join(" ");
+  return "";
+}
+
+function isDuplicateContactError(status: number, err: CreateContactErrorBody): boolean {
+  const msg = errorMessageString(err).toLowerCase();
+  return (
+    status === 409 ||
+    (status === 400 && (msg.includes("duplicat") || msg.includes("already exist"))) ||
+    msg.includes("duplicate") ||
+    msg.includes("duplicated")
+  );
 }
 
 /**
@@ -138,34 +240,41 @@ export async function agentCrmApplyNewsletterTag(params: {
     }
 
     const errText = await postRes.text();
-    let errJson: { message?: string } = {};
+    let errJson: CreateContactErrorBody = {};
     try {
-      errJson = JSON.parse(errText);
+      errJson = JSON.parse(errText) as CreateContactErrorBody;
     } catch {
       /* ignore */
     }
-    const msg = (errJson.message || errText || "").toLowerCase();
-    const looksDuplicate =
-      postRes.status === 409 ||
-      msg.includes("duplicate") ||
-      msg.includes("already exist");
 
-    if (looksDuplicate) {
-      const again = await findContactByEmail(email, locationId, token);
-      if (again) {
-        const merged = [...new Set([...again.tags, tag])];
-        const putRes = await fetch(`${BASE_URL}/contacts/${again.id}`, {
+    if (isDuplicateContactError(postRes.status, errJson)) {
+      const fromMeta = errJson.meta?.contactId;
+      let target: { id: string; tags: string[] } | null = null;
+
+      if (fromMeta) {
+        target = await fetchContactById(fromMeta, locationId, token);
+      }
+      if (!target) {
+        target = await findContactByEmail(email, locationId, token);
+      }
+
+      if (target) {
+        const merged = [...new Set([...target.tags, tag])];
+        const putRes = await fetch(`${BASE_URL}/contacts/${target.id}`, {
           method: "PUT",
           headers: jsonHeaders(token),
           body: JSON.stringify({ tags: merged }),
         });
         if (putRes.ok) {
-          console.log(`[AGENT_CRM_NEWSLETTER] Duplicate on create; merged tag onto ${again.id}`);
+          console.log(
+            `[AGENT_CRM_NEWSLETTER] Duplicate on create; merged tag onto ${target.id}` +
+              (fromMeta ? " (used meta.contactId)" : "")
+          );
         } else {
           console.error("[AGENT_CRM_NEWSLETTER] Merge after duplicate failed:", await putRes.text());
         }
       } else {
-        console.error("[AGENT_CRM_NEWSLETTER] Duplicate but contact not found by email:", errText);
+        console.error("[AGENT_CRM_NEWSLETTER] Duplicate but could not resolve contact:", errText);
       }
       return;
     }

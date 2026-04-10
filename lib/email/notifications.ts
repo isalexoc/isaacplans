@@ -14,6 +14,8 @@ function createTransporter() {
     passLength: process.env.EMAIL_PASS_INFO?.length || 0,
   });
 
+  const timeoutMs = parseInt(process.env.EMAIL_SMTP_TIMEOUT_MS || "25000", 10);
+
   const config: SMTPTransport.Options = {
     host: process.env.EMAIL_HOST,
     port: parseInt(process.env.EMAIL_PORT || "587", 10),
@@ -22,10 +24,10 @@ function createTransporter() {
       user: process.env.EMAIL_USER_INFO,
       pass: process.env.EMAIL_PASS_INFO,
     },
-    // Serverless-optimized settings
-    connectionTimeout: 10000, // 10 seconds
-    greetingTimeout: 10000,
-    socketTimeout: 10000,
+    // Serverless / cold start: allow long enough for TLS + ImprovMX (avoid ETIMEDOUT on second connection)
+    connectionTimeout: timeoutMs,
+    greetingTimeout: timeoutMs,
+    socketTimeout: timeoutMs,
     // Additional options for better compatibility
     requireTLS: !(process.env.EMAIL_SECURE === "true"), // Require TLS for non-secure connections (port 587)
     tls: {
@@ -337,31 +339,24 @@ export async function sendNewsletterEmail(
     const transporter = createTransporter(); // Create fresh transporter for serverless
     
     // Test connection before sending (optional - skip if it times out, some servers don't support verify)
-    try {
-      console.log(`[EMAIL] Verifying SMTP connection...`);
-      const verifyStartTime = Date.now();
-      
-      // Add timeout to verify (5 seconds)
-      const verifyWithTimeout = Promise.race([
-        transporter.verify(),
-        new Promise((_, reject) => 
-          setTimeout(() => reject(new Error("SMTP verify timeout after 5 seconds")), 5000)
-        )
-      ]);
-      
-      await verifyWithTimeout;
-      const verifyDuration = Date.now() - verifyStartTime;
-      console.log(`[EMAIL] SMTP connection verified successfully in ${verifyDuration}ms`);
-    } catch (verifyError: any) {
-      // Log but don't throw - some SMTP servers don't support verify but can still send emails
-      console.warn(`[EMAIL] SMTP connection verification failed or timed out (will still attempt to send):`, {
-        message: verifyError.message,
-        code: verifyError.code,
-        command: verifyError.command,
-        response: verifyError.response,
-        responseCode: verifyError.responseCode,
-      });
-      // Don't throw - continue to attempt sending
+    if (process.env.EMAIL_SMTP_VERIFY === "true") {
+      try {
+        console.log(`[EMAIL] Verifying SMTP connection...`);
+        const verifyStartTime = Date.now();
+        const verifyWithTimeout = Promise.race([
+          transporter.verify(),
+          new Promise((_, reject) =>
+            setTimeout(() => reject(new Error("SMTP verify timeout after 8 seconds")), 8000)
+          ),
+        ]);
+        await verifyWithTimeout;
+        console.log(`[EMAIL] SMTP verified in ${Date.now() - verifyStartTime}ms`);
+      } catch (verifyError: any) {
+        console.warn(`[EMAIL] SMTP verify failed (will still attempt send):`, {
+          message: verifyError.message,
+          code: verifyError.code,
+        });
+      }
     }
     
     const mailOptions = {
