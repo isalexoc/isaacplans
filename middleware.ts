@@ -43,7 +43,9 @@ export default clerkMiddleware(async (auth, req) => {
   const pathname = req.nextUrl.pathname;
   if (
     pathname.includes("/get-health-coverage-fast") ||
-    pathname.includes("/cobertura-salud-rapida")
+    pathname.includes("/cobertura-salud-rapida") ||
+    pathname.includes("/final-expense/get-covered") ||
+    pathname.includes("/gastos-finales/obtener-cobertura")
   ) {
     response.headers.set("x-is-ads-landing", "1");
   }

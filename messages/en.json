@@ -2258,6 +2258,47 @@
       "breadcrumbPage": "Get health coverage fast"
     }
   },
+  "finalExpenseGetCoveredPage": {
+    "metadata": {
+      "title": "Final expense coverage in Virginia | Isaac Plans Insurance",
+      "description": "Request a free consultation for final expense (burial) insurance in Virginia. Licensed guidance—then share your address so we can meet you in person.",
+      "keywords": "final expense insurance Virginia, burial insurance, funeral insurance, Isaac Plans",
+      "imageAlt": "Trusted insurance guidance for Virginia families",
+      "breadcrumbPage": "Final expense — get covered"
+    },
+    "funnel": {
+      "banner": "Licensed guidance · Final expense insurance · Virginia",
+      "hero": {
+        "badge": "Virginia · In-person appointments available",
+        "title": "Get covered—final expense insurance",
+        "subtitle": "Help protect your family from funeral and burial costs. Share your contact info, then your address so we can schedule a visit at your home in Virginia."
+      },
+      "secureNote": "Secure · No obligation · Your data stays private",
+      "progress": {
+        "step": "Step {current} of {total}",
+        "done": "Complete"
+      },
+      "contact": {
+        "intro": "Start here—we’ll reach out to discuss final expense options. Availability and underwriting vary.",
+        "cta": "Continue"
+      },
+      "address": {
+        "intro": "Almost done. Enter the address where you’d like us to meet you for your appointment.",
+        "line1": "Street address",
+        "line2": "Apt / unit (optional)",
+        "city": "City",
+        "state": "State",
+        "zip": "ZIP code",
+        "cta": "Save address & finish",
+        "required": "Please fill in all required address fields.",
+        "invalidZip": "Enter a valid U.S. ZIP code (e.g. 12345 or 12345-6789)."
+      },
+      "done": {
+        "title": "You’re all set",
+        "body": "Thank you. We received your information and will be in touch about your Virginia appointment."
+      }
+    }
+  },
   "shortTermMedicalPage": {
     "calendar": {
       "title": "Schedule your temporary health insurance consultation",

@@ -308,6 +308,12 @@ export async function POST(request: NextRequest) {
       const submittedAt = new Date().toLocaleString() + ' ' + (Intl.DateTimeFormat().resolvedOptions().timeZone || '');
       const smsConsent = finalExpenseData.smsConsent === true ? 'Yes' : 'No';
       const marketingConsent = finalExpenseData.marketingConsent === true ? 'Yes' : 'No';
+      const campaignLine = finalExpenseData.campaign
+        ? `  Campaign: ${finalExpenseData.campaign}\n`
+        : '';
+      const regionLine = finalExpenseData.targetRegion
+        ? `  Target region: ${finalExpenseData.targetRegion}\n`
+        : '';
       leadDetailsText = [
         'Final Expense Lead',
         '==================',
@@ -319,6 +325,8 @@ export async function POST(request: NextRequest) {
         '',
         'Lead Details:',
         `  Source: ${finalExpenseData.source || 'final_expense_page'}`,
+        campaignLine,
+        regionLine,
         `  Language: ${languageDisplay}`,
         `  SMS Consent: ${smsConsent}`,
         `  Marketing Consent: ${marketingConsent}`,
@@ -1139,6 +1147,7 @@ export async function POST(request: NextRequest) {
       message: "Contact created successfully!",
       contact: createResponseData.contact || createResponseData,
       contactId: contactId,
+      isExisting: false,
     });
 
   } catch (error) {

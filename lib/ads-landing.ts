@@ -5,6 +5,8 @@
 export const ADS_LANDING_PATHNAMES = [
   "/get-health-coverage-fast",
   "/cobertura-salud-rapida",
+  "/final-expense/get-covered",
+  "/gastos-finales/obtener-cobertura",
 ] as const;
 
 export type AdsLandingPathname = (typeof ADS_LANDING_PATHNAMES)[number];

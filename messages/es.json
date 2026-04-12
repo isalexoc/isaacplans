@@ -2249,6 +2249,47 @@
       "breadcrumbPage": "Cobertura de salud rápida"
     }
   },
+  "finalExpenseGetCoveredPage": {
+    "metadata": {
+      "title": "Gastos finales en Virginia | Isaac Plans Insurance",
+      "description": "Solicite una consulta gratuita sobre seguro de gastos finales (funerarios) en Virginia. Asesoría con licencia—luego comparta su dirección para una visita en persona.",
+      "keywords": "seguro gastos finales Virginia, seguro funerario, Isaac Plans",
+      "imageAlt": "Orientación de seguros confiable para familias en Virginia",
+      "breadcrumbPage": "Gastos finales — obtener cobertura"
+    },
+    "funnel": {
+      "banner": "Asesoría con licencia · Gastos finales · Virginia",
+      "hero": {
+        "badge": "Virginia · Citas en persona disponibles",
+        "title": "Protéjase con seguro de gastos finales",
+        "subtitle": "Ayude a proteger a su familia de los costos de funeral y sepultura. Comparta su contacto y luego su dirección para agendar una visita a su hogar en Virginia."
+      },
+      "secureNote": "Seguro · Sin compromiso · Sus datos son privados",
+      "progress": {
+        "step": "Paso {current} de {total}",
+        "done": "Listo"
+      },
+      "contact": {
+        "intro": "Empiece aquí—nos pondremos en contacto para hablar de opciones de gastos finales. La disponibilidad y la aprobación varían.",
+        "cta": "Continuar"
+      },
+      "address": {
+        "intro": "Casi listo. Ingrese la dirección donde desea que lo visitemos para su cita.",
+        "line1": "Dirección",
+        "line2": "Apto / unidad (opcional)",
+        "city": "Ciudad",
+        "state": "Estado",
+        "zip": "Código postal",
+        "cta": "Guardar dirección y finalizar",
+        "required": "Complete todos los campos obligatorios de la dirección.",
+        "invalidZip": "Ingrese un código postal válido en EE. UU. (ej. 12345 o 12345-6789)."
+      },
+      "done": {
+        "title": "Listo",
+        "body": "Gracias. Recibimos su información y nos comunicaremos sobre su cita en Virginia."
+      }
+    }
+  },
   "shortTermMedicalPage": {
     "calendar": {
       "title": "Programe su consulta de seguro médico temporal",
