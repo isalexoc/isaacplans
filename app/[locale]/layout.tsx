@@ -15,6 +15,7 @@ import { ClerkProvider } from '@clerk/nextjs';
 import { esES, enUS } from '@clerk/localizations';
 import { SanityLive } from '@/sanity/lib/live';
 import MetaPixelWrapper from "@/components/meta-pixel-wrapper";
+import AgentCrmChat from "@/components/agent-crm-chat";
 import { GoogleAnalytics } from '@next/third-parties/google'
 import { getLicensedStateCount } from "@/lib/licensed-states";
 
@@ -63,22 +64,6 @@ export async function generateMetadata(): Promise<Metadata> {
 
 const inter = Inter({ subsets: ["latin"] });
 
-const CHAT_CONFIG: Record<
-  string,
-  { src: string; resourcesUrl: string; widgetId: string }
-> = {
-  en: {
-    src: "https://widgets.leadconnectorhq.com/loader.js",
-    resourcesUrl: "https://widgets.leadconnectorhq.com/chat-widget/loader.js",
-    widgetId: "687794d4afd5323330f86826",
-  },
-  es: {
-    src: "https://beta.leadconnectorhq.com/loader.js",
-    resourcesUrl: "https://beta.leadconnectorhq.com/chat-widget/loader.js",
-    widgetId: "69d4000b6ddd01f306170b54",
-  },
-};
-
 export default async function LocaleLayout({
   children,
   params,
@@ -91,8 +76,6 @@ export default async function LocaleLayout({
   if (!hasLocale(routing.locales, locale)) {
     notFound();
   }
-
-  const chat = CHAT_CONFIG[locale] ?? CHAT_CONFIG.en;
 
   // Get Facebook Pixel ID from environment variable
   const facebookPixelId = process.env.NEXT_PUBLIC_FACEBOOK_PIXEL_ID;
@@ -126,12 +109,12 @@ export default async function LocaleLayout({
         className={`${inter.className} flex min-h-screen flex-col bg-white text-gray-900 overflow-x-hidden`}
         suppressHydrationWarning
       >
-        {/* Strip extension-injected attrs (e.g. fdprocessedid from password managers) before React hydrates */}
+        {/* Strip extension-injected attrs (e.g. fdprocessedid) — must run synchronously on mutation so React hydration does not see mismatched attrs */}
         <Script
           id="strip-extension-hydration-attrs"
           strategy="beforeInteractive"
           dangerouslySetInnerHTML={{
-            __html: `(function(){function strip(){document.querySelectorAll("[fdprocessedid]").forEach(function(el){el.removeAttribute("fdprocessedid");});}var scheduled=false;function schedule(){if(scheduled)return;scheduled=true;requestAnimationFrame(function(){scheduled=false;strip();});}strip();if(typeof MutationObserver!=="undefined"){try{new MutationObserver(schedule).observe(document.documentElement,{subtree:true,childList:true,attributes:true,attributeFilter:["fdprocessedid"]});}catch(e){}}})();`,
+            __html: `(function(){function strip(){document.querySelectorAll("[fdprocessedid]").forEach(function(el){el.removeAttribute("fdprocessedid");});}function onMut(){strip();}strip();document.addEventListener("DOMContentLoaded",strip);if(typeof MutationObserver!=="undefined"){try{new MutationObserver(onMut).observe(document.documentElement,{subtree:true,childList:true,attributes:true,attributeFilter:["fdprocessedid"]});}catch(e){}}})();`,
           }}
         />
         <NextIntlClientProvider locale={locale}>
@@ -144,14 +127,8 @@ export default async function LocaleLayout({
           <Footer />
           {/* Facebook Pixel */}
           {facebookPixelId && <MetaPixelWrapper pixelId={facebookPixelId} />}
-          {/* Agent CRM (LeadConnector) chat – loads after page is interactive */}
-          <Script
-            id={`agentcrm-chat-${locale}`} // unique per-locale to avoid dedupe
-            src={chat.src}
-            strategy="afterInteractive"
-            data-resources-url={chat.resourcesUrl}
-            data-widget-id={chat.widgetId}
-          />
+          {/* Agent CRM (LeadConnector) chat — client-managed so locale toggles replace one widget */}
+          <AgentCrmChat />
           {agentCrmTrackingId ? (
             <Script
               id="agentcrm-external-tracking"
