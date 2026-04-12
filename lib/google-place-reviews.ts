@@ -9,6 +9,8 @@ export type GoogleReviewItem = {
   text: string;
   relativeTime: string;
   authorUri?: string;
+  /** Profile photo URL from Places API `authorAttribution.photoUri` when present */
+  authorPhotoUrl?: string;
 };
 
 export type GoogleReviewsData = {
@@ -26,6 +28,7 @@ type PlacesReview = {
   authorAttribution?: {
     displayName?: string;
     uri?: string;
+    photoUri?: string;
   };
 };
 
@@ -79,12 +82,14 @@ export async function fetchGooglePlaceReviews(
       .map((r): GoogleReviewItem | null => {
         const text = r.text?.text?.trim();
         if (!text) return null;
+        const photoUri = r.authorAttribution?.photoUri?.trim();
         return {
           authorName: r.authorAttribution?.displayName?.trim() || "Google user",
           rating: Math.min(5, Math.max(1, Number(r.rating) || 0)) || 5,
           text,
           relativeTime: r.relativePublishTimeDescription?.trim() || "",
           authorUri: r.authorAttribution?.uri,
+          authorPhotoUrl: photoUri || undefined,
         };
       })
       .filter((x): x is GoogleReviewItem => x !== null);

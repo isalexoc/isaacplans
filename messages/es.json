@@ -196,6 +196,10 @@
       "title": "Lo que dicen los clientes en Google",
       "summary": "{count} reseñas · {rating} de 5",
       "starsLabel": "{n} de 5 estrellas",
+      "sourceBadge": "Google Maps",
+      "carouselPrev": "Reseña anterior",
+      "carouselNext": "Siguiente reseña",
+      "carouselHint": "Desliza o usa las flechas para ver más reseñas.",
       "viewOnGoogle": "Ver en Google Maps",
       "attribution": "Las reseñas provienen de Google Maps y están sujetas a las políticas de Google."
     },

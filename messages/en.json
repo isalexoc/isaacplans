@@ -206,6 +206,10 @@
       "title": "What clients say on Google",
       "summary": "{count} reviews · {rating} out of 5",
       "starsLabel": "{n} out of 5 stars",
+      "sourceBadge": "Google Maps",
+      "carouselPrev": "Previous review",
+      "carouselNext": "Next review",
+      "carouselHint": "Swipe or use the arrows to see more reviews.",
       "viewOnGoogle": "View on Google Maps",
       "attribution": "Reviews are shown from Google Maps and are subject to Google’s policies."
     },

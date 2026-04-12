@@ -21,6 +21,12 @@ const nextConfig = {
         hostname: 'cdn.sanity.io',
         pathname: '/**',
       },
+      // Google reviewer profile photos (Places API authorAttribution.photoUri)
+      ...['lh3', 'lh4', 'lh5', 'lh6'].map((sub) => ({
+        protocol: 'https',
+        hostname: `${sub}.googleusercontent.com`,
+        pathname: '/**',
+      })),
     ],
   },
 };
