@@ -191,6 +191,14 @@
         }
       }
     },
+    "googleReviews": {
+      "label": "Reseñas de Google",
+      "title": "Lo que dicen los clientes en Google",
+      "summary": "{count} reseñas · {rating} de 5",
+      "starsLabel": "{n} de 5 estrellas",
+      "viewOnGoogle": "Ver en Google Maps",
+      "attribution": "Las reseñas provienen de Google Maps y están sujetas a las políticas de Google."
+    },
     "coverage": {
       "title": "Cobertura Nacional",
       "subtitle": "Licenciado y certificado para servir clientes en {states}+ estados de EE. UU.",

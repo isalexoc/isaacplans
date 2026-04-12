@@ -201,6 +201,14 @@
         }
       }
     },
+    "googleReviews": {
+      "label": "Google Reviews",
+      "title": "What clients say on Google",
+      "summary": "{count} reviews · {rating} out of 5",
+      "starsLabel": "{n} out of 5 stars",
+      "viewOnGoogle": "View on Google Maps",
+      "attribution": "Reviews are shown from Google Maps and are subject to Google’s policies."
+    },
     "coverage": {
       "title": "Nation-wide Coverage",
       "subtitle": "Licensed and certified to serve clients in {states}+ U.S. states.",

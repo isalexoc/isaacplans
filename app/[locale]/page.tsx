@@ -5,6 +5,7 @@ import Services from "@/components/services";
 import About from "@/components/about";
 import HomeBlogPosts from "@/components/home-blog-posts";
 import HomeNewsletter from "@/components/home-newsletter";
+import GoogleReviewsSection from "@/components/google-reviews-section";
 import Coverage from "@/components/states";
 import {
   ogLocaleOf,
@@ -83,6 +84,8 @@ export default async function HomePage() {
       {/* @ts-expect-error Async Server Component */}
       <HomeBlogPosts />
       <HomeNewsletter />
+      {/* @ts-expect-error Async Server Component */}
+      <GoogleReviewsSection />
       {/* @ts-expect-error Async Server Component */}
       <Coverage />
     </main>
