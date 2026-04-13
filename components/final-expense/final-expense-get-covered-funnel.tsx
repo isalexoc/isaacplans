@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Script from "next/script";
 import { useLocale, useTranslations } from "next-intl";
@@ -61,6 +61,15 @@ export default function FinalExpenseGetCoveredFunnel() {
   const googleAutocompleteInstanceRef = useRef<any>(null);
 
   const mapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+
+  /** After step 1 (or 2), bring viewport to top — mobile users often stay mid-page after focusing lower fields. */
+  useLayoutEffect(() => {
+    if (phase === "contact") return;
+    if (typeof window === "undefined") return;
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  }, [phase]);
 
   useEffect(() => {
     if (phase !== "address") return;
