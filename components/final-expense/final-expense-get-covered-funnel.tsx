@@ -153,6 +153,17 @@ export default function FinalExpenseGetCoveredFunnel() {
         );
       }
 
+      const capiDispatched = (data as { capiDispatched?: boolean }).capiDispatched;
+      if (
+        process.env.NODE_ENV === "development" &&
+        data.isExisting !== true &&
+        capiDispatched === false
+      ) {
+        console.warn(
+          "[final-expense/get-covered] New lead saved but Meta CAPI Lead was not sent. Set META_CAPI_ACCESS_TOKEN and NEXT_PUBLIC_FACEBOOK_PIXEL_ID; ensure meta.eventId and eventSourceUrl are sent."
+        );
+      }
+
       setContactId(id);
 
       const userData = {

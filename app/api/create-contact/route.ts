@@ -1,5 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sendMetaCapiEvent } from "@/lib/meta-capi";
+import {
+  agentCrmFetchContactById,
+  agentCrmFindContactByEmail,
+  agentCrmIsDuplicateContactError,
+  type AgentCrmCreateContactErrorBody,
+} from "@/lib/agent-crm-contacts";
+
+/** Best-effort client IP for Meta CAPI (Vercel / proxies). */
+function getClientIpFromRequest(request: NextRequest): string | undefined {
+  const xff = request.headers.get("x-forwarded-for");
+  if (xff) {
+    const first = xff.split(",")[0]?.trim();
+    if (first) return first;
+  }
+  const cf = request.headers.get("cf-connecting-ip");
+  if (cf?.trim()) return cf.trim();
+  const realIp = request.headers.get("x-real-ip");
+  if (realIp?.trim()) return realIp.trim();
+  return undefined;
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -447,6 +467,9 @@ export async function POST(request: NextRequest) {
     if (finalExpenseData) {
       finalExpenseTags.push('Final Expense Lead');
       finalExpenseTags.push(finalExpenseData.language === 'es' ? 'Spanish' : 'English');
+      if (finalExpenseData.source === "final_expense_get_covered_ads") {
+        finalExpenseTags.push("fe_get_covered_funnel");
+      }
     }
 
     // Build tags for Get Covered Fast funnel leads
@@ -564,83 +587,54 @@ export async function POST(request: NextRequest) {
     }
 
     if (!createResponse.ok) {
-      // Check if the error is due to duplicate contact
-      const errorMessage = createResponseData?.message || createResponseData?.error || '';
-      const isDuplicateError = 
-        errorMessage.toLowerCase().includes('duplicate') || 
-        errorMessage.toLowerCase().includes('already exist') ||
-        createResponse.status === 409; // Conflict status code
-      
+      // Normalize duplicate detection via shared helper.
+      const errBody = (createResponseData ?? {}) as AgentCrmCreateContactErrorBody;
+      const errorMessageRaw =
+        createResponseData?.message || createResponseData?.error || "";
+      const errorMessage =
+        typeof errorMessageRaw === "string"
+          ? errorMessageRaw
+          : Array.isArray(errorMessageRaw)
+            ? errorMessageRaw.join(" ")
+            : "";
+      const isDuplicateError = agentCrmIsDuplicateContactError(
+        createResponse.status,
+        errBody
+      );
+
       if (isDuplicateError) {
-        console.log('Contact already exists, attempting to find and update it...');
-        
-        // Try to find the existing contact by email or phone
+        console.log(
+          "[create-contact] Duplicate create detected, resolving existing contact..."
+        );
+
         let existingContactId: string | null = null;
-        
-        // Try searching by email first
-        try {
-          const searchResponse = await fetch(`${baseUrl}/contacts/?email=${encodeURIComponent(email)}&locationId=${locationId}`, {
-            method: 'GET',
-            headers: {
-              'Accept': 'application/json',
-              'Authorization': `Bearer ${piToken}`,
-              'Version': '2021-07-28',
-            },
+        const duplicateMetaId = errBody?.meta?.contactId;
+
+        // 1) Fast path: duplicate error often includes meta.contactId.
+        if (duplicateMetaId) {
+          const full = await agentCrmFetchContactById(
+            duplicateMetaId,
+            locationId,
+            piToken
+          );
+          existingContactId = full?.id ?? duplicateMetaId;
+          console.log("[create-contact] Resolved duplicate via meta.contactId:", {
+            duplicateMetaId,
+            found: !!full,
           });
-          
-          if (searchResponse.ok) {
-            const searchData = await searchResponse.json();
-            const contacts = searchData.contacts || searchData;
-            
-            if (Array.isArray(contacts) && contacts.length > 0) {
-              // Find exact match by email
-              const exactMatch = contacts.find((c: any) => 
-                c.email?.toLowerCase() === email.toLowerCase()
-              );
-              if (exactMatch) {
-                existingContactId = exactMatch.id;
-              } else if (contacts[0]) {
-                existingContactId = contacts[0].id;
-              }
-            }
-          }
-        } catch (searchErr) {
-          console.warn('Could not search for existing contact by email:', searchErr);
         }
-        
-        // If not found by email, try phone
+
+        // 2) Fallback: robust POST /contacts/search by email.
         if (!existingContactId) {
-          try {
-            const searchResponse = await fetch(`${baseUrl}/contacts/?phone=${encodeURIComponent(phone)}&locationId=${locationId}`, {
-              method: 'GET',
-              headers: {
-                'Accept': 'application/json',
-                'Authorization': `Bearer ${piToken}`,
-                'Version': '2021-07-28',
-              },
-            });
-            
-            if (searchResponse.ok) {
-              const searchData = await searchResponse.json();
-              const contacts = searchData.contacts || searchData;
-              
-              if (Array.isArray(contacts) && contacts.length > 0) {
-                // Find exact match by phone
-                const exactMatch = contacts.find((c: any) => 
-                  c.phone?.replace(/\D/g, '') === phone.replace(/\D/g, '')
-                );
-                if (exactMatch) {
-                  existingContactId = exactMatch.id;
-                } else if (contacts[0]) {
-                  existingContactId = contacts[0].id;
-                }
-              }
-            }
-          } catch (searchErr) {
-            console.warn('Could not search for existing contact by phone:', searchErr);
-          }
+          const found = await agentCrmFindContactByEmail(
+            email,
+            locationId,
+            piToken,
+            "[create-contact]"
+          );
+          existingContactId = found?.id ?? null;
         }
-        
+
         if (existingContactId) {
           // Update the existing contact with custom fields and tags (for STM leads)
           console.log("[create-contact] Found existing contact, updating (no workflow enrollment - early return):", {
@@ -655,6 +649,11 @@ export async function POST(request: NextRequest) {
           });
           
           const updatePayload: any = {};
+          // Keep core contact fields fresh on duplicate-merge path too.
+          updatePayload.firstName = firstName;
+          updatePayload.lastName = lastName;
+          updatePayload.email = email;
+          updatePayload.phone = phone;
           if (customFieldsArray.length > 0) {
             updatePayload.customFields = customFieldsArray;
           }
@@ -703,15 +702,27 @@ export async function POST(request: NextRequest) {
               isExisting: true,
             });
           }
-        } else {
-          // Contact exists but we couldn't find it - still return success to proceed with unlock
-          console.log('Contact exists but could not be found, proceeding anyway...');
-          return NextResponse.json({
-            success: true,
-            message: "Contact already exists!",
-            isExisting: true,
-          });
         }
+
+        // Duplicate reported but could not resolve contact id.
+        // Return an error so clients can retry, instead of false-success with missing contactId.
+        console.error(
+          "[create-contact] Duplicate reported but contact ID could not be resolved.",
+          {
+            status: createResponse.status,
+            errorMessage,
+            duplicateMetaId: errBody?.meta?.contactId ?? null,
+          }
+        );
+        return NextResponse.json(
+          {
+            success: false,
+            error:
+              "Duplicate contact was reported but could not be resolved. Please retry.",
+            status: createResponse.status,
+          },
+          { status: 409 }
+        );
       }
       
       // For other errors, return the error
@@ -1016,6 +1027,7 @@ export async function POST(request: NextRequest) {
     const feLanguage = finalExpenseData?.language === "es" ? "es" : "en";
     const willAddFinalExpense = !!(
       finalExpenseData &&
+      finalExpenseData.source !== "final_expense_get_covered_ads" &&
       !shortTermMedicalData &&
       !contactPageData &&
       !acaData &&
@@ -1033,6 +1045,8 @@ export async function POST(request: NextRequest) {
       willAddFinalExpense,
       reason: !finalExpenseData
         ? "not a Final Expense CTA lead"
+        : finalExpenseData.source === "final_expense_get_covered_ads"
+          ? "final-expense/get-covered funnel — workflow intentionally skipped"
         : shortTermMedicalData || contactPageData || acaData || dentalVisionData || hospitalIndemnityData || iulLeadGenData
           ? "other lead type — skipped"
           : !finalExpenseWorkflowId
@@ -1050,6 +1064,11 @@ export async function POST(request: NextRequest) {
     const accessToken = process.env.META_CAPI_ACCESS_TOKEN;
     const testEventCode = process.env.META_TEST_EVENT_CODE; // Optional, for testing
 
+    const isFinalExpenseGetCoveredAds =
+      finalExpenseData?.source === "final_expense_get_covered_ads";
+
+    let capiDispatched = false;
+
     // Log CAPI check for debugging
     console.log("[Meta CAPI] Check:", {
       hasPixelId: !!pixelId,
@@ -1057,48 +1076,60 @@ export async function POST(request: NextRequest) {
       hasEventId: !!meta?.eventId,
       hasEventSourceUrl: !!meta?.eventSourceUrl,
       isNewContact: isNewContact,
+      isFinalExpenseGetCoveredAds,
       willSend: !!(pixelId && accessToken && meta?.eventId && meta?.eventSourceUrl && isNewContact),
     });
 
     if (pixelId && accessToken && meta?.eventId && meta?.eventSourceUrl && isNewContact) {
       try {
-        // Get user agent and IP from request headers
         const userAgent = request.headers.get("user-agent") || "";
-        const xff = request.headers.get("x-forwarded-for") || "";
-        const ip = xff.split(",")[0]?.trim(); // Best effort behind proxies
+        const ip = getClientIpFromRequest(request);
 
-        // Determine value and source based on lead type
         const value = 100;
-        const source = shortTermMedicalData
-          ? "short_term_medical"
-          : acaData
-            ? "aca"
-            : contactPageData
-              ? "contact_page"
-              : dentalVisionData
-                ? "dental_vision"
-                : hospitalIndemnityData
-                  ? "hospital_indemnity"
-                  : finalExpenseData
-                    ? "final_expense"
-                    : getCoveredFastData
-                      ? "get_covered_fast"
-                      : "iul_lead_gen";
-        const contentName = shortTermMedicalData
-          ? "Short Term Medical Lead"
-          : acaData
-            ? "ACA Lead"
-            : contactPageData
-              ? "Contact Page Lead"
-              : dentalVisionData
-                ? "Dental & Vision Lead"
-                : hospitalIndemnityData
-                  ? "Hospital Indemnity Lead"
-                  : finalExpenseData
-                    ? "Final Expense Lead"
-                    : getCoveredFastData
-                      ? "Get Covered Fast funnel"
-                      : "IUL Lead Generation Campaign";
+        const source = isFinalExpenseGetCoveredAds
+          ? "final_expense_get_covered_ads"
+          : shortTermMedicalData
+            ? "short_term_medical"
+            : acaData
+              ? "aca"
+              : contactPageData
+                ? "contact_page"
+                : dentalVisionData
+                  ? "dental_vision"
+                  : hospitalIndemnityData
+                    ? "hospital_indemnity"
+                    : finalExpenseData
+                      ? "final_expense"
+                      : getCoveredFastData
+                        ? "get_covered_fast"
+                        : "iul_lead_gen";
+        const contentName = isFinalExpenseGetCoveredAds
+          ? "Final expense get covered (VA ads)"
+          : shortTermMedicalData
+            ? "Short Term Medical Lead"
+            : acaData
+              ? "ACA Lead"
+              : contactPageData
+                ? "Contact Page Lead"
+                : dentalVisionData
+                  ? "Dental & Vision Lead"
+                  : hospitalIndemnityData
+                    ? "Hospital Indemnity Lead"
+                    : finalExpenseData
+                      ? "Final Expense Lead"
+                      : getCoveredFastData
+                        ? "Get Covered Fast funnel"
+                        : "IUL Lead Generation Campaign";
+
+        const customData: Record<string, unknown> = {
+          content_name: contentName,
+          currency: "USD",
+          value: value,
+          source: source,
+        };
+        if (isFinalExpenseGetCoveredAds) {
+          customData.lead_event_source = "fe_get_covered_funnel";
+        }
 
         console.log("[Meta CAPI] Sending event:", {
           eventId: meta.eventId,
@@ -1106,6 +1137,8 @@ export async function POST(request: NextRequest) {
           email: email.substring(0, 3) + "***", // Partial for privacy
           hasFbp: !!meta.fbp,
           hasFbc: !!meta.fbc,
+          contentName,
+          source,
         });
 
         await sendMetaCapiEvent({
@@ -1122,16 +1155,11 @@ export async function POST(request: NextRequest) {
           phone,
           firstName,
           lastName,
-          customData: {
-            content_name: contentName,
-            currency: "USD",
-            value: value,
-            source: source,
-          },
+          customData,
           testEventCode, // Only used during testing
         });
 
-        // Log success in production
+        capiDispatched = true;
         console.log("[Meta CAPI] Event sent successfully (production)");
       } catch (capiError) {
         // Log error but don't fail the request - CAPI is a backup
@@ -1148,6 +1176,7 @@ export async function POST(request: NextRequest) {
       contact: createResponseData.contact || createResponseData,
       contactId: contactId,
       isExisting: false,
+      capiDispatched,
     });
 
   } catch (error) {
