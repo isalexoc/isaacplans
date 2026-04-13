@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
+import Script from "next/script";
 import { useLocale, useTranslations } from "next-intl";
 import { Loader2, MapPin, Shield } from "lucide-react";
 import PhoneInput, { parsePhoneNumber } from "react-phone-number-input";
@@ -44,6 +45,9 @@ export default function FinalExpenseGetCoveredFunnel() {
   const [city, setCity] = useState("");
   const [stateVal, setStateVal] = useState("VA");
   const [postalCode, setPostalCode] = useState("");
+  const [addressSearch, setAddressSearch] = useState("");
+  const [addressScriptLoaded, setAddressScriptLoaded] = useState(false);
+  const [addressSelectionError, setAddressSelectionError] = useState<string | null>(null);
 
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -54,6 +58,64 @@ export default function FinalExpenseGetCoveredFunnel() {
     "w-full px-4 py-3 rounded-lg border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:border-[hsl(var(--custom))] focus:ring-2 focus:ring-[hsl(var(--custom)/0.2)] transition-all duration-200";
 
   const progress = useMemo(() => (phase === "contact" ? 50 : phase === "address" ? 100 : 100), [phase]);
+  const addressAutocompleteRef = useRef<HTMLInputElement | null>(null);
+  const googleAutocompleteInstanceRef = useRef<any>(null);
+
+  const mapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+
+  useEffect(() => {
+    if (phase !== "address") return;
+    if (!addressScriptLoaded) return;
+    if (!addressAutocompleteRef.current) return;
+    if (googleAutocompleteInstanceRef.current) return;
+    if (typeof window === "undefined") return;
+    const g = (window as any).google;
+    if (!g?.maps?.places?.Autocomplete) return;
+
+    const autocomplete = new g.maps.places.Autocomplete(
+      addressAutocompleteRef.current,
+      {
+        componentRestrictions: { country: "us" },
+        fields: ["address_components", "formatted_address"],
+        types: ["address"],
+      }
+    );
+
+    autocomplete.addListener("place_changed", () => {
+      const place = autocomplete.getPlace();
+      const components = place?.address_components as
+        | Array<{ long_name: string; short_name: string; types: string[] }>
+        | undefined;
+      if (!components || components.length === 0) return;
+
+      const getPart = (type: string, pick: "long_name" | "short_name" = "long_name") =>
+        components.find((c) => c.types.includes(type))?.[pick] ?? "";
+
+      const streetNumber = getPart("street_number");
+      const route = getPart("route");
+      const locality =
+        getPart("locality") ||
+        getPart("postal_town") ||
+        getPart("administrative_area_level_3");
+      const stateShort = getPart("administrative_area_level_1", "short_name");
+      const zip = getPart("postal_code");
+
+      const line1 = [streetNumber, route].filter(Boolean).join(" ").trim();
+      if (line1) setAddressLine1(line1);
+      if (locality) setCity(locality);
+      if (stateShort) setStateVal(stateShort.toUpperCase());
+      if (zip) setPostalCode(zip);
+      if (place?.formatted_address) setAddressSearch(place.formatted_address);
+
+      if (stateShort && stateShort.toUpperCase() !== "VA") {
+        setAddressSelectionError(t("address.vaOnly"));
+      } else {
+        setAddressSelectionError(null);
+      }
+    });
+
+    googleAutocompleteInstanceRef.current = autocomplete;
+  }, [addressScriptLoaded, phase, t]);
 
   const translateIssue = (messageKey: string) => {
     if (messageKey === "required") return tForm("required");
@@ -216,6 +278,10 @@ export default function FinalExpenseGetCoveredFunnel() {
       setSubmitError(t("address.required"));
       return;
     }
+    if (stateVal.trim().toUpperCase() !== "VA") {
+      setSubmitError(t("address.vaOnly"));
+      return;
+    }
 
     const zipOk = /^\d{5}(-\d{4})?$/.test(postalCode.trim());
     if (!zipOk) {
@@ -278,6 +344,14 @@ export default function FinalExpenseGetCoveredFunnel() {
 
   return (
     <div className="relative min-h-screen bg-[#f4f6f9] dark:bg-slate-950">
+      {mapsApiKey && phase === "address" && (
+        <Script
+          id="google-maps-places"
+          src={`https://maps.googleapis.com/maps/api/js?key=${mapsApiKey}&libraries=places`}
+          strategy="afterInteractive"
+          onLoad={() => setAddressScriptLoaded(true)}
+        />
+      )}
       <div
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_120%_80%_at_50%_-20%,hsl(var(--custom)/0.12),transparent_55%)] dark:bg-[radial-gradient(ellipse_100%_60%_at_50%_0%,hsl(var(--custom)/0.08),transparent_50%)]"
         aria-hidden
@@ -499,9 +573,35 @@ export default function FinalExpenseGetCoveredFunnel() {
                     <p className="text-sm leading-relaxed">{t("address.intro")}</p>
                   </div>
 
+                  {mapsApiKey ? (
+                    <div>
+                      <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                        {t("address.search")}
+                      </label>
+                      <input
+                        ref={addressAutocompleteRef}
+                        type="text"
+                        value={addressSearch}
+                        onChange={(e) => setAddressSearch(e.target.value)}
+                        placeholder={t("address.searchPlaceholder")}
+                        className={inputBase}
+                        disabled={loadingAddress}
+                      />
+                    </div>
+                  ) : (
+                    <p className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-xs text-amber-800 dark:border-amber-700 dark:bg-amber-900/20 dark:text-amber-300">
+                      {t("address.searchUnavailable")}
+                    </p>
+                  )}
+
                   {submitError && (
                     <div className="rounded-lg border-2 border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300">
                       {submitError}
+                    </div>
+                  )}
+                  {addressSelectionError && (
+                    <div className="rounded-lg border-2 border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300">
+                      {addressSelectionError}
                     </div>
                   )}
 

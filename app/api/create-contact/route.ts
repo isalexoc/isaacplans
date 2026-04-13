@@ -3,9 +3,35 @@ import { sendMetaCapiEvent } from "@/lib/meta-capi";
 import {
   agentCrmFetchContactById,
   agentCrmFindContactByEmail,
+  agentCrmFindContactByPhone,
   agentCrmIsDuplicateContactError,
   type AgentCrmCreateContactErrorBody,
 } from "@/lib/agent-crm-contacts";
+
+/** Parse LeadConnector JSON error bodies (duplicate contact, etc.). */
+function parseLeadConnectorErrorJson(text: string): {
+  message?: string;
+  meta?: { contactId?: string; matchingField?: string; contactName?: string };
+} | null {
+  try {
+    return JSON.parse(text) as {
+      message?: string;
+      meta?: { contactId?: string; matchingField?: string; contactName?: string };
+    };
+  } catch {
+    return null;
+  }
+}
+
+function isLocationDuplicateContactsError(message: string | undefined): boolean {
+  if (!message) return false;
+  const m = message.toLowerCase();
+  return (
+    m.includes("does not allow duplicated contacts") ||
+    m.includes("does not allow duplicate") ||
+    m.includes("duplicated contacts")
+  );
+}
 
 /** Best-effort client IP for Meta CAPI (Vercel / proxies). */
 function getClientIpFromRequest(request: NextRequest): string | undefined {
@@ -635,6 +661,17 @@ export async function POST(request: NextRequest) {
           existingContactId = found?.id ?? null;
         }
 
+        // 3) Last resort: search by phone (duplicate keyed on phone, email mismatch, search quirks).
+        if (!existingContactId && phone) {
+          const byPhone = await agentCrmFindContactByPhone(
+            phone,
+            locationId,
+            piToken,
+            "[create-contact]"
+          );
+          existingContactId = byPhone?.id ?? null;
+        }
+
         if (existingContactId) {
           // Update the existing contact with custom fields and tags (for STM leads)
           console.log("[create-contact] Found existing contact, updating (no workflow enrollment - early return):", {
@@ -647,60 +684,226 @@ export async function POST(request: NextRequest) {
             hasIulLeadGenData: !!iulLeadGenData,
             hasFinalExpenseData: !!finalExpenseData,
           });
-          
-          const updatePayload: any = {};
-          // Keep core contact fields fresh on duplicate-merge path too.
-          updatePayload.firstName = firstName;
-          updatePayload.lastName = lastName;
-          updatePayload.email = email;
-          updatePayload.phone = phone;
-          if (customFieldsArray.length > 0) {
-            updatePayload.customFields = customFieldsArray;
-          }
-          const allTags = [...stmTags, ...contactPageTags, ...acaTags, ...dentalVisionTags, ...hospitalIndemnityTags, ...iulLeadGenTags, ...finalExpenseTags];
-          if (allTags.length > 0) {
-            updatePayload.tags = allTags;
-          }
-          
+
+          const incomingTags = [
+            ...stmTags,
+            ...contactPageTags,
+            ...acaTags,
+            ...dentalVisionTags,
+            ...hospitalIndemnityTags,
+            ...iulLeadGenTags,
+            ...finalExpenseTags,
+          ];
+
+          const buildMergePayload = async (
+            mergeContactId: string,
+            includePhone: boolean,
+            includeEmail: boolean,
+            includeCustomFields: boolean
+          ): Promise<Record<string, unknown>> => {
+            const existingRow = await agentCrmFetchContactById(
+              mergeContactId,
+              locationId,
+              piToken
+            );
+            const priorTags = existingRow?.tags ?? [];
+            const mergedTags = [...new Set([...priorTags, ...incomingTags])];
+            const p: Record<string, unknown> = {
+              firstName,
+              lastName,
+            };
+            if (includeEmail) {
+              p.email = email;
+            }
+            if (includePhone) {
+              p.phone = phone;
+            }
+            if (includeCustomFields && customFieldsArray.length > 0) {
+              p.customFields = customFieldsArray;
+            }
+            if (mergedTags.length > 0) {
+              p.tags = mergedTags;
+            }
+            return p;
+          };
+
+          const putHeaders = {
+            Accept: "application/json",
+            Authorization: `Bearer ${piToken}`,
+            "Content-Type": "application/json",
+            Version: "2021-07-28",
+          } as const;
+
+          const putTo = (contactId: string, payload: Record<string, unknown>) =>
+            fetch(
+              `${baseUrl}/contacts/${encodeURIComponent(
+                contactId
+              )}?${new URLSearchParams({ locationId })}`,
+              {
+                method: "PUT",
+                headers: putHeaders,
+                body: JSON.stringify(payload),
+              }
+            );
+
           try {
-            const updateResponse = await fetch(`${baseUrl}/contacts/${existingContactId}`, {
-              method: 'PUT',
-              headers: {
-                'Accept': 'application/json',
-                'Authorization': `Bearer ${piToken}`,
-                'Content-Type': 'application/json',
-                'Version': '2021-07-28',
-              },
-              body: JSON.stringify(updatePayload),
-            });
-            
+            let targetId = existingContactId;
+            let includePhone = true;
+            let includeEmail = true;
+            let includeCf = true;
+
+            let updateResponse: Response | null = null;
+
+            /**
+             * Split-duplicate case: email on contact A, phone on contact B.
+             * Follow meta.contactId and adjust which fields we send (omit phone/email when API says they belong on another record).
+             */
+            for (let attempt = 0; attempt < 12; attempt++) {
+              updateResponse = await putTo(
+                targetId,
+                await buildMergePayload(
+                  targetId,
+                  includePhone,
+                  includeEmail,
+                  includeCf
+                )
+              );
+
+              if (updateResponse.ok) {
+                break;
+              }
+
+              const errTxt = await updateResponse.text();
+              const parsed = parseLeadConnectorErrorJson(errTxt);
+
+              if (
+                updateResponse.status === 400 &&
+                isLocationDuplicateContactsError(parsed?.message) &&
+                parsed?.meta
+              ) {
+                const nextId = parsed.meta.contactId;
+                const mf = (parsed.meta.matchingField || "").toLowerCase();
+
+                if (nextId && nextId !== targetId) {
+                  console.log(
+                    "[create-contact] Duplicate policy: switching merge target",
+                    {
+                      from: targetId,
+                      to: nextId,
+                      matchingField: parsed.meta.matchingField,
+                    }
+                  );
+                  targetId = nextId;
+                  if (mf.includes("phone")) {
+                    includePhone = false;
+                  }
+                  if (mf.includes("email")) {
+                    // API points at the contact that owns this email — update that record with the submitted email.
+                    includeEmail = true;
+                  }
+                  continue;
+                }
+
+                if (mf.includes("phone")) {
+                  includePhone = false;
+                  continue;
+                }
+                if (mf.includes("email")) {
+                  includeEmail = false;
+                  continue;
+                }
+              }
+
+              if (includeCf) {
+                console.warn(
+                  "[create-contact] Merge PUT failed; retrying without custom fields:",
+                  updateResponse.status,
+                  errTxt.slice(0, 400)
+                );
+                includeCf = false;
+                continue;
+              }
+
+              console.warn(
+                "[create-contact] Merge PUT failed (no more duplicate redirects):",
+                updateResponse.status,
+                errTxt.slice(0, 500)
+              );
+              break;
+            }
+
+            if (!updateResponse?.ok) {
+              updateResponse = await putTo(
+                targetId,
+                await buildMergePayload(targetId, includePhone, includeEmail, false)
+              );
+            }
+
+            if (!updateResponse.ok) {
+              updateResponse = await putTo(
+                targetId,
+                await buildMergePayload(
+                  targetId,
+                  false,
+                  includeEmail,
+                  false
+                )
+              );
+            }
+
+            if (!updateResponse.ok) {
+              updateResponse = await putTo(
+                targetId,
+                await buildMergePayload(targetId, false, false, false)
+              );
+            }
+
+            if (!updateResponse.ok) {
+              const bare: Record<string, unknown> = { firstName, lastName };
+              if (includeEmail) bare.email = email;
+              updateResponse = await putTo(targetId, bare);
+            }
+
             if (updateResponse.ok) {
-              console.log('Successfully updated existing contact with custom fields');
+              console.log(
+                "[create-contact] Successfully updated existing contact (duplicate path)",
+                { contactId: targetId }
+              );
               return NextResponse.json({
                 success: true,
                 message: "Contact updated successfully!",
-                contactId: existingContactId,
-                isExisting: true,
-              });
-            } else {
-              console.warn('Could not update existing contact, but contact exists');
-              // Still return success since contact exists
-              return NextResponse.json({
-                success: true,
-                message: "Contact already exists!",
-                contactId: existingContactId,
+                contactId: targetId,
                 isExisting: true,
               });
             }
+
+            const finalErr = await updateResponse.text().catch(() => "");
+            console.error(
+              "[create-contact] All duplicate merge PUT attempts failed:",
+              finalErr
+            );
+            return NextResponse.json(
+              {
+                success: false,
+                error:
+                  "This email or phone is already on file, but we could not refresh the contact. Please try again.",
+                contactId: targetId,
+                isExisting: true,
+              },
+              { status: 502 }
+            );
           } catch (updateErr) {
-            console.warn('Error updating existing contact:', updateErr);
-            // Still return success since contact exists
-            return NextResponse.json({
-              success: true,
-              message: "Contact already exists!",
-              contactId: existingContactId,
-              isExisting: true,
-            });
+            console.error("[create-contact] Duplicate merge PUT error:", updateErr);
+            return NextResponse.json(
+              {
+                success: false,
+                error:
+                  "This email or phone is already on file, but the update failed. Please try again.",
+                contactId: existingContactId,
+                isExisting: true,
+              },
+              { status: 502 }
+            );
           }
         }
 

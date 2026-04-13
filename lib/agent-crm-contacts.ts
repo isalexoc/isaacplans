@@ -42,7 +42,7 @@ export function agentCrmNormalizeContactTags(tags: unknown): string[] {
   return out;
 }
 
-type LcContact = { id?: string; email?: string; tags?: unknown };
+type LcContact = { id?: string; email?: string; phone?: string; tags?: unknown };
 
 function parseContactsSearchResponse(data: unknown): LcContact[] {
   if (!data || typeof data !== "object") return [];
@@ -130,6 +130,78 @@ export async function agentCrmFindContactByEmail(
       list.find((c) => c.email?.toLowerCase().includes(lower)) ??
       list[0];
     if (!match?.id) continue;
+    const full = await agentCrmFetchContactById(match.id, locationId, token);
+    if (full) return full;
+    return { id: match.id, tags: agentCrmNormalizeContactTags(match.tags) };
+  }
+
+  return null;
+}
+
+/** POST /contacts/search by phone when email resolution fails on duplicate create. */
+export async function agentCrmFindContactByPhone(
+  phone: string,
+  locationId: string,
+  token: string,
+  logPrefix = "[AGENT_CRM]"
+): Promise<{ id: string; tags: string[] } | null> {
+  const digits = phone.replace(/\D/g, "");
+  if (digits.length < 10) return null;
+  const last10 = digits.slice(-10);
+  const normalized =
+    digits.length === 11 && digits.startsWith("1")
+      ? `+${digits}`
+      : `+1${last10}`;
+
+  const searchBodies: Record<string, unknown>[] = [
+    {
+      locationId,
+      page: 1,
+      pageLimit: 20,
+      filters: [{ field: "phone", operator: "eq", value: phone.trim() }],
+    },
+    {
+      locationId,
+      page: 1,
+      pageLimit: 20,
+      filters: [{ field: "phone", operator: "eq", value: normalized }],
+    },
+    {
+      locationId,
+      page: 1,
+      pageLimit: 20,
+      query: last10,
+    },
+  ];
+
+  for (const body of searchBodies) {
+    const res = await fetch(`${AGENT_CRM_API_BASE}/contacts/search`, {
+      method: "POST",
+      headers: agentCrmJsonHeaders(token),
+      body: JSON.stringify(body),
+    });
+    const text = await res.text();
+    if (!res.ok) {
+      console.warn(`${logPrefix} Contact phone search failed:`, res.status, text);
+      continue;
+    }
+    let data: unknown;
+    try {
+      data = JSON.parse(text);
+    } catch {
+      continue;
+    }
+    const list = parseContactsSearchResponse(data);
+    if (list.length === 0) continue;
+
+    const byDigits = (c: LcContact) => {
+      const p = c.phone?.replace(/\D/g, "") ?? "";
+      return p.length >= 10 && p.slice(-10) === last10;
+    };
+
+    const match = list.find(byDigits) ?? list[0];
+    if (!match?.id) continue;
+
     const full = await agentCrmFetchContactById(match.id, locationId, token);
     if (full) return full;
     return { id: match.id, tags: agentCrmNormalizeContactTags(match.tags) };
