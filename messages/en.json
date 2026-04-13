@@ -2292,9 +2292,8 @@
         "cta": "Save address & finish",
         "required": "Please fill in all required address fields.",
         "invalidZip": "Enter a valid U.S. ZIP code (e.g. 12345 or 12345-6789).",
-        "vaOnly": "We currently support Virginia addresses only.",
         "search": "Find your address",
-        "searchPlaceholder": "Start typing your Virginia address...",
+        "searchPlaceholder": "Start typing your street address...",
         "searchUnavailable": "Address autocomplete is temporarily unavailable. Please enter your address manually."
       },
       "done": {

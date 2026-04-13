@@ -2283,9 +2283,8 @@
         "cta": "Guardar dirección y finalizar",
         "required": "Complete todos los campos obligatorios de la dirección.",
         "invalidZip": "Ingrese un código postal válido en EE. UU. (ej. 12345 o 12345-6789).",
-        "vaOnly": "Actualmente solo atendemos direcciones de Virginia.",
         "search": "Busque su dirección",
-        "searchPlaceholder": "Empiece a escribir su dirección en Virginia...",
+        "searchPlaceholder": "Empiece a escribir su dirección...",
         "searchUnavailable": "La autocompletación de direcciones no está disponible temporalmente. Ingrese su dirección manualmente."
       },
       "done": {

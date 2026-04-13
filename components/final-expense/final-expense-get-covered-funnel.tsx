@@ -47,7 +47,6 @@ export default function FinalExpenseGetCoveredFunnel() {
   const [postalCode, setPostalCode] = useState("");
   const [addressSearch, setAddressSearch] = useState("");
   const [addressScriptLoaded, setAddressScriptLoaded] = useState(false);
-  const [addressSelectionError, setAddressSelectionError] = useState<string | null>(null);
 
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -106,16 +105,10 @@ export default function FinalExpenseGetCoveredFunnel() {
       if (stateShort) setStateVal(stateShort.toUpperCase());
       if (zip) setPostalCode(zip);
       if (place?.formatted_address) setAddressSearch(place.formatted_address);
-
-      if (stateShort && stateShort.toUpperCase() !== "VA") {
-        setAddressSelectionError(t("address.vaOnly"));
-      } else {
-        setAddressSelectionError(null);
-      }
     });
 
     googleAutocompleteInstanceRef.current = autocomplete;
-  }, [addressScriptLoaded, phase, t]);
+  }, [addressScriptLoaded, phase]);
 
   const translateIssue = (messageKey: string) => {
     if (messageKey === "required") return tForm("required");
@@ -276,10 +269,6 @@ export default function FinalExpenseGetCoveredFunnel() {
 
     if (!addressLine1.trim() || !city.trim() || !stateVal.trim() || !postalCode.trim()) {
       setSubmitError(t("address.required"));
-      return;
-    }
-    if (stateVal.trim().toUpperCase() !== "VA") {
-      setSubmitError(t("address.vaOnly"));
       return;
     }
 
@@ -597,11 +586,6 @@ export default function FinalExpenseGetCoveredFunnel() {
                   {submitError && (
                     <div className="rounded-lg border-2 border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300">
                       {submitError}
-                    </div>
-                  )}
-                  {addressSelectionError && (
-                    <div className="rounded-lg border-2 border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300">
-                      {addressSelectionError}
                     </div>
                   )}
 
