@@ -510,7 +510,23 @@ export default function FinalExpenseGetCoveredFunnel() {
                     )}
                   </div>
 
-                  <div className="space-y-3 border-t border-gray-200 pt-2 dark:border-gray-700">
+                  <Button
+                    type="submit"
+                    disabled={loadingContact}
+                    size="lg"
+                    className="h-14 w-full rounded-xl bg-gradient-to-r from-[hsl(var(--custom))] to-blue-600 text-base font-semibold text-white shadow-lg"
+                  >
+                    {loadingContact ? (
+                      <>
+                        <Loader2 className="mr-2 h-5 w-5 animate-spin" aria-hidden />
+                        {tForm("submitting")}
+                      </>
+                    ) : (
+                      t("contact.cta")
+                    )}
+                  </Button>
+
+                  <div className="space-y-3 border-t border-gray-200 pt-4 dark:border-gray-700">
                     <label className="group flex cursor-pointer items-start gap-3">
                       <input
                         type="checkbox"
@@ -536,22 +552,6 @@ export default function FinalExpenseGetCoveredFunnel() {
                       </span>
                     </label>
                   </div>
-
-                  <Button
-                    type="submit"
-                    disabled={loadingContact}
-                    size="lg"
-                    className="h-14 w-full rounded-xl bg-gradient-to-r from-[hsl(var(--custom))] to-blue-600 text-base font-semibold text-white shadow-lg"
-                  >
-                    {loadingContact ? (
-                      <>
-                        <Loader2 className="mr-2 h-5 w-5 animate-spin" aria-hidden />
-                        {tForm("submitting")}
-                      </>
-                    ) : (
-                      t("contact.cta")
-                    )}
-                  </Button>
                 </form>
               )}
 
