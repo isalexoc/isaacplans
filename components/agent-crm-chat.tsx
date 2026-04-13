@@ -1,7 +1,12 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useLayoutEffect, useRef } from "react";
 import { useLocale } from "next-intl";
+import { usePathname } from "@/i18n/navigation";
+import {
+  AGENT_CRM_NO_SWEEP_HTML_ATTR,
+  isAgentCrmBookingCalendarPathname,
+} from "@/lib/agent-crm-calendar-route";
 import {
   AGENT_CRM_CHAT_CONFIG,
   AGENT_CRM_CHAT_SCRIPT_ID,
@@ -14,10 +19,25 @@ import {
  */
 export default function AgentCrmChat() {
   const locale = useLocale();
+  const pathname = usePathname();
   const generationRef = useRef(0);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (typeof document === "undefined") return;
+
+    /** Client: real URL is authoritative (next-intl pathname can lag one frame). */
+    const path =
+      typeof window !== "undefined"
+        ? window.location.pathname
+        : pathname ?? "";
+
+    /** Booking embed sets this in useLayoutEffect (tree order) — extra guard. */
+    if (document.documentElement.hasAttribute(AGENT_CRM_NO_SWEEP_HTML_ATTR)) {
+      return;
+    }
+    if (isAgentCrmBookingCalendarPathname(path)) {
+      return;
+    }
 
     const gen = ++generationRef.current;
 
@@ -38,7 +58,6 @@ export default function AgentCrmChat() {
         '[class*="lc-chat"]',
         '[class*="lc_text-widget"]',
         'iframe[src*="leadconnector"]',
-        'iframe[src*="agent-crm"]',
         'iframe[src*="widgets.leadconnectorhq.com"]',
         'iframe[src*="beta.leadconnectorhq.com"]',
         "div[data-widget-id]",
@@ -74,7 +93,7 @@ export default function AgentCrmChat() {
         removeLeadConnectorChatArtifacts();
       }
     };
-  }, [locale]);
+  }, [locale, pathname]);
 
   return null;
 }

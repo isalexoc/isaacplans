@@ -16,6 +16,7 @@ import { esES, enUS } from '@clerk/localizations';
 import { SanityLive } from '@/sanity/lib/live';
 import MetaPixelWrapper from "@/components/meta-pixel-wrapper";
 import AgentCrmChat from "@/components/agent-crm-chat";
+import AgentCrmExternalTracking from "@/components/agent-crm-external-tracking";
 import { GoogleAnalytics } from '@next/third-parties/google'
 import { getLicensedStateCount } from "@/lib/licensed-states";
 
@@ -130,12 +131,10 @@ export default async function LocaleLayout({
           {/* Agent CRM (LeadConnector) chat — client-managed so locale toggles replace one widget */}
           <AgentCrmChat />
           {agentCrmTrackingId ? (
-            <Script
-              id="agentcrm-external-tracking"
+            <AgentCrmExternalTracking
+              trackingId={agentCrmTrackingId}
               src={agentCrmTrackingSrc}
-              strategy="afterInteractive"
-              data-tracking-id={agentCrmTrackingId}
-              {...(agentCrmTrackingDebug ? { "data-debug": "true" } : {})}
+              debug={agentCrmTrackingDebug}
             />
           ) : null}
         </NextIntlClientProvider>

@@ -1,10 +1,9 @@
 /* app/[locale]/final-expense/calendar/page.tsx – server component */
 import { getTranslations, getLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation"; // ✅ locale-aware Link
-import Script from "next/script";
 import type { Metadata } from "next";
 import { Button } from "@/components/ui/button";
-import BookingCalendarIframe from "@/components/booking-calendar-iframe";
+import AgentCrmBookingCalendarEmbed from "@/components/agent-crm-booking-calendar-embed";
 import { appendAgentCrmBookingPrefill } from "@/lib/agent-crm-booking-url";
 
 import {
@@ -85,11 +84,10 @@ export default async function FinalExpenseCalendarPage({
   // Await searchParams (Next.js 15+ requires this)
   const params = await searchParams;
 
-  /* Choose the booking URL by language */
-  const base =
-    locale === "es"
-      ? "https://link.agent-crm.com/widget/booking/cp075CJgwaZppyW7EVmV" // Spanish
-      : "https://link.agent-crm.com/widget/booking/ndTlLivbrRxtySFg7jgQ"; // English (default)
+  /* Agent CRM booking widgets (public ids) — must match dashboard embeds */
+  const widgetPublicId =
+    locale === "es" ? "cp075CJgwaZppyW7EVmV" : "ndTlLivbrRxtySFg7jgQ";
+  const base = `https://link.agent-crm.com/widget/booking/${widgetPublicId}`;
 
   /* Prefill only non-empty fields — empty keys can break Agent CRM embeds */
   const iframeSrc = appendAgentCrmBookingPrefill(base, {
@@ -116,17 +114,13 @@ export default async function FinalExpenseCalendarPage({
         <div className="w-[110px] sm:w-[120px]" />
       </div>
 
-      {/* Agent-CRM helper script (afterInteractive — beforeInteractive is root-layout-only in App Router) */}
-      <Script
-        id="agent-crm-embed-fe"
-        src="https://link.agent-crm.com/js/form_embed.js"
-        strategy="afterInteractive"
-      />
-
-      <BookingCalendarIframe
-        src={iframeSrc}
+      {/*
+        CRM embed order: iframe then form_embed.js as the next sibling — see AgentCrmBookingCalendarEmbed.
+      */}
+      <AgentCrmBookingCalendarEmbed
+        iframeSrc={iframeSrc}
         title="Final Expense Appointment Calendar"
-        loadingLabel={t("loadingIframe")}
+        widgetPublicId={widgetPublicId}
       />
     </main>
   );
