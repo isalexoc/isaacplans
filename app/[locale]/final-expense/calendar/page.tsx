@@ -4,6 +4,8 @@ import { Link } from "@/i18n/navigation"; // ✅ locale-aware Link
 import Script from "next/script";
 import type { Metadata } from "next";
 import { Button } from "@/components/ui/button";
+import BookingCalendarIframe from "@/components/booking-calendar-iframe";
+import { appendAgentCrmBookingPrefill } from "@/lib/agent-crm-booking-url";
 
 import {
   ogLocaleOf,
@@ -89,15 +91,13 @@ export default async function FinalExpenseCalendarPage({
       ? "https://link.agent-crm.com/widget/booking/cp075CJgwaZppyW7EVmV" // Spanish
       : "https://link.agent-crm.com/widget/booking/ndTlLivbrRxtySFg7jgQ"; // English (default)
 
-  /* Build query string if any pre-filled fields arrive */
-  const qs = new URLSearchParams({
+  /* Prefill only non-empty fields — empty keys can break Agent CRM embeds */
+  const iframeSrc = appendAgentCrmBookingPrefill(base, {
     first_name: param(params.first_name),
     last_name: param(params.last_name),
     email: param(params.email),
     phone: param(params.phone),
   });
-
-  const iframeSrc = qs.toString() ? `${base}?${qs}` : base;
 
   return (
     <main className="min-h-screen flex flex-col items-center gap-6 p-4">
@@ -116,18 +116,17 @@ export default async function FinalExpenseCalendarPage({
         <div className="w-[110px] sm:w-[120px]" />
       </div>
 
-      {/* Agent-CRM helper script */}
+      {/* Agent-CRM helper script (afterInteractive — beforeInteractive is root-layout-only in App Router) */}
       <Script
         id="agent-crm-embed-fe"
         src="https://link.agent-crm.com/js/form_embed.js"
         strategy="afterInteractive"
       />
 
-      {/* Booking iframe */}
-      <iframe
+      <BookingCalendarIframe
         src={iframeSrc}
         title="Final Expense Appointment Calendar"
-        className="w-full max-w-4xl h-[80vh] md:rounded-lg border-none shadow-lg"
+        loadingLabel={t("loadingIframe")}
       />
     </main>
   );

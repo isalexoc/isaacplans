@@ -4,6 +4,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Script from "next/script";
 import { useLocale, useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import { Loader2, MapPin, Shield } from "lucide-react";
 import PhoneInput, { parsePhoneNumber } from "react-phone-number-input";
 import "react-phone-number-input/style.css";
@@ -15,6 +16,7 @@ import {
 import { shortTermMedicalFormSchema, capitalizeName } from "@/lib/validation/shortTermMedicalSchema";
 import { trackLead, updateAdvancedMatching } from "@/lib/facebook-pixel";
 import { generateEventId, getFacebookCookies } from "@/lib/meta-capi";
+import { appendAgentCrmBookingPrefill } from "@/lib/agent-crm-booking-url";
 
 function toE164OrUndefined(phone: string | undefined): string | undefined {
   if (!phone?.trim()) return undefined;
@@ -61,6 +63,16 @@ export default function FinalExpenseGetCoveredFunnel() {
   const googleAutocompleteInstanceRef = useRef<any>(null);
 
   const mapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+
+  const calendarBookingHref = useMemo(() => {
+    const phoneE164 = parsePhoneNumber(phone, "US")?.number?.trim() ?? "";
+    return appendAgentCrmBookingPrefill("/final-expense/calendar", {
+      first_name: firstName.trim(),
+      last_name: lastName.trim(),
+      email: email.trim().toLowerCase(),
+      phone: phoneE164,
+    });
+  }, [firstName, lastName, email, phone]);
 
   /** After step 1 (or 2), bring viewport to top — mobile users often stay mid-page after focusing lower fields. */
   useLayoutEffect(() => {
@@ -699,6 +711,18 @@ export default function FinalExpenseGetCoveredFunnel() {
                   <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
                     {t("done.body")}
                   </p>
+                  <p className="mt-3 text-xs text-slate-500 dark:text-slate-500">
+                    {t("done.bookHint")}
+                  </p>
+                  <Button
+                    asChild
+                    size="lg"
+                    className="mt-6 h-14 w-full rounded-xl bg-gradient-to-r from-[hsl(var(--custom))] to-blue-600 text-base font-semibold text-white shadow-lg"
+                  >
+                    <Link href={calendarBookingHref as "/final-expense/calendar"}>
+                      {t("done.bookCta")}
+                    </Link>
+                  </Button>
                 </div>
               )}
             </div>

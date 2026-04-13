@@ -2289,7 +2289,9 @@
       },
       "done": {
         "title": "Listo",
-        "body": "Gracias. Recibimos su información y nos comunicaremos sobre su cita en Virginia."
+        "body": "Gracias. Recibimos su información y nos comunicaremos sobre su cita en Virginia.",
+        "bookCta": "Agendar su cita",
+        "bookHint": "Elija el horario que prefiera — su nombre, correo y teléfono se transferirán para que no tenga que escribirlos otra vez."
       }
     }
   },
@@ -2611,7 +2613,8 @@
         "keywords": "calendario gastos finales, cita seguro funerario, consulta gastos finales, agendar gastos finales, cita seguro de vida, agente bilingüe",
         "image": "https://www.isaacplans.com/images/fe_es.png",
         "imageAlt": "Calendario de citas de Gastos Finales",
-        "backButton": "← Volver"
+        "backButton": "← Volver",
+        "loadingIframe": "Cargando calendario…"
       }
     }
   },
