@@ -2290,8 +2290,13 @@
       "done": {
         "title": "Listo",
         "body": "Gracias. Recibimos su información y nos comunicaremos sobre su cita en Virginia.",
+        "optionIntro": "¿Qué desea hacer ahora?",
         "bookCta": "Agendar su cita",
-        "bookHint": "Elija el horario que prefiera — su nombre, correo y teléfono se transferirán para que no tenga que escribirlos otra vez."
+        "bookHint": "Elija el horario que prefiera — su nombre, correo y teléfono se transferirán para que no tenga que escribirlos otra vez.",
+        "callCta": "Llamar ahora",
+        "callAria": "Llamar a Isaac Plans Insurance al 540-426-1804",
+        "whatsappCta": "Contactar por WhatsApp",
+        "whatsappAria": "Abrir WhatsApp con Isaac Plans Insurance"
       }
     }
   },

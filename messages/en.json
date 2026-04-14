@@ -2299,8 +2299,13 @@
       "done": {
         "title": "You’re all set",
         "body": "Thank you. We received your information and will be in touch about your Virginia appointment.",
+        "optionIntro": "What would you like to do next?",
         "bookCta": "Schedule your appointment",
-        "bookHint": "Pick a time that works for you — your name, email, and phone will carry over so you don’t have to enter them again."
+        "bookHint": "Pick a time that works for you — your name, email, and phone will carry over so you don’t have to enter them again.",
+        "callCta": "Call now",
+        "callAria": "Call Isaac Plans Insurance at 540-426-1804",
+        "whatsappCta": "Message us on WhatsApp",
+        "whatsappAria": "Open WhatsApp with Isaac Plans Insurance"
       }
     }
   },

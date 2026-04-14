@@ -5,7 +5,7 @@ import Image from "next/image";
 import Script from "next/script";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { Loader2, MapPin, Shield } from "lucide-react";
+import { Loader2, MapPin, Phone, Shield } from "lucide-react";
 import PhoneInput, { parsePhoneNumber } from "react-phone-number-input";
 import "react-phone-number-input/style.css";
 import { cn } from "@/lib/utils";
@@ -17,6 +17,10 @@ import { shortTermMedicalFormSchema, capitalizeName } from "@/lib/validation/sho
 import { trackLead, updateAdvancedMatching } from "@/lib/facebook-pixel";
 import { generateEventId, getFacebookCookies } from "@/lib/meta-capi";
 import { appendAgentCrmBookingPrefill } from "@/lib/agent-crm-booking-url";
+
+/** CRM line — same as site header / contact */
+const CRM_PHONE_TEL = "tel:+15404261804";
+const WHATSAPP_CHAT_HREF = "https://wa.me/15406813507";
 
 function toE164OrUndefined(phone: string | undefined): string | undefined {
   if (!phone?.trim()) return undefined;
@@ -711,18 +715,57 @@ export default function FinalExpenseGetCoveredFunnel() {
                   <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
                     {t("done.body")}
                   </p>
-                  <p className="mt-3 text-xs text-slate-500 dark:text-slate-500">
-                    {t("done.bookHint")}
+                  <p className="mt-5 text-sm font-medium text-slate-800 dark:text-slate-200">
+                    {t("done.optionIntro")}
                   </p>
-                  <Button
-                    asChild
-                    size="lg"
-                    className="mt-6 h-14 w-full rounded-xl bg-gradient-to-r from-[hsl(var(--custom))] to-blue-600 text-base font-semibold text-white shadow-lg"
-                  >
-                    <Link href={calendarBookingHref as "/final-expense/calendar"}>
-                      {t("done.bookCta")}
-                    </Link>
-                  </Button>
+                  <div className="mt-4 flex w-full flex-col gap-3">
+                    <div>
+                      <Button
+                        asChild
+                        size="lg"
+                        className="h-14 w-full rounded-xl bg-gradient-to-r from-[hsl(var(--custom))] to-blue-600 text-base font-semibold text-white shadow-lg"
+                      >
+                        <Link href={calendarBookingHref as "/final-expense/calendar"}>
+                          {t("done.bookCta")}
+                        </Link>
+                      </Button>
+                      <p className="mt-2 text-xs text-slate-500 dark:text-slate-500">
+                        {t("done.bookHint")}
+                      </p>
+                    </div>
+                    <Button
+                      asChild
+                      size="lg"
+                      variant="outline"
+                      className="h-14 w-full rounded-xl border-2 border-slate-300 bg-white text-base font-semibold text-slate-900 shadow-sm hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-900/50 dark:text-white dark:hover:bg-slate-800"
+                    >
+                      <a
+                        href={CRM_PHONE_TEL}
+                        className="inline-flex w-full items-center justify-center gap-2"
+                        aria-label={t("done.callAria")}
+                      >
+                        <Phone className="h-5 w-5 shrink-0" aria-hidden />
+                        {t("done.callCta")}
+                      </a>
+                    </Button>
+                    {isES && (
+                      <Button
+                        asChild
+                        size="lg"
+                        className="h-14 w-full rounded-xl border-0 bg-[#25D366] text-base font-semibold text-white shadow-lg hover:bg-[#20bd5a]"
+                      >
+                        <a
+                          href={WHATSAPP_CHAT_HREF}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex w-full items-center justify-center"
+                          aria-label={t("done.whatsappAria")}
+                        >
+                          {t("done.whatsappCta")}
+                        </a>
+                      </Button>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
