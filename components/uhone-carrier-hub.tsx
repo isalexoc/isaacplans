@@ -11,7 +11,6 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { getTranslations } from "next-intl/server";
-import { Link } from "@/i18n/navigation";
 import ShortTermMedicalButton from "@/components/ShortTermMedicalButton";
 import {
   UHONE_ALL_PLANS_BUTTON_IMAGE_URL,
@@ -26,7 +25,6 @@ import {
   type UhoneHubProductId,
   type UhoneHubSectionId,
 } from "@/lib/uhone-hub-products";
-import { getUhoneLearnMoreHref } from "@/lib/uhone-product-slugs";
 
 /** Cloudinary: f_auto, q_auto, bounded dimensions, smart crop for hero */
 const UHONE_HUB_HERO_IMAGE =
@@ -62,16 +60,8 @@ function ProductQuoteBlock({
     ? uhoneMarketingAssetUrl(cfg.bannerFile)
     : null;
 
-  const learnMoreHref = getUhoneLearnMoreHref(productId);
-
   return (
     <div className="flex w-full min-w-0 flex-col gap-3">
-      <Link
-        href={learnMoreHref as never}
-        className="text-center text-sm font-semibold text-[hsl(var(--custom))] underline-offset-4 transition hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--custom))] focus-visible:ring-offset-2"
-      >
-        {t("labels.learnMoreProductPage")}
-      </Link>
       <a
         href={href}
         target="_blank"

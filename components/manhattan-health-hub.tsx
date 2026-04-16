@@ -14,12 +14,8 @@ export type ManhattanHealthHubProps = {
 const cardBtn =
   "inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#0c4a6e] to-[#0d9488] px-4 py-2.5 text-sm font-semibold text-white shadow-md transition hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0c4a6e] focus-visible:ring-offset-2";
 
-const learnMoreClass =
-  "mt-3 block text-center text-sm font-semibold text-[#0c4a6e] underline-offset-4 transition hover:underline dark:text-[#5eead4]";
-
 export default function ManhattanHealthHub({ t }: ManhattanHealthHubProps) {
   const quoteLabel = t("labels.quoteCta");
-  const learnMore = t("labels.learnMore");
 
   return (
     <main id="manhattan-health-hub-main" className="text-foreground">
@@ -127,15 +123,6 @@ export default function ManhattanHealthHub({ t }: ManhattanHealthHubProps) {
                     {quoteLabel}
                     <ExternalLink className="h-4 w-4 shrink-0 opacity-90" aria-hidden />
                   </a>
-                  <Link
-                    href={{
-                      pathname: "/carriers/manhattan/[product]",
-                      params: { product: slug },
-                    }}
-                    className={learnMoreClass}
-                  >
-                    {learnMore}
-                  </Link>
                 </article>
               </li>
             ))}
