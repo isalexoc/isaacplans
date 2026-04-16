@@ -17,12 +17,8 @@ export type AllstateHealthHubProps = {
 const cardBtn =
   "inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#0033A0] to-[#0077B6] px-4 py-2.5 text-sm font-semibold text-white shadow-md transition hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0033A0] focus-visible:ring-offset-2";
 
-const learnMoreClass =
-  "mt-3 block text-center text-sm font-semibold text-[#0033A0] underline-offset-4 transition hover:underline dark:text-[#5eb3e8]";
-
 export default function AllstateHealthHub({ t }: AllstateHealthHubProps) {
   const quoteLabel = t("labels.quoteCta");
-  const learnMore = t("labels.learnMore");
 
   return (
     <main id="allstate-health-hub-main" className="text-foreground">
@@ -132,15 +128,6 @@ export default function AllstateHealthHub({ t }: AllstateHealthHubProps) {
                     {quoteLabel}
                     <ExternalLink className="h-4 w-4 shrink-0 opacity-90" aria-hidden />
                   </a>
-                  <Link
-                    href={{
-                      pathname: "/carriers/allstate/seniors/[product]",
-                      params: { product: slug },
-                    }}
-                    className={learnMoreClass}
-                  >
-                    {learnMore}
-                  </Link>
                 </article>
               </li>
             ))}
@@ -161,9 +148,6 @@ export default function AllstateHealthHub({ t }: AllstateHealthHubProps) {
                 {quoteLabel}
                 <ExternalLink className="h-4 w-4 shrink-0 opacity-90" aria-hidden />
               </a>
-              <Link href="/carriers/allstate/cancer-only" className={`${learnMoreClass} sm:ml-2`}>
-                {learnMore}
-              </Link>
             </div>
           </div>
         </div>
@@ -203,15 +187,6 @@ export default function AllstateHealthHub({ t }: AllstateHealthHubProps) {
                     {quoteLabel}
                     <ExternalLink className="h-4 w-4 shrink-0 opacity-90" aria-hidden />
                   </a>
-                  <Link
-                    href={{
-                      pathname: "/carriers/allstate/individual/[product]",
-                      params: { product: slug },
-                    }}
-                    className={learnMoreClass}
-                  >
-                    {learnMore}
-                  </Link>
                 </article>
               </li>
             ))}
@@ -232,9 +207,6 @@ export default function AllstateHealthHub({ t }: AllstateHealthHubProps) {
                 {quoteLabel}
                 <ExternalLink className="h-4 w-4 shrink-0 opacity-90" aria-hidden />
               </a>
-              <Link href="/carriers/allstate/cancer-only" className={`${learnMoreClass} sm:ml-2`}>
-                {learnMore}
-              </Link>
             </div>
           </div>
         </div>
