@@ -17,6 +17,7 @@ import { shortTermMedicalFormSchema, capitalizeName } from "@/lib/validation/sho
 import { trackLead, updateAdvancedMatching } from "@/lib/facebook-pixel";
 import { generateEventId, getFacebookCookies } from "@/lib/meta-capi";
 import { appendAgentCrmBookingPrefill } from "@/lib/agent-crm-booking-url";
+import { trackFeGetCoveredPhase } from "@/lib/analytics/final-expense-get-covered-ga";
 
 /** CRM line — same as site header / contact */
 const CRM_PHONE_TEL = "tel:+15404261804";
@@ -77,6 +78,11 @@ export default function FinalExpenseGetCoveredFunnel() {
       phone: phoneE164,
     });
   }, [firstName, lastName, email, phone]);
+
+  /** GA4: one event per funnel phase (contact → address → done). Does not affect Meta Pixel/CAPI. */
+  useEffect(() => {
+    trackFeGetCoveredPhase({ phase, locale });
+  }, [phase, locale]);
 
   /** After step 1 (or 2), bring viewport to top — mobile users often stay mid-page after focusing lower fields. */
   useLayoutEffect(() => {
