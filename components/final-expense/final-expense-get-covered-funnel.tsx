@@ -445,7 +445,8 @@ export default function FinalExpenseGetCoveredFunnel() {
 
   return (
     <div className="relative min-h-screen bg-[#f4f6f9] dark:bg-slate-950">
-      {mapsApiKey && phase === "address" && (
+      {/* Prefetch during step 1 so Places is ready (or nearly) when the user reaches the address step */}
+      {mapsApiKey && (phase === "contact" || phase === "address") && (
         <Script
           id="google-maps-places"
           src={`https://maps.googleapis.com/maps/api/js?key=${mapsApiKey}&libraries=places&loading=async`}
@@ -678,7 +679,7 @@ export default function FinalExpenseGetCoveredFunnel() {
                         {t("address.line1")} <span className="text-red-500">*</span>
                       </label>
                       <div
-                        className="min-h-[52px] w-full overflow-hidden rounded-lg border-2 border-gray-200 bg-white transition-all focus-within:border-[hsl(var(--custom))] focus-within:ring-2 focus-within:ring-[hsl(var(--custom)/0.2)] dark:border-gray-700 dark:bg-slate-800/50 dark:focus-within:ring-[hsl(var(--custom)/0.2)]"
+                        className="min-h-[52px] w-full overflow-visible rounded-lg border-2 border-gray-200 bg-white transition-all focus-within:border-[hsl(var(--custom))] focus-within:ring-2 focus-within:ring-[hsl(var(--custom)/0.2)] dark:border-gray-700 dark:bg-slate-800/50 dark:focus-within:ring-[hsl(var(--custom)/0.2)]"
                         aria-busy={!addressScriptLoaded}
                       >
                         <div ref={placeAutocompleteContainerRef} className="w-full" />
