@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
 import FinalExpenseGetCoveredFunnel from "@/components/final-expense/final-expense-get-covered-funnel";
 import ServicePageTracker from "@/components/service-page-tracker";
-import { GET_COVERED_FAST_OG_IMAGE } from "@/lib/get-covered-fast/constants";
+import { getFinalExpenseGetCoveredOgImageUrl } from "@/lib/get-covered-fast/constants";
 import {
   getFinalExpenseGetCoveredAdsBreadcrumbLd,
   getFinalExpenseGetCoveredAdsPageLd,
@@ -15,7 +15,7 @@ import {
   type SupportedLocale,
 } from "@/lib/seo/i18n";
 
-/** Paid-ads landing: final expense VA funnel with minimal site header/footer (middleware + ads-landing). */
+/** Paid-ads landing: final expense lead funnel with minimal site header/footer (middleware + ads-landing). */
 export async function generateMetadata(): Promise<Metadata> {
   const locale = (await getLocale()) as SupportedLocale;
   const t = await getTranslations({
@@ -33,6 +33,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const languages = languageAlternatesPrefixed(routeKey);
   const xDefault = withLocalePrefix("en", localizedSlug(routeKey, "en"));
   const ogLocale = ogLocaleOf(locale);
+  const ogImageUrl = getFinalExpenseGetCoveredOgImageUrl(locale);
 
   return {
     title,
@@ -57,7 +58,7 @@ export async function generateMetadata(): Promise<Metadata> {
       type: "website",
       images: [
         {
-          url: GET_COVERED_FAST_OG_IMAGE,
+          url: ogImageUrl,
           width: 1200,
           height: 630,
           alt: imageAlt,
@@ -68,7 +69,7 @@ export async function generateMetadata(): Promise<Metadata> {
       card: "summary_large_image",
       title,
       description,
-      images: [{ url: GET_COVERED_FAST_OG_IMAGE, alt: imageAlt }],
+      images: [{ url: ogImageUrl, alt: imageAlt }],
     },
   };
 }
@@ -94,7 +95,7 @@ export default async function FinalExpenseGetCoveredAdsPage() {
   return (
     <div className="relative min-h-screen">
       <ServicePageTracker
-        serviceName="Final expense get covered (VA ads)"
+        serviceName="Final expense get covered"
         serviceCategory="final-expense-get-covered-ads"
       />
       <FinalExpenseGetCoveredFunnel />

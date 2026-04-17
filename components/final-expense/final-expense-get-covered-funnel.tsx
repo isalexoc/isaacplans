@@ -286,8 +286,8 @@ export default function FinalExpenseGetCoveredFunnel() {
           finalExpenseData: {
             language: isES ? "es" : "en",
             source: "final_expense_get_covered_ads",
-            campaign: "virginia_in_person",
-            targetRegion: "Virginia",
+            campaign: "final_expense_get_covered",
+            targetRegion: "United States",
             smsConsent,
             marketingConsent,
           },
@@ -345,7 +345,7 @@ export default function FinalExpenseGetCoveredFunnel() {
       if (isNew) {
         trackLead(
           {
-            contentName: "Final expense — get covered (VA ads)",
+            contentName: "Final expense — get covered",
             value: 100,
             currency: "USD",
             source: "final_expense_get_covered_ads",

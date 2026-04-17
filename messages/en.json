@@ -2260,18 +2260,18 @@
   },
   "finalExpenseGetCoveredPage": {
     "metadata": {
-      "title": "Final expense coverage in Virginia | Isaac Plans Insurance",
-      "description": "Request a free consultation for final expense (burial) insurance in Virginia. Licensed guidance—then share your address so we can meet you in person.",
-      "keywords": "final expense insurance Virginia, burial insurance, funeral insurance, Isaac Plans",
-      "imageAlt": "Trusted insurance guidance for Virginia families",
+      "title": "Final expense insurance — get covered | Isaac Plans Insurance",
+      "description": "Compare burial and final expense options with licensed, bilingual guidance. Share your contact and address—we’ll follow up with benefits that may fit your situation.",
+      "keywords": "final expense insurance, burial insurance, funeral insurance, life insurance, Isaac Plans",
+      "imageAlt": "Warm, reassuring moment—planning ahead with a caring advisor",
       "breadcrumbPage": "Final expense — get covered"
     },
     "funnel": {
       "banner": "Licensed guidance · Final expense insurance",
       "hero": {
-        "badge": "Virginia · In-person appointments available",
-        "title": "Get covered—final expense insurance",
-        "subtitle": "Help protect your family from funeral and burial costs. Share your contact info, then your address so we can schedule a visit at your home in Virginia."
+        "badge": "Licensed agents · Personal guidance",
+        "title": "Final expense coverage that fits your life",
+        "subtitle": "Help cushion your loved ones from funeral and burial costs. Tell us how to reach you, then confirm your mailing address so we can share state-approved plans and next steps."
       },
       "secureNote": "Secure · No obligation · Your data stays private",
       "progress": {

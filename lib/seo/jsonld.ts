@@ -915,7 +915,7 @@ export const getHealthCoverageFastAdsBreadcrumbLd = (
   };
 };
 
-/** Paid ads — final expense VA in-person lead funnel; locale slug from routing. */
+/** Paid ads — final expense get-covered lead funnel; locale slug from routing. */
 const getFinalExpenseGetCoveredAdsPathFor = (locale: string) =>
   locale?.toLowerCase().startsWith("es")
     ? "gastos-finales/obtener-cobertura"

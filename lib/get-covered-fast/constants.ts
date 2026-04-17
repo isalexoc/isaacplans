@@ -9,3 +9,22 @@ export const GET_COVERED_FAST_HERO_IMAGE =
 /** Open Graph / Twitter card (1200×630) — aligned with hero art for social previews. */
 export const GET_COVERED_FAST_OG_IMAGE =
   "https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_1200,h_630,c_fill,g_center/pexels-wanda-yanery-villarraga-tole-584965425-17052722_ewanjk.jpg";
+
+/** Cloudinary public IDs for `/final-expense/get-covered` OG / Twitter (1200×630). */
+export const FINAL_EXPENSE_GET_COVERED_OG_PUBLIC_ID_EN =
+  "gastos_finales_planes_regulados_por_el_estado_en_thdapq";
+export const FINAL_EXPENSE_GET_COVERED_OG_PUBLIC_ID_ES =
+  "Planes_y_beneficios_de_gastos_finales_aprobados_en_su_estado_es_cjhqtj";
+
+const CLOUDINARY_ISAAC = "https://res.cloudinary.com/isaacdev/image/upload";
+
+/**
+ * Optimized 1200×630 OG image URL for the final expense get-covered page (`f_auto`, `q_auto`, fill, smart gravity).
+ */
+export function getFinalExpenseGetCoveredOgImageUrl(locale: string): string {
+  const isEs = locale.toLowerCase().startsWith("es");
+  const publicId = isEs
+    ? FINAL_EXPENSE_GET_COVERED_OG_PUBLIC_ID_ES
+    : FINAL_EXPENSE_GET_COVERED_OG_PUBLIC_ID_EN;
+  return `${CLOUDINARY_ISAAC}/f_auto,q_auto,w_1200,h_630,c_fill,g_auto/${publicId}`;
+}
