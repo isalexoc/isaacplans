@@ -2283,25 +2283,22 @@
         "cta": "Continue"
       },
       "address": {
-        "intro": "Almost done. Enter the address where you’d like us to meet you for your appointment.",
         "line1": "Street address",
         "line2": "Apt / unit (optional)",
         "city": "City",
         "state": "State",
         "zip": "ZIP code",
-        "cta": "Save address & finish",
+        "cta": "Submit",
         "required": "Please fill in all required address fields.",
         "invalidZip": "Enter a valid U.S. ZIP code (e.g. 12345 or 12345-6789).",
-        "search": "Find your address",
         "searchPlaceholder": "Start typing your street address...",
         "searchUnavailable": "Address autocomplete is temporarily unavailable. Please enter your address manually."
       },
       "done": {
         "title": "You’re all set",
-        "body": "Thank you. We received your information and will be in touch about your Virginia appointment.",
+        "body": "Thank you. We received your information and will be in touch.",
         "optionIntro": "What would you like to do next?",
         "bookCta": "Schedule your appointment",
-        "bookHint": "Pick a time that works for you — your name, email, and phone will carry over so you don’t have to enter them again.",
         "callCta": "Call now",
         "callAria": "Call Isaac Plans Insurance at 540-426-1804",
         "whatsappCta": "Message us on WhatsApp",

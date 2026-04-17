@@ -5,7 +5,7 @@ import Image from "next/image";
 import Script from "next/script";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { Loader2, MapPin, Phone, Shield } from "lucide-react";
+import { Loader2, Phone, Shield } from "lucide-react";
 import PhoneInput, { parsePhoneNumber } from "react-phone-number-input";
 import "react-phone-number-input/style.css";
 import { cn } from "@/lib/utils";
@@ -27,6 +27,43 @@ function toE164OrUndefined(phone: string | undefined): string | undefined {
   if (!phone?.trim()) return undefined;
   const parsed = parsePhoneNumber(phone, "US");
   return parsed?.number;
+}
+
+type GoogleAddressComponent = {
+  types: string[];
+  longText?: string;
+  shortText?: string;
+};
+
+/** Parses `Place.addressComponents` from the Places API (new `Place` class). */
+function parseGooglePlaceAddressComponents(components: GoogleAddressComponent[] | undefined) {
+  if (!components?.length) return null;
+
+  const getPart = (type: string, pick: "longText" | "shortText" = "longText") => {
+    const c = components.find((x) => x.types?.includes(type));
+    if (!c) return "";
+    const v = pick === "shortText" ? c.shortText : c.longText;
+    return (v ?? "").trim();
+  };
+
+  const streetNumber = getPart("street_number");
+  const route = getPart("route");
+  const locality =
+    getPart("locality") ||
+    getPart("postal_town") ||
+    getPart("administrative_area_level_3");
+  const stateShort = getPart("administrative_area_level_1", "shortText");
+  const zip = getPart("postal_code");
+
+  const line1 = [streetNumber, route].filter(Boolean).join(" ").trim();
+  if (!line1) return null;
+
+  return {
+    line1,
+    city: locality,
+    state: stateShort ? stateShort.toUpperCase() : "",
+    zip,
+  };
 }
 
 type Phase = "contact" | "address" | "done";
@@ -52,7 +89,6 @@ export default function FinalExpenseGetCoveredFunnel() {
   const [city, setCity] = useState("");
   const [stateVal, setStateVal] = useState("VA");
   const [postalCode, setPostalCode] = useState("");
-  const [addressSearch, setAddressSearch] = useState("");
   const [addressScriptLoaded, setAddressScriptLoaded] = useState(false);
 
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
@@ -64,8 +100,7 @@ export default function FinalExpenseGetCoveredFunnel() {
     "w-full px-4 py-3 rounded-lg border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:border-[hsl(var(--custom))] focus:ring-2 focus:ring-[hsl(var(--custom)/0.2)] transition-all duration-200";
 
   const progress = useMemo(() => (phase === "contact" ? 50 : phase === "address" ? 100 : 100), [phase]);
-  const addressAutocompleteRef = useRef<HTMLInputElement | null>(null);
-  const googleAutocompleteInstanceRef = useRef<any>(null);
+  const placeAutocompleteContainerRef = useRef<HTMLDivElement | null>(null);
 
   const mapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
@@ -93,53 +128,99 @@ export default function FinalExpenseGetCoveredFunnel() {
     document.body.scrollTop = 0;
   }, [phase]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (phase !== "address") return;
+    if (!mapsApiKey) return;
     if (!addressScriptLoaded) return;
-    if (!addressAutocompleteRef.current) return;
-    if (googleAutocompleteInstanceRef.current) return;
     if (typeof window === "undefined") return;
-    const g = (window as any).google;
-    if (!g?.maps?.places?.Autocomplete) return;
 
-    const autocomplete = new g.maps.places.Autocomplete(
-      addressAutocompleteRef.current,
-      {
-        componentRestrictions: { country: "us" },
-        fields: ["address_components", "formatted_address"],
-        types: ["address"],
+    if (!placeAutocompleteContainerRef.current) return;
+
+    let cancelled = false;
+    let detach: (() => void) | undefined;
+    const gWin = window as unknown as {
+      google?: { maps?: { importLibrary: (name: string) => Promise<unknown> } };
+    };
+
+    void (async () => {
+      const lib = await gWin.google?.maps?.importLibrary?.("places");
+      if (cancelled || !placeAutocompleteContainerRef.current) return;
+      if (!lib || typeof lib !== "object") return;
+
+      const PlaceAutocompleteElement = (lib as { PlaceAutocompleteElement?: new (opts?: object) => HTMLElement })
+        .PlaceAutocompleteElement;
+      if (!PlaceAutocompleteElement) return;
+
+      const mountRoot = placeAutocompleteContainerRef.current;
+      mountRoot.replaceChildren();
+
+      const el = new PlaceAutocompleteElement({
+        includedRegionCodes: ["us"],
+        requestedLanguage: isES ? "es" : "en",
+        requestedRegion: "us",
+        placeholder: t("address.searchPlaceholder"),
+        name: "streetAddress",
+      });
+      el.id = "fe-get-covered-street-address";
+      el.style.width = "100%";
+      el.style.display = "block";
+      el.style.colorScheme = "light";
+      el.style.boxSizing = "border-box";
+      el.style.border = "none";
+      el.style.backgroundColor = "transparent";
+
+      const onSelect = (event: Event) => {
+        void (async () => {
+          const pred = (event as unknown as { placePrediction?: { toPlace: () => unknown } }).placePrediction;
+          if (!pred) return;
+
+          try {
+            const place = pred.toPlace() as {
+              fetchFields: (opts: { fields: string[] }) => Promise<void>;
+              addressComponents?: GoogleAddressComponent[];
+            };
+
+            await place.fetchFields({ fields: ["addressComponents"] });
+            const parsed = parseGooglePlaceAddressComponents(place.addressComponents);
+            if (parsed?.line1) {
+              setAddressLine1(parsed.line1);
+              (el as unknown as { value: string }).value = parsed.line1;
+            }
+            if (parsed?.city) setCity(parsed.city);
+            if (parsed?.state) setStateVal(parsed.state);
+            if (parsed?.zip) setPostalCode(parsed.zip);
+          } catch (e) {
+            if (process.env.NODE_ENV === "development") {
+              console.error("[final-expense/get-covered] Place fetchFields failed:", e);
+            }
+          }
+        })();
+      };
+
+      const onInput = () => {
+        setAddressLine1((el as unknown as { value?: string }).value ?? "");
+      };
+
+      el.addEventListener("gmp-select", onSelect as EventListener);
+      el.addEventListener("input", onInput);
+      if (cancelled || !placeAutocompleteContainerRef.current) return;
+
+      mountRoot.appendChild(el);
+
+      detach = () => {
+        el.removeEventListener("gmp-select", onSelect as EventListener);
+        el.removeEventListener("input", onInput);
+      };
+    })();
+
+    return () => {
+      cancelled = true;
+      detach?.();
+      if (placeAutocompleteContainerRef.current) {
+        placeAutocompleteContainerRef.current.replaceChildren();
       }
-    );
-
-    autocomplete.addListener("place_changed", () => {
-      const place = autocomplete.getPlace();
-      const components = place?.address_components as
-        | Array<{ long_name: string; short_name: string; types: string[] }>
-        | undefined;
-      if (!components || components.length === 0) return;
-
-      const getPart = (type: string, pick: "long_name" | "short_name" = "long_name") =>
-        components.find((c) => c.types.includes(type))?.[pick] ?? "";
-
-      const streetNumber = getPart("street_number");
-      const route = getPart("route");
-      const locality =
-        getPart("locality") ||
-        getPart("postal_town") ||
-        getPart("administrative_area_level_3");
-      const stateShort = getPart("administrative_area_level_1", "short_name");
-      const zip = getPart("postal_code");
-
-      const line1 = [streetNumber, route].filter(Boolean).join(" ").trim();
-      if (line1) setAddressLine1(line1);
-      if (locality) setCity(locality);
-      if (stateShort) setStateVal(stateShort.toUpperCase());
-      if (zip) setPostalCode(zip);
-      if (place?.formatted_address) setAddressSearch(place.formatted_address);
-    });
-
-    googleAutocompleteInstanceRef.current = autocomplete;
-  }, [addressScriptLoaded, phase]);
+    };
+  }, [phase, mapsApiKey, addressScriptLoaded, isES, t]);
 
   const translateIssue = (messageKey: string) => {
     if (messageKey === "required") return tForm("required");
@@ -367,7 +448,7 @@ export default function FinalExpenseGetCoveredFunnel() {
       {mapsApiKey && phase === "address" && (
         <Script
           id="google-maps-places"
-          src={`https://maps.googleapis.com/maps/api/js?key=${mapsApiKey}&libraries=places`}
+          src={`https://maps.googleapis.com/maps/api/js?key=${mapsApiKey}&libraries=places&loading=async`}
           strategy="afterInteractive"
           onLoad={() => setAddressScriptLoaded(true)}
         />
@@ -588,30 +669,50 @@ export default function FinalExpenseGetCoveredFunnel() {
 
               {phase === "address" && (
                 <form onSubmit={handleAddressSubmit} className="space-y-4">
-                  <div className="mb-2 flex items-start gap-2 text-slate-700 dark:text-slate-300">
-                    <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-[hsl(var(--custom))]" />
-                    <p className="text-sm leading-relaxed">{t("address.intro")}</p>
-                  </div>
-
                   {mapsApiKey ? (
                     <div>
-                      <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                        {t("address.search")}
+                      <label
+                        htmlFor="fe-get-covered-street-address"
+                        className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300"
+                      >
+                        {t("address.line1")} <span className="text-red-500">*</span>
                       </label>
-                      <input
-                        ref={addressAutocompleteRef}
-                        type="text"
-                        value={addressSearch}
-                        onChange={(e) => setAddressSearch(e.target.value)}
-                        placeholder={t("address.searchPlaceholder")}
-                        className={inputBase}
-                        disabled={loadingAddress}
-                      />
+                      <div
+                        className="min-h-[52px] w-full overflow-hidden rounded-lg border-2 border-gray-200 bg-white transition-all focus-within:border-[hsl(var(--custom))] focus-within:ring-2 focus-within:ring-[hsl(var(--custom)/0.2)] dark:border-gray-700 dark:bg-slate-800/50 dark:focus-within:ring-[hsl(var(--custom)/0.2)]"
+                        aria-busy={!addressScriptLoaded}
+                      >
+                        <div ref={placeAutocompleteContainerRef} className="w-full" />
+                      </div>
+                      {!addressScriptLoaded && (
+                        <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                          {tForm("submitting")}
+                        </p>
+                      )}
                     </div>
                   ) : (
-                    <p className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-xs text-amber-800 dark:border-amber-700 dark:bg-amber-900/20 dark:text-amber-300">
-                      {t("address.searchUnavailable")}
-                    </p>
+                    <div className="space-y-2">
+                      <p className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-xs text-amber-800 dark:border-amber-700 dark:bg-amber-900/20 dark:text-amber-300">
+                        {t("address.searchUnavailable")}
+                      </p>
+                      <div>
+                        <label
+                          htmlFor="fe-get-covered-street-address-manual"
+                          className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300"
+                        >
+                          {t("address.line1")} <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          id="fe-get-covered-street-address-manual"
+                          name="streetAddress"
+                          type="text"
+                          autoComplete="street-address"
+                          value={addressLine1}
+                          onChange={(e) => setAddressLine1(e.target.value)}
+                          className={inputBase}
+                          disabled={loadingAddress}
+                        />
+                      </div>
+                    </div>
                   )}
 
                   {submitError && (
@@ -619,20 +720,6 @@ export default function FinalExpenseGetCoveredFunnel() {
                       {submitError}
                     </div>
                   )}
-
-                  <div>
-                    <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                      {t("address.line1")} <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      autoComplete="street-address"
-                      value={addressLine1}
-                      onChange={(e) => setAddressLine1(e.target.value)}
-                      className={inputBase}
-                      disabled={loadingAddress}
-                    />
-                  </div>
 
                   <div>
                     <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -735,9 +822,6 @@ export default function FinalExpenseGetCoveredFunnel() {
                           {t("done.bookCta")}
                         </Link>
                       </Button>
-                      <p className="mt-2 text-xs text-slate-500 dark:text-slate-500">
-                        {t("done.bookHint")}
-                      </p>
                     </div>
                     <Button
                       asChild
