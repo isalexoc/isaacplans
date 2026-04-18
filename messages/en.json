@@ -2514,7 +2514,10 @@
       "successTitle": "Thank you!",
       "successMessage": "We received your information. We’ll reach out soon about final expense options.",
       "successScheduleAppointment": "Schedule a call",
-      "successClose": "Close"
+      "successClose": "Close",
+      "successWhatsAppCta": "Contact on WhatsApp",
+      "successWhatsAppAria": "Open WhatsApp to message Isaac Plans Insurance",
+      "successWhatsAppMessage": "Hi — I just submitted the final expense form on isaacplans.com and would like to continue the conversation here."
     },
     "presentationButton": {
       "title": "Go to Presentation Mode"

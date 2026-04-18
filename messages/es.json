@@ -2505,7 +2505,10 @@
       "successTitle": "¡Gracias!",
       "successMessage": "Hemos recibido su información. Nos comunicaremos pronto sobre opciones de gastos finales.",
       "successScheduleAppointment": "Agendar llamada",
-      "successClose": "Cerrar"
+      "successClose": "Cerrar",
+      "successWhatsAppCta": "Contactar por WhatsApp",
+      "successWhatsAppAria": "Abrir WhatsApp para escribir a Isaac Plans Insurance",
+      "successWhatsAppMessage": "Hola, acabo de enviar el formulario de gastos finales en isaacplans.com y me gustaría continuar la conversación por aquí."
     },
     "presentationButton": {
       "title": "Ir al modo presentación"

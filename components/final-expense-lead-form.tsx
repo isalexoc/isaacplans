@@ -10,6 +10,10 @@ import {
 import PhoneInput, { parsePhoneNumber } from "react-phone-number-input";
 import "react-phone-number-input/style.css";
 import { Link } from "@/i18n/navigation";
+import { Button } from "@/components/ui/button";
+
+/** Same business line as footer / get-covered funnel (E.164 without +). */
+const WHATSAPP_E164 = "15406813507";
 
 function toE164OrUndefined(phone: string | undefined): string | undefined {
   if (!phone?.trim()) return undefined;
@@ -92,7 +96,7 @@ export default function FinalExpenseLeadForm({
           <p className="mt-2 text-sm text-sky-800 dark:text-sky-200">
             {t("successMessage")}
           </p>
-          <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
+          <div className="mt-6 flex flex-col sm:flex-row sm:flex-wrap gap-3 justify-center items-stretch sm:items-center">
             {onCloseModal && (
               <button
                 type="button"
@@ -120,6 +124,23 @@ export default function FinalExpenseLeadForm({
             >
               {t("successScheduleAppointment")}
             </Link>
+            {isES && (
+              <Button
+                asChild
+                size="lg"
+                className="h-12 rounded-lg border-0 bg-[#25D366] text-base font-semibold text-white shadow-md hover:bg-[#20bd5a] sm:min-w-[200px]"
+              >
+                <a
+                  href={`https://wa.me/${WHATSAPP_E164}?text=${encodeURIComponent(t("successWhatsAppMessage"))}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex w-full items-center justify-center gap-2"
+                  aria-label={t("successWhatsAppAria")}
+                >
+                  {t("successWhatsAppCta")}
+                </a>
+              </Button>
+            )}
           </div>
         </div>
       </div>
