@@ -488,14 +488,12 @@ export async function POST(request: NextRequest) {
       iulLeadGenTags.push(iulLeadGenData.language === 'es' ? 'Spanish' : 'English');
     }
 
-    // Build tags for Final Expense page CTA leads
+    // Build tags for Final Expense page CTA leads (CRM workflows branch on fe_get_covered_funnel)
     const finalExpenseTags: string[] = [];
     if (finalExpenseData) {
       finalExpenseTags.push('Final Expense Lead');
       finalExpenseTags.push(finalExpenseData.language === 'es' ? 'Spanish' : 'English');
-      if (finalExpenseData.source === "final_expense_get_covered_ads") {
-        finalExpenseTags.push("fe_get_covered_funnel");
-      }
+      finalExpenseTags.push("fe_get_covered_funnel");
     }
 
     // Build tags for Get Covered Fast funnel leads
@@ -986,7 +984,7 @@ export async function POST(request: NextRequest) {
       }
     };
 
-    // Step 1: Activate notification workflow FIRST (if configured) - skip for specialty page leads, IUL, and Final Expense (dedicated workflows)
+    // Step 1: Activate notification workflow FIRST (if configured) - skip for specialty page leads, IUL, and Final Expense (tagged fe_get_covered_funnel instead)
     const notificationWorkflowId = process.env.AGENT_CRM_WORKFLOW_NOTIFICATION;
     const willAddNotification = !!(
       notificationWorkflowId &&
@@ -1010,7 +1008,7 @@ export async function POST(request: NextRequest) {
           : iulLeadGenData
             ? "IUL lead — use AGENT_CRM_WORKFLOW_IUL only"
             : finalExpenseData
-              ? "Final Expense lead — use AGENT_CRM_WORKFLOW_FINALE only"
+              ? "Final Expense lead — tagged fe_get_covered_funnel (no notification workflow)"
               : shortTermMedicalData || contactPageData || acaData || dentalVisionData || hospitalIndemnityData
                 ? "specialty page lead - skipped"
                 : "generic website lead",
@@ -1225,41 +1223,7 @@ export async function POST(request: NextRequest) {
       await addContactToWorkflow(hiWorkflowId!, `Hospital Indemnity (${hiLanguage})`);
     }
 
-    // Step 8: Final Expense page CTA — dedicated workflow
-    const finalExpenseWorkflowId = process.env.AGENT_CRM_WORKFLOW_FINALE;
-    const feLanguage = finalExpenseData?.language === "es" ? "es" : "en";
-    const willAddFinalExpense = !!(
-      finalExpenseData &&
-      finalExpenseData.source !== "final_expense_get_covered_ads" &&
-      !shortTermMedicalData &&
-      !contactPageData &&
-      !acaData &&
-      !dentalVisionData &&
-      !hospitalIndemnityData &&
-      !iulLeadGenData &&
-      contactId &&
-      finalExpenseWorkflowId
-    );
-
-    console.log("[create-contact] Final Expense workflow decision:", {
-      hasFinalExpenseData: !!finalExpenseData,
-      feLanguage,
-      workflowId: finalExpenseWorkflowId ?? "not configured",
-      willAddFinalExpense,
-      reason: !finalExpenseData
-        ? "not a Final Expense CTA lead"
-        : finalExpenseData.source === "final_expense_get_covered_ads"
-          ? "final-expense/get-covered funnel — workflow intentionally skipped"
-        : shortTermMedicalData || contactPageData || acaData || dentalVisionData || hospitalIndemnityData || iulLeadGenData
-          ? "other lead type — skipped"
-          : !finalExpenseWorkflowId
-            ? "AGENT_CRM_WORKFLOW_FINALE not set"
-            : "Final Expense lead — adding to workflow",
-    });
-
-    if (willAddFinalExpense) {
-      await addContactToWorkflow(finalExpenseWorkflowId!, `Final Expense (${feLanguage})`);
-    }
+    // Final Expense leads: fe_get_covered_funnel tag only (no AGENT_CRM_WORKFLOW_FINALE enrollment)
 
     // Send Meta Conversions API event (if configured and metadata provided)
     // ⚠️ IMPORTANT: Only send CAPI for NEW contacts to avoid double-counting

@@ -53,7 +53,7 @@ type BuildBodyParams = Omit<GuideLeadFormValues, "phone"> & {
 
 /**
  * Maps consumer guide category to the same CRM payload shapes as full product pages
- * so `create-contact` applies AGENT_CRM_WORKFLOW_ACA, _STM, _DENTAL, _HI, _IUL, _FINALE.
+ * so `create-contact` applies AGENT_CRM_WORKFLOW_ACA, _STM, _DENTAL, _HI, _IUL; Final Expense uses tag fe_get_covered_funnel.
  */
 export function buildGuideLeadCrmBody(params: BuildBodyParams): Record<string, unknown> {
   const {
