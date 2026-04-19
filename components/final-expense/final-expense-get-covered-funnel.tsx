@@ -87,7 +87,7 @@ export default function FinalExpenseGetCoveredFunnel() {
   const [addressLine1, setAddressLine1] = useState("");
   const [addressLine2, setAddressLine2] = useState("");
   const [city, setCity] = useState("");
-  const [stateVal, setStateVal] = useState("VA");
+  const [stateVal, setStateVal] = useState("");
   const [postalCode, setPostalCode] = useState("");
   const [addressScriptLoaded, setAddressScriptLoaded] = useState(false);
 
