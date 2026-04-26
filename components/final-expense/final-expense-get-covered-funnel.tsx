@@ -5,12 +5,14 @@ import Image from "next/image";
 import Script from "next/script";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { Loader2, Phone, Shield } from "lucide-react";
+import { Contact, Loader2, Phone, Shield } from "lucide-react";
 import PhoneInput, { parsePhoneNumber } from "react-phone-number-input";
 import "react-phone-number-input/style.css";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
+  FINAL_EXPENSE_GET_COVERED_AGENT_HEADSHOT,
+  FINAL_EXPENSE_GET_COVERED_VCARD_URL,
   GET_COVERED_FAST_HERO_IMAGE,
 } from "@/lib/get-covered-fast/constants";
 import { shortTermMedicalFormSchema, capitalizeName } from "@/lib/validation/shortTermMedicalSchema";
@@ -809,7 +811,57 @@ export default function FinalExpenseGetCoveredFunnel() {
                   <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
                     {t("done.body")}
                   </p>
-                  <p className="mt-5 text-sm font-medium text-slate-800 dark:text-slate-200">
+
+                  <div
+                    className="mx-auto mt-6 w-full max-w-md rounded-2xl border border-slate-200/90 bg-slate-50/95 p-4 text-left shadow-sm dark:border-slate-600/60 dark:bg-slate-800/60 sm:mt-7 sm:p-5"
+                    role="region"
+                    aria-label={`${t("done.callerIntro")} ${t("done.callerSubline")}`}
+                  >
+                    <p className="text-sm font-medium leading-snug text-slate-600 dark:text-slate-300">
+                      {t("done.callerIntro")}
+                    </p>
+                    <p className="mt-1.5 text-sm leading-snug text-slate-500 dark:text-slate-400">
+                      {t("done.callerSubline")}
+                    </p>
+
+                    <div className="mt-3 flex min-w-0 items-center gap-3 sm:mt-4 sm:gap-4">
+                      <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-2xl border-2 border-white bg-slate-200 shadow-md ring-2 ring-slate-200/80 dark:border-slate-700 dark:bg-slate-700 dark:ring-slate-600 sm:h-24 sm:w-24">
+                        <Image
+                          src={FINAL_EXPENSE_GET_COVERED_AGENT_HEADSHOT}
+                          alt={t("done.headshotAlt")}
+                          width={256}
+                          height={256}
+                          className="h-full w-full object-cover object-[center_20%] sm:object-center"
+                          sizes="(max-width: 640px) 80px, 96px"
+                        />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-lg font-bold leading-tight tracking-tight text-slate-900 dark:text-white sm:text-xl">
+                          {t("done.agentName")}
+                        </p>
+                        <p className="mt-1 text-sm leading-snug text-slate-600 dark:text-slate-300">
+                          {t("done.agentTitle")}
+                        </p>
+                      </div>
+                    </div>
+
+                    <a
+                      href={FINAL_EXPENSE_GET_COVERED_VCARD_URL}
+                      download="Isaac-Orraiz-Isaac-Plans.vcf"
+                      rel="noopener noreferrer"
+                      className="mt-3 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border-2 border-[hsl(var(--custom))] bg-white px-4 text-sm font-semibold text-[hsl(var(--custom))] shadow-sm transition-colors active:bg-slate-50 dark:bg-slate-900/40 dark:text-[hsl(var(--custom))] dark:active:bg-slate-800 sm:mt-4"
+                      aria-label={t("done.saveContactAria")}
+                    >
+                      <Contact
+                        className="h-5 w-5 shrink-0"
+                        strokeWidth={2.25}
+                        aria-hidden
+                      />
+                      {t("done.saveContactCta")}
+                    </a>
+                  </div>
+
+                  <p className="mt-6 text-sm font-medium text-slate-800 dark:text-slate-200 sm:mt-7">
                     {t("done.optionIntro")}
                   </p>
                   <div className="mt-4 flex w-full flex-col gap-3">

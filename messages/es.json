@@ -2293,7 +2293,14 @@
         "callCta": "Llamar ahora",
         "callAria": "Llamar a Isaac Plans Insurance al 540-426-1804",
         "whatsappCta": "Contactar por WhatsApp",
-        "whatsappAria": "Abrir WhatsApp con Isaac Plans Insurance"
+        "whatsappAria": "Abrir WhatsApp con Isaac Plans Insurance",
+        "callerIntro": "Especialista designado para su caso",
+        "callerSubline": "Este agente le llamará. Guarde su información de contacto.",
+        "agentName": "Isaac Orraiz",
+        "agentTitle": "Coordinador de beneficios senior",
+        "headshotAlt": "Isaac Orraiz, coordinador de beneficios senior",
+        "saveContactCta": "Guardar contacto",
+        "saveContactAria": "Guardar a Isaac Orraiz en los contactos del teléfono (descarga vCard)"
       }
     }
   },

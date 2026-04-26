@@ -28,3 +28,11 @@ export function getFinalExpenseGetCoveredOgImageUrl(locale: string): string {
     : FINAL_EXPENSE_GET_COVERED_OG_PUBLIC_ID_EN;
   return `${CLOUDINARY_ISAAC}/f_auto,q_auto,w_1200,h_630,c_fill,g_auto/${publicId}`;
 }
+
+/** Agent headshot on `/final-expense/get-covered` success (square, face-cropped; displayed as rounded-rect in UI). */
+export const FINAL_EXPENSE_GET_COVERED_AGENT_HEADSHOT =
+  "https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_320,h_320,c_fill,g_face/v1764176212/isaacpic_c8kca5_3_hz35qm.png";
+
+/** vCard for “Save contact” on the get-covered success screen. */
+export const FINAL_EXPENSE_GET_COVERED_VCARD_URL =
+  "https://res.cloudinary.com/isaacdev/raw/upload/v1777217085/isaac-orraiz_uaubck.vcf";
