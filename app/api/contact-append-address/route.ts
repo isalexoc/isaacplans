@@ -56,8 +56,34 @@ function phonesMatch(a: string, b: string): boolean {
   return last10(a) === last10(b) && last10(a).length === 10;
 }
 
+const DOB_ISO_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+
+function getTodayIsoLocal(): string {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, "0");
+  const d = String(now.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
+function isValidPastOrTodayIsoDate(value: string): boolean {
+  if (!DOB_ISO_REGEX.test(value)) return false;
+  const [y, m, d] = value.split("-").map(Number);
+  const date = new Date(y, m - 1, d);
+  if (
+    Number.isNaN(date.getTime()) ||
+    date.getFullYear() !== y ||
+    date.getMonth() !== m - 1 ||
+    date.getDate() !== d
+  ) {
+    return false;
+  }
+  return value <= getTodayIsoLocal();
+}
+
 /** LeadConnector rejects top-level `address2`; apt/unit uses custom field `apt_or_unit_number`. */
 const APT_OR_UNIT_FIELD_KEY = "apt_or_unit_number";
+const LEAD_SOURCE_DETAILS_FIELD_KEY = "lead_source_details";
 
 /** API list responses may use `fieldKey: "contact.apt_or_unit_number"` with `key` omitted. */
 function normalizeLeadConnectorFieldKeySegment(raw: string): string {
@@ -97,6 +123,26 @@ function isAptOrUnitFieldDefinition(def: Record<string, unknown>): boolean {
   return false;
 }
 
+function isLeadSourceDetailsFieldDefinition(def: Record<string, unknown>): boolean {
+  const key = typeof def.key === "string" ? def.key.toLowerCase() : "";
+  if (
+    key === LEAD_SOURCE_DETAILS_FIELD_KEY ||
+    key.replace(/[_\s-]/g, "") === "leadsourcedetails"
+  ) {
+    return true;
+  }
+  const fieldKeyRaw = typeof def.fieldKey === "string" ? def.fieldKey : "";
+  const fk = normalizeLeadConnectorFieldKeySegment(fieldKeyRaw);
+  if (
+    fk === LEAD_SOURCE_DETAILS_FIELD_KEY ||
+    fk.replace(/[_\s-]/g, "") === "leadsourcedetails"
+  ) {
+    return true;
+  }
+  const name = typeof def.name === "string" ? def.name.toLowerCase() : "";
+  return name.includes("lead") && name.includes("source") && name.includes("detail");
+}
+
 async function resolveAptOrUnitCustomFieldId(
   baseUrl: string,
   locationId: string,
@@ -127,6 +173,43 @@ async function resolveAptOrUnitCustomFieldId(
     }
   } catch (e) {
     console.warn("[contact-append-address] Could not list custom fields:", e);
+  }
+  return null;
+}
+
+async function resolveLeadSourceDetailsCustomField(
+  baseUrl: string,
+  locationId: string,
+  piToken: string
+): Promise<{ id: string; key?: string } | null> {
+  const envId = process.env.AGENT_CRM_CUSTOM_FIELD_LEAD_SOURCE_DETAILS_ID?.trim();
+  if (envId) {
+    return { id: envId, key: LEAD_SOURCE_DETAILS_FIELD_KEY };
+  }
+
+  try {
+    const res = await fetch(`${baseUrl}/locations/${encodeURIComponent(locationId)}/customFields`, {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+        Authorization: `Bearer ${piToken}`,
+        Version: "2021-07-28",
+      },
+    });
+    if (!res.ok) return null;
+    const data = (await res.json()) as { customFields?: unknown };
+    const list = data.customFields ?? data;
+    if (!Array.isArray(list)) return null;
+    for (const field of list) {
+      const def = unwrapCustomFieldDefinition(field);
+      if (!def || !isLeadSourceDetailsFieldDefinition(def)) continue;
+      const id = typeof def.id === "string" ? def.id : "";
+      if (!id) continue;
+      const key = typeof def.key === "string" ? def.key : undefined;
+      return { id, key };
+    }
+  } catch (e) {
+    console.warn("[contact-append-address] Could not resolve lead_source_details field:", e);
   }
   return null;
 }
@@ -166,6 +249,57 @@ function mergeCustomFieldsWithApt(
   return out;
 }
 
+function mergeCustomFieldsWithUpdates(
+  existingOnContact: unknown,
+  updates: CrmCustomFieldRow[]
+): CrmCustomFieldRow[] {
+  const out: CrmCustomFieldRow[] = [];
+  const byId = new Map<string, CrmCustomFieldRow>();
+
+  if (Array.isArray(existingOnContact)) {
+    for (const row of existingOnContact) {
+      if (!row || typeof row !== "object") continue;
+      const r = row as Record<string, unknown>;
+      const id = typeof r.id === "string" ? r.id : "";
+      if (!id) continue;
+      const raw = r.field_value ?? r.value;
+      if (raw === undefined || raw === null) continue;
+      byId.set(id, {
+        id,
+        key: typeof r.key === "string" ? r.key : undefined,
+        field_value: Array.isArray(raw) ? raw : String(raw),
+      });
+    }
+  }
+
+  for (const update of updates) {
+    byId.set(update.id, update);
+  }
+
+  for (const item of byId.values()) {
+    out.push(item);
+  }
+
+  return out;
+}
+
+function getCustomFieldStringValue(
+  existingOnContact: unknown,
+  fieldId: string
+): string {
+  if (!Array.isArray(existingOnContact)) return "";
+  for (const row of existingOnContact) {
+    if (!row || typeof row !== "object") continue;
+    const r = row as Record<string, unknown>;
+    if (r.id !== fieldId) continue;
+    const raw = r.field_value ?? r.value;
+    if (typeof raw === "string") return raw.trim();
+    if (Array.isArray(raw)) return raw.map((v) => String(v)).join(", ").trim();
+    return String(raw ?? "").trim();
+  }
+  return "";
+}
+
 /**
  * LeadConnector accepts standard address fields on the contact model.
  * Do not send `locationId` in the JSON body (PUT updates in this repo omit it);
@@ -189,6 +323,7 @@ export async function POST(request: NextRequest) {
       contactId,
       email,
       phone,
+      dateOfBirth,
       addressLine1,
       addressLine2,
       city,
@@ -200,6 +335,7 @@ export async function POST(request: NextRequest) {
     if (
       !contactId ||
       !email?.trim() ||
+      !dateOfBirth?.trim() ||
       !addressLine1?.trim() ||
       !city?.trim() ||
       !state?.trim() ||
@@ -212,6 +348,7 @@ export async function POST(request: NextRequest) {
           required: [
             "contactId",
             "email",
+            "dateOfBirth",
             "addressLine1",
             "city",
             "state",
@@ -226,6 +363,14 @@ export async function POST(request: NextRequest) {
     if (zipNorm.length < 5) {
       return NextResponse.json(
         { success: false, error: "Invalid postal code" },
+        { status: 400 }
+      );
+    }
+
+    const dobNorm = dateOfBirth.trim();
+    if (!isValidPastOrTodayIsoDate(dobNorm)) {
+      return NextResponse.json(
+        { success: false, error: "Invalid date of birth" },
         { status: 400 }
       );
     }
@@ -319,6 +464,7 @@ export async function POST(request: NextRequest) {
       : addressLine1.trim();
 
     const addressPayload: Record<string, unknown> = {
+      dateOfBirth: dobNorm,
       address1: street1,
       city: city.trim(),
       state:
@@ -331,11 +477,60 @@ export async function POST(request: NextRequest) {
     if (ctry) {
       addressPayload.country = ctry;
     }
+    const customFieldUpdates: CrmCustomFieldRow[] = [];
     if (aptTrimmed && aptFieldId) {
-      addressPayload.customFields = mergeCustomFieldsWithApt(
+      customFieldUpdates.push({
+        id: aptFieldId,
+        key: APT_OR_UNIT_FIELD_KEY,
+        field_value: aptTrimmed,
+      });
+    }
+
+    const leadSourceDetailsField = await resolveLeadSourceDetailsCustomField(
+      baseUrl,
+      locationId,
+      piToken
+    );
+    if (leadSourceDetailsField?.id) {
+      const existingLeadDetails = getCustomFieldStringValue(
         contact.customFields,
-        aptFieldId,
-        aptTrimmed
+        leadSourceDetailsField.id
+      );
+      const submittedAt =
+        new Date().toLocaleString() +
+        " " +
+        (Intl.DateTimeFormat().resolvedOptions().timeZone || "");
+      const step2Details = [
+        "Final Expense Step 2",
+        "====================",
+        "",
+        "Step 2 details:",
+        `  Date of birth: ${dobNorm}`,
+        `  Street address: ${addressLine1.trim()}`,
+        `  Apt / unit: ${aptTrimmed || "Not provided"}`,
+        `  City: ${city.trim()}`,
+        `  State: ${state.trim().length === 2 ? state.trim().toUpperCase() : state.trim()}`,
+        `  ZIP: ${postalCode.trim()}`,
+        `  Country: ${ctry || "US"}`,
+        "",
+        `Step 2 submitted: ${submittedAt}`,
+      ].join("\n");
+
+      const nextLeadDetails = existingLeadDetails
+        ? `${existingLeadDetails}\n\n${step2Details}`
+        : step2Details;
+
+      customFieldUpdates.push({
+        id: leadSourceDetailsField.id,
+        key: leadSourceDetailsField.key,
+        field_value: nextLeadDetails,
+      });
+    }
+
+    if (customFieldUpdates.length > 0) {
+      addressPayload.customFields = mergeCustomFieldsWithUpdates(
+        contact.customFields,
+        customFieldUpdates
       );
     }
 

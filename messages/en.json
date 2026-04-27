@@ -2283,12 +2283,15 @@
         "cta": "Continue"
       },
       "address": {
+        "dob": "Date of birth",
         "line1": "Street address",
         "line2": "Apt / unit (optional)",
         "city": "City",
         "state": "State",
         "zip": "ZIP code",
         "cta": "Submit",
+        "requiredDob": "Please enter your date of birth.",
+        "invalidDob": "Enter a valid date of birth (it cannot be in the future).",
         "required": "Please fill in all required address fields.",
         "invalidZip": "Enter a valid U.S. ZIP code (e.g. 12345 or 12345-6789).",
         "searchPlaceholder": "Start typing your street address...",
@@ -2307,6 +2310,7 @@
         "callerSubline": "This agent will call you. Please save his contact info.",
         "agentName": "Isaac Orraiz",
         "agentTitle": "Senior benefits coordinator",
+        "agentPhoneLine": "This agent will call you from this number 540-426-1804. Please save his contact info.",
         "headshotAlt": "Isaac Orraiz, senior benefits coordinator",
         "saveContactCta": "Save contact",
         "saveContactAria": "Save Isaac Orraiz to your phone contacts (vCard download)"

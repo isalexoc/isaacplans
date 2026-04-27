@@ -23,7 +23,32 @@ import { trackFeGetCoveredPhase } from "@/lib/analytics/final-expense-get-covere
 
 /** CRM line — same as site header / contact */
 const CRM_PHONE_TEL = "tel:+15404261804";
+const CRM_PHONE_DISPLAY = "540-426-1804";
 const WHATSAPP_CHAT_HREF = "https://wa.me/15406813507";
+const DOB_ISO_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+
+function getTodayIsoLocal(): string {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, "0");
+  const d = String(now.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
+function isValidPastOrTodayIsoDate(value: string): boolean {
+  if (!DOB_ISO_REGEX.test(value)) return false;
+  const [y, m, d] = value.split("-").map(Number);
+  const date = new Date(y, m - 1, d);
+  if (
+    Number.isNaN(date.getTime()) ||
+    date.getFullYear() !== y ||
+    date.getMonth() !== m - 1 ||
+    date.getDate() !== d
+  ) {
+    return false;
+  }
+  return value <= getTodayIsoLocal();
+}
 
 function toE164OrUndefined(phone: string | undefined): string | undefined {
   if (!phone?.trim()) return undefined;
@@ -91,6 +116,7 @@ export default function FinalExpenseGetCoveredFunnel() {
   const [city, setCity] = useState("");
   const [stateVal, setStateVal] = useState("");
   const [postalCode, setPostalCode] = useState("");
+  const [dateOfBirth, setDateOfBirth] = useState("");
   const [addressScriptLoaded, setAddressScriptLoaded] = useState(false);
 
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
@@ -102,6 +128,7 @@ export default function FinalExpenseGetCoveredFunnel() {
     "w-full px-4 py-3 rounded-lg border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:border-[hsl(var(--custom))] focus:ring-2 focus:ring-[hsl(var(--custom)/0.2)] transition-all duration-200";
 
   const progress = useMemo(() => (phase === "contact" ? 50 : phase === "address" ? 100 : 100), [phase]);
+  const maxDob = useMemo(() => getTodayIsoLocal(), []);
   const placeAutocompleteContainerRef = useRef<HTMLDivElement | null>(null);
 
   const mapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
@@ -381,6 +408,15 @@ export default function FinalExpenseGetCoveredFunnel() {
       return;
     }
 
+    if (!dateOfBirth.trim()) {
+      setSubmitError(t("address.requiredDob"));
+      return;
+    }
+    if (!isValidPastOrTodayIsoDate(dateOfBirth.trim())) {
+      setSubmitError(t("address.invalidDob"));
+      return;
+    }
+
     if (!addressLine1.trim() || !city.trim() || !stateVal.trim() || !postalCode.trim()) {
       setSubmitError(t("address.required"));
       return;
@@ -411,6 +447,7 @@ export default function FinalExpenseGetCoveredFunnel() {
           contactId,
           email: email.trim().toLowerCase(),
           phone: phoneE164,
+          dateOfBirth: dateOfBirth.trim(),
           addressLine1: addressLine1.trim(),
           addressLine2: addressLine2.trim() || undefined,
           city: city.trim(),
@@ -672,6 +709,27 @@ export default function FinalExpenseGetCoveredFunnel() {
 
               {phase === "address" && (
                 <form onSubmit={handleAddressSubmit} className="space-y-4">
+                  <div>
+                    <label
+                      htmlFor="fe-get-covered-dob"
+                      className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300"
+                    >
+                      {t("address.dob")} <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      id="fe-get-covered-dob"
+                      type="date"
+                      autoComplete="bday"
+                      inputMode="none"
+                      value={dateOfBirth}
+                      onChange={(e) => setDateOfBirth(e.target.value)}
+                      max={maxDob}
+                      className={inputBase}
+                      disabled={loadingAddress}
+                      aria-label={t("address.dob")}
+                    />
+                  </div>
+
                   {mapsApiKey ? (
                     <div>
                       <label
@@ -820,10 +878,6 @@ export default function FinalExpenseGetCoveredFunnel() {
                     <p className="text-sm font-medium leading-snug text-slate-600 dark:text-slate-300">
                       {t("done.callerIntro")}
                     </p>
-                    <p className="mt-1.5 text-sm leading-snug text-slate-500 dark:text-slate-400">
-                      {t("done.callerSubline")}
-                    </p>
-
                     <div className="mt-3 flex min-w-0 items-center gap-3 sm:mt-4 sm:gap-4">
                       <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-2xl border-2 border-white bg-slate-200 shadow-md ring-2 ring-slate-200/80 dark:border-slate-700 dark:bg-slate-700 dark:ring-slate-600 sm:h-24 sm:w-24">
                         <Image
@@ -836,14 +890,31 @@ export default function FinalExpenseGetCoveredFunnel() {
                         />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="text-lg font-bold leading-tight tracking-tight text-slate-900 dark:text-white sm:text-xl">
-                          {t("done.agentName")}
-                        </p>
-                        <p className="mt-1 text-sm leading-snug text-slate-600 dark:text-slate-300">
-                          {t("done.agentTitle")}
+                        <p className="text-sm font-semibold leading-snug text-slate-900 dark:text-white sm:text-base">
+                          {t("done.headshotAlt")}
                         </p>
                       </div>
                     </div>
+                    <p className="mt-3 text-sm leading-snug text-slate-500 dark:text-slate-400">
+                      {(() => {
+                        const subline = t("done.callerSubline");
+                        const [beforePhone, ...afterParts] = subline.split(CRM_PHONE_DISPLAY);
+
+                        if (afterParts.length === 0) {
+                          return subline;
+                        }
+
+                        return (
+                          <>
+                            {beforePhone}
+                            <strong className="font-semibold text-slate-700 dark:text-slate-200">
+                              {CRM_PHONE_DISPLAY}
+                            </strong>
+                            {afterParts.join(CRM_PHONE_DISPLAY)}
+                          </>
+                        );
+                      })()}
+                    </p>
 
                     <a
                       href={FINAL_EXPENSE_GET_COVERED_VCARD_URL}

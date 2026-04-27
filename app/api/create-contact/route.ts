@@ -494,6 +494,9 @@ export async function POST(request: NextRequest) {
       finalExpenseTags.push('Final Expense Lead');
       finalExpenseTags.push(finalExpenseData.language === 'es' ? 'Spanish' : 'English');
       finalExpenseTags.push("fe_get_covered_funnel");
+      if (finalExpenseData.language === "es") {
+        finalExpenseTags.push("fe_senior_life_spanish");
+      }
     }
 
     // Build tags for Get Covered Fast funnel leads
