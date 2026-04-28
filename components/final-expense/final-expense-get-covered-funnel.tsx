@@ -118,6 +118,7 @@ export default function FinalExpenseGetCoveredFunnel() {
   const [postalCode, setPostalCode] = useState("");
   const [dateOfBirth, setDateOfBirth] = useState("");
   const [addressScriptLoaded, setAddressScriptLoaded] = useState(false);
+  const [addressScriptFailed, setAddressScriptFailed] = useState(false);
 
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -125,13 +126,20 @@ export default function FinalExpenseGetCoveredFunnel() {
   const [loadingAddress, setLoadingAddress] = useState(false);
 
   const inputBase =
-    "w-full px-4 py-3 rounded-lg border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:border-[hsl(var(--custom))] focus:ring-2 focus:ring-[hsl(var(--custom)/0.2)] transition-all duration-200";
+    "min-h-[56px] w-full rounded-lg border-2 border-gray-200 bg-white px-4 py-3 text-[17px] leading-6 text-gray-900 placeholder:text-[15px] placeholder:text-gray-400 transition-all duration-200 focus:border-[hsl(var(--custom))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--custom)/0.2)] dark:border-gray-700 dark:bg-gray-800/50 dark:text-white dark:placeholder:text-gray-500";
+  const dateInputBase = cn(
+    inputBase,
+    "appearance-none [-webkit-appearance:none] [&::-webkit-date-and-time-value]:min-h-[1.5rem] [&::-webkit-date-and-time-value]:text-left [&::-webkit-datetime-edit]:leading-6",
+  );
+  const labelBase = "mb-1.5 block text-base font-semibold text-gray-800 dark:text-gray-200";
+  const fieldErrorBase = "mt-1.5 text-sm font-medium text-red-600 dark:text-red-400";
 
   const progress = useMemo(() => (phase === "contact" ? 50 : phase === "address" ? 100 : 100), [phase]);
   const maxDob = useMemo(() => getTodayIsoLocal(), []);
   const placeAutocompleteContainerRef = useRef<HTMLDivElement | null>(null);
 
   const mapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+  const shouldUseAddressAutocomplete = Boolean(mapsApiKey) && addressScriptLoaded && !addressScriptFailed;
 
   const calendarBookingHref = useMemo(() => {
     const phoneE164 = parsePhoneNumber(phone, "US")?.number?.trim() ?? "";
@@ -147,6 +155,52 @@ export default function FinalExpenseGetCoveredFunnel() {
   useEffect(() => {
     trackFeGetCoveredPhase({ phase, locale });
   }, [phase, locale]);
+
+  useEffect(() => {
+    if (!submitError) return;
+
+    const requiredAddressError = t("address.required");
+    const invalidZipError = t("address.invalidZip");
+    const hasRequiredAddress =
+      addressLine1.trim().length > 0 &&
+      city.trim().length > 0 &&
+      stateVal.trim().length > 0 &&
+      postalCode.trim().length > 0;
+
+    if (submitError === requiredAddressError && hasRequiredAddress) {
+      setSubmitError(null);
+      return;
+    }
+
+    if (submitError === invalidZipError && /^\d{5}(-\d{4})?$/.test(postalCode.trim())) {
+      setSubmitError(null);
+    }
+  }, [submitError, addressLine1, city, stateVal, postalCode, t]);
+
+  useEffect(() => {
+    if (!mapsApiKey) return;
+    if (typeof window === "undefined") return;
+    const gWin = window as unknown as { google?: { maps?: { importLibrary?: unknown } } };
+    if (gWin.google?.maps?.importLibrary) {
+      setAddressScriptLoaded(true);
+      setAddressScriptFailed(false);
+    }
+  }, [mapsApiKey, phase]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (phase !== "address") return;
+    if (!mapsApiKey) return;
+    if (addressScriptLoaded || addressScriptFailed) return;
+
+    const timeoutId = window.setTimeout(() => {
+      setAddressScriptFailed(true);
+    }, 10000);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [phase, mapsApiKey, addressScriptLoaded, addressScriptFailed]);
 
   /** After step 1 (or 2), bring viewport to top — mobile users often stay mid-page after focusing lower fields. */
   useLayoutEffect(() => {
@@ -172,13 +226,25 @@ export default function FinalExpenseGetCoveredFunnel() {
     };
 
     void (async () => {
-      const lib = await gWin.google?.maps?.importLibrary?.("places");
+      let lib: unknown;
+      try {
+        lib = await gWin.google?.maps?.importLibrary?.("places");
+      } catch {
+        setAddressScriptFailed(true);
+        return;
+      }
       if (cancelled || !placeAutocompleteContainerRef.current) return;
-      if (!lib || typeof lib !== "object") return;
+      if (!lib || typeof lib !== "object") {
+        setAddressScriptFailed(true);
+        return;
+      }
 
       const PlaceAutocompleteElement = (lib as { PlaceAutocompleteElement?: new (opts?: object) => HTMLElement })
         .PlaceAutocompleteElement;
-      if (!PlaceAutocompleteElement) return;
+      if (!PlaceAutocompleteElement) {
+        setAddressScriptFailed(true);
+        return;
+      }
 
       const mountRoot = placeAutocompleteContainerRef.current;
       mountRoot.replaceChildren();
@@ -230,6 +296,7 @@ export default function FinalExpenseGetCoveredFunnel() {
         setAddressLine1((el as unknown as { value?: string }).value ?? "");
       };
 
+      setAddressScriptFailed(false);
       el.addEventListener("gmp-select", onSelect as EventListener);
       el.addEventListener("input", onInput);
       if (cancelled || !placeAutocompleteContainerRef.current) return;
@@ -260,6 +327,15 @@ export default function FinalExpenseGetCoveredFunnel() {
     if (messageKey === "firstNameMaxLength") return tForm("firstNameMaxLength");
     if (messageKey === "lastNameMaxLength") return tForm("lastNameMaxLength");
     return tForm("required");
+  };
+
+  const clearFieldError = (field: string) => {
+    setFieldErrors((prev) => {
+      if (!prev[field]) return prev;
+      const next = { ...prev };
+      delete next[field];
+      return next;
+    });
   };
 
   const handleContactSubmit = async (e: React.FormEvent) => {
@@ -482,6 +558,33 @@ export default function FinalExpenseGetCoveredFunnel() {
     }
   };
 
+  const handleDateOfBirthChange = (value: string) => {
+    setDateOfBirth(value);
+
+    if (!submitError) return;
+
+    const requiredDobError = t("address.requiredDob");
+    const invalidDobError = t("address.invalidDob");
+
+    if (submitError === requiredDobError && value.trim()) {
+      setSubmitError(null);
+      return;
+    }
+
+    if (submitError === invalidDobError && isValidPastOrTodayIsoDate(value.trim())) {
+      setSubmitError(null);
+    }
+  };
+
+  const dobErrorMessage =
+    submitError === t("address.requiredDob") || submitError === t("address.invalidDob")
+      ? submitError
+      : null;
+  const addressErrorMessage =
+    submitError === t("address.required") || submitError === t("address.invalidZip")
+      ? submitError
+      : null;
+
   return (
     <div className="relative min-h-screen bg-[#f4f6f9] dark:bg-slate-950">
       {/* Prefetch during step 1 so Places is ready (or nearly) when the user reaches the address step */}
@@ -490,7 +593,17 @@ export default function FinalExpenseGetCoveredFunnel() {
           id="google-maps-places"
           src={`https://maps.googleapis.com/maps/api/js?key=${mapsApiKey}&libraries=places&loading=async`}
           strategy="afterInteractive"
-          onLoad={() => setAddressScriptLoaded(true)}
+          onLoad={() => {
+            setAddressScriptLoaded(true);
+            setAddressScriptFailed(false);
+          }}
+          onReady={() => {
+            setAddressScriptLoaded(true);
+            setAddressScriptFailed(false);
+          }}
+          onError={() => {
+            setAddressScriptFailed(true);
+          }}
         />
       )}
       <div
@@ -577,7 +690,7 @@ export default function FinalExpenseGetCoveredFunnel() {
             <div className="mt-7 rounded-2xl border border-slate-200/80 bg-white/95 p-5 shadow-[0_4px_40px_-12px_rgba(15,23,42,0.12)] backdrop-blur-sm dark:border-slate-700/80 dark:bg-slate-900/85 sm:p-7 sm:px-8">
               {phase === "contact" && (
                 <form onSubmit={handleContactSubmit} className="space-y-4">
-                  <p className="text-center text-sm text-slate-600 dark:text-slate-400">
+                  <p className="text-center text-base leading-relaxed text-slate-700 dark:text-slate-300">
                     {t("contact.intro")}
                   </p>
 
@@ -588,7 +701,7 @@ export default function FinalExpenseGetCoveredFunnel() {
                   )}
 
                   <div>
-                    <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <label className={labelBase}>
                       {tForm("firstName")} <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -596,17 +709,21 @@ export default function FinalExpenseGetCoveredFunnel() {
                       name="firstName"
                       autoComplete="given-name"
                       value={firstName}
-                      onChange={(e) => setFirstName(e.target.value)}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setFirstName(value);
+                        if (value.trim()) clearFieldError("firstName");
+                      }}
                       className={cn(inputBase, fieldErrors.firstName && "border-red-500")}
                       disabled={loadingContact}
                     />
                     {fieldErrors.firstName && (
-                      <p className="mt-1 text-xs text-red-500">{fieldErrors.firstName}</p>
+                      <p className={fieldErrorBase}>{fieldErrors.firstName}</p>
                     )}
                   </div>
 
                   <div>
-                    <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <label className={labelBase}>
                       {tForm("lastName")} <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -614,17 +731,21 @@ export default function FinalExpenseGetCoveredFunnel() {
                       name="lastName"
                       autoComplete="family-name"
                       value={lastName}
-                      onChange={(e) => setLastName(e.target.value)}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setLastName(value);
+                        if (value.trim()) clearFieldError("lastName");
+                      }}
                       className={cn(inputBase, fieldErrors.lastName && "border-red-500")}
                       disabled={loadingContact}
                     />
                     {fieldErrors.lastName && (
-                      <p className="mt-1 text-xs text-red-500">{fieldErrors.lastName}</p>
+                      <p className={fieldErrorBase}>{fieldErrors.lastName}</p>
                     )}
                   </div>
 
                   <div>
-                    <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <label className={labelBase}>
                       {tForm("email")} <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -632,17 +753,21 @@ export default function FinalExpenseGetCoveredFunnel() {
                       name="email"
                       autoComplete="email"
                       value={email}
-                      onChange={(e) => setEmail(e.target.value)}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setEmail(value);
+                        if (value.trim()) clearFieldError("email");
+                      }}
                       className={cn(inputBase, fieldErrors.email && "border-red-500")}
                       disabled={loadingContact}
                     />
                     {fieldErrors.email && (
-                      <p className="mt-1 text-xs text-red-500">{fieldErrors.email}</p>
+                      <p className={fieldErrorBase}>{fieldErrors.email}</p>
                     )}
                   </div>
 
                   <div>
-                    <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <label className={labelBase}>
                       {tForm("phone")} <span className="text-red-500">*</span>
                     </label>
                     <PhoneInput
@@ -650,7 +775,11 @@ export default function FinalExpenseGetCoveredFunnel() {
                       countries={["US"]}
                       addInternationalOption={false}
                       value={toE164OrUndefined(phone)}
-                      onChange={(v) => setPhone(v || "")}
+                      onChange={(v) => {
+                        const value = v || "";
+                        setPhone(value);
+                        if (value.trim()) clearFieldError("phone");
+                      }}
                       className={cn(
                         inputBase,
                         fieldErrors.phone && "border-red-500"
@@ -658,7 +787,7 @@ export default function FinalExpenseGetCoveredFunnel() {
                       disabled={loadingContact}
                     />
                     {fieldErrors.phone && (
-                      <p className="mt-1 text-xs text-red-500">{fieldErrors.phone}</p>
+                      <p className={fieldErrorBase}>{fieldErrors.phone}</p>
                     )}
                   </div>
 
@@ -666,7 +795,7 @@ export default function FinalExpenseGetCoveredFunnel() {
                     type="submit"
                     disabled={loadingContact}
                     size="lg"
-                    className="h-14 w-full rounded-xl bg-gradient-to-r from-[hsl(var(--custom))] to-blue-600 text-base font-semibold text-white shadow-lg"
+                    className="h-16 w-full rounded-xl bg-gradient-to-r from-[hsl(var(--custom))] to-blue-600 text-lg font-semibold text-white shadow-lg"
                   >
                     {loadingContact ? (
                       <>
@@ -687,7 +816,7 @@ export default function FinalExpenseGetCoveredFunnel() {
                         disabled={loadingContact}
                         className="mt-1 h-4 w-4 shrink-0 rounded border-2 border-gray-300 text-[hsl(var(--custom))] focus:ring-[hsl(var(--custom)/0.3)] dark:border-gray-600"
                       />
-                      <span className="text-xs text-gray-600 group-hover:text-gray-800 dark:text-gray-400 dark:group-hover:text-gray-200">
+                      <span className="text-sm leading-relaxed text-gray-700 group-hover:text-gray-900 dark:text-gray-300 dark:group-hover:text-gray-100">
                         {tForm("smsConsent")}
                       </span>
                     </label>
@@ -699,7 +828,7 @@ export default function FinalExpenseGetCoveredFunnel() {
                         disabled={loadingContact}
                         className="mt-1 h-4 w-4 shrink-0 rounded border-2 border-gray-300 text-[hsl(var(--custom))] focus:ring-[hsl(var(--custom)/0.3)] dark:border-gray-600"
                       />
-                      <span className="text-xs text-gray-600 group-hover:text-gray-800 dark:text-gray-400 dark:group-hover:text-gray-200">
+                      <span className="text-sm leading-relaxed text-gray-700 group-hover:text-gray-900 dark:text-gray-300 dark:group-hover:text-gray-100">
                         {tForm("marketingConsent")}
                       </span>
                     </label>
@@ -712,7 +841,7 @@ export default function FinalExpenseGetCoveredFunnel() {
                   <div>
                     <label
                       htmlFor="fe-get-covered-dob"
-                      className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300"
+                      className={labelBase}
                     >
                       {t("address.dob")} <span className="text-red-500">*</span>
                     </label>
@@ -722,43 +851,45 @@ export default function FinalExpenseGetCoveredFunnel() {
                       autoComplete="bday"
                       inputMode="none"
                       value={dateOfBirth}
-                      onChange={(e) => setDateOfBirth(e.target.value)}
+                      onChange={(e) => handleDateOfBirthChange(e.target.value)}
                       max={maxDob}
-                      className={inputBase}
+                      className={cn(dateInputBase, dobErrorMessage && "border-red-500")}
                       disabled={loadingAddress}
                       aria-label={t("address.dob")}
                     />
+                    {dobErrorMessage && <p className={fieldErrorBase}>{dobErrorMessage}</p>}
                   </div>
 
-                  {mapsApiKey ? (
+                  {shouldUseAddressAutocomplete ? (
                     <div>
                       <label
                         htmlFor="fe-get-covered-street-address"
-                        className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300"
+                        className={labelBase}
                       >
                         {t("address.line1")} <span className="text-red-500">*</span>
                       </label>
                       <div
-                        className="min-h-[52px] w-full overflow-visible rounded-lg border-2 border-gray-200 bg-white transition-all focus-within:border-[hsl(var(--custom))] focus-within:ring-2 focus-within:ring-[hsl(var(--custom)/0.2)] dark:border-gray-700 dark:bg-slate-800/50 dark:focus-within:ring-[hsl(var(--custom)/0.2)]"
+                        className={cn(
+                          "min-h-[52px] w-full overflow-visible rounded-lg border-2 border-gray-200 bg-white transition-all focus-within:border-[hsl(var(--custom))] focus-within:ring-2 focus-within:ring-[hsl(var(--custom)/0.2)] dark:border-gray-700 dark:bg-slate-800/50 dark:focus-within:ring-[hsl(var(--custom)/0.2)]",
+                          addressErrorMessage && "border-red-500"
+                        )}
                         aria-busy={!addressScriptLoaded}
                       >
                         <div ref={placeAutocompleteContainerRef} className="w-full" />
                       </div>
-                      {!addressScriptLoaded && (
-                        <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-                          {tForm("submitting")}
-                        </p>
+                      {addressErrorMessage && (
+                        <p className={fieldErrorBase}>{addressErrorMessage}</p>
                       )}
                     </div>
                   ) : (
                     <div className="space-y-2">
-                      <p className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-xs text-amber-800 dark:border-amber-700 dark:bg-amber-900/20 dark:text-amber-300">
+                      <p className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm leading-relaxed text-amber-800 dark:border-amber-700 dark:bg-amber-900/20 dark:text-amber-300">
                         {t("address.searchUnavailable")}
                       </p>
                       <div>
                         <label
                           htmlFor="fe-get-covered-street-address-manual"
-                          className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300"
+                          className={labelBase}
                         >
                           {t("address.line1")} <span className="text-red-500">*</span>
                         </label>
@@ -769,21 +900,24 @@ export default function FinalExpenseGetCoveredFunnel() {
                           autoComplete="street-address"
                           value={addressLine1}
                           onChange={(e) => setAddressLine1(e.target.value)}
-                          className={inputBase}
+                          className={cn(inputBase, addressErrorMessage && "border-red-500")}
                           disabled={loadingAddress}
                         />
+                        {addressErrorMessage && (
+                          <p className={fieldErrorBase}>{addressErrorMessage}</p>
+                        )}
                       </div>
                     </div>
                   )}
 
-                  {submitError && (
+                  {submitError && !dobErrorMessage && !addressErrorMessage && (
                     <div className="rounded-lg border-2 border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300">
                       {submitError}
                     </div>
                   )}
 
                   <div>
-                    <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <label className={labelBase}>
                       {t("address.line2")}
                     </label>
                     <input
@@ -797,7 +931,7 @@ export default function FinalExpenseGetCoveredFunnel() {
 
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div>
-                      <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                      <label className={labelBase}>
                         {t("address.city")} <span className="text-red-500">*</span>
                       </label>
                       <input
@@ -810,7 +944,7 @@ export default function FinalExpenseGetCoveredFunnel() {
                       />
                     </div>
                     <div>
-                      <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                      <label className={labelBase}>
                         {t("address.state")} <span className="text-red-500">*</span>
                       </label>
                       <input
@@ -826,7 +960,7 @@ export default function FinalExpenseGetCoveredFunnel() {
                   </div>
 
                   <div>
-                    <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <label className={labelBase}>
                       {t("address.zip")} <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -844,7 +978,7 @@ export default function FinalExpenseGetCoveredFunnel() {
                     type="submit"
                     disabled={loadingAddress}
                     size="lg"
-                    className="h-14 w-full rounded-xl bg-gradient-to-r from-[hsl(var(--custom))] to-blue-600 text-base font-semibold text-white shadow-lg"
+                    className="h-16 w-full rounded-xl bg-gradient-to-r from-[hsl(var(--custom))] to-blue-600 text-lg font-semibold text-white shadow-lg"
                   >
                     {loadingAddress ? (
                       <>
@@ -940,7 +1074,7 @@ export default function FinalExpenseGetCoveredFunnel() {
                       <Button
                         asChild
                         size="lg"
-                        className="h-14 w-full rounded-xl bg-gradient-to-r from-[hsl(var(--custom))] to-blue-600 text-base font-semibold text-white shadow-lg"
+                        className="h-16 w-full rounded-xl bg-gradient-to-r from-[hsl(var(--custom))] to-blue-600 text-lg font-semibold text-white shadow-lg"
                       >
                         <Link href={calendarBookingHref as "/final-expense/calendar"}>
                           {t("done.bookCta")}
@@ -951,7 +1085,7 @@ export default function FinalExpenseGetCoveredFunnel() {
                       asChild
                       size="lg"
                       variant="outline"
-                      className="h-14 w-full rounded-xl border-2 border-slate-300 bg-white text-base font-semibold text-slate-900 shadow-sm hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-900/50 dark:text-white dark:hover:bg-slate-800"
+                      className="h-16 w-full rounded-xl border-2 border-slate-300 bg-white text-lg font-semibold text-slate-900 shadow-sm hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-900/50 dark:text-white dark:hover:bg-slate-800"
                     >
                       <a
                         href={CRM_PHONE_TEL}
@@ -966,7 +1100,7 @@ export default function FinalExpenseGetCoveredFunnel() {
                       <Button
                         asChild
                         size="lg"
-                        className="h-14 w-full rounded-xl border-0 bg-[#25D366] text-base font-semibold text-white shadow-lg hover:bg-[#20bd5a]"
+                        className="h-16 w-full rounded-xl border-0 bg-[#25D366] text-lg font-semibold text-white shadow-lg hover:bg-[#20bd5a]"
                       >
                         <a
                           href={WHATSAPP_CHAT_HREF}
