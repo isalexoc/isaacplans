@@ -19,7 +19,15 @@ import { shortTermMedicalFormSchema, capitalizeName } from "@/lib/validation/sho
 import { trackLead, updateAdvancedMatching } from "@/lib/facebook-pixel";
 import { generateEventId, getFacebookCookies } from "@/lib/meta-capi";
 import { appendAgentCrmBookingPrefill } from "@/lib/agent-crm-booking-url";
-import { trackFeGetCoveredPhase } from "@/lib/analytics/final-expense-get-covered-ga";
+import {
+  trackFeGetCoveredAbandon,
+  trackFeGetCoveredFieldCompleted,
+  trackFeGetCoveredFieldStarted,
+  trackFeGetCoveredPhase,
+  trackFeGetCoveredSubmitAttempt,
+  trackFeGetCoveredSubmitSuccess,
+  type FeGetCoveredFieldId,
+} from "@/lib/analytics/final-expense-get-covered-ga";
 
 /** CRM line — same as site header / contact */
 const CRM_PHONE_TEL = "tel:+15404261804";
@@ -140,6 +148,10 @@ export default function FinalExpenseGetCoveredFunnel() {
 
   const mapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
   const shouldUseAddressAutocomplete = Boolean(mapsApiKey) && addressScriptLoaded && !addressScriptFailed;
+  const pageViewStartedAtRef = useRef<number>(Date.now());
+  const startedFieldsRef = useRef<Set<FeGetCoveredFieldId>>(new Set());
+  const completedFieldsRef = useRef<Set<FeGetCoveredFieldId>>(new Set());
+  const abandonTrackedRef = useRef(false);
 
   const calendarBookingHref = useMemo(() => {
     const phoneE164 = parsePhoneNumber(phone, "US")?.number?.trim() ?? "";
@@ -154,6 +166,35 @@ export default function FinalExpenseGetCoveredFunnel() {
   /** GA4: one event per funnel phase (contact → address → done). Does not affect Meta Pixel/CAPI. */
   useEffect(() => {
     trackFeGetCoveredPhase({ phase, locale });
+  }, [phase, locale]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const trackAbandon = () => {
+      if (abandonTrackedRef.current) return;
+      if (phase === "done") return;
+      const elapsedSeconds = Math.max(0, Math.round((Date.now() - pageViewStartedAtRef.current) / 1000));
+      trackFeGetCoveredAbandon({
+        phase,
+        locale,
+        time_on_page_seconds: elapsedSeconds,
+      });
+      abandonTrackedRef.current = true;
+    };
+
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "hidden") {
+        trackAbandon();
+      }
+    };
+
+    window.addEventListener("pagehide", trackAbandon);
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    return () => {
+      window.removeEventListener("pagehide", trackAbandon);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+    };
   }, [phase, locale]);
 
   useEffect(() => {
@@ -338,10 +379,54 @@ export default function FinalExpenseGetCoveredFunnel() {
     });
   };
 
+  const trackFieldStartedOnce = (fieldId: FeGetCoveredFieldId, phaseForEvent: "contact" | "address") => {
+    if (startedFieldsRef.current.has(fieldId)) return;
+    startedFieldsRef.current.add(fieldId);
+    trackFeGetCoveredFieldStarted({ field_id: fieldId, phase: phaseForEvent, locale });
+  };
+
+  const trackFieldCompletedOnce = (
+    fieldId: FeGetCoveredFieldId,
+    phaseForEvent: "contact" | "address",
+    isValidValue: boolean
+  ) => {
+    if (!isValidValue) return;
+    if (completedFieldsRef.current.has(fieldId)) return;
+    completedFieldsRef.current.add(fieldId);
+    trackFeGetCoveredFieldCompleted({ field_id: fieldId, phase: phaseForEvent, locale });
+  };
+
+  useEffect(() => {
+    if (phase !== "address") return;
+
+    const line1 = addressLine1.trim();
+    const cityTrim = city.trim();
+    const stateTrim = stateVal.trim();
+    const zipTrim = postalCode.trim();
+
+    if (line1.length > 0) {
+      trackFieldStartedOnce("address_line1", "address");
+      trackFieldCompletedOnce("address_line1", "address", true);
+    }
+    if (cityTrim.length > 0) {
+      trackFieldStartedOnce("city", "address");
+      trackFieldCompletedOnce("city", "address", true);
+    }
+    if (stateTrim.length > 0) {
+      trackFieldStartedOnce("state", "address");
+      trackFieldCompletedOnce("state", "address", stateTrim.length >= 2);
+    }
+    if (zipTrim.length > 0) {
+      trackFieldStartedOnce("zip", "address");
+      trackFieldCompletedOnce("zip", "address", /^\d{5}(-\d{4})?$/.test(zipTrim));
+    }
+  }, [phase, addressLine1, city, stateVal, postalCode, trackFieldStartedOnce, trackFieldCompletedOnce]);
+
   const handleContactSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitError(null);
     setFieldErrors({});
+    trackFeGetCoveredSubmitAttempt({ phase: "contact", locale });
 
     const parsed = shortTermMedicalFormSchema.safeParse({
       firstName,
@@ -424,6 +509,7 @@ export default function FinalExpenseGetCoveredFunnel() {
           isES ? "Respuesta inválida del servidor." : "Invalid server response."
         );
       }
+      trackFeGetCoveredSubmitSuccess({ phase: "contact", locale });
 
       const capiDispatched = (data as { capiDispatched?: boolean }).capiDispatched;
       if (
@@ -476,6 +562,7 @@ export default function FinalExpenseGetCoveredFunnel() {
   const handleAddressSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitError(null);
+    trackFeGetCoveredSubmitAttempt({ phase: "address", locale });
 
     if (!contactId || !email.trim()) {
       setSubmitError(
@@ -544,6 +631,7 @@ export default function FinalExpenseGetCoveredFunnel() {
         );
       }
 
+      trackFeGetCoveredSubmitSuccess({ phase: "address", locale });
       setPhase("done");
     } catch (err) {
       setSubmitError(
@@ -560,6 +648,8 @@ export default function FinalExpenseGetCoveredFunnel() {
 
   const handleDateOfBirthChange = (value: string) => {
     setDateOfBirth(value);
+    trackFieldStartedOnce("dob", "address");
+    trackFieldCompletedOnce("dob", "address", isValidPastOrTodayIsoDate(value.trim()));
 
     if (!submitError) return;
 
@@ -712,6 +802,8 @@ export default function FinalExpenseGetCoveredFunnel() {
                       onChange={(e) => {
                         const value = e.target.value;
                         setFirstName(value);
+                        trackFieldStartedOnce("first_name", "contact");
+                        trackFieldCompletedOnce("first_name", "contact", value.trim().length > 0);
                         if (value.trim()) clearFieldError("firstName");
                       }}
                       className={cn(inputBase, fieldErrors.firstName && "border-red-500")}
@@ -734,6 +826,8 @@ export default function FinalExpenseGetCoveredFunnel() {
                       onChange={(e) => {
                         const value = e.target.value;
                         setLastName(value);
+                        trackFieldStartedOnce("last_name", "contact");
+                        trackFieldCompletedOnce("last_name", "contact", value.trim().length > 0);
                         if (value.trim()) clearFieldError("lastName");
                       }}
                       className={cn(inputBase, fieldErrors.lastName && "border-red-500")}
@@ -756,6 +850,8 @@ export default function FinalExpenseGetCoveredFunnel() {
                       onChange={(e) => {
                         const value = e.target.value;
                         setEmail(value);
+                        trackFieldStartedOnce("email", "contact");
+                        trackFieldCompletedOnce("email", "contact", value.trim().length > 0);
                         if (value.trim()) clearFieldError("email");
                       }}
                       className={cn(inputBase, fieldErrors.email && "border-red-500")}
@@ -778,6 +874,8 @@ export default function FinalExpenseGetCoveredFunnel() {
                       onChange={(v) => {
                         const value = v || "";
                         setPhone(value);
+                        trackFieldStartedOnce("phone", "contact");
+                        trackFieldCompletedOnce("phone", "contact", Boolean(parsePhoneNumber(value, "US")?.number));
                         if (value.trim()) clearFieldError("phone");
                       }}
                       className={cn(
@@ -899,7 +997,12 @@ export default function FinalExpenseGetCoveredFunnel() {
                           type="text"
                           autoComplete="street-address"
                           value={addressLine1}
-                          onChange={(e) => setAddressLine1(e.target.value)}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            setAddressLine1(value);
+                            trackFieldStartedOnce("address_line1", "address");
+                            trackFieldCompletedOnce("address_line1", "address", value.trim().length > 0);
+                          }}
                           className={cn(inputBase, addressErrorMessage && "border-red-500")}
                           disabled={loadingAddress}
                         />
@@ -938,7 +1041,12 @@ export default function FinalExpenseGetCoveredFunnel() {
                         type="text"
                         autoComplete="address-level2"
                         value={city}
-                        onChange={(e) => setCity(e.target.value)}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setCity(value);
+                          trackFieldStartedOnce("city", "address");
+                          trackFieldCompletedOnce("city", "address", value.trim().length > 0);
+                        }}
                         className={inputBase}
                         disabled={loadingAddress}
                       />
@@ -950,7 +1058,12 @@ export default function FinalExpenseGetCoveredFunnel() {
                       <input
                         type="text"
                         value={stateVal}
-                        onChange={(e) => setStateVal(e.target.value.toUpperCase())}
+                        onChange={(e) => {
+                          const value = e.target.value.toUpperCase();
+                          setStateVal(value);
+                          trackFieldStartedOnce("state", "address");
+                          trackFieldCompletedOnce("state", "address", value.trim().length >= 2);
+                        }}
                         maxLength={2}
                         className={inputBase}
                         disabled={loadingAddress}
@@ -968,7 +1081,12 @@ export default function FinalExpenseGetCoveredFunnel() {
                       autoComplete="postal-code"
                       inputMode="numeric"
                       value={postalCode}
-                      onChange={(e) => setPostalCode(e.target.value)}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setPostalCode(value);
+                        trackFieldStartedOnce("zip", "address");
+                        trackFieldCompletedOnce("zip", "address", /^\d{5}(-\d{4})?$/.test(value.trim()));
+                      }}
                       className={inputBase}
                       disabled={loadingAddress}
                     />
