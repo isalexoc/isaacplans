@@ -59,6 +59,10 @@ export async function generateMetadata(): Promise<Metadata> {
     verification: {
       google:
         "google-site-verification=bHyg2vwWXgsYAG8Ue4uwYs8QPDDiu56H0BrecWVNGaQ",
+      /** Meta / Facebook domain verification (Business Settings → Brand safety → Domains) */
+      other: {
+        "facebook-domain-verification": "u856wjwv5r8s2yjoyqhaqcpv6z5j95",
+      },
     },
   };
 }
