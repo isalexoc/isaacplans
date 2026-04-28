@@ -102,6 +102,7 @@ function parseGooglePlaceAddressComponents(components: GoogleAddressComponent[] 
 }
 
 type Phase = "contact" | "address" | "done";
+type AddressFieldErrorKey = "dob" | "addressLine1" | "city" | "state" | "postalCode";
 
 export default function FinalExpenseGetCoveredFunnel() {
   const locale = useLocale();
@@ -129,6 +130,9 @@ export default function FinalExpenseGetCoveredFunnel() {
   const [addressScriptFailed, setAddressScriptFailed] = useState(false);
 
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [addressFieldErrors, setAddressFieldErrors] = useState<Partial<Record<AddressFieldErrorKey, string>>>(
+    {}
+  );
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [loadingContact, setLoadingContact] = useState(false);
   const [loadingAddress, setLoadingAddress] = useState(false);
@@ -196,27 +200,6 @@ export default function FinalExpenseGetCoveredFunnel() {
       document.removeEventListener("visibilitychange", onVisibilityChange);
     };
   }, [phase, locale]);
-
-  useEffect(() => {
-    if (!submitError) return;
-
-    const requiredAddressError = t("address.required");
-    const invalidZipError = t("address.invalidZip");
-    const hasRequiredAddress =
-      addressLine1.trim().length > 0 &&
-      city.trim().length > 0 &&
-      stateVal.trim().length > 0 &&
-      postalCode.trim().length > 0;
-
-    if (submitError === requiredAddressError && hasRequiredAddress) {
-      setSubmitError(null);
-      return;
-    }
-
-    if (submitError === invalidZipError && /^\d{5}(-\d{4})?$/.test(postalCode.trim())) {
-      setSubmitError(null);
-    }
-  }, [submitError, addressLine1, city, stateVal, postalCode, t]);
 
   useEffect(() => {
     if (!mapsApiKey) return;
@@ -320,11 +303,43 @@ export default function FinalExpenseGetCoveredFunnel() {
             const parsed = parseGooglePlaceAddressComponents(place.addressComponents);
             if (parsed?.line1) {
               setAddressLine1(parsed.line1);
+              setAddressFieldErrors((prev) => {
+                if (!prev.addressLine1) return prev;
+                const next = { ...prev };
+                delete next.addressLine1;
+                return next;
+              });
               (el as unknown as { value: string }).value = parsed.line1;
             }
-            if (parsed?.city) setCity(parsed.city);
-            if (parsed?.state) setStateVal(parsed.state);
-            if (parsed?.zip) setPostalCode(parsed.zip);
+            if (parsed?.city) {
+              setCity(parsed.city);
+              setAddressFieldErrors((prev) => {
+                if (!prev.city) return prev;
+                const next = { ...prev };
+                delete next.city;
+                return next;
+              });
+            }
+            if (parsed?.state) {
+              setStateVal(parsed.state);
+              setAddressFieldErrors((prev) => {
+                if (!prev.state) return prev;
+                const next = { ...prev };
+                delete next.state;
+                return next;
+              });
+            }
+            if (parsed?.zip) {
+              setPostalCode(parsed.zip);
+              if (/^\d{5}(-\d{4})?$/.test(parsed.zip.trim())) {
+                setAddressFieldErrors((prev) => {
+                  if (!prev.postalCode) return prev;
+                  const next = { ...prev };
+                  delete next.postalCode;
+                  return next;
+                });
+              }
+            }
           } catch (e) {
             if (process.env.NODE_ENV === "development") {
               console.error("[final-expense/get-covered] Place fetchFields failed:", e);
@@ -334,7 +349,16 @@ export default function FinalExpenseGetCoveredFunnel() {
       };
 
       const onInput = () => {
-        setAddressLine1((el as unknown as { value?: string }).value ?? "");
+        const value = (el as unknown as { value?: string }).value ?? "";
+        setAddressLine1(value);
+        if (value.trim()) {
+          setAddressFieldErrors((prev) => {
+            if (!prev.addressLine1) return prev;
+            const next = { ...prev };
+            delete next.addressLine1;
+            return next;
+          });
+        }
       };
 
       setAddressScriptFailed(false);
@@ -562,6 +586,7 @@ export default function FinalExpenseGetCoveredFunnel() {
   const handleAddressSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitError(null);
+    setAddressFieldErrors({});
     trackFeGetCoveredSubmitAttempt({ phase: "address", locale });
 
     if (!contactId || !email.trim()) {
@@ -571,23 +596,28 @@ export default function FinalExpenseGetCoveredFunnel() {
       return;
     }
 
+    const nextAddressErrors: Partial<Record<AddressFieldErrorKey, string>> = {};
     if (!dateOfBirth.trim()) {
-      setSubmitError(t("address.requiredDob"));
-      return;
+      nextAddressErrors.dob = t("address.requiredDob");
+    } else if (!isValidPastOrTodayIsoDate(dateOfBirth.trim())) {
+      nextAddressErrors.dob = t("address.invalidDob");
     }
-    if (!isValidPastOrTodayIsoDate(dateOfBirth.trim())) {
-      setSubmitError(t("address.invalidDob"));
-      return;
+    if (!addressLine1.trim()) {
+      nextAddressErrors.addressLine1 = tForm("required");
     }
-
-    if (!addressLine1.trim() || !city.trim() || !stateVal.trim() || !postalCode.trim()) {
-      setSubmitError(t("address.required"));
-      return;
+    if (!city.trim()) {
+      nextAddressErrors.city = tForm("required");
     }
-
-    const zipOk = /^\d{5}(-\d{4})?$/.test(postalCode.trim());
-    if (!zipOk) {
-      setSubmitError(t("address.invalidZip"));
+    if (!stateVal.trim()) {
+      nextAddressErrors.state = tForm("required");
+    }
+    if (!postalCode.trim()) {
+      nextAddressErrors.postalCode = tForm("required");
+    } else if (!/^\d{5}(-\d{4})?$/.test(postalCode.trim())) {
+      nextAddressErrors.postalCode = t("address.invalidZip");
+    }
+    if (Object.keys(nextAddressErrors).length > 0) {
+      setAddressFieldErrors(nextAddressErrors);
       return;
     }
 
@@ -650,30 +680,15 @@ export default function FinalExpenseGetCoveredFunnel() {
     setDateOfBirth(value);
     trackFieldStartedOnce("dob", "address");
     trackFieldCompletedOnce("dob", "address", isValidPastOrTodayIsoDate(value.trim()));
-
-    if (!submitError) return;
-
-    const requiredDobError = t("address.requiredDob");
-    const invalidDobError = t("address.invalidDob");
-
-    if (submitError === requiredDobError && value.trim()) {
-      setSubmitError(null);
-      return;
-    }
-
-    if (submitError === invalidDobError && isValidPastOrTodayIsoDate(value.trim())) {
-      setSubmitError(null);
-    }
+    setAddressFieldErrors((prev) => {
+      if (!prev.dob) return prev;
+      if (!value.trim()) return prev;
+      if (!isValidPastOrTodayIsoDate(value.trim())) return prev;
+      const next = { ...prev };
+      delete next.dob;
+      return next;
+    });
   };
-
-  const dobErrorMessage =
-    submitError === t("address.requiredDob") || submitError === t("address.invalidDob")
-      ? submitError
-      : null;
-  const addressErrorMessage =
-    submitError === t("address.required") || submitError === t("address.invalidZip")
-      ? submitError
-      : null;
 
   return (
     <div className="relative min-h-screen bg-[#f4f6f9] dark:bg-slate-950">
@@ -951,11 +966,11 @@ export default function FinalExpenseGetCoveredFunnel() {
                       value={dateOfBirth}
                       onChange={(e) => handleDateOfBirthChange(e.target.value)}
                       max={maxDob}
-                      className={cn(dateInputBase, dobErrorMessage && "border-red-500")}
+                      className={cn(dateInputBase, addressFieldErrors.dob && "border-red-500")}
                       disabled={loadingAddress}
                       aria-label={t("address.dob")}
                     />
-                    {dobErrorMessage && <p className={fieldErrorBase}>{dobErrorMessage}</p>}
+                    {addressFieldErrors.dob && <p className={fieldErrorBase}>{addressFieldErrors.dob}</p>}
                   </div>
 
                   {shouldUseAddressAutocomplete ? (
@@ -969,14 +984,14 @@ export default function FinalExpenseGetCoveredFunnel() {
                       <div
                         className={cn(
                           "min-h-[52px] w-full overflow-visible rounded-lg border-2 border-gray-200 bg-white transition-all focus-within:border-[hsl(var(--custom))] focus-within:ring-2 focus-within:ring-[hsl(var(--custom)/0.2)] dark:border-gray-700 dark:bg-slate-800/50 dark:focus-within:ring-[hsl(var(--custom)/0.2)]",
-                          addressErrorMessage && "border-red-500"
+                          addressFieldErrors.addressLine1 && "border-red-500"
                         )}
                         aria-busy={!addressScriptLoaded}
                       >
                         <div ref={placeAutocompleteContainerRef} className="w-full" />
                       </div>
-                      {addressErrorMessage && (
-                        <p className={fieldErrorBase}>{addressErrorMessage}</p>
+                      {addressFieldErrors.addressLine1 && (
+                        <p className={fieldErrorBase}>{addressFieldErrors.addressLine1}</p>
                       )}
                     </div>
                   ) : (
@@ -1002,18 +1017,26 @@ export default function FinalExpenseGetCoveredFunnel() {
                             setAddressLine1(value);
                             trackFieldStartedOnce("address_line1", "address");
                             trackFieldCompletedOnce("address_line1", "address", value.trim().length > 0);
+                            if (value.trim()) {
+                              setAddressFieldErrors((prev) => {
+                                if (!prev.addressLine1) return prev;
+                                const next = { ...prev };
+                                delete next.addressLine1;
+                                return next;
+                              });
+                            }
                           }}
-                          className={cn(inputBase, addressErrorMessage && "border-red-500")}
+                          className={cn(inputBase, addressFieldErrors.addressLine1 && "border-red-500")}
                           disabled={loadingAddress}
                         />
-                        {addressErrorMessage && (
-                          <p className={fieldErrorBase}>{addressErrorMessage}</p>
+                        {addressFieldErrors.addressLine1 && (
+                          <p className={fieldErrorBase}>{addressFieldErrors.addressLine1}</p>
                         )}
                       </div>
                     </div>
                   )}
 
-                  {submitError && !dobErrorMessage && !addressErrorMessage && (
+                  {submitError && (
                     <div className="rounded-lg border-2 border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300">
                       {submitError}
                     </div>
@@ -1046,10 +1069,21 @@ export default function FinalExpenseGetCoveredFunnel() {
                           setCity(value);
                           trackFieldStartedOnce("city", "address");
                           trackFieldCompletedOnce("city", "address", value.trim().length > 0);
+                          if (value.trim()) {
+                            setAddressFieldErrors((prev) => {
+                              if (!prev.city) return prev;
+                              const next = { ...prev };
+                              delete next.city;
+                              return next;
+                            });
+                          }
                         }}
-                        className={inputBase}
+                        className={cn(inputBase, addressFieldErrors.city && "border-red-500")}
                         disabled={loadingAddress}
                       />
+                      {addressFieldErrors.city && (
+                        <p className={fieldErrorBase}>{addressFieldErrors.city}</p>
+                      )}
                     </div>
                     <div>
                       <label className={labelBase}>
@@ -1063,12 +1097,23 @@ export default function FinalExpenseGetCoveredFunnel() {
                           setStateVal(value);
                           trackFieldStartedOnce("state", "address");
                           trackFieldCompletedOnce("state", "address", value.trim().length >= 2);
+                          if (value.trim().length >= 2) {
+                            setAddressFieldErrors((prev) => {
+                              if (!prev.state) return prev;
+                              const next = { ...prev };
+                              delete next.state;
+                              return next;
+                            });
+                          }
                         }}
                         maxLength={2}
-                        className={inputBase}
+                        className={cn(inputBase, addressFieldErrors.state && "border-red-500")}
                         disabled={loadingAddress}
                         aria-label={t("address.state")}
                       />
+                      {addressFieldErrors.state && (
+                        <p className={fieldErrorBase}>{addressFieldErrors.state}</p>
+                      )}
                     </div>
                   </div>
 
@@ -1086,10 +1131,21 @@ export default function FinalExpenseGetCoveredFunnel() {
                         setPostalCode(value);
                         trackFieldStartedOnce("zip", "address");
                         trackFieldCompletedOnce("zip", "address", /^\d{5}(-\d{4})?$/.test(value.trim()));
+                        if (/^\d{5}(-\d{4})?$/.test(value.trim())) {
+                          setAddressFieldErrors((prev) => {
+                            if (!prev.postalCode) return prev;
+                            const next = { ...prev };
+                            delete next.postalCode;
+                            return next;
+                          });
+                        }
                       }}
-                      className={inputBase}
+                      className={cn(inputBase, addressFieldErrors.postalCode && "border-red-500")}
                       disabled={loadingAddress}
                     />
+                    {addressFieldErrors.postalCode && (
+                      <p className={fieldErrorBase}>{addressFieldErrors.postalCode}</p>
+                    )}
                   </div>
 
                   <Button
