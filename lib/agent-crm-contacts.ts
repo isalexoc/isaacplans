@@ -213,7 +213,12 @@ export async function agentCrmFindContactByPhone(
 export type AgentCrmCreateContactErrorBody = {
   message?: string | string[];
   statusCode?: number;
-  meta?: { contactId?: string; matchingField?: string };
+  meta?: {
+    contactId?: string;
+    matchingField?: string;
+    /** Other LC fields occasionally present on conflict responses */
+    [key: string]: unknown;
+  };
 };
 
 export function agentCrmErrorMessageString(err: AgentCrmCreateContactErrorBody): string {

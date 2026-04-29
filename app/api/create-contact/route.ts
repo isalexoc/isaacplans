@@ -47,6 +47,175 @@ function getClientIpFromRequest(request: NextRequest): string | undefined {
   return undefined;
 }
 
+type CreateContactMetaBody = {
+  eventId?: string;
+  eventSourceUrl?: string;
+  fbp?: string;
+  fbc?: string;
+};
+
+type OptLeadBlob = Record<string, unknown> | undefined;
+
+/** Meta CAPI Lead: new contacts always; duplicate-merge path only for final-expense-get-covered-ads uses same eventId as Pixel for deduplication */
+async function trySendMetaLeadCapiLead(
+  request: NextRequest,
+  opts: {
+    meta: CreateContactMetaBody | undefined;
+    email: string;
+    phone: string;
+    firstName: string;
+    lastName: string;
+    isNewContact: boolean;
+    shortTermMedicalData?: OptLeadBlob;
+    contactPageData?: OptLeadBlob;
+    acaData?: OptLeadBlob;
+    dentalVisionData?: OptLeadBlob;
+    hospitalIndemnityData?: OptLeadBlob;
+    finalExpenseData?: OptLeadBlob;
+    getCoveredFastData?: OptLeadBlob;
+    iulLeadGenData?: OptLeadBlob;
+  }
+): Promise<boolean> {
+  const pixelId = process.env.NEXT_PUBLIC_FACEBOOK_PIXEL_ID;
+  const accessToken = process.env.META_CAPI_ACCESS_TOKEN;
+  const testEventCode = process.env.META_TEST_EVENT_CODE;
+
+  const {
+    meta,
+    email,
+    phone,
+    firstName,
+    lastName,
+    isNewContact,
+    shortTermMedicalData,
+    contactPageData,
+    acaData,
+    dentalVisionData,
+    hospitalIndemnityData,
+    finalExpenseData,
+    getCoveredFastData,
+    iulLeadGenData,
+  } = opts;
+
+  const feSource =
+    typeof finalExpenseData?.source === "string" ? finalExpenseData.source : undefined;
+  const isFinalExpenseGetCoveredAds = feSource === "final_expense_get_covered_ads";
+  const allowDuplicateMergeCapi = !isNewContact && isFinalExpenseGetCoveredAds;
+
+  const willSend = !!(
+    pixelId &&
+    accessToken &&
+    meta?.eventId &&
+    meta?.eventSourceUrl &&
+    (isNewContact || allowDuplicateMergeCapi)
+  );
+
+  console.log("[Meta CAPI] Check:", {
+    hasPixelId: !!pixelId,
+    hasAccessToken: !!accessToken,
+    hasEventId: !!meta?.eventId,
+    hasEventSourceUrl: !!meta?.eventSourceUrl,
+    isNewContact,
+    allowDuplicateMergeCapi,
+    isFinalExpenseGetCoveredAds,
+    willSend,
+  });
+
+  if (!willSend) {
+    console.log(
+      "[Meta CAPI] Skipped - missing env/meta, or not eligible (new contact vs duplicate FE get-covered CAPI)"
+    );
+    return false;
+  }
+
+  try {
+    const userAgent = request.headers.get("user-agent") || "";
+    const ip = getClientIpFromRequest(request);
+
+    const value = 100;
+    const source = isFinalExpenseGetCoveredAds
+      ? "final_expense_get_covered_ads"
+      : shortTermMedicalData
+        ? "short_term_medical"
+        : acaData
+          ? "aca"
+          : contactPageData
+            ? "contact_page"
+            : dentalVisionData
+              ? "dental_vision"
+              : hospitalIndemnityData
+                ? "hospital_indemnity"
+                : finalExpenseData
+                  ? "final_expense"
+                  : getCoveredFastData
+                    ? "get_covered_fast"
+                    : "iul_lead_gen";
+
+    const contentName = isFinalExpenseGetCoveredAds
+      ? "Final expense get covered (VA ads)"
+      : shortTermMedicalData
+        ? "Short Term Medical Lead"
+        : acaData
+          ? "ACA Lead"
+          : contactPageData
+            ? "Contact Page Lead"
+            : dentalVisionData
+              ? "Dental & Vision Lead"
+              : hospitalIndemnityData
+                ? "Hospital Indemnity Lead"
+                : finalExpenseData
+                  ? "Final Expense Lead"
+                  : getCoveredFastData
+                    ? "Get Covered Fast funnel"
+                    : "IUL Lead Generation Campaign";
+
+    const customData: Record<string, unknown> = {
+      content_name: contentName,
+      currency: "USD",
+      value: value,
+      source,
+    };
+    if (isFinalExpenseGetCoveredAds) {
+      customData.lead_event_source = "fe_get_covered_funnel";
+    }
+
+    console.log("[Meta CAPI] Sending event:", {
+      eventId: meta!.eventId,
+      eventName: "Lead",
+      email: `${email.slice(0, 3)}***`,
+      hasFbp: !!meta?.fbp,
+      hasFbc: !!meta?.fbc,
+      contentName,
+      source,
+      duplicateMergePath: allowDuplicateMergeCapi,
+    });
+
+    await sendMetaCapiEvent({
+      pixelId: pixelId!,
+      accessToken: accessToken!,
+      eventName: "Lead",
+      eventId: meta!.eventId!,
+      eventSourceUrl: meta!.eventSourceUrl!,
+      userAgent,
+      ip,
+      fbp: meta?.fbp,
+      fbc: meta?.fbc,
+      email,
+      phone,
+      firstName,
+      lastName,
+      customData,
+      testEventCode,
+    });
+
+    console.log("[Meta CAPI] Event sent successfully");
+    return true;
+  } catch (capiError) {
+    console.error("[Meta CAPI] Failed to send event (non-blocking):", capiError);
+    return false;
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const piToken = process.env.AGENT_CRM_PI;
@@ -629,6 +798,18 @@ export async function POST(request: NextRequest) {
         errBody
       );
 
+      console.warn("[create-contact] LeadConnector POST /contacts/ failed:", {
+        httpStatus: createResponse.status,
+        statusText: createResponse.statusText,
+        classifiedAsDuplicate: isDuplicateError,
+        messageString: errorMessage || undefined,
+        meta: errBody.meta,
+        bodySnippet:
+          typeof createResponseText === "string"
+            ? createResponseText.slice(0, 4000)
+            : undefined,
+      });
+
       if (isDuplicateError) {
         console.log(
           "[create-contact] Duplicate create detected, resolving existing contact..."
@@ -870,11 +1051,28 @@ export async function POST(request: NextRequest) {
                 "[create-contact] Successfully updated existing contact (duplicate path)",
                 { contactId: targetId }
               );
+              const capiDispatched = await trySendMetaLeadCapiLead(request, {
+                meta: meta as CreateContactMetaBody | undefined,
+                email,
+                phone,
+                firstName,
+                lastName,
+                isNewContact: false,
+                shortTermMedicalData,
+                contactPageData,
+                acaData,
+                dentalVisionData,
+                hospitalIndemnityData,
+                finalExpenseData,
+                getCoveredFastData,
+                iulLeadGenData,
+              });
               return NextResponse.json({
                 success: true,
                 message: "Contact updated successfully!",
                 contactId: targetId,
                 isExisting: true,
+                capiDispatched,
               });
             }
 
@@ -1228,116 +1426,23 @@ export async function POST(request: NextRequest) {
 
     // Final Expense leads: fe_get_covered_funnel tag only (no AGENT_CRM_WORKFLOW_FINALE enrollment)
 
-    // Send Meta Conversions API event (if configured and metadata provided)
-    // ⚠️ IMPORTANT: Only send CAPI for NEW contacts to avoid double-counting
-    const pixelId = process.env.NEXT_PUBLIC_FACEBOOK_PIXEL_ID;
-    const accessToken = process.env.META_CAPI_ACCESS_TOKEN;
-    const testEventCode = process.env.META_TEST_EVENT_CODE; // Optional, for testing
-
-    const isFinalExpenseGetCoveredAds =
-      finalExpenseData?.source === "final_expense_get_covered_ads";
-
-    let capiDispatched = false;
-
-    // Log CAPI check for debugging
-    console.log("[Meta CAPI] Check:", {
-      hasPixelId: !!pixelId,
-      hasAccessToken: !!accessToken,
-      hasEventId: !!meta?.eventId,
-      hasEventSourceUrl: !!meta?.eventSourceUrl,
-      isNewContact: isNewContact,
-      isFinalExpenseGetCoveredAds,
-      willSend: !!(pixelId && accessToken && meta?.eventId && meta?.eventSourceUrl && isNewContact),
+    // Meta CAPI Lead — newly created row; FE get-covered duplicate-merge path sends CAPI in duplicate branch helper
+    const capiDispatched = await trySendMetaLeadCapiLead(request, {
+      meta: meta as CreateContactMetaBody | undefined,
+      email,
+      phone,
+      firstName,
+      lastName,
+      isNewContact,
+      shortTermMedicalData,
+      contactPageData,
+      acaData,
+      dentalVisionData,
+      hospitalIndemnityData,
+      finalExpenseData,
+      getCoveredFastData,
+      iulLeadGenData,
     });
-
-    if (pixelId && accessToken && meta?.eventId && meta?.eventSourceUrl && isNewContact) {
-      try {
-        const userAgent = request.headers.get("user-agent") || "";
-        const ip = getClientIpFromRequest(request);
-
-        const value = 100;
-        const source = isFinalExpenseGetCoveredAds
-          ? "final_expense_get_covered_ads"
-          : shortTermMedicalData
-            ? "short_term_medical"
-            : acaData
-              ? "aca"
-              : contactPageData
-                ? "contact_page"
-                : dentalVisionData
-                  ? "dental_vision"
-                  : hospitalIndemnityData
-                    ? "hospital_indemnity"
-                    : finalExpenseData
-                      ? "final_expense"
-                      : getCoveredFastData
-                        ? "get_covered_fast"
-                        : "iul_lead_gen";
-        const contentName = isFinalExpenseGetCoveredAds
-          ? "Final expense get covered (VA ads)"
-          : shortTermMedicalData
-            ? "Short Term Medical Lead"
-            : acaData
-              ? "ACA Lead"
-              : contactPageData
-                ? "Contact Page Lead"
-                : dentalVisionData
-                  ? "Dental & Vision Lead"
-                  : hospitalIndemnityData
-                    ? "Hospital Indemnity Lead"
-                    : finalExpenseData
-                      ? "Final Expense Lead"
-                      : getCoveredFastData
-                        ? "Get Covered Fast funnel"
-                        : "IUL Lead Generation Campaign";
-
-        const customData: Record<string, unknown> = {
-          content_name: contentName,
-          currency: "USD",
-          value: value,
-          source: source,
-        };
-        if (isFinalExpenseGetCoveredAds) {
-          customData.lead_event_source = "fe_get_covered_funnel";
-        }
-
-        console.log("[Meta CAPI] Sending event:", {
-          eventId: meta.eventId,
-          eventName: "Lead",
-          email: email.substring(0, 3) + "***", // Partial for privacy
-          hasFbp: !!meta.fbp,
-          hasFbc: !!meta.fbc,
-          contentName,
-          source,
-        });
-
-        await sendMetaCapiEvent({
-          pixelId,
-          accessToken,
-          eventName: "Lead",
-          eventId: meta.eventId, // Must match Pixel eventID
-          eventSourceUrl: meta.eventSourceUrl,
-          userAgent,
-          ip,
-          fbp: meta.fbp,
-          fbc: meta.fbc,
-          email,
-          phone,
-          firstName,
-          lastName,
-          customData,
-          testEventCode, // Only used during testing
-        });
-
-        capiDispatched = true;
-        console.log("[Meta CAPI] Event sent successfully (production)");
-      } catch (capiError) {
-        // Log error but don't fail the request - CAPI is a backup
-        console.error("[Meta CAPI] Failed to send event (non-blocking):", capiError);
-      }
-    } else {
-      console.log("[Meta CAPI] Skipped - missing requirements or existing contact");
-    }
 
     // Success!
     return NextResponse.json({

@@ -156,6 +156,8 @@ export default function FinalExpenseGetCoveredFunnel() {
   const startedFieldsRef = useRef<Set<FeGetCoveredFieldId>>(new Set());
   const completedFieldsRef = useRef<Set<FeGetCoveredFieldId>>(new Set());
   const abandonTrackedRef = useRef(false);
+  /** Prevents double POST before React re-disables submit (pairs with Meta event_id deduplication server-side). */
+  const contactSubmitInFlightRef = useRef(false);
 
   const calendarBookingHref = useMemo(() => {
     const phoneE164 = parsePhoneNumber(phone, "US")?.number?.trim() ?? "";
@@ -475,6 +477,9 @@ export default function FinalExpenseGetCoveredFunnel() {
       return;
     }
 
+    if (contactSubmitInFlightRef.current) return;
+    contactSubmitInFlightRef.current = true;
+
     setLoadingContact(true);
     try {
       const eventId = generateEventId();
@@ -536,13 +541,9 @@ export default function FinalExpenseGetCoveredFunnel() {
       trackFeGetCoveredSubmitSuccess({ phase: "contact", locale });
 
       const capiDispatched = (data as { capiDispatched?: boolean }).capiDispatched;
-      if (
-        process.env.NODE_ENV === "development" &&
-        data.isExisting !== true &&
-        capiDispatched === false
-      ) {
+      if (process.env.NODE_ENV === "development" && capiDispatched !== true) {
         console.warn(
-          "[final-expense/get-covered] New lead saved but Meta CAPI Lead was not sent. Set META_CAPI_ACCESS_TOKEN and NEXT_PUBLIC_FACEBOOK_PIXEL_ID; ensure meta.eventId and eventSourceUrl are sent."
+          "[final-expense/get-covered] Meta CAPI Lead was not dispatched. Set META_CAPI_ACCESS_TOKEN and NEXT_PUBLIC_FACEBOOK_PIXEL_ID; ensure meta.eventId and eventSourceUrl are sent (also sent on duplicate-merge for FE get-covered)."
         );
       }
 
@@ -556,18 +557,15 @@ export default function FinalExpenseGetCoveredFunnel() {
       };
       void updateAdvancedMatching(userData);
 
-      const isNew = data.isExisting !== true;
-      if (isNew) {
-        trackLead(
-          {
-            contentName: "Final expense — get covered",
-            value: 100,
-            currency: "USD",
-            source: "final_expense_get_covered_ads",
-          },
-          eventId
-        );
-      }
+      trackLead(
+        {
+          contentName: "Final expense — get covered",
+          value: 100,
+          currency: "USD",
+          source: "final_expense_get_covered_ads",
+        },
+        eventId
+      );
 
       setPhase("address");
     } catch (err) {
@@ -579,6 +577,7 @@ export default function FinalExpenseGetCoveredFunnel() {
             : "Unexpected error."
       );
     } finally {
+      contactSubmitInFlightRef.current = false;
       setLoadingContact(false);
     }
   };
