@@ -691,8 +691,8 @@ export default function FinalExpenseGetCoveredFunnel() {
 
   return (
     <div className="relative min-h-screen bg-[#f4f6f9] dark:bg-slate-950">
-      {/* Prefetch during step 1 so Places is ready (or nearly) when the user reaches the address step */}
-      {mapsApiKey && (phase === "contact" || phase === "address") && (
+      {/* Load Places only on the address step — avoids Maps JS on initial contact step (mobile LCP/TBT). */}
+      {mapsApiKey && phase === "address" && (
         <Script
           id="google-maps-places"
           src={`https://maps.googleapis.com/maps/api/js?key=${mapsApiKey}&libraries=places&loading=async`}

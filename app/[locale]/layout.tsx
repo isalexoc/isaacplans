@@ -1,4 +1,5 @@
 import { NextIntlClientProvider, hasLocale } from "next-intl";
+import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import type { Metadata } from "next";
@@ -82,6 +83,9 @@ export default async function LocaleLayout({
     notFound();
   }
 
+  const isAdsLanding =
+    (await headers()).get("x-is-ads-landing") === "1";
+
   // Get Facebook Pixel ID from environment variable
   const facebookPixelId = process.env.NEXT_PUBLIC_FACEBOOK_PIXEL_ID;
 
@@ -132,9 +136,9 @@ export default async function LocaleLayout({
           <Footer />
           {/* Facebook Pixel */}
           {facebookPixelId && <MetaPixelWrapper pixelId={facebookPixelId} />}
-          {/* Agent CRM (LeadConnector) chat — client-managed so locale toggles replace one widget */}
-          <AgentCrmChat />
-          {agentCrmTrackingId ? (
+          {/* LeadConnector chat — omit on paid landing routes (middleware x-is-ads-landing) for perf + funnel focus */}
+          {!isAdsLanding ? <AgentCrmChat /> : null}
+          {!isAdsLanding && agentCrmTrackingId ? (
             <AgentCrmExternalTracking
               trackingId={agentCrmTrackingId}
               src={agentCrmTrackingSrc}

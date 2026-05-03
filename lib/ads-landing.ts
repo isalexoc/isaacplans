@@ -15,3 +15,10 @@ export function isAdsLandingPath(pathname: string | null | undefined): boolean {
   if (!pathname) return false;
   return (ADS_LANDING_PATHNAMES as readonly string[]).includes(pathname);
 }
+
+/** Same as {@link isAdsLandingPath}, but strips an `/{locale}` prefix (e.g. `window.location.pathname`). */
+export function isAdsLandingPathResolved(pathname: string | null | undefined): boolean {
+  if (!pathname) return false;
+  const normalized = pathname.replace(/^\/(en|es)(?=\/)/i, "");
+  return isAdsLandingPath(normalized || pathname);
+}
