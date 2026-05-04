@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { ianaTimezoneFromUsPostalCode } from "@/lib/iana-timezone-from-us-postal";
+
 /**
  * Append / update mailing address on an existing CRM contact (after initial lead capture).
  * Verifies `email` and/or `phone` match the contact before updating.
@@ -463,17 +465,24 @@ export async function POST(request: NextRequest) {
       ? `${addressLine1.trim()}, ${aptTrimmed}`
       : addressLine1.trim();
 
+    const stateNormalized =
+      state.trim().length === 2 ? state.trim().toUpperCase() : state.trim();
+
+    const ctry = (country || "US").trim().toUpperCase();
+
+    const estimatedIanaTz =
+      ctry === "US"
+        ? ianaTimezoneFromUsPostalCode(postalCode.trim(), stateNormalized)
+        : null;
+
     const addressPayload: Record<string, unknown> = {
       dateOfBirth: dobNorm,
       address1: street1,
       city: city.trim(),
-      state:
-        state.trim().length === 2
-          ? state.trim().toUpperCase()
-          : state.trim(),
+      state: stateNormalized,
       postalCode: postalCode.trim(),
+      ...(estimatedIanaTz ? { timezone: estimatedIanaTz } : {}),
     };
-    const ctry = (country || "US").trim().toUpperCase();
     if (ctry) {
       addressPayload.country = ctry;
     }
@@ -512,6 +521,9 @@ export async function POST(request: NextRequest) {
         `  State: ${state.trim().length === 2 ? state.trim().toUpperCase() : state.trim()}`,
         `  ZIP: ${postalCode.trim()}`,
         `  Country: ${ctry || "US"}`,
+        ...(estimatedIanaTz
+          ? [`  Contact timezone (IANA): ${estimatedIanaTz}`]
+          : []),
         "",
         `Step 2 submitted: ${submittedAt}`,
       ].join("\n");

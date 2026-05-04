@@ -28,6 +28,12 @@ import {
   trackFeGetCoveredSubmitSuccess,
   type FeGetCoveredFieldId,
 } from "@/lib/analytics/final-expense-get-covered-ga";
+import { US_STATE_OPTIONS } from "@/lib/get-covered-fast/us-states";
+import {
+  inspectGmpSelectEvent,
+  logFePlaces,
+  readPlacePredictionFromGmpSelectEvent,
+} from "@/lib/fe-get-covered-places";
 
 /** CRM line — same as site header / contact */
 const CRM_PHONE_TEL = "tel:+15404261804";
@@ -41,6 +47,28 @@ function getTodayIsoLocal(): string {
   const m = String(now.getMonth() + 1).padStart(2, "0");
   const d = String(now.getDate()).padStart(2, "0");
   return `${y}-${m}-${d}`;
+}
+
+/** Build ISO `YYYY-MM-DD` from split DOB selects (numeric month/day, 4-digit year). */
+function buildDobIsoFromParts(month: string, day: string, year: string): string {
+  if (!month?.trim() || !day?.trim() || !year?.trim()) return "";
+  const m = month.padStart(2, "0");
+  const d = day.padStart(2, "0");
+  const yNum = Number(year);
+  const mNum = Number(month);
+  const dNum = Number(day);
+  if (!Number.isFinite(yNum) || !Number.isFinite(mNum) || !Number.isFinite(dNum))
+    return "";
+  const check = new Date(yNum, mNum - 1, dNum);
+  if (
+    Number.isNaN(check.getTime()) ||
+    check.getFullYear() !== yNum ||
+    check.getMonth() !== mNum - 1 ||
+    check.getDate() !== dNum
+  ) {
+    return "";
+  }
+  return `${year}-${m}-${d}`;
 }
 
 function isValidPastOrTodayIsoDate(value: string): boolean {
@@ -101,6 +129,30 @@ function parseGooglePlaceAddressComponents(components: GoogleAddressComponent[] 
   };
 }
 
+/**
+ * After Places fills the form, small viewports often keep focus/suggestions above the fold.
+ * Smooth-scroll to the DOB block on viewports that match our `lg` breakpoint’s “mobile” side (max-width: 1023px).
+ */
+function scrollDobBlockIntoViewMobileIfNeeded(container: HTMLElement | null) {
+  if (typeof window === "undefined" || !container?.isConnected) return;
+  if (!window.matchMedia("(max-width: 1023px)").matches) return;
+
+  const run = () => {
+    if (!container.isConnected) return;
+    const rect = container.getBoundingClientRect();
+    const vh = window.visualViewport?.height ?? window.innerHeight;
+    if (rect.top >= 40 && rect.bottom <= vh + 32) return;
+
+    container.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      window.setTimeout(run, 120);
+    });
+  });
+}
+
 type Phase = "contact" | "address" | "done";
 type AddressFieldErrorKey = "dob" | "addressLine1" | "city" | "state" | "postalCode";
 
@@ -125,7 +177,10 @@ export default function FinalExpenseGetCoveredFunnel() {
   const [city, setCity] = useState("");
   const [stateVal, setStateVal] = useState("");
   const [postalCode, setPostalCode] = useState("");
-  const [dateOfBirth, setDateOfBirth] = useState("");
+  /** Split DOB is easier than `<input type="date">` for many adults on phones. */
+  const [dobMonth, setDobMonth] = useState("");
+  const [dobDay, setDobDay] = useState("");
+  const [dobYear, setDobYear] = useState("");
   const [addressScriptLoaded, setAddressScriptLoaded] = useState(false);
   const [addressScriptFailed, setAddressScriptFailed] = useState(false);
 
@@ -139,19 +194,31 @@ export default function FinalExpenseGetCoveredFunnel() {
 
   const inputBase =
     "min-h-[56px] w-full rounded-lg border-2 border-gray-200 bg-white px-4 py-3 text-[17px] leading-6 text-gray-900 placeholder:text-[15px] placeholder:text-gray-400 transition-all duration-200 focus:border-[hsl(var(--custom))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--custom)/0.2)] dark:border-gray-700 dark:bg-gray-800/50 dark:text-white dark:placeholder:text-gray-500";
-  const dateInputBase = cn(
-    inputBase,
-    "appearance-none [-webkit-appearance:none] [&::-webkit-date-and-time-value]:min-h-[1.5rem] [&::-webkit-date-and-time-value]:text-left [&::-webkit-datetime-edit]:leading-6",
-  );
+  const selectBase = cn(inputBase, "cursor-pointer");
   const labelBase = "mb-1.5 block text-base font-semibold text-gray-800 dark:text-gray-200";
   const fieldErrorBase = "mt-1.5 text-sm font-medium text-red-600 dark:text-red-400";
 
   const progress = useMemo(() => (phase === "contact" ? 50 : phase === "address" ? 100 : 100), [phase]);
-  const maxDob = useMemo(() => getTodayIsoLocal(), []);
   const placeAutocompleteContainerRef = useRef<HTMLDivElement | null>(null);
+  const dobSectionScrollTargetRef = useRef<HTMLDivElement | null>(null);
 
   const mapsApiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-  const shouldUseAddressAutocomplete = Boolean(mapsApiKey) && addressScriptLoaded && !addressScriptFailed;
+  /** After script + importLibrary succeeds, swap line 1 to PlaceAutocompleteElement; until then plain text input (no scary “unavailable” banner). */
+  const showPlacesLine1Ui = Boolean(mapsApiKey) && addressScriptLoaded && !addressScriptFailed;
+
+  const dateOfBirth = useMemo(
+    () => buildDobIsoFromParts(dobMonth, dobDay, dobYear),
+    [dobMonth, dobDay, dobYear],
+  );
+
+  const dobBirthYearRange = useMemo(() => {
+    const yNow = new Date().getFullYear();
+    const max = yNow - 18;
+    const min = yNow - 115;
+    const years: number[] = [];
+    for (let y = max; y >= min; y -= 1) years.push(y);
+    return years;
+  }, []);
   const pageViewStartedAtRef = useRef<number>(Date.now());
   const startedFieldsRef = useRef<Set<FeGetCoveredFieldId>>(new Set());
   const completedFieldsRef = useRef<Set<FeGetCoveredFieldId>>(new Set());
@@ -203,29 +270,66 @@ export default function FinalExpenseGetCoveredFunnel() {
     };
   }, [phase, locale]);
 
+  /** `google.maps.importLibrary` is the real readiness signal — not `<Script onLoad>` (that can fire before Maps attaches `importLibrary`). */
   useEffect(() => {
     if (!mapsApiKey) return;
     if (typeof window === "undefined") return;
     const gWin = window as unknown as { google?: { maps?: { importLibrary?: unknown } } };
-    if (gWin.google?.maps?.importLibrary) {
+    if (phase === "address" && gWin.google?.maps?.importLibrary) {
       setAddressScriptLoaded(true);
       setAddressScriptFailed(false);
+      logFePlaces("detect:importLibrary-already-available", {});
     }
   }, [mapsApiKey, phase]);
 
+  /** When leaving the address step, reset so a future visit does not reuse stale “loaded” from a half-ready Maps state. */
+  useEffect(() => {
+    if (phase !== "address") {
+      setAddressScriptLoaded(false);
+    }
+  }, [phase]);
+
+  /** Poll until `importLibrary` exists (script tag loaded ≠ bootstrap complete). */
   useEffect(() => {
     if (typeof window === "undefined") return;
-    if (phase !== "address") return;
-    if (!mapsApiKey) return;
+    if (phase !== "address" || !mapsApiKey || addressScriptFailed) return;
+    if (addressScriptLoaded) return;
+
+    let attempts = 0;
+    const id = window.setInterval(() => {
+      attempts += 1;
+      const gWin = window as unknown as {
+        google?: { maps?: { importLibrary?: unknown } };
+      };
+      if (gWin.google?.maps?.importLibrary) {
+        logFePlaces("poll:importLibrary-ready", {
+          attempts,
+          elapsedMsApprox: attempts * 100,
+        });
+        setAddressScriptLoaded(true);
+        setAddressScriptFailed(false);
+        window.clearInterval(id);
+        return;
+      }
+      if (attempts >= 200) window.clearInterval(id);
+    }, 100);
+
+    return () => window.clearInterval(id);
+  }, [phase, mapsApiKey, addressScriptLoaded, addressScriptFailed]);
+
+  /** Slow CDN — log only (do not force “manual fallback failed” UX; manual field is always usable). */
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (phase !== "address" || !mapsApiKey) return;
     if (addressScriptLoaded || addressScriptFailed) return;
 
     const timeoutId = window.setTimeout(() => {
-      setAddressScriptFailed(true);
-    }, 10000);
+      logFePlaces("slow-load:no-importLibrary-yet-after-25s", {
+        tip: 'Check API key referrer restrictions & Maps / Places SKU; set NEXT_PUBLIC_LOG_FE_GET_COVERED_PLACES=true',
+      });
+    }, 25000);
 
-    return () => {
-      window.clearTimeout(timeoutId);
-    };
+    return () => window.clearTimeout(timeoutId);
   }, [phase, mapsApiKey, addressScriptLoaded, addressScriptFailed]);
 
   /** After step 1 (or 2), bring viewport to top — mobile users often stay mid-page after focusing lower fields. */
@@ -255,12 +359,19 @@ export default function FinalExpenseGetCoveredFunnel() {
       let lib: unknown;
       try {
         lib = await gWin.google?.maps?.importLibrary?.("places");
-      } catch {
+      } catch (err) {
+        logFePlaces("error", {
+          message: String(err instanceof Error ? err.message : err),
+          hint: "importLibrary('places') rejected — billing, API enablement, or key restrictions?",
+        });
         setAddressScriptFailed(true);
         return;
       }
       if (cancelled || !placeAutocompleteContainerRef.current) return;
       if (!lib || typeof lib !== "object") {
+        logFePlaces("error", {
+          message: "importLibrary('places') returned empty",
+        });
         setAddressScriptFailed(true);
         return;
       }
@@ -268,6 +379,10 @@ export default function FinalExpenseGetCoveredFunnel() {
       const PlaceAutocompleteElement = (lib as { PlaceAutocompleteElement?: new (opts?: object) => HTMLElement })
         .PlaceAutocompleteElement;
       if (!PlaceAutocompleteElement) {
+        logFePlaces("error", {
+          message: "PlaceAutocompleteElement missing from places library",
+          libKeys: Object.keys(lib as object),
+        });
         setAddressScriptFailed(true);
         return;
       }
@@ -291,8 +406,9 @@ export default function FinalExpenseGetCoveredFunnel() {
       el.style.backgroundColor = "transparent";
 
       const onSelect = (event: Event) => {
+        inspectGmpSelectEvent(event);
         void (async () => {
-          const pred = (event as unknown as { placePrediction?: { toPlace: () => unknown } }).placePrediction;
+          const pred = readPlacePredictionFromGmpSelectEvent(event);
           if (!pred) return;
 
           try {
@@ -342,7 +458,15 @@ export default function FinalExpenseGetCoveredFunnel() {
                 });
               }
             }
+
+            if (parsed?.line1) {
+              scrollDobBlockIntoViewMobileIfNeeded(dobSectionScrollTargetRef.current);
+            }
           } catch (e) {
+            logFePlaces("error", {
+              message: String(e instanceof Error ? e.message : e),
+              step: "place.fetchFields-or-parse",
+            });
             if (process.env.NODE_ENV === "development") {
               console.error("[final-expense/get-covered] Place fetchFields failed:", e);
             }
@@ -369,6 +493,15 @@ export default function FinalExpenseGetCoveredFunnel() {
       if (cancelled || !placeAutocompleteContainerRef.current) return;
 
       mountRoot.appendChild(el);
+      logFePlaces("place-autocomplete:mounted", {});
+      try {
+        const line = addressLine1.trim();
+        if (line && "value" in el) {
+          (el as unknown as { value: string }).value = line;
+        }
+      } catch {
+        /* non-fatal */
+      }
 
       detach = () => {
         el.removeEventListener("gmp-select", onSelect as EventListener);
@@ -447,6 +580,21 @@ export default function FinalExpenseGetCoveredFunnel() {
       trackFieldCompletedOnce("zip", "address", /^\d{5}(-\d{4})?$/.test(zipTrim));
     }
   }, [phase, addressLine1, city, stateVal, postalCode, trackFieldStartedOnce, trackFieldCompletedOnce]);
+
+  useEffect(() => {
+    if (phase !== "address") return;
+    if (!dobMonth && !dobDay && !dobYear) return;
+    trackFieldStartedOnce("dob", "address");
+    trackFieldCompletedOnce("dob", "address", Boolean(dateOfBirth) && isValidPastOrTodayIsoDate(dateOfBirth));
+  }, [
+    phase,
+    dobMonth,
+    dobDay,
+    dobYear,
+    dateOfBirth,
+    trackFieldStartedOnce,
+    trackFieldCompletedOnce,
+  ]);
 
   const handleContactSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -596,9 +744,12 @@ export default function FinalExpenseGetCoveredFunnel() {
     }
 
     const nextAddressErrors: Partial<Record<AddressFieldErrorKey, string>> = {};
-    if (!dateOfBirth.trim()) {
+    const dobPartsComplete = Boolean(dobMonth && dobDay && dobYear);
+    if (!dobPartsComplete) {
       nextAddressErrors.dob = t("address.requiredDob");
-    } else if (!isValidPastOrTodayIsoDate(dateOfBirth.trim())) {
+    } else if (!dateOfBirth.trim()) {
+      nextAddressErrors.dob = t("address.invalidDob");
+    } else if (!isValidPastOrTodayIsoDate(dateOfBirth)) {
       nextAddressErrors.dob = t("address.invalidDob");
     }
     if (!addressLine1.trim()) {
@@ -639,7 +790,7 @@ export default function FinalExpenseGetCoveredFunnel() {
           contactId,
           email: email.trim().toLowerCase(),
           phone: phoneE164,
-          dateOfBirth: dateOfBirth.trim(),
+          dateOfBirth,
           addressLine1: addressLine1.trim(),
           addressLine2: addressLine2.trim() || undefined,
           city: city.trim(),
@@ -675,20 +826,6 @@ export default function FinalExpenseGetCoveredFunnel() {
     }
   };
 
-  const handleDateOfBirthChange = (value: string) => {
-    setDateOfBirth(value);
-    trackFieldStartedOnce("dob", "address");
-    trackFieldCompletedOnce("dob", "address", isValidPastOrTodayIsoDate(value.trim()));
-    setAddressFieldErrors((prev) => {
-      if (!prev.dob) return prev;
-      if (!value.trim()) return prev;
-      if (!isValidPastOrTodayIsoDate(value.trim())) return prev;
-      const next = { ...prev };
-      delete next.dob;
-      return next;
-    });
-  };
-
   return (
     <div className="relative min-h-screen bg-[#f4f6f9] dark:bg-slate-950">
       {/* Load Places only on the address step — avoids Maps JS on initial contact step (mobile LCP/TBT). */}
@@ -698,14 +835,22 @@ export default function FinalExpenseGetCoveredFunnel() {
           src={`https://maps.googleapis.com/maps/api/js?key=${mapsApiKey}&libraries=places&loading=async`}
           strategy="afterInteractive"
           onLoad={() => {
-            setAddressScriptLoaded(true);
+            logFePlaces("script:onLoad", {
+              note: "Maps JS file loaded; Places mounts only after importLibrary is callable (poll).",
+            });
             setAddressScriptFailed(false);
           }}
           onReady={() => {
-            setAddressScriptLoaded(true);
+            logFePlaces("script:onReady", {
+              note: "Do not set addressScriptLoaded here — importLibrary may not exist yet.",
+            });
             setAddressScriptFailed(false);
           }}
           onError={() => {
+            logFePlaces("error", {
+              message: "google-maps-places Script failed",
+              hint: "Network CSP, blocked key, or Maps JS load error — check DevTools Console/Network.",
+            });
             setAddressScriptFailed(true);
           }}
         />
@@ -952,88 +1097,53 @@ export default function FinalExpenseGetCoveredFunnel() {
                 <form onSubmit={handleAddressSubmit} className="space-y-4">
                   <div>
                     <label
-                      htmlFor="fe-get-covered-dob"
+                      htmlFor="fe-get-covered-street-address-main"
                       className={labelBase}
                     >
-                      {t("address.dob")} <span className="text-red-500">*</span>
+                      {t("address.line1")} <span className="text-red-500">*</span>
                     </label>
-                    <input
-                      id="fe-get-covered-dob"
-                      type="date"
-                      autoComplete="bday"
-                      inputMode="none"
-                      value={dateOfBirth}
-                      onChange={(e) => handleDateOfBirthChange(e.target.value)}
-                      max={maxDob}
-                      className={cn(dateInputBase, addressFieldErrors.dob && "border-red-500")}
-                      disabled={loadingAddress}
-                      aria-label={t("address.dob")}
-                    />
-                    {addressFieldErrors.dob && <p className={fieldErrorBase}>{addressFieldErrors.dob}</p>}
-                  </div>
-
-                  {shouldUseAddressAutocomplete ? (
-                    <div>
-                      <label
-                        htmlFor="fe-get-covered-street-address"
-                        className={labelBase}
-                      >
-                        {t("address.line1")} <span className="text-red-500">*</span>
-                      </label>
+                    {showPlacesLine1Ui ? (
                       <div
                         className={cn(
-                          "min-h-[52px] w-full overflow-visible rounded-lg border-2 border-gray-200 bg-white transition-all focus-within:border-[hsl(var(--custom))] focus-within:ring-2 focus-within:ring-[hsl(var(--custom)/0.2)] dark:border-gray-700 dark:bg-slate-800/50 dark:focus-within:ring-[hsl(var(--custom)/0.2)]",
-                          addressFieldErrors.addressLine1 && "border-red-500"
+                          "min-h-[56px] w-full overflow-visible rounded-lg border-2 border-gray-200 bg-white px-1 transition-all focus-within:border-[hsl(var(--custom))] focus-within:ring-2 focus-within:ring-[hsl(var(--custom)/0.2)] dark:border-gray-700 dark:bg-slate-800/50 dark:focus-within:ring-[hsl(var(--custom)/0.2)]",
+                          addressFieldErrors.addressLine1 && "border-red-500",
                         )}
-                        aria-busy={!addressScriptLoaded}
                       >
-                        <div ref={placeAutocompleteContainerRef} className="w-full" />
+                        <div ref={placeAutocompleteContainerRef} className="w-full [&_input]:box-border [&_input]:min-h-[52px] [&_input]:w-full [&_input]:rounded-md [&_input]:border-none [&_input]:bg-transparent [&_input]:px-3 [&_input]:py-2 [&_input]:text-[17px]" />
                       </div>
-                      {addressFieldErrors.addressLine1 && (
-                        <p className={fieldErrorBase}>{addressFieldErrors.addressLine1}</p>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      <p className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm leading-relaxed text-amber-800 dark:border-amber-700 dark:bg-amber-900/20 dark:text-amber-300">
-                        {t("address.searchUnavailable")}
-                      </p>
-                      <div>
-                        <label
-                          htmlFor="fe-get-covered-street-address-manual"
-                          className={labelBase}
-                        >
-                          {t("address.line1")} <span className="text-red-500">*</span>
-                        </label>
-                        <input
-                          id="fe-get-covered-street-address-manual"
-                          name="streetAddress"
-                          type="text"
-                          autoComplete="street-address"
-                          value={addressLine1}
-                          onChange={(e) => {
-                            const value = e.target.value;
-                            setAddressLine1(value);
-                            trackFieldStartedOnce("address_line1", "address");
-                            trackFieldCompletedOnce("address_line1", "address", value.trim().length > 0);
-                            if (value.trim()) {
-                              setAddressFieldErrors((prev) => {
-                                if (!prev.addressLine1) return prev;
-                                const next = { ...prev };
-                                delete next.addressLine1;
-                                return next;
-                              });
-                            }
-                          }}
-                          className={cn(inputBase, addressFieldErrors.addressLine1 && "border-red-500")}
-                          disabled={loadingAddress}
-                        />
-                        {addressFieldErrors.addressLine1 && (
-                          <p className={fieldErrorBase}>{addressFieldErrors.addressLine1}</p>
-                        )}
-                      </div>
-                    </div>
-                  )}
+                    ) : (
+                      <input
+                        id="fe-get-covered-street-address-main"
+                        name="streetAddress"
+                        type="text"
+                        autoComplete="street-address"
+                        value={addressLine1}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setAddressLine1(value);
+                          trackFieldStartedOnce("address_line1", "address");
+                          trackFieldCompletedOnce("address_line1", "address", value.trim().length > 0);
+                          if (value.trim()) {
+                            setAddressFieldErrors((prev) => {
+                              if (!prev.addressLine1) return prev;
+                              const next = { ...prev };
+                              delete next.addressLine1;
+                              return next;
+                            });
+                          }
+                        }}
+                        className={cn(inputBase, addressFieldErrors.addressLine1 && "border-red-500")}
+                        disabled={loadingAddress}
+                        aria-label={t("address.line1")}
+                      />
+                    )}
+                    {!showPlacesLine1Ui && mapsApiKey && !addressScriptFailed && (
+                      <p className="mt-2 text-[14px] text-slate-500 dark:text-slate-400">{t("address.line1LoadingPlaces")}</p>
+                    )}
+                    {addressFieldErrors.addressLine1 && (
+                      <p className={fieldErrorBase}>{addressFieldErrors.addressLine1}</p>
+                    )}
+                  </div>
 
                   {submitError && (
                     <div className="rounded-lg border-2 border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300">
@@ -1042,10 +1152,11 @@ export default function FinalExpenseGetCoveredFunnel() {
                   )}
 
                   <div>
-                    <label className={labelBase}>
+                    <label htmlFor="fe-get-covered-address2" className={labelBase}>
                       {t("address.line2")}
                     </label>
                     <input
+                      id="fe-get-covered-address2"
                       type="text"
                       value={addressLine2}
                       onChange={(e) => setAddressLine2(e.target.value)}
@@ -1056,10 +1167,11 @@ export default function FinalExpenseGetCoveredFunnel() {
 
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div>
-                      <label className={labelBase}>
+                      <label htmlFor="fe-get-covered-city" className={labelBase}>
                         {t("address.city")} <span className="text-red-500">*</span>
                       </label>
                       <input
+                        id="fe-get-covered-city"
                         type="text"
                         autoComplete="address-level2"
                         value={city}
@@ -1085,18 +1197,21 @@ export default function FinalExpenseGetCoveredFunnel() {
                       )}
                     </div>
                     <div>
-                      <label className={labelBase}>
+                      <label className={labelBase} htmlFor="fe-get-covered-state">
                         {t("address.state")} <span className="text-red-500">*</span>
                       </label>
-                      <input
-                        type="text"
+                      <select
+                        id="fe-get-covered-state"
+                        title={t("address.state")}
                         value={stateVal}
+                        disabled={loadingAddress}
+                        aria-label={t("address.state")}
                         onChange={(e) => {
-                          const value = e.target.value.toUpperCase();
+                          const value = e.target.value.slice(0, 2).toUpperCase();
                           setStateVal(value);
                           trackFieldStartedOnce("state", "address");
-                          trackFieldCompletedOnce("state", "address", value.trim().length >= 2);
-                          if (value.trim().length >= 2) {
+                          trackFieldCompletedOnce("state", "address", value.trim().length === 2);
+                          if (value.length === 2) {
                             setAddressFieldErrors((prev) => {
                               if (!prev.state) return prev;
                               const next = { ...prev };
@@ -1105,11 +1220,15 @@ export default function FinalExpenseGetCoveredFunnel() {
                             });
                           }
                         }}
-                        maxLength={2}
-                        className={cn(inputBase, addressFieldErrors.state && "border-red-500")}
-                        disabled={loadingAddress}
-                        aria-label={t("address.state")}
-                      />
+                        className={cn(selectBase, addressFieldErrors.state && "border-red-500")}
+                      >
+                        <option value="">{t("address.chooseState")}</option>
+                        {US_STATE_OPTIONS.map((row) => (
+                          <option key={row.code} value={row.code}>
+                            {row.code} — {row.name}
+                          </option>
+                        ))}
+                      </select>
                       {addressFieldErrors.state && (
                         <p className={fieldErrorBase}>{addressFieldErrors.state}</p>
                       )}
@@ -1117,10 +1236,11 @@ export default function FinalExpenseGetCoveredFunnel() {
                   </div>
 
                   <div>
-                    <label className={labelBase}>
+                    <label className={labelBase} htmlFor="fe-get-covered-zip">
                       {t("address.zip")} <span className="text-red-500">*</span>
                     </label>
                     <input
+                      id="fe-get-covered-zip"
                       type="text"
                       autoComplete="postal-code"
                       inputMode="numeric"
@@ -1139,12 +1259,106 @@ export default function FinalExpenseGetCoveredFunnel() {
                           });
                         }
                       }}
+                      placeholder="12345"
                       className={cn(inputBase, addressFieldErrors.postalCode && "border-red-500")}
                       disabled={loadingAddress}
                     />
                     {addressFieldErrors.postalCode && (
                       <p className={fieldErrorBase}>{addressFieldErrors.postalCode}</p>
                     )}
+                  </div>
+
+                  <div ref={dobSectionScrollTargetRef} className="scroll-mt-6">
+                    <p className={labelBase}>
+                      {t("address.dob")} <span className="text-red-500">*</span>
+                    </p>
+                    <div className="grid grid-cols-3 gap-2 sm:gap-3">
+                      <div>
+                        <label htmlFor="fe-get-covered-dob-m" className="sr-only">
+                          {t("address.month")}
+                        </label>
+                        <select
+                          id="fe-get-covered-dob-m"
+                          value={dobMonth}
+                          disabled={loadingAddress}
+                          onChange={(e) => {
+                            setDobMonth(e.target.value);
+                            setAddressFieldErrors((prev) => {
+                              if (!prev.dob) return prev;
+                              const next = { ...prev };
+                              delete next.dob;
+                              return next;
+                            });
+                          }}
+                          className={cn(selectBase, addressFieldErrors.dob && "border-red-500")}
+                          aria-label={t("address.month")}
+                        >
+                          <option value="">{t("address.month")}</option>
+                          {Array.from({ length: 12 }, (_, i) => String(i + 1)).map((m) => (
+                            <option key={m} value={m}>
+                              {m.padStart(2, "0")}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label htmlFor="fe-get-covered-dob-d" className="sr-only">
+                          {t("address.day")}
+                        </label>
+                        <select
+                          id="fe-get-covered-dob-d"
+                          value={dobDay}
+                          disabled={loadingAddress}
+                          onChange={(e) => {
+                            setDobDay(e.target.value);
+                            setAddressFieldErrors((prev) => {
+                              if (!prev.dob) return prev;
+                              const next = { ...prev };
+                              delete next.dob;
+                              return next;
+                            });
+                          }}
+                          className={cn(selectBase, addressFieldErrors.dob && "border-red-500")}
+                          aria-label={t("address.day")}
+                        >
+                          <option value="">{t("address.day")}</option>
+                          {Array.from({ length: 31 }, (_, i) => String(i + 1)).map((d) => (
+                            <option key={d} value={d}>
+                              {d.padStart(2, "0")}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label htmlFor="fe-get-covered-dob-y" className="sr-only">
+                          {t("address.year")}
+                        </label>
+                        <select
+                          id="fe-get-covered-dob-y"
+                          value={dobYear}
+                          disabled={loadingAddress}
+                          onChange={(e) => {
+                            setDobYear(e.target.value);
+                            setAddressFieldErrors((prev) => {
+                              if (!prev.dob) return prev;
+                              const next = { ...prev };
+                              delete next.dob;
+                              return next;
+                            });
+                          }}
+                          className={cn(selectBase, addressFieldErrors.dob && "border-red-500")}
+                          aria-label={t("address.year")}
+                        >
+                          <option value="">{t("address.year")}</option>
+                          {dobBirthYearRange.map((y) => (
+                            <option key={y} value={String(y)}>
+                              {y}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                    {addressFieldErrors.dob && <p className={fieldErrorBase}>{addressFieldErrors.dob}</p>}
                   </div>
 
                   <Button
