@@ -23,6 +23,7 @@ import BlogCategoryCTA from "@/components/blog-category-cta";
 import { BlogSocialLinks } from "@/components/blog-social-links";
 import { BlogNewsletter } from "@/components/blog-newsletter";
 import BlogPostTracker from "@/components/blog-post-tracker";
+import { cloudinaryFetchedFeaturedHeroUrl } from "@/lib/blog-featured-image";
 
 const POST_QUERY = `*[_type == "post" && slug.current == $slug && locale == $locale][0]{
   _id,
@@ -319,13 +320,14 @@ export default async function BlogPostPage({
     notFound();
   }
 
-  const imageUrl = post.image
-    ? urlFor(post.image).width(1200).height(630).fit('crop').crop('top').url()
+  /** Sanity source URL (high ceiling), then Cloudinary fetch → 16:9 + auto gradient gutters */
+  const featuredImageSource = post.ogImage || post.image;
+  const sanityFeaturedSrc = featuredImageSource
+    ? urlFor(featuredImageSource).width(2000).fit("max").url()
     : null;
-
-  const ogImageUrlForDisplay = post.ogImage
-    ? urlFor(post.ogImage).width(1200).height(630).fit('crop').crop('top').url()
-    : imageUrl;
+  const featuredImageUrl = sanityFeaturedSrc
+    ? cloudinaryFetchedFeaturedHeroUrl(sanityFeaturedSrc) ?? sanityFeaturedSrc
+    : null;
 
   // Determine if there's a related post in another language
   const relatedPost = post.relatedPost;
@@ -642,18 +644,24 @@ export default async function BlogPostPage({
       />
       </header>
 
-      {/* Featured Image */}
-      {ogImageUrlForDisplay && (
-        <div className="mb-8 relative w-full h-[200px] sm:h-[300px] lg:h-[400px] overflow-hidden rounded-lg shadow-lg">
-          <Image
-            src={ogImageUrlForDisplay}
-            alt={post.image?.alt || post.title}
-            fill
-            className="object-cover object-top"
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 1200px"
-            priority
-          />
-        </div>
+      {/* Featured image: Cloudinary fetch crop-fills 16:9 (`c_fill,g_auto`; no padded gutters) */}
+      {featuredImageUrl && (
+        <figure className="mb-8 w-full overflow-hidden rounded-xl shadow-lg ring-1 ring-black/5 dark:ring-white/10">
+          <div className="relative aspect-video w-full">
+            <Image
+              src={featuredImageUrl}
+              alt={
+                post.ogImage?.alt ||
+                post.image?.alt ||
+                post.title
+              }
+              fill
+              className="object-cover object-center"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) min(90vw, 896px), 896px"
+              priority
+            />
+          </div>
+        </figure>
       )}
 
       {/* Content - First Half */}
