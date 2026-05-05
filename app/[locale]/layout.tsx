@@ -12,6 +12,7 @@ import { getTranslations } from "next-intl/server";
 import { getAgencyLd, siteLd, getIsaacPersonLd } from "@/lib/seo/jsonld";
 import { getLocale } from "next-intl/server";
 import Script from "next/script";
+import { ThemeProvider } from "@/components/theme-provider";
 import { ClerkProvider } from '@clerk/nextjs';
 import { esES, enUS } from '@clerk/localizations';
 import { SanityLive } from '@/sanity/lib/live';
@@ -115,7 +116,7 @@ export default async function LocaleLayout({
       suppressHydrationWarning
     >
       <body
-        className={`${inter.className} flex min-h-screen flex-col bg-white text-gray-900 overflow-x-hidden`}
+        className={`${inter.className} flex min-h-screen flex-col bg-background text-foreground antialiased overflow-x-hidden`}
         suppressHydrationWarning
       >
         {/* Strip extension-injected attrs (e.g. fdprocessedid) — must run synchronously on mutation so React hydration does not see mismatched attrs */}
@@ -126,6 +127,13 @@ export default async function LocaleLayout({
             __html: `(function(){function strip(){document.querySelectorAll("[fdprocessedid]").forEach(function(el){el.removeAttribute("fdprocessedid");});}function onMut(){strip();}strip();document.addEventListener("DOMContentLoaded",strip);if(typeof MutationObserver!=="undefined"){try{new MutationObserver(onMut).observe(document.documentElement,{subtree:true,childList:true,attributes:true,attributeFilter:["fdprocessedid"]});}catch(e){}}})();`,
           }}
         />
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+          storageKey="isaacplans-ui-theme"
+        >
         <NextIntlClientProvider locale={locale}>
           <SanityLive />
           <Header />
@@ -146,6 +154,7 @@ export default async function LocaleLayout({
             />
           ) : null}
         </NextIntlClientProvider>
+        </ThemeProvider>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{

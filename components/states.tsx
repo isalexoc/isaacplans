@@ -23,7 +23,7 @@ export default async function Coverage() {
   return (
     <section
       id="coverage"
-      className="relative py-16 lg:py-24 bg-gradient-to-b from-white via-gray-50 to-white overflow-hidden"
+      className="relative overflow-hidden bg-gradient-to-b from-background via-muted/50 to-background py-16 lg:py-24 dark:via-muted/25"
     >
       {/* Decorative background elements */}
       <div
@@ -36,19 +36,19 @@ export default async function Coverage() {
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Heading ----------------------------------------------------- */}
-        <div className="text-center mb-12 lg:mb-16 animate-fadeUp">
-          <div className="flex items-center justify-center mb-4">
-            <div className="p-3 bg-gradient-to-br from-[hsl(var(--custom)/0.15)] to-[hsl(var(--custom)/0.1)] rounded-xl shadow-md shadow-[hsl(var(--custom)/0.2)]">
+        <div className="mb-12 animate-fadeUp text-center lg:mb-16">
+          <div className="mb-4 flex items-center justify-center">
+            <div className="rounded-xl bg-gradient-to-br from-[hsl(var(--custom)/0.15)] to-[hsl(var(--custom)/0.1)] p-3 shadow-md shadow-[hsl(var(--custom)/0.2)] dark:from-[hsl(var(--custom)/0.22)] dark:to-[hsl(var(--custom)/0.08)]">
               <MapPin
-                className="w-8 h-8 lg:w-10 lg:h-10 text-[hsl(var(--custom))]"
+                className="h-8 w-8 text-[hsl(var(--custom))] lg:h-10 lg:w-10"
                 aria-hidden="true"
               />
             </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 ml-4">
+            <h2 className="ml-4 text-3xl font-bold text-gray-900 dark:text-gray-50 sm:text-4xl lg:text-5xl">
               {t("title")}
             </h2>
           </div>
-          <p className="text-lg lg:text-xl text-gray-700 max-w-3xl mx-auto leading-relaxed">
+          <p className="mx-auto max-w-3xl text-lg leading-relaxed text-gray-700 dark:text-gray-300 lg:text-xl">
             {subtitle}
           </p>
         </div>
@@ -59,39 +59,34 @@ export default async function Coverage() {
           style={{ animationDelay: "0.1s" }}
         >
           <div
-            className="bg-gradient-to-br from-[hsl(var(--custom)/0.08)] via-[hsl(var(--custom)/0.04)] to-[hsl(var(--custom)/0.12)]
-                       rounded-3xl p-6 sm:p-8 lg:p-10 mb-12
-                       border border-[hsl(var(--custom)/0.2)] shadow-xl"
+            className="mb-12 rounded-3xl border border-[hsl(var(--custom)/0.2)] bg-gradient-to-br from-[hsl(var(--custom)/0.08)] via-[hsl(var(--custom)/0.04)] to-[hsl(var(--custom)/0.12)] p-6 shadow-xl dark:border-[hsl(var(--custom)/0.28)] dark:from-[hsl(var(--custom)/0.1)] dark:via-[hsl(var(--custom)/0.05)] dark:to-[hsl(var(--custom)/0.12)] sm:p-8 lg:p-10"
           >
-            <div className="text-center mb-8 lg:mb-10">
-              <h3 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-4">
+            <div className="mb-8 text-center lg:mb-10">
+              <h3 className="mb-4 text-2xl font-bold text-gray-900 dark:text-gray-50 lg:text-3xl">
                 {t("name")}
               </h3>
-              <p className="text-lg lg:text-xl text-gray-700 leading-relaxed max-w-2xl mx-auto">
+              <p className="mx-auto max-w-2xl text-lg leading-relaxed text-gray-700 dark:text-gray-300 lg:text-xl">
                 {description}
               </p>
             </div>
 
             <div
-              className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-5"
+              className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 lg:gap-5"
               role="list"
               aria-label="Coverage features"
             >
               {featureLines.map((line: string, idx: number) => (
                 <div
                   key={`feature-${idx}`}
-                  className="flex items-start bg-white/95 backdrop-blur-sm rounded-xl p-4 lg:p-5
-                             shadow-lg hover:shadow-xl border border-gray-200/60
-                             transition-all duration-300 hover:-translate-y-1
-                             animate-fadeUp focus-within:ring-2 focus-within:ring-[hsl(var(--custom))] focus-within:ring-offset-2"
+                  className="flex animate-fadeUp items-start rounded-xl border border-gray-200/60 bg-white/95 p-4 shadow-lg backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl focus-within:ring-2 focus-within:ring-[hsl(var(--custom))] focus-within:ring-offset-2 focus-within:ring-offset-background dark:border-gray-700/70 dark:bg-gray-950/90 lg:p-5"
                   role="listitem"
                   style={{ animationDelay: `${0.15 + idx * 0.05}s` }}
                 >
                   <CheckCircle
-                    className="w-5 h-5 lg:w-6 lg:h-6 text-[hsl(var(--custom))] mr-3 mt-0.5 shrink-0"
+                    className="mr-3 mt-0.5 h-5 w-5 shrink-0 text-[hsl(var(--custom))] lg:h-6 lg:w-6"
                     aria-hidden="true"
                   />
-                  <span className="text-sm lg:text-base font-medium text-gray-700 break-words leading-relaxed">
+                  <span className="break-words text-sm font-medium leading-relaxed text-gray-700 dark:text-gray-300 lg:text-base">
                     {line}
                   </span>
                 </div>
@@ -106,20 +101,19 @@ export default async function Coverage() {
             className="text-center px-2 animate-fadeUp"
             style={{ animationDelay: "0.7s" }}
           >
-            <Card className="border-0 shadow-2xl overflow-hidden bg-white/95 backdrop-blur-sm">
+            <Card className="overflow-hidden border border-border bg-white/95 shadow-2xl backdrop-blur-sm dark:border-gray-700/70 dark:bg-gray-950/95">
               {/* Brand top bar for visual anchor */}
               <div className="h-3 w-full bg-gradient-to-r from-[hsl(var(--custom))] to-[hsl(var(--custom)/0.8)]" />
 
               <CardContent className="p-6 sm:p-10 lg:p-12">
                 <h4
                   id="cta-heading"
-                  className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight
-                   text-gray-900 mb-4"
+                  className="mb-4 text-2xl font-extrabold tracking-tight text-gray-900 dark:text-gray-50 sm:text-3xl lg:text-4xl"
                 >
                   {t("cta.heading")}
                 </h4>
 
-                <p className="text-base sm:text-lg lg:text-xl text-gray-700 mb-8 lg:mb-10 max-w-2xl mx-auto leading-relaxed">
+                <p className="mx-auto mb-8 max-w-2xl text-base leading-relaxed text-gray-700 dark:text-gray-300 sm:text-lg lg:mb-10 lg:text-xl">
                   {t("cta.text")}
                 </p>
 
@@ -135,7 +129,7 @@ export default async function Coverage() {
                                hover:bg-[hsl(var(--custom)/0.9)]
                                focus:outline-none focus-visible:ring-4
                                focus-visible:ring-[hsl(var(--custom)/0.35)]
-                               focus-visible:ring-offset-2
+                               focus-visible:ring-offset-2 focus-visible:ring-offset-background
                                transition-all duration-300 hover:-translate-y-0.5"
                   >
                     <Phone className="w-5 h-5" aria-hidden="true" />
@@ -146,17 +140,7 @@ export default async function Coverage() {
                   <a
                     href="mailto:info@isaacplans.com"
                     aria-label={`Email ${t("cta.email")}`}
-                    className="inline-flex items-center justify-center gap-3
-                               px-8 py-4 rounded-xl font-semibold text-lg
-                               bg-white text-gray-900
-                               border-2 border-[hsl(var(--custom)/0.3)]
-                               hover:bg-[hsl(var(--custom)/0.1)]
-                               hover:border-[hsl(var(--custom))]
-                               focus:outline-none focus-visible:ring-4
-                               focus-visible:ring-[hsl(var(--custom)/0.35)]
-                               focus-visible:ring-offset-2
-                               transition-all duration-300 hover:-translate-y-0.5
-                               shadow-lg hover:shadow-xl w-full sm:w-auto"
+                    className="inline-flex w-full items-center justify-center gap-3 rounded-xl border-2 border-[hsl(var(--custom)/0.3)] bg-white px-8 py-4 text-lg font-semibold text-gray-900 shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:border-[hsl(var(--custom))] hover:bg-[hsl(var(--custom)/0.1)] hover:shadow-xl focus:outline-none focus-visible:ring-4 focus-visible:ring-[hsl(var(--custom)/0.35)] focus-visible:ring-offset-2 focus-visible:ring-offset-background dark:border-[hsl(var(--custom)/0.4)] dark:bg-gray-900/90 dark:text-gray-50 dark:hover:bg-[hsl(var(--custom)/0.12)] sm:w-auto"
                   >
                     <Mail className="h-5 w-5" aria-hidden="true" />
                     <span className="truncate">{t("cta.email")}</span>
@@ -164,7 +148,7 @@ export default async function Coverage() {
                 </div>
 
                 {/* Small reassurance line to boost conversions */}
-                <p className="mt-8 text-sm text-gray-600">
+                <p className="mt-8 text-sm text-gray-600 dark:text-gray-400">
                   {t("cta.reassurance")}
                 </p>
               </CardContent>

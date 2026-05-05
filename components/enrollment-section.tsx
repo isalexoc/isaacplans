@@ -32,16 +32,16 @@ export default function EnrollmentSection({
 
   return (
     <section
-      className="relative py-16 lg:py-24 bg-gradient-to-br from-[hsl(var(--custom)/0.06)] via-white to-[hsl(var(--custom)/0.04)] 
-                 dark:bg-gray-950 px-4 sm:px-6 lg:px-8 overflow-hidden"
+      className="relative overflow-hidden bg-gradient-to-br from-[hsl(var(--custom)/0.06)] via-white to-[hsl(var(--custom)/0.04)] px-4 py-16 sm:px-6 lg:px-8 lg:py-24
+                 dark:bg-gradient-to-br dark:from-gray-950 dark:via-slate-900 dark:to-gray-950"
     >
       {/* Decorative background elements */}
       <div
-        className="absolute inset-0 opacity-25 pointer-events-none"
+        className="pointer-events-none absolute inset-0 opacity-25 dark:opacity-[0.14]"
         aria-hidden="true"
       >
-        <div className="absolute top-20 left-10 w-96 h-96 bg-[hsl(var(--custom)/0.08)] rounded-full blur-3xl" />
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-[hsl(var(--custom)/0.08)] rounded-full blur-3xl" />
+        <div className="absolute left-10 top-20 h-96 w-96 rounded-full bg-[hsl(var(--custom)/0.08)] blur-3xl dark:bg-[hsl(var(--custom)/0.12)]" />
+        <div className="absolute bottom-20 right-10 h-96 w-96 rounded-full bg-[hsl(var(--custom)/0.08)] blur-3xl dark:bg-[hsl(var(--custom)/0.1)]" />
       </div>
 
       <div
@@ -71,9 +71,8 @@ export default function EnrollmentSection({
             {steps.map((step, idx) => (
               <li
                 key={`step-${idx}`}
-                className="flex items-start gap-4 bg-white/60 backdrop-blur-sm rounded-xl p-5
-                           border border-gray-200/60 shadow-sm hover:shadow-md
-                           transition-all duration-300 hover:-translate-y-0.5"
+                className="flex items-start gap-4 rounded-xl border border-gray-200/60 bg-white/60 p-5 shadow-sm backdrop-blur-sm transition-all duration-300
+                           hover:-translate-y-0.5 hover:shadow-md dark:border-gray-700/70 dark:bg-gray-950/85 dark:hover:bg-muted/65"
                 role="listitem"
               >
                 <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-[hsl(var(--custom))] to-[hsl(var(--custom)/0.8)] 
@@ -99,9 +98,8 @@ export default function EnrollmentSection({
             {bullets.map((item, idx) => (
               <li
                 key={`bullet-${idx}`}
-                className="flex items-start gap-4 bg-white/50 backdrop-blur-sm rounded-xl p-4
-                           border border-gray-200/60 shadow-sm hover:shadow-md
-                           transition-all duration-300 hover:-translate-y-0.5"
+                className="flex items-start gap-4 rounded-xl border border-gray-200/60 bg-white/50 p-4 shadow-sm backdrop-blur-sm transition-all duration-300
+                           hover:-translate-y-0.5 hover:shadow-md dark:border-gray-700/70 dark:bg-gray-950/85 dark:hover:bg-muted/60"
                 role="listitem"
               >
                 <div className="p-1.5 bg-gradient-to-br from-[hsl(var(--custom)/0.15)] to-[hsl(var(--custom)/0.1)] rounded-lg shrink-0">
@@ -119,8 +117,8 @@ export default function EnrollmentSection({
 
           {note && (
             <div
-              className="bg-[hsl(var(--custom)/0.06)] border-l-4 border-[hsl(var(--custom))] 
-                         rounded-r-lg p-4 mb-10 shadow-sm italic"
+              className="mb-10 rounded-r-lg border-l-4 border-[hsl(var(--custom))] bg-[hsl(var(--custom)/0.06)] p-4 italic shadow-sm
+                         dark:bg-[hsl(var(--custom)/0.15)] dark:shadow-black/30"
               role="note"
             >
               <p className="text-gray-700 dark:text-gray-300 text-base lg:text-lg leading-relaxed">
@@ -147,8 +145,7 @@ export default function EnrollmentSection({
                 alt="Enrollment visual"
                 fill
                 sizes="(max-width: 1024px) 100vw, 33vw"
-                className="rounded-2xl object-cover shadow-2xl border-4 border-white/50
-                           group-hover:shadow-3xl transition-all duration-300"
+                className="rounded-2xl border-4 border-white/50 object-cover shadow-2xl transition-all duration-300 group-hover:shadow-3xl dark:border-gray-700/80"
                 priority
                 fetchPriority="high"
               />

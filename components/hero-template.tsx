@@ -44,16 +44,15 @@ const HeroWithTestimonialsGeneric: React.FC<HeroWithTestimonialsProps> = ({
 
   return (
     <section
-      className="relative bg-gradient-to-br from-white via-gray-50/30 to-white dark:bg-gray-950 
-                 min-h-screen flex items-center justify-center px-4 overflow-hidden"
+      className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-white via-gray-50/30 to-white px-4 dark:bg-gradient-to-br dark:from-gray-950 dark:via-slate-900 dark:to-gray-950"
     >
       {/* Decorative background elements */}
       <div
-        className="absolute inset-0 opacity-20 pointer-events-none"
+        className="pointer-events-none absolute inset-0 opacity-20 dark:opacity-[0.12]"
         aria-hidden="true"
       >
-        <div className="absolute top-20 left-10 w-96 h-96 bg-[hsl(var(--custom)/0.05)] rounded-full blur-3xl" />
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-[hsl(var(--custom)/0.05)] rounded-full blur-3xl" />
+        <div className="absolute left-10 top-20 h-96 w-96 rounded-full bg-[hsl(var(--custom)/0.05)] blur-3xl dark:bg-[hsl(var(--custom)/0.12)]" />
+        <div className="absolute bottom-20 right-10 h-96 w-96 rounded-full bg-[hsl(var(--custom)/0.05)] blur-3xl dark:bg-[hsl(var(--custom)/0.1)]" />
       </div>
 
       <div
@@ -66,10 +65,9 @@ const HeroWithTestimonialsGeneric: React.FC<HeroWithTestimonialsProps> = ({
         <div className="text-center lg:text-left max-w-2xl flex-1 space-y-6 animate-fadeLeft">
           {name && (
             <div
-              className="inline-flex items-center space-x-2 bg-white/90 backdrop-blur-sm text-[hsl(var(--custom))] 
-                         px-5 py-2.5 rounded-full text-sm font-semibold
-                         shadow-lg shadow-[hsl(var(--custom)/0.2)] border border-[hsl(var(--custom)/0.2)]
-                         hover:shadow-xl hover:shadow-[hsl(var(--custom)/0.3)] transition-all duration-300"
+              className="inline-flex items-center space-x-2 rounded-full border border-[hsl(var(--custom)/0.2)] bg-white/90 px-5 py-2.5 text-sm font-semibold text-[hsl(var(--custom))]
+                         shadow-lg shadow-[hsl(var(--custom)/0.2)] backdrop-blur-sm transition-all duration-300 hover:shadow-xl hover:shadow-[hsl(var(--custom)/0.3)]
+                         dark:border-[hsl(var(--custom)/0.38)] dark:bg-gray-950/90"
             >
               <span>{name}</span>
             </div>
@@ -82,8 +80,8 @@ const HeroWithTestimonialsGeneric: React.FC<HeroWithTestimonialsProps> = ({
               </span>
             )}
             {/* Mobile image */}
-            <div className="block lg:hidden relative w-full max-w-xl sm:max-w-2xl mx-auto aspect-[4/3] my-6">
-              <div className="absolute inset-0 bg-gradient-to-br from-[hsl(var(--custom)/0.2)] to-transparent rounded-2xl blur-2xl opacity-50 -z-10" />
+            <div className="relative mx-auto my-6 block aspect-[4/3] w-full max-w-xl sm:max-w-2xl lg:hidden">
+              <div className="-z-10 absolute inset-0 rounded-2xl bg-gradient-to-br from-[hsl(var(--custom)/0.2)] to-transparent opacity-50 blur-2xl dark:from-[hsl(var(--custom)/0.14)] dark:opacity-40" />
               <Image
                 src={imageUrl}
                 alt={title || "Hero Visual"}
@@ -110,17 +108,17 @@ const HeroWithTestimonialsGeneric: React.FC<HeroWithTestimonialsProps> = ({
         <div className="relative hidden lg:block w-full max-w-3xl aspect-[4/3] flex-1 animate-fadeRight">
           {/* Decorative gradient behind image */}
           <div
-            className="absolute inset-0 bg-gradient-to-br from-[hsl(var(--custom)/0.2)] via-transparent to-[hsl(var(--custom)/0.1)] rounded-3xl blur-3xl -z-10 transform scale-110"
+            className="-z-10 absolute inset-0 scale-110 rounded-3xl bg-gradient-to-br from-[hsl(var(--custom)/0.2)] via-transparent to-[hsl(var(--custom)/0.1)] blur-3xl dark:from-[hsl(var(--custom)/0.12)] dark:to-[hsl(var(--custom)/0.06)] dark:opacity-90"
             aria-hidden="true"
           />
 
-          <div className="relative w-full h-full">
-            <div className="absolute -inset-4 bg-gradient-to-br from-[hsl(var(--custom)/0.3)] to-transparent rounded-3xl blur-2xl opacity-50" />
+          <div className="relative h-full w-full">
+            <div className="absolute -inset-4 rounded-3xl bg-gradient-to-br from-[hsl(var(--custom)/0.3)] to-transparent opacity-50 blur-2xl dark:from-[hsl(var(--custom)/0.15)] dark:opacity-35" />
             <Image
               src={imageUrl}
               alt={title || "Hero Visual"}
               fill
-              className="object-contain rounded-3xl shadow-2xl border-4 border-white/50"
+              className="rounded-3xl border-4 border-white/50 object-contain shadow-2xl dark:border-gray-700/80"
               priority
               fetchPriority="high"
             />
@@ -128,17 +126,16 @@ const HeroWithTestimonialsGeneric: React.FC<HeroWithTestimonialsProps> = ({
 
           {testimonials?.[0] && (
             <div
-              className="absolute -top-12 left-8 bg-white/95 backdrop-blur-sm rounded-xl p-5 shadow-2xl 
-                         border border-gray-200/60 w-[85%] max-w-sm
-                         hover:shadow-3xl transition-all duration-300 hover:-translate-y-1
-                         focus-within:ring-2 focus-within:ring-[hsl(var(--custom))] focus-within:ring-offset-2"
+              className="absolute -top-12 left-8 w-[85%] max-w-sm rounded-xl border border-gray-200/60 bg-white/95 p-5 shadow-2xl backdrop-blur-sm
+                         transition-all duration-300 hover:-translate-y-1 hover:shadow-3xl focus-within:ring-2 focus-within:ring-[hsl(var(--custom))]
+                         focus-within:ring-offset-2 focus-within:ring-offset-background dark:border-gray-700/80 dark:bg-gray-950/95"
               role="article"
               aria-label={`Testimonial from ${testimonials[0].name}`}
             >
-              <p className="font-bold text-sm text-gray-900 mb-2">
+              <p className="mb-2 text-sm font-bold text-gray-900 dark:text-gray-50">
                 ⭐⭐⭐⭐⭐ {testimonials[0].name}
               </p>
-              <p className="text-xs text-gray-700 leading-relaxed">
+              <p className="text-xs leading-relaxed text-gray-700 dark:text-gray-300">
                 {testimonials[0].text}
               </p>
             </div>
@@ -146,15 +143,14 @@ const HeroWithTestimonialsGeneric: React.FC<HeroWithTestimonialsProps> = ({
 
           {happyClient && (
             <div
-              className="absolute bottom-8 right-8 bg-white/95 backdrop-blur-sm rounded-xl p-4 shadow-2xl 
-                         border border-gray-200/60
-                         hover:shadow-3xl transition-all duration-300 hover:-translate-y-1
-                         focus-within:ring-2 focus-within:ring-[hsl(var(--custom))] focus-within:ring-offset-2"
+              className="absolute bottom-8 right-8 rounded-xl border border-gray-200/60 bg-white/95 p-4 shadow-2xl backdrop-blur-sm
+                         transition-all duration-300 hover:-translate-y-1 hover:shadow-3xl focus-within:ring-2 focus-within:ring-[hsl(var(--custom))]
+                         focus-within:ring-offset-2 focus-within:ring-offset-background dark:border-gray-700/80 dark:bg-gray-950/95"
               role="region"
               aria-label="Client statistics"
             >
-              <p className="font-bold text-sm text-gray-900">{happyClient.title}</p>
-              <p className="text-xs text-gray-600 mt-1">{happyClient.subtitle}</p>
+              <p className="text-sm font-bold text-gray-900 dark:text-gray-50">{happyClient.title}</p>
+              <p className="mt-1 text-xs text-gray-600 dark:text-gray-400">{happyClient.subtitle}</p>
             </div>
           )}
         </div>

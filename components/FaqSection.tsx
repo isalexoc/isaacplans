@@ -46,16 +46,16 @@ export default function FaqSection({
 
   return (
     <section
-      className="relative py-16 lg:py-24 bg-gradient-to-br from-[hsl(var(--custom)/0.06)] via-white to-[hsl(var(--custom)/0.04)] 
-                 dark:bg-gray-950 px-4 sm:px-6 lg:px-8 overflow-hidden"
+      className="relative overflow-hidden bg-gradient-to-br from-[hsl(var(--custom)/0.06)] via-white to-[hsl(var(--custom)/0.04)] px-4 py-16 sm:px-6 lg:px-8 lg:py-24
+                 dark:bg-gradient-to-br dark:from-gray-950 dark:via-slate-900 dark:to-gray-950"
     >
       {/* Decorative background elements */}
       <div
-        className="absolute inset-0 opacity-25 pointer-events-none"
+        className="pointer-events-none absolute inset-0 opacity-25 dark:opacity-[0.14]"
         aria-hidden="true"
       >
-        <div className="absolute top-20 left-10 w-96 h-96 bg-[hsl(var(--custom)/0.08)] rounded-full blur-3xl" />
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-[hsl(var(--custom)/0.08)] rounded-full blur-3xl" />
+        <div className="absolute left-10 top-20 h-96 w-96 rounded-full bg-[hsl(var(--custom)/0.08)] blur-3xl dark:bg-[hsl(var(--custom)/0.12)]" />
+        <div className="absolute bottom-20 right-10 h-96 w-96 rounded-full bg-[hsl(var(--custom)/0.08)] blur-3xl dark:bg-[hsl(var(--custom)/0.1)]" />
       </div>
 
       <div
@@ -83,10 +83,9 @@ export default function FaqSection({
         <div className="w-full lg:w-1/2 max-w-xl mx-auto animate-fadeUp" style={{ animationDelay: "0.1s" }}>
           {label && (
             <div
-              className="inline-flex items-center bg-white/90 backdrop-blur-sm text-[hsl(var(--custom))] 
-                         px-5 py-2.5 rounded-full text-sm font-semibold mb-6
-                         shadow-lg shadow-[hsl(var(--custom)/0.2)] border border-[hsl(var(--custom)/0.2)]
-                         hover:shadow-xl hover:shadow-[hsl(var(--custom)/0.3)] transition-all duration-300"
+              className="mb-6 inline-flex items-center rounded-full border border-[hsl(var(--custom)/0.2)] bg-white/90 px-5 py-2.5 text-sm font-semibold text-[hsl(var(--custom))]
+                         shadow-lg shadow-[hsl(var(--custom)/0.2)] backdrop-blur-sm transition-all duration-300 hover:shadow-xl hover:shadow-[hsl(var(--custom)/0.3)]
+                         dark:border-[hsl(var(--custom)/0.38)] dark:bg-gray-950/90"
             >
               <span>{label}</span>
             </div>
@@ -112,16 +111,14 @@ export default function FaqSection({
               <AccordionItem
                 key={`faq-${i}`}
                 value={`item-${i}`}
-                className="bg-white/60 backdrop-blur-sm rounded-xl border border-gray-200/60 
-                           shadow-sm hover:shadow-md transition-all duration-300 px-5 py-2
-                           hover:bg-white/80"
+                className="rounded-xl border border-gray-200/60 bg-white/60 px-5 py-2 shadow-sm backdrop-blur-sm transition-all duration-300
+                           hover:bg-white/80 hover:shadow-md data-[state=open]:bg-white/90
+                           dark:border-gray-700/70 dark:bg-gray-950/88 dark:hover:bg-muted/80 dark:data-[state=open]:bg-muted/90"
               >
-                <AccordionTrigger className="text-left text-base lg:text-lg font-semibold text-gray-900 dark:text-white 
-                                             hover:text-[hsl(var(--custom))] transition-colors duration-200
-                                             py-4">
+                <AccordionTrigger className="py-4 text-left text-base font-semibold text-gray-900 transition-colors duration-200 hover:text-[hsl(var(--custom))] dark:text-white dark:hover:text-foreground lg:text-lg">
                   {f.question}
                 </AccordionTrigger>
-                <AccordionContent className="text-gray-700 dark:text-gray-300 leading-relaxed text-base lg:text-lg pt-2 pb-4">
+                <AccordionContent className="pb-4 pt-2 text-base leading-relaxed text-gray-700 dark:text-gray-200 lg:text-lg">
                   {f.answer}
                 </AccordionContent>
               </AccordionItem>

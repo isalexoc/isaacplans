@@ -49,6 +49,7 @@ body {
 
 @layer base {
   :root {
+    color-scheme: light;
     --background: 0 0% 100%;
     --foreground: 0 0% 3.9%;
     --card: 0 0% 100%;
@@ -86,6 +87,7 @@ body {
     --custom-foreground: 0 0% 100%; /* white text on that cyan */
   }
   .dark {
+    color-scheme: dark;
     --background: 0 0% 3.9%;
     --foreground: 0 0% 98%;
     --card: 0 0% 3.9%;
@@ -172,15 +174,9 @@ body {
     @apply text-gray-700 dark:text-gray-300 leading-relaxed;
   }
   
-  /* Navigation menu item hover override - using specific class for higher specificity */
-  [data-radix-navigation-menu-viewport] .nav-menu-item:hover {
-    background-color: rgb(249 250 251); /* gray-50 */
-  }
+  [data-radix-navigation-menu-viewport] .nav-menu-item:hover,
   [data-radix-navigation-menu-viewport] .nav-menu-item[data-highlighted] {
-    background-color: rgb(249 250 251); /* gray-50 */
-  }
-  /* Ensure viewport is white */
-  [data-radix-navigation-menu-viewport] {
-    background-color: white;
+    background-color: hsl(var(--muted));
+    color: hsl(var(--foreground));
   }
 }

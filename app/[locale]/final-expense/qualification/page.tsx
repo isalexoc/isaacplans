@@ -90,7 +90,7 @@ export default async function FinalExpenseQualificationPage() {
           <div className="w-[110px] sm:w-[120px]" />
         </div>
 
-        <div className="mb-8 bg-white rounded-lg shadow-md p-6">
+        <div className="mb-8 rounded-lg bg-white p-6 shadow-md dark:bg-gray-950 dark:ring-1 dark:ring-gray-800">
           <FinalExpenseWorkflowStepperWrapper
             steps={steps}
             currentStep={1}

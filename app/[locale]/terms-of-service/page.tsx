@@ -232,6 +232,7 @@ export default async function TermsOfServicePage() {
             bg-white text-gray-900
             border border-[hsl(var(--custom))]
             hover:bg-gray-50
+            dark:bg-gray-950 dark:text-gray-50 dark:hover:bg-gray-900
             focus:outline-none focus-visible:ring-4
             focus-visible:ring-[hsl(var(--custom)/0.35)]
             focus-visible:ring-offset-2

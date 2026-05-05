@@ -102,7 +102,7 @@ export default async function FinalExpensePresentationPage() {
         </div>
 
         {/* Stepper */}
-        <div className="mb-8 bg-white rounded-lg shadow-md p-6">
+        <div className="mb-8 rounded-lg bg-white p-6 shadow-md dark:bg-gray-950 dark:ring-1 dark:ring-gray-800">
           <FinalExpenseWorkflowStepperWrapper steps={steps} currentStep={0} />
         </div>
 

@@ -21,15 +21,15 @@ export default function PlanTiersSection({
 }: PlanTiersProps) {
   return (
     <section
-      className="relative py-16 lg:py-24 bg-white dark:bg-gray-950 px-4 sm:px-6 lg:px-8 overflow-hidden"
+      className="relative overflow-hidden bg-white px-4 py-16 sm:px-6 lg:px-8 lg:py-24 dark:bg-gray-950"
     >
       {/* Decorative background elements */}
       <div
-        className="absolute inset-0 opacity-20 pointer-events-none"
+        className="pointer-events-none absolute inset-0 opacity-20 dark:opacity-[0.1]"
         aria-hidden="true"
       >
-        <div className="absolute top-0 right-0 w-96 h-96 bg-[hsl(var(--custom)/0.05)] rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-[hsl(var(--custom)/0.05)] rounded-full blur-3xl" />
+        <div className="absolute right-0 top-0 h-96 w-96 rounded-full bg-[hsl(var(--custom)/0.05)] blur-3xl dark:bg-[hsl(var(--custom)/0.09)]" />
+        <div className="absolute bottom-0 left-0 h-96 w-96 rounded-full bg-[hsl(var(--custom)/0.05)] blur-3xl dark:bg-[hsl(var(--custom)/0.07)]" />
       </div>
 
       <div className="container mx-auto text-center w-full max-w-7xl relative z-10">
@@ -55,7 +55,7 @@ export default function PlanTiersSection({
                 "relative bg-white/95 backdrop-blur-sm dark:bg-gray-900/95 rounded-2xl shadow-lg p-6 lg:p-8 text-left",
                 "border-2",
                 "hover:shadow-2xl hover:-translate-y-1 transition-all duration-300",
-                "focus-within:ring-2 focus-within:ring-offset-2",
+                "focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-offset-background",
                 "animate-fadeUp"
               )}
               style={{

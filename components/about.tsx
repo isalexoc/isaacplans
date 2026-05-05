@@ -50,7 +50,7 @@ export default async function About() {
   return (
     <section
       id="about"
-      className="relative py-16 lg:py-24 bg-gradient-to-b from-white via-gray-50 to-white overflow-hidden"
+      className="relative overflow-hidden bg-gradient-to-b from-background via-muted/50 to-background py-16 lg:py-24 dark:via-muted/30"
     >
       {/* Decorative background elements */}
       <div
@@ -66,15 +66,15 @@ export default async function About() {
           {/* ── Text column ───────────────────────────────────────────── */}
           <div className="space-y-6 lg:space-y-8 order-1 animate-fadeLeft">
             <div>
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-6 lg:mb-8">
+              <h2 className="mb-6 text-3xl font-bold text-gray-900 dark:text-gray-50 sm:text-4xl lg:mb-8 lg:text-5xl">
                 {t("title")}
               </h2>
 
               <div className="space-y-4">
-                <p className="text-lg lg:text-xl text-gray-700 leading-relaxed">
+                <p className="text-lg leading-relaxed text-gray-700 dark:text-gray-300 lg:text-xl">
                   {subtitle1}
                 </p>
-                <p className="text-lg lg:text-xl text-gray-700 leading-relaxed">
+                <p className="text-lg leading-relaxed text-gray-700 dark:text-gray-300 lg:text-xl">
                   {subtitle2}
                 </p>
               </div>
@@ -82,7 +82,7 @@ export default async function About() {
 
             {/* Certifications */}
             <div>
-              <h3 className="text-xl lg:text-2xl font-semibold text-gray-900 mb-4 lg:mb-5">
+              <h3 className="mb-4 text-xl font-semibold text-gray-900 dark:text-gray-50 lg:mb-5 lg:text-2xl">
                 {t("certifications")}
               </h3>
 
@@ -95,11 +95,11 @@ export default async function About() {
                   <Badge
                     key={cert}
                     variant="secondary"
-                    className="bg-white/95 backdrop-blur-sm border-2 border-[hsl(var(--custom)/0.3)] 
-                               text-[hsl(var(--custom))] px-4 py-2 text-sm font-semibold
-                               shadow-md hover:shadow-lg hover:border-[hsl(var(--custom))] 
-                               transition-all duration-300 hover:-translate-y-0.5
-                               focus:ring-2 focus:ring-[hsl(var(--custom))] focus:ring-offset-2"
+                    className="border-2 border-[hsl(var(--custom)/0.3)] bg-white/95 px-4 py-2 text-sm font-semibold
+                               text-[hsl(var(--custom))] shadow-md backdrop-blur-sm transition-all duration-300
+                               hover:-translate-y-0.5 hover:border-[hsl(var(--custom))] hover:shadow-lg
+                               focus:ring-2 focus:ring-[hsl(var(--custom))] focus:ring-offset-2
+                               dark:border-[hsl(var(--custom)/0.45)] dark:bg-gray-950/90"
                     role="listitem"
                   >
                     {cert}
@@ -119,12 +119,12 @@ export default async function About() {
             {/* States Map */}
             {states.length > 0 && (
               <div className="relative mb-6 lg:mb-8 animate-fadeUp" style={{ animationDelay: "0.2s" }}>
-                <Card className="bg-white/95 backdrop-blur-sm border border-gray-200/60 shadow-xl overflow-hidden">
+                <Card className="overflow-hidden border border-gray-200/60 bg-white/95 shadow-xl backdrop-blur-sm dark:border-gray-700/70 dark:bg-gray-950/95">
                   <CardContent className="p-4 lg:p-6">
-                    <h3 className="text-xl lg:text-2xl font-semibold text-gray-900 mb-4 text-center">
+                    <h3 className="mb-4 text-center text-xl font-semibold text-gray-900 dark:text-gray-50 lg:text-2xl">
                       {t("certifications")}
                     </h3>
-                    <div className="rounded-lg overflow-hidden border-2 border-gray-200/60">
+                    <div className="overflow-hidden rounded-lg border-2 border-gray-200/60 dark:border-gray-700/70">
                       <StatesMap states={states} />
                     </div>
                   </CardContent>
@@ -146,11 +146,9 @@ export default async function About() {
                   role="listitem"
                 >
                   <Card
-                    className="p-4 lg:p-5 text-center bg-white/95 backdrop-blur-sm
-                               border border-gray-200/60 shadow-lg hover:shadow-2xl
-                               transition-all duration-300 hover:-translate-y-1 
-                               hover:border-[hsl(var(--custom)/0.3)]
-                               focus-within:ring-2 focus-within:ring-[hsl(var(--custom))] focus-within:ring-offset-2"
+                    className="border border-gray-200/60 bg-white/95 p-4 text-center shadow-lg backdrop-blur-sm transition-all duration-300
+                               hover:-translate-y-1 hover:border-[hsl(var(--custom)/0.3)] hover:shadow-2xl
+                               focus-within:ring-2 focus-within:ring-[hsl(var(--custom))] focus-within:ring-offset-2 dark:border-gray-700/70 dark:bg-gray-950/95 lg:p-5"
                   >
                     <CardContent className="p-0">
                       <div
@@ -163,10 +161,10 @@ export default async function About() {
                           aria-hidden="true"
                         />
                       </div>
-                      <h4 className="font-bold text-sm lg:text-base mb-2 text-gray-900">
+                      <h4 className="mb-2 text-sm font-bold text-gray-900 dark:text-gray-50 lg:text-base">
                         {t(`achievements.${slug}.title`, { states: statesDisplay })}
                       </h4>
-                      <p className="text-xs lg:text-sm text-gray-600 leading-relaxed">
+                      <p className="text-xs leading-relaxed text-gray-600 dark:text-gray-400 lg:text-sm">
                         {t(`achievements.${slug}.description`)}
                       </p>
                     </CardContent>

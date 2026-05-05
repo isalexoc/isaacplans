@@ -34,6 +34,7 @@ import {
 
 import Logo from "@/components/logo";
 import LocaleSwitcher from "./LocaleSwitcher";
+import { ThemeSwitcher } from "@/components/theme-switcher";
 
 /* ────────────────────────────────────────────────────────────
    Link tables (single source of truth)
@@ -112,19 +113,20 @@ const Header = () => {
   if (isAdsLandingPath(pathname)) {
     return (
       <Headroom style={{ zIndex: 50 }}>
-        <header className="border-b border-gray-100 bg-white shadow-sm transition-shadow duration-300">
+        <header className="border-b border-border bg-background/95 backdrop-blur-sm shadow-sm transition-shadow duration-300 supports-[backdrop-filter]:bg-background/80">
           <div className="container mx-auto px-4 sm:px-6">
             <div className="flex h-16 items-center justify-between md:h-20">
               <Logo />
-              <div className="flex items-center gap-3 sm:gap-5">
+              <div className="flex items-center gap-2 sm:gap-4">
                 <a
                   href={`tel:${nav("phone")}`}
-                  className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm font-medium text-gray-700 transition-colors duration-200 hover:text-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/20 focus-visible:ring-offset-2"
+                  className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm font-medium text-foreground/90 transition-colors duration-200 hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                   aria-label={`Call us at ${nav("phone")}`}
                 >
                   <Lucide.Phone className="h-4 w-4 shrink-0" aria-hidden="true" />
                   <span className="hidden sm:inline">{nav("phone")}</span>
                 </a>
+                <ThemeSwitcher />
                 <LocaleSwitcher />
               </div>
             </div>
@@ -136,24 +138,25 @@ const Header = () => {
 
   return (
     <Headroom style={{ zIndex: 50 }}>
-      <header className="bg-white border-b border-gray-100 shadow-sm transition-shadow duration-300">
+      <header className="border-b border-border bg-background/95 backdrop-blur-sm shadow-sm transition-shadow duration-300 supports-[backdrop-filter]:bg-background/80">
         <div className="container mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between h-16 md:h-20">
             <Logo />
-            <div className="block md:hidden">
+            <div className="flex items-center gap-0.5 md:hidden">
+              <ThemeSwitcher />
               <LocaleSwitcher />
             </div>
 
             {/* Desktop navigation */}
             <nav className="hidden md:flex items-center space-x-1 lg:space-x-2" aria-label="Main navigation">
-              <NavigationMenu className="[&>div>div]:bg-white">
+              <NavigationMenu>
                 <NavigationMenuList className="space-x-1">
                   {/* SERVICES ▸ */}
                   <NavigationMenuItem>
-                    <NavigationMenuTrigger className="text-sm font-medium text-gray-700 hover:text-brand transition-colors duration-200 data-[state=open]:text-brand data-[active]:text-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/20 focus-visible:ring-offset-2 rounded-md px-3 py-2">
+                    <NavigationMenuTrigger className="rounded-md px-3 py-2 text-sm font-medium text-foreground/90 transition-colors duration-200 hover:text-foreground data-[active]:text-foreground data-[state=open]:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30 focus-visible:ring-offset-2 focus-visible:ring-offset-background">
                       {nav("services.label")}
                     </NavigationMenuTrigger>
-                    <NavigationMenuContent className="bg-white">
+                    <NavigationMenuContent className="bg-popover text-popover-foreground">
                       <ul className="grid gap-2 p-4 w-[400px] md:w-[500px] md:grid-cols-2 lg:w-[600px]">
                         {serviceLinks.map(({ key, href, icon }) => (
                           <ListItem
@@ -172,10 +175,10 @@ const Header = () => {
 
                   {/* RESOURCES ▸ */}
                   <NavigationMenuItem>
-                    <NavigationMenuTrigger className="text-sm font-medium text-gray-700 hover:text-brand transition-colors duration-200 data-[state=open]:text-brand data-[active]:text-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/20 focus-visible:ring-offset-2 rounded-md px-3 py-2">
+                    <NavigationMenuTrigger className="rounded-md px-3 py-2 text-sm font-medium text-foreground/90 transition-colors duration-200 hover:text-foreground data-[active]:text-foreground data-[state=open]:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30 focus-visible:ring-offset-2 focus-visible:ring-offset-background">
                       {nav("resources.label")}
                     </NavigationMenuTrigger>
-                    <NavigationMenuContent className="bg-white">
+                    <NavigationMenuContent className="bg-popover text-popover-foreground">
                       <ul className="grid gap-2 p-4 w-[400px] md:w-[500px] md:grid-cols-2 lg:w-[600px]">
                         {resourceLinks.map(({ key, href, icon }) => (
                           <ListItem
@@ -194,10 +197,10 @@ const Header = () => {
 
                   {/* ABOUT ▸ */}
                   <NavigationMenuItem>
-                    <NavigationMenuTrigger className="text-sm font-medium text-gray-700 hover:text-brand transition-colors duration-200 data-[state=open]:text-brand data-[active]:text-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/20 focus-visible:ring-offset-2 rounded-md px-3 py-2">
+                    <NavigationMenuTrigger className="rounded-md px-3 py-2 text-sm font-medium text-foreground/90 transition-colors duration-200 hover:text-foreground data-[active]:text-foreground data-[state=open]:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30 focus-visible:ring-offset-2 focus-visible:ring-offset-background">
                       {nav("about.label")}
                     </NavigationMenuTrigger>
-                    <NavigationMenuContent className="bg-white">
+                    <NavigationMenuContent className="bg-popover text-popover-foreground">
                       <ul className="grid gap-2 p-4 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
                         {/* promo tile */}
                         <li className="row-span-3">
@@ -249,7 +252,7 @@ const Header = () => {
                         href="/contact"
                         className={cn(
                           navigationMenuTriggerStyle(),
-                          "text-sm font-medium text-gray-700 hover:text-brand transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/20 focus-visible:ring-offset-2 rounded-md px-3 py-2"
+                          "rounded-md px-3 py-2 text-sm font-medium text-foreground/90 transition-colors duration-200 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                         )}
                       >
                         {nav("contact.label")}
@@ -259,7 +262,8 @@ const Header = () => {
                 </NavigationMenuList>
               </NavigationMenu>
 
-              <div className="ml-2">
+              <div className="ml-2 flex items-center gap-0.5">
+                <ThemeSwitcher />
                 <LocaleSwitcher />
               </div>
             </nav>
@@ -268,7 +272,7 @@ const Header = () => {
             <div className="hidden lg:flex items-center space-x-4 lg:space-x-6">
               <a
                 href={`tel:${nav("phone")}`}
-                className="hidden xl:flex items-center text-sm font-medium text-gray-700 hover:text-brand space-x-2 transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/20 focus-visible:ring-offset-2 rounded-md px-2 py-1"
+                className="hidden rounded-md px-2 py-1 text-sm font-medium text-foreground/90 transition-colors duration-200 hover:bg-muted hover:text-foreground xl:flex xl:items-center xl:space-x-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 aria-label={`Call us at ${nav("phone")}`}
               >
                 <Lucide.Phone className="w-4 h-4" aria-hidden="true" />
@@ -317,26 +321,26 @@ const MobileSheet = ({
         variant="ghost"
         size="icon"
         aria-label="Open main menu"
-        className="hover:bg-gray-100 focus-visible:ring-2 focus-visible:ring-brand/20 focus-visible:ring-offset-2 rounded-md transition-colors duration-200"
+        className="rounded-md transition-colors duration-200 hover:bg-muted focus-visible:ring-2 focus-visible:ring-brand/30 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
       >
-        <Lucide.Menu className="w-6 h-6 text-gray-700" aria-hidden="true" />
+        <Lucide.Menu className="w-6 h-6 text-foreground" aria-hidden="true" />
       </Button>
     </SheetTrigger>
 
-    <SheetContent className="p-0 w-[80%] sm:max-w-md overflow-hidden flex flex-col border-0 shadow-xl [&>button]:hidden">
-      <div className="flex flex-col h-full bg-gradient-to-b from-white via-gray-50/30 to-white">
+    <SheetContent className="flex w-[80%] flex-col overflow-hidden border-border bg-background p-0 shadow-xl sm:max-w-md [&>button]:hidden">
+      <div className="flex h-full flex-col bg-gradient-to-b from-background via-muted/40 to-background">
         {/* Header with logo */}
-        <div className="px-6 pt-8 pb-6 border-b border-gray-200/60 bg-gradient-to-r from-white via-brand/5 to-accent/5 backdrop-blur-sm">
+        <div className="border-b border-border bg-gradient-to-r from-background via-brand/5 to-accent/10 px-6 pb-6 pt-8 backdrop-blur-sm dark:via-brand/10">
           <div className="flex items-center justify-between">
             <Logo />
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setIsOpen(false)}
-              className="rounded-full hover:bg-gray-100 focus-visible:ring-2 focus-visible:ring-brand/20 h-10 w-10"
+              className="h-10 w-10 rounded-full hover:bg-muted focus-visible:ring-2 focus-visible:ring-brand/30 focus-visible:ring-offset-background"
               aria-label="Close menu"
             >
-              <Lucide.X className="w-6 h-6 text-gray-700" />
+              <Lucide.X className="w-6 h-6 text-foreground" />
             </Button>
           </div>
         </div>
@@ -351,12 +355,12 @@ const MobileSheet = ({
                 handleNavClick={handleNavClick}
                 setIsOpen={setIsOpen}
                 icon="Home"
-                className="flex items-center gap-3 py-3.5 px-4 rounded-xl text-base font-semibold text-gray-900 bg-white border border-gray-200/60 hover:bg-gradient-to-r hover:from-brand/10 hover:to-accent/10 hover:text-brand hover:border-brand/30 hover:shadow-sm transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30 focus-visible:ring-offset-2 mb-3"
+                className="mb-3 flex items-center gap-3 rounded-xl border border-border bg-card px-4 py-3.5 text-base font-semibold text-card-foreground transition-all duration-200 hover:border-brand/40 hover:bg-gradient-to-r hover:from-brand/10 hover:to-accent/10 hover:text-brand hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               />
 
               {/* Services */}
               <AccordionItem value="services" className="border-0">
-                <AccordionTrigger className="py-3.5 px-4 rounded-xl text-base font-semibold text-gray-900 bg-white border border-gray-200/60 hover:bg-gradient-to-r hover:from-brand/10 hover:to-accent/10 hover:text-brand hover:border-brand/30 hover:shadow-sm transition-all duration-200 [&[data-state=open]]:text-brand [&[data-state=open]]:bg-gradient-to-r [&[data-state=open]]:from-brand/10 [&[data-state=open]]:to-accent/10 [&[data-state=open]]:border-brand/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30 focus-visible:ring-offset-2">
+                <AccordionTrigger className="rounded-xl border border-border bg-card px-4 py-3.5 text-base font-semibold text-card-foreground transition-all duration-200 hover:border-brand/40 hover:bg-gradient-to-r hover:from-brand/10 hover:to-accent/10 hover:text-brand hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30 focus-visible:ring-offset-2 focus-visible:ring-offset-background [&[data-state=open]]:border-brand/40 [&[data-state=open]]:bg-gradient-to-r [&[data-state=open]]:from-brand/10 [&[data-state=open]]:to-accent/10 [&[data-state=open]]:text-brand">
                   <div className="flex items-center gap-3">
                     <Lucide.Grid3x3 className="w-5 h-5 text-brand" />
                     <span>{nav("services.label")}</span>
@@ -372,7 +376,7 @@ const MobileSheet = ({
                         handleNavClick={handleNavClick}
                         setIsOpen={setIsOpen}
                         icon={icon}
-                        className="flex items-center gap-3 py-2.5 px-4 rounded-lg text-sm font-medium text-gray-700 bg-gray-50/50 border border-transparent hover:bg-white hover:text-brand hover:border-brand/20 hover:shadow-sm transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/20 focus-visible:ring-offset-2"
+                        className="flex items-center gap-3 rounded-lg border border-transparent bg-muted/50 px-4 py-2.5 text-sm font-medium text-foreground/90 transition-all duration-200 hover:border-brand/25 hover:bg-card hover:text-brand hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/20 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                       />
                     ))}
                   </div>
@@ -381,7 +385,7 @@ const MobileSheet = ({
 
               {/* Resources */}
               <AccordionItem value="resources" className="border-0">
-                <AccordionTrigger className="py-3.5 px-4 rounded-xl text-base font-semibold text-gray-900 bg-white border border-gray-200/60 hover:bg-gradient-to-r hover:from-brand/10 hover:to-accent/10 hover:text-brand hover:border-brand/30 hover:shadow-sm transition-all duration-200 [&[data-state=open]]:text-brand [&[data-state=open]]:bg-gradient-to-r [&[data-state=open]]:from-brand/10 [&[data-state=open]]:to-accent/10 [&[data-state=open]]:border-brand/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30 focus-visible:ring-offset-2">
+                <AccordionTrigger className="rounded-xl border border-border bg-card px-4 py-3.5 text-base font-semibold text-card-foreground transition-all duration-200 hover:border-brand/40 hover:bg-gradient-to-r hover:from-brand/10 hover:to-accent/10 hover:text-brand hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30 focus-visible:ring-offset-2 focus-visible:ring-offset-background [&[data-state=open]]:border-brand/40 [&[data-state=open]]:bg-gradient-to-r [&[data-state=open]]:from-brand/10 [&[data-state=open]]:to-accent/10 [&[data-state=open]]:text-brand">
                   <div className="flex items-center gap-3">
                     <Lucide.BookOpen className="w-5 h-5 text-brand" />
                     <span>{nav("resources.label")}</span>
@@ -397,7 +401,7 @@ const MobileSheet = ({
                         handleNavClick={handleNavClick}
                         setIsOpen={setIsOpen}
                         icon={icon}
-                        className="flex items-center gap-3 py-2.5 px-4 rounded-lg text-sm font-medium text-gray-700 bg-gray-50/50 border border-transparent hover:bg-white hover:text-brand hover:border-brand/20 hover:shadow-sm transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/20 focus-visible:ring-offset-2"
+                        className="flex items-center gap-3 rounded-lg border border-transparent bg-muted/50 px-4 py-2.5 text-sm font-medium text-foreground/90 transition-all duration-200 hover:border-brand/25 hover:bg-card hover:text-brand hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/20 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                       />
                     ))}
                   </div>
@@ -406,7 +410,7 @@ const MobileSheet = ({
 
               {/* About */}
               <AccordionItem value="about" className="border-0">
-                <AccordionTrigger className="py-3.5 px-4 rounded-xl text-base font-semibold text-gray-900 bg-white border border-gray-200/60 hover:bg-gradient-to-r hover:from-brand/10 hover:to-accent/10 hover:text-brand hover:border-brand/30 hover:shadow-sm transition-all duration-200 [&[data-state=open]]:text-brand [&[data-state=open]]:bg-gradient-to-r [&[data-state=open]]:from-brand/10 [&[data-state=open]]:to-accent/10 [&[data-state=open]]:border-brand/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30 focus-visible:ring-offset-2">
+                <AccordionTrigger className="rounded-xl border border-border bg-card px-4 py-3.5 text-base font-semibold text-card-foreground transition-all duration-200 hover:border-brand/40 hover:bg-gradient-to-r hover:from-brand/10 hover:to-accent/10 hover:text-brand hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30 focus-visible:ring-offset-2 focus-visible:ring-offset-background [&[data-state=open]]:border-brand/40 [&[data-state=open]]:bg-gradient-to-r [&[data-state=open]]:from-brand/10 [&[data-state=open]]:to-accent/10 [&[data-state=open]]:text-brand">
                   <div className="flex items-center gap-3">
                     <Lucide.Info className="w-5 h-5 text-brand" />
                     <span>{nav("about.label")}</span>
@@ -422,7 +426,7 @@ const MobileSheet = ({
                         handleNavClick={handleNavClick}
                         setIsOpen={setIsOpen}
                         icon={icon}
-                        className="flex items-center gap-3 py-2.5 px-4 rounded-lg text-sm font-medium text-gray-700 bg-gray-50/50 border border-transparent hover:bg-white hover:text-brand hover:border-brand/20 hover:shadow-sm transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/20 focus-visible:ring-offset-2"
+                        className="flex items-center gap-3 rounded-lg border border-transparent bg-muted/50 px-4 py-2.5 text-sm font-medium text-foreground/90 transition-all duration-200 hover:border-brand/25 hover:bg-card hover:text-brand hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/20 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                       />
                     ))}
                   </div>
@@ -435,26 +439,29 @@ const MobileSheet = ({
                 handleNavClick={handleNavClick}
                 setIsOpen={setIsOpen}
                 icon="Mail"
-                className="flex items-center gap-3 py-3.5 px-4 rounded-xl text-base font-semibold text-gray-900 bg-white border border-gray-200/60 hover:bg-gradient-to-r hover:from-brand/10 hover:to-accent/10 hover:text-brand hover:border-brand/30 hover:shadow-sm transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30 focus-visible:ring-offset-2 mt-3"
+                className="mt-3 flex items-center gap-3 rounded-xl border border-border bg-card px-4 py-3.5 text-base font-semibold text-card-foreground transition-all duration-200 hover:border-brand/40 hover:bg-gradient-to-r hover:from-brand/10 hover:to-accent/10 hover:text-brand hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               />
             </Accordion>
           </div>
         </div>
 
         {/* Sticky bottom */}
-        <div className="border-t border-gray-200/60 bg-gradient-to-b from-white to-gray-50/50 backdrop-blur-sm px-6 pt-6 pb-6 space-y-4 shadow-[0_-8px_16px_-4px_rgba(0,0,0,0.08)]">
-          <div className="flex justify-between items-center bg-white/80 rounded-xl p-4 border border-gray-200/60">
+        <div className="space-y-4 border-t border-border bg-gradient-to-b from-background to-muted/30 px-6 pb-6 pt-6 shadow-[0_-8px_24px_-8px_rgba(0,0,0,0.12)] backdrop-blur-sm dark:shadow-[0_-8px_24px_-8px_rgba(0,0,0,0.35)]">
+          <div className="flex items-center justify-between rounded-xl border border-border bg-card/95 p-4 backdrop-blur-sm">
             <a
               href={`tel:${nav("phone")}`}
-              className="flex items-center text-sm font-semibold text-gray-700 hover:text-brand space-x-2.5 transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/20 focus-visible:ring-offset-2 rounded-lg px-2 py-1.5"
+              className="flex items-center space-x-2.5 rounded-lg px-2 py-1.5 text-sm font-semibold text-foreground/90 transition-colors duration-200 hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               aria-label={`Call us at ${nav("phone")}`}
             >
-              <div className="p-1.5 rounded-lg bg-brand/10">
-                <Lucide.Phone className="w-4 h-4 text-brand" aria-hidden="true" />
+              <div className="rounded-lg bg-brand/10 p-1.5 dark:bg-brand/20">
+                <Lucide.Phone className="h-4 w-4 text-brand" aria-hidden="true" />
               </div>
               <span>{nav("phone")}</span>
             </a>
-            <LocaleSwitcher />
+            <div className="flex items-center gap-0.5">
+              <ThemeSwitcher />
+              <LocaleSwitcher />
+            </div>
           </div>
           {/* CTA island (client) */}
           <div className="animate-fadeLeft-d4">
@@ -545,20 +552,20 @@ const ListItem = React.forwardRef<React.ElementRef<"a">, ListItemProps>(
               href={href as any}
               ref={ref}
               className={cn(
-                "group flex items-start space-x-3 rounded-lg p-3 select-none leading-none transition-all duration-200 bg-white hover:bg-gray-50 hover:shadow-md border border-transparent hover:border-gray-200 focus-visible:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30 focus-visible:ring-offset-2 data-[highlighted]:bg-gray-50 nav-menu-item",
+                "nav-menu-item group flex select-none items-start space-x-3 rounded-lg border border-transparent bg-popover p-3 leading-none outline-none transition-all duration-200 hover:border-border hover:bg-muted hover:shadow-md focus-visible:ring-2 focus-visible:ring-brand/30 focus-visible:ring-offset-2 focus-visible:ring-offset-background data-[highlighted]:bg-muted data-[highlighted]:shadow-sm",
                 className
               )}
               aria-label={title}
             >
               {Icon && (
-                <Icon className="w-5 h-5 mt-0.5 text-brand shrink-0 transition-all duration-200 group-hover:text-brand group-hover:scale-110 group-focus-visible:text-brand" />
+                <Icon className="mt-0.5 h-5 w-5 shrink-0 text-[hsl(var(--custom))] transition-transform duration-200 group-hover:scale-105 group-data-[highlighted]:scale-105" />
               )}
-              <div className="space-y-1.5 flex-1 min-w-0">
-                <div className="text-sm font-semibold leading-tight text-gray-900 group-hover:text-gray-900 group-focus-visible:text-gray-900 transition-colors duration-200">
+              <div className="min-w-0 flex-1 space-y-1.5">
+                <div className="text-sm font-semibold leading-tight text-foreground transition-colors duration-200 group-hover:text-foreground group-data-[highlighted]:text-foreground">
                   {title}
                 </div>
                 {children && (
-                  <p className="line-clamp-2 text-xs text-gray-600 leading-relaxed group-hover:text-gray-700 transition-colors duration-200">
+                  <p className="line-clamp-2 text-xs leading-relaxed text-muted-foreground transition-colors duration-200 group-hover:text-foreground/80 group-data-[highlighted]:text-foreground/80 dark:group-hover:text-gray-300 dark:group-data-[highlighted]:text-gray-300">
                     {children}
                   </p>
                 )}
@@ -569,17 +576,17 @@ const ListItem = React.forwardRef<React.ElementRef<"a">, ListItemProps>(
           <div
             aria-disabled="true"
             className={cn(
-              "flex items-start space-x-3 rounded-lg p-3 select-none leading-none cursor-not-allowed opacity-60 bg-gray-50",
+              "flex cursor-not-allowed select-none items-start space-x-3 rounded-lg bg-muted/60 p-3 leading-none opacity-60",
               className
             )}
           >
-            {Icon && <Icon className="w-5 h-5 mt-0.5 text-gray-400 shrink-0" />}
-            <div className="space-y-1.5 flex-1 min-w-0">
-              <div className="text-sm font-semibold leading-tight text-gray-500">
+            {Icon && <Icon className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground" />}
+            <div className="min-w-0 flex-1 space-y-1.5">
+              <div className="text-sm font-semibold leading-tight text-muted-foreground">
                 {title}
               </div>
               {children && (
-                <p className="line-clamp-2 text-xs text-gray-400 leading-relaxed">
+                <p className="line-clamp-2 text-xs leading-relaxed text-muted-foreground/80">
                   {children}
                 </p>
               )}

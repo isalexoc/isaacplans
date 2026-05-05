@@ -83,25 +83,25 @@ const HeroWithTestimonials: React.FC<HeroWithTestimonialsProps> = ({
             src={imageUrl}
             alt="Hero Visual"
             fill
-            className="object-contain"
+            className="rounded-2xl object-contain ring-1 ring-black/5 dark:ring-white/10"
             priority
           />
 
           {testimonials?.[0] && (
-            <div className="absolute top-4 left-4 bg-white bg-opacity-90 backdrop-blur-sm rounded-lg p-4 shadow-md w-[85%] max-w-sm">
-              <p className="font-semibold text-sm text-gray-800 dark:text-gray-200">
+            <div className="absolute left-4 top-4 w-[85%] max-w-sm rounded-lg border border-gray-200/60 bg-white/90 p-4 shadow-md backdrop-blur-sm dark:border-gray-700/80 dark:bg-gray-950/95">
+              <p className="text-sm font-semibold text-gray-800 dark:text-gray-50">
                 ⭐⭐⭐⭐⭐ {testimonials[0].name}
               </p>
-              <p className="text-xs text-gray-700 dark:text-gray-300 mt-1">
+              <p className="mt-1 text-xs text-gray-700 dark:text-gray-300">
                 {testimonials[0].text}
               </p>
             </div>
           )}
 
           {happyClient && (
-            <div className="absolute bottom-4 right-4 bg-white bg-opacity-90 backdrop-blur-sm rounded-lg p-3 shadow-md text-sm text-gray-800 dark:text-gray-200">
-              <p className="font-bold">{happyClient.title}</p>
-              <p className="text-xs">{happyClient.subtitle}</p>
+            <div className="absolute bottom-4 right-4 rounded-lg border border-gray-200/60 bg-white/90 p-3 text-sm shadow-md backdrop-blur-sm dark:border-gray-700/80 dark:bg-gray-950/95">
+              <p className="font-bold text-gray-800 dark:text-gray-50">{happyClient.title}</p>
+              <p className="text-xs text-gray-600 dark:text-gray-400">{happyClient.subtitle}</p>
             </div>
           )}
         </div>

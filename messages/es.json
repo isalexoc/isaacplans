@@ -422,6 +422,12 @@
       },
       "contact": {
         "label": "Contacto"
+      },
+      "theme": {
+        "label": "Tema",
+        "light": "Claro",
+        "dark": "Oscuro",
+        "system": "Sistema"
       }
     }
   },

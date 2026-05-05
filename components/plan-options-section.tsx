@@ -17,16 +17,16 @@ export default function PlanOptionsSection({
 }: PlanOptionsProps) {
   return (
     <section
-      className="relative py-16 lg:py-24 bg-gradient-to-b from-gray-50 via-white to-gray-50/80 
-                 dark:bg-gray-950 px-4 sm:px-6 lg:px-8 overflow-hidden"
+      className="relative overflow-hidden bg-gradient-to-b from-gray-50 via-white to-gray-50/80 px-4 py-16 sm:px-6 lg:px-8 lg:py-24
+                 dark:bg-gradient-to-b dark:from-gray-950 dark:via-slate-900 dark:to-gray-950"
     >
       {/* Decorative background elements */}
       <div
-        className="absolute inset-0 opacity-20 pointer-events-none"
+        className="pointer-events-none absolute inset-0 opacity-20 dark:opacity-[0.12]"
         aria-hidden="true"
       >
-        <div className="absolute top-0 left-0 w-96 h-96 bg-[hsl(var(--custom)/0.05)] rounded-full blur-3xl" />
-        <div className="absolute bottom-0 right-0 w-96 h-96 bg-[hsl(var(--custom)/0.05)] rounded-full blur-3xl" />
+        <div className="absolute left-0 top-0 h-96 w-96 rounded-full bg-[hsl(var(--custom)/0.05)] blur-3xl dark:bg-[hsl(var(--custom)/0.1)]" />
+        <div className="absolute bottom-0 right-0 h-96 w-96 rounded-full bg-[hsl(var(--custom)/0.05)] blur-3xl dark:bg-[hsl(var(--custom)/0.08)]" />
       </div>
 
       <div className="container mx-auto text-center max-w-6xl relative z-10">

@@ -68,7 +68,7 @@ export default async function Services() {
   return (
     <section
       id="services"
-      className="relative py-16 lg:py-24 bg-gradient-to-b from-white via-gray-50 to-white overflow-hidden"
+      className="relative overflow-hidden bg-gradient-to-b from-background via-muted/50 to-background py-16 lg:py-24 dark:via-muted/30"
     >
       {/* Decorative background elements */}
       <div
@@ -82,10 +82,10 @@ export default async function Services() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Heading */}
         <div className="text-center mb-12 lg:mb-16 animate-fadeUp">
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
+          <h2 className="mb-4 text-3xl font-bold text-gray-900 dark:text-gray-50 sm:text-4xl lg:text-5xl">
             {t("title")}
           </h2>
-          <p className="text-lg lg:text-xl text-gray-700 max-w-3xl mx-auto leading-relaxed">
+          <p className="mx-auto max-w-3xl text-lg leading-relaxed text-gray-700 dark:text-gray-300 lg:text-xl">
             {t("subtitle")}
           </p>
         </div>
@@ -119,13 +119,10 @@ export default async function Services() {
                   aria-label={`Learn more about ${serviceTitle}`}
                 >
                   <Card
-                    className="h-full flex flex-col justify-between bg-white/95 backdrop-blur-sm
-                               border border-gray-200/60 shadow-lg hover:shadow-2xl
-                               transition-all duration-300 hover:-translate-y-2 hover:border-[hsl(var(--custom)/0.3)]
-                               overflow-hidden group cursor-pointer"
+                    className="group flex h-full cursor-pointer flex-col justify-between overflow-hidden border border-gray-200/60 bg-white/95 shadow-lg backdrop-blur-sm transition-all duration-300 hover:-translate-y-2 hover:border-[hsl(var(--custom)/0.3)] hover:shadow-2xl dark:border-gray-700/70 dark:bg-gray-950/95"
                   >
                   {/* Image Section */}
-                  <div className="relative w-full h-48 lg:h-56 overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200">
+                  <div className="relative h-48 w-full overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-900 dark:to-gray-800 lg:h-56">
                     <Image
                       src={imageUrl}
                       alt={serviceTitle}
@@ -139,10 +136,7 @@ export default async function Services() {
                     {/* Icon badge overlay */}
                     <div className="absolute top-4 right-4">
                       <div
-                        className="w-12 h-12 lg:w-14 lg:h-14 bg-white/95 backdrop-blur-sm
-                                   rounded-xl flex items-center justify-center
-                                   shadow-lg shadow-black/20 border border-white/50
-                                   group-hover:scale-110 transition-transform duration-300"
+                        className="flex h-12 w-12 items-center justify-center rounded-xl border border-white/50 bg-white/95 shadow-lg shadow-black/20 backdrop-blur-sm transition-transform duration-300 group-hover:scale-110 lg:h-14 lg:w-14 dark:border-gray-700 dark:bg-gray-950/95"
                       >
                         <Icon
                           className="w-6 h-6 lg:w-7 lg:h-7 text-[hsl(var(--custom))]"
@@ -153,10 +147,10 @@ export default async function Services() {
                   </div>
 
                   <CardHeader className="pb-4">
-                    <CardTitle className="text-xl lg:text-2xl font-bold text-gray-900 mb-2">
+                    <CardTitle className="mb-2 text-xl font-bold text-gray-900 dark:text-gray-50 lg:text-2xl">
                       {serviceTitle}
                     </CardTitle>
-                    <CardDescription className="text-gray-700 text-sm lg:text-base leading-relaxed">
+                    <CardDescription className="text-sm leading-relaxed text-gray-700 dark:text-gray-300 lg:text-base">
                       {t(`${base}.description`)}
                     </CardDescription>
                   </CardHeader>
@@ -169,7 +163,7 @@ export default async function Services() {
                       {features.map((feature: string, featureIdx: number) => (
                         <li
                           key={`${key}-feature-${featureIdx}`}
-                          className="flex items-start text-sm lg:text-base text-gray-700"
+                          className="flex items-start text-sm text-gray-700 dark:text-gray-300 lg:text-base"
                         >
                           <span
                             className="w-2 h-2 bg-[hsl(var(--custom))] rounded-full mr-3 mt-2 shrink-0
@@ -181,7 +175,7 @@ export default async function Services() {
                       ))}
                     </ul>
 
-                    <div className="mt-auto pt-4 border-t border-gray-100">
+                    <div className="mt-auto border-t border-gray-100 pt-4 dark:border-gray-800">
                       <div className="flex items-center justify-between text-sm font-semibold text-[hsl(var(--custom))] group-hover:gap-2 transition-all duration-300">
                         <span>{t("ctaLearnMore", { defaultValue: "Learn More" })}</span>
                         <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" aria-hidden="true" />

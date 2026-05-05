@@ -15,7 +15,7 @@ export default async function Hero() {
   return (
     <section
       id="home"
-      className="relative bg-gradient-to-br from-[hsl(var(--custom)/0.08)] via-[hsl(var(--custom)/0.04)] to-[hsl(var(--custom)/0.12)] min-h-screen flex items-center overflow-hidden"
+      className="relative flex min-h-screen items-center overflow-hidden bg-gradient-to-br from-[hsl(var(--custom)/0.08)] via-[hsl(var(--custom)/0.04)] to-[hsl(var(--custom)/0.12)] dark:from-[hsl(var(--custom)/0.12)] dark:via-[hsl(var(--custom)/0.06)] dark:to-[hsl(var(--custom)/0.15)]"
     >
       {/* Decorative background elements */}
       <div
@@ -32,11 +32,7 @@ export default async function Hero() {
           <div className="space-y-6 lg:space-y-8 order-2 lg:order-1">
             {/* badge */}
             <div
-              className="inline-flex items-center space-x-2 bg-white/90 backdrop-blur-sm text-[hsl(var(--custom))] 
-                            px-5 py-2.5 rounded-full text-sm font-semibold
-                            shadow-lg shadow-[hsl(var(--custom)/0.2)] border border-[hsl(var(--custom)/0.2)]
-                            animate-fadeUp hover:shadow-xl hover:shadow-[hsl(var(--custom)/0.3)] transition-all duration-300
-                            focus-within:ring-2 focus-within:ring-[hsl(var(--custom))] focus-within:ring-offset-2"
+              className="inline-flex items-center space-x-2 rounded-full border border-[hsl(var(--custom)/0.2)] bg-white/90 px-5 py-2.5 text-sm font-semibold text-[hsl(var(--custom))] shadow-lg shadow-[hsl(var(--custom)/0.2)] backdrop-blur-sm animate-fadeUp transition-all duration-300 hover:shadow-xl hover:shadow-[hsl(var(--custom)/0.3)] focus-within:ring-2 focus-within:ring-[hsl(var(--custom))] focus-within:ring-offset-2 dark:border-[hsl(var(--custom)/0.35)] dark:bg-gray-950/90"
               role="status"
               aria-label={t("hero.badge", { states })}
             >
@@ -46,8 +42,7 @@ export default async function Hero() {
 
             {/* headline */}
             <h1
-              className="text-4xl sm:text-5xl lg:text-7xl font-bold text-gray-900 leading-[1.1] tracking-tight
-                           animate-fadeLeft"
+              className="animate-fadeLeft text-4xl font-bold leading-[1.1] tracking-tight text-gray-900 dark:text-gray-50 sm:text-5xl lg:text-7xl"
             >
               <span className="text-[hsl(var(--custom))] block text-2xl sm:text-3xl lg:text-6xl mb-3 font-extrabold">
                 {t("hero.name")}
@@ -60,8 +55,7 @@ export default async function Hero() {
 
             {/* description */}
             <p
-              className="text-lg sm:text-xl lg:text-2xl text-gray-700 leading-relaxed max-w-2xl
-                          animate-fadeLeft-d2"
+              className="animate-fadeLeft-d2 max-w-2xl text-lg leading-relaxed text-gray-700 dark:text-gray-300 sm:text-xl lg:text-2xl"
             >
               {t("hero.description")}
             </p>
@@ -119,7 +113,7 @@ export default async function Hero() {
                   alt={t("hero.name")}
                   width={280}
                   height={280}
-                  className="rounded-full border-4 border-white shadow-2xl object-cover"
+                  className="rounded-full border-4 border-white object-cover shadow-2xl dark:border-gray-800"
                   priority
                   fetchPriority="high"
                 />
@@ -141,8 +135,7 @@ export default async function Hero() {
 
             {/* stats */}
             <div
-              className="grid grid-cols-3 gap-6 py-8 border-t border-gray-200/60
-                            animate-fadeLeft-d4"
+              className="grid grid-cols-3 gap-6 border-t border-gray-200/60 py-8 animate-fadeLeft-d4 dark:border-gray-700/60"
               role="region"
               aria-label={t("hero.stats.label")}
             >
@@ -171,7 +164,7 @@ export default async function Hero() {
                   alt={`${t("hero.name")} – ${t("hero.subtitle")}`}
                   width={500}
                   height={600}
-                  className="relative rounded-3xl shadow-2xl w-full h-auto object-cover border-4 border-white/50"
+                  className="relative h-auto w-full rounded-3xl border-4 border-white/50 object-cover shadow-2xl dark:border-gray-700/80"
                   priority
                   fetchPriority="high"
                 />
@@ -206,7 +199,7 @@ function Stat({ value, label }: { value: string; label: string }) {
       >
         {value}
       </div>
-      <div className="text-xs sm:text-sm text-gray-600 font-medium">{label}</div>
+      <div className="text-xs font-medium text-gray-600 dark:text-gray-400 sm:text-sm">{label}</div>
     </div>
   );
 }
@@ -222,17 +215,15 @@ function FeatureCard({
 }) {
   return (
     <Card
-      className="p-4 bg-white/95 backdrop-blur-sm shadow-lg hover:shadow-xl 
-                   transition-all duration-300 hover:-translate-y-1 border border-gray-100
-                   focus-within:ring-2 focus-within:ring-[hsl(var(--custom))] focus-within:ring-offset-2"
+      className="border border-gray-100 bg-white/95 p-4 shadow-lg backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl focus-within:ring-2 focus-within:ring-[hsl(var(--custom))] focus-within:ring-offset-2 dark:border-gray-700/80 dark:bg-gray-950/90"
     >
       <div className="flex items-start space-x-3">
         <div className="p-2 bg-[hsl(var(--custom)/0.1)] rounded-lg shrink-0">
           <Icon className="w-5 h-5 text-[hsl(var(--custom))]" aria-hidden="true" />
         </div>
         <div className="min-w-0">
-          <div className="font-semibold text-sm text-gray-900 mb-1">{title}</div>
-          <div className="text-xs text-gray-600 leading-relaxed">{desc}</div>
+          <div className="mb-1 text-sm font-semibold text-gray-900 dark:text-gray-50">{title}</div>
+          <div className="text-xs leading-relaxed text-gray-600 dark:text-gray-400">{desc}</div>
         </div>
       </div>
     </Card>
