@@ -187,17 +187,19 @@ export default function FinalExpenseLeaveBehindForm() {
     <div className="space-y-8">
       {/* Phase 1: Data collection */}
       {phase === 1 && (
-        <div className="bg-white rounded-xl shadow-lg p-6 md:p-8 space-y-6">
+        <div className="space-y-6 rounded-xl border border-gray-200/80 bg-white p-6 shadow-lg dark:border-gray-700/80 dark:bg-gray-950 md:p-8">
           <div>
-            <h2 className="text-2xl font-bold text-[#003366] mb-2">
+            <h2 className="mb-2 text-2xl font-bold text-[#003366] dark:text-sky-300">
               {t("phase1.title")}
             </h2>
-            <p className="text-lg text-gray-600">{t("phase1.description")}</p>
+            <p className="text-lg text-gray-600 dark:text-gray-300">{t("phase1.description")}</p>
           </div>
 
           <div className="grid gap-6">
             <div className="space-y-2">
-              <Label htmlFor="prospectName" className="text-base">{t("phase1.prospectName")}</Label>
+              <Label htmlFor="prospectName" className="text-base text-foreground">
+                {t("phase1.prospectName")}
+              </Label>
               <Input
                 id="prospectName"
                 type="text"
@@ -205,12 +207,14 @@ export default function FinalExpenseLeaveBehindForm() {
                 value={prospectName}
                 onChange={(e) => setProspectName(e.target.value)}
               />
-              <p className="text-sm text-gray-500">{t("phase1.prospectNameHint")}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{t("phase1.prospectNameHint")}</p>
             </div>
 
             <div className="grid sm:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="natural" className="text-base">{t("phase1.naturalDeath")}</Label>
+                <Label htmlFor="natural" className="text-base text-foreground">
+                {t("phase1.naturalDeath")}
+              </Label>
                 <Input
                   id="natural"
                   type="text"
@@ -221,11 +225,13 @@ export default function FinalExpenseLeaveBehindForm() {
                   className={errors.natural ? "border-red-500" : ""}
                 />
                 {errors.natural && (
-                  <p className="text-sm text-red-600">{errors.natural}</p>
+                  <p className="text-sm text-red-600 dark:text-red-400">{errors.natural}</p>
                 )}
               </div>
               <div className="space-y-2">
-                <Label htmlFor="accidental" className="text-base">{t("phase1.accidentalDeath")}</Label>
+                <Label htmlFor="accidental" className="text-base text-foreground">
+                {t("phase1.accidentalDeath")}
+              </Label>
                 <Input
                   id="accidental"
                   type="text"
@@ -236,16 +242,18 @@ export default function FinalExpenseLeaveBehindForm() {
                   className={errors.accidental ? "border-red-500" : ""}
                 />
                 {errors.accidental && (
-                  <p className="text-sm text-red-600">{errors.accidental}</p>
+                  <p className="text-sm text-red-600 dark:text-red-400">{errors.accidental}</p>
                 )}
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-gray-500 dark:text-gray-400">
                   {t("phase1.accidentalHint")}
                 </p>
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="premium" className="text-base">{t("phase1.monthlyPremium")}</Label>
+              <Label htmlFor="premium" className="text-base text-foreground">
+                {t("phase1.monthlyPremium")}
+              </Label>
               <Input
                 id="premium"
                 type="text"
@@ -254,7 +262,7 @@ export default function FinalExpenseLeaveBehindForm() {
                 value={monthlyPremium}
                 onChange={(e) => setMonthlyPremium(sanitizeDecimalInput(e.target.value))}
               />
-              <p className="text-sm text-gray-500">{t("phase1.monthlyPremiumHint")}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{t("phase1.monthlyPremiumHint")}</p>
             </div>
 
             <div className="space-y-2">
@@ -266,11 +274,13 @@ export default function FinalExpenseLeaveBehindForm() {
                 value={avoidNames}
                 onChange={(e) => setAvoidNames(e.target.value)}
               />
-              <p className="text-xs text-gray-500">{t("phase1.avoidHint")}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">{t("phase1.avoidHint")}</p>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="protect">{t("phase1.protectNames")}</Label>
+              <Label htmlFor="protect" className="text-foreground">
+                {t("phase1.protectNames")}
+              </Label>
               <Input
                 id="protect"
                 type="text"
@@ -278,12 +288,12 @@ export default function FinalExpenseLeaveBehindForm() {
                 value={protectNames}
                 onChange={(e) => setProtectNames(e.target.value)}
               />
-              <p className="text-sm text-gray-500">{t("phase1.protectHint")}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{t("phase1.protectHint")}</p>
             </div>
 
             <div className="space-y-3">
-              <Label className="text-base">{t("phase1.planType")}</Label>
-              <p className="text-sm text-gray-500">{t("phase1.planTypeHint")}</p>
+              <Label className="text-base text-foreground">{t("phase1.planType")}</Label>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{t("phase1.planTypeHint")}</p>
               <RadioGroup
                 value={planType}
                 onValueChange={(v) => setPlanType(v as typeof planType)}
@@ -291,25 +301,25 @@ export default function FinalExpenseLeaveBehindForm() {
               >
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="standard" id="plan-standard" />
-                  <Label htmlFor="plan-standard" className="font-normal cursor-pointer">
+                  <Label htmlFor="plan-standard" className="cursor-pointer font-normal text-foreground">
                     {t("phase1.planStandard")}
                   </Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="modified" id="plan-modified" />
-                  <Label htmlFor="plan-modified" className="font-normal cursor-pointer">
+                  <Label htmlFor="plan-modified" className="cursor-pointer font-normal text-foreground">
                     {t("phase1.planModified")}
                   </Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="easyIssue" id="plan-easy" />
-                  <Label htmlFor="plan-easy" className="font-normal cursor-pointer">
+                  <Label htmlFor="plan-easy" className="cursor-pointer font-normal text-foreground">
                     {t("phase1.planEasyIssue")}
                   </Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="guaranteedIssue" id="plan-guaranteed" />
-                  <Label htmlFor="plan-guaranteed" className="font-normal cursor-pointer">
+                  <Label htmlFor="plan-guaranteed" className="cursor-pointer font-normal text-foreground">
                     {t("phase1.planGuaranteedIssue")}
                   </Label>
                 </div>

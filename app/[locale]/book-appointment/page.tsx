@@ -56,7 +56,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function BookAppointmentPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-950 dark:via-slate-900 dark:to-gray-950">
       <ServicePageTracker
         serviceName="Book an appointment"
         serviceCategory="book-appointment"

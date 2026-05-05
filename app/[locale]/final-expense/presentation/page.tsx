@@ -77,11 +77,11 @@ export default async function FinalExpensePresentationPage() {
   ];
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
+    <main className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-950 dark:via-slate-900 dark:to-gray-950">
+      <div className="container mx-auto max-w-7xl px-4 py-8">
         {/* Header - stacks vertically on mobile to prevent overflow */}
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8">
-          <div className="flex flex-wrap gap-2 shrink-0">
+        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex shrink-0 flex-wrap gap-2">
             <Button asChild variant="secondary" size="sm">
               <Link href="/final-expense">{t("backButton")}</Link>
             </Button>
@@ -89,7 +89,7 @@ export default async function FinalExpensePresentationPage() {
               <Link href="/final-expense/leave-behind">{t("leaveBehindLink")}</Link>
             </Button>
           </div>
-          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-center sm:flex-1 text-[#003366] min-w-0">
+          <h1 className="min-w-0 text-center text-xl font-bold text-[#003366] dark:text-sky-300 sm:flex-1 sm:text-2xl md:text-3xl">
             {t("title")}
           </h1>
           <div className="flex justify-center sm:justify-end shrink-0">
@@ -102,14 +102,14 @@ export default async function FinalExpensePresentationPage() {
         </div>
 
         {/* Stepper */}
-        <div className="mb-8 rounded-lg bg-white p-6 shadow-md dark:bg-gray-950 dark:ring-1 dark:ring-gray-800">
+        <div className="mb-8 rounded-lg border border-gray-200/80 bg-white p-6 shadow-md dark:border-gray-700/80 dark:bg-gray-900/95 dark:shadow-none dark:ring-1 dark:ring-gray-800">
           <FinalExpenseWorkflowStepperWrapper steps={steps} currentStep={0} />
         </div>
 
         {/* Presentation Content Area - overscroll-contain in fullscreen reduces accidental exit on swipe */}
         <div
           id="presentation-content"
-          className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg shadow-lg min-h-[600px] h-[70vh] overflow-hidden relative [&:fullscreen]:h-screen [&:fullscreen]:w-screen [&:fullscreen]:rounded-none [&:fullscreen]:min-h-screen [&:fullscreen]:overscroll-none [&:fullscreen]:bg-black/70"
+          className="relative h-[70vh] min-h-[600px] overflow-hidden rounded-lg bg-gradient-to-br from-gray-50 to-gray-100 shadow-lg dark:from-gray-950 dark:to-slate-900 dark:shadow-black/40 [&:fullscreen]:h-screen [&:fullscreen]:min-h-screen [&:fullscreen]:w-screen [&:fullscreen]:rounded-none [&:fullscreen]:overscroll-none [&:fullscreen]:bg-black/70 [&:fullscreen]:dark:bg-black/90"
         >
           <IULPresentationSlides
             exitFullscreenLabel={t("fullscreen.exit")}

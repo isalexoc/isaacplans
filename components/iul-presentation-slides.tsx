@@ -220,7 +220,7 @@ export default function IULPresentationSlides({
             variant="secondary"
             size="sm"
             onClick={handleExitFullscreen}
-            className="gap-2 bg-white/95 backdrop-blur-md shadow-lg border border-gray-200 hover:bg-white"
+            className="gap-2 border border-gray-200 bg-white/95 shadow-lg backdrop-blur-md hover:bg-white dark:border-gray-600 dark:bg-gray-900/95 dark:hover:bg-gray-800"
             aria-label={exitFullscreenLabel}
           >
             <Minimize2 className="h-4 w-4" />
@@ -266,7 +266,7 @@ export default function IULPresentationSlides({
           onClick={prevSlide}
           disabled={currentSlide === 0}
           className={cn(
-            "pointer-events-auto ml-4 h-12 w-12 rounded-full bg-white/95 backdrop-blur-md shadow-[0_4px_20px_rgba(0,0,0,0.12)] hover:bg-white hover:scale-105 transition-all duration-200 border border-gray-200/50",
+            "pointer-events-auto ml-4 h-12 w-12 rounded-full border border-gray-200/50 bg-white/95 text-foreground shadow-[0_4px_20px_rgba(0,0,0,0.12)] backdrop-blur-md transition-all duration-200 hover:scale-105 hover:bg-white dark:border-gray-600 dark:bg-gray-900/90 dark:text-gray-100 dark:hover:bg-gray-800",
             currentSlide === 0 && "opacity-50 cursor-not-allowed"
           )}
           aria-label="Previous slide"
@@ -279,7 +279,7 @@ export default function IULPresentationSlides({
           onClick={nextSlide}
           disabled={currentSlide === slides.length - 1}
           className={cn(
-            "pointer-events-auto mr-4 h-12 w-12 rounded-full bg-white/95 backdrop-blur-md shadow-[0_4px_20px_rgba(0,0,0,0.12)] hover:bg-white hover:scale-105 transition-all duration-200 border border-gray-200/50",
+            "pointer-events-auto mr-4 h-12 w-12 rounded-full border border-gray-200/50 bg-white/95 text-foreground shadow-[0_4px_20px_rgba(0,0,0,0.12)] backdrop-blur-md transition-all duration-200 hover:scale-105 hover:bg-white dark:border-gray-600 dark:bg-gray-900/90 dark:text-gray-100 dark:hover:bg-gray-800",
             currentSlide === slides.length - 1 && "opacity-50 cursor-not-allowed"
           )}
           aria-label="Next slide"
@@ -297,8 +297,8 @@ export default function IULPresentationSlides({
             className={cn(
               "h-2 rounded-full transition-all duration-300",
               index === currentSlide
-                ? "w-8 bg-[#003366] shadow-md"
-                : "w-2 bg-gray-300 hover:bg-gray-400"
+                ? "w-8 bg-[#003366] shadow-md dark:bg-sky-500"
+                : "w-2 bg-gray-300 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-500"
             )}
             aria-label={`Go to slide ${index + 1}`}
           />

@@ -26,11 +26,18 @@ const SL = {
   blue: "#003366",
   blueLight: "#004080",
   blueBg: "bg-[#003366]",
-  blueText: "text-[#003366]",
+  blueText: "text-[#003366] dark:text-sky-300",
   gold: "#d4a84b",
   goldBg: "bg-amber-500",
-  grayBg: "bg-gray-100",
+  grayBg: "bg-gray-100 dark:bg-gray-800/90",
   white: "bg-white",
+};
+
+/** Dark-mode-friendly brand text (replaces inline SL.blue on icons/headings) */
+const SL_TEXT = {
+  blue: "text-[#003366] dark:text-sky-300",
+  blueLight: "text-[#004080] dark:text-sky-400",
+  gold: "text-[#d4a84b] dark:text-amber-300",
 };
 
 interface SlideContentProps {
@@ -40,16 +47,29 @@ interface SlideContentProps {
 /** Wraps slide content: premium stage background + company footer */
 function SlideWrapper({ children }: { children: ReactNode }) {
   return (
-    <div className="relative w-full min-h-0 flex flex-col">
-      {/* Stage area: soft gradient and subtle radial glow for depth */}
+    <div className="relative flex min-h-0 w-full flex-col">
+      {/* Stage area: soft gradient (light) / slate stack (dark) */}
       <div
-        className="flex-1 min-h-0 rounded-t-2xl overflow-hidden"
-        style={{
-          background: "linear-gradient(165deg, #f0f4f8 0%, #e8eef5 25%, #fafbfd 60%, #f5f7fa 100%)",
-          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.9), inset 0 -1px 0 rgba(0,51,102,0.04)",
-        }}
+        className={cn(
+          "flex-1 min-h-0 overflow-hidden rounded-t-2xl",
+          "bg-gradient-to-br from-[#f0f4f8] via-[#fafbfd] to-[#f5f7fa]",
+          "dark:from-gray-950 dark:via-slate-900 dark:to-gray-950",
+          "shadow-[inset_0_1px_0_rgba(255,255,255,0.9),inset_0_-1px_0_rgba(0,51,102,0.04)]",
+          "dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.05),inset_0_-1px_0_rgba(0,0,0,0.45)]"
+        )}
       >
-        {children}
+        <div
+          className={cn(
+            "h-full min-h-0",
+            "dark:[&_.text-gray-500]:text-gray-400",
+            "dark:[&_.text-gray-600]:text-gray-400",
+            "dark:[&_.text-gray-700]:text-gray-300",
+            "dark:[&_.text-gray-800]:text-gray-200",
+            "dark:[&_.text-gray-900]:text-gray-50"
+          )}
+        >
+          {children}
+        </div>
       </div>
       <motion.footer
         initial={{ opacity: 0, y: 8 }}
@@ -186,9 +206,10 @@ function AgentSlide({ t }: { t: ReturnType<typeof useTranslations> }) {
           <motion.div
             variants={itemScaleVariants}
             className={cn(
-              "p-8 rounded-2xl border-2 border-[#003366]/25 bg-white/90 backdrop-blur-sm",
+              "rounded-2xl border-2 border-[#003366]/25 bg-white/90 backdrop-blur-sm p-8",
+              "dark:border-sky-400/25 dark:bg-gray-900/95",
               "shadow-[0_8px_32px_rgba(0,51,102,0.12),0_2px_8px_rgba(0,0,0,0.06)]",
-              "ring-1 ring-white/50"
+              "ring-1 ring-white/50 dark:ring-gray-700/60"
             )}
           >
             <div className="flex items-center mb-6">
@@ -206,26 +227,26 @@ function AgentSlide({ t }: { t: ReturnType<typeof useTranslations> }) {
               </motion.div>
               <div>
                 <h3 className="text-2xl md:text-3xl font-bold text-gray-900">{contact?.name || "Isaac Orraiz"}</h3>
-                <p className={cn("text-lg font-semibold")} style={{ color: SL.blue }}>{t("role")}</p>
+                <p className={cn("text-lg font-semibold", SL_TEXT.blue)}>{t("role")}</p>
               </div>
             </div>
             <p className="text-gray-700 text-lg leading-relaxed mb-6">{t("introduction")}</p>
             <div className="space-y-4">
               {contact?.phone && (
                 <a href={`tel:${contact.phone}`} className="flex items-center text-gray-700 hover:opacity-80">
-                  <Phone className="h-5 w-5 mr-3" style={{ color: SL.blue }} />
+                  <Phone className={cn("mr-3 h-5 w-5", SL_TEXT.blue)} />
                   <span className="text-lg font-medium">{contact.phone}</span>
                 </a>
               )}
               {contact?.email && (
                 <a href={`mailto:${contact.email}`} className="flex items-center text-gray-700 hover:opacity-80">
-                  <Mail className="h-5 w-5 mr-3" style={{ color: SL.blue }} />
+                  <Mail className={cn("mr-3 h-5 w-5", SL_TEXT.blue)} />
                   <span className="text-lg font-medium break-all">{contact.email}</span>
                 </a>
               )}
               {contact?.website && (
                 <span className="flex items-center text-gray-700">
-                  <User className="h-5 w-5 mr-3" style={{ color: SL.blue }} />
+                  <User className={cn("mr-3 h-5 w-5", SL_TEXT.blue)} />
                   <span className="text-lg font-medium">{contact.website}</span>
                 </span>
               )}
@@ -233,10 +254,10 @@ function AgentSlide({ t }: { t: ReturnType<typeof useTranslations> }) {
           </motion.div>
           <motion.div
             variants={itemVariants}
-            className="bg-white p-6 rounded-xl border-l-4 border-amber-500 shadow-[0_6px_24px_rgba(0,51,102,0.08)]"
+            className="rounded-xl border-l-4 border-amber-500 bg-white p-6 shadow-[0_6px_24px_rgba(0,51,102,0.08)] dark:bg-gray-900"
           >
             <div className="flex items-center mb-4">
-              <BadgeCheck className="h-6 w-6 mr-2" style={{ color: SL.blue }} />
+              <BadgeCheck className={cn("mr-2 h-6 w-6", SL_TEXT.blue)} />
               <h4 className="text-xl font-bold text-gray-900">{t("credentials.title")}</h4>
             </div>
             <ul className="space-y-2">
@@ -246,7 +267,7 @@ function AgentSlide({ t }: { t: ReturnType<typeof useTranslations> }) {
                   variants={itemSlideLeftVariants}
                   className="flex items-start text-gray-700 gap-2"
                 >
-                  <CheckCircle2 className="h-5 w-5 mt-0.5 flex-shrink-0" style={{ color: SL.gold }} />
+                  <CheckCircle2 className={cn("mt-0.5 h-5 w-5 flex-shrink-0", SL_TEXT.gold)} />
                   <span className="text-base">{item}</span>
                 </motion.li>
               ))}
@@ -255,12 +276,12 @@ function AgentSlide({ t }: { t: ReturnType<typeof useTranslations> }) {
         </motion.div>
 
         <motion.div variants={itemScaleVariants} className="space-y-6">
-          <div className="bg-white p-6 rounded-xl border-2 border-gray-200 shadow-[0_8px_32px_rgba(0,0,0,0.08)]">
+          <div className="rounded-xl border-2 border-gray-200 bg-white p-6 shadow-[0_8px_32px_rgba(0,0,0,0.08)] dark:border-gray-600 dark:bg-gray-900">
             <div className="flex items-center mb-4">
-              <BadgeCheck className="h-6 w-6 mr-2" style={{ color: SL.blue }} />
+              <BadgeCheck className={cn("mr-2 h-6 w-6", SL_TEXT.blue)} />
               <h4 className="text-xl font-bold text-gray-900">{t("credentialTitle")}</h4>
             </div>
-            <div className="relative w-full aspect-[3/4] max-h-[560px] bg-gray-100 rounded-lg overflow-hidden">
+            <div className="relative aspect-[3/4] max-h-[560px] w-full overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800">
               <Image
                 src={SENIOR_LIFE_CREDENTIAL_IMAGE}
                 alt={t("credentialAlt")}
@@ -306,7 +327,7 @@ function CoverSlide({ t }: { t: ReturnType<typeof useTranslations> }) {
     >
       <motion.div
         variants={itemScaleVariants}
-        className="rounded-2xl overflow-hidden shadow-[0_20px_60px_rgba(0,51,102,0.2),0_8px_24px_rgba(0,0,0,0.12)] border-2 border-[#003366]/25 bg-white ring-1 ring-black/5"
+        className="rounded-2xl overflow-hidden border-2 border-[#003366]/25 bg-white shadow-[0_20px_60px_rgba(0,51,102,0.2),0_8px_24px_rgba(0,0,0,0.12)] ring-1 ring-black/5 dark:border-sky-400/25 dark:bg-gray-900 dark:ring-white/10"
       >
         <div className="relative">
           <motion.div
@@ -360,7 +381,7 @@ function CoverSlide({ t }: { t: ReturnType<typeof useTranslations> }) {
         </div>
 
         <div className="p-8 md:p-10">
-          <motion.p variants={itemVariants} className="text-center mb-6 text-lg font-medium" style={{ color: SL.blue }}>
+          <motion.p variants={itemVariants} className={cn("mb-6 text-center text-lg font-medium", SL_TEXT.blue)}>
             {whyPlanText}
           </motion.p>
           <ul className="space-y-3 max-w-xl mx-auto">
@@ -379,7 +400,7 @@ function CoverSlide({ t }: { t: ReturnType<typeof useTranslations> }) {
                 >
                   {i + 1}
                 </motion.span>
-                <span style={{ color: SL.blue }}>{item}</span>
+                <span className={SL_TEXT.blue}>{item}</span>
               </motion.li>
             ))}
           </ul>
@@ -406,7 +427,7 @@ function PlanificacionSlide({ t }: { t: ReturnType<typeof useTranslations> }) {
     >
       <motion.div
         variants={itemScaleVariants}
-        className="rounded-2xl overflow-hidden shadow-[0_20px_60px_rgba(0,51,102,0.18)] border-2 border-[#003366]/25 bg-white"
+        className="rounded-2xl overflow-hidden border-2 border-[#003366]/25 bg-white shadow-[0_20px_60px_rgba(0,51,102,0.18)] dark:border-sky-400/25 dark:bg-gray-900"
       >
         <motion.div
           initial={{ scaleX: 0 }}
@@ -446,7 +467,7 @@ function PlanificacionSlide({ t }: { t: ReturnType<typeof useTranslations> }) {
               <motion.div
                 key={i}
                 variants={itemScaleVariants}
-                className="relative rounded-xl p-6 text-center border-2 overflow-hidden bg-white shadow-[0_8px_24px_rgba(0,51,102,0.1)] hover:shadow-[0_12px_32px_rgba(0,51,102,0.15)] transition-shadow duration-300"
+                className="relative overflow-hidden rounded-xl border-2 bg-white p-6 text-center shadow-[0_8px_24px_rgba(0,51,102,0.1)] transition-shadow duration-300 hover:shadow-[0_12px_32px_rgba(0,51,102,0.15)] dark:bg-gray-900"
                 style={{ borderColor: SL.blue }}
               >
                 <motion.div
@@ -465,7 +486,7 @@ function PlanificacionSlide({ t }: { t: ReturnType<typeof useTranslations> }) {
                 >
                   {i + 1}
                 </motion.span>
-                <h3 className="text-xl font-bold mb-2" style={{ color: SL.blue }}>
+                <h3 className={cn("mb-2 text-xl font-bold", SL_TEXT.blue)}>
                   {opt.title}
                 </h3>
                 {opt.subtitle && (
@@ -587,7 +608,7 @@ function RiesgoSlide({ t }: { t: ReturnType<typeof useTranslations> }) {
           </thead>
           <tbody>
             {rows.map((row, i) => (
-              <tr key={i} className={i % 2 === 0 ? "bg-gray-50" : "bg-white"}>
+              <tr key={i} className={i % 2 === 0 ? "bg-gray-50 dark:bg-gray-800/50" : "bg-white dark:bg-gray-900/80"}>
                 <td className="p-3 font-medium text-gray-800">{row.label}</td>
                 {row.cols.map((c, j) => (
                   <td key={j} className="p-3 text-center text-gray-700">{c}</td>
@@ -615,7 +636,7 @@ function PyramidCard({
   return (
     <motion.div
       variants={variants}
-      className="rounded-2xl border-[3px] bg-white/95 backdrop-blur-sm px-4 py-3 shadow-xl max-w-[260px] md:max-w-[300px]"
+      className="max-w-[260px] rounded-2xl border-[3px] border-[#003366]/40 bg-white/95 px-4 py-3 shadow-xl backdrop-blur-sm dark:border-gray-600 dark:bg-gray-900/95 md:max-w-[300px]"
       style={{
         borderColor,
         boxShadow: `0 4px 20px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.04)`,
@@ -657,17 +678,17 @@ function CompanySlide({ t }: { t: ReturnType<typeof useTranslations> }) {
               variants={itemSlideLeftVariants}
               className="flex items-start gap-2 text-gray-700 text-lg md:text-xl"
             >
-              <CheckCircle2 className="h-6 w-6 flex-shrink-0 mt-0.5" style={{ color: SL.blue }} />
+              <CheckCircle2 className={cn("mt-0.5 h-6 w-6 flex-shrink-0", SL_TEXT.blue)} />
               <span>{b}</span>
             </motion.li>
           ))}
         </motion.ul>
         {imageUrl ? (
-          <motion.div variants={itemScaleVariants} className="relative aspect-video rounded-xl overflow-hidden bg-gray-100 shadow-[0_8px_32px_rgba(0,0,0,0.08)]">
+          <motion.div variants={itemScaleVariants} className="relative aspect-video overflow-hidden rounded-xl bg-gray-100 shadow-[0_8px_32px_rgba(0,0,0,0.08)] dark:bg-gray-800">
             <Image src={imageUrl} alt={t("imageAlt")} fill className="object-contain" sizes="50vw" />
           </motion.div>
         ) : (
-          <motion.div variants={itemScaleVariants} className="aspect-video rounded-xl bg-gray-200 flex items-center justify-center text-gray-500 text-lg">
+          <motion.div variants={itemScaleVariants} className="aspect-video rounded-xl bg-gray-200 text-lg flex items-center justify-center text-gray-500 dark:bg-gray-700 dark:text-gray-400">
             {t("imagePlaceholder")}
           </motion.div>
         )}
@@ -707,7 +728,7 @@ function DefinicionSlide({ t }: { t: ReturnType<typeof useTranslations> }) {
             style={{ background: `linear-gradient(90deg, ${SL.blue} 0%, ${SL.gold} 50%, ${SL.blue} 100%)` }}
           />
           <div className="flex-1 min-h-0 grid md:grid-cols-2 gap-6 p-6 md:p-8 items-center">
-            <motion.div variants={itemScaleVariants} className="relative w-full aspect-[4/3] min-h-[200px] rounded-xl overflow-hidden bg-gray-100 order-2 md:order-1 shadow-lg">
+            <motion.div variants={itemScaleVariants} className="relative w-full aspect-[4/3] min-h-[200px] order-2 overflow-hidden rounded-xl bg-gray-100 shadow-lg dark:bg-gray-800 md:order-1">
               <Image
                 src={imageUrl}
                 alt={imageAlt || t("title")}
@@ -717,10 +738,10 @@ function DefinicionSlide({ t }: { t: ReturnType<typeof useTranslations> }) {
               />
             </motion.div>
             <div className="space-y-4 order-1 md:order-2">
-              <motion.h2 variants={titleVariants} className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight" style={{ color: SL.blue }}>
+              <motion.h2 variants={titleVariants} className={cn("text-3xl font-bold leading-tight md:text-4xl lg:text-5xl", SL_TEXT.blue)}>
                 {t("title")}
               </motion.h2>
-              <motion.p variants={itemVariants} className="text-xl md:text-2xl lg:text-3xl leading-relaxed font-medium" style={{ color: SL.blueLight }}>
+              <motion.p variants={itemVariants} className={cn("text-xl font-medium leading-relaxed md:text-2xl lg:text-3xl", SL_TEXT.blueLight)}>
                 {t("body")}
               </motion.p>
             </div>
@@ -778,7 +799,7 @@ function PreocupacionesSlide({ t }: { t: ReturnType<typeof useTranslations> }) {
           <div className="flex-1 min-h-0 flex flex-col p-4 md:p-6">
             <motion.div
               variants={itemScaleVariants}
-              className="relative w-full aspect-[21/9] min-h-[140px] md:min-h-[180px] rounded-xl overflow-hidden bg-gray-100 mb-4 md:mb-6 shadow-md"
+              className="relative w-full aspect-[21/9] min-h-[140px] md:min-h-[180px] mb-4 overflow-hidden rounded-xl bg-gray-100 shadow-md dark:bg-gray-800 md:mb-6"
             >
               <Image
                 src={mainImageUrl}
@@ -808,7 +829,7 @@ function PreocupacionesSlide({ t }: { t: ReturnType<typeof useTranslations> }) {
                   className="rounded-xl p-4 md:p-5 border-2 flex flex-col min-h-0 bg-white/80 shadow-sm"
                   style={{ borderColor: `${SL.blue}30` }}
                 >
-                  <h4 className="font-bold text-lg md:text-xl mb-2 flex-shrink-0" style={{ color: SL.blue }}>
+                  <h4 className={cn("mb-2 flex-shrink-0 text-lg font-bold md:text-xl", SL_TEXT.blue)}>
                     {cat.label}
                   </h4>
                   <ul className="text-base md:text-lg text-gray-600 space-y-1 mb-2 flex-shrink-0">
@@ -821,7 +842,7 @@ function PreocupacionesSlide({ t }: { t: ReturnType<typeof useTranslations> }) {
                       {cat.images.map((img, j) => (
                         <div
                           key={j}
-                          className="relative aspect-square min-h-[60px] rounded-lg overflow-hidden bg-gray-100"
+                          className="relative aspect-square min-h-[60px] overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800"
                         >
                           <Image
                             src={img.url}
@@ -867,7 +888,7 @@ function PreocupacionesSlide({ t }: { t: ReturnType<typeof useTranslations> }) {
             {cat.images && cat.images.length > 0 && (
               <div className="grid grid-cols-2 gap-2 mt-3">
                 {cat.images.map((img, j) => (
-                  <div key={j} className="relative aspect-square min-h-[80px] rounded-lg overflow-hidden bg-gray-100">
+                  <div key={j} className="relative aspect-square min-h-[80px] overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800">
                     <Image src={img.url} alt={img.alt} fill className="object-cover" sizes="120px" />
                   </div>
                 ))}
@@ -891,10 +912,10 @@ function CostosCremacionSlide({ t }: { t: ReturnType<typeof useTranslations> }) 
       <div className="grid md:grid-cols-2 gap-8">
         <div>
           {options.map((opt, i) => (
-            <motion.div key={i} variants={itemVariants} className="mb-4 p-4 rounded-lg bg-gray-50 border border-gray-200">
+            <motion.div key={i} variants={itemVariants} className="mb-4 rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-600 dark:bg-gray-800/50">
               <h4 className="font-bold text-gray-900">{opt.name}</h4>
               <p className="text-gray-600">{opt.coverage}</p>
-              <p className="text-lg font-semibold" style={{ color: SL.blue }}>{opt.suggested}</p>
+              <p className={cn("text-lg font-semibold", SL_TEXT.blue)}>{opt.suggested}</p>
             </motion.div>
           ))}
         </div>
@@ -922,10 +943,10 @@ function CostosTradicionalSlide({ t }: { t: ReturnType<typeof useTranslations> }
       <div className="grid md:grid-cols-2 gap-8">
         <div>
           {options.map((opt, i) => (
-            <motion.div key={i} variants={itemVariants} className="mb-4 p-4 rounded-lg bg-gray-50 border border-gray-200">
+            <motion.div key={i} variants={itemVariants} className="mb-4 rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-600 dark:bg-gray-800/50">
               <h4 className="font-bold text-gray-900">{opt.name}</h4>
               <p className="text-gray-600">{opt.coverage}</p>
-              <p className="text-lg font-semibold" style={{ color: SL.blue }}>{opt.suggested}</p>
+              <p className={cn("text-lg font-semibold", SL_TEXT.blue)}>{opt.suggested}</p>
             </motion.div>
           ))}
         </div>
@@ -955,12 +976,12 @@ function RidersSlide({ t }: { t: ReturnType<typeof useTranslations> }) {
             key={i}
             variants={itemSlideLeftVariants}
             className={cn(
-              "rounded-xl border-2 border-[#003366]/25 bg-white overflow-hidden flex flex-col sm:flex-row shadow-[0_6px_24px_rgba(0,51,102,0.08)]",
+              "flex flex-col overflow-hidden rounded-xl border-2 border-[#003366]/25 bg-white shadow-[0_6px_24px_rgba(0,51,102,0.08)] dark:border-sky-400/20 dark:bg-gray-900 sm:flex-row",
               r.imageUrl ? "p-0" : "p-6"
             )}
           >
             {r.imageUrl && (
-              <div className="relative w-full sm:w-48 md:w-56 flex-shrink-0 aspect-video sm:aspect-square bg-gray-100">
+              <div className="relative w-full sm:w-48 md:w-56 flex-shrink-0 aspect-video bg-gray-100 sm:aspect-square dark:bg-gray-800">
                 <Image src={r.imageUrl} alt="" fill className="object-cover" sizes="(max-width: 640px) 100vw, 224px" />
               </div>
             )}
@@ -989,17 +1010,17 @@ function FuneralCostsRisingSlide({ t }: { t: ReturnType<typeof useTranslations> 
         {t("subtitle")}
       </motion.p>
       {imageUrl ? (
-        <motion.div variants={itemVariants} className="relative w-full aspect-video rounded-xl overflow-hidden bg-gray-100 mb-6">
+        <motion.div variants={itemVariants} className="relative w-full aspect-video mb-6 overflow-hidden rounded-xl bg-gray-100 dark:bg-gray-800">
           <Image src={imageUrl} alt={t("imageAlt")} fill className="object-contain" sizes="100vw" />
         </motion.div>
       ) : (
-        <motion.div variants={itemVariants} className="aspect-video rounded-xl bg-gray-200 flex items-center justify-center text-gray-500 mb-6">
+        <motion.div variants={itemVariants} className="mb-6 aspect-video rounded-xl bg-gray-200 flex items-center justify-center text-gray-500 dark:bg-gray-700 dark:text-gray-400">
           {t("imagePlaceholder")}
         </motion.div>
       )}
       <motion.div variants={itemVariants} className="rounded-xl border-2 border-gray-200 overflow-hidden">
         {breakdown.map((row, i) => (
-          <div key={i} className={cn("flex justify-between p-3", i % 2 === 0 ? "bg-gray-50" : "bg-white")}>
+          <div key={i} className={cn("flex justify-between p-3", i % 2 === 0 ? "bg-gray-50 dark:bg-gray-800/50" : "bg-white dark:bg-gray-900/80")}>
             <span className="text-gray-800">{row.label}</span>
             <span className="font-semibold">{row.amount}</span>
           </div>
@@ -1050,9 +1071,9 @@ function MejorProteccionSlide({ t }: { t: ReturnType<typeof useTranslations> }) 
             <motion.div
               key={i}
               variants={itemSlideLeftVariants}
-              className="w-full rounded-xl border-2 border-[#003366]/15 overflow-hidden bg-white shadow-[0_4px_16px_rgba(0,51,102,0.06)] flex flex-row items-center gap-4 md:gap-6 flex-shrink-0"
+              className="flex w-full flex-shrink-0 flex-row items-center gap-4 overflow-hidden rounded-xl border-2 border-[#003366]/15 bg-white shadow-[0_4px_16px_rgba(0,51,102,0.06)] dark:border-gray-600 dark:bg-gray-900 md:gap-6"
             >
-              <div className="relative w-24 h-24 md:w-32 md:h-32 lg:w-40 lg:h-40 flex-shrink-0 bg-gray-100">
+              <div className="relative w-24 h-24 md:w-32 md:h-32 lg:w-40 lg:h-40 flex-shrink-0 bg-gray-100 dark:bg-gray-800">
                 <Image
                   src={item.imageUrl}
                   alt=""
@@ -1062,7 +1083,7 @@ function MejorProteccionSlide({ t }: { t: ReturnType<typeof useTranslations> }) 
                 />
               </div>
               <div className="flex-1 flex items-center gap-3 md:gap-4 py-3 md:py-4 pr-4 md:pr-6 min-h-0">
-                <CheckCircle2 className="h-6 w-6 md:h-7 md:w-7 lg:h-8 lg:w-8 flex-shrink-0" style={{ color: SL.blue }} />
+                <CheckCircle2 className={cn("h-6 w-6 flex-shrink-0 md:h-7 md:w-7 lg:h-8", SL_TEXT.blue)} />
                 <span className="text-xl md:text-2xl lg:text-3xl xl:text-4xl font-medium text-gray-800">{item.text}</span>
               </div>
             </motion.div>
@@ -1081,7 +1102,7 @@ function MejorProteccionSlide({ t }: { t: ReturnType<typeof useTranslations> }) 
       <ul className="space-y-3">
         {items.map((item: string, i: number) => (
           <motion.li key={i} variants={itemVariants} className="flex items-start gap-3 text-gray-800">
-            <CheckCircle2 className="h-5 w-5 flex-shrink-0 mt-0.5" style={{ color: SL.blue }} />
+            <CheckCircle2 className={cn("mt-0.5 h-5 w-5 flex-shrink-0", SL_TEXT.blue)} />
             <span className="text-lg md:text-xl font-medium">{item}</span>
           </motion.li>
         ))}
@@ -1100,11 +1121,11 @@ function ImagePlaceholderSlide({ t }: { t: ReturnType<typeof useTranslations> })
         </motion.h2>
       )}
       {imageUrl ? (
-        <motion.div variants={itemScaleVariants} className="relative w-full aspect-video rounded-xl overflow-hidden bg-gray-100 shadow-lg">
+        <motion.div variants={itemScaleVariants} className="relative w-full aspect-video overflow-hidden rounded-xl bg-gray-100 shadow-lg dark:bg-gray-800">
           <Image src={imageUrl} alt={t("imageAlt") || ""} fill className="object-contain" sizes="100vw" />
         </motion.div>
       ) : (
-        <motion.div variants={itemScaleVariants} className="w-full aspect-video rounded-xl bg-gray-200 flex items-center justify-center text-gray-500">
+        <motion.div variants={itemScaleVariants} className="aspect-video w-full rounded-xl bg-gray-200 flex items-center justify-center text-gray-500 dark:bg-gray-700 dark:text-gray-400">
           {t("imagePlaceholder")}
         </motion.div>
       )}
@@ -1137,7 +1158,7 @@ function DiscoverySlide({ t }: { t: ReturnType<typeof useTranslations> }) {
       <ul className="space-y-4">
         {bullets.map((text, i) => (
           <motion.li key={i} variants={itemVariants} className="flex items-start gap-3 text-gray-700">
-            <CheckCircle2 className="h-5 w-5 flex-shrink-0 mt-0.5" style={{ color: SL.blue }} />
+            <CheckCircle2 className={cn("mt-0.5 h-5 w-5 flex-shrink-0", SL_TEXT.blue)} />
             <span>{text}</span>
           </motion.li>
         ))}
@@ -1219,7 +1240,7 @@ function KeyBenefitsSlide({ t }: { t: ReturnType<typeof useTranslations> }) {
       <ul className="space-y-3 mb-8">
         {(benefits || []).map((b: string, i: number) => (
           <motion.li key={i} variants={itemVariants} className="flex items-start gap-2 text-gray-700">
-            <CheckCircle2 className="h-5 w-5 flex-shrink-0 mt-0.5" style={{ color: SL.blue }} />
+            <CheckCircle2 className={cn("mt-0.5 h-5 w-5 flex-shrink-0", SL_TEXT.blue)} />
             <span>{b}</span>
           </motion.li>
         ))}
@@ -1244,7 +1265,7 @@ function PharmacySlide({ t }: { t: ReturnType<typeof useTranslations> }) {
       <motion.ul className="space-y-2">
         {bullets.map((bullet: string, i: number) => (
           <motion.li key={i} variants={itemSlideLeftVariants} className="flex items-start gap-2 text-lg text-gray-700">
-            <CheckCircle2 className="h-6 w-6 mt-0.5 flex-shrink-0" style={{ color: SL.gold }} />
+            <CheckCircle2 className={cn("mt-0.5 h-6 w-6 flex-shrink-0", SL_TEXT.gold)} />
             <span>{bullet}</span>
           </motion.li>
         ))}
@@ -1320,7 +1341,7 @@ function ThreeOptionsSlide({ t }: { t: ReturnType<typeof useTranslations> }) {
         <div className={cn("rounded-lg p-4 border-2", "border-amber-600/30 bg-amber-50")}>
           <span className="font-bold text-gray-800">Bronze:</span> {t("bronze")}
         </div>
-        <div className={cn("rounded-lg p-4 border-2", "border-gray-400 bg-gray-50")}>
+        <div className={cn("rounded-lg border-2 border-gray-400 bg-gray-50 p-4 dark:border-gray-500 dark:bg-gray-800/70")}>
           <span className="font-bold text-gray-800">Silver:</span> {t("silver")}
         </div>
         <div className={cn("rounded-lg p-4 border-2", "border-amber-500 bg-amber-50/50")}>

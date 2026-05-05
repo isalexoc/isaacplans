@@ -68,19 +68,19 @@ export default async function FinalExpenseLeaveBehindPage() {
   const t = await getTranslations({ locale, namespace: "finalExpenseLeaveBehind" });
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <div className="flex justify-between items-center mb-8">
+    <main className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-950 dark:via-slate-900 dark:to-gray-950">
+      <div className="container mx-auto max-w-4xl px-4 py-8">
+        <div className="mb-8 flex items-center justify-between">
           <Button asChild variant="secondary">
             <Link href="/final-expense">{t("backButton")}</Link>
           </Button>
         </div>
 
-        <div className="text-center mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-[#003366] mb-2">
+        <div className="mb-8 text-center">
+          <h1 className="mb-2 text-2xl font-bold text-[#003366] dark:text-sky-300 sm:text-3xl">
             {t("title")}
           </h1>
-          <p className="text-gray-600">{t("subtitle")}</p>
+          <p className="text-gray-600 dark:text-gray-300">{t("subtitle")}</p>
         </div>
 
         <FinalExpenseLeaveBehindForm />

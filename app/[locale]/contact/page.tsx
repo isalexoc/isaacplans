@@ -129,17 +129,15 @@ export default async function ContactPage() {
         <BackHome />
       </div>
       <section
-        className="relative py-16 lg:py-24 px-4 sm:px-6 lg:px-8 
-                   bg-gradient-to-br from-[hsl(var(--custom)/0.06)] via-white to-[hsl(var(--custom)/0.04)] 
-                   dark:bg-gray-950 overflow-hidden"
+        className="relative py-16 lg:py-24 px-4 sm:px-6 lg:px-8 overflow-hidden bg-gradient-to-br from-[hsl(var(--custom)/0.06)] via-white to-[hsl(var(--custom)/0.04)] dark:bg-gradient-to-br dark:from-gray-950 dark:via-slate-900 dark:to-gray-950"
       >
         {/* Decorative background elements */}
         <div
-          className="absolute inset-0 opacity-25 pointer-events-none"
+          className="pointer-events-none absolute inset-0 opacity-25 dark:opacity-[0.12]"
           aria-hidden="true"
         >
-          <div className="absolute top-20 left-10 w-96 h-96 bg-[hsl(var(--custom)/0.08)] rounded-full blur-3xl" />
-          <div className="absolute bottom-20 right-10 w-96 h-96 bg-[hsl(var(--custom)/0.08)] rounded-full blur-3xl" />
+          <div className="absolute left-10 top-20 h-96 w-96 rounded-full bg-[hsl(var(--custom)/0.08)] blur-3xl dark:bg-[hsl(var(--custom)/0.12)]" />
+          <div className="absolute bottom-20 right-10 h-96 w-96 rounded-full bg-[hsl(var(--custom)/0.08)] blur-3xl dark:bg-[hsl(var(--custom)/0.12)]" />
         </div>
 
         <div className="max-w-3xl mx-auto text-center relative z-10">
@@ -173,7 +171,7 @@ export default async function ContactPage() {
                     alt="Isaac Orraiz"
                     width={140}
                     height={140}
-                    className="rounded-full shadow-2xl border-4 border-white/50 group-hover:shadow-3xl transition-all duration-300"
+                    className="rounded-full border-4 border-white/50 shadow-2xl transition-all duration-300 group-hover:shadow-3xl dark:border-gray-700/80"
                     priority
                     fetchPriority="high"
                   />
@@ -197,7 +195,7 @@ export default async function ContactPage() {
                   className="flex items-center justify-center gap-3 bg-[hsl(var(--custom))] hover:bg-[hsl(var(--custom)/0.9)] 
                              text-white font-semibold rounded-xl py-4 px-6 shadow-lg hover:shadow-xl
                              transition-all duration-300 hover:-translate-y-0.5
-                             focus-visible:ring-2 focus-visible:ring-[hsl(var(--custom))] focus-visible:ring-offset-2"
+                             focus-visible:ring-2 focus-visible:ring-[hsl(var(--custom))] focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                   aria-label={`Call ${PHONE}`}
                   role="listitem"
                 >
@@ -210,7 +208,7 @@ export default async function ContactPage() {
                   className="flex items-center justify-center gap-3 bg-[hsl(var(--custom))] hover:bg-[hsl(var(--custom)/0.9)] 
                              text-white font-semibold rounded-xl py-4 px-6 shadow-lg hover:shadow-xl
                              transition-all duration-300 hover:-translate-y-0.5
-                             focus-visible:ring-2 focus-visible:ring-[hsl(var(--custom))] focus-visible:ring-offset-2"
+                             focus-visible:ring-2 focus-visible:ring-[hsl(var(--custom))] focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                   aria-label="Send email to info@isaacplans.com"
                   role="listitem"
                 >
@@ -225,7 +223,7 @@ export default async function ContactPage() {
                   className="flex items-center justify-center gap-3 bg-[hsl(var(--custom))] hover:bg-[hsl(var(--custom)/0.9)] 
                              text-white font-semibold rounded-xl py-4 px-6 shadow-lg hover:shadow-xl
                              transition-all duration-300 hover:-translate-y-0.5
-                             focus-visible:ring-2 focus-visible:ring-[hsl(var(--custom))] focus-visible:ring-offset-2"
+                             focus-visible:ring-2 focus-visible:ring-[hsl(var(--custom))] focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                   aria-label={`${t("info.buttons.whatsapp")} (opens in new tab)`}
                   role="listitem"
                 >
@@ -239,7 +237,7 @@ export default async function ContactPage() {
                   className="flex items-center justify-center gap-3 bg-[hsl(var(--custom))] hover:bg-[hsl(var(--custom)/0.9)] 
                              text-white font-semibold rounded-xl py-4 px-6 shadow-lg hover:shadow-xl
                              transition-all duration-300 hover:-translate-y-0.5
-                             focus-visible:ring-2 focus-visible:ring-[hsl(var(--custom))] focus-visible:ring-offset-2"
+                             focus-visible:ring-2 focus-visible:ring-[hsl(var(--custom))] focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                   aria-label={t("info.addContact")}
                   role="listitem"
                 >
@@ -253,7 +251,7 @@ export default async function ContactPage() {
                   className="flex items-center justify-center gap-3 bg-[hsl(var(--custom))] hover:bg-[hsl(var(--custom)/0.9)] 
                              text-white font-semibold rounded-xl py-4 px-6 shadow-lg hover:shadow-xl
                              transition-all duration-300 hover:-translate-y-0.5
-                             focus-visible:ring-2 focus-visible:ring-[hsl(var(--custom))] focus-visible:ring-offset-2"
+                             focus-visible:ring-2 focus-visible:ring-[hsl(var(--custom))] focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                   aria-label={t("info.buttons.website")}
                   role="listitem"
                 >
@@ -268,7 +266,7 @@ export default async function ContactPage() {
                   className="flex items-center justify-center gap-3 bg-[hsl(var(--custom))] hover:bg-[hsl(var(--custom)/0.9)] 
                              text-white font-semibold rounded-xl py-4 px-6 shadow-lg hover:shadow-xl
                              transition-all duration-300 hover:-translate-y-0.5
-                             focus-visible:ring-2 focus-visible:ring-[hsl(var(--custom))] focus-visible:ring-offset-2"
+                             focus-visible:ring-2 focus-visible:ring-[hsl(var(--custom))] focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                   aria-label={`${t("info.buttons.schedule")} (opens in new tab)`}
                   role="listitem"
                 >
@@ -292,7 +290,7 @@ export default async function ContactPage() {
                              text-[hsl(var(--custom))] hover:text-white
                              hover:bg-[hsl(var(--custom))] shadow-md hover:shadow-lg
                              transition-all duration-300 hover:-translate-y-0.5
-                             focus-visible:ring-2 focus-visible:ring-[hsl(var(--custom))] focus-visible:ring-offset-2"
+                             focus-visible:ring-2 focus-visible:ring-[hsl(var(--custom))] focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                   role="listitem"
                 >
                   <Facebook className="w-6 h-6" aria-hidden="true" />
@@ -306,7 +304,7 @@ export default async function ContactPage() {
                              text-[hsl(var(--custom))] hover:text-white
                              hover:bg-[hsl(var(--custom))] shadow-md hover:shadow-lg
                              transition-all duration-300 hover:-translate-y-0.5
-                             focus-visible:ring-2 focus-visible:ring-[hsl(var(--custom))] focus-visible:ring-offset-2"
+                             focus-visible:ring-2 focus-visible:ring-[hsl(var(--custom))] focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                   role="listitem"
                 >
                   <Instagram className="w-6 h-6" aria-hidden="true" />
@@ -320,7 +318,7 @@ export default async function ContactPage() {
                              text-[hsl(var(--custom))] hover:text-white
                              hover:bg-[hsl(var(--custom))] shadow-md hover:shadow-lg
                              transition-all duration-300 hover:-translate-y-0.5
-                             focus-visible:ring-2 focus-visible:ring-[hsl(var(--custom))] focus-visible:ring-offset-2"
+                             focus-visible:ring-2 focus-visible:ring-[hsl(var(--custom))] focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                   role="listitem"
                 >
                   <Youtube className="w-6 h-6" aria-hidden="true" />
@@ -334,7 +332,7 @@ export default async function ContactPage() {
                              text-[hsl(var(--custom))] hover:text-white
                              hover:bg-[hsl(var(--custom))] shadow-md hover:shadow-lg
                              transition-all duration-300 hover:-translate-y-0.5
-                             focus-visible:ring-2 focus-visible:ring-[hsl(var(--custom))] focus-visible:ring-offset-2"
+                             focus-visible:ring-2 focus-visible:ring-[hsl(var(--custom))] focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                   role="listitem"
                 >
                   <Linkedin className="w-6 h-6" aria-hidden="true" />
@@ -365,7 +363,7 @@ export default async function ContactPage() {
             <div className="mt-4">
               <Link
                 href="/get-covered-fast"
-                className="inline-flex items-center justify-center rounded-lg bg-gradient-to-r from-[hsl(var(--custom))] to-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md transition hover:from-[hsl(var(--custom)/0.92)] hover:to-blue-600/95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--custom))] focus-visible:ring-offset-2"
+                className="inline-flex items-center justify-center rounded-lg bg-gradient-to-r from-[hsl(var(--custom))] to-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md transition hover:from-[hsl(var(--custom)/0.92)] hover:to-blue-600/95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--custom))] focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               >
                 {t("quizBanner.cta")}
               </Link>

@@ -47,7 +47,7 @@ export default function IULWorkflowStepper({
                       "border-green-600 bg-green-600 text-white",
                     !isCompleted &&
                       !isActive &&
-                      "border-gray-300 bg-white text-gray-400",
+                      "border-gray-300 bg-white text-gray-400 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-500",
                     isClickable && "cursor-pointer hover:scale-105",
                     !isClickable && "cursor-not-allowed"
                   )}
@@ -65,10 +65,10 @@ export default function IULWorkflowStepper({
                   disabled={!isClickable}
                   className={cn(
                     "mt-2 text-xs sm:text-sm font-medium text-center transition-colors",
-                    isActive && "text-blue-600 font-semibold",
-                    isCompleted && !isActive && "text-green-600",
-                    !isCompleted && !isActive && "text-gray-500",
-                    isClickable && "cursor-pointer hover:text-blue-600 hover:underline",
+                    isActive && "font-semibold text-blue-600 dark:text-sky-400",
+                    isCompleted && !isActive && "text-green-600 dark:text-green-400",
+                    !isCompleted && !isActive && "text-gray-500 dark:text-gray-400",
+                    isClickable && "cursor-pointer hover:text-blue-600 hover:underline dark:hover:text-sky-400",
                     !isClickable && "cursor-not-allowed"
                   )}
                 >
@@ -81,7 +81,7 @@ export default function IULWorkflowStepper({
                 <div
                   className={cn(
                     "h-0.5 flex-1 mx-2 transition-colors",
-                    index < currentStep ? "bg-green-600" : "bg-gray-300"
+                    index < currentStep ? "bg-green-600" : "bg-gray-300 dark:bg-gray-600"
                   )}
                 />
               )}
