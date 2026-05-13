@@ -194,6 +194,15 @@ export default function FinalExpenseGetCoveredFunnel() {
 
   const inputBase =
     "min-h-[56px] w-full rounded-lg border-2 border-gray-200 bg-white px-4 py-3 text-[17px] leading-6 text-gray-900 placeholder:text-[15px] placeholder:text-gray-400 transition-all duration-200 focus:border-[hsl(var(--custom))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--custom)/0.2)] dark:border-gray-700 dark:bg-gray-800/50 dark:text-white dark:placeholder:text-gray-500";
+  const phoneInputBase = cn(
+    inputBase,
+    "flex items-center gap-2",
+    "[&_.PhoneInputCountry]:m-0 [&_.PhoneInputCountry]:self-stretch [&_.PhoneInputCountry]:rounded-md [&_.PhoneInputCountry]:bg-transparent",
+    "[&_.PhoneInputCountrySelect]:h-full [&_.PhoneInputCountrySelect]:rounded-md [&_.PhoneInputCountrySelect]:bg-transparent",
+    "[&_.PhoneInputCountrySelectArrow]:text-gray-500 dark:[&_.PhoneInputCountrySelectArrow]:text-gray-300",
+    "[&_.PhoneInputCountryIcon]:shadow-none",
+    "[&_.PhoneInputInput]:h-full [&_.PhoneInputInput]:min-h-[48px] [&_.PhoneInputInput]:flex-1 [&_.PhoneInputInput]:border-0 [&_.PhoneInputInput]:bg-transparent [&_.PhoneInputInput]:p-0 [&_.PhoneInputInput]:text-[17px] [&_.PhoneInputInput]:leading-6 [&_.PhoneInputInput]:text-gray-900 [&_.PhoneInputInput]:outline-none dark:[&_.PhoneInputInput]:text-white"
+  );
   const selectBase = cn(inputBase, "cursor-pointer");
   const labelBase = "mb-1.5 block text-base font-semibold text-gray-800 dark:text-gray-200";
   const fieldErrorBase = "mt-1.5 text-sm font-medium text-red-600 dark:text-red-400";
@@ -1037,10 +1046,7 @@ export default function FinalExpenseGetCoveredFunnel() {
                         trackFieldCompletedOnce("phone", "contact", Boolean(parsePhoneNumber(value, "US")?.number));
                         if (value.trim()) clearFieldError("phone");
                       }}
-                      className={cn(
-                        inputBase,
-                        fieldErrors.phone && "border-red-500"
-                      )}
+                      className={cn(phoneInputBase, fieldErrors.phone && "border-red-500")}
                       disabled={loadingContact}
                     />
                     {fieldErrors.phone && (

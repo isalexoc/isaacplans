@@ -8,6 +8,21 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FileImage, ArrowRight, Pencil, Share2 } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import type { PresentationTier } from "@/lib/final-expense-leave-behind-tiers";
+import {
+  TIER_LABEL_KEYS,
+  TIER_MEDAL_URLS,
+  TIER_THEMES,
+} from "@/lib/final-expense-leave-behind-tiers";
+
+export type { PresentationTier } from "@/lib/final-expense-leave-behind-tiers";
 
 // 2x resolution (560px) for crisp html2canvas capture at 280px display
 const SENIOR_LIFE_LOGO =
@@ -60,8 +75,11 @@ export default function FinalExpenseLeaveBehindForm() {
   const [avoidNames, setAvoidNames] = useState("");
   const [protectNames, setProtectNames] = useState("");
   const [planType, setPlanType] = useState<"standard" | "modified" | "easyIssue" | "guaranteedIssue">("standard");
+  const [presentationTier, setPresentationTier] = useState<PresentationTier>("gold");
 
   const imageRef = useRef<HTMLDivElement>(null);
+  const tierTheme = TIER_THEMES[presentationTier];
+  const tierDisplayName = t(`phase1.${TIER_LABEL_KEYS[presentationTier]}`);
 
   const naturalNum = parseFloat(sanitizeDecimalInput(naturalDeath)) || 0;
   const accidentalNum = parseFloat(sanitizeDecimalInput(accidentalDeath)) || 0;
@@ -110,7 +128,7 @@ export default function FinalExpenseLeaveBehindForm() {
     );
 
     const canvas = await html2canvas(imageRef.current, {
-      backgroundColor: "#0a1628",
+      backgroundColor: tierTheme.captureBg,
       scale: 2,
       logging: false,
       useCORS: true,
@@ -325,11 +343,32 @@ export default function FinalExpenseLeaveBehindForm() {
                 </div>
               </RadioGroup>
             </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="presentation-tier" className="text-base text-foreground">
+                {t("phase1.presentationTier")}
+              </Label>
+              <Select
+                value={presentationTier}
+                onValueChange={(v) => setPresentationTier(v as PresentationTier)}
+              >
+                <SelectTrigger id="presentation-tier" className="w-full sm:max-w-md">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="bronze">{t("phase1.tierBronze")}</SelectItem>
+                  <SelectItem value="silver">{t("phase1.tierSilver")}</SelectItem>
+                  <SelectItem value="gold">{t("phase1.tierGold")}</SelectItem>
+                  <SelectItem value="platinum">{t("phase1.tierPlatinum")}</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{t("phase1.presentationTierHint")}</p>
+            </div>
           </div>
 
           <Button
             onClick={handleGenerate}
-            className="w-full sm:w-auto bg-[#003366] hover:bg-[#004080] gap-2 text-base py-6 px-8"
+            className="w-full sm:w-auto bg-[#003366] text-white hover:bg-[#004080] hover:text-white gap-2 text-base py-6 px-8"
           >
             {t("phase2.generateButton")}
             <ArrowRight className="h-4 w-4" />
@@ -352,7 +391,7 @@ export default function FinalExpenseLeaveBehindForm() {
             <Button
               onClick={handleDownload}
               disabled={isDownloading || isSharing}
-              className="gap-2 bg-[#003366] hover:bg-[#004080]"
+              className="gap-2 bg-[#003366] text-white hover:bg-[#004080] hover:text-white"
             >
               <FileImage className="h-4 w-4" />
               {isDownloading ? t("phase2.downloading") : t("phase2.downloadButton")}
@@ -370,6 +409,28 @@ export default function FinalExpenseLeaveBehindForm() {
             )}
           </div>
 
+          <div className="max-w-sm mx-auto space-y-3">
+            <div className="space-y-2">
+              <Label htmlFor="presentation-tier-preview" className="text-sm font-medium text-foreground">
+                {t("phase2.imageTierLabel")}
+              </Label>
+              <Select
+                value={presentationTier}
+                onValueChange={(v) => setPresentationTier(v as PresentationTier)}
+              >
+                <SelectTrigger id="presentation-tier-preview" className="w-full bg-background">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="bronze">{t("phase1.tierBronze")}</SelectItem>
+                  <SelectItem value="silver">{t("phase1.tierSilver")}</SelectItem>
+                  <SelectItem value="gold">{t("phase1.tierGold")}</SelectItem>
+                  <SelectItem value="platinum">{t("phase1.tierPlatinum")}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
           {/* Image preview - portrait 9:16 for phone viewing, shareable design */}
           {/* No shadows/frames here - html2canvas renders them as artifacts in the downloaded image */}
           <div
@@ -378,7 +439,7 @@ export default function FinalExpenseLeaveBehindForm() {
             style={{
               minWidth: 360,
               aspectRatio: "9/18",
-              background: "linear-gradient(165deg, #0a1628 0%, #0d1f3c 30%, #003366 70%, #0a1628 100%)",
+              background: tierTheme.cardGradient,
             }}
           >
             <div
@@ -398,10 +459,34 @@ export default function FinalExpenseLeaveBehindForm() {
                   className="object-contain"
                 />
 
-              {/* Decorative gold line */}
+                <div className="flex flex-row items-center justify-center gap-2.5 w-full max-w-[320px] mx-auto">
+                  <img
+                    src={TIER_MEDAL_URLS[presentationTier]}
+                    alt=""
+                    width={48}
+                    height={48}
+                    crossOrigin="anonymous"
+                    className="object-contain h-12 w-12 shrink-0 select-none"
+                    draggable={false}
+                    aria-hidden
+                  />
+                  <p
+                    className="text-[0.7rem] font-semibold uppercase tracking-[0.18em] leading-tight px-3 py-1.5 rounded-full min-w-0 text-center"
+                    style={{
+                      color: tierTheme.accentHero,
+                      border: `1px solid ${tierTheme.borderAccent}`,
+                      backgroundColor: "rgba(0,0,0,0.22)",
+                      fontFamily: "system-ui, sans-serif",
+                    }}
+                  >
+                    {t("phase2.planTierBadge", { tier: tierDisplayName })}
+                  </p>
+                </div>
+
+              {/* Decorative accent line */}
               <div
                 className="w-36 h-0.5 rounded-full"
-                style={{ background: "linear-gradient(90deg, transparent, #d4a84b, transparent)" }}
+                style={{ background: tierTheme.lineGradient }}
               />
 
               {/* Prospect name - soft cream, always uppercase */}
@@ -424,23 +509,23 @@ export default function FinalExpenseLeaveBehindForm() {
               <div className="space-y-3">
                 <p
                   className="text-base font-semibold uppercase tracking-[0.15em]"
-                  style={{ color: "#d4a84b", fontFamily: "system-ui, sans-serif", fontSize: "1.1rem" }}
+                  style={{ color: tierTheme.accent, fontFamily: "system-ui, sans-serif", fontSize: "1.1rem" }}
                 >
                   {t("phase2.totalCoverage")}
                 </p>
                 <p
                   className="font-bold tracking-tight leading-none"
-                  style={{ color: "#f0d78c", fontFamily: "system-ui, sans-serif", fontSize: "3.25rem" }}
+                  style={{ color: tierTheme.accentHero, fontFamily: "system-ui, sans-serif", fontSize: "3.25rem" }}
                 >
                   ${formatCurrency(totalCoverage)}
                 </p>
                 {premiumNum > 0 && (
                   <p
                     className="text-xl font-normal leading-relaxed"
-                    style={{ color: "#e8d5a3", fontFamily: "system-ui, sans-serif" }}
+                    style={{ color: tierTheme.accentMuted, fontFamily: "system-ui, sans-serif" }}
                   >
                     {t("phase2.smallPremiumOf")}{" "}
-                    <span style={{ color: "#f0d78c", fontWeight: 700 }}>
+                    <span style={{ color: tierTheme.accentHero, fontWeight: 700 }}>
                       ${formatCurrency(premiumNum)}
                     </span>{" "}
                     {t("phase2.perMonth")}
@@ -451,11 +536,11 @@ export default function FinalExpenseLeaveBehindForm() {
                   style={{ fontFamily: "system-ui, sans-serif" }}
                 >
                   {t("phase2.naturalDeathLabel")}{" "}
-                  <span style={{ color: "#d4a84b", fontWeight: 600 }}>
+                  <span style={{ color: tierTheme.accent, fontWeight: 600 }}>
                     ${formatCurrency(naturalNum)}
                   </span>{" "}
                   {t("phase2.plusAccidental")}{" "}
-                  <span style={{ color: "#d4a84b", fontWeight: 600 }}>
+                  <span style={{ color: tierTheme.accent, fontWeight: 600 }}>
                     ${formatCurrency(accidentalNum)}
                   </span>{" "}
                   {t("phase2.ifAccidental")}
@@ -463,7 +548,7 @@ export default function FinalExpenseLeaveBehindForm() {
                 {(planType === "modified" || planType === "easyIssue" || planType === "guaranteedIssue") && (
                   <p
                     className="text-sm font-medium leading-relaxed mt-2"
-                    style={{ color: "#d4a84b", fontFamily: "system-ui, sans-serif" }}
+                    style={{ color: tierTheme.accent, fontFamily: "system-ui, sans-serif" }}
                   >
                     {planType === "modified" ? t("phase2.rop2Years") : t("phase2.rop3Years")}
                   </p>
@@ -473,11 +558,11 @@ export default function FinalExpenseLeaveBehindForm() {
               {avoidList.length > 0 && (
                 <div
                   className="pt-3 w-full border-t"
-                  style={{ borderColor: "rgba(212,168,75,0.35)" }}
+                  style={{ borderColor: tierTheme.borderAccent }}
                 >
                   <p
                     className="text-base font-semibold uppercase tracking-wider mb-2"
-                    style={{ color: "#d4a84b", fontFamily: "system-ui, sans-serif" }}
+                    style={{ color: tierTheme.accent, fontFamily: "system-ui, sans-serif" }}
                   >
                     {t("phase2.avoidPrefix")}
                   </p>
@@ -490,11 +575,11 @@ export default function FinalExpenseLeaveBehindForm() {
               {protectList.length > 0 && (
                 <div
                   className="pt-3 w-full border-t"
-                  style={{ borderColor: "rgba(212,168,75,0.35)" }}
+                  style={{ borderColor: tierTheme.borderAccent }}
                 >
                   <p
                     className="text-base font-semibold uppercase tracking-wider mb-2"
-                    style={{ color: "#d4a84b", fontFamily: "system-ui, sans-serif" }}
+                    style={{ color: tierTheme.accent, fontFamily: "system-ui, sans-serif" }}
                   >
                     {t("phase2.protectPrefix")}
                   </p>
@@ -506,7 +591,7 @@ export default function FinalExpenseLeaveBehindForm() {
               </div>
 
               {/* Agent banner - Isaac Orraiz signature at bottom */}
-              <div className="flex-shrink-0 w-full mt-4 pt-3 border-t" style={{ borderColor: "rgba(212,168,75,0.25)" }}>
+              <div className="flex-shrink-0 w-full mt-4 pt-3 border-t" style={{ borderColor: tierTheme.borderAccent }}>
                 <img
                   src={ISAAC_BANNER}
                   alt="Isaac Orraiz - Senior Life"

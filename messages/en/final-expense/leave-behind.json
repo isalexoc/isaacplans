@@ -10,6 +10,10 @@
     "title": "Leave-Behind Quote Image",
     "subtitle": "Create an image to send clients with their plan and quote details",
     "backButton": "Back to Final Expense",
+    "tabs": {
+      "singleQuote": "Single quote image",
+      "comparePlans": "Compare plans image"
+    },
     "phase1": {
       "title": "1. Enter Information",
       "description": "Fill in the details collected during your presentation",
@@ -35,7 +39,13 @@
       "planStandard": "Standard / Whole Life (no ROP)",
       "planModified": "Modified – ROP + 10% first 2 years",
       "planEasyIssue": "Easy Issue – ROP + 10% first 3 years",
-      "planGuaranteedIssue": "Guaranteed Issue – ROP + 10% first 3 years"
+      "planGuaranteedIssue": "Guaranteed Issue – ROP + 10% first 3 years",
+      "presentationTier": "Quote card tier (colors)",
+      "presentationTierHint": "Match the shareable image to how you presented the options—Bronze, Silver, Gold, or Platinum.",
+      "tierBronze": "Bronze",
+      "tierSilver": "Silver",
+      "tierGold": "Gold",
+      "tierPlatinum": "Platinum"
     },
     "phase2": {
       "title": "2. Preview & Download",
@@ -58,12 +68,45 @@
       "avoidPrefix": "AVOID WHAT HAPPENED WITH:",
       "protectPrefix": "PROTECT YOUR LOVED ONES:",
       "rop2Years": "Return of Premium plus 10% during the first 2 years of coverage",
-      "rop3Years": "Return of Premium plus 10% during the first 3 years of coverage"
+      "rop3Years": "Return of Premium plus 10% during the first 3 years of coverage",
+      "imageTierLabel": "Image style",
+      "planTierBadge": "{tier} plan"
     },
     "validation": {
       "naturalRequired": "Natural death amount is required",
       "accidentalRequired": "Accidental death amount is required",
       "minAmount": "Amount must be at least $1"
+    },
+    "compare": {
+      "phase1Title": "1. Enter amounts for each tier",
+      "phase1Description": "Fill natural death, accidental death, and monthly premium for Bronze, Silver, and Gold. Choose which plan to highlight on the landscape image.",
+      "prospectName": "Prospect / insured name (optional)",
+      "prospectNamePlaceholder": "e.g. Maria Garcia",
+      "prospectNameHint": "Shown at the top of the comparison when provided",
+      "highlightLabel": "Highlight this plan",
+      "highlightHint": "That column is emphasized on the comparison image.",
+      "tierBlockTitle": "{tier} plan",
+      "generateButton": "Generate comparison image",
+      "editButton": "Edit information",
+      "downloadButton": "Download image",
+      "downloading": "Downloading...",
+      "shareButton": "Share image",
+      "sharing": "Sharing...",
+      "shareTitle": "Senior Life plan comparison",
+      "shareTextPreparedFor": "Plan comparison for {name}",
+      "shareTextDefault": "Your Senior Life plan comparison",
+      "comparisonHeadline": "Compare your options",
+      "preparedFor": "Prepared for",
+      "totalCoverage": "Total coverage",
+      "perMonth": "per month",
+      "naturalShort": "Natural",
+      "accidentalShort": "Accidental",
+      "selectedBadge": "Selected",
+      "imageStyleHint": "Change highlight and download again without re-entering all fields.",
+      "validationTier": "Enter valid natural and accidental amounts (at least $1) for {tier}.",
+      "sharedDetailsTitle": "Details shared by all three plans",
+      "sharedDetailsHint": "These appear once on the comparison image (not repeated in each column).",
+      "imagePlanTypeLabel": "Plan type"
     }
   }
 }

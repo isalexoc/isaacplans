@@ -4,7 +4,7 @@ import { getTranslations, getLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import type { Metadata } from "next";
 import { Button } from "@/components/ui/button";
-import FinalExpenseLeaveBehindForm from "@/components/final-expense-leave-behind-form";
+import FinalExpenseLeaveBehindHub from "@/components/final-expense-leave-behind-hub";
 
 import {
   ogLocaleOf,
@@ -69,7 +69,7 @@ export default async function FinalExpenseLeaveBehindPage() {
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-950 dark:via-slate-900 dark:to-gray-950">
-      <div className="container mx-auto max-w-4xl px-4 py-8">
+      <div className="container mx-auto max-w-6xl px-4 py-8">
         <div className="mb-8 flex items-center justify-between">
           <Button asChild variant="secondary">
             <Link href="/final-expense">{t("backButton")}</Link>
@@ -83,7 +83,7 @@ export default async function FinalExpenseLeaveBehindPage() {
           <p className="text-gray-600 dark:text-gray-300">{t("subtitle")}</p>
         </div>
 
-        <FinalExpenseLeaveBehindForm />
+        <FinalExpenseLeaveBehindHub />
       </div>
     </main>
   );

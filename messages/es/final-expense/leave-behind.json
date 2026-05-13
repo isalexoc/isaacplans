@@ -10,6 +10,10 @@
     "title": "Imagen de Cotización para Dejar",
     "subtitle": "Crea una imagen para enviar a clientes con los detalles de su plan y cotización",
     "backButton": "Volver a Gastos Finales",
+    "tabs": {
+      "singleQuote": "Imagen de cotización única",
+      "comparePlans": "Imagen comparativa de planes"
+    },
     "phase1": {
       "title": "1. Ingresar Información",
       "description": "Completa los detalles recopilados durante tu presentación",
@@ -35,7 +39,13 @@
       "planStandard": "Estándar / Vida entera (sin ROP)",
       "planModified": "Modificado – ROP + 10% primeros 2 años",
       "planEasyIssue": "Easy Issue – ROP + 10% primeros 3 años",
-      "planGuaranteedIssue": "Emisión Garantizada – ROP + 10% primeros 3 años"
+      "planGuaranteedIssue": "Emisión Garantizada – ROP + 10% primeros 3 años",
+      "presentationTier": "Nivel de la tarjeta (colores)",
+      "presentationTierHint": "Alinea la imagen con cómo presentaste las opciones: Bronce, Plata, Oro o Platino.",
+      "tierBronze": "Bronce",
+      "tierSilver": "Plata",
+      "tierGold": "Oro",
+      "tierPlatinum": "Platino"
     },
     "phase2": {
       "title": "2. Vista Previa y Descargar",
@@ -58,12 +68,45 @@
       "avoidPrefix": "EVITA LO QUE PASÓ CON:",
       "protectPrefix": "PROTEGE A TUS SERES QUERIDOS:",
       "rop2Years": "Devolución de Prima más 10% durante los primeros 2 años de cobertura",
-      "rop3Years": "Devolución de Prima más 10% durante los primeros 3 años de cobertura"
+      "rop3Years": "Devolución de Prima más 10% durante los primeros 3 años de cobertura",
+      "imageTierLabel": "Estilo de imagen",
+      "planTierBadge": "Plan {tier}"
     },
     "validation": {
       "naturalRequired": "El monto de muerte natural es requerido",
       "accidentalRequired": "El monto de muerte accidental es requerido",
       "minAmount": "El monto debe ser al menos $1"
+    },
+    "compare": {
+      "phase1Title": "1. Montos por cada nivel",
+      "phase1Description": "Indica muerte natural, muerte accidental y prima mensual para Bronce, Plata y Oro. Elige qué plan resaltar en la imagen horizontal.",
+      "prospectName": "Nombre del prospecto / asegurado (opcional)",
+      "prospectNamePlaceholder": "ej. María García",
+      "prospectNameHint": "Si lo indicas, aparece arriba en la comparación",
+      "highlightLabel": "Resaltar este plan",
+      "highlightHint": "Esa columna se destacará en la imagen comparativa.",
+      "tierBlockTitle": "Plan {tier}",
+      "generateButton": "Generar imagen comparativa",
+      "editButton": "Editar información",
+      "downloadButton": "Descargar imagen",
+      "downloading": "Descargando...",
+      "shareButton": "Compartir imagen",
+      "sharing": "Compartiendo...",
+      "shareTitle": "Comparación de planes Senior Life",
+      "shareTextPreparedFor": "Comparación de planes para {name}",
+      "shareTextDefault": "Tu comparación de planes Senior Life",
+      "comparisonHeadline": "Compara tus opciones",
+      "preparedFor": "Preparado para",
+      "totalCoverage": "Cobertura total",
+      "perMonth": "al mes",
+      "naturalShort": "Natural",
+      "accidentalShort": "Accidental",
+      "selectedBadge": "Seleccionado",
+      "imageStyleHint": "Cambia el resaltado y vuelve a descargar sin volver a ingresar todos los datos.",
+      "validationTier": "Ingresa montos válidos de natural y accidental (mínimo $1) para {tier}.",
+      "sharedDetailsTitle": "Datos comunes a los tres planes",
+      "sharedDetailsHint": "Aparecen una sola vez en la imagen comparativa (no en cada columna).",
+      "imagePlanTypeLabel": "Tipo de plan"
     }
   }
 }
