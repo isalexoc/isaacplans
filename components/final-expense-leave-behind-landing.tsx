@@ -15,6 +15,7 @@ import {
   Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { LeaveBehindLandingShare } from "@/components/leave-behind/leave-behind-landing-share";
 import { cn } from "@/lib/utils";
 import {
   COMPARISON_TIER_ORDER,
@@ -201,12 +202,15 @@ export default function FinalExpenseLeaveBehindLanding() {
           >
             <Link href="/final-expense">{t("backToFe")}</Link>
           </Button>
-          <LandingSignInButton
-            redirectUrl={redirectUrl}
-            className="rounded-lg border border-white/20 bg-white/5 px-4 py-2 text-sm font-medium text-white backdrop-blur-sm transition hover:bg-white/10"
-          >
-            {t("ctaPrimary")}
-          </LandingSignInButton>
+          <div className="flex items-center gap-2">
+            <LeaveBehindLandingShare />
+            <LandingSignInButton
+              redirectUrl={redirectUrl}
+              className="rounded-lg border border-sky-400/30 bg-sky-500/15 px-4 py-2 text-sm font-medium text-white backdrop-blur-sm transition hover:bg-sky-500/25"
+            >
+              {t("ctaPrimary")}
+            </LandingSignInButton>
+          </div>
         </div>
 
         <div className="mx-auto mt-10 grid max-w-6xl items-center gap-12 lg:grid-cols-2 lg:gap-16">
@@ -337,7 +341,7 @@ export default function FinalExpenseLeaveBehindLanding() {
         <div className="mx-auto max-w-3xl rounded-3xl border border-sky-500/20 bg-gradient-to-br from-[#003366] via-[#0c4a7a] to-sky-800 px-6 py-12 text-center text-white shadow-xl sm:px-10">
           <h2 className="text-2xl font-bold sm:text-3xl">{t("finalTitle")}</h2>
           <p className="mx-auto mt-4 max-w-lg text-sky-100/90">{t("finalSubtitle")}</p>
-          <div className="mt-8 flex flex-col items-center gap-3">
+          <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
             <LandingSignInButton
               redirectUrl={redirectUrl}
               className="inline-flex items-center gap-2 rounded-xl bg-white px-8 py-3.5 text-base font-semibold text-[#003366] shadow-lg transition hover:bg-sky-50"
@@ -345,6 +349,7 @@ export default function FinalExpenseLeaveBehindLanding() {
               {t("finalCta")}
               <ArrowRight className="h-5 w-5" aria-hidden />
             </LandingSignInButton>
+            <LeaveBehindLandingShare className="border-white/40 bg-white/10 text-white hover:border-white/60 hover:bg-white/20" />
           </div>
         </div>
       </section>

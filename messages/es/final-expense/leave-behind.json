@@ -207,8 +207,15 @@
       "meta": {
         "title": "Imágenes de Cotización para Agentes de Gastos Finales | Isaac Plans",
         "description": "Crea imágenes Bronce, Plata, Oro y comparativa con tu marca en minutos. Ingresa al cliente una vez, descarga o comparte cada nivel—diseñado para después de la presentación.",
-        "keywords": "gastos finales, imagen cotización, herramienta agente, Senior Life, bronce plata oro"
+        "keywords": "gastos finales, imagen cotización, herramienta agente, Senior Life, bronce plata oro",
+        "imageAlt": "Vista previa de tarjetas de cotización Bronce, Plata y Oro para dejar al cliente"
       },
+      "shareButton": "Compartir",
+      "shareCopied": "¡Enlace copiado!",
+      "shareOpening": "Compartiendo…",
+      "shareTitle": "Imágenes de cotización para agentes",
+      "shareText": "Crea imágenes de cotización Bronce, Plata, Oro y comparativa con tu marca después de tu presentación de gastos finales.",
+      "shareCopyPrompt": "Copia este enlace para compartir:",
       "eyebrow": "Herramienta para agentes · Gastos finales",
       "heroTitle": "Sal de la cita con",
       "heroTitleHighlight": "imágenes de cotización impresionantes",
