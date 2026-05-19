@@ -33,6 +33,7 @@ import {
   LEAVE_BEHIND_SINGLE_CARD_WIDTH,
 } from "@/lib/leave-behind-assets";
 import {
+  COMPARISON_CAPTURE_BG,
   COMPARISON_TIER_ORDER,
   TIER_LABEL_KEYS,
   TIER_THEMES,
@@ -319,7 +320,12 @@ export default function FinalExpenseLeaveBehindPackageForm({
   };
 
   const getCaptureElement = (): HTMLElement | null => {
-    if (previewAsset === "compare") return compareRef.current;
+    if (previewAsset === "compare") {
+      return (
+        compareRef.current ??
+        document.getElementById("leave-behind-compare-capture")
+      );
+    }
     return cardRefs.current[previewAsset];
   };
 
@@ -344,28 +350,26 @@ export default function FinalExpenseLeaveBehindPackageForm({
     );
 
     const isCompare = previewAsset === "compare";
-    const captureWidth = isCompare
-      ? Math.max(el.scrollWidth, LEAVE_BEHIND_COMPARE_WIDTH)
-      : LEAVE_BEHIND_SINGLE_CARD_WIDTH;
-    const captureHeight = isCompare
-      ? Math.max(el.scrollHeight, LEAVE_BEHIND_COMPARE_MIN_HEIGHT)
-      : Math.ceil(el.getBoundingClientRect().height) || el.scrollHeight;
-
-    const bg =
-      previewAsset === "compare"
-        ? "#060a12"
-        : TIER_THEMES[previewAsset].captureBg;
 
     const canvas = await html2canvas(el, {
-      backgroundColor: bg,
+      backgroundColor: isCompare
+        ? COMPARISON_CAPTURE_BG
+        : TIER_THEMES[previewAsset].captureBg,
       scale: 2,
       logging: false,
       useCORS: true,
       imageTimeout: 15000,
-      width: captureWidth,
-      height: captureHeight,
-      windowWidth: captureWidth,
-      windowHeight: captureHeight,
+      ...(isCompare
+        ? {
+            windowWidth: Math.max(el.scrollWidth, LEAVE_BEHIND_COMPARE_WIDTH),
+            windowHeight: Math.max(el.scrollHeight, LEAVE_BEHIND_COMPARE_MIN_HEIGHT),
+          }
+        : {
+            width: LEAVE_BEHIND_SINGLE_CARD_WIDTH,
+            windowWidth: LEAVE_BEHIND_SINGLE_CARD_WIDTH,
+            height: Math.ceil(el.getBoundingClientRect().height) || el.scrollHeight,
+            windowHeight: Math.ceil(el.getBoundingClientRect().height) || el.scrollHeight,
+          }),
     });
 
     return new Promise<Blob | null>((resolve) => {
@@ -381,7 +385,10 @@ export default function FinalExpenseLeaveBehindPackageForm({
     setIsDownloading(true);
     try {
       const blob = await captureImageAsBlob();
-      if (!blob) return;
+      if (!blob) {
+        console.error("Leave-behind download: capture returned no image");
+        return;
+      }
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
@@ -785,7 +792,10 @@ export default function FinalExpenseLeaveBehindPackageForm({
               >
                 <div className="border border-gray-300/80 bg-muted/30 py-4 dark:border-gray-600/80">
                   <CompareQuotePreview
-                    ref={compareRef}
+                    id="leave-behind-compare-capture"
+                    ref={(node) => {
+                      compareRef.current = node;
+                    }}
                     prospectName={data.prospectName}
                     tierInputs={data.tierInputs}
                     highlightTier={data.highlightTier}
@@ -800,21 +810,6 @@ export default function FinalExpenseLeaveBehindPackageForm({
             </div>
           </div>
 
-          {previewHidden && profile && (
-            <div className="fixed left-[-10000px] top-0 w-[1280px]">
-              <CompareQuotePreview
-                ref={compareRef}
-                prospectName={data.prospectName}
-                tierInputs={data.tierInputs}
-                highlightTier={data.highlightTier}
-                planType={data.planType}
-                planTypeLabel={planTypeLabel}
-                avoidList={avoidList}
-                protectList={protectList}
-                agentProfile={profile}
-              />
-            </div>
-          )}
         </div>
       )}
     </div>

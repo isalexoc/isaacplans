@@ -21,6 +21,7 @@ import { tierComputedFromInputs } from "@/lib/leave-behind-package";
 import type { CompareTierInputs } from "@/lib/leave-behind-clients";
 
 export type CompareQuotePreviewProps = {
+  id?: string;
   prospectName: string;
   tierInputs: Record<ComparisonTier, CompareTierInputs>;
   highlightTier: ComparisonTier;
@@ -34,6 +35,7 @@ export type CompareQuotePreviewProps = {
 export const CompareQuotePreview = forwardRef<HTMLDivElement, CompareQuotePreviewProps>(
   function CompareQuotePreview(
     {
+      id,
       prospectName,
       tierInputs,
       highlightTier,
@@ -49,6 +51,7 @@ export const CompareQuotePreview = forwardRef<HTMLDivElement, CompareQuotePrevie
 
     return (
       <div
+        id={id}
         ref={ref}
         style={{
           width: LEAVE_BEHIND_COMPARE_WIDTH,
