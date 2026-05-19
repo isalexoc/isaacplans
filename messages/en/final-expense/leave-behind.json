@@ -208,7 +208,8 @@
         "title": "Client Quote Images for Final Expense Agents | Isaac Plans",
         "description": "Create branded Bronze, Silver, Gold, and comparison images in minutes. Enter the client once, download or share every tier—built for agents after the kitchen-table presentation.",
         "keywords": "final expense leave-behind, quote image generator, agent tools, Senior Life, bronze silver gold",
-        "imageAlt": "Preview of Bronze, Silver, and Gold final expense leave-behind quote cards"
+        "image": "https://res.cloudinary.com/isaacdev/image/upload/c_fill,w_1200,h_630,g_auto/f_auto,q_auto:good/v1779232065/og_leave_image_english_iuktbh.png",
+        "imageAlt": "Isaac Plans leave-behind tool — branded Bronze, Silver, and Gold quote images for final expense agents"
       },
       "shareButton": "Share",
       "shareCopied": "Link copied!",

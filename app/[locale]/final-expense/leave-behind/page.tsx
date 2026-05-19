@@ -19,7 +19,7 @@ import {
   withLocalePrefix,
   languageAlternatesPrefixed,
 } from "@/lib/seo/i18n";
-import { leaveBehindOgImageUrl } from "@/lib/leave-behind-og-url";
+import { leaveBehindLandingOgImageUrl } from "@/lib/leave-behind-og-url";
 
 /* ───────── SEO ───────── */
 export async function generateMetadata(): Promise<Metadata> {
@@ -33,7 +33,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const title = userId ? t("meta.title") : t("landing.meta.title");
   const description = userId ? t("meta.description") : t("landing.meta.description");
   const keywords = userId ? t("meta.keywords") : t("landing.meta.keywords");
-  const image = userId ? t("meta.image") : leaveBehindOgImageUrl(locale);
+  const image = userId ? t("meta.image") : leaveBehindLandingOgImageUrl(locale);
   const alt = userId ? t("meta.imageAlt") : t("landing.meta.imageAlt");
 
   const routeKey = "/final-expense/leave-behind" as const;
