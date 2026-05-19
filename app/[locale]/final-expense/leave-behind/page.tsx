@@ -1,10 +1,16 @@
 /* app/[locale]/final-expense/leave-behind/page.tsx – server component */
 
+import { auth } from "@clerk/nextjs/server";
 import { getTranslations, getLocale } from "next-intl/server";
+import { NextIntlClientProvider } from "next-intl";
+import { redirect } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import type { Metadata } from "next";
 import { Button } from "@/components/ui/button";
+import { BlogUserAuth } from "@/components/blog-user-auth";
 import FinalExpenseLeaveBehindHub from "@/components/final-expense-leave-behind-hub";
+import enLeaveBehindMessages from "@/messages/en/final-expense/leave-behind.json";
+import esLeaveBehindMessages from "@/messages/es/final-expense/leave-behind.json";
 
 import {
   ogLocaleOf,
@@ -59,21 +65,35 @@ export async function generateMetadata(): Promise<Metadata> {
       description,
       images: [{ url: image, alt }],
     },
+    robots: {
+      index: false,
+      follow: false,
+    },
   };
 }
 
 /* ───────── Page ───────── */
 export default async function FinalExpenseLeaveBehindPage() {
   const locale = (await getLocale()) as SupportedLocale;
+  const { userId } = await auth();
+
+  if (!userId) {
+    const slug = localizedSlug("/final-expense/leave-behind", locale);
+    redirect(`/${locale}/sign-in?redirect_url=/${locale}${slug}`);
+  }
+
   const t = await getTranslations({ locale, namespace: "finalExpenseLeaveBehind" });
+  const leaveBehindMessages =
+    locale === "es" ? esLeaveBehindMessages : enLeaveBehindMessages;
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-950 dark:via-slate-900 dark:to-gray-950">
       <div className="container mx-auto max-w-6xl px-4 py-8">
-        <div className="mb-8 flex items-center justify-between">
+        <div className="mb-8 flex items-center justify-between gap-4">
           <Button asChild variant="secondary">
             <Link href="/final-expense">{t("backButton")}</Link>
           </Button>
+          <BlogUserAuth />
         </div>
 
         <div className="mb-8 text-center">
@@ -83,7 +103,9 @@ export default async function FinalExpenseLeaveBehindPage() {
           <p className="text-gray-600 dark:text-gray-300">{t("subtitle")}</p>
         </div>
 
-        <FinalExpenseLeaveBehindHub />
+        <NextIntlClientProvider locale={locale} messages={leaveBehindMessages}>
+          <FinalExpenseLeaveBehindHub />
+        </NextIntlClientProvider>
       </div>
     </main>
   );

@@ -11,7 +11,9 @@ const intlMiddleware = createMiddleware(routing);
 const isProtectedRoute = createRouteMatcher([
   '/presentations(.*)',
   '/en/presentations(.*)',
-  '/es/presentations(.*)'
+  '/es/presentations(.*)',
+  '/en/final-expense/leave-behind(.*)',
+  '/es/gastos-finales/dejar-imagen(.*)',
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
@@ -25,14 +27,15 @@ export default clerkMiddleware(async (auth, req) => {
     return NextResponse.redirect(url, 308);
   }
 
-  // Handle API routes that need auth
-  if (req.nextUrl.pathname.startsWith('/api/blog')) {
-    // API routes are handled by the route handlers themselves
-    // Just ensure middleware runs for Clerk context
+  // API routes: Clerk context only — do not run next-intl (would return HTML)
+  if (
+    req.nextUrl.pathname.startsWith('/api/blog') ||
+    req.nextUrl.pathname.startsWith('/api/leave-behind')
+  ) {
     return;
   }
 
-  // Protect presentations route - requires authentication
+  // Protected agent tools — requires authentication
   if (isProtectedRoute(req)) {
     await auth.protect();
   }
@@ -60,6 +63,7 @@ export const config = {
   // Include /api/blog routes for Clerk auth (but exclude other /api routes)
   matcher: [
     "/api/blog/:path*",
+    "/api/leave-behind/:path*",
     "/((?!api|trpc|_next|_vercel|studio|.*\\..*).*)"
   ],
 };

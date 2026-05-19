@@ -8,7 +8,7 @@ import "@/app/globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
-import { getTranslations } from "next-intl/server";
+import { getMessages, getTranslations } from "next-intl/server";
 import { getAgencyLd, siteLd, getIsaacPersonLd } from "@/lib/seo/jsonld";
 import { getLocale } from "next-intl/server";
 import Script from "next/script";
@@ -105,6 +105,7 @@ export default async function LocaleLayout({
 
   // Map your locale to Clerk's localization
   const clerkLocale = locale === "es" ? esES : enUS;
+  const messages = await getMessages();
 
   return (
     // @ts-ignore - ClerkProvider works correctly with React 19, TypeScript types need update
@@ -134,7 +135,7 @@ export default async function LocaleLayout({
           disableTransitionOnChange
           storageKey="isaacplans-ui-theme"
         >
-        <NextIntlClientProvider locale={locale}>
+        <NextIntlClientProvider locale={locale} messages={messages}>
           <SanityLive />
           <Header />
           <main className="flex-1 w-full">{children}</main>

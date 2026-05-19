@@ -1,12 +1,30 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import { LEAVE_BEHIND_PLAN_LABEL_DEFAULTS } from "@/lib/leave-behind-plan-labels";
 import html2canvas from "html2canvas";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { FileImage, ArrowRight, Pencil, Share2 } from "lucide-react";
+import { saveLeaveBehindClient } from "@/lib/leave-behind-clients-api";
+import type {
+  CompareQuoteData,
+  LeaveBehindClientRecord,
+  LeaveBehindPlanType,
+} from "@/lib/leave-behind-clients";
+import { migrateLeaveBehindPlanType } from "@/lib/leave-behind-clients";
+import {
+  LeaveBehindPremiumField,
+  LeaveBehindWholeDollarField,
+} from "@/components/leave-behind-money-input";
+import {
+  formatCurrency,
+  formatPremiumForQuote,
+  parsePremiumAmount,
+  parseWholeDollarInput,
+} from "@/lib/leave-behind-money-input";
+import { LeaveBehindQuoteToolbar } from "@/components/leave-behind-quote-toolbar";
+import { cn } from "@/lib/utils";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
@@ -32,22 +50,6 @@ const ISAAC_BANNER =
 const COMPARE_WIDTH = 1280;
 const COMPARE_MIN_HEIGHT = 720;
 
-function formatCurrency(value: number): string {
-  return new Intl.NumberFormat("en-US", {
-    style: "decimal",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 2,
-  }).format(value);
-}
-
-function sanitizeDecimalInput(value: string): string {
-  const normalized = value.replace(/[,·\u00B7\u2022]/g, ".");
-  const cleaned = normalized.replace(/[^\d.]/g, "");
-  const parts = cleaned.split(".");
-  if (parts.length <= 1) return parts[0] || "";
-  return `${parts[0]}.${(parts[1] ?? "").slice(0, 2)}`;
-}
-
 function parseNames(input: string): string[] {
   return input
     .split(",")
@@ -62,18 +64,57 @@ function emptyTierInputs(): Record<ComparisonTier, TierInputs> {
   return { bronze: { ...empty }, silver: { ...empty }, gold: { ...empty } };
 }
 
-export default function FinalExpenseLeaveBehindCompareForm() {
+function normalizeTierInputs(
+  raw?: Record<ComparisonTier, TierInputs> | null
+): Record<ComparisonTier, TierInputs> {
+  const base = emptyTierInputs();
+  if (!raw) return base;
+  for (const tier of COMPARISON_TIER_ORDER) {
+    const block = raw[tier];
+    if (!block) continue;
+    const coverage = parseWholeDollarInput(block.natural || block.accidental || "");
+    base[tier] = { natural: coverage, accidental: coverage, premium: block.premium ?? "" };
+  }
+  return base;
+}
+
+export type FinalExpenseLeaveBehindCompareFormProps = {
+  clientId?: string | null;
+  initialData?: CompareQuoteData | null;
+  onClientSaved?: (client: LeaveBehindClientRecord) => void;
+  onNewQuote?: () => void;
+};
+
+export default function FinalExpenseLeaveBehindCompareForm({
+  clientId = null,
+  initialData = null,
+  onClientSaved,
+  onNewQuote,
+}: FinalExpenseLeaveBehindCompareFormProps) {
   const t = useTranslations("finalExpenseLeaveBehind");
-  const [phase, setPhase] = useState<1 | 2>(1);
+  const locale = useLocale();
+  const planLabelFallback =
+    LEAVE_BEHIND_PLAN_LABEL_DEFAULTS[locale === "es" ? "es" : "en"];
+  const [phase, setPhase] = useState<1 | 2>(initialData?.phase ?? 1);
+  const [hasPreview, setHasPreview] = useState((initialData?.phase ?? 1) === 2);
+  const formSectionRef = useRef<HTMLDivElement>(null);
   const [isDownloading, setIsDownloading] = useState(false);
   const [isSharing, setIsSharing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveMessage, setSaveMessage] = useState<string | null>(null);
   const [canShare, setCanShare] = useState(false);
-  const [tierInputs, setTierInputs] = useState<Record<ComparisonTier, TierInputs>>(emptyTierInputs);
-  const [highlightTier, setHighlightTier] = useState<ComparisonTier>("gold");
-  const [prospectName, setProspectName] = useState("");
-  const [planType, setPlanType] = useState<"standard" | "modified" | "easyIssue" | "guaranteedIssue">("standard");
-  const [avoidNames, setAvoidNames] = useState("");
-  const [protectNames, setProtectNames] = useState("");
+  const [tierInputs, setTierInputs] = useState<Record<ComparisonTier, TierInputs>>(
+    normalizeTierInputs(initialData?.tierInputs)
+  );
+  const [highlightTier, setHighlightTier] = useState<ComparisonTier>(
+    initialData?.highlightTier ?? "gold"
+  );
+  const [prospectName, setProspectName] = useState(initialData?.prospectName ?? "");
+  const [planType, setPlanType] = useState<LeaveBehindPlanType>(() =>
+    migrateLeaveBehindPlanType(initialData?.planType)
+  );
+  const [avoidNames, setAvoidNames] = useState(initialData?.avoidNames ?? "");
+  const [protectNames, setProtectNames] = useState(initialData?.protectNames ?? "");
   const [tierErrors, setTierErrors] = useState<Partial<Record<ComparisonTier, string>>>({});
 
   const compareRef = useRef<HTMLDivElement>(null);
@@ -82,13 +123,18 @@ export default function FinalExpenseLeaveBehindCompareForm() {
     setCanShare(typeof navigator !== "undefined" && !!navigator.share);
   }, []);
 
-  const updateTierField = (tier: ComparisonTier, field: keyof TierInputs, value: string) => {
+  const updateTierCoverage = (tier: ComparisonTier, value: string) => {
+    const coverage = parseWholeDollarInput(value);
     setTierInputs((prev) => ({
       ...prev,
-      [tier]: {
-        ...prev[tier],
-        [field]: field === "premium" ? sanitizeDecimalInput(value) : sanitizeDecimalInput(value),
-      },
+      [tier]: { ...prev[tier], natural: coverage, accidental: coverage },
+    }));
+  };
+
+  const updateTierPremium = (tier: ComparisonTier, value: string) => {
+    setTierInputs((prev) => ({
+      ...prev,
+      [tier]: { ...prev[tier], premium: value },
     }));
   };
 
@@ -96,9 +142,8 @@ export default function FinalExpenseLeaveBehindCompareForm() {
     const errs: Partial<Record<ComparisonTier, string>> = {};
     for (const tier of COMPARISON_TIER_ORDER) {
       const inp = tierInputs[tier];
-      const naturalNum = parseFloat(sanitizeDecimalInput(inp.natural)) || 0;
-      const accidentalNum = parseFloat(sanitizeDecimalInput(inp.accidental)) || 0;
-      if (!inp.natural.trim() || naturalNum < 1 || !inp.accidental.trim() || accidentalNum < 1) {
+      const coverageNum = parseInt(parseWholeDollarInput(inp.natural), 10) || 0;
+      if (!inp.natural.trim() || coverageNum < 1) {
         errs[tier] = t("compare.validationTier", {
           tier: t(`phase1.${TIER_LABEL_KEYS[tier]}`),
         });
@@ -110,7 +155,73 @@ export default function FinalExpenseLeaveBehindCompareForm() {
 
   const handleGenerate = () => {
     if (!validate()) return;
+    setHasPreview(true);
     setPhase(2);
+    requestAnimationFrame(() => {
+      document.getElementById("leave-behind-compare-preview")?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    });
+  };
+
+  const handleEditDetails = () => {
+    if (phase === 1 && hasPreview) {
+      setPhase(2);
+      requestAnimationFrame(() => {
+        document.getElementById("leave-behind-compare-preview")?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      });
+      return;
+    }
+    setPhase(1);
+    requestAnimationFrame(() => {
+      formSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  };
+
+  const toolbarLabels = {
+    newQuote: t("clients.newClient"),
+    editDetails: t("compare.editButton"),
+    viewPreview: t("workflow.viewPreview"),
+    generatePreview: t("workflow.generatePreview"),
+    download: t("compare.downloadButton"),
+    downloading: t("compare.downloading"),
+    share: t("compare.shareButton"),
+    sharing: t("compare.sharing"),
+    saveClient: t("clients.saveClient"),
+    saving: t("clients.saving"),
+  };
+
+  const buildQuoteData = (): CompareQuoteData => ({
+    prospectName,
+    tierInputs,
+    highlightTier,
+    planType,
+    avoidNames,
+    protectNames,
+    phase,
+  });
+
+  const handleSaveClient = async () => {
+    setIsSaving(true);
+    setSaveMessage(null);
+    try {
+      const client = await saveLeaveBehindClient({
+        id: clientId,
+        quoteType: "compare",
+        prospectName: prospectName.trim() || null,
+        quoteData: buildQuoteData(),
+      });
+      onClientSaved?.(client);
+      setSaveMessage(t("clients.saved"));
+    } catch {
+      setSaveMessage(t("clients.saveFailed"));
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const captureImageAsBlob = async (): Promise<Blob | null> => {
@@ -146,9 +257,7 @@ export default function FinalExpenseLeaveBehindCompareForm() {
     });
   };
 
-  const handleDownload = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleDownload = async () => {
     if (!compareRef.current) return;
     setIsDownloading(true);
     try {
@@ -172,9 +281,7 @@ export default function FinalExpenseLeaveBehindCompareForm() {
     }
   };
 
-  const handleShare = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleShare = async () => {
     if (!navigator.share) return;
     setIsSharing(true);
     try {
@@ -201,10 +308,12 @@ export default function FinalExpenseLeaveBehindCompareForm() {
 
   const tierComputed = (tier: ComparisonTier) => {
     const inp = tierInputs[tier];
-    const naturalNum = parseFloat(sanitizeDecimalInput(inp.natural)) || 0;
-    const accidentalNum = parseFloat(sanitizeDecimalInput(inp.accidental)) || 0;
-    const premiumNum = parseFloat(sanitizeDecimalInput(inp.premium)) || 0;
-    return { naturalNum, accidentalNum, premiumNum, total: naturalNum + accidentalNum };
+    const coverageNum = parseInt(parseWholeDollarInput(inp.natural), 10) || 0;
+    const naturalNum = coverageNum;
+    const accidentalNum = coverageNum;
+    const premiumNum = parsePremiumAmount(inp.premium);
+    const premiumDisplay = formatPremiumForQuote(inp.premium);
+    return { naturalNum, accidentalNum, premiumNum, premiumDisplay, total: naturalNum + accidentalNum };
   };
 
   const avoidList = parseNames(avoidNames);
@@ -212,23 +321,40 @@ export default function FinalExpenseLeaveBehindCompareForm() {
 
   const planTypeDisplay = () => {
     switch (planType) {
-      case "standard":
-        return t("phase1.planStandard");
       case "modified":
-        return t("phase1.planModified");
-      case "easyIssue":
-        return t("phase1.planEasyIssue");
-      case "guaranteedIssue":
-        return t("phase1.planGuaranteedIssue");
+        return t("phase1.planModified", { default: planLabelFallback.planModified });
+      case "guaranteed":
+        return t("phase1.planGuaranteed", { default: planLabelFallback.planGuaranteed });
       default:
-        return t("phase1.planStandard");
+        return t("phase1.planPreferred", { default: planLabelFallback.planPreferred });
     }
   };
 
   return (
-    <div className="space-y-8">
-      {phase === 1 && (
-        <div className="space-y-6 rounded-xl border border-gray-200/80 bg-white p-6 shadow-lg dark:border-gray-700/80 dark:bg-gray-950 md:p-8">
+    <div className="space-y-6">
+      <LeaveBehindQuoteToolbar
+        hasPreview={hasPreview}
+        isEditing={phase === 1 && hasPreview}
+        canShare={canShare}
+        isDownloading={isDownloading}
+        isSharing={isSharing}
+        isSaving={isSaving}
+        labels={toolbarLabels}
+        onNewQuote={onNewQuote}
+        onEditDetails={handleEditDetails}
+        onUpdatePreview={handleGenerate}
+        onDownload={handleDownload}
+        onShare={handleShare}
+        onSave={handleSaveClient}
+        saveMessage={saveMessage}
+      />
+
+      {(phase === 1 || !hasPreview) && (
+        <div
+          ref={formSectionRef}
+          id="leave-behind-compare-form"
+          className="space-y-6 rounded-xl border border-gray-200/80 bg-white p-6 shadow-lg dark:border-gray-700/80 dark:bg-gray-950 md:p-8"
+        >
           <div>
             <h2 className="mb-2 text-2xl font-bold text-[#003366] dark:text-sky-300">{t("compare.phase1Title")}</h2>
             <p className="text-lg text-gray-600 dark:text-gray-300">{t("compare.phase1Description")}</p>
@@ -263,27 +389,27 @@ export default function FinalExpenseLeaveBehindCompareForm() {
                 className="grid gap-3"
               >
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="standard" id="cmp-plan-standard" />
-                  <Label htmlFor="cmp-plan-standard" className="cursor-pointer font-normal text-foreground">
-                    {t("phase1.planStandard")}
+                  <RadioGroupItem value="preferred" id="cmp-plan-preferred" />
+                  <Label htmlFor="cmp-plan-preferred" className="cursor-pointer font-normal text-foreground">
+                    {t("phase1.planPreferred", {
+                      default: planLabelFallback.planPreferred,
+                    })}
                   </Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="modified" id="cmp-plan-modified" />
                   <Label htmlFor="cmp-plan-modified" className="cursor-pointer font-normal text-foreground">
-                    {t("phase1.planModified")}
+                    {t("phase1.planModified", {
+                      default: planLabelFallback.planModified,
+                    })}
                   </Label>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="easyIssue" id="cmp-plan-easy" />
-                  <Label htmlFor="cmp-plan-easy" className="cursor-pointer font-normal text-foreground">
-                    {t("phase1.planEasyIssue")}
-                  </Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="guaranteedIssue" id="cmp-plan-guaranteed" />
+                  <RadioGroupItem value="guaranteed" id="cmp-plan-guaranteed" />
                   <Label htmlFor="cmp-plan-guaranteed" className="cursor-pointer font-normal text-foreground">
-                    {t("phase1.planGuaranteedIssue")}
+                    {t("phase1.planGuaranteed", {
+                      default: planLabelFallback.planGuaranteed,
+                    })}
                   </Label>
                 </div>
               </RadioGroup>
@@ -352,37 +478,25 @@ export default function FinalExpenseLeaveBehindCompareForm() {
                   <h3 className="text-lg font-semibold text-[#003366] dark:text-sky-300">
                     {t("compare.tierBlockTitle", { tier: t(`phase1.${TIER_LABEL_KEYS[tier]}`) })}
                   </h3>
-                  <div className="grid gap-4 sm:grid-cols-3">
-                    <div className="space-y-2">
-                      <Label className="text-foreground">{t("phase1.naturalDeath")}</Label>
-                      <Input
-                        type="text"
-                        inputMode="decimal"
-                        placeholder={t("phase1.naturalDeathPlaceholder")}
-                        value={inp.natural}
-                        onChange={(e) => updateTierField(tier, "natural", e.target.value)}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-foreground">{t("phase1.accidentalDeath")}</Label>
-                      <Input
-                        type="text"
-                        inputMode="decimal"
-                        placeholder={t("phase1.accidentalDeathPlaceholder")}
-                        value={inp.accidental}
-                        onChange={(e) => updateTierField(tier, "accidental", e.target.value)}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-foreground">{t("phase1.monthlyPremium")}</Label>
-                      <Input
-                        type="text"
-                        inputMode="decimal"
-                        placeholder={t("phase1.monthlyPremiumPlaceholder")}
-                        value={inp.premium}
-                        onChange={(e) => updateTierField(tier, "premium", e.target.value)}
-                      />
-                    </div>
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <LeaveBehindWholeDollarField
+                      id={`coverage-${tier}`}
+                      label={
+                        <Label className="text-foreground">{t("phase1.coverageAmount")}</Label>
+                      }
+                      placeholder={t("phase1.coverageAmountPlaceholder")}
+                      value={inp.natural}
+                      onChange={(v) => updateTierCoverage(tier, v)}
+                    />
+                    <LeaveBehindPremiumField
+                      id={`premium-${tier}`}
+                      label={
+                        <Label className="text-foreground">{t("phase1.monthlyPremium")}</Label>
+                      }
+                      placeholder={t("phase1.monthlyPremiumPlaceholder")}
+                      value={inp.premium}
+                      onChange={(v) => updateTierPremium(tier, v)}
+                    />
                   </div>
                   {err && <p className="text-sm text-red-600 dark:text-red-400">{err}</p>}
                 </div>
@@ -390,45 +504,25 @@ export default function FinalExpenseLeaveBehindCompareForm() {
             })}
           </div>
 
-          <Button
-            onClick={handleGenerate}
-            className="w-full sm:w-auto bg-[#003366] text-white hover:bg-[#004080] hover:text-white gap-2 text-base py-6 px-8"
-          >
-            {t("compare.generateButton")}
-            <ArrowRight className="h-4 w-4" />
-          </Button>
+          {phase === 1 && hasPreview && (
+            <p className="rounded-lg border border-border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
+              {t("workflow.editingHint")}
+            </p>
+          )}
         </div>
       )}
 
-      {phase === 2 && (
-        <div className="space-y-6">
-          <div className="flex flex-wrap gap-3">
-            <Button variant="outline" onClick={() => setPhase(1)} className="gap-2">
-              <Pencil className="h-4 w-4" />
-              {t("compare.editButton")}
-            </Button>
-            <Button
-              onClick={handleDownload}
-              disabled={isDownloading || isSharing}
-              className="gap-2 bg-[#003366] text-white hover:bg-[#004080] hover:text-white"
-            >
-              <FileImage className="h-4 w-4" />
-              {isDownloading ? t("compare.downloading") : t("compare.downloadButton")}
-            </Button>
-            {canShare && (
-              <Button
-                variant="outline"
-                onClick={handleShare}
-                disabled={isDownloading || isSharing}
-                className="gap-2"
-              >
-                <Share2 className="h-4 w-4" />
-                {isSharing ? t("compare.sharing") : t("compare.shareButton")}
-              </Button>
-            )}
-          </div>
-
-          <div className="max-w-xl mx-auto space-y-2">
+      {hasPreview && (
+        <div
+          id="leave-behind-compare-preview"
+          className={cn(
+            "space-y-6",
+            phase === 1 && "fixed left-[-10000px] top-0 w-[1280px] opacity-0 pointer-events-none"
+          )}
+          aria-hidden={phase === 1}
+        >
+          {phase === 2 && (
+            <div className="max-w-xl mx-auto space-y-2">
             <Label htmlFor="compare-highlight-preview" className="text-sm font-medium text-foreground">
               {t("compare.highlightLabel")}
             </Label>
@@ -448,7 +542,8 @@ export default function FinalExpenseLeaveBehindCompareForm() {
               </SelectContent>
             </Select>
             <p className="text-sm text-gray-500 dark:text-gray-400">{t("compare.imageStyleHint")}</p>
-          </div>
+            </div>
+          )}
 
           <div className="w-full overflow-x-auto border border-gray-300/80 bg-muted/30 py-4 dark:border-gray-600/80">
             <div
@@ -559,7 +654,7 @@ export default function FinalExpenseLeaveBehindCompareForm() {
                   >
                     {planTypeDisplay()}
                   </p>
-                  {(planType === "modified" || planType === "easyIssue" || planType === "guaranteedIssue") && (
+                  {(planType === "modified" || planType === "guaranteed") && (
                     <p
                       style={{
                         fontSize: 12,
@@ -657,7 +752,8 @@ export default function FinalExpenseLeaveBehindCompareForm() {
               >
                 {COMPARISON_TIER_ORDER.map((tier) => {
                   const th = TIER_THEMES[tier];
-                  const { naturalNum, accidentalNum, premiumNum, total } = tierComputed(tier);
+                  const { naturalNum, accidentalNum, premiumNum, premiumDisplay, total } =
+                    tierComputed(tier);
                   const highlighted = highlightTier === tier;
                   const tierName = t(`phase1.${TIER_LABEL_KEYS[tier]}`);
 
@@ -770,7 +866,7 @@ export default function FinalExpenseLeaveBehindCompareForm() {
                         <p style={{ fontSize: 14, lineHeight: 1.45, color: th.accentMuted, marginTop: "auto" }}>
                           {t("phase2.smallPremiumOf")}{" "}
                           <span style={{ color: th.accentHero, fontWeight: 700 }}>
-                            ${formatCurrency(premiumNum)}
+                            ${premiumDisplay || formatCurrency(premiumNum)}
                           </span>{" "}
                           {t("compare.perMonth")}
                         </p>

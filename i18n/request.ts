@@ -97,14 +97,6 @@ async function loadSplitMessages(locale: string): Promise<Record<string, any>> {
       // File doesn't exist, skip
     }
 
-    // Load Final Expense leave-behind messages if they exist
-    try {
-      const feLeaveBehind = (await import(`@/messages/${locale}/final-expense/leave-behind.json`)).default;
-      Object.assign(splitMessages, feLeaveBehind);
-    } catch {
-      // File doesn't exist, skip
-    }
-    
     // Load FAQ messages if they exist
     try {
       const faq = (await import(`@/messages/${locale}/faq.json`)).default;
@@ -243,6 +235,21 @@ async function loadSplitMessages(locale: string): Promise<Record<string, any>> {
         await import(`@/messages/${locale}/header-services-carriers.json`)
       ).default;
       Object.assign(splitMessages, headerCarriers);
+    } catch {
+      // File doesn't exist, skip
+    }
+
+    // Leave-behind last so nothing overwrites finalExpenseLeaveBehind via Object.assign
+    try {
+      const feLeaveBehind = (await import(`@/messages/${locale}/final-expense/leave-behind.json`))
+        .default;
+      const mergedLeaveBehind = deepMergeMessages(
+        splitMessages as Record<string, unknown>,
+        feLeaveBehind as Record<string, unknown>
+      );
+      for (const k of Object.keys(mergedLeaveBehind)) {
+        splitMessages[k] = mergedLeaveBehind[k];
+      }
     } catch {
       // File doesn't exist, skip
     }

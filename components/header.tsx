@@ -447,21 +447,21 @@ const MobileSheet = ({
 
         {/* Sticky bottom */}
         <div className="space-y-4 border-t border-border bg-gradient-to-b from-background to-muted/30 px-6 pb-6 pt-6 shadow-[0_-8px_24px_-8px_rgba(0,0,0,0.12)] backdrop-blur-sm dark:shadow-[0_-8px_24px_-8px_rgba(0,0,0,0.35)]">
-          <div className="flex items-center justify-between rounded-xl border border-border bg-card/95 p-4 backdrop-blur-sm">
-            <a
-              href={`tel:${nav("phone")}`}
-              className="flex items-center space-x-2.5 rounded-lg px-2 py-1.5 text-sm font-semibold text-foreground/90 transition-colors duration-200 hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-              aria-label={`Call us at ${nav("phone")}`}
-            >
-              <div className="rounded-lg bg-brand/10 p-1.5 dark:bg-brand/20">
-                <Lucide.Phone className="h-4 w-4 text-brand" aria-hidden="true" />
-              </div>
-              <span>{nav("phone")}</span>
-            </a>
-            <div className="flex items-center gap-0.5">
+          <div className="flex flex-col gap-3 rounded-xl border border-border bg-card/95 p-3 backdrop-blur-sm sm:p-4">
+            <div className="flex items-center justify-end gap-0.5">
               <ThemeSwitcher />
               <LocaleSwitcher />
             </div>
+            <a
+              href={`tel:${nav("phone")}`}
+              className="flex items-center gap-2 rounded-lg py-1.5 text-sm font-semibold text-foreground/90 transition-colors duration-200 hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              aria-label={`Call us at ${nav("phone")}`}
+            >
+              <div className="shrink-0 rounded-lg bg-brand/10 p-1.5 dark:bg-brand/20">
+                <Lucide.Phone className="h-4 w-4 text-brand" aria-hidden="true" />
+              </div>
+              <span className="whitespace-nowrap">{nav("phone")}</span>
+            </a>
           </div>
           {/* CTA island (client) */}
           <div className="animate-fadeLeft-d4">

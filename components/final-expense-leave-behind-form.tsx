@@ -1,12 +1,30 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import { LEAVE_BEHIND_PLAN_LABEL_DEFAULTS } from "@/lib/leave-behind-plan-labels";
 import html2canvas from "html2canvas";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { FileImage, ArrowRight, Pencil, Share2 } from "lucide-react";
+import { saveLeaveBehindClient } from "@/lib/leave-behind-clients-api";
+import type {
+  LeaveBehindClientRecord,
+  LeaveBehindPlanType,
+  SingleQuoteData,
+} from "@/lib/leave-behind-clients";
+import { migrateLeaveBehindPlanType } from "@/lib/leave-behind-clients";
+import {
+  LeaveBehindPremiumField,
+  LeaveBehindWholeDollarField,
+} from "@/components/leave-behind-money-input";
+import {
+  formatCurrency,
+  formatPremiumForQuote,
+  parsePremiumAmount,
+  parseWholeDollarInput,
+} from "@/lib/leave-behind-money-input";
+import { LeaveBehindQuoteToolbar } from "@/components/leave-behind-quote-toolbar";
+import { cn } from "@/lib/utils";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
@@ -31,22 +49,9 @@ const SENIOR_LIFE_LOGO =
 const ISAAC_BANNER =
   "https://res.cloudinary.com/isaacdev/image/upload/v1773068098/bfi_wi8szs.png";
 
-function formatCurrency(value: number): string {
-  return new Intl.NumberFormat("en-US", {
-    style: "decimal",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 2,
-  }).format(value);
-}
-
-/** Allow digits and one decimal point (e.g. 69.73 or 69,73) for mobile keyboard */
-function sanitizeDecimalInput(value: string): string {
-  // Normalize comma, middle dot, and other decimal separators to period
-  const normalized = value.replace(/[,·\u00B7\u2022]/g, ".");
-  const cleaned = normalized.replace(/[^\d.]/g, "");
-  const parts = cleaned.split(".");
-  if (parts.length <= 1) return parts[0] || "";
-  return `${parts[0]}.${(parts[1] ?? "").slice(0, 2)}`;
+function initialCoverageFromData(data?: SingleQuoteData | null): string {
+  if (!data) return "";
+  return parseWholeDollarInput(data.naturalDeath || data.accidentalDeath || "");
 }
 
 function parseNames(input: string): string[] {
@@ -56,11 +61,30 @@ function parseNames(input: string): string[] {
     .filter(Boolean);
 }
 
-export default function FinalExpenseLeaveBehindForm() {
+export type FinalExpenseLeaveBehindFormProps = {
+  clientId?: string | null;
+  initialData?: SingleQuoteData | null;
+  onClientSaved?: (client: LeaveBehindClientRecord) => void;
+  onNewQuote?: () => void;
+};
+
+export default function FinalExpenseLeaveBehindForm({
+  clientId = null,
+  initialData = null,
+  onClientSaved,
+  onNewQuote,
+}: FinalExpenseLeaveBehindFormProps) {
   const t = useTranslations("finalExpenseLeaveBehind");
-  const [phase, setPhase] = useState<1 | 2>(1);
+  const locale = useLocale();
+  const planLabelFallback =
+    LEAVE_BEHIND_PLAN_LABEL_DEFAULTS[locale === "es" ? "es" : "en"];
+  const [phase, setPhase] = useState<1 | 2>(initialData?.phase ?? 1);
+  const [hasPreview, setHasPreview] = useState((initialData?.phase ?? 1) === 2);
+  const formSectionRef = useRef<HTMLDivElement>(null);
   const [isDownloading, setIsDownloading] = useState(false);
   const [isSharing, setIsSharing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveMessage, setSaveMessage] = useState<string | null>(null);
   const [canShare, setCanShare] = useState(false);
 
   useEffect(() => {
@@ -68,37 +92,45 @@ export default function FinalExpenseLeaveBehindForm() {
   }, []);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const [prospectName, setProspectName] = useState("");
-  const [naturalDeath, setNaturalDeath] = useState("");
-  const [accidentalDeath, setAccidentalDeath] = useState("");
-  const [monthlyPremium, setMonthlyPremium] = useState("");
-  const [avoidNames, setAvoidNames] = useState("");
-  const [protectNames, setProtectNames] = useState("");
-  const [planType, setPlanType] = useState<"standard" | "modified" | "easyIssue" | "guaranteedIssue">("standard");
-  const [presentationTier, setPresentationTier] = useState<PresentationTier>("gold");
+  const [prospectName, setProspectName] = useState(initialData?.prospectName ?? "");
+  const [coverageAmount, setCoverageAmount] = useState(() =>
+    initialCoverageFromData(initialData)
+  );
+  const [monthlyPremium, setMonthlyPremium] = useState(initialData?.monthlyPremium ?? "");
+  const [avoidNames, setAvoidNames] = useState(initialData?.avoidNames ?? "");
+  const [protectNames, setProtectNames] = useState(initialData?.protectNames ?? "");
+  const [planType, setPlanType] = useState<LeaveBehindPlanType>(() =>
+    migrateLeaveBehindPlanType(initialData?.planType)
+  );
+  const [presentationTier, setPresentationTier] = useState<PresentationTier>(
+    initialData?.presentationTier ?? "gold"
+  );
 
   const imageRef = useRef<HTMLDivElement>(null);
   const tierTheme = TIER_THEMES[presentationTier];
   const tierDisplayName = t(`phase1.${TIER_LABEL_KEYS[presentationTier]}`);
 
-  const naturalNum = parseFloat(sanitizeDecimalInput(naturalDeath)) || 0;
-  const accidentalNum = parseFloat(sanitizeDecimalInput(accidentalDeath)) || 0;
-  const premiumNum = parseFloat(sanitizeDecimalInput(monthlyPremium)) || 0;
+  const coverageNum = parseInt(parseWholeDollarInput(coverageAmount), 10) || 0;
+  const naturalNum = coverageNum;
+  const accidentalNum = coverageNum;
+  const premiumNum = parsePremiumAmount(monthlyPremium);
   const totalCoverage = naturalNum + accidentalNum;
+  const premiumDisplay = formatPremiumForQuote(monthlyPremium);
   const avoidList = parseNames(avoidNames);
   const protectList = parseNames(protectNames);
 
+  const detailCharCount =
+    avoidNames.length + protectNames.length + prospectName.trim().length;
+  const isDenseCard =
+    detailCharCount > 100 ||
+    avoidList.length + protectList.length > 4 ||
+    avoidList.some((n) => n.length > 28) ||
+    protectList.some((n) => n.length > 28);
+
   const validate = (): boolean => {
     const errs: Record<string, string> = {};
-    if (!naturalDeath.trim() || naturalNum < 1) {
-      errs.natural = t("validation.naturalRequired");
-    } else if (naturalNum < 1) {
-      errs.natural = t("validation.minAmount");
-    }
-    if (!accidentalDeath.trim() || accidentalNum < 1) {
-      errs.accidental = t("validation.accidentalRequired");
-    } else if (accidentalNum < 1) {
-      errs.accidental = t("validation.minAmount");
+    if (!coverageAmount.trim() || coverageNum < 1) {
+      errs.coverage = t("validation.coverageRequired");
     }
     setErrors(errs);
     return Object.keys(errs).length === 0;
@@ -106,13 +138,82 @@ export default function FinalExpenseLeaveBehindForm() {
 
   const handleGenerate = () => {
     if (!validate()) return;
+    setHasPreview(true);
     setPhase(2);
+    requestAnimationFrame(() => {
+      document.getElementById("leave-behind-single-preview")?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    });
+  };
+
+  const handleEditDetails = () => {
+    if (phase === 1 && hasPreview) {
+      setPhase(2);
+      requestAnimationFrame(() => {
+        document.getElementById("leave-behind-single-preview")?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      });
+      return;
+    }
+    setPhase(1);
+    requestAnimationFrame(() => {
+      formSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  };
+
+  const toolbarLabels = {
+    newQuote: t("clients.newClient"),
+    editDetails: t("phase2.editButton"),
+    viewPreview: t("workflow.viewPreview"),
+    generatePreview: t("workflow.generatePreview"),
+    download: t("phase2.downloadButton"),
+    downloading: t("phase2.downloading"),
+    share: t("phase2.shareButton"),
+    sharing: t("phase2.sharing"),
+    saveClient: t("clients.saveClient"),
+    saving: t("clients.saving"),
+  };
+
+  const buildQuoteData = (): SingleQuoteData => ({
+    prospectName,
+    naturalDeath: coverageAmount,
+    accidentalDeath: coverageAmount,
+    monthlyPremium,
+    avoidNames,
+    protectNames,
+    planType,
+    presentationTier,
+    phase,
+  });
+
+  const handleSaveClient = async () => {
+    setIsSaving(true);
+    setSaveMessage(null);
+    try {
+      const client = await saveLeaveBehindClient({
+        id: clientId,
+        quoteType: "single",
+        prospectName: prospectName.trim() || null,
+        quoteData: buildQuoteData(),
+      });
+      onClientSaved?.(client);
+      setSaveMessage(t("clients.saved"));
+    } catch {
+      setSaveMessage(t("clients.saveFailed"));
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const captureImageAsBlob = async (): Promise<Blob | null> => {
     if (!imageRef.current) return null;
     imageRef.current.scrollIntoView({ behavior: "auto", block: "center" });
     await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+    await new Promise((r) => setTimeout(r, 50));
 
     const images = imageRef.current.querySelectorAll<HTMLImageElement>("img");
     await Promise.all(
@@ -127,14 +228,20 @@ export default function FinalExpenseLeaveBehindForm() {
       )
     );
 
-    const canvas = await html2canvas(imageRef.current, {
+    const el = imageRef.current;
+    const captureWidth = 360;
+    const captureHeight = Math.ceil(el.getBoundingClientRect().height) || el.scrollHeight;
+
+    const canvas = await html2canvas(el, {
       backgroundColor: tierTheme.captureBg,
       scale: 2,
       logging: false,
       useCORS: true,
       imageTimeout: 15000,
-      windowWidth: Math.max(imageRef.current.scrollWidth, 360),
-      windowHeight: Math.max(imageRef.current.scrollHeight, 640),
+      width: captureWidth,
+      height: captureHeight,
+      windowWidth: captureWidth,
+      windowHeight: captureHeight,
     });
 
     return new Promise<Blob | null>((resolve) => {
@@ -146,9 +253,7 @@ export default function FinalExpenseLeaveBehindForm() {
     });
   };
 
-  const handleDownload = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleDownload = async () => {
     if (!imageRef.current) return;
     setIsDownloading(true);
     try {
@@ -173,9 +278,7 @@ export default function FinalExpenseLeaveBehindForm() {
     }
   };
 
-  const handleShare = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleShare = async () => {
     if (!navigator.share) return;
     setIsSharing(true);
     try {
@@ -202,10 +305,30 @@ export default function FinalExpenseLeaveBehindForm() {
   };
 
   return (
-    <div className="space-y-8">
-      {/* Phase 1: Data collection */}
-      {phase === 1 && (
-        <div className="space-y-6 rounded-xl border border-gray-200/80 bg-white p-6 shadow-lg dark:border-gray-700/80 dark:bg-gray-950 md:p-8">
+    <div className="space-y-6">
+      <LeaveBehindQuoteToolbar
+        hasPreview={hasPreview}
+        isEditing={phase === 1 && hasPreview}
+        canShare={canShare}
+        isDownloading={isDownloading}
+        isSharing={isSharing}
+        isSaving={isSaving}
+        labels={toolbarLabels}
+        onNewQuote={onNewQuote}
+        onEditDetails={handleEditDetails}
+        onUpdatePreview={handleGenerate}
+        onDownload={handleDownload}
+        onShare={handleShare}
+        onSave={handleSaveClient}
+        saveMessage={saveMessage}
+      />
+
+      {(phase === 1 || !hasPreview) && (
+        <div
+          ref={formSectionRef}
+          id="leave-behind-single-form"
+          className="space-y-6 rounded-xl border border-gray-200/80 bg-white p-6 shadow-lg dark:border-gray-700/80 dark:bg-gray-950 md:p-8"
+        >
           <div>
             <h2 className="mb-2 text-2xl font-bold text-[#003366] dark:text-sky-300">
               {t("phase1.title")}
@@ -228,60 +351,36 @@ export default function FinalExpenseLeaveBehindForm() {
               <p className="text-sm text-gray-500 dark:text-gray-400">{t("phase1.prospectNameHint")}</p>
             </div>
 
-            <div className="grid sm:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="natural" className="text-base text-foreground">
-                {t("phase1.naturalDeath")}
-              </Label>
-                <Input
-                  id="natural"
-                  type="text"
-                  inputMode="decimal"
-                  placeholder={t("phase1.naturalDeathPlaceholder")}
-                  value={naturalDeath}
-                  onChange={(e) => setNaturalDeath(sanitizeDecimalInput(e.target.value))}
-                  className={errors.natural ? "border-red-500" : ""}
-                />
-                {errors.natural && (
-                  <p className="text-sm text-red-600 dark:text-red-400">{errors.natural}</p>
-                )}
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="accidental" className="text-base text-foreground">
-                {t("phase1.accidentalDeath")}
-              </Label>
-                <Input
-                  id="accidental"
-                  type="text"
-                  inputMode="decimal"
-                  placeholder={t("phase1.accidentalDeathPlaceholder")}
-                  value={accidentalDeath}
-                  onChange={(e) => setAccidentalDeath(sanitizeDecimalInput(e.target.value))}
-                  className={errors.accidental ? "border-red-500" : ""}
-                />
-                {errors.accidental && (
-                  <p className="text-sm text-red-600 dark:text-red-400">{errors.accidental}</p>
-                )}
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  {t("phase1.accidentalHint")}
-                </p>
-              </div>
-            </div>
+            <LeaveBehindWholeDollarField
+              id="coverage"
+              label={
+                <Label htmlFor="coverage" className="text-base text-foreground">
+                  {t("phase1.coverageAmount")}
+                </Label>
+              }
+              hint={
+                <p className="text-sm text-gray-500 dark:text-gray-400">{t("phase1.coverageHint")}</p>
+              }
+              placeholder={t("phase1.coverageAmountPlaceholder")}
+              value={coverageAmount}
+              onChange={setCoverageAmount}
+              error={errors.coverage}
+            />
 
-            <div className="space-y-2">
-              <Label htmlFor="premium" className="text-base text-foreground">
-                {t("phase1.monthlyPremium")}
-              </Label>
-              <Input
-                id="premium"
-                type="text"
-                inputMode="decimal"
-                placeholder={t("phase1.monthlyPremiumPlaceholder")}
-                value={monthlyPremium}
-                onChange={(e) => setMonthlyPremium(sanitizeDecimalInput(e.target.value))}
-              />
-              <p className="text-sm text-gray-500 dark:text-gray-400">{t("phase1.monthlyPremiumHint")}</p>
-            </div>
+            <LeaveBehindPremiumField
+              id="premium"
+              label={
+                <Label htmlFor="premium" className="text-base text-foreground">
+                  {t("phase1.monthlyPremium")}
+                </Label>
+              }
+              hint={
+                <p className="text-sm text-gray-500 dark:text-gray-400">{t("phase1.monthlyPremiumHint")}</p>
+              }
+              placeholder={t("phase1.monthlyPremiumPlaceholder")}
+              value={monthlyPremium}
+              onChange={setMonthlyPremium}
+            />
 
             <div className="space-y-2">
               <Label htmlFor="avoid" className="text-base">{t("phase1.avoidNames")}</Label>
@@ -318,27 +417,21 @@ export default function FinalExpenseLeaveBehindForm() {
                 className="grid gap-3"
               >
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="standard" id="plan-standard" />
-                  <Label htmlFor="plan-standard" className="cursor-pointer font-normal text-foreground">
-                    {t("phase1.planStandard")}
+                  <RadioGroupItem value="preferred" id="plan-preferred" />
+                  <Label htmlFor="plan-preferred" className="cursor-pointer font-normal text-foreground">
+                    {t("phase1.planPreferred", { default: planLabelFallback.planPreferred })}
                   </Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="modified" id="plan-modified" />
                   <Label htmlFor="plan-modified" className="cursor-pointer font-normal text-foreground">
-                    {t("phase1.planModified")}
+                    {t("phase1.planModified", { default: planLabelFallback.planModified })}
                   </Label>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="easyIssue" id="plan-easy" />
-                  <Label htmlFor="plan-easy" className="cursor-pointer font-normal text-foreground">
-                    {t("phase1.planEasyIssue")}
-                  </Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="guaranteedIssue" id="plan-guaranteed" />
+                  <RadioGroupItem value="guaranteed" id="plan-guaranteed" />
                   <Label htmlFor="plan-guaranteed" className="cursor-pointer font-normal text-foreground">
-                    {t("phase1.planGuaranteedIssue")}
+                    {t("phase1.planGuaranteed", { default: planLabelFallback.planGuaranteed })}
                   </Label>
                 </div>
               </RadioGroup>
@@ -366,50 +459,22 @@ export default function FinalExpenseLeaveBehindForm() {
             </div>
           </div>
 
-          <Button
-            onClick={handleGenerate}
-            className="w-full sm:w-auto bg-[#003366] text-white hover:bg-[#004080] hover:text-white gap-2 text-base py-6 px-8"
-          >
-            {t("phase2.generateButton")}
-            <ArrowRight className="h-4 w-4" />
-          </Button>
+          {phase === 1 && hasPreview && (
+            <p className="rounded-lg border border-border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
+              {t("workflow.editingHint")}
+            </p>
+          )}
         </div>
       )}
 
-      {/* Phase 2: Preview & Download */}
-      {phase === 2 && (
-        <div className="space-y-6">
-          <div className="flex flex-wrap gap-3">
-            <Button
-              variant="outline"
-              onClick={() => setPhase(1)}
-              className="gap-2"
-            >
-              <Pencil className="h-4 w-4" />
-              {t("phase2.editButton")}
-            </Button>
-            <Button
-              onClick={handleDownload}
-              disabled={isDownloading || isSharing}
-              className="gap-2 bg-[#003366] text-white hover:bg-[#004080] hover:text-white"
-            >
-              <FileImage className="h-4 w-4" />
-              {isDownloading ? t("phase2.downloading") : t("phase2.downloadButton")}
-            </Button>
-            {canShare && (
-              <Button
-                variant="outline"
-                onClick={handleShare}
-                disabled={isDownloading || isSharing}
-                className="gap-2"
-              >
-                <Share2 className="h-4 w-4" />
-                {isSharing ? t("phase2.sharing") : t("phase2.shareButton")}
-              </Button>
-            )}
-          </div>
-
-          <div className="max-w-sm mx-auto space-y-3">
+      {hasPreview && (
+        <div
+          id="leave-behind-single-preview"
+          className={cn("space-y-6", phase === 1 && "fixed left-[-10000px] top-0 w-[360px] opacity-0 pointer-events-none")}
+          aria-hidden={phase === 1}
+        >
+          {phase === 2 && (
+            <div className="max-w-sm mx-auto space-y-3">
             <div className="space-y-2">
               <Label htmlFor="presentation-tier-preview" className="text-sm font-medium text-foreground">
                 {t("phase2.imageTierLabel")}
@@ -429,27 +494,31 @@ export default function FinalExpenseLeaveBehindForm() {
                 </SelectContent>
               </Select>
             </div>
-          </div>
+            </div>
+          )}
 
-          {/* Image preview - portrait 9:16 for phone viewing, shareable design */}
-          {/* No shadows/frames here - html2canvas renders them as artifacts in the downloaded image */}
+          <div
+            className={cn(
+              "mx-auto max-w-sm",
+              phase === 2 && "max-h-[min(90vh,1400px)] overflow-y-auto rounded-xl"
+            )}
+          >
           <div
             ref={imageRef}
-            className="rounded-xl overflow-hidden max-w-sm mx-auto"
+            className="mx-auto w-[360px] max-w-full"
             style={{
-              minWidth: 360,
-              aspectRatio: "9/18",
               background: tierTheme.cardGradient,
+              boxSizing: "border-box",
             }}
           >
             <div
-              className="flex flex-col items-center justify-between text-center h-full px-6 py-5"
+              className="flex w-full flex-col items-center gap-4 px-6 py-6 text-center"
               style={{
                 fontFamily: "'Georgia', 'Times New Roman', serif",
               }}
             >
               {/* Main quote content */}
-              <div className="flex flex-col items-center space-y-3 flex-1 justify-center min-h-0">
+              <div className="flex w-full flex-col items-center gap-3">
                 <img
                   src={SENIOR_LIFE_LOGO}
                   alt="Senior Life Insurance Company"
@@ -492,11 +561,11 @@ export default function FinalExpenseLeaveBehindForm() {
               {/* Prospect name - soft cream, always uppercase */}
               {prospectName.trim() && (
                 <p
-                  className="leading-tight uppercase"
+                  className="w-full break-words leading-tight uppercase"
                   style={{
                     color: "#faf6eb",
                     fontFamily: "system-ui, sans-serif",
-                    fontSize: "1.6rem",
+                    fontSize: isDenseCard ? "1.35rem" : "1.6rem",
                     fontWeight: 600,
                     letterSpacing: "0.04em",
                   }}
@@ -515,7 +584,11 @@ export default function FinalExpenseLeaveBehindForm() {
                 </p>
                 <p
                   className="font-bold tracking-tight leading-none"
-                  style={{ color: tierTheme.accentHero, fontFamily: "system-ui, sans-serif", fontSize: "3.25rem" }}
+                  style={{
+                    color: tierTheme.accentHero,
+                    fontFamily: "system-ui, sans-serif",
+                    fontSize: isDenseCard ? "2.75rem" : "3.25rem",
+                  }}
                 >
                   ${formatCurrency(totalCoverage)}
                 </p>
@@ -526,14 +599,17 @@ export default function FinalExpenseLeaveBehindForm() {
                   >
                     {t("phase2.smallPremiumOf")}{" "}
                     <span style={{ color: tierTheme.accentHero, fontWeight: 700 }}>
-                      ${formatCurrency(premiumNum)}
+                      ${premiumDisplay || formatCurrency(premiumNum)}
                     </span>{" "}
                     {t("phase2.perMonth")}
                   </p>
                 )}
                 <p
-                  className="text-xl text-white/95 leading-relaxed"
-                  style={{ fontFamily: "system-ui, sans-serif" }}
+                  className="text-white/95 leading-relaxed"
+                  style={{
+                    fontFamily: "system-ui, sans-serif",
+                    fontSize: isDenseCard ? "1rem" : "1.25rem",
+                  }}
                 >
                   {t("phase2.naturalDeathLabel")}{" "}
                   <span style={{ color: tierTheme.accent, fontWeight: 600 }}>
@@ -545,7 +621,7 @@ export default function FinalExpenseLeaveBehindForm() {
                   </span>{" "}
                   {t("phase2.ifAccidental")}
                 </p>
-                {(planType === "modified" || planType === "easyIssue" || planType === "guaranteedIssue") && (
+                {(planType === "modified" || planType === "guaranteed") && (
                   <p
                     className="text-sm font-medium leading-relaxed mt-2"
                     style={{ color: tierTheme.accent, fontFamily: "system-ui, sans-serif" }}
@@ -566,7 +642,13 @@ export default function FinalExpenseLeaveBehindForm() {
                   >
                     {t("phase2.avoidPrefix")}
                   </p>
-                  <p className="text-xl font-medium text-white/95 leading-relaxed" style={{ fontFamily: "system-ui, sans-serif" }}>
+                  <p
+                    className="w-full break-words font-medium text-white/95 leading-snug"
+                    style={{
+                      fontFamily: "system-ui, sans-serif",
+                      fontSize: isDenseCard ? "1rem" : "1.25rem",
+                    }}
+                  >
                     {avoidList.join(", ")}
                   </p>
                 </div>
@@ -583,7 +665,13 @@ export default function FinalExpenseLeaveBehindForm() {
                   >
                     {t("phase2.protectPrefix")}
                   </p>
-                  <p className="text-xl font-medium text-white/95 leading-relaxed" style={{ fontFamily: "system-ui, sans-serif" }}>
+                  <p
+                    className="w-full break-words font-medium text-white/95 leading-snug"
+                    style={{
+                      fontFamily: "system-ui, sans-serif",
+                      fontSize: isDenseCard ? "1rem" : "1.25rem",
+                    }}
+                  >
                     {protectList.join(", ")}
                   </p>
                 </div>
@@ -591,17 +679,21 @@ export default function FinalExpenseLeaveBehindForm() {
               </div>
 
               {/* Agent banner - Isaac Orraiz signature at bottom */}
-              <div className="flex-shrink-0 w-full mt-4 pt-3 border-t" style={{ borderColor: tierTheme.borderAccent }}>
+              <div
+                className="w-full shrink-0 border-t pt-4"
+                style={{ borderColor: tierTheme.borderAccent }}
+              >
                 <img
                   src={ISAAC_BANNER}
                   alt="Isaac Orraiz - Senior Life"
                   width={360}
                   height={120}
                   crossOrigin="anonymous"
-                  className="w-full h-auto object-contain object-center"
+                  className="block w-full h-auto object-contain object-center"
                 />
               </div>
             </div>
+          </div>
           </div>
         </div>
       )}

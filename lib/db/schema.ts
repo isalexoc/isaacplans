@@ -1,4 +1,5 @@
-import { pgTable, text, timestamp, boolean, integer, index, uniqueIndex } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, boolean, integer, index, uniqueIndex, jsonb } from "drizzle-orm/pg-core";
+import type { LeaveBehindQuoteData } from "@/lib/leave-behind-clients";
 
 // Guides table - stores all available guides
 export const guides = pgTable("guides", {
@@ -129,5 +130,37 @@ export const newsletterSubscribers = pgTable("newsletter_subscribers", {
   unsubscribeTokenIdx: index("newsletter_unsubscribe_token_idx").on(table.unsubscribeToken),
   emailUniqueIdx: uniqueIndex("newsletter_email_unique_idx").on(table.email), // Prevent duplicates
 }));
+
+// Final expense leave-behind: agent-saved client quote data (JSON only; images generated client-side)
+export const leaveBehindClients = pgTable("leave_behind_clients", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull(),
+  quoteType: text("quote_type").notNull(), // package | single | compare (legacy)
+  prospectName: text("prospect_name"),
+  quoteData: jsonb("quote_data").notNull().$type<LeaveBehindQuoteData>(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => ({
+  userIdIdx: index("leave_behind_clients_user_id_idx").on(table.userId),
+  userUpdatedIdx: index("leave_behind_clients_user_updated_idx").on(table.userId, table.updatedAt),
+}));
+
+/** Per-agent branding for leave-behind quote image footers. */
+export const leaveBehindAgentProfiles = pgTable("leave_behind_agent_profiles", {
+  userId: text("user_id").primaryKey(),
+  firstName: text("first_name").default("").notNull(),
+  lastName: text("last_name").default("").notNull(),
+  professionalTitle: text("professional_title").default("").notNull(),
+  phone: text("phone").default("").notNull(),
+  email: text("email").default("").notNull(),
+  profileImageUrl: text("profile_image_url").default("").notNull(),
+  profileImagePublicId: text("profile_image_public_id").default("").notNull(),
+  companyLogoUrl: text("company_logo_url").default("").notNull(),
+  companyLogoPublicId: text("company_logo_public_id").default("").notNull(),
+  logoRemoveBackground: boolean("logo_remove_background").default(true).notNull(),
+  onboardingCompletedAt: timestamp("onboarding_completed_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
 
 
