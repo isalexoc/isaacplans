@@ -13,7 +13,7 @@ import { getAgencyLd, siteLd, getIsaacPersonLd } from "@/lib/seo/jsonld";
 import { getLocale } from "next-intl/server";
 import Script from "next/script";
 import { ThemeProvider } from "@/components/theme-provider";
-import { ClerkProvider } from '@clerk/nextjs';
+import { ClerkThemeProvider } from "@/components/clerk-theme-provider";
 import { esES, enUS } from '@clerk/localizations';
 import { SanityLive } from '@/sanity/lib/live';
 import MetaPixelWrapper from "@/components/meta-pixel-wrapper";
@@ -108,8 +108,6 @@ export default async function LocaleLayout({
   const messages = await getMessages();
 
   return (
-    // @ts-ignore - ClerkProvider works correctly with React 19, TypeScript types need update
-    <ClerkProvider localization={clerkLocale}>
     <html
       lang={locale}
       translate="no"
@@ -135,6 +133,7 @@ export default async function LocaleLayout({
           disableTransitionOnChange
           storageKey="isaacplans-ui-theme"
         >
+        <ClerkThemeProvider localization={clerkLocale}>
         <NextIntlClientProvider locale={locale} messages={messages}>
           <SanityLive />
           <Header />
@@ -155,6 +154,7 @@ export default async function LocaleLayout({
             />
           ) : null}
         </NextIntlClientProvider>
+        </ClerkThemeProvider>
         </ThemeProvider>
         <script
           type="application/ld+json"
@@ -169,6 +169,5 @@ export default async function LocaleLayout({
       </body>
       <GoogleAnalytics gaId="G-5SDTGH29ER" />
     </html>
-    </ClerkProvider>
   );
 }

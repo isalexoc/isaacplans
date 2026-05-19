@@ -62,14 +62,14 @@ export function LeaveBehindLandingShare({ className }: LeaveBehindLandingSharePr
         className
       )}
       aria-live="polite"
+      aria-label={copied || sharing ? undefined : t("shareButton")}
     >
       {copied ? (
         <Check className="h-4 w-4 shrink-0" aria-hidden />
       ) : (
         <Share2 className="h-4 w-4 shrink-0" aria-hidden />
       )}
-      <span className="hidden sm:inline">{label}</span>
-      <span className="sm:hidden">{copied ? label : <Share2 className="h-4 w-4" />}</span>
+      <span className={cn(copied || sharing ? "inline" : "hidden sm:inline")}>{label}</span>
     </button>
   );
 }

@@ -28,7 +28,7 @@ export function AgentFooter({ profile, variant = "card" }: AgentFooterProps) {
         marginLeft: isCompare ? -32 : 0,
         marginRight: isCompare ? -32 : 0,
         marginTop: isCompare ? 30 : 0,
-        padding: isCompare ? "22px 28px 24px" : "16px 0 0",
+        padding: isCompare ? "22px 28px 24px" : "12px 0 4px",
         boxSizing: "border-box",
         backgroundColor: isCompare ? "#021428" : "transparent",
         borderTop: isCompare ? "1px solid rgba(255,255,255,0.14)" : undefined,

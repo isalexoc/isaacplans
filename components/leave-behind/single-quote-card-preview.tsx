@@ -8,6 +8,7 @@ import { AgentFooter } from "@/components/leave-behind/agent-footer";
 import { formatCurrency } from "@/lib/leave-behind-money-input";
 import type { LeaveBehindPlanType } from "@/lib/leave-behind-clients";
 import type { ComparisonTier } from "@/lib/final-expense-leave-behind-tiers";
+import { LEAVE_BEHIND_SINGLE_CARD_WIDTH } from "@/lib/leave-behind-assets";
 import {
   TIER_LABEL_KEYS,
   TIER_MEDAL_URLS,
@@ -56,14 +57,18 @@ export const SingleQuoteCardPreview = forwardRef<HTMLDivElement, SingleQuoteCard
     return (
       <div
         ref={ref}
-        className={cn("mx-auto w-[360px] max-w-full", className)}
+        className={cn("mx-auto shrink-0", className)}
         style={{
+          width: LEAVE_BEHIND_SINGLE_CARD_WIDTH,
+          minWidth: LEAVE_BEHIND_SINGLE_CARD_WIDTH,
+          maxWidth: LEAVE_BEHIND_SINGLE_CARD_WIDTH,
           background: tierTheme.cardGradient,
           boxSizing: "border-box",
+          overflow: "hidden",
         }}
       >
         <div
-          className="flex w-full flex-col items-center gap-4 px-6 py-6 text-center"
+          className="flex w-full flex-col items-center gap-4 px-6 pb-8 pt-6 text-center"
           style={{ fontFamily: "'Georgia', 'Times New Roman', serif" }}
         >
           <div className="flex w-full flex-col items-center gap-3">
@@ -214,7 +219,10 @@ export const SingleQuoteCardPreview = forwardRef<HTMLDivElement, SingleQuoteCard
               </div>
             )}
           </div>
-          <div className="w-full shrink-0 border-t pt-4" style={{ borderColor: tierTheme.borderAccent }}>
+          <div
+            className="w-full shrink-0 border-t pt-4 pb-1"
+            style={{ borderColor: tierTheme.borderAccent }}
+          >
             <AgentFooter profile={agentProfile} variant="card" />
           </div>
         </div>

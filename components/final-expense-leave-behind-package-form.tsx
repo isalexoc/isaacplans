@@ -28,10 +28,9 @@ import {
 } from "@/components/leave-behind-money-input";
 import { LEAVE_BEHIND_PLAN_LABEL_DEFAULTS } from "@/lib/leave-behind-plan-labels";
 import {
-  LEAVE_BEHIND_COMPARE_MIN_HEIGHT,
-  LEAVE_BEHIND_COMPARE_WIDTH,
-  LEAVE_BEHIND_SINGLE_CARD_WIDTH,
-} from "@/lib/leave-behind-assets";
+  measureLeaveBehindCompareCapture,
+  measureLeaveBehindSingleCardCapture,
+} from "@/lib/leave-behind-capture";
 import {
   COMPARISON_CAPTURE_BG,
   COMPARISON_TIER_ORDER,
@@ -350,6 +349,9 @@ export default function FinalExpenseLeaveBehindPackageForm({
     );
 
     const isCompare = previewAsset === "compare";
+    const { width: captureWidth, height: captureHeight } = isCompare
+      ? measureLeaveBehindCompareCapture(el)
+      : measureLeaveBehindSingleCardCapture(el);
 
     const canvas = await html2canvas(el, {
       backgroundColor: isCompare
@@ -359,17 +361,8 @@ export default function FinalExpenseLeaveBehindPackageForm({
       logging: false,
       useCORS: true,
       imageTimeout: 15000,
-      ...(isCompare
-        ? {
-            windowWidth: Math.max(el.scrollWidth, LEAVE_BEHIND_COMPARE_WIDTH),
-            windowHeight: Math.max(el.scrollHeight, LEAVE_BEHIND_COMPARE_MIN_HEIGHT),
-          }
-        : {
-            width: LEAVE_BEHIND_SINGLE_CARD_WIDTH,
-            windowWidth: LEAVE_BEHIND_SINGLE_CARD_WIDTH,
-            height: Math.ceil(el.getBoundingClientRect().height) || el.scrollHeight,
-            windowHeight: Math.ceil(el.getBoundingClientRect().height) || el.scrollHeight,
-          }),
+      windowWidth: captureWidth,
+      windowHeight: captureHeight,
     });
 
     return new Promise<Blob | null>((resolve) => {
@@ -730,7 +723,7 @@ export default function FinalExpenseLeaveBehindPackageForm({
 
           <div
             className={cn(
-              phase === 2 && previewAsset !== "compare" && "mx-auto max-w-sm max-h-[min(90vh,1400px)] overflow-y-auto",
+              phase === 2 && previewAsset !== "compare" && "mx-auto max-w-sm",
               phase === 2 && previewAsset === "compare" && "w-full overflow-x-auto"
             )}
           >
@@ -745,7 +738,7 @@ export default function FinalExpenseLeaveBehindPackageForm({
                   className={cn(
                     "mx-auto w-[360px] max-w-full",
                     !visible &&
-                      "fixed left-[-10000px] top-0 opacity-0 pointer-events-none"
+                      "fixed left-[-12000px] top-0 z-[-1] w-[360px] pointer-events-none"
                   )}
                   aria-hidden={!visible}
                 >

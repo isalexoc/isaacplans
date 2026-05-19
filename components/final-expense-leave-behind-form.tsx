@@ -24,6 +24,7 @@ import {
   parseWholeDollarInput,
 } from "@/lib/leave-behind-money-input";
 import { LeaveBehindQuoteToolbar } from "@/components/leave-behind-quote-toolbar";
+import { measureLeaveBehindSingleCardCapture } from "@/lib/leave-behind-capture";
 import { cn } from "@/lib/utils";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
@@ -229,8 +230,7 @@ export default function FinalExpenseLeaveBehindForm({
     );
 
     const el = imageRef.current;
-    const captureWidth = 360;
-    const captureHeight = Math.ceil(el.getBoundingClientRect().height) || el.scrollHeight;
+    const { width: captureWidth, height: captureHeight } = measureLeaveBehindSingleCardCapture(el);
 
     const canvas = await html2canvas(el, {
       backgroundColor: tierTheme.captureBg,
@@ -238,8 +238,6 @@ export default function FinalExpenseLeaveBehindForm({
       logging: false,
       useCORS: true,
       imageTimeout: 15000,
-      width: captureWidth,
-      height: captureHeight,
       windowWidth: captureWidth,
       windowHeight: captureHeight,
     });
