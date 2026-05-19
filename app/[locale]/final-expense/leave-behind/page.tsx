@@ -3,12 +3,12 @@
 import { auth } from "@clerk/nextjs/server";
 import { getTranslations, getLocale } from "next-intl/server";
 import { NextIntlClientProvider } from "next-intl";
-import { redirect } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import type { Metadata } from "next";
 import { Button } from "@/components/ui/button";
 import { BlogUserAuth } from "@/components/blog-user-auth";
 import FinalExpenseLeaveBehindHub from "@/components/final-expense-leave-behind-hub";
+import FinalExpenseLeaveBehindLanding from "@/components/final-expense-leave-behind-landing";
 import enLeaveBehindMessages from "@/messages/en/final-expense/leave-behind.json";
 import esLeaveBehindMessages from "@/messages/es/final-expense/leave-behind.json";
 
@@ -23,16 +23,17 @@ import {
 /* ───────── SEO ───────── */
 export async function generateMetadata(): Promise<Metadata> {
   const locale = (await getLocale()) as SupportedLocale;
+  const { userId } = await auth();
   const t = await getTranslations({
     locale,
-    namespace: "finalExpenseLeaveBehind.meta",
+    namespace: "finalExpenseLeaveBehind",
   });
 
-  const title = t("title");
-  const description = t("description");
-  const keywords = t("keywords");
-  const image = t("image");
-  const alt = t("imageAlt");
+  const title = userId ? t("meta.title") : t("landing.meta.title");
+  const description = userId ? t("meta.description") : t("landing.meta.description");
+  const keywords = userId ? t("meta.keywords") : t("landing.meta.keywords");
+  const image = t("meta.image");
+  const alt = t("meta.imageAlt");
 
   const routeKey = "/final-expense/leave-behind" as const;
   const slug = localizedSlug(routeKey, locale);
@@ -65,10 +66,9 @@ export async function generateMetadata(): Promise<Metadata> {
       description,
       images: [{ url: image, alt }],
     },
-    robots: {
-      index: false,
-      follow: false,
-    },
+    robots: userId
+      ? { index: false, follow: false }
+      : { index: true, follow: true },
   };
 }
 
@@ -76,15 +76,20 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function FinalExpenseLeaveBehindPage() {
   const locale = (await getLocale()) as SupportedLocale;
   const { userId } = await auth();
+  const leaveBehindMessages =
+    locale === "es" ? esLeaveBehindMessages : enLeaveBehindMessages;
 
   if (!userId) {
-    const slug = localizedSlug("/final-expense/leave-behind", locale);
-    redirect(`/${locale}/sign-in?redirect_url=/${locale}${slug}`);
+    return (
+      <main className="min-h-screen bg-background">
+        <NextIntlClientProvider locale={locale} messages={leaveBehindMessages}>
+          <FinalExpenseLeaveBehindLanding />
+        </NextIntlClientProvider>
+      </main>
+    );
   }
 
   const t = await getTranslations({ locale, namespace: "finalExpenseLeaveBehind" });
-  const leaveBehindMessages =
-    locale === "es" ? esLeaveBehindMessages : enLeaveBehindMessages;
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-950 dark:via-slate-900 dark:to-gray-950">

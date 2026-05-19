@@ -115,6 +115,10 @@ const config: Config = {
           "0%": { opacity: "0", transform: "translateX(40px)" },
           "100%": { opacity: "1", transform: "translateX(0)" },
         },
+        "leave-behind-float": {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-8px)" },
+        },
       },
       animation: {
         /* existing */
@@ -133,8 +137,7 @@ const config: Config = {
         "fadeLeft-d2": "fadeInLeft  0.6s 0.2s ease-out both",
         "fadeUp-d4": "fadeInUp    0.6s 0.4s ease-out both",
         "fadeLeft-d4": "fadeInLeft  0.6s 0.4s ease-out both",
-        /* Right column didn’t need stagger variants,
-           add if you want: 'fadeRight-d2', etc. */
+        "leave-behind-float": "leave-behind-float 6s ease-in-out infinite",
       },
     },
   },

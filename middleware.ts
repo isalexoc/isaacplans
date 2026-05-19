@@ -12,8 +12,6 @@ const isProtectedRoute = createRouteMatcher([
   '/presentations(.*)',
   '/en/presentations(.*)',
   '/es/presentations(.*)',
-  '/en/final-expense/leave-behind(.*)',
-  '/es/gastos-finales/dejar-imagen(.*)',
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
