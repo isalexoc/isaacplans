@@ -247,13 +247,18 @@ export default function FinalExpenseLeaveBehindPackageForm({
     [data, phase]
   );
 
-  const { status: autosaveStatus, saveNow, isSaving } = useLeaveBehindPackageAutosave({
-    clientId,
-    quoteData,
-    onClientSaved: (client) => {
+  const handleClientSavedFromAutosave = useCallback(
+    (client: LeaveBehindClientRecord) => {
       setShowDraftHint(false);
       onClientSaved?.(client);
     },
+    [onClientSaved]
+  );
+
+  const { status: autosaveStatus, saveNow, isSaving } = useLeaveBehindPackageAutosave({
+    clientId,
+    quoteData,
+    onClientSaved: handleClientSavedFromAutosave,
   });
 
   const handleGenerate = () => {

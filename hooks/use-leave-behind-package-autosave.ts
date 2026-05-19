@@ -31,19 +31,25 @@ export function useLeaveBehindPackageAutosave({
   const [status, setStatus] = useState<LeaveBehindAutosaveStatus>("idle");
   const activeClientIdRef = useRef(activeClientId);
   const quoteDataRef = useRef(quoteData);
+  const onClientSavedRef = useRef(onClientSaved);
   const saveGenerationRef = useRef(0);
   const skipAutosaveRef = useRef(true);
+  const lastPersistedSnapshotRef = useRef<string | null>(null);
   const savedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   activeClientIdRef.current = activeClientId;
   quoteDataRef.current = quoteData;
+  onClientSavedRef.current = onClientSaved;
 
   const canAutosave = isProspectNameComplete(quoteData.prospectName);
   const quoteSnapshot = JSON.stringify(quoteData);
+  const quoteSnapshotRef = useRef(quoteSnapshot);
+  quoteSnapshotRef.current = quoteSnapshot;
 
   useEffect(() => {
     setActiveClientId(clientId);
     skipAutosaveRef.current = true;
+    lastPersistedSnapshotRef.current = quoteSnapshotRef.current;
     setStatus("idle");
   }, [clientId]);
 
@@ -54,7 +60,7 @@ export function useLeaveBehindPackageAutosave({
   }, []);
 
   const persist = useCallback(async (): Promise<boolean> => {
-    if (!canAutosave) return false;
+    if (!isProspectNameComplete(quoteDataRef.current.prospectName)) return false;
 
     const generation = ++saveGenerationRef.current;
     setStatus("pending");
@@ -71,8 +77,9 @@ export function useLeaveBehindPackageAutosave({
       if (generation !== saveGenerationRef.current) return false;
 
       setActiveClientId(client.id);
-      onClientSaved?.(client);
+      onClientSavedRef.current?.(client);
       clearLeaveBehindPackageDraft();
+      lastPersistedSnapshotRef.current = JSON.stringify(snapshot);
       setStatus("saved");
 
       if (savedTimerRef.current) clearTimeout(savedTimerRef.current);
@@ -86,17 +93,22 @@ export function useLeaveBehindPackageAutosave({
       setStatus("error");
       return false;
     }
-  }, [canAutosave, onClientSaved]);
+  }, []);
 
   useEffect(() => {
     if (skipAutosaveRef.current) {
       skipAutosaveRef.current = false;
+      lastPersistedSnapshotRef.current = quoteSnapshot;
       return;
     }
 
     if (!canAutosave) {
       writeLeaveBehindPackageDraft(quoteData);
       setStatus("idle");
+      return;
+    }
+
+    if (quoteSnapshot === lastPersistedSnapshotRef.current) {
       return;
     }
 
@@ -107,7 +119,7 @@ export function useLeaveBehindPackageAutosave({
     }, debounceMs);
 
     return () => clearTimeout(timer);
-  }, [quoteSnapshot, canAutosave, debounceMs, persist]);
+  }, [quoteSnapshot, canAutosave, debounceMs, persist, quoteData]);
 
   const saveNow = useCallback(async () => {
     if (savedTimerRef.current) {
