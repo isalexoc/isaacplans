@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState, type CSSProperties } from "react";
+import { useEffect, useState } from "react";
 import { SignInButton } from "@clerk/nextjs";
-import { useTranslations } from "next-intl";
-import { Link } from "@/i18n/navigation";
+import { useLocale, useTranslations } from "next-intl";
+import Image from "next/image";
 import {
   ArrowRight,
   BadgeCheck,
@@ -14,122 +14,9 @@ import {
   UserCircle,
   Zap,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { LeaveBehindLandingShare } from "@/components/leave-behind/leave-behind-landing-share";
-import { cn } from "@/lib/utils";
-import {
-  COMPARISON_TIER_ORDER,
-  TIER_MEDAL_URLS,
-  TIER_THEMES,
-  type ComparisonTier,
-} from "@/lib/final-expense-leave-behind-tiers";
-
-function MockTierCard({
-  tier,
-  label,
-  prospect,
-  coverage,
-  coverageLabel,
-  premium,
-  perMonth,
-  className,
-  style,
-}: {
-  tier: ComparisonTier;
-  label: string;
-  prospect: string;
-  coverage: string;
-  coverageLabel: string;
-  premium: string;
-  perMonth: string;
-  className?: string;
-  style?: CSSProperties;
-}) {
-  const theme = TIER_THEMES[tier];
-
-  return (
-    <div
-      className={cn(
-        "relative w-[168px] shrink-0 overflow-hidden rounded-xl border shadow-2xl sm:w-[188px]",
-        className
-      )}
-      style={{
-        background: theme.cardGradient,
-        borderColor: theme.borderAccent,
-        boxShadow: `0 24px 48px -12px rgba(0,0,0,0.55), 0 0 0 1px ${theme.borderAccent}`,
-        ...style,
-      }}
-    >
-      <div
-        className="flex flex-col items-center gap-2 px-3 py-4 text-center"
-        style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}
-      >
-        <div className="h-6 w-24 rounded bg-white/10" aria-hidden />
-        <div className="flex items-center gap-1.5">
-          <img src={TIER_MEDAL_URLS[tier]} alt="" className="h-8 w-8 object-contain" />
-          <span className="text-xs font-semibold tracking-wide" style={{ color: theme.accentHero }}>
-            {label}
-          </span>
-        </div>
-        <p className="text-[10px] text-white/70">{prospect}</p>
-        <p className="text-lg font-bold leading-none" style={{ color: theme.accentHero }}>
-          {coverage}
-        </p>
-        <p className="text-[10px] text-white/60">{coverageLabel}</p>
-        <div
-          className="mt-1 rounded-md px-2 py-1"
-          style={{ background: "rgba(255,255,255,0.08)" }}
-        >
-          <span className="text-sm font-semibold text-white">{premium}</span>
-          <span className="text-[10px] text-white/65">{perMonth}</span>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function MockCompareStrip({
-  labels,
-  compareLabel,
-}: {
-  labels: Record<ComparisonTier, string>;
-  compareLabel: string;
-}) {
-  return (
-    <div
-      className="mx-auto mt-6 max-w-md overflow-hidden rounded-xl border border-white/10 bg-[#060a12] p-3 shadow-2xl"
-      aria-hidden
-    >
-      <p className="mb-2 text-center text-[10px] font-medium uppercase tracking-widest text-white/50">
-        {compareLabel}
-      </p>
-      <div className="grid grid-cols-3 gap-2">
-        {COMPARISON_TIER_ORDER.map((tier) => {
-          const theme = TIER_THEMES[tier];
-          return (
-            <div
-              key={tier}
-              className="rounded-lg border px-1 py-2 text-center"
-              style={{
-                background: theme.cardGradient,
-                borderColor: theme.borderAccent,
-              }}
-            >
-              <img
-                src={TIER_MEDAL_URLS[tier]}
-                alt=""
-                className="mx-auto h-6 w-6 object-contain"
-              />
-              <p className="mt-1 text-[9px] font-medium" style={{ color: theme.accentMuted }}>
-                {labels[tier]}
-              </p>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
+import { leaveBehindLandingOgImageUrl } from "@/lib/leave-behind-og-url";
+import type { SupportedLocale } from "@/lib/seo/i18n";
 
 const FEATURE_ICONS = [Layers, UserCircle, Zap, BadgeCheck] as const;
 
@@ -158,7 +45,9 @@ function LandingSignInButton({
 }
 
 export default function FinalExpenseLeaveBehindLanding() {
+  const locale = useLocale() as SupportedLocale;
   const t = useTranslations("finalExpenseLeaveBehind.landing");
+  const heroImageUrl = leaveBehindLandingOgImageUrl(locale);
   const [redirectUrl, setRedirectUrl] = useState("/");
 
   useEffect(() => {
@@ -166,20 +55,6 @@ export default function FinalExpenseLeaveBehindLanding() {
       setRedirectUrl(window.location.pathname);
     }
   }, []);
-
-  const tierLabels: Record<ComparisonTier, string> = {
-    bronze: t("tierBronze"),
-    silver: t("tierSilver"),
-    gold: t("tierGold"),
-  };
-
-  const mockCardProps = {
-    prospect: t("mockProspect"),
-    coverage: t("mockCoverage"),
-    coverageLabel: t("mockCoverageLabel"),
-    premium: t("mockPremium"),
-    perMonth: t("mockPerMonth"),
-  };
 
   const primaryCtaClass =
     "inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 px-8 py-3.5 text-base font-semibold text-white shadow-lg shadow-sky-500/25 transition hover:from-sky-400 hover:to-blue-500 hover:shadow-sky-500/35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#060a12]";
@@ -192,28 +67,8 @@ export default function FinalExpenseLeaveBehindLanding() {
         <div className="absolute bottom-0 left-1/2 h-[300px] w-[600px] -translate-x-1/2 rounded-full bg-[#003366]/30 blur-3xl" />
       </div>
 
-      <section className="relative border-b border-white/10 bg-gradient-to-b from-[#060a12] via-[#0c1424] to-[#0f172a] px-4 pb-20 pt-4 text-white sm:pb-28">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 py-2">
-          <Button
-            asChild
-            variant="ghost"
-            size="sm"
-            className="text-white/80 hover:bg-white/10 hover:text-white"
-          >
-            <Link href="/final-expense">{t("backToFe")}</Link>
-          </Button>
-          <div className="flex items-center gap-2">
-            <LeaveBehindLandingShare />
-            <LandingSignInButton
-              redirectUrl={redirectUrl}
-              className="rounded-lg border border-sky-400/30 bg-sky-500/15 px-4 py-2 text-sm font-medium text-white backdrop-blur-sm transition hover:bg-sky-500/25"
-            >
-              {t("ctaPrimary")}
-            </LandingSignInButton>
-          </div>
-        </div>
-
-        <div className="mx-auto mt-10 grid max-w-6xl items-center gap-12 lg:grid-cols-2 lg:gap-16">
+      <section className="relative border-b border-white/10 bg-gradient-to-b from-[#060a12] via-[#0c1424] to-[#0f172a] px-4 pb-20 pt-12 text-white sm:pb-28 sm:pt-16">
+        <div className="mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-2 lg:gap-16">
           <div className="text-center lg:text-left">
             <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-sky-400/30 bg-sky-500/10 px-3 py-1 text-xs font-medium uppercase tracking-wider text-sky-200">
               <Sparkles className="h-3.5 w-3.5" aria-hidden />
@@ -241,31 +96,21 @@ export default function FinalExpenseLeaveBehindLanding() {
             </p>
           </div>
 
-          <div className="relative mx-auto w-full max-w-lg" aria-hidden>
-            <p className="mb-4 text-center text-xs font-medium uppercase tracking-widest text-slate-500">
-              {t("previewLabel")}
-            </p>
-            <div className="relative flex h-[280px] items-end justify-center sm:h-[300px]">
-              <MockTierCard
-                tier="bronze"
-                label={tierLabels.bronze}
-                {...mockCardProps}
-                className="absolute left-0 top-8 -rotate-12 opacity-90 animate-leave-behind-float"
+          <div className="relative mx-auto w-full max-w-lg">
+            <div className="relative overflow-hidden rounded-2xl border border-white/10 shadow-2xl ring-1 ring-white/10">
+              <Image
+                src={heroImageUrl}
+                alt={t("meta.imageAlt")}
+                width={1200}
+                height={630}
+                className="h-auto w-full"
+                priority
+                sizes="(max-width: 1024px) 100vw, 512px"
               />
-              <MockTierCard
-                tier="gold"
-                label={tierLabels.gold}
-                {...mockCardProps}
-                className="absolute right-0 top-8 rotate-12 opacity-90 animate-leave-behind-float [animation-delay:1s]"
-              />
-              <MockTierCard
-                tier="silver"
-                label={tierLabels.silver}
-                {...mockCardProps}
-                className="relative z-10 scale-105 animate-leave-behind-float [animation-delay:0.5s]"
-              />
+              <div className="absolute right-3 top-3 z-10 sm:right-4 sm:top-4">
+                <LeaveBehindLandingShare className="border-white/25 bg-black/45 shadow-lg backdrop-blur-md hover:border-sky-400/50 hover:bg-black/60" />
+              </div>
             </div>
-            <MockCompareStrip labels={tierLabels} compareLabel={t("tierCompare")} />
           </div>
         </div>
       </section>
@@ -349,7 +194,6 @@ export default function FinalExpenseLeaveBehindLanding() {
               {t("finalCta")}
               <ArrowRight className="h-5 w-5" aria-hidden />
             </LandingSignInButton>
-            <LeaveBehindLandingShare className="border-white/40 bg-white/10 text-white hover:border-white/60 hover:bg-white/20" />
           </div>
         </div>
       </section>
