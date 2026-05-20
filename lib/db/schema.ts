@@ -163,4 +163,22 @@ export const leaveBehindAgentProfiles = pgTable("leave_behind_agent_profiles", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+/** Tracks Agent CRM call messages already summarized to contact notes (idempotency). */
+export const callSummaryProcessed = pgTable("call_summary_processed", {
+  messageId: text("message_id").primaryKey(),
+  contactId: text("contact_id").notNull(),
+  locationId: text("location_id").notNull(),
+  noteId: text("note_id"),
+  direction: text("direction"),
+  callDurationSeconds: integer("call_duration_seconds"),
+  status: text("status").notNull().default("completed"), // completed | failed | skipped
+  errorMessage: text("error_message"),
+  processedAt: timestamp("processed_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => ({
+  contactIdIdx: index("call_summary_processed_contact_id_idx").on(table.contactId),
+  statusIdx: index("call_summary_processed_status_idx").on(table.status),
+  processedAtIdx: index("call_summary_processed_processed_at_idx").on(table.processedAt),
+}));
+
 

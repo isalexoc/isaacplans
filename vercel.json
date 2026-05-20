@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/call-summary-backfill",
+      "schedule": "0 6 * * *"
+    }
+  ]
+}
