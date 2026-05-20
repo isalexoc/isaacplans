@@ -6,7 +6,7 @@ Automatically summarizes phone calls from GoHighLevel (Agent CRM) and creates no
 
 1. **Real-time:** GHL sends `InboundMessage` / `OutboundMessage` (call) to the webhook.
 2. Fetch transcript from GHL (`GET .../messages/:messageId/transcription`), or Whisper on recording URL if empty.
-3. OpenAI generates a structured summary.
+3. OpenAI generates a structured summary (Spanish or English to match the call), with a **Coaching** section focused on final expense when applicable, and **bold** markdown for key facts (names, DOB, amounts, etc.).
 4. `POST /contacts/:contactId/notes` in Agent CRM.
 5. `call_summary_processed` table prevents duplicate notes.
 
