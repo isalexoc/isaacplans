@@ -58,6 +58,8 @@ import { SingleQuoteCardPreview } from "@/components/leave-behind/single-quote-c
 import { CompareQuotePreview } from "@/components/leave-behind/compare-quote-preview";
 import { useLeaveBehindAgentProfile } from "@/components/leave-behind/leave-behind-agent-profile-context";
 import { Button } from "@/components/ui/button";
+import { toast } from "@/hooks/use-toast";
+import { shareLeaveBehindPng } from "@/lib/leave-behind-share-image";
 
 export type FinalExpenseLeaveBehindPackageFormProps = {
   clientId?: string | null;
@@ -98,7 +100,6 @@ export default function FinalExpenseLeaveBehindPackageForm({
   const [isDownloading, setIsDownloading] = useState(false);
   const [isSharing, setIsSharing] = useState(false);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
-  const [canShare, setCanShare] = useState(false);
 
   const formSectionRef = useRef<HTMLDivElement>(null);
   const prospectFieldRef = useRef<HTMLDivElement>(null);
@@ -108,10 +109,6 @@ export default function FinalExpenseLeaveBehindPackageForm({
     gold: null,
   });
   const compareRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    setCanShare(typeof navigator !== "undefined" && !!navigator.share);
-  }, []);
 
   useEffect(() => {
     if (initialData || clientId) return;
@@ -373,15 +370,8 @@ export default function FinalExpenseLeaveBehindPackageForm({
   const downloadSuffix =
     previewAsset === "compare" ? "compare" : `${previewAsset}-card`;
 
-  const handleDownload = async () => {
-    if (!validateActiveAsset()) return;
-    setIsDownloading(true);
-    try {
-      const blob = await captureImageAsBlob();
-      if (!blob) {
-        console.error("Leave-behind download: capture returned no image");
-        return;
-      }
+  const downloadCapturedBlob = useCallback(
+    (blob: Blob) => {
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
@@ -393,40 +383,79 @@ export default function FinalExpenseLeaveBehindPackageForm({
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
       }, 100);
+    },
+    [data.prospectName, downloadSuffix]
+  );
+
+  const handleDownload = async () => {
+    if (!validateActiveAsset()) return;
+    setIsDownloading(true);
+    try {
+      const blob = await captureImageAsBlob();
+      if (!blob) {
+        toast({
+          title: t("package.shareCaptureFailed"),
+          variant: "destructive",
+        });
+        return;
+      }
+      downloadCapturedBlob(blob);
     } catch (error) {
       console.error("Error downloading leave-behind image:", error);
+      toast({
+        title: t("package.shareCaptureFailed"),
+        variant: "destructive",
+      });
     } finally {
       setIsDownloading(false);
     }
   };
 
   const handleShare = async () => {
-    if (!navigator.share) return;
     if (!validateActiveAsset()) return;
     setIsSharing(true);
     try {
       const blob = await captureImageAsBlob();
-      if (!blob) return;
-      const file = new File(
-        [blob],
-        packageFilenameSlug(data.prospectName, downloadSuffix),
-        { type: "image/png" }
-      );
-      if (navigator.canShare?.({ files: [file] })) {
-        await navigator.share({
-          files: [file],
-          title:
-            previewAsset === "compare"
-              ? t("compare.shareTitle")
-              : t("phase2.shareTitle"),
-          text: data.prospectName.trim()
-            ? t("phase2.shareTextPreparedFor", { name: data.prospectName.trim() })
-            : t("phase2.shareTextDefault"),
+      if (!blob) {
+        toast({
+          title: t("package.shareCaptureFailed"),
+          variant: "destructive",
         });
+        return;
+      }
+
+      const filename = packageFilenameSlug(data.prospectName, downloadSuffix);
+      const title =
+        previewAsset === "compare"
+          ? t("compare.shareTitle")
+          : t("phase2.shareTitle");
+      const text =
+        previewAsset === "compare"
+          ? data.prospectName.trim()
+            ? t("compare.shareTextPreparedFor", { name: data.prospectName.trim() })
+            : t("compare.shareTextDefault")
+          : data.prospectName.trim()
+            ? t("phase2.shareTextPreparedFor", { name: data.prospectName.trim() })
+            : t("phase2.shareTextDefault");
+
+      const result = await shareLeaveBehindPng({
+        blob,
+        filename,
+        title,
+        text,
+        downloadFallback: () => downloadCapturedBlob(blob),
+      });
+
+      if (result === "downloaded") {
+        toast({ title: t("package.shareDownloadedInstead") });
       }
     } catch (error) {
       if ((error as Error).name !== "AbortError") {
         console.error("Error sharing leave-behind image:", error);
+        toast({
+          title: t("package.shareFailed"),
+          variant: "destructive",
+        });
       }
     } finally {
       setIsSharing(false);
@@ -483,7 +512,6 @@ export default function FinalExpenseLeaveBehindPackageForm({
         isEditing={phase === 1 && hasPreview}
         previewAsset={previewAsset}
         assetLabels={assetLabels}
-        canShare={canShare}
         isDownloading={isDownloading}
         isSharing={isSharing}
         isSaving={isSaving}

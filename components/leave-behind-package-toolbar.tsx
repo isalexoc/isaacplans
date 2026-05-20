@@ -12,7 +12,6 @@ export type LeaveBehindPackageToolbarProps = {
   isEditing: boolean;
   previewAsset: PackagePreviewAsset;
   assetLabels: Record<PackagePreviewAsset, string>;
-  canShare: boolean;
   isDownloading: boolean;
   isSharing: boolean;
   isSaving: boolean;
@@ -53,7 +52,6 @@ export function LeaveBehindPackageToolbar({
   isEditing,
   previewAsset,
   assetLabels,
-  canShare,
   isDownloading,
   isSharing,
   isSaving,
@@ -128,19 +126,17 @@ export function LeaveBehindPackageToolbar({
               <FileImage className="h-4 w-4" />
               {isDownloading ? labels.downloading : downloadLabel}
             </Button>
-            {canShare && (
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="gap-1.5"
-                disabled={busy}
-                onClick={onShare}
-              >
-                <Share2 className="h-4 w-4" />
-                {isSharing ? labels.sharing : labels.share}
-              </Button>
-            )}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="gap-1.5"
+              disabled={busy}
+              onClick={onShare}
+            >
+              <Share2 className="h-4 w-4" />
+              {isSharing ? labels.sharing : labels.share}
+            </Button>
           </>
         )}
 

@@ -165,6 +165,9 @@
       "downloading": "Downloading…",
       "shareImage": "Share image",
       "sharing": "Sharing…",
+      "shareCaptureFailed": "Couldn't create the image. Complete the selected tier (or all three for compare) and try again.",
+      "shareFailed": "Sharing didn't work. Try Download image instead.",
+      "shareDownloadedInstead": "Sharing isn't available in this browser — the image was downloaded instead.",
       "editButton": "Edit package"
     },
     "validation": {

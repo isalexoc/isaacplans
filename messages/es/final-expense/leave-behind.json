@@ -165,6 +165,9 @@
       "downloading": "Descargando…",
       "shareImage": "Compartir imagen",
       "sharing": "Compartiendo…",
+      "shareCaptureFailed": "No se pudo crear la imagen. Completa el nivel seleccionado (o los tres para comparar) e inténtalo de nuevo.",
+      "shareFailed": "No se pudo compartir. Prueba Descargar imagen.",
+      "shareDownloadedInstead": "Compartir no está disponible en este navegador — la imagen se descargó en su lugar.",
       "editButton": "Editar paquete"
     },
     "validation": {
