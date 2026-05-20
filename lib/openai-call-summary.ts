@@ -48,11 +48,15 @@ export async function summarizeCallTranscript(
   });
   const t0 = Date.now();
 
-  const durationMin = Math.max(1, Math.round(input.callDurationSeconds / 60));
+  const durationLine =
+    input.callDurationSeconds > 0
+      ? `Duration: ~${Math.round(input.callDurationSeconds / 60)} min`
+      : null;
+  const statusLine = input.callStatus ? `Call status: ${input.callStatus}` : null;
   const userContent = [
     `Direction: ${input.direction}`,
-    `Duration: ~${durationMin} min`,
-    `Call status: ${input.callStatus}`,
+    durationLine,
+    statusLine,
     input.dateAdded ? `Date: ${input.dateAdded}` : null,
     `Contact ID: ${input.contactId}`,
     "",

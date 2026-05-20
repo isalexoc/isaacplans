@@ -29,7 +29,6 @@ Automatically summarizes phone calls from GoHighLevel (Agent CRM) and creates no
 |----------|---------|---------|
 | `AGENT_CRM_CALL_SUMMARY_ENABLED` | `true` | Master switch |
 | `AGENT_CRM_CALL_SUMMARY_WEBHOOK_SECRET` | *(you choose)* | Bearer token for workflow webhooks; optional if using GHL signature headers |
-| `AGENT_CRM_CALL_SUMMARY_MIN_DURATION_SECONDS` | `60` | Skip short calls |
 | `AGENT_CRM_CALL_SUMMARY_NOTE_PREFIX` | `AI Call Summary` | Prefix in note (no quotes in `.env`) |
 | `CRON_SECRET` | *(long random string)* | Protects backfill cron route |
 | `OPENAI_WHISPER_MODEL` | `whisper-1` | Fallback when GHL transcript is empty |
@@ -88,7 +87,8 @@ After each completed call, add **Custom Webhook**:
 
 - URL: same as above
 - Header: `Authorization: Bearer <AGENT_CRM_CALL_SUMMARY_WEBHOOK_SECRET>`
-- Body: include `contactId`, `transcript` (e.g. `{{transcript_generated.call_transcript}}`), `callDuration`, `direction`, and optionally `messageType: CALL`.
+- Body: `contactId`, `messageType: CALL`, and `transcript` from the Transcript Generated trigger.
+- Filter short calls in the **GHL workflow** (e.g. duration &gt; 60s); the app does not enforce a minimum duration.
 
 Example workflow JSON:
 
@@ -96,10 +96,6 @@ Example workflow JSON:
 {
   "contactId": "{{contact.id}}",
   "messageType": "CALL",
-  "direction": "{{transcript_generated.direction}}",
-  "callDuration": "{{transcript_generated.duration}}",
-  "callStatus": "{{transcript_generated.status}}",
-  "status": "{{transcript_generated.status}}",
   "transcript": "{{transcript_generated.call_transcript}}"
 }
 ```

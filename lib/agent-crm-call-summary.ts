@@ -90,17 +90,27 @@ function isVoicemailPayload(payload: GhlCallWebhookPayload): boolean {
   return status.includes("voicemail") || typeStr.includes("VOICEMAIL");
 }
 
+/** GHL sends literal "null" / empty when a merge field is missing. */
+export function normalizeMergeField(value: unknown): string {
+  if (value == null) return "";
+  const s = String(value).trim();
+  if (!s) return "";
+  const lower = s.toLowerCase();
+  if (lower === "null" || lower === "undefined" || lower === "n/a") return "";
+  return s;
+}
+
+/** Optional metadata; duration filtering belongs in GHL workflows. */
 export function parseCallDuration(value: unknown): number {
+  const normalized = normalizeMergeField(value);
+  if (!normalized) return 0;
   if (typeof value === "number" && Number.isFinite(value)) return Math.max(0, Math.floor(value));
-  if (typeof value === "string") {
-    const trimmed = value.trim();
-    const n = Number.parseInt(trimmed, 10);
-    if (Number.isFinite(n)) return Math.max(0, n);
-    const digits = trimmed.replace(/\D/g, "");
-    if (digits) {
-      const d = Number.parseInt(digits, 10);
-      if (Number.isFinite(d)) return Math.max(0, d);
-    }
+  const n = Number.parseInt(normalized, 10);
+  if (Number.isFinite(n)) return Math.max(0, n);
+  const digits = normalized.replace(/\D/g, "");
+  if (digits) {
+    const d = Number.parseInt(digits, 10);
+    if (Number.isFinite(d)) return Math.max(0, d);
   }
   return 0;
 }
@@ -166,11 +176,7 @@ function shouldProcessCall(payload: GhlCallWebhookPayload, config: CallSummaryCo
   if (!config.includeVoicemail && isVoicemailPayload(payload)) {
     return { ok: false, reason: "voicemail_excluded" };
   }
-  const duration = parseCallDuration(payload.callDuration);
-  if (duration < config.minDurationSeconds) {
-    return { ok: false, reason: "duration_below_minimum" };
-  }
-  const status = `${payload.callStatus ?? payload.status ?? ""}`.toLowerCase();
+  const status = normalizeMergeField(payload.callStatus ?? payload.status).toLowerCase();
   if (status && !["completed", "answered", "voicemail"].some((s) => status.includes(s))) {
     if (status.includes("no-answer") || status.includes("busy") || status.includes("failed")) {
       return { ok: false, reason: `call_status_${status}` };
@@ -314,15 +320,20 @@ function formatNoteBody(
     transcriptSource: "workflow" | "api" | "whisper";
   }
 ): string {
-  const mins = Math.floor(meta.callDurationSeconds / 60);
-  const secs = meta.callDurationSeconds % 60;
-  const durationLabel = `${mins}m ${secs.toString().padStart(2, "0")}s`;
+  const durationLabel =
+    meta.callDurationSeconds > 0
+      ? `${Math.floor(meta.callDurationSeconds / 60)}m ${(meta.callDurationSeconds % 60).toString().padStart(2, "0")}s`
+      : null;
   const dateLine = meta.dateAdded
     ? new Date(meta.dateAdded).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" })
     : new Date().toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" });
 
+  const headerMeta = [dateLine, meta.direction !== "unknown" ? meta.direction : null, durationLabel]
+    .filter(Boolean)
+    .join(" · ");
+
   return [
-    `[${config.notePrefix}] — ${dateLine} · ${meta.direction} · ${durationLabel}`,
+    `[${config.notePrefix}] — ${headerMeta}`,
     "",
     summaryBody,
     "",
@@ -701,7 +712,12 @@ export async function runCallSummaryBackfill(overrides?: {
       const payload = exportMessageToPayload(msg, config.locationId!);
       const result = await processCallSummary(payload);
       if (result.ok) processed += 1;
-      else if (result.reason === "already_processed" || result.reason?.startsWith("duration_") || result.reason === "voicemail_excluded" || result.reason === "not_a_call" || result.reason === "duration_below_minimum") {
+      else if (
+        result.reason === "already_processed" ||
+        result.reason?.startsWith("call_status_") ||
+        result.reason === "voicemail_excluded" ||
+        result.reason === "not_a_call"
+      ) {
         skipped += 1;
         log.debug("Backfill: skipped", { messageId, reason: result.reason });
       } else if (result.reason === "not_configured" || result.reason === "missing_ids") {

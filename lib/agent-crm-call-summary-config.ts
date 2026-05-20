@@ -4,7 +4,6 @@ export type CallSummaryConfig = {
   enabled: boolean;
   debug: boolean;
   webhookSecret: string | null;
-  minDurationSeconds: number;
   notePrefix: string;
   includeVoicemail: boolean;
   openaiApiKey: string | null;
@@ -45,7 +44,6 @@ export function getCallSummaryConfig(): CallSummaryConfig {
     enabled: parseBool(process.env.AGENT_CRM_CALL_SUMMARY_ENABLED, false),
     debug: parseBool(process.env.AGENT_CRM_CALL_SUMMARY_DEBUG, false),
     webhookSecret: process.env.AGENT_CRM_CALL_SUMMARY_WEBHOOK_SECRET?.trim() || null,
-    minDurationSeconds: parseIntEnv(process.env.AGENT_CRM_CALL_SUMMARY_MIN_DURATION_SECONDS, 60),
     notePrefix: stripQuotes(notePrefixRaw || "AI Call Summary"),
     includeVoicemail: parseBool(process.env.AGENT_CRM_CALL_SUMMARY_INCLUDE_VOICEMAIL, false),
     openaiApiKey: process.env.OPENAI_API_KEY?.trim() || null,
