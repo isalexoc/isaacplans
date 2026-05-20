@@ -1,5 +1,17 @@
 export type LeaveBehindImageKind = "profile_photo" | "company_logo";
 
+/** Root folder in Cloudinary Media Library for leave-behind agent assets. */
+export const LEAVE_BEHIND_CLOUDINARY_ROOT_FOLDER = "isaacplans";
+
+/** Upload path: isaacplans/leave-behind-agents/{userId}/photos|logos */
+export function leaveBehindAgentUploadFolder(
+  userId: string,
+  kind: LeaveBehindImageKind
+): string {
+  const subfolder = kind === "profile_photo" ? "photos" : "logos";
+  return `${LEAVE_BEHIND_CLOUDINARY_ROOT_FOLDER}/leave-behind-agents/${userId}/${subfolder}`;
+}
+
 function cloudName(): string {
   const name =
     process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME ?? process.env.CLOUDINARY_CLOUD_NAME;

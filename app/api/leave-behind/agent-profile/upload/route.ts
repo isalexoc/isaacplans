@@ -2,6 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import cloudinary from "@/config/cloudinary";
 import {
+  leaveBehindAgentUploadFolder,
   leaveBehindDeliveryUrl,
   type LeaveBehindImageKind,
 } from "@/lib/leave-behind-cloudinary";
@@ -51,7 +52,6 @@ export async function POST(request: Request) {
   }
 
   const buffer = Buffer.from(await file.arrayBuffer());
-  const subfolder = kind === "profile_photo" ? "photos" : "logos";
 
   try {
     const uploadResult = await new Promise<{
@@ -60,7 +60,7 @@ export async function POST(request: Request) {
     }>((resolve, reject) => {
       const stream = cloudinary.uploader.upload_stream(
         {
-          folder: `leave-behind-agents/${userId}/${subfolder}`,
+          folder: leaveBehindAgentUploadFolder(userId, kind),
           resource_type: "image",
           overwrite: false,
           unique_filename: true,
