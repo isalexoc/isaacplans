@@ -10,7 +10,7 @@ export type CallPayloadForLog = {
   messageType?: string;
   messageTypeString?: string;
   direction?: string;
-  callDuration?: number;
+  callDuration?: number | string;
   callStatus?: string;
   status?: string;
   dateAdded?: string;
@@ -18,6 +18,7 @@ export type CallPayloadForLog = {
   userId?: string;
   from?: string;
   to?: string;
+  transcript?: string;
 };
 
 export function isCallSummaryDebugEnabled(): boolean {
@@ -93,6 +94,11 @@ export function sanitizeCallPayload(payload: CallPayloadForLog): Record<string, 
     });
   }
 
+  const transcript =
+    typeof payload.transcript === "string" && payload.transcript.trim()
+      ? previewText(payload.transcript, 120)
+      : undefined;
+
   return {
     type: payload.type,
     locationId: payload.locationId,
@@ -110,6 +116,7 @@ export function sanitizeCallPayload(payload: CallPayloadForLog): Record<string, 
     from: payload.from,
     to: payload.to,
     attachments: attachmentInfo,
+    transcript,
   };
 }
 

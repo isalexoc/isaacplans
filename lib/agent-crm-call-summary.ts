@@ -13,6 +13,7 @@ import {
   summarizeCallTranscript,
   transcribeRecordingWithWhisper,
 } from "@/lib/openai-call-summary";
+import { createHash } from "crypto";
 import {
   createCallSummaryLogger,
   previewText,
@@ -29,7 +30,8 @@ export type GhlCallWebhookPayload = {
   messageType?: string;
   messageTypeString?: string;
   direction?: string;
-  callDuration?: number;
+  /** Seconds; GHL workflows may send a string merge field. */
+  callDuration?: number | string;
   callStatus?: string;
   status?: string;
   dateAdded?: string;
@@ -37,7 +39,13 @@ export type GhlCallWebhookPayload = {
   userId?: string;
   from?: string;
   to?: string;
+  /** Full call text from workflow (e.g. {{transcript_generated.call_transcript}}). */
+  transcript?: string;
+  call_transcript?: string;
+  callTranscript?: string;
 };
+
+const CALL_EVENT_TYPES = new Set(["InboundMessage", "OutboundMessage"]);
 
 export type ExportCallMessage = {
   id?: string;
@@ -82,10 +90,70 @@ function isVoicemailPayload(payload: GhlCallWebhookPayload): boolean {
   return status.includes("voicemail") || typeStr.includes("VOICEMAIL");
 }
 
+export function parseCallDuration(value: unknown): number {
+  if (typeof value === "number" && Number.isFinite(value)) return Math.max(0, Math.floor(value));
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    const n = Number.parseInt(trimmed, 10);
+    if (Number.isFinite(n)) return Math.max(0, n);
+    const digits = trimmed.replace(/\D/g, "");
+    if (digits) {
+      const d = Number.parseInt(digits, 10);
+      if (Number.isFinite(d)) return Math.max(0, d);
+    }
+  }
+  return 0;
+}
+
+/** Transcript text sent directly from a GHL workflow custom webhook. */
+export function extractWebhookTranscript(payload: GhlCallWebhookPayload): string {
+  for (const c of [payload.transcript, payload.call_transcript, payload.callTranscript]) {
+    if (typeof c === "string" && c.trim()) return c.trim();
+  }
+  return "";
+}
+
+export function isCallSummaryWebhookPayload(
+  payload: GhlCallWebhookPayload,
+  eventType?: string
+): boolean {
+  const mt = (payload.messageType ?? "").toUpperCase();
+  const mts = (payload.messageTypeString ?? "").toUpperCase();
+  if (mt === "CALL" || mts.includes("CALL") || mts.includes("VOICEMAIL")) return true;
+  if (eventType && CALL_EVENT_TYPES.has(eventType) && (mt || mts)) return true;
+  if (payload.contactId?.trim() && extractWebhookTranscript(payload)) return true;
+  return false;
+}
+
 function isCallMessage(payload: GhlCallWebhookPayload): boolean {
+  if (isCallSummaryWebhookPayload(payload)) return true;
   const mt = (payload.messageType ?? "").toUpperCase();
   const mts = (payload.messageTypeString ?? "").toUpperCase();
   return mt === "CALL" || mts.includes("CALL") || mts.includes("VOICEMAIL");
+}
+
+/** DB idempotency key: real messageId when present, else stable hash for workflow transcript webhooks. */
+export function resolveCallProcessingId(payload: GhlCallWebhookPayload): string {
+  const messageId = payload.messageId?.trim();
+  if (messageId) return messageId;
+
+  const contactId = payload.contactId?.trim() ?? "";
+  const transcript = extractWebhookTranscript(payload);
+  const direction = (payload.direction ?? "").trim();
+  const duration = String(parseCallDuration(payload.callDuration));
+  const dateAdded = (payload.dateAdded ?? "").trim();
+  const status = `${payload.callStatus ?? payload.status ?? ""}`.trim();
+
+  const hash = createHash("sha256")
+    .update([contactId, direction, duration, dateAdded, status, transcript.slice(0, 4000)].join("|"))
+    .digest("hex")
+    .slice(0, 24);
+
+  return `wh_${hash}`;
+}
+
+function isGhlMessageId(messageId: string): boolean {
+  return Boolean(messageId.trim()) && !messageId.startsWith("wh_");
 }
 
 function shouldProcessCall(payload: GhlCallWebhookPayload, config: CallSummaryConfig): {
@@ -98,7 +166,7 @@ function shouldProcessCall(payload: GhlCallWebhookPayload, config: CallSummaryCo
   if (!config.includeVoicemail && isVoicemailPayload(payload)) {
     return { ok: false, reason: "voicemail_excluded" };
   }
-  const duration = Number(payload.callDuration ?? 0);
+  const duration = parseCallDuration(payload.callDuration);
   if (duration < config.minDurationSeconds) {
     return { ok: false, reason: "duration_below_minimum" };
   }
@@ -242,7 +310,8 @@ function formatNoteBody(
     direction: string;
     callDurationSeconds: number;
     dateAdded?: string;
-    messageId: string;
+    processingId: string;
+    transcriptSource: "workflow" | "api" | "whisper";
   }
 ): string {
   const mins = Math.floor(meta.callDurationSeconds / 60);
@@ -258,8 +327,40 @@ function formatNoteBody(
     summaryBody,
     "",
     "---",
-    `Generated from call transcript (messageId: ${meta.messageId})`,
+    meta.transcriptSource === "workflow"
+      ? `Generated from call transcript (workflow: ${meta.processingId})`
+      : `Generated from call transcript (messageId: ${meta.processingId})`,
   ].join("\n");
+}
+
+async function resolveTranscriptForSummary(
+  payload: GhlCallWebhookPayload,
+  config: CallSummaryConfig,
+  locationId: string,
+  token: string,
+  log: CallSummaryLogger
+): Promise<{ transcript: string; source: "workflow" | "api" | "whisper" }> {
+  const fromWebhook = extractWebhookTranscript(payload);
+  if (fromWebhook) {
+    log.info("Using transcript from workflow webhook", previewText(fromWebhook, 200));
+    return { transcript: fromWebhook, source: "workflow" };
+  }
+
+  const messageId = payload.messageId?.trim();
+  if (messageId && isGhlMessageId(messageId)) {
+    let transcript = await fetchCallTranscription(locationId, messageId, token, log);
+    if (transcript) return { transcript, source: "api" };
+
+    const recordingUrl = firstRecordingUrl(payload.attachments);
+    if (recordingUrl) {
+      log.info("No GHL API transcript; falling back to Whisper", { messageId });
+      transcript = await transcribeRecordingWithWhisper(recordingUrl, config, log);
+      if (transcript) return { transcript, source: "whisper" };
+    }
+    log.warn("No recording URL in attachments", { messageId });
+  }
+
+  return { transcript: "", source: "api" };
 }
 
 export async function processCallSummary(
@@ -286,27 +387,33 @@ export async function processCallSummary(
     return { ok: false, reason: "not_configured" };
   }
 
-  const messageId = payload.messageId?.trim();
   const contactId = payload.contactId?.trim();
   const locationId = (payload.locationId ?? config.locationId)?.trim();
   const token = config.piToken!;
+  const processingId = resolveCallProcessingId(payload);
+  const webhookTranscript = extractWebhookTranscript(payload);
 
-  if (!messageId || !contactId || !locationId) {
-    log.warn("Missing required IDs", { messageId, contactId, locationId });
+  if (!contactId || !locationId) {
+    log.warn("Missing required IDs", { contactId, locationId, processingId });
     return { ok: false, reason: "missing_ids" };
+  }
+
+  if (!webhookTranscript && !payload.messageId?.trim()) {
+    log.warn("Missing messageId and workflow transcript", { contactId });
+    return { ok: false, reason: "missing_transcript_or_message_id" };
   }
 
   const gate = shouldProcessCall(payload, config);
   if (!gate.ok) {
-    log.info("Call skipped by rules", { messageId, reason: gate.reason, gate });
+    log.info("Call skipped by rules", { processingId, reason: gate.reason });
     if (!options?.force) {
       await markCallProcessed(
         {
-          messageId,
+          messageId: processingId,
           contactId,
           locationId,
           direction: payload.direction ?? null,
-          callDurationSeconds: payload.callDuration ?? null,
+          callDurationSeconds: parseCallDuration(payload.callDuration),
           status: "skipped",
           errorMessage: gate.reason,
         },
@@ -317,42 +424,40 @@ export async function processCallSummary(
   }
 
   if (!options?.force) {
-    const existing = await getProcessedCall(messageId, log);
+    const existing = await getProcessedCall(processingId, log);
     if (existing?.status === "completed") {
-      log.info("Already processed", { messageId, noteId: existing.noteId });
+      log.info("Already processed", { processingId, noteId: existing.noteId });
       return { ok: false, reason: "already_processed" };
     }
     if (existing?.status === "skipped") {
-      log.info("Previously skipped", { messageId, reason: existing.errorMessage });
+      log.info("Previously skipped", { processingId, reason: existing.errorMessage });
       return { ok: false, reason: existing.errorMessage ?? "skipped" };
     }
     if (existing?.status === "failed") {
-      log.info("Retrying previously failed call", { messageId, priorError: existing.errorMessage });
+      log.info("Retrying previously failed call", { processingId, priorError: existing.errorMessage });
     }
   }
 
   const direction = payload.direction ?? "unknown";
-  const callDuration = Number(payload.callDuration ?? 0);
+  const callDuration = parseCallDuration(payload.callDuration);
   const callStatus = payload.callStatus ?? payload.status ?? "completed";
 
   try {
-    let transcript = await fetchCallTranscription(locationId, messageId, token, log);
+    const { transcript, source: transcriptSource } = await resolveTranscriptForSummary(
+      payload,
+      config,
+      locationId,
+      token,
+      log
+    );
 
     if (!transcript) {
-      const recordingUrl = firstRecordingUrl(payload.attachments);
-      if (recordingUrl) {
-        log.info("No GHL transcript; falling back to Whisper", { messageId });
-        transcript = await transcribeRecordingWithWhisper(recordingUrl, config, log);
-      } else {
-        log.warn("No recording URL in attachments", { messageId });
-      }
+      throw new Error(
+        "No transcript available (provide transcript in webhook or a valid messageId with GHL transcription)"
+      );
     }
 
-    if (!transcript) {
-      throw new Error("No transcript available (GHL transcription empty and no recording)");
-    }
-
-    log.step("Transcript ready", previewText(transcript, 250));
+    log.step("Transcript ready", { source: transcriptSource, ...previewText(transcript, 250) });
 
     const { title, body: summaryBody } = await summarizeCallTranscript(
       {
@@ -371,7 +476,8 @@ export async function processCallSummary(
       direction,
       callDurationSeconds: callDuration,
       dateAdded: payload.dateAdded,
-      messageId,
+      processingId,
+      transcriptSource,
     });
 
     const noteTitle = title.startsWith(config.notePrefix) ? title : `${config.notePrefix}: ${title}`;
@@ -389,7 +495,7 @@ export async function processCallSummary(
 
     await markCallProcessed(
       {
-        messageId,
+        messageId: processingId,
         contactId,
         locationId,
         noteId,
@@ -401,23 +507,24 @@ export async function processCallSummary(
     );
 
     log.info("Pipeline completed successfully", {
-      messageId,
+      processingId,
       contactId,
       noteId,
+      transcriptSource,
       ms: Date.now() - pipelineT0,
     });
     return { ok: true, noteId };
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     log.error("Pipeline failed", {
-      messageId,
+      processingId,
       contactId,
       error: message,
       ms: Date.now() - pipelineT0,
     });
     await markCallProcessed(
       {
-        messageId,
+        messageId: processingId,
         contactId,
         locationId,
         direction: payload.direction ?? null,
@@ -431,12 +538,51 @@ export async function processCallSummary(
   }
 }
 
+function pickString(obj: Record<string, unknown>, ...keys: string[]): string | undefined {
+  for (const key of keys) {
+    const v = obj[key];
+    if (typeof v === "string" && v.trim()) return v.trim();
+  }
+  return undefined;
+}
+
 export function payloadFromWebhookBody(body: Record<string, unknown>): GhlCallWebhookPayload {
   const nested = body.data;
-  if (nested && typeof nested === "object" && !Array.isArray(nested)) {
-    return { ...(nested as GhlCallWebhookPayload), type: (body.type as string) ?? (nested as GhlCallWebhookPayload).type };
-  }
-  return body as GhlCallWebhookPayload;
+  const raw =
+    nested && typeof nested === "object" && !Array.isArray(nested)
+      ? ({ ...nested, type: (body.type as string) ?? (nested as Record<string, unknown>).type } as Record<
+          string,
+          unknown
+        >)
+      : body;
+
+  const transcript = pickString(raw, "transcript", "call_transcript", "callTranscript");
+
+  return {
+    ...(raw as GhlCallWebhookPayload),
+    type: typeof raw.type === "string" ? raw.type : undefined,
+    locationId: pickString(raw, "locationId", "location_id"),
+    contactId: pickString(raw, "contactId", "contact_id"),
+    messageId: pickString(raw, "messageId", "message_id", "id"),
+    conversationId: pickString(raw, "conversationId", "conversation_id"),
+    messageType: pickString(raw, "messageType", "message_type"),
+    messageTypeString: pickString(raw, "messageTypeString", "message_type_string"),
+    direction: pickString(raw, "direction"),
+    callDuration:
+      typeof raw.callDuration === "number" || typeof raw.callDuration === "string"
+        ? raw.callDuration
+        : typeof raw.duration === "number" || typeof raw.duration === "string"
+          ? raw.duration
+          : undefined,
+    callStatus: pickString(raw, "callStatus", "call_status"),
+    status: pickString(raw, "status"),
+    dateAdded: pickString(raw, "dateAdded", "date_added"),
+    userId: pickString(raw, "userId", "user_id"),
+    from: pickString(raw, "from"),
+    to: pickString(raw, "to"),
+    transcript,
+    call_transcript: transcript,
+  };
 }
 
 export async function exportCallMessages(

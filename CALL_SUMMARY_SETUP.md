@@ -88,7 +88,23 @@ After each completed call, add **Custom Webhook**:
 
 - URL: same as above
 - Header: `Authorization: Bearer <AGENT_CRM_CALL_SUMMARY_WEBHOOK_SECRET>`
-- Body: include `contactId`, `messageId`, `callDuration`, `direction`, `messageType: CALL`, etc.
+- Body: include `contactId`, `transcript` (e.g. `{{transcript_generated.call_transcript}}`), `callDuration`, `direction`, and optionally `messageType: CALL`.
+
+Example workflow JSON:
+
+```json
+{
+  "contactId": "{{contact.id}}",
+  "messageType": "CALL",
+  "direction": "{{transcript_generated.direction}}",
+  "callDuration": "{{transcript_generated.duration}}",
+  "callStatus": "{{transcript_generated.status}}",
+  "status": "{{transcript_generated.status}}",
+  "transcript": "{{transcript_generated.call_transcript}}"
+}
+```
+
+Use the `{ }` picker for each value. `messageId` is optional when `transcript` is sent.
 
 ### 3. Health check
 

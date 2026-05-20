@@ -5,9 +5,10 @@ import {
   isCallSummaryConfigured,
 } from "@/lib/agent-crm-call-summary-config";
 import {
+  isCallSummaryWebhookPayload,
   payloadFromWebhookBody,
   processCallSummary,
-  type GhlCallWebhookPayload,
+  resolveCallProcessingId,
 } from "@/lib/agent-crm-call-summary";
 import { createCallSummaryLogger, sanitizeCallPayload } from "@/lib/agent-crm-call-summary-log";
 
@@ -15,27 +16,13 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
-const CALL_EVENT_TYPES = new Set([
-  "InboundMessage",
-  "OutboundMessage",
-]);
-
-function isCallWebhookEvent(payload: GhlCallWebhookPayload, eventType: string | undefined): boolean {
-  const mt = (payload.messageType ?? "").toUpperCase();
-  const mts = (payload.messageTypeString ?? "").toUpperCase();
-  if (mt === "CALL" || mts.includes("CALL") || mts.includes("VOICEMAIL")) return true;
-  if (eventType && CALL_EVENT_TYPES.has(eventType) && (mt || mts)) return true;
-  return false;
-}
-
 /**
  * Agent CRM (GoHighLevel) call webhooks → OpenAI summary → contact note.
  *
- * Configure in GHL:
- * - Native: subscribe InboundMessage + OutboundMessage; verify via X-GHL-Signature / X-WH-Signature
- * - Workflow custom webhook: POST here with Authorization: Bearer <AGENT_CRM_CALL_SUMMARY_WEBHOOK_SECRET>
- *
- * Debug: set AGENT_CRM_CALL_SUMMARY_DEBUG=true — logs appear in Vercel/server console.
+ * Workflow example (Transcript Generated + Custom Webhook):
+ * - transcript: {{transcript_generated.call_transcript}}
+ * - contactId: {{contact.id}}
+ * - direction / duration / status from transcript_generated.* or phoneCall.*
  *
  * URL: https://www.isaacplans.com/api/webhooks/agent-crm/calls
  */
@@ -81,7 +68,7 @@ export async function POST(req: NextRequest) {
     payload: sanitizeCallPayload(payload),
   });
 
-  if (!isCallWebhookEvent(payload, eventType)) {
+  if (!isCallSummaryWebhookPayload(payload, eventType)) {
     log.debug("Webhook ignored: not a call event", { eventType, messageType: payload.messageType });
     return NextResponse.json({ received: true, skipped: "not_call_event" });
   }
@@ -91,24 +78,27 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ received: true, error: "not_configured" });
   }
 
+  const processingId = resolveCallProcessingId(payload);
+
   log.info("Webhook accepted; queueing call summary", {
-    messageId: payload.messageId,
+    processingId,
     contactId: payload.contactId,
     direction: payload.direction,
     callDuration: payload.callDuration,
+    hasWorkflowTranscript: Boolean(payload.transcript),
   });
 
   after(async () => {
-    log.debug("Background processing started", { messageId: payload.messageId });
+    log.debug("Background processing started", { processingId });
     const result = await processCallSummary(payload);
     if (result.ok) {
       log.info("Background processing succeeded", {
-        messageId: payload.messageId,
+        processingId,
         noteId: result.noteId,
       });
     } else {
       log.info("Background processing finished without note", {
-        messageId: payload.messageId,
+        processingId,
         reason: result.reason,
       });
     }
@@ -125,5 +115,6 @@ export async function GET() {
     enabled: config.enabled,
     debug: config.debug,
     configured: isCallSummaryConfigured(config),
+    acceptsWorkflowTranscript: true,
   });
 }
