@@ -12,6 +12,8 @@ Automatically summarizes phone calls from GoHighLevel (Agent CRM) and creates no
 
 **Backfill:** Daily cron processes recent calls that were missed.
 
+**Kixie:** End Call webhook → Whisper on `recordingurl` → same OpenAI summary → GHL contact note (see [Kixie setup](#kixie-dialer-setup) below).
+
 ## Environment variables
 
 ### Required (you likely already have)
@@ -34,6 +36,16 @@ Automatically summarizes phone calls from GoHighLevel (Agent CRM) and creates no
 | `OPENAI_WHISPER_MODEL` | `whisper-1` | Fallback when GHL transcript is empty |
 | `AGENT_CRM_CALL_SUMMARY_INCLUDE_VOICEMAIL` | `false` | Include voicemail calls |
 | `AGENT_CRM_CALL_SUMMARY_DEBUG` | `true` | Verbose step-by-step logs in server console (Vercel → Logs) |
+
+### Kixie dialer
+
+| Variable | Example | Purpose |
+|----------|---------|---------|
+| `KIXIE_CALL_SUMMARY_ENABLED` | `true` | Master switch for Kixie End Call webhook |
+| `KIXIE_CALL_SUMMARY_WEBHOOK_SECRET` | *(you choose)* | Bearer token for Kixie webhook |
+| `KIXIE_CALL_SUMMARY_MIN_DURATION_SECONDS` | `60` | Skip short calls (also filter in Kixie UI) |
+
+Requires the same `AGENT_CRM_*`, `OPENAI_*`, and `DATABASE_URL` as GHL summaries.
 
 ### Optional
 
@@ -102,13 +114,51 @@ Example workflow JSON:
 
 Use the `{ }` picker for each value. `messageId` is optional when `transcript` is sent.
 
-### 3. Health check
+### 3. Health check (GHL)
 
 ```bash
 curl https://www.isaacplans.com/api/webhooks/agent-crm/calls
 ```
 
 Returns `{ ok: true, enabled: true, configured: true }` when env is complete.
+
+## Kixie dialer setup
+
+### 1. Prerequisites
+
+- Kixie integrated with **Go High Level** (LeadConnector) so `contactid` and `crmlink` are populated.
+- **Call recording** enabled in Kixie (required for `recordingurl`).
+- Same Private Integration and OpenAI keys as the GHL flow.
+
+### 2. Webhook in Kixie
+
+**Manage → Integrations → Kixie Event Webhooks** (or Account → Webhooks):
+
+| Setting | Value |
+|---------|--------|
+| Event | **End Call** (`endcall`) |
+| URL | `https://www.isaacplans.com/api/webhooks/kixie/calls` |
+| Header | `Authorization: Bearer <KIXIE_CALL_SUMMARY_WEBHOOK_SECRET>` |
+| Filters | **Answered** calls; duration **≥ 60 seconds** (recommended) |
+
+Kixie sends JSON automatically (no custom body). Important fields:
+
+- `data.callDetails.contactid` — GHL contact ID
+- `data.callDetails.recordingurl` — MP3 for Whisper
+- `data.callDetails.callid` — idempotency key (`kx_<callid>`)
+
+### 3. Health check
+
+```bash
+curl https://www.isaacplans.com/api/webhooks/kixie/calls
+```
+
+### 4. Avoid duplicate notes
+
+If the same call also triggers your GHL **Transcript Generated** workflow, you may get **two** notes. Use **one** path per dialer:
+
+- **LC Phone / GHL native** → GHL workflow only  
+- **Kixie PowerCall** → Kixie webhook only  
 
 ## Cron backfill
 
@@ -170,3 +220,6 @@ curl https://www.isaacplans.com/api/webhooks/agent-crm/calls
 | `No transcript available` | GHL transcription on? Recording in `attachments`? |
 | `Create note failed 401` | PI needs `contacts.write` |
 | Duplicate notes | Run migration; `call_summary_processed` must exist |
+| Kixie `missing_recording_url` | Enable call recording in Kixie |
+| Kixie `missing_contact_id` | Confirm GHL integration; check `contactid` in webhook payload |
+| Kixie slow / timeout | Route allows 300s; Whisper + long calls need OpenAI quota |

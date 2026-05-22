@@ -163,7 +163,8 @@ export function resolveCallProcessingId(payload: GhlCallWebhookPayload): string 
 }
 
 function isGhlMessageId(messageId: string): boolean {
-  return Boolean(messageId.trim()) && !messageId.startsWith("wh_");
+  const id = messageId.trim();
+  return Boolean(id) && !id.startsWith("wh_") && !id.startsWith("kx_");
 }
 
 function shouldProcessCall(payload: GhlCallWebhookPayload, config: CallSummaryConfig): {
@@ -338,9 +339,11 @@ function formatNoteBody(
     summaryBody,
     "",
     "---",
-    meta.transcriptSource === "workflow"
-      ? `Generated from call transcript (workflow: ${meta.processingId})`
-      : `Generated from call transcript (messageId: ${meta.processingId})`,
+    meta.processingId.startsWith("kx_")
+      ? `Generated from Kixie call recording (${meta.processingId})`
+      : meta.transcriptSource === "workflow"
+        ? `Generated from call transcript (workflow: ${meta.processingId})`
+        : `Generated from call transcript (messageId: ${meta.processingId})`,
   ].join("\n");
 }
 
@@ -358,17 +361,22 @@ async function resolveTranscriptForSummary(
   }
 
   const messageId = payload.messageId?.trim();
+  const recordingUrl = firstRecordingUrl(payload.attachments);
+
   if (messageId && isGhlMessageId(messageId)) {
     let transcript = await fetchCallTranscription(locationId, messageId, token, log);
     if (transcript) return { transcript, source: "api" };
 
-    const recordingUrl = firstRecordingUrl(payload.attachments);
     if (recordingUrl) {
       log.info("No GHL API transcript; falling back to Whisper", { messageId });
       transcript = await transcribeRecordingWithWhisper(recordingUrl, config, log);
       if (transcript) return { transcript, source: "whisper" };
     }
     log.warn("No recording URL in attachments", { messageId });
+  } else if (recordingUrl) {
+    log.info("Transcribing recording with Whisper", { messageId: messageId ?? "none" });
+    const transcript = await transcribeRecordingWithWhisper(recordingUrl, config, log);
+    if (transcript) return { transcript, source: "whisper" };
   }
 
   return { transcript: "", source: "api" };
@@ -409,8 +417,9 @@ export async function processCallSummary(
     return { ok: false, reason: "missing_ids" };
   }
 
-  if (!webhookTranscript && !payload.messageId?.trim()) {
-    log.warn("Missing messageId and workflow transcript", { contactId });
+  const hasRecording = Boolean(firstRecordingUrl(payload.attachments));
+  if (!webhookTranscript && !payload.messageId?.trim() && !hasRecording) {
+    log.warn("Missing transcript, messageId, and recording URL", { contactId });
     return { ok: false, reason: "missing_transcript_or_message_id" };
   }
 
@@ -464,7 +473,7 @@ export async function processCallSummary(
 
     if (!transcript) {
       throw new Error(
-        "No transcript available (provide transcript in webhook or a valid messageId with GHL transcription)"
+        "No transcript available (workflow transcript, GHL message transcription, or Whisper on recording URL)"
       );
     }
 
