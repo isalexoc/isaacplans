@@ -382,6 +382,119 @@ async function resolveTranscriptForSummary(
   return { transcript: "", source: "api" };
 }
 
+/** Summarize an existing transcript and create CRM note (Kixie async processor). */
+export async function completeCallSummaryFromTranscript(
+  payload: GhlCallWebhookPayload,
+  transcript: string,
+  transcriptSource: "workflow" | "api" | "whisper",
+  options?: { skipIdempotency?: boolean }
+): Promise<{ ok: boolean; reason?: string; noteId?: string | null }> {
+  const config = getCallSummaryConfig();
+  const log = createCallSummaryLogger(config.debug);
+  const pipelineT0 = Date.now();
+
+  if (!isCallSummaryConfigured(config)) {
+    return { ok: false, reason: "not_configured" };
+  }
+
+  const contactId = payload.contactId?.trim();
+  const locationId = (payload.locationId ?? config.locationId)?.trim();
+  const token = config.piToken!;
+  const processingId = resolveCallProcessingId(payload);
+
+  if (!contactId || !locationId) {
+    return { ok: false, reason: "missing_ids" };
+  }
+
+  if (!transcript.trim()) {
+    return { ok: false, reason: "empty_transcript" };
+  }
+
+  if (!options?.skipIdempotency) {
+    const existing = await getProcessedCall(processingId, log);
+    if (existing?.status === "completed") {
+      return { ok: false, reason: "already_processed" };
+    }
+  }
+
+  const direction = payload.direction ?? "unknown";
+  const callDuration = parseCallDuration(payload.callDuration);
+  const callStatus = payload.callStatus ?? payload.status ?? "completed";
+
+  try {
+    const trimmed = truncateTranscriptForConfig(transcript, config);
+    log.step("Transcript ready", { source: transcriptSource, ...previewText(trimmed, 250) });
+
+    const { title, body: summaryBody } = await summarizeCallTranscript(
+      {
+        transcript: trimmed,
+        direction,
+        callDurationSeconds: callDuration,
+        callStatus,
+        contactId,
+        dateAdded: payload.dateAdded,
+      },
+      config,
+      log
+    );
+
+    const noteBody = formatNoteBody(config, summaryBody, {
+      direction,
+      callDurationSeconds: callDuration,
+      dateAdded: payload.dateAdded,
+      processingId,
+      transcriptSource,
+    });
+
+    const noteTitle = title.startsWith(config.notePrefix) ? title : `${config.notePrefix}: ${title}`;
+
+    const noteId = await createContactNote(
+      {
+        contactId,
+        token,
+        title: noteTitle,
+        body: noteBody,
+        userId: payload.userId,
+      },
+      log
+    );
+
+    await markCallProcessed(
+      {
+        messageId: processingId,
+        contactId,
+        locationId,
+        noteId,
+        direction,
+        callDurationSeconds: callDuration,
+        status: "completed",
+        source: "kixie",
+        errorMessage: null,
+      },
+      log
+    );
+
+    log.info("Pipeline completed successfully", {
+      processingId,
+      contactId,
+      noteId,
+      transcriptSource,
+      ms: Date.now() - pipelineT0,
+    });
+    return { ok: true, noteId };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    log.error("Pipeline failed", { processingId, contactId, error: message });
+    return { ok: false, reason: message };
+  }
+}
+
+function truncateTranscriptForConfig(transcript: string, config: CallSummaryConfig): string {
+  const max = config.maxTranscriptChars;
+  if (transcript.length <= max) return transcript;
+  return `${transcript.slice(0, max)}\n\n[Transcript truncated for length]`;
+}
+
 export async function processCallSummary(
   payload: GhlCallWebhookPayload,
   options?: { force?: boolean }
@@ -452,6 +565,10 @@ export async function processCallSummary(
     if (existing?.status === "skipped") {
       log.info("Previously skipped", { processingId, reason: existing.errorMessage });
       return { ok: false, reason: existing.errorMessage ?? "skipped" };
+    }
+    if (existing?.status === "pending" || existing?.status === "processing") {
+      log.info("Call queued for async processing", { processingId, status: existing.status });
+      return { ok: false, reason: "queued_for_processing" };
     }
     if (existing?.status === "failed") {
       log.info("Retrying previously failed call", { processingId, priorError: existing.errorMessage });

@@ -42,10 +42,14 @@ Automatically summarizes phone calls from GoHighLevel (Agent CRM) and creates no
 | Variable | Example | Purpose |
 |----------|---------|---------|
 | `KIXIE_CALL_SUMMARY_ENABLED` | `true` | Master switch for Kixie End Call webhook |
-| `KIXIE_CALL_SUMMARY_WEBHOOK_SECRET` | *(you choose)* | Bearer token for Kixie webhook |
+| `KIXIE_CALL_SUMMARY_WEBHOOK_SECRET` | *(you choose)* | Webhook auth (`x-call-summary-secret` header or `?token=`) |
 | `KIXIE_CALL_SUMMARY_MIN_DURATION_SECONDS` | `60` | Skip short calls (also filter in Kixie UI) |
+| `KIXIE_API_KEY` | *(from Kixie dashboard)* | Recording download auth |
+| `KIXIE_BUSINESS_ID` | e.g. `65871` | Optional query param for recording URL |
+| `KIXIE_RECORDING_MAX_BYTES` | `24000000` | Max bytes per Whisper chunk (~25MB API limit) |
+| `KIXIE_WHISPER_SEGMENT_SECONDS` | `600` | Split longer recordings (10 min segments) |
 
-Requires the same `AGENT_CRM_*`, `OPENAI_*`, and `DATABASE_URL` as GHL summaries.
+Requires the same `AGENT_CRM_*`, `OPENAI_*`, `DATABASE_URL`, and `CRON_SECRET` as GHL summaries.
 
 ### Optional
 
@@ -138,8 +142,10 @@ Returns `{ ok: true, enabled: true, configured: true }` when env is complete.
 |---------|--------|
 | Event | **End Call** (`endcall`) |
 | URL | `https://www.isaacplans.com/api/webhooks/kixie/calls` |
-| Header | `Authorization: Bearer <KIXIE_CALL_SUMMARY_WEBHOOK_SECRET>` |
+| Header | `x-call-summary-secret`: `<KIXIE_CALL_SUMMARY_WEBHOOK_SECRET>` (no `Bearer` — Kixie rejects spaces) |
 | Filters | **Answered** calls; duration **≥ 60 seconds** (recommended) |
+
+**Async queue:** The webhook only enqueues a job (`status: pending`). A cron worker (`/api/cron/kixie-call-summary`, every 3 minutes, **800s** timeout on Vercel Pro) downloads the MP3, runs Whisper (with ffmpeg chunking for long calls), and creates the GHL note.
 
 Kixie sends JSON automatically (no custom body). Important fields:
 
@@ -153,7 +159,16 @@ Kixie sends JSON automatically (no custom body). Important fields:
 curl https://www.isaacplans.com/api/webhooks/kixie/calls
 ```
 
-### 4. Avoid duplicate notes
+### 4. Processor cron (manual)
+
+```bash
+curl -X POST -H "Authorization: Bearer YOUR_CRON_SECRET" \
+  https://www.isaacplans.com/api/cron/kixie-call-summary
+```
+
+Runs one queued Kixie job. Scheduled every **3 minutes** in `vercel.json`.
+
+### 5. Avoid duplicate notes
 
 If the same call also triggers your GHL **Transcript Generated** workflow, you may get **two** notes. Use **one** path per dialer:
 
@@ -222,4 +237,7 @@ curl https://www.isaacplans.com/api/webhooks/agent-crm/calls
 | Duplicate notes | Run migration; `call_summary_processed` must exist |
 | Kixie `missing_recording_url` | Enable call recording in Kixie |
 | Kixie `missing_contact_id` | Confirm GHL integration; check `contactid` in webhook payload |
-| Kixie slow / timeout | Route allows 300s; Whisper + long calls need OpenAI quota |
+| Kixie download 403 | Fixed via browser-like headers + `KIXIE_API_KEY`; retry with `failed` row |
+| Kixie slow / timeout | Processor allows **800s**; very long calls use ffmpeg 10-min chunks |
+| Job stuck `processing` | Reclaimed after 2 hours; or run processor cron manually |
+| Run migration | `npm run db:migrate` for `0009_call_summary_jobs.sql` |

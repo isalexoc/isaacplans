@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/call-summary-backfill",
       "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/cron/kixie-call-summary",
+      "schedule": "*/3 * * * *"
     }
   ]
 }

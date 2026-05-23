@@ -163,7 +163,7 @@ export const leaveBehindAgentProfiles = pgTable("leave_behind_agent_profiles", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-/** Tracks Agent CRM call messages already summarized to contact notes (idempotency). */
+/** Tracks Agent CRM / Kixie call summaries (idempotency + async Kixie job queue). */
 export const callSummaryProcessed = pgTable("call_summary_processed", {
   messageId: text("message_id").primaryKey(),
   contactId: text("contact_id").notNull(),
@@ -171,14 +171,30 @@ export const callSummaryProcessed = pgTable("call_summary_processed", {
   noteId: text("note_id"),
   direction: text("direction"),
   callDurationSeconds: integer("call_duration_seconds"),
-  status: text("status").notNull().default("completed"), // completed | failed | skipped
+  /** pending | processing | completed | failed | skipped */
+  status: text("status").notNull().default("completed"),
   errorMessage: text("error_message"),
+  source: text("source"),
+  recordingUrl: text("recording_url"),
+  jobState: jsonb("job_state").$type<CallSummaryJobState | null>(),
+  attemptCount: integer("attempt_count").notNull().default(0),
+  nextRetryAt: timestamp("next_retry_at"),
   processedAt: timestamp("processed_at").defaultNow().notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 }, (table) => ({
   contactIdIdx: index("call_summary_processed_contact_id_idx").on(table.contactId),
   statusIdx: index("call_summary_processed_status_idx").on(table.status),
   processedAtIdx: index("call_summary_processed_processed_at_idx").on(table.processedAt),
+  sourceStatusIdx: index("call_summary_processed_source_status_idx").on(table.source, table.status),
 }));
+
+export type CallSummaryJobState = {
+  step?: "download" | "transcribe" | "summarize" | "note";
+  chunksDone?: number;
+  chunksTotal?: number;
+  lastError?: string;
+};
+
+export type CallSummarySource = "kixie" | "ghl_workflow" | "ghl_backfill" | "ghl_native";
 
 

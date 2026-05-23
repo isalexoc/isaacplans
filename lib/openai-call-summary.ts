@@ -1,4 +1,6 @@
 import type { CallSummaryConfig } from "@/lib/agent-crm-call-summary-config";
+import { isKixieRecordingHost } from "@/lib/kixie-call-summary-config";
+import { downloadKixieRecording, downloadRecordingUrl } from "@/lib/kixie-recording-download";
 import {
   createCallSummaryLogger,
   previewText,
@@ -171,29 +173,31 @@ export async function transcribeRecordingWithWhisper(
   const apiKey = config.openaiApiKey;
   if (!apiKey) throw new Error("OPENAI_API_KEY is not set");
 
-  log.step("Whisper: download recording", {
-    urlLength: recordingUrl.length,
-    urlHost: (() => {
-      try {
-        return new URL(recordingUrl).host;
-      } catch {
-        return "invalid-url";
-      }
-    })(),
-  });
-  const downloadT0 = Date.now();
-  const audioRes = await fetch(recordingUrl);
-  if (!audioRes.ok) {
-    log.error("Recording download failed", { status: audioRes.status });
-    throw new Error(`Failed to download recording (${audioRes.status})`);
-  }
+  const urlHost = (() => {
+    try {
+      return new URL(recordingUrl).hostname;
+    } catch {
+      return "invalid-url";
+    }
+  })();
 
-  const buffer = await audioRes.arrayBuffer();
+  log.step("Whisper: download recording", { urlLength: recordingUrl.length, urlHost });
+  const downloadT0 = Date.now();
+
+  const { getKixieCallSummaryConfig } = await import("@/lib/kixie-call-summary-config");
+  const kixieConfig = getKixieCallSummaryConfig();
+
+  const downloaded = isKixieRecordingHost(urlHost)
+    ? await downloadKixieRecording(recordingUrl, kixieConfig, log)
+    : await downloadRecordingUrl(recordingUrl, log);
+
+  const buffer = downloaded.buffer;
+  const contentType = downloaded.contentType;
   log.elapsed("Whisper: recording downloaded", downloadT0, {
-    bytes: buffer.byteLength,
-    contentType: audioRes.headers.get("content-type"),
+    bytes: downloaded.byteLength,
+    contentType,
+    authMethod: downloaded.authMethod,
   });
-  const contentType = audioRes.headers.get("content-type") || "audio/mpeg";
   const ext = contentType.includes("wav")
     ? "wav"
     : contentType.includes("mp4") || contentType.includes("m4a")
