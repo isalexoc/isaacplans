@@ -1,13 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { Loader2, CheckCircle2 } from "lucide-react";
+import { Loader2, CheckCircle2, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
   SelectContent,
@@ -15,9 +17,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { VALID_CATEGORIES, type BlogCategory, type YouTubeExtractionResult, type GeneratedBlogContent, type SanityPublishResult } from "@/lib/blog-generator/types";
+import {
+  VALID_CATEGORIES,
+  type BlogCategory,
+  type YouTubeExtractionResult,
+  type GeneratedBlogContent,
+  type SanityPublishResult,
+  type CTASettings,
+} from "@/lib/blog-generator/types";
+import { CATEGORY_CTA } from "@/lib/blog-generator/cta-config";
 
 type Stage = "idle" | "extracting" | "generating" | "review" | "publishing" | "success";
+type RegenerableField = "title" | "excerpt" | "body";
 
 interface ReviewForm {
   title: string;
@@ -32,6 +43,15 @@ interface ReviewForm {
     focusKeyword: string;
     keywords: string;
   };
+  cta: CTASettings;
+  publishStatus: "draft" | "published";
+}
+
+interface BatchItem {
+  url: string;
+  status: "queued" | "processing" | "done" | "error";
+  result?: SanityPublishResult;
+  error?: string;
 }
 
 const EMPTY_FORM: ReviewForm = {
@@ -42,6 +62,8 @@ const EMPTY_FORM: ReviewForm = {
   readingTime: 5,
   bodyMarkdown: "",
   seo: { metaTitle: "", metaDescription: "", focusKeyword: "", keywords: "" },
+  cta: { enableCTA: true, ctaType: "consultation", ctaText: "Schedule a Free Consultation", ctaPosition: "bottom" },
+  publishStatus: "draft",
 };
 
 const STAGE_LABELS: Record<string, string> = {
@@ -64,6 +86,17 @@ const CATEGORY_LABELS: Record<BlogCategory, string> = {
   news: "Industry News",
 };
 
+async function postJson(url: string, body: unknown) {
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  const data = await res.json();
+  if (!data.success) throw new Error(data.error);
+  return data;
+}
+
 export default function BlogGeneratorPage() {
   const [stage, setStage] = useState<Stage>("idle");
   const [url, setUrl] = useState("");
@@ -72,6 +105,13 @@ export default function BlogGeneratorPage() {
   const [form, setForm] = useState<ReviewForm>(EMPTY_FORM);
   const [result, setResult] = useState<SanityPublishResult | null>(null);
 
+  const [regenerating, setRegenerating] = useState({ title: false, excerpt: false, body: false });
+  const [fieldErrors, setFieldErrors] = useState<Partial<Record<RegenerableField, string>>>({});
+
+  const [batchUrls, setBatchUrls] = useState("");
+  const [batchItems, setBatchItems] = useState<BatchItem[]>([]);
+  const [batchRunning, setBatchRunning] = useState(false);
+
   function resetAll() {
     setStage("idle");
     setUrl("");
@@ -79,60 +119,29 @@ export default function BlogGeneratorPage() {
     setExtraction(null);
     setForm(EMPTY_FORM);
     setResult(null);
+    setRegenerating({ title: false, excerpt: false, body: false });
+    setFieldErrors({});
   }
 
-  async function runPipeline() {
-    setError(null);
-
-    try {
-      setStage("extracting");
-      const extractRes = await fetch("/api/admin/blog-generator/extract", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url }),
-      });
-      const extractData = await extractRes.json();
-      if (!extractData.success) throw new Error(extractData.error);
-      setExtraction(extractData.data);
-
-      setStage("generating");
-      const generateRes = await fetch("/api/admin/blog-generator/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ extraction: extractData.data }),
-      });
-      const generateData = await generateRes.json();
-      if (!generateData.success) throw new Error(generateData.error);
-
-      const content: GeneratedBlogContent = generateData.data;
-      setForm({
-        title: content.title,
-        excerpt: content.excerpt,
-        category: content.category,
-        tags: content.tags.join(", "),
-        readingTime: content.readingTime,
-        bodyMarkdown: content.bodyMarkdown,
-        seo: {
-          metaTitle: content.seo.metaTitle,
-          metaDescription: content.seo.metaDescription,
-          focusKeyword: content.seo.focusKeyword,
-          keywords: content.seo.keywords.join(", "),
-        },
-      });
-
-      setStage("review");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
-      setStage("idle");
-    }
+  function setFormField<K extends keyof ReviewForm>(key: K, value: ReviewForm[K]) {
+    setForm((prev) => ({ ...prev, [key]: value }));
   }
 
-  async function handlePublish() {
-    if (!extraction) return;
-    setError(null);
-    setStage("publishing");
+  function setSeoField(key: keyof ReviewForm["seo"], value: string) {
+    setForm((prev) => ({ ...prev, seo: { ...prev.seo, [key]: value } }));
+  }
 
-    const content: GeneratedBlogContent = {
+  function setCTAField<K extends keyof CTASettings>(key: K, value: CTASettings[K]) {
+    setForm((prev) => ({ ...prev, cta: { ...prev.cta, [key]: value } }));
+  }
+
+  function handleCategoryChange(category: BlogCategory) {
+    const defaults = CATEGORY_CTA[category];
+    setForm((prev) => ({ ...prev, category, cta: { ...prev.cta, ...defaults } }));
+  }
+
+  function buildContentFromForm(): GeneratedBlogContent {
+    return {
       title: form.title,
       excerpt: form.excerpt,
       bodyMarkdown: form.bodyMarkdown,
@@ -147,15 +156,55 @@ export default function BlogGeneratorPage() {
         keywords: form.seo.keywords.split(",").map((k) => k.trim()).filter(Boolean),
       },
     };
+  }
 
+  async function runPipeline() {
+    setError(null);
     try {
-      const res = await fetch("/api/admin/blog-generator/publish", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content, extraction }),
+      setStage("extracting");
+      const extractData = await postJson("/api/admin/blog-generator/extract", { url });
+      setExtraction(extractData.data);
+
+      setStage("generating");
+      const generateData = await postJson("/api/admin/blog-generator/generate", { extraction: extractData.data });
+
+      const content: GeneratedBlogContent = generateData.data;
+      const ctaDefaults = CATEGORY_CTA[content.category];
+      setForm({
+        title: content.title,
+        excerpt: content.excerpt,
+        category: content.category,
+        tags: content.tags.join(", "),
+        readingTime: content.readingTime,
+        bodyMarkdown: content.bodyMarkdown,
+        seo: {
+          metaTitle: content.seo.metaTitle,
+          metaDescription: content.seo.metaDescription,
+          focusKeyword: content.seo.focusKeyword,
+          keywords: content.seo.keywords.join(", "),
+        },
+        cta: { enableCTA: true, ...ctaDefaults },
+        publishStatus: "draft",
       });
-      const data = await res.json();
-      if (!data.success) throw new Error(data.error);
+
+      setStage("review");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong");
+      setStage("idle");
+    }
+  }
+
+  async function handlePublish() {
+    if (!extraction) return;
+    setError(null);
+    setStage("publishing");
+    try {
+      const data = await postJson("/api/admin/blog-generator/publish", {
+        content: buildContentFromForm(),
+        extraction,
+        cta: form.cta,
+        status: form.publishStatus,
+      });
       setResult(data.data);
       setStage("success");
     } catch (err) {
@@ -164,15 +213,76 @@ export default function BlogGeneratorPage() {
     }
   }
 
-  function setFormField<K extends keyof ReviewForm>(key: K, value: ReviewForm[K]) {
-    setForm((prev) => ({ ...prev, [key]: value }));
+  async function handleRegenerate(field: RegenerableField) {
+    if (!extraction) return;
+    setRegenerating((prev) => ({ ...prev, [field]: true }));
+    setFieldErrors((prev) => ({ ...prev, [field]: undefined }));
+    try {
+      const data = await postJson("/api/admin/blog-generator/regenerate", {
+        field,
+        extraction,
+        currentContent: buildContentFromForm(),
+      });
+      if (field === "title") setFormField("title", data.data.value);
+      if (field === "excerpt") setFormField("excerpt", data.data.value);
+      if (field === "body") setFormField("bodyMarkdown", data.data.value);
+    } catch (err) {
+      setFieldErrors((prev) => ({
+        ...prev,
+        [field]: err instanceof Error ? err.message : "Regeneration failed",
+      }));
+    } finally {
+      setRegenerating((prev) => ({ ...prev, [field]: false }));
+    }
   }
 
-  function setSeoField(key: keyof ReviewForm["seo"], value: string) {
-    setForm((prev) => ({ ...prev, seo: { ...prev.seo, [key]: value } }));
+  async function runBatch() {
+    const urls = batchUrls
+      .split("\n")
+      .map((u) => u.trim())
+      .filter(Boolean)
+      .slice(0, 10);
+
+    if (urls.length === 0) return;
+
+    const items: BatchItem[] = urls.map((u) => ({ url: u, status: "queued" }));
+    setBatchItems(items);
+    setBatchRunning(true);
+
+    for (let i = 0; i < items.length; i++) {
+      setBatchItems((prev) =>
+        prev.map((item, idx) => (idx === i ? { ...item, status: "processing" } : item))
+      );
+      try {
+        const extractData = await postJson("/api/admin/blog-generator/extract", { url: items[i].url });
+        const generateData = await postJson("/api/admin/blog-generator/generate", { extraction: extractData.data });
+        const content: GeneratedBlogContent = generateData.data;
+        const cta = CATEGORY_CTA[content.category];
+        const publishData = await postJson("/api/admin/blog-generator/publish", {
+          content,
+          extraction: extractData.data,
+          cta: { enableCTA: true, ...cta },
+          status: "draft",
+        });
+        setBatchItems((prev) =>
+          prev.map((item, idx) =>
+            idx === i ? { ...item, status: "done", result: publishData.data } : item
+          )
+        );
+      } catch (err) {
+        setBatchItems((prev) =>
+          prev.map((item, idx) =>
+            idx === i
+              ? { ...item, status: "error", error: err instanceof Error ? err.message : "Failed" }
+              : item
+          )
+        );
+      }
+    }
+    setBatchRunning(false);
   }
 
-  // ── Loading stages ──────────────────────────────────────────────────────────
+  // ── Loading ──────────────────────────────────────────────────────────────────
   if (stage === "extracting" || stage === "generating" || stage === "publishing") {
     return (
       <div className="max-w-3xl mx-auto px-4 py-16">
@@ -185,7 +295,7 @@ export default function BlogGeneratorPage() {
     );
   }
 
-  // ── Success ─────────────────────────────────────────────────────────────────
+  // ── Success ──────────────────────────────────────────────────────────────────
   if (stage === "success" && result) {
     return (
       <div className="max-w-3xl mx-auto px-4 py-16">
@@ -194,7 +304,9 @@ export default function BlogGeneratorPage() {
           <CardContent className="pt-6 flex flex-col gap-4">
             <div className="flex items-center gap-2 text-green-600">
               <CheckCircle2 className="h-5 w-5" />
-              <span className="font-medium">Posts created as drafts in Sanity</span>
+              <span className="font-medium">
+                Posts {form.publishStatus === "published" ? "published" : "created as drafts"} in Sanity
+              </span>
             </div>
             <Separator />
             <div className="flex flex-col gap-2 text-sm">
@@ -243,7 +355,6 @@ export default function BlogGeneratorPage() {
         </div>
 
         <div className="flex flex-col gap-6">
-          {/* Video metadata */}
           {extraction && (
             <Card>
               <CardHeader>
@@ -270,7 +381,7 @@ export default function BlogGeneratorPage() {
             </Card>
           )}
 
-          {/* Content fields */}
+          {/* Content */}
           <Card>
             <CardHeader>
               <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
@@ -279,9 +390,23 @@ export default function BlogGeneratorPage() {
             </CardHeader>
             <CardContent className="flex flex-col gap-4">
               <div className="flex flex-col gap-1.5">
-                <div className="flex justify-between">
+                <div className="flex items-center justify-between">
                   <Label htmlFor="title">Title *</Label>
-                  <span className="text-xs text-muted-foreground">{form.title.length}/70</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-muted-foreground">{form.title.length}/70</span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 px-2 text-xs"
+                      onClick={() => handleRegenerate("title")}
+                      disabled={regenerating.title}
+                    >
+                      {regenerating.title
+                        ? <Loader2 className="h-3 w-3 animate-spin" />
+                        : <RotateCcw className="h-3 w-3" />}
+                      <span className="ml-1">Regenerate</span>
+                    </Button>
+                  </div>
                 </div>
                 <Input
                   id="title"
@@ -289,12 +414,27 @@ export default function BlogGeneratorPage() {
                   onChange={(e) => setFormField("title", e.target.value)}
                   maxLength={70}
                 />
+                {fieldErrors.title && <p className="text-xs text-red-600">{fieldErrors.title}</p>}
               </div>
 
               <div className="flex flex-col gap-1.5">
-                <div className="flex justify-between">
+                <div className="flex items-center justify-between">
                   <Label htmlFor="excerpt">Excerpt *</Label>
-                  <span className="text-xs text-muted-foreground">{form.excerpt.length}/200</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-muted-foreground">{form.excerpt.length}/200</span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 px-2 text-xs"
+                      onClick={() => handleRegenerate("excerpt")}
+                      disabled={regenerating.excerpt}
+                    >
+                      {regenerating.excerpt
+                        ? <Loader2 className="h-3 w-3 animate-spin" />
+                        : <RotateCcw className="h-3 w-3" />}
+                      <span className="ml-1">Regenerate</span>
+                    </Button>
+                  </div>
                 </div>
                 <Textarea
                   id="excerpt"
@@ -303,6 +443,7 @@ export default function BlogGeneratorPage() {
                   onChange={(e) => setFormField("excerpt", e.target.value)}
                   maxLength={200}
                 />
+                {fieldErrors.excerpt && <p className="text-xs text-red-600">{fieldErrors.excerpt}</p>}
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -310,7 +451,7 @@ export default function BlogGeneratorPage() {
                   <Label>Category *</Label>
                   <Select
                     value={form.category}
-                    onValueChange={(v) => setFormField("category", v as BlogCategory)}
+                    onValueChange={(v) => handleCategoryChange(v as BlogCategory)}
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -352,9 +493,23 @@ export default function BlogGeneratorPage() {
           {/* Body */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
-                Body (Markdown)
-              </CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
+                  Body (Markdown)
+                </CardTitle>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 px-2 text-xs font-normal"
+                  onClick={() => handleRegenerate("body")}
+                  disabled={regenerating.body}
+                >
+                  {regenerating.body
+                    ? <Loader2 className="h-3 w-3 animate-spin" />
+                    : <RotateCcw className="h-3 w-3" />}
+                  <span className="ml-1">Regenerate</span>
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
               <Textarea
@@ -363,6 +518,7 @@ export default function BlogGeneratorPage() {
                 onChange={(e) => setFormField("bodyMarkdown", e.target.value)}
                 className="font-mono text-sm"
               />
+              {fieldErrors.body && <p className="text-xs text-red-600 mt-1">{fieldErrors.body}</p>}
             </CardContent>
           </Card>
 
@@ -422,17 +578,105 @@ export default function BlogGeneratorPage() {
             </CardContent>
           </Card>
 
+          {/* CTA */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
+                CTA
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="flex flex-col gap-4">
+              <div className="flex items-center gap-3">
+                <Switch
+                  id="enableCTA"
+                  checked={form.cta.enableCTA}
+                  onCheckedChange={(checked) => setCTAField("enableCTA", checked)}
+                />
+                <Label htmlFor="enableCTA">Enable CTA</Label>
+              </div>
+
+              {form.cta.enableCTA && (
+                <>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="flex flex-col gap-1.5">
+                      <Label>CTA Type</Label>
+                      <Select
+                        value={form.cta.ctaType}
+                        onValueChange={(v) => setCTAField("ctaType", v as CTASettings["ctaType"])}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="quote">Quote</SelectItem>
+                          <SelectItem value="consultation">Consultation</SelectItem>
+                          <SelectItem value="contact">Contact</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="flex flex-col gap-1.5">
+                      <Label>Position</Label>
+                      <Select
+                        value={form.cta.ctaPosition}
+                        onValueChange={(v) => setCTAField("ctaPosition", v as CTASettings["ctaPosition"])}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="top">Top</SelectItem>
+                          <SelectItem value="middle">Middle</SelectItem>
+                          <SelectItem value="bottom">Bottom</SelectItem>
+                          <SelectItem value="floating">Floating</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-1.5">
+                    <Label htmlFor="ctaText">Button Text</Label>
+                    <Input
+                      id="ctaText"
+                      value={form.cta.ctaText}
+                      onChange={(e) => setCTAField("ctaText", e.target.value)}
+                    />
+                  </div>
+                </>
+              )}
+            </CardContent>
+          </Card>
+
           {error && <p className="text-sm text-red-600">{error}</p>}
 
-          <Button onClick={handlePublish} size="lg" className="w-full">
-            Publish as Draft
-          </Button>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <span className="text-sm font-medium">Publish as:</span>
+              <Button
+                variant={form.publishStatus === "draft" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setFormField("publishStatus", "draft")}
+              >
+                Draft
+              </Button>
+              <Button
+                variant={form.publishStatus === "published" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setFormField("publishStatus", "published")}
+              >
+                Published
+              </Button>
+            </div>
+            <Button onClick={handlePublish} size="lg" className="flex-1">
+              Publish
+            </Button>
+          </div>
         </div>
       </div>
     );
   }
 
-  // ── Idle — URL input ─────────────────────────────────────────────────────────
+  // ── Idle — URL input with tabs ───────────────────────────────────────────────
   return (
     <div className="max-w-3xl mx-auto px-4 py-16">
       <h1 className="text-2xl font-bold mb-2">Blog Generator</h1>
@@ -440,26 +684,92 @@ export default function BlogGeneratorPage() {
         Generate a bilingual blog post from a YouTube video using AI.
       </p>
 
-      <div className="flex flex-col gap-3">
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="youtube-url">YouTube URL</Label>
-          <div className="flex gap-2">
-            <Input
-              id="youtube-url"
-              type="url"
-              placeholder="https://www.youtube.com/watch?v=..."
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && url.trim() && runPipeline()}
-            />
-            <Button onClick={runPipeline} disabled={!url.trim()}>
-              Generate
-            </Button>
-          </div>
-        </div>
+      <Tabs defaultValue="single">
+        <TabsList className="mb-6">
+          <TabsTrigger value="single">Single</TabsTrigger>
+          <TabsTrigger value="batch">Batch</TabsTrigger>
+        </TabsList>
 
-        {error && <p className="text-sm text-red-600">{error}</p>}
-      </div>
+        <TabsContent value="single">
+          <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="youtube-url">YouTube URL</Label>
+              <div className="flex gap-2">
+                <Input
+                  id="youtube-url"
+                  type="url"
+                  placeholder="https://www.youtube.com/watch?v=..."
+                  value={url}
+                  onChange={(e) => setUrl(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && url.trim() && runPipeline()}
+                />
+                <Button onClick={runPipeline} disabled={!url.trim()}>
+                  Generate
+                </Button>
+              </div>
+            </div>
+            {error && <p className="text-sm text-red-600">{error}</p>}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="batch">
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="batch-urls">YouTube URLs (one per line, max 10)</Label>
+              <Textarea
+                id="batch-urls"
+                rows={6}
+                placeholder={"https://www.youtube.com/watch?v=...\nhttps://www.youtube.com/watch?v=..."}
+                value={batchUrls}
+                onChange={(e) => setBatchUrls(e.target.value)}
+                disabled={batchRunning}
+              />
+            </div>
+
+            <Button onClick={runBatch} disabled={batchRunning || !batchUrls.trim()}>
+              {batchRunning ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  Processing...
+                </>
+              ) : (
+                "Process All as Drafts"
+              )}
+            </Button>
+
+            {batchItems.length > 0 && (
+              <div className="flex flex-col gap-2 mt-2">
+                <Separator />
+                {batchItems.map((item, idx) => (
+                  <div key={idx} className="flex items-start gap-2 text-sm">
+                    <span className="mt-0.5 flex-shrink-0 w-4">
+                      {item.status === "done" && <CheckCircle2 className="h-4 w-4 text-green-600" />}
+                      {item.status === "processing" && <Loader2 className="h-4 w-4 animate-spin text-blue-600" />}
+                      {item.status === "queued" && <span className="text-muted-foreground">○</span>}
+                      {item.status === "error" && <span className="text-red-600">✗</span>}
+                    </span>
+                    <div className="flex flex-col gap-0.5 min-w-0">
+                      <span className="truncate text-muted-foreground text-xs">{item.url}</span>
+                      {item.status === "done" && item.result && (
+                        <span className="text-green-600 text-xs">→ /en/blog/{item.result.enSlug}</span>
+                      )}
+                      {item.status === "processing" && (
+                        <span className="text-blue-600 text-xs">processing...</span>
+                      )}
+                      {item.status === "queued" && (
+                        <span className="text-muted-foreground text-xs">queued</span>
+                      )}
+                      {item.status === "error" && (
+                        <span className="text-red-600 text-xs">{item.error}</span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

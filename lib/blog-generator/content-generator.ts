@@ -165,3 +165,43 @@ export async function generateBlogContent(
 
   return { ...normalized, bodyBlocks };
 }
+
+export async function regenerateField(
+  field: "title" | "excerpt" | "body",
+  extraction: YouTubeExtractionResult,
+  currentContent: GeneratedBlogContent
+): Promise<string> {
+  if (!process.env.OPENAI_API_KEY) {
+    throw new Error("OPENAI_API_KEY is not configured");
+  }
+
+  const model = process.env.OPENAI_MODEL ?? "gpt-4o";
+  const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+  const prompts: Record<"title" | "excerpt" | "body", string> = {
+    title: `The current title is: "${currentContent.title}"\nBased on the transcript below, suggest one improved, SEO-optimized title (max 70 chars) that better captures the main topic. Return only the title string, no explanation, no quotes.\n\nTranscript: ${extraction.transcript}`,
+    excerpt: `The current excerpt is: "${currentContent.excerpt}"\nWrite an improved 150–160 character excerpt that better summarizes the post for search results. Return only the excerpt string, no explanation, no quotes.\n\nPost title: ${currentContent.title}\nTranscript: ${extraction.transcript}`,
+    body: `Regenerate the full blog post body based on the transcript. Use these markdown format rules: ## for H2, ### for H3, **text** for bold, - for bullet lists. No numbered lists, tables, or blockquotes. 800–1200 words. Return only the markdown body, no JSON wrapper, no explanation.\n\nVideo title: ${extraction.metadata.title}\nTranscript: ${extraction.transcript}`,
+  };
+
+  let rawContent: string;
+  try {
+    const response = await client.chat.completions.create({
+      model,
+      messages: [
+        { role: "system", content: SYSTEM_PROMPT },
+        { role: "user", content: prompts[field] },
+      ],
+    });
+    rawContent = (response.choices[0]?.message?.content ?? "").trim();
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    throw new Error(`OpenAI API error during regeneration: ${msg}`);
+  }
+
+  if (!rawContent) throw new Error("OpenAI returned an empty response");
+
+  if (field === "title") return rawContent.slice(0, 70);
+  if (field === "excerpt") return rawContent.slice(0, 200);
+  return rawContent;
+}

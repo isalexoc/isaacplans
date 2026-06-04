@@ -4,6 +4,7 @@ import type {
   GeneratedBlogContent,
   TranslatedBlogContent,
   SanityPublishResult,
+  CTASettings,
 } from "./types";
 
 function getWriteClient() {
@@ -44,7 +45,9 @@ export async function uploadThumbnail(
 export async function publishBilingualPost(
   enContent: GeneratedBlogContent,
   esContent: TranslatedBlogContent,
-  thumbnailAssetId: string
+  thumbnailAssetId: string,
+  cta?: CTASettings,
+  status: "draft" | "published" = "draft"
 ): Promise<SanityPublishResult> {
   const client = getWriteClient();
 
@@ -58,6 +61,10 @@ export async function publishBilingualPost(
   const enSlug = createSlug(enContent.title);
   const esSlug = createSlug(esContent.title);
 
+  const leadCapture = cta?.enableCTA
+    ? { enableCTA: true, ctaType: cta.ctaType, ctaText: cta.ctaText, ctaPosition: cta.ctaPosition }
+    : { enableCTA: false };
+
   const postEn = await client.create({
     _type: "post",
     locale: "en",
@@ -69,10 +76,11 @@ export async function publishBilingualPost(
     image: imageField,
     author: "Isaac Orraiz",
     publishedAt,
-    status: "draft",
+    status,
     featured: false,
     tags: enContent.tags,
     readingTime: enContent.readingTime,
+    leadCapture,
     seo: {
       metaTitle: enContent.seo.metaTitle,
       metaDescription: enContent.seo.metaDescription,
@@ -92,10 +100,11 @@ export async function publishBilingualPost(
     image: imageField,
     author: "Isaac Orraiz",
     publishedAt,
-    status: "draft",
+    status,
     featured: false,
     tags: esContent.tags,
     readingTime: enContent.readingTime,
+    leadCapture,
     seo: {
       metaTitle: esContent.seo.metaTitle,
       metaDescription: esContent.seo.metaDescription,

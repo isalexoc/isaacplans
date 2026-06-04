@@ -127,6 +127,8 @@ export interface SanityPublishResult {
 export interface PublishRequest {
   content: GeneratedBlogContent;
   extraction: YouTubeExtractionResult;
+  cta?: CTASettings;
+  status?: "draft" | "published";
 }
 
 export interface PublishResponse {
@@ -135,6 +137,33 @@ export interface PublishResponse {
 }
 
 export interface PublishErrorResponse {
+  success: false;
+  error: string;
+}
+
+// --- Phase 5 types ---
+
+export interface CTASettings {
+  enableCTA: boolean;
+  ctaType: "quote" | "consultation" | "contact";
+  ctaText: string;
+  ctaPosition: "top" | "middle" | "bottom" | "floating";
+}
+
+export type RegenerateField = "title" | "excerpt" | "body";
+
+export interface RegenerateRequest {
+  field: RegenerateField;
+  extraction: YouTubeExtractionResult;
+  currentContent: GeneratedBlogContent;
+}
+
+export interface RegenerateResponse {
+  success: true;
+  data: { field: RegenerateField; value: string };
+}
+
+export interface RegenerateErrorResponse {
   success: false;
   error: string;
 }
