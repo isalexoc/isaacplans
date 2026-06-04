@@ -100,3 +100,41 @@ export interface GenerateErrorResponse {
   success: false;
   error: string;
 }
+
+// --- Phase 3 types ---
+
+export interface TranslatedBlogContent {
+  title: string;
+  excerpt: string;
+  bodyMarkdown: string;
+  bodyBlocks: PortableTextBlock[];
+  tags: string[];
+  seo: {
+    metaTitle: string;
+    metaDescription: string;
+    focusKeyword: string;
+    keywords: string[];
+  };
+}
+
+export interface SanityPublishResult {
+  enPostId: string;
+  esPostId: string;
+  enSlug: string;
+  esSlug: string;
+}
+
+export interface PublishRequest {
+  content: GeneratedBlogContent;
+  extraction: YouTubeExtractionResult;
+}
+
+export interface PublishResponse {
+  success: true;
+  data: SanityPublishResult;
+}
+
+export interface PublishErrorResponse {
+  success: false;
+  error: string;
+}
