@@ -67,21 +67,24 @@ function getSanityWriteClient() {
   });
 }
 
+type ImageGenResult = { data?: Array<{ url?: string; revised_prompt?: string }> };
+
 async function generateDalleImage(
   client: OpenAI,
   prompt: string,
-  size: "1792x1024" | "1024x1024"
+  size: "1536x1024" | "1024x1024"
 ): Promise<{ url: string; revisedPrompt: string }> {
-  const response = await client.images.generate({
-    model: "dall-e-3",
+  const response = (await (client.images.generate as unknown as (
+    body: Record<string, unknown>
+  ) => Promise<ImageGenResult>)({
+    model: "gpt-image-2",
     prompt,
     n: 1,
     size,
-    quality: "standard",
-    response_format: "url",
-  });
+    quality: "medium",
+  }));
   const item = response.data?.[0];
-  if (!item?.url) throw new Error("DALL-E returned no image URL");
+  if (!item?.url) throw new Error("gpt-image-2 returned no image URL");
   return {
     url: item.url,
     revisedPrompt: item.revised_prompt ?? prompt,
@@ -145,7 +148,7 @@ export async function generateBlogImages(
 
   try {
     [featuredDalle, body1Dalle, body2Dalle, body3Dalle] = await Promise.all([
-      generateDalleImage(openai, prompts.featured.prompt, "1792x1024"),
+      generateDalleImage(openai, prompts.featured.prompt, "1536x1024"),
       generateDalleImage(openai, prompts.body1.prompt, "1024x1024"),
       generateDalleImage(openai, prompts.body2.prompt, "1024x1024"),
       generateDalleImage(openai, prompts.body3.prompt, "1024x1024"),
