@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Loader2, CheckCircle2, RotateCcw } from "lucide-react";
+import { Loader2, CheckCircle2, RotateCcw, ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -24,10 +24,19 @@ import {
   type GeneratedBlogContent,
   type SanityPublishResult,
   type CTASettings,
+  type GeneratedImages,
 } from "@/lib/blog-generator/types";
 import { CATEGORY_CTA } from "@/lib/blog-generator/cta-config";
 
-type Stage = "idle" | "extracting" | "generating" | "review" | "publishing" | "success";
+type Stage =
+  | "idle"
+  | "extracting"
+  | "generating"
+  | "generating-images"
+  | "review"
+  | "publishing"
+  | "success";
+
 type RegenerableField = "title" | "excerpt" | "body";
 
 interface ReviewForm {
@@ -69,6 +78,7 @@ const EMPTY_FORM: ReviewForm = {
 const STAGE_LABELS: Record<string, string> = {
   extracting: "Extracting transcript and metadata...",
   generating: "Generating blog post with AI...",
+  "generating-images": "Generating images with DALL-E 3 (this takes ~30 seconds)...",
   publishing: "Translating to Spanish and publishing...",
 };
 
@@ -104,9 +114,11 @@ export default function BlogGeneratorPage() {
   const [extraction, setExtraction] = useState<YouTubeExtractionResult | null>(null);
   const [form, setForm] = useState<ReviewForm>(EMPTY_FORM);
   const [result, setResult] = useState<SanityPublishResult | null>(null);
+  const [images, setImages] = useState<GeneratedImages | null>(null);
 
   const [regenerating, setRegenerating] = useState({ title: false, excerpt: false, body: false });
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<RegenerableField, string>>>({});
+  const [generatingImages, setGeneratingImages] = useState(false);
 
   const [batchUrls, setBatchUrls] = useState("");
   const [batchItems, setBatchItems] = useState<BatchItem[]>([]);
@@ -119,6 +131,7 @@ export default function BlogGeneratorPage() {
     setExtraction(null);
     setForm(EMPTY_FORM);
     setResult(null);
+    setImages(null);
     setRegenerating({ title: false, excerpt: false, body: false });
     setFieldErrors({});
   }
@@ -187,6 +200,15 @@ export default function BlogGeneratorPage() {
         publishStatus: "draft",
       });
 
+      // Image generation — non-fatal
+      setStage("generating-images");
+      try {
+        const imagesData = await postJson("/api/admin/blog-generator/generate-images", { content });
+        setImages(imagesData.data);
+      } catch {
+        setImages(null);
+      }
+
       setStage("review");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
@@ -204,6 +226,7 @@ export default function BlogGeneratorPage() {
         extraction,
         cta: form.cta,
         status: form.publishStatus,
+        images: images ?? undefined,
       });
       setResult(data.data);
       setStage("success");
@@ -236,6 +259,21 @@ export default function BlogGeneratorPage() {
     }
   }
 
+  async function handleGenerateImages() {
+    setGeneratingImages(true);
+    setError(null);
+    try {
+      const data = await postJson("/api/admin/blog-generator/generate-images", {
+        content: buildContentFromForm(),
+      });
+      setImages(data.data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Image generation failed");
+    } finally {
+      setGeneratingImages(false);
+    }
+  }
+
   async function runBatch() {
     const urls = batchUrls
       .split("\n")
@@ -257,12 +295,22 @@ export default function BlogGeneratorPage() {
         const extractData = await postJson("/api/admin/blog-generator/extract", { url: items[i].url });
         const generateData = await postJson("/api/admin/blog-generator/generate", { extraction: extractData.data });
         const content: GeneratedBlogContent = generateData.data;
+
+        let batchImages: GeneratedImages | undefined;
+        try {
+          const imgData = await postJson("/api/admin/blog-generator/generate-images", { content });
+          batchImages = imgData.data;
+        } catch {
+          batchImages = undefined;
+        }
+
         const cta = CATEGORY_CTA[content.category];
         const publishData = await postJson("/api/admin/blog-generator/publish", {
           content,
           extraction: extractData.data,
           cta: { enableCTA: true, ...cta },
           status: "draft",
+          images: batchImages,
         });
         setBatchItems((prev) =>
           prev.map((item, idx) =>
@@ -283,7 +331,7 @@ export default function BlogGeneratorPage() {
   }
 
   // ── Loading ──────────────────────────────────────────────────────────────────
-  if (stage === "extracting" || stage === "generating" || stage === "publishing") {
+  if (stage === "extracting" || stage === "generating" || stage === "generating-images" || stage === "publishing") {
     return (
       <div className="max-w-3xl mx-auto px-4 py-16">
         <h1 className="text-2xl font-bold mb-12">Blog Generator</h1>
@@ -306,6 +354,7 @@ export default function BlogGeneratorPage() {
               <CheckCircle2 className="h-5 w-5" />
               <span className="font-medium">
                 Posts {form.publishStatus === "published" ? "published" : "created as drafts"} in Sanity
+                {images ? " with AI-generated images" : ""}
               </span>
             </div>
             <Separator />
@@ -355,6 +404,7 @@ export default function BlogGeneratorPage() {
         </div>
 
         <div className="flex flex-col gap-6">
+          {/* Source video */}
           {extraction && (
             <Card>
               <CardHeader>
@@ -381,6 +431,66 @@ export default function BlogGeneratorPage() {
             </Card>
           )}
 
+          {/* Images */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
+                Images
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {images ? (
+                <div className="flex flex-col gap-4">
+                  <div className="flex gap-3 flex-wrap items-start">
+                    <img
+                      src={images.featured.url}
+                      alt={images.featured.alt}
+                      className="rounded-lg object-cover flex-shrink-0"
+                      style={{ height: "128px", aspectRatio: "16/9" }}
+                    />
+                    <div className="flex gap-2 flex-wrap">
+                      {images.body.map((img, i) => (
+                        <img
+                          key={i}
+                          src={img.url}
+                          alt={img.alt}
+                          className="h-32 w-32 rounded-lg object-cover flex-shrink-0"
+                        />
+                      ))}
+                    </div>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Featured image + 3 body images inserted at 25%, 50%, and 75% of the post body.
+                  </p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-fit"
+                    onClick={() => setImages(null)}
+                  >
+                    Remove Images
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-4">
+                  <p className="text-sm text-muted-foreground">No images generated. Will use YouTube thumbnail.</p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleGenerateImages}
+                    disabled={generatingImages}
+                  >
+                    {generatingImages ? (
+                      <><Loader2 className="h-3 w-3 animate-spin mr-1" />Generating...</>
+                    ) : (
+                      <><ImageIcon className="h-3 w-3 mr-1" />Generate Images</>
+                    )}
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
           {/* Content */}
           <Card>
             <CardHeader>
@@ -401,9 +511,7 @@ export default function BlogGeneratorPage() {
                       onClick={() => handleRegenerate("title")}
                       disabled={regenerating.title}
                     >
-                      {regenerating.title
-                        ? <Loader2 className="h-3 w-3 animate-spin" />
-                        : <RotateCcw className="h-3 w-3" />}
+                      {regenerating.title ? <Loader2 className="h-3 w-3 animate-spin" /> : <RotateCcw className="h-3 w-3" />}
                       <span className="ml-1">Regenerate</span>
                     </Button>
                   </div>
@@ -429,9 +537,7 @@ export default function BlogGeneratorPage() {
                       onClick={() => handleRegenerate("excerpt")}
                       disabled={regenerating.excerpt}
                     >
-                      {regenerating.excerpt
-                        ? <Loader2 className="h-3 w-3 animate-spin" />
-                        : <RotateCcw className="h-3 w-3" />}
+                      {regenerating.excerpt ? <Loader2 className="h-3 w-3 animate-spin" /> : <RotateCcw className="h-3 w-3" />}
                       <span className="ml-1">Regenerate</span>
                     </Button>
                   </div>
@@ -465,7 +571,6 @@ export default function BlogGeneratorPage() {
                     </SelectContent>
                   </Select>
                 </div>
-
                 <div className="flex flex-col gap-1.5">
                   <Label htmlFor="readingTime">Reading Time (min)</Label>
                   <Input
@@ -504,9 +609,7 @@ export default function BlogGeneratorPage() {
                   onClick={() => handleRegenerate("body")}
                   disabled={regenerating.body}
                 >
-                  {regenerating.body
-                    ? <Loader2 className="h-3 w-3 animate-spin" />
-                    : <RotateCcw className="h-3 w-3" />}
+                  {regenerating.body ? <Loader2 className="h-3 w-3 animate-spin" /> : <RotateCcw className="h-3 w-3" />}
                   <span className="ml-1">Regenerate</span>
                 </Button>
               </div>
@@ -542,7 +645,6 @@ export default function BlogGeneratorPage() {
                   maxLength={60}
                 />
               </div>
-
               <div className="flex flex-col gap-1.5">
                 <div className="flex justify-between">
                   <Label htmlFor="metaDescription">Meta Description</Label>
@@ -556,7 +658,6 @@ export default function BlogGeneratorPage() {
                   maxLength={160}
                 />
               </div>
-
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="focusKeyword">Focus Keyword</Label>
                 <Input
@@ -565,7 +666,6 @@ export default function BlogGeneratorPage() {
                   onChange={(e) => setSeoField("focusKeyword", e.target.value)}
                 />
               </div>
-
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="keywords">Keywords (comma-separated)</Label>
                 <Input
@@ -594,7 +694,6 @@ export default function BlogGeneratorPage() {
                 />
                 <Label htmlFor="enableCTA">Enable CTA</Label>
               </div>
-
               {form.cta.enableCTA && (
                 <>
                   <div className="grid grid-cols-2 gap-4">
@@ -604,9 +703,7 @@ export default function BlogGeneratorPage() {
                         value={form.cta.ctaType}
                         onValueChange={(v) => setCTAField("ctaType", v as CTASettings["ctaType"])}
                       >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
                         <SelectContent>
                           <SelectItem value="quote">Quote</SelectItem>
                           <SelectItem value="consultation">Consultation</SelectItem>
@@ -614,16 +711,13 @@ export default function BlogGeneratorPage() {
                         </SelectContent>
                       </Select>
                     </div>
-
                     <div className="flex flex-col gap-1.5">
                       <Label>Position</Label>
                       <Select
                         value={form.cta.ctaPosition}
                         onValueChange={(v) => setCTAField("ctaPosition", v as CTASettings["ctaPosition"])}
                       >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
                         <SelectContent>
                           <SelectItem value="top">Top</SelectItem>
                           <SelectItem value="middle">Middle</SelectItem>
@@ -633,7 +727,6 @@ export default function BlogGeneratorPage() {
                       </Select>
                     </div>
                   </div>
-
                   <div className="flex flex-col gap-1.5">
                     <Label htmlFor="ctaText">Button Text</Label>
                     <Input
@@ -728,10 +821,7 @@ export default function BlogGeneratorPage() {
 
             <Button onClick={runBatch} disabled={batchRunning || !batchUrls.trim()}>
               {batchRunning ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  Processing...
-                </>
+                <><Loader2 className="h-4 w-4 animate-spin mr-2" />Processing...</>
               ) : (
                 "Process All as Drafts"
               )}
@@ -753,15 +843,9 @@ export default function BlogGeneratorPage() {
                       {item.status === "done" && item.result && (
                         <span className="text-green-600 text-xs">→ /en/blog/{item.result.enSlug}</span>
                       )}
-                      {item.status === "processing" && (
-                        <span className="text-blue-600 text-xs">processing...</span>
-                      )}
-                      {item.status === "queued" && (
-                        <span className="text-muted-foreground text-xs">queued</span>
-                      )}
-                      {item.status === "error" && (
-                        <span className="text-red-600 text-xs">{item.error}</span>
-                      )}
+                      {item.status === "processing" && <span className="text-blue-600 text-xs">processing...</span>}
+                      {item.status === "queued" && <span className="text-muted-foreground text-xs">queued</span>}
+                      {item.status === "error" && <span className="text-red-600 text-xs">{item.error}</span>}
                     </div>
                   </div>
                 ))}

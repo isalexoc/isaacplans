@@ -1,7 +1,9 @@
 import { createClient } from "next-sanity";
-import { createSlug, textToBlocks } from "./portable-text";
+import { createSlug, generateKey, textToBlocks } from "./portable-text";
 import type {
   GeneratedBlogContent,
+  GeneratedImages,
+  PortableTextBlock,
   TranslatedBlogContent,
   SanityPublishResult,
   CTASettings,
@@ -42,20 +44,54 @@ export async function uploadThumbnail(
   return asset._id;
 }
 
+function insertBodyImages(
+  blocks: PortableTextBlock[],
+  images: GeneratedImages["body"]
+): PortableTextBlock[] {
+  if (blocks.length < 6) return blocks;
+
+  const total = blocks.length;
+  const insertions = [
+    { idx: Math.floor(total * 0.75), image: images[2] },
+    { idx: Math.floor(total * 0.50), image: images[1] },
+    { idx: Math.floor(total * 0.25), image: images[0] },
+  ];
+
+  const result = [...blocks];
+  for (const { idx, image } of insertions) {
+    result.splice(idx, 0, {
+      _type: "image",
+      _key: generateKey(),
+      asset: { _type: "reference", _ref: image.assetId },
+      alt: image.alt,
+    } as unknown as PortableTextBlock);
+  }
+  return result;
+}
+
 export async function publishBilingualPost(
   enContent: GeneratedBlogContent,
   esContent: TranslatedBlogContent,
   thumbnailAssetId: string,
   cta?: CTASettings,
-  status: "draft" | "published" = "draft"
+  status: "draft" | "published" = "draft",
+  images?: GeneratedImages
 ): Promise<SanityPublishResult> {
   const client = getWriteClient();
 
+  const featuredAssetId = images?.featured.assetId ?? thumbnailAssetId;
+  const featuredAlt = images?.featured.alt ?? enContent.title;
+
   const imageField = {
     _type: "image",
-    asset: { _type: "reference", _ref: thumbnailAssetId },
-    alt: enContent.title,
+    asset: { _type: "reference", _ref: featuredAssetId },
+    alt: featuredAlt,
   };
+
+  const rawEnBlocks = textToBlocks(enContent.bodyMarkdown);
+  const rawEsBlocks = textToBlocks(esContent.bodyMarkdown);
+  const enBodyBlocks = images ? insertBodyImages(rawEnBlocks, images.body) : rawEnBlocks;
+  const esBodyBlocks = images ? insertBodyImages(rawEsBlocks, images.body) : rawEsBlocks;
 
   const publishedAt = new Date().toISOString();
   const enSlug = createSlug(enContent.title);
@@ -72,7 +108,7 @@ export async function publishBilingualPost(
     slug: { _type: "slug", current: enSlug },
     category: enContent.category,
     excerpt: enContent.excerpt,
-    body: textToBlocks(enContent.bodyMarkdown),
+    body: enBodyBlocks,
     image: imageField,
     author: "Isaac Orraiz",
     publishedAt,
@@ -96,7 +132,7 @@ export async function publishBilingualPost(
     slug: { _type: "slug", current: esSlug },
     category: enContent.category,
     excerpt: esContent.excerpt,
-    body: textToBlocks(esContent.bodyMarkdown),
+    body: esBodyBlocks,
     image: imageField,
     author: "Isaac Orraiz",
     publishedAt,

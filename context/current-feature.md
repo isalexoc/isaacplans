@@ -1,10 +1,27 @@
 # Current Feature
 
-None
+Blog Generation from YouTube — Phase 6
 
 ## Status
 
-Complete
+Planned
+
+## Goals
+
+Generate a professional featured image (1792×1024) and 3 body images (1024×1024) per blog post using DALL-E 3, automatically embedded in the Sanity post at publish time.
+
+**Phases:**
+
+- [x] Phase 1: YouTube data extraction
+- [x] Phase 2: OpenAI content generation
+- [x] Phase 3: Spanish translation + Sanity publishing
+- [x] Phase 4: Admin UI
+- [x] Phase 5: Polish (regeneration, CTA, status, batch)
+- [x] Phase 6: AI image generation (DALL-E 3)
+
+## Notes
+
+Full spec in `context/features/blog-generation-spec-phase-6.md`.
 
 ## History
 

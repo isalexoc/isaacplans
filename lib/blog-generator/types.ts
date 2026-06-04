@@ -129,6 +129,7 @@ export interface PublishRequest {
   extraction: YouTubeExtractionResult;
   cta?: CTASettings;
   status?: "draft" | "published";
+  images?: GeneratedImages;
 }
 
 export interface PublishResponse {
@@ -148,6 +149,35 @@ export interface CTASettings {
   ctaType: "quote" | "consultation" | "contact";
   ctaText: string;
   ctaPosition: "top" | "middle" | "bottom" | "floating";
+}
+
+// --- Phase 6 types ---
+
+export interface GeneratedImage {
+  assetId: string;
+  url: string;
+  prompt: string;
+  revisedPrompt: string;
+  alt: string;
+}
+
+export interface GeneratedImages {
+  featured: GeneratedImage;
+  body: [GeneratedImage, GeneratedImage, GeneratedImage];
+}
+
+export interface GenerateImagesRequest {
+  content: GeneratedBlogContent;
+}
+
+export interface GenerateImagesResponse {
+  success: true;
+  data: GeneratedImages;
+}
+
+export interface GenerateImagesErrorResponse {
+  success: false;
+  error: string;
 }
 
 export type RegenerateField = "title" | "excerpt" | "body";

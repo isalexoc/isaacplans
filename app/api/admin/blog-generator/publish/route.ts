@@ -8,6 +8,7 @@ import type {
   GeneratedBlogContent,
   YouTubeExtractionResult,
   CTASettings,
+  GeneratedImages,
 } from "@/lib/blog-generator/types";
 
 export const maxDuration = 60;
@@ -24,12 +25,14 @@ export async function POST(
   let extraction: YouTubeExtractionResult;
   let cta: CTASettings | undefined;
   let status: "draft" | "published";
+  let images: GeneratedImages | undefined;
   try {
     const body = await request.json();
     content = body?.content;
     extraction = body?.extraction;
     cta = body?.cta;
     status = body?.status === "published" ? "published" : "draft";
+    images = body?.images;
   } catch {
     return NextResponse.json({ success: false, error: "Invalid request body" }, { status: 400 });
   }
@@ -55,7 +58,7 @@ export async function POST(
       uploadThumbnail(extraction.metadata.thumbnailUrl, extraction.metadata.title),
     ]);
 
-    const result = await publishBilingualPost(content, esContent, thumbnailAssetId, cta, status);
+    const result = await publishBilingualPost(content, esContent, thumbnailAssetId, cta, status, images);
 
     return NextResponse.json({ success: true, data: result });
   } catch (err) {
