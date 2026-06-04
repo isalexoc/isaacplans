@@ -28,7 +28,8 @@ export default clerkMiddleware(async (auth, req) => {
   // API routes: Clerk context only — do not run next-intl (would return HTML)
   if (
     req.nextUrl.pathname.startsWith('/api/blog') ||
-    req.nextUrl.pathname.startsWith('/api/leave-behind')
+    req.nextUrl.pathname.startsWith('/api/leave-behind') ||
+    req.nextUrl.pathname.startsWith('/api/admin')
   ) {
     return;
   }
@@ -62,6 +63,7 @@ export const config = {
   matcher: [
     "/api/blog/:path*",
     "/api/leave-behind/:path*",
+    "/api/admin/:path*",
     "/((?!api|trpc|_next|_vercel|studio|.*\\..*).*)"
   ],
 };
