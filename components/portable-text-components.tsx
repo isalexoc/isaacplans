@@ -33,34 +33,33 @@ export const portableTextComponents: PortableTextComponents = {
     },
   },
   block: {
-    // Headings with beautiful styling
     h1: ({ children }) => (
-      <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-900 dark:text-white mt-12 mb-6 leading-tight tracking-tight">
+      <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mt-10 mb-4 leading-snug">
         {children}
       </h1>
     ),
     h2: ({ children }) => (
-      <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mt-10 mb-5 leading-tight tracking-tight border-b border-gray-200 dark:border-gray-700 pb-3">
+      <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mt-8 mb-3 leading-snug">
         {children}
       </h2>
     ),
     h3: ({ children }) => (
-      <h3 className="text-2xl sm:text-3xl font-semibold text-gray-900 dark:text-white mt-8 mb-4 leading-tight">
+      <h3 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mt-6 mb-2 leading-snug">
         {children}
       </h3>
     ),
     h4: ({ children }) => (
-      <h4 className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white mt-6 mb-3 leading-tight">
+      <h4 className="text-base sm:text-lg font-semibold text-gray-800 dark:text-gray-200 mt-5 mb-2 leading-snug">
         {children}
       </h4>
     ),
     h5: ({ children }) => (
-      <h5 className="text-lg sm:text-xl font-semibold text-gray-800 dark:text-gray-200 mt-5 mb-3">
+      <h5 className="text-base font-semibold text-gray-800 dark:text-gray-200 mt-4 mb-2">
         {children}
       </h5>
     ),
     h6: ({ children }) => (
-      <h6 className="text-base sm:text-lg font-semibold text-gray-800 dark:text-gray-200 mt-4 mb-2">
+      <h6 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mt-3 mb-1">
         {children}
       </h6>
     ),
@@ -78,17 +77,15 @@ export const portableTextComponents: PortableTextComponents = {
     ),
   },
   list: {
-    // Bulleted lists
     bullet: ({ children }) => (
-      <ul className="list-none space-y-3 my-6">
+      <ul className="list-none space-y-2 my-5 pl-1">
         {children}
       </ul>
     ),
-    // Numbered lists - wrap children to add indices
     number: ({ children }) => {
       const childrenArray = Children.toArray(children);
       return (
-        <ol className="list-none space-y-3 my-6">
+        <ol className="list-none space-y-2 my-5 pl-1">
           {childrenArray.map((child, index) => {
             if (isValidElement(child)) {
               return cloneElement(child, { index } as any);
@@ -100,28 +97,24 @@ export const portableTextComponents: PortableTextComponents = {
     },
   },
   listItem: {
-    // List items with custom styling
     bullet: ({ children }) => (
-      <li className="flex items-start gap-4 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-lg p-4 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200">
-        <span className="mt-1.5 flex-shrink-0 w-2 h-2 rounded-full bg-blue-600 dark:bg-blue-400 shadow-sm" />
+      <li className="flex items-start gap-3">
+        <span className="mt-2.5 flex-shrink-0 w-1.5 h-1.5 rounded-full bg-blue-600 dark:bg-blue-400" />
         <span className="flex-1 text-lg leading-relaxed text-gray-700 dark:text-gray-300">
           {children}
         </span>
       </li>
     ),
-    number: ({ children, index }: any) => {
-      const itemIndex = index ?? 0;
-      return (
-        <li className="flex items-start gap-4 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-lg p-4 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200">
-          <span className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-blue-600 to-blue-700 dark:from-blue-500 dark:to-blue-600 flex items-center justify-center text-white font-bold text-sm shadow-md">
-            {itemIndex + 1}
-          </span>
-          <span className="flex-1 text-lg leading-relaxed text-gray-700 dark:text-gray-300">
-            {children}
-          </span>
-        </li>
-      );
-    },
+    number: ({ children, index }: any) => (
+      <li className="flex items-start gap-3">
+        <span className="mt-1 flex-shrink-0 w-6 h-6 rounded-full bg-blue-600 dark:bg-blue-500 flex items-center justify-center text-white font-bold text-xs">
+          {(index ?? 0) + 1}
+        </span>
+        <span className="flex-1 text-lg leading-relaxed text-gray-700 dark:text-gray-300">
+          {children}
+        </span>
+      </li>
+    ),
   },
   marks: {
     // Links
