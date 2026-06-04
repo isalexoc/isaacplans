@@ -1,36 +1,10 @@
 # Current Feature
 
-Blog Generation from YouTube — Phase 5
+None
 
 ## Status
 
-In Progress
-
-## Goals
-
-Polish the blog generator with four enhancements: field-level regeneration, CTA auto-suggestion, publish status control, and batch mode.
-
-**Phases:**
-
-- [x] Phase 1: YouTube data extraction (transcript + metadata)
-- [x] Phase 2: OpenAI content generation (transcript → structured English blog post)
-- [x] Phase 3: Spanish translation + Sanity publishing (bilingual pair, thumbnail → Sanity asset)
-- [x] Phase 4: Admin UI (URL input, review/edit, one-click publish)
-- [x] Phase 5: Polish (regeneration controls, CTA auto-detection, batch processing)
-
-## Notes
-
-Full spec in `context/features/blog-generation-spec-phase-5.md`.
-
-Phase 5 deliverables:
-
-- `lib/blog-generator/cta-config.ts` — NEW: category → CTA mapping
-- `lib/blog-generator/types.ts` — add `CTASettings`, update `PublishRequest`
-- `lib/blog-generator/content-generator.ts` — add `regenerateField()` export
-- `lib/blog-generator/sanity-publisher.ts` — add `cta` + `status` params to `publishBilingualPost`
-- `app/api/admin/blog-generator/regenerate/route.ts` — NEW: field regeneration endpoint
-- `app/api/admin/blog-generator/publish/route.ts` — pass `cta` + `status` through
-- `app/[locale]/admin/blog-generator/page.tsx` — add regenerate buttons, CTA card, status toggle, batch tab
+Complete
 
 ## History
 
