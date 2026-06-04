@@ -1,5 +1,5 @@
 import { createClient } from "next-sanity";
-import { createSlug } from "./portable-text";
+import { createSlug, textToBlocks } from "./portable-text";
 import type {
   GeneratedBlogContent,
   TranslatedBlogContent,
@@ -65,7 +65,7 @@ export async function publishBilingualPost(
     slug: { _type: "slug", current: enSlug },
     category: enContent.category,
     excerpt: enContent.excerpt,
-    body: enContent.bodyBlocks,
+    body: textToBlocks(enContent.bodyMarkdown),
     image: imageField,
     author: "Isaac Orraiz",
     publishedAt,
@@ -88,7 +88,7 @@ export async function publishBilingualPost(
     slug: { _type: "slug", current: esSlug },
     category: enContent.category,
     excerpt: esContent.excerpt,
-    body: esContent.bodyBlocks,
+    body: textToBlocks(esContent.bodyMarkdown),
     image: imageField,
     author: "Isaac Orraiz",
     publishedAt,

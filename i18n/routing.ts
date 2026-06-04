@@ -243,6 +243,10 @@ export const routing = defineRouting({
       en: "/newsletter",
       es: "/boletín",
     },
+    "/admin/blog-generator": {
+      en: "/admin/blog-generator",
+      es: "/admin/blog-generator",
+    },
   },
 });
 
