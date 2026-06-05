@@ -65,10 +65,45 @@ async function fetchMetadata(videoId: string): Promise<YouTubeMetadata> {
   };
 }
 
-async function fetchTranscript(
+// Primary: Supadata API (works from Vercel/AWS IPs via residential proxy)
+async function fetchTranscriptSupadata(
   videoId: string
 ): Promise<{ text: string; language: string }> {
-  // Try English first, fall back to auto-detected language
+  const apiKey = process.env.SUPADATA_API_KEY;
+  if (!apiKey) throw new Error("SUPADATA_API_KEY not configured");
+
+  const url = `https://api.supadata.ai/v1/youtube/transcript?videoId=${videoId}&text=true`;
+  const res = await fetch(url, {
+    headers: { "x-api-key": apiKey },
+  });
+
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    throw new Error(`Supadata API ${res.status}: ${body || res.statusText}`);
+  }
+
+  const data = await res.json() as { content?: unknown; lang?: string };
+
+  // With text=true, content is a plain string
+  // Without it, content is an array of segments — handle both for safety
+  let text: string;
+  if (typeof data.content === "string") {
+    text = data.content;
+  } else if (Array.isArray(data.content)) {
+    text = (data.content as Array<{ text: string }>).map((s) => s.text.trim()).join(" ");
+  } else {
+    throw new Error("Supadata returned unexpected response format");
+  }
+
+  if (!text.trim()) throw new Error("Supadata returned an empty transcript");
+
+  return { text, language: data.lang ?? "en" };
+}
+
+// Fallback: youtube-transcript library (works locally, blocked on Vercel AWS IPs)
+async function fetchTranscriptLocal(
+  videoId: string
+): Promise<{ text: string; language: string }> {
   const attempts = [
     () => YoutubeTranscript.fetchTranscript(videoId, { lang: "en" }),
     () => YoutubeTranscript.fetchTranscript(videoId),
@@ -80,21 +115,49 @@ async function fetchTranscript(
       const segments = await attempt();
       if (segments.length === 0) continue;
       const text = segments.map((s) => s.text.trim()).join(" ");
-      // youtube-transcript doesn't expose the resolved language; "en" is best-effort
       return { text, language: "en" };
     } catch (err) {
       lastError = err;
     }
   }
 
-  const msg =
-    lastError instanceof Error ? lastError.message : String(lastError);
+  const msg = lastError instanceof Error ? lastError.message : String(lastError);
+  throw new Error(msg);
+}
 
-  if (msg.toLowerCase().includes("disabled") || msg.toLowerCase().includes("no transcript")) {
-    throw new Error("No transcript is available for this video. The video may have transcripts disabled or be private.");
+async function fetchTranscript(
+  videoId: string
+): Promise<{ text: string; language: string }> {
+  // Use Supadata in production (bypasses YouTube's datacenter IP blocks).
+  // Fall back to the local library when the key isn't set (dev).
+  if (process.env.SUPADATA_API_KEY) {
+    try {
+      return await fetchTranscriptSupadata(videoId);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error("[youtube-extractor] Supadata failed, falling back:", msg);
+      // Fall through to local fallback
+    }
   }
 
-  throw new Error(`Failed to fetch transcript: ${msg}`);
+  try {
+    return await fetchTranscriptLocal(videoId);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    if (
+      msg.toLowerCase().includes("disabled") ||
+      msg.toLowerCase().includes("no transcript") ||
+      msg.toLowerCase().includes("captcha") ||
+      msg.toLowerCase().includes("too many")
+    ) {
+      throw new Error(
+        "No transcript is available for this video. " +
+        "The video may have transcripts disabled, be private, or YouTube is blocking server requests. " +
+        "Ensure SUPADATA_API_KEY is set in production."
+      );
+    }
+    throw new Error(`Failed to fetch transcript: ${msg}`);
+  }
 }
 
 export async function extractYouTubeData(
