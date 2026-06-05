@@ -71,8 +71,8 @@ const EMPTY_FORM: ReviewForm = {
   readingTime: 5,
   bodyMarkdown: "",
   seo: { metaTitle: "", metaDescription: "", focusKeyword: "", keywords: "" },
-  cta: { enableCTA: true, ctaType: "consultation", ctaText: "Schedule a Free Consultation", ctaPosition: "bottom" },
-  publishStatus: "draft",
+  cta: { enableCTA: false, ctaType: "consultation", ctaText: "Schedule a Free Consultation", ctaPosition: "bottom" },
+  publishStatus: "published",
 };
 
 const STAGE_LABELS: Record<string, string> = {
@@ -196,8 +196,8 @@ export default function BlogGeneratorPage() {
           focusKeyword: content.seo.focusKeyword,
           keywords: content.seo.keywords.join(", "),
         },
-        cta: { enableCTA: true, ...ctaDefaults },
-        publishStatus: "draft",
+        cta: { enableCTA: false, ...ctaDefaults },
+        publishStatus: "published",
       });
 
       // Image generation — non-fatal
