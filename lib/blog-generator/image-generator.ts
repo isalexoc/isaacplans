@@ -7,8 +7,10 @@ const IMAGE_SYSTEM_PROMPT_ES = `You are a creative director for a professional i
 
 Rules for ALL prompts:
 - Photorealistic photography style, warm professional lighting, shallow depth of field
-- Show Hispanic/Latino people — families, couples, seniors, professionals
-- Settings: warm homes, family gatherings, community spaces, outdoors — real-life insurance moments
+- Each image must feature the SPECIFIC subject type listed in the slot description — do not substitute a group or family if a single person is specified
+- Show Hispanic/Latino individuals — vary ages, genders, and life situations widely: young adults, middle-aged professionals, seniors, couples, parents with ONE child
+- NEVER default to large multi-generation family gatherings unless the article is explicitly about family legacy
+- Settings: warm homes, workplaces, community spaces, outdoors — authentic real-life moments
 - NO text, words, signs, logos, or watermarks anywhere in the image
 - NO graphic medical content, no death imagery
 - Mood: warm, trustworthy, hopeful, professional
@@ -18,36 +20,92 @@ const IMAGE_SYSTEM_PROMPT_EN = `You are a creative director for a professional i
 
 Rules for ALL prompts:
 - Photorealistic photography style, warm professional lighting, shallow depth of field
-- Show diverse American people — white, Black, Asian, and mixed-race families, couples, seniors, professionals
+- Each image must feature the SPECIFIC subject type listed in the slot description — do not substitute a group or family if a single person is specified
+- Show diverse Americans — vary races, ages, genders, and life situations: white, Black, Asian, Hispanic, mixed-race; young adults, middle-aged professionals, seniors, couples, parents with ONE child
+- NEVER default to large multi-generation family gatherings unless the article is explicitly about family legacy
 - Settings: American suburban homes, modern offices, parks, community spaces — real-life insurance moments
 - NO text, words, signs, logos, or watermarks anywhere in the image
 - NO graphic medical content, no death imagery
 - Mood: warm, trustworthy, hopeful, professional
 - Style: editorial photography, 4K quality`;
 
-function buildImageUserPrompt(content: GeneratedBlogContent): string {
+// Large pool of distinct subject archetypes. Four unique entries are sampled
+// per post so every set of images looks different from every other post.
+const SUBJECT_ARCHETYPES_ES = [
+  "a single Latina woman in her 40s, professional blazer, reviewing documents at a kitchen table",
+  "a young Latino man in his late 20s, alone at a modern desk with a laptop",
+  "an elderly Latino grandfather in his 70s, sitting in a sunlit armchair reading",
+  "a Latina woman in her 30s, standing in a bright kitchen, looking confident",
+  "a middle-aged Latino man in his 50s, business casual, outdoors on a suburban porch",
+  "a young Latina couple in their late 20s, sitting close together on a couch looking at paperwork",
+  "a Latino father in his 30s with ONE young toddler on his lap",
+  "a Latina grandmother in her 60s and her adult daughter (30s) sitting together at a table",
+  "a young Latina professional in her late 20s, standing in a modern office hallway",
+  "a middle-aged Latina woman in her 50s, gardening or in a backyard setting",
+  "a Latino senior couple in their 60s, walking together in a park",
+  "a Latina teenager with her mother (40s), both looking at a phone or tablet",
+  "a single Latino professional man in his 30s, in a business meeting room",
+  "an elderly Latina woman in her 70s, alone, dignified expression, at home",
+  "a young Latino college-age man (early 20s), casual clothes, outdoors",
+  "a Latina nurse or healthcare worker in her 30s, in a clinical setting",
+  "a Latino construction worker or tradesman in his 40s, in work gear outdoors",
+  "a Latina teacher in her 30s at a desk with books and papers",
+];
+
+const SUBJECT_ARCHETYPES_EN = [
+  "a single Black woman in her 40s, professional blazer, reviewing documents at a kitchen table",
+  "a young white man in his late 20s, alone at a modern desk with a laptop",
+  "an elderly Asian grandfather in his 70s, sitting in a sunlit armchair reading",
+  "a white woman in her 30s, standing in a bright kitchen, looking confident",
+  "a middle-aged Black man in his 50s, business casual, outdoors on a suburban porch",
+  "a young mixed-race couple in their late 20s, sitting close together on a couch looking at paperwork",
+  "a Hispanic father in his 30s with ONE young toddler on his lap",
+  "a white grandmother in her 60s and her adult daughter (30s) sitting together at a table",
+  "a young Asian American professional woman in her late 20s, standing in a modern office hallway",
+  "a middle-aged Black woman in her 50s, casual clothes, in a backyard setting",
+  "a white senior couple in their 60s, walking together in a park",
+  "a teenage girl with her father (40s), both looking at a phone or tablet",
+  "a single South Asian professional man in his 30s, in a business meeting room",
+  "an elderly white woman in her 70s, alone, dignified expression, at home",
+  "a young Black college-age man (early 20s), casual clothes, outdoors",
+  "a Latina nurse or healthcare worker in her 30s, in a clinical setting",
+  "a white construction worker or tradesman in his 40s, in work gear outdoors",
+  "an Asian American teacher in her 30s at a desk with books and papers",
+];
+
+function pickUniqueArchetypes(pool: string[], count: number): string[] {
+  const shuffled = [...pool].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, count);
+}
+
+function buildImageUserPrompt(content: GeneratedBlogContent, locale: "en" | "es"): string {
+  const pool = locale === "es" ? SUBJECT_ARCHETYPES_ES : SUBJECT_ARCHETYPES_EN;
+  const [s1, s2, s3, s4] = pickUniqueArchetypes(pool, 4);
+
   return `Generate image prompts for this insurance blog post.
 
 Title: ${content.title}
 Category: ${content.category}
 Excerpt: ${content.excerpt}
 
+IMPORTANT — each slot has a required subject. Build the scene around that person; do NOT swap them for a group or family.
+
 Return exactly this JSON — no explanation:
 {
   "featured": {
-    "prompt": "highly detailed prompt for the hero image (most impactful, wide landscape mood, conveys the post's core theme)",
+    "prompt": "hero image — subject: ${s1} — wide landscape mood, conveys the post's core theme",
     "alt": "descriptive alt text for accessibility (max 125 chars)"
   },
   "body1": {
-    "prompt": "prompt for image supporting the opening section of the article",
+    "prompt": "opening-section image — subject: ${s2} — scene supports the article's introduction",
     "alt": "descriptive alt text (max 125 chars)"
   },
   "body2": {
-    "prompt": "prompt for image supporting the middle section of the article",
+    "prompt": "mid-article image — subject: ${s3} — scene supports the article's middle section",
     "alt": "descriptive alt text (max 125 chars)"
   },
   "body3": {
-    "prompt": "prompt for image near the conclusion or call-to-action section",
+    "prompt": "conclusion/CTA image — subject: ${s4} — scene conveys action, resolution, or next step",
     "alt": "descriptive alt text (max 125 chars)"
   }
 }`;
@@ -132,7 +190,7 @@ async function generateImageSet(
       response_format: { type: "json_object" },
       messages: [
         { role: "system", content: systemPrompt },
-        { role: "user", content: buildImageUserPrompt(content) },
+        { role: "user", content: buildImageUserPrompt(content, locale) },
       ],
     });
     prompts = JSON.parse(raw.choices[0].message.content ?? "{}");
