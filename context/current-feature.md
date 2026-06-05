@@ -1,6 +1,27 @@
 # Current Feature
 
-None
+Blog Post to Newsletter — Phase 1
+
+## Status
+
+Not Started
+
+## Goals
+
+Build the complete server-side infrastructure for sending a blog post as a newsletter email to confirmed subscribers, segmented by locale (EN/ES). Full spec: `context/features/blogpost-to-newsletter/blogpost-to-newsletter-spec-phase-1.md`
+
+**Deliverables:**
+1. `newsletterSentAt` readonly field added to `sanity/schemaTypes/postType.ts`
+2. `lib/email/portable-text-to-html.ts` — Sanity portable text → inline-styled email HTML
+3. `lib/email/newsletter-post.ts` — email template builder + `sendNewsletterPost()` orchestrator
+4. `GET /api/newsletter/subscriber-counts` — confirmed subscriber counts by locale (Clerk-auth)
+5. `POST /api/newsletter/send-post` — main send endpoint (Clerk-auth, duplicate prevention via `newsletterSentAt`, `force` override)
+
+## Notes
+
+- Uses existing Nodemailer SMTP setup and existing `newsletterSubscribers` Neon table — no new services
+- Posts are separate Sanity documents per language, linked via `relatedPost` reference
+- New dependency: `@portabletext/to-html`
 
 ## History
 
