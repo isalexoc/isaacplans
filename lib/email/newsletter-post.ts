@@ -367,7 +367,7 @@ export async function sendNewsletterPost(
             text: emailData.text,
           }),
           new Promise<never>((_, reject) =>
-            setTimeout(() => reject(new Error("Email send timeout")), 25000)
+            setTimeout(() => reject(new Error("Email send timeout")), 55000)
           ),
         ]);
 
