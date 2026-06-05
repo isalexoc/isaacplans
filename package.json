@@ -23,6 +23,7 @@
     "@neondatabase/serverless": "^0.9.5",
     "@next/third-parties": "^15.5.9",
     "@portabletext/react": "^5.0.0",
+    "@portabletext/to-html": "^5.0.2",
     "@radix-ui/react-accordion": "1.2.2",
     "@radix-ui/react-alert-dialog": "1.1.4",
     "@radix-ui/react-aspect-ratio": "1.1.1",

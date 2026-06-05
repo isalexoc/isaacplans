@@ -324,6 +324,13 @@ export const postType = defineType({
       description: 'When was this post last updated?',
     }),
     defineField({
+      name: 'newsletterSentAt',
+      type: 'datetime',
+      title: 'Newsletter Sent At',
+      description: 'Set automatically when this post is sent as a newsletter. Do not edit manually.',
+      readOnly: true,
+    }),
+    defineField({
       name: 'status',
       type: 'string',
       title: 'Status',
