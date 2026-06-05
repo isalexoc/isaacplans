@@ -22,12 +22,16 @@ type DialogState = 'confirm' | 'sending' | 'success' | 'error'
 
 function SendNewsletterDialog({
   postId,
+  postLocale,
+  hasRelatedPost,
   alreadySent,
   sentAt,
   onClose,
   onComplete,
 }: {
   postId: string
+  postLocale: 'en' | 'es'
+  hasRelatedPost: boolean
   alreadySent: boolean
   sentAt?: string
   onClose: () => void
@@ -87,6 +91,8 @@ function SendNewsletterDialog({
   }
 
   if (dialogState === 'success' && sendResult) {
+    const showEn = postLocale === 'en' || hasRelatedPost
+    const showEs = postLocale === 'es' || hasRelatedPost
     const totalFailed = sendResult.enFailed + sendResult.esFailed
     return (
       <Box padding={4}>
@@ -94,20 +100,24 @@ function SendNewsletterDialog({
           <Text size={2} weight="semibold">Newsletter sent successfully</Text>
           <Card padding={3} radius={2} shadow={1}>
             <Stack space={3}>
-              <Flex justify="space-between">
-                <Text size={2}>English</Text>
-                <Text size={2}>
-                  {sendResult.enSent} sent
-                  {sendResult.enFailed > 0 && ` · ${sendResult.enFailed} failed`}
-                </Text>
-              </Flex>
-              <Flex justify="space-between">
-                <Text size={2}>Spanish</Text>
-                <Text size={2}>
-                  {sendResult.esSent} sent
-                  {sendResult.esFailed > 0 && ` · ${sendResult.esFailed} failed`}
-                </Text>
-              </Flex>
+              {showEn && (
+                <Flex justify="space-between">
+                  <Text size={2}>English</Text>
+                  <Text size={2}>
+                    {sendResult.enSent} sent
+                    {sendResult.enFailed > 0 && ` · ${sendResult.enFailed} failed`}
+                  </Text>
+                </Flex>
+              )}
+              {showEs && (
+                <Flex justify="space-between">
+                  <Text size={2}>Spanish</Text>
+                  <Text size={2}>
+                    {sendResult.esSent} sent
+                    {sendResult.esFailed > 0 && ` · ${sendResult.esFailed} failed`}
+                  </Text>
+                </Flex>
+              )}
             </Stack>
           </Card>
           {totalFailed > 0 && (
@@ -137,8 +147,10 @@ function SendNewsletterDialog({
     )
   }
 
-  // Confirm state
-  const totalCount = (counts?.en ?? 0) + (counts?.es ?? 0)
+  // Confirm state — only show locales that have a post to send
+  const showEn = postLocale === 'en' || hasRelatedPost
+  const showEs = postLocale === 'es' || hasRelatedPost
+  const totalCount = (showEn ? (counts?.en ?? 0) : 0) + (showEs ? (counts?.es ?? 0) : 0)
   const sentAtFormatted = sentAt
     ? new Date(sentAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
     : null
@@ -158,14 +170,18 @@ function SendNewsletterDialog({
         ) : counts ? (
           <Card padding={3} radius={2} shadow={1}>
             <Stack space={3}>
-              <Flex justify="space-between">
-                <Text size={2}>English subscribers</Text>
-                <Text size={2} weight="semibold">{counts.en.toLocaleString()}</Text>
-              </Flex>
-              <Flex justify="space-between">
-                <Text size={2}>Spanish subscribers</Text>
-                <Text size={2} weight="semibold">{counts.es.toLocaleString()}</Text>
-              </Flex>
+              {showEn && (
+                <Flex justify="space-between">
+                  <Text size={2}>English subscribers</Text>
+                  <Text size={2} weight="semibold">{counts.en.toLocaleString()}</Text>
+                </Flex>
+              )}
+              {showEs && (
+                <Flex justify="space-between">
+                  <Text size={2}>Spanish subscribers</Text>
+                  <Text size={2} weight="semibold">{counts.es.toLocaleString()}</Text>
+                </Flex>
+              )}
             </Stack>
           </Card>
         ) : null}
@@ -207,10 +223,16 @@ export const sendNewsletterAction: DocumentActionComponent = function SendNewsle
   const { id, published, onComplete } = props
   const [dialogOpen, setDialogOpen] = useState(false)
 
-  const publishedDoc = published as (Record<string, unknown> & { newsletterSentAt?: string; status?: string }) | null
+  const publishedDoc = published as (Record<string, unknown> & {
+    newsletterSentAt?: string
+    locale?: string
+    relatedPost?: { _ref: string }
+  }) | null
   const isPublished = !!publishedDoc
   const alreadySent = !!publishedDoc?.newsletterSentAt
   const sentAt = publishedDoc?.newsletterSentAt
+  const postLocale = (publishedDoc?.locale ?? 'en') as 'en' | 'es'
+  const hasRelatedPost = !!publishedDoc?.relatedPost?._ref
 
   const handleOpen = useCallback(() => setDialogOpen(true), [])
   const handleClose = useCallback(() => setDialogOpen(false), [])
@@ -230,6 +252,8 @@ export const sendNewsletterAction: DocumentActionComponent = function SendNewsle
           content: (
             <SendNewsletterDialog
               postId={id}
+              postLocale={postLocale}
+              hasRelatedPost={hasRelatedPost}
               alreadySent={alreadySent}
               sentAt={sentAt}
               onClose={handleClose}
