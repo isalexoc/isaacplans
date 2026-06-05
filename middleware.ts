@@ -32,7 +32,8 @@ export default clerkMiddleware(async (auth, req) => {
   if (
     req.nextUrl.pathname.startsWith('/api/blog') ||
     req.nextUrl.pathname.startsWith('/api/leave-behind') ||
-    req.nextUrl.pathname.startsWith('/api/admin')
+    req.nextUrl.pathname.startsWith('/api/admin') ||
+    req.nextUrl.pathname.startsWith('/api/newsletter')
   ) {
     return;
   }
@@ -67,6 +68,7 @@ export const config = {
     "/api/blog/:path*",
     "/api/leave-behind/:path*",
     "/api/admin/:path*",
+    "/api/newsletter/:path*",
     "/((?!api|trpc|_next|_vercel|studio|.*\\..*).*)"
   ],
 };
