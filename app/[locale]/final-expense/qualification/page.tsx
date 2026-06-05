@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import FinalExpenseWorkflowStepperWrapper from "@/components/final-expense-workflow-stepper-wrapper";
 import AnimatedCompletionSwitch from "@/components/animated-completion-switch";
 
+import { cloudinaryOgImageUrl } from "@/lib/blog-featured-image";
 import {
   ogLocaleOf,
   type SupportedLocale,
@@ -52,13 +53,13 @@ export async function generateMetadata(): Promise<Metadata> {
       locale: ogLocale,
       alternateLocale: ogLocale === "en_US" ? ["es_ES"] : ["en_US"],
       type: "website",
-      images: [{ url: image, width: 1200, height: 630, alt }],
+      images: [{ url: cloudinaryOgImageUrl(image), width: 1200, height: 630, alt }],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: [{ url: image, alt }],
+      images: [{ url: cloudinaryOgImageUrl(image), alt }],
     },
   };
 }

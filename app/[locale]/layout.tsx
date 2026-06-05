@@ -21,6 +21,7 @@ import AgentCrmChat from "@/components/agent-crm-chat";
 import AgentCrmExternalTracking from "@/components/agent-crm-external-tracking";
 import { GoogleAnalytics } from '@next/third-parties/google'
 import { getLicensedStateCount } from "@/lib/licensed-states";
+import { cloudinaryOgImageUrl } from "@/lib/blog-featured-image";
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
@@ -47,13 +48,13 @@ export async function generateMetadata(): Promise<Metadata> {
       locale: ogLocale,
       title,
       description,
-      images: [{ url: image, width: 1200, height: 630, alt }],
+      images: [{ url: cloudinaryOgImageUrl(image), width: 1200, height: 630, alt }],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: [{ url: image, alt }],
+      images: [{ url: cloudinaryOgImageUrl(image), alt }],
     },
     other: {
       google: "notranslate",

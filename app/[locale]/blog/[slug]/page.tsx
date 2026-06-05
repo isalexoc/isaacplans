@@ -4,7 +4,7 @@ import { getLocale, getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 import { type SanityDocument } from "next-sanity";
 import { sanityFetch } from "@/sanity/lib/live";
-import { urlFor } from "@/sanity/lib/image";
+import { urlFor, sanityOgImageUrl } from "@/sanity/lib/image";
 import { PortableText } from "@portabletext/react";
 import { portableTextComponents } from "@/components/portable-text-components";
 import {
@@ -23,7 +23,7 @@ import BlogCategoryCTA from "@/components/blog-category-cta";
 import { BlogSocialLinks } from "@/components/blog-social-links";
 import { BlogNewsletter } from "@/components/blog-newsletter";
 import BlogPostTracker from "@/components/blog-post-tracker";
-import { cloudinaryFetchedFeaturedHeroUrl } from "@/lib/blog-featured-image";
+import { cloudinaryFetchedFeaturedHeroUrl, cloudinaryOgImageUrl } from "@/lib/blog-featured-image";
 
 const POST_QUERY = `*[_type == "post" && slug.current == $slug && locale == $locale][0]{
   _id,
@@ -186,10 +186,10 @@ export async function generateMetadata({
   // Use metaTitle directly if it's custom, otherwise add site name
   const title = post.seo?.metaTitle || `${post.title} | Isaac Plans Insurance`;
   const imageUrl = post.ogImage
-    ? urlFor(post.ogImage).width(1200).height(630).url()
+    ? sanityOgImageUrl(post.ogImage)
     : post.image
-    ? urlFor(post.image).width(1200).height(630).url()
-    : "https://www.isaacplans.com/images/blog.png";
+    ? sanityOgImageUrl(post.image)
+    : cloudinaryOgImageUrl("https://www.isaacplans.com/images/blog.png");
 
   const canonical = post.seo?.canonicalUrl 
     ? (post.seo.canonicalUrl.startsWith("http") 

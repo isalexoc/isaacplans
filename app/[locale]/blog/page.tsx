@@ -16,6 +16,7 @@ import { BackHome } from "@/components/back-home";
 import { BlogPagination } from "@/components/blog-pagination";
 import { BlogSearch } from "@/components/blog-search";
 import { BlogPostCard } from "@/components/blog-post-card";
+import { cloudinaryOgImageUrl } from "@/lib/blog-featured-image";
 
 const POSTS_PER_PAGE = 12;
 
@@ -141,13 +142,13 @@ export async function generateMetadata({
       locale: ogLocale,
       alternateLocale: ogLocale === "en_US" ? ["es_ES"] : ["en_US"],
       type: "website",
-      images: [{ url: image, width: 1200, height: 630, alt }],
+      images: [{ url: cloudinaryOgImageUrl(image), width: 1200, height: 630, alt }],
     },
     twitter: {
       card: "summary_large_image",
       title: currentPage > 1 ? `${title} - Page ${currentPage}` : title,
       description,
-      images: [{ url: image, alt }],
+      images: [{ url: cloudinaryOgImageUrl(image), alt }],
     },
   };
 }

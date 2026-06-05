@@ -12,6 +12,7 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { getLicensedStateCount } from "@/lib/licensed-states";
 import { interpolateLegalCopy } from "@/lib/legal-placeholders";
+import { cloudinaryOgImageUrl } from "@/lib/blog-featured-image";
 
 const PHONE = process.env.NEXT_PUBLIC_PHONE_NUMBER ?? "540-426-1804";
 
@@ -51,13 +52,13 @@ export async function generateMetadata(): Promise<Metadata> {
       locale: ogLocale,
       alternateLocale: ogLocale === "en_US" ? ["es_ES"] : ["en_US"],
       type: "article",
-      images: [{ url: image, width: 1200, height: 630, alt }],
+      images: [{ url: cloudinaryOgImageUrl(image), width: 1200, height: 630, alt }],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: [{ url: image, alt }],
+      images: [{ url: cloudinaryOgImageUrl(image), alt }],
     },
     // robots optional; omit for defaults (index, follow)
   };

@@ -12,6 +12,7 @@ import {
   type SupportedLocale,
 } from "@/lib/seo/i18n";
 import { routing } from "@/i18n/routing";
+import { cloudinaryOgImageUrl } from "@/lib/blog-featured-image";
 
 /* ───────── SEO ───────── */
 export async function generateMetadata(): Promise<Metadata> {
@@ -49,13 +50,13 @@ export async function generateMetadata(): Promise<Metadata> {
       locale: ogLocale,
       alternateLocale: ogLocale === "en_US" ? ["es_ES"] : ["en_US"],
       type: "website",
-      images: [{ url: image, width: 1200, height: 630, alt }],
+      images: [{ url: cloudinaryOgImageUrl(image), width: 1200, height: 630, alt }],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: [{ url: image, alt }],
+      images: [{ url: cloudinaryOgImageUrl(image), alt }],
     },
   };
 }
