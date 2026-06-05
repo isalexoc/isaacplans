@@ -2,7 +2,7 @@ import { createClient } from "next-sanity";
 import { createSlug, generateKey, textToBlocks } from "./portable-text";
 import type {
   GeneratedBlogContent,
-  GeneratedImages,
+  BilingualImages,
   PortableTextBlock,
   TranslatedBlogContent,
   SanityPublishResult,
@@ -46,7 +46,7 @@ export async function uploadThumbnail(
 
 function insertBodyImages(
   blocks: PortableTextBlock[],
-  images: GeneratedImages["body"]
+  images: [{ assetId: string; alt: string }, { assetId: string; alt: string }, { assetId: string; alt: string }]
 ): PortableTextBlock[] {
   if (blocks.length < 6) return blocks;
 
@@ -75,23 +75,26 @@ export async function publishBilingualPost(
   thumbnailAssetId: string,
   cta?: CTASettings,
   status: "draft" | "published" = "draft",
-  images?: GeneratedImages
+  images?: BilingualImages
 ): Promise<SanityPublishResult> {
   const client = getWriteClient();
 
-  const featuredAssetId = images?.featured.assetId ?? thumbnailAssetId;
-  const featuredAlt = images?.featured.alt ?? enContent.title;
-
-  const imageField = {
+  const enImageField = {
     _type: "image",
-    asset: { _type: "reference", _ref: featuredAssetId },
-    alt: featuredAlt,
+    asset: { _type: "reference", _ref: images?.en.featured.assetId ?? thumbnailAssetId },
+    alt: images?.en.featured.alt ?? enContent.title,
+  };
+
+  const esImageField = {
+    _type: "image",
+    asset: { _type: "reference", _ref: images?.es.featured.assetId ?? thumbnailAssetId },
+    alt: images?.es.featured.alt ?? esContent.title,
   };
 
   const rawEnBlocks = textToBlocks(enContent.bodyMarkdown);
   const rawEsBlocks = textToBlocks(esContent.bodyMarkdown);
-  const enBodyBlocks = images ? insertBodyImages(rawEnBlocks, images.body) : rawEnBlocks;
-  const esBodyBlocks = images ? insertBodyImages(rawEsBlocks, images.body) : rawEsBlocks;
+  const enBodyBlocks = images ? insertBodyImages(rawEnBlocks, images.en.body) : rawEnBlocks;
+  const esBodyBlocks = images ? insertBodyImages(rawEsBlocks, images.es.body) : rawEsBlocks;
 
   const publishedAt = new Date().toISOString();
   const enSlug = createSlug(enContent.title);
@@ -109,7 +112,7 @@ export async function publishBilingualPost(
     category: enContent.category,
     excerpt: enContent.excerpt,
     body: enBodyBlocks,
-    image: imageField,
+    image: enImageField,
     author: "Isaac Orraiz",
     publishedAt,
     status,
@@ -133,7 +136,7 @@ export async function publishBilingualPost(
     category: enContent.category,
     excerpt: esContent.excerpt,
     body: esBodyBlocks,
-    image: imageField,
+    image: esImageField,
     author: "Isaac Orraiz",
     publishedAt,
     status,

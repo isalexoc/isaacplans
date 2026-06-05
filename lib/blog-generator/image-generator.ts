@@ -1,14 +1,25 @@
-import OpenAI from "openai";
+import OpenAI, { APIError } from "openai";
 import { createClient } from "next-sanity";
 import { createSlug, generateKey } from "./portable-text";
-import type { GeneratedBlogContent, GeneratedImages } from "./types";
+import type { GeneratedBlogContent, GeneratedImages, BilingualImages } from "./types";
 
-const IMAGE_SYSTEM_PROMPT = `You are a creative director for a professional insurance agency blog targeting Hispanic/Latino families in the United States. Your job is to write DALL-E 3 image prompts that produce warm, trustworthy, photorealistic photographs.
+const IMAGE_SYSTEM_PROMPT_ES = `You are a creative director for a professional insurance agency blog targeting Hispanic/Latino families in the United States. Your job is to write image prompts that produce warm, trustworthy, photorealistic photographs.
 
 Rules for ALL prompts:
 - Photorealistic photography style, warm professional lighting, shallow depth of field
-- Show diverse people with Hispanic/Latino representation welcome
-- Settings: homes, families, offices, outdoors — real-life insurance moments
+- Show Hispanic/Latino people — families, couples, seniors, professionals
+- Settings: warm homes, family gatherings, community spaces, outdoors — real-life insurance moments
+- NO text, words, signs, logos, or watermarks anywhere in the image
+- NO graphic medical content, no death imagery
+- Mood: warm, trustworthy, hopeful, professional
+- Style: editorial photography, 4K quality`;
+
+const IMAGE_SYSTEM_PROMPT_EN = `You are a creative director for a professional insurance agency blog targeting American families. Your job is to write image prompts that produce warm, trustworthy, photorealistic photographs.
+
+Rules for ALL prompts:
+- Photorealistic photography style, warm professional lighting, shallow depth of field
+- Show diverse American people — white, Black, Asian, and mixed-race families, couples, seniors, professionals
+- Settings: American suburban homes, modern offices, parks, community spaces — real-life insurance moments
 - NO text, words, signs, logos, or watermarks anywhere in the image
 - NO graphic medical content, no death imagery
 - Mood: warm, trustworthy, hopeful, professional
@@ -24,7 +35,7 @@ Excerpt: ${content.excerpt}
 Return exactly this JSON — no explanation:
 {
   "featured": {
-    "prompt": "highly detailed DALL-E 3 prompt for the hero image (most impactful, wide landscape mood, conveys the post's core theme)",
+    "prompt": "highly detailed prompt for the hero image (most impactful, wide landscape mood, conveys the post's core theme)",
     "alt": "descriptive alt text for accessibility (max 125 chars)"
   },
   "body1": {
@@ -67,13 +78,13 @@ function getSanityWriteClient() {
   });
 }
 
-type ImageGenResult = { data?: Array<{ url?: string; revised_prompt?: string }> };
+type ImageGenResult = { data?: Array<{ b64_json?: string; url?: string; revised_prompt?: string }> };
 
 async function generateDalleImage(
   client: OpenAI,
   prompt: string,
   size: "1536x1024" | "1024x1024"
-): Promise<{ url: string; revisedPrompt: string }> {
+): Promise<{ buffer: Buffer; revisedPrompt: string }> {
   const response = (await (client.images.generate as unknown as (
     body: Record<string, unknown>
   ) => Promise<ImageGenResult>)({
@@ -82,69 +93,66 @@ async function generateDalleImage(
     n: 1,
     size,
     quality: "medium",
+    output_format: "png",
   }));
   const item = response.data?.[0];
-  if (!item?.url) throw new Error("gpt-image-2 returned no image URL");
+  if (!item?.b64_json) throw new Error("gpt-image-2 returned no image data");
   return {
-    url: item.url,
+    buffer: Buffer.from(item.b64_json, "base64"),
     revisedPrompt: item.revised_prompt ?? prompt,
   };
 }
 
 async function uploadImageToSanity(
-  imageUrl: string,
+  buffer: Buffer,
   filename: string
-): Promise<string> {
+): Promise<{ id: string; url: string }> {
   const sanity = getSanityWriteClient();
-  const res = await fetch(imageUrl);
-  if (!res.ok) throw new Error(`Failed to fetch generated image: ${res.status}`);
-  const buffer = Buffer.from(await res.arrayBuffer());
   const asset = await sanity.assets.upload("image", buffer, {
     filename,
     contentType: "image/png",
   });
-  return asset._id;
+  return { id: asset._id, url: asset.url };
 }
 
-export async function generateBlogImages(
-  content: GeneratedBlogContent
+async function generateImageSet(
+  openai: OpenAI,
+  model: string,
+  content: GeneratedBlogContent,
+  locale: "en" | "es"
 ): Promise<GeneratedImages> {
-  if (!process.env.OPENAI_API_KEY) {
-    throw new Error("OPENAI_API_KEY is not configured");
-  }
+  const systemPrompt = locale === "en" ? IMAGE_SYSTEM_PROMPT_EN : IMAGE_SYSTEM_PROMPT_ES;
+  const localeSuffix = locale;
 
-  const model = process.env.OPENAI_MODEL ?? "gpt-4o";
-  const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-
-  // 1. Generate all 4 prompts with one GPT call
+  // Generate prompts
   let prompts: ImagePromptSet;
   try {
-    const promptsRaw = await openai.chat.completions.create({
+    const raw = await openai.chat.completions.create({
       model,
       response_format: { type: "json_object" },
       messages: [
-        { role: "system", content: IMAGE_SYSTEM_PROMPT },
+        { role: "system", content: systemPrompt },
         { role: "user", content: buildImageUserPrompt(content) },
       ],
     });
-    prompts = JSON.parse(promptsRaw.choices[0].message.content ?? "{}");
+    prompts = JSON.parse(raw.choices[0].message.content ?? "{}");
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
-    throw new Error(`Failed to generate image prompts: ${msg}`);
+    throw new Error(`[${locale}] Failed to generate image prompts: ${msg}`);
   }
 
   if (!prompts.featured?.prompt || !prompts.body1?.prompt || !prompts.body2?.prompt || !prompts.body3?.prompt) {
-    throw new Error("GPT returned incomplete image prompts");
+    throw new Error(`[${locale}] GPT returned incomplete image prompts`);
   }
 
   const baseSlug = createSlug(content.title).slice(0, 40);
   const suffix = generateKey().slice(0, 6);
 
-  // 2. Generate all 4 images in parallel (DALL-E 3 only supports n=1 per call)
-  let featuredDalle: { url: string; revisedPrompt: string };
-  let body1Dalle: { url: string; revisedPrompt: string };
-  let body2Dalle: { url: string; revisedPrompt: string };
-  let body3Dalle: { url: string; revisedPrompt: string };
+  // Generate 4 images in parallel
+  let featuredDalle: { buffer: Buffer; revisedPrompt: string };
+  let body1Dalle: { buffer: Buffer; revisedPrompt: string };
+  let body2Dalle: { buffer: Buffer; revisedPrompt: string };
+  let body3Dalle: { buffer: Buffer; revisedPrompt: string };
 
   try {
     [featuredDalle, body1Dalle, body2Dalle, body3Dalle] = await Promise.all([
@@ -154,58 +162,79 @@ export async function generateBlogImages(
       generateDalleImage(openai, prompts.body3.prompt, "1024x1024"),
     ]);
   } catch (err) {
+    if (err instanceof APIError) {
+      console.error(`[image-generator/${locale}] OpenAI APIError:`, {
+        status: err.status,
+        message: err.message,
+        code: err.code,
+        type: err.type,
+      });
+    } else {
+      console.error(`[image-generator/${locale}] Unknown error:`, err);
+    }
     const msg = err instanceof Error ? err.message : String(err);
-    throw new Error(`DALL-E image generation failed: ${msg}`);
+    throw new Error(`[${locale}] Image generation failed: ${msg}`);
   }
 
-  // 3. Upload all 4 to Sanity in parallel
-  let featuredId: string;
-  let body1Id: string;
-  let body2Id: string;
-  let body3Id: string;
-
-  try {
-    [featuredId, body1Id, body2Id, body3Id] = await Promise.all([
-      uploadImageToSanity(featuredDalle.url, `${baseSlug}-featured-${suffix}.png`),
-      uploadImageToSanity(body1Dalle.url, `${baseSlug}-body-1-${suffix}.png`),
-      uploadImageToSanity(body2Dalle.url, `${baseSlug}-body-2-${suffix}.png`),
-      uploadImageToSanity(body3Dalle.url, `${baseSlug}-body-3-${suffix}.png`),
-    ]);
-  } catch (err) {
+  // Upload 4 images to Sanity in parallel
+  const [featured, body1, body2, body3] = await Promise.all([
+    uploadImageToSanity(featuredDalle.buffer, `${baseSlug}-${localeSuffix}-featured-${suffix}.png`),
+    uploadImageToSanity(body1Dalle.buffer, `${baseSlug}-${localeSuffix}-body-1-${suffix}.png`),
+    uploadImageToSanity(body2Dalle.buffer, `${baseSlug}-${localeSuffix}-body-2-${suffix}.png`),
+    uploadImageToSanity(body3Dalle.buffer, `${baseSlug}-${localeSuffix}-body-3-${suffix}.png`),
+  ]).catch((err: unknown) => {
     const msg = err instanceof Error ? err.message : String(err);
-    throw new Error(`Failed to upload generated images to Sanity: ${msg}`);
-  }
+    throw new Error(`[${locale}] Failed to upload images to Sanity: ${msg}`);
+  });
 
   return {
     featured: {
-      assetId: featuredId,
-      url: featuredDalle.url,
+      assetId: featured.id,
+      url: featured.url,
       prompt: prompts.featured.prompt,
       revisedPrompt: featuredDalle.revisedPrompt,
       alt: prompts.featured.alt,
     },
     body: [
       {
-        assetId: body1Id,
-        url: body1Dalle.url,
+        assetId: body1.id,
+        url: body1.url,
         prompt: prompts.body1.prompt,
         revisedPrompt: body1Dalle.revisedPrompt,
         alt: prompts.body1.alt,
       },
       {
-        assetId: body2Id,
-        url: body2Dalle.url,
+        assetId: body2.id,
+        url: body2.url,
         prompt: prompts.body2.prompt,
         revisedPrompt: body2Dalle.revisedPrompt,
         alt: prompts.body2.alt,
       },
       {
-        assetId: body3Id,
-        url: body3Dalle.url,
+        assetId: body3.id,
+        url: body3.url,
         prompt: prompts.body3.prompt,
         revisedPrompt: body3Dalle.revisedPrompt,
         alt: prompts.body3.alt,
       },
     ],
   };
+}
+
+export async function generateBlogImages(
+  content: GeneratedBlogContent
+): Promise<BilingualImages> {
+  if (!process.env.OPENAI_API_KEY) {
+    throw new Error("OPENAI_API_KEY is not configured");
+  }
+
+  const model = process.env.OPENAI_MODEL ?? "gpt-4o";
+  const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+  const [en, es] = await Promise.all([
+    generateImageSet(openai, model, content, "en"),
+    generateImageSet(openai, model, content, "es"),
+  ]);
+
+  return { en, es };
 }

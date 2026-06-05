@@ -24,7 +24,7 @@ import {
   type GeneratedBlogContent,
   type SanityPublishResult,
   type CTASettings,
-  type GeneratedImages,
+  type BilingualImages,
 } from "@/lib/blog-generator/types";
 import { CATEGORY_CTA } from "@/lib/blog-generator/cta-config";
 
@@ -114,7 +114,7 @@ export default function BlogGeneratorPage() {
   const [extraction, setExtraction] = useState<YouTubeExtractionResult | null>(null);
   const [form, setForm] = useState<ReviewForm>(EMPTY_FORM);
   const [result, setResult] = useState<SanityPublishResult | null>(null);
-  const [images, setImages] = useState<GeneratedImages | null>(null);
+  const [images, setImages] = useState<BilingualImages | null>(null);
 
   const [regenerating, setRegenerating] = useState({ title: false, excerpt: false, body: false });
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<RegenerableField, string>>>({});
@@ -296,7 +296,7 @@ export default function BlogGeneratorPage() {
         const generateData = await postJson("/api/admin/blog-generator/generate", { extraction: extractData.data });
         const content: GeneratedBlogContent = generateData.data;
 
-        let batchImages: GeneratedImages | undefined;
+        let batchImages: BilingualImages | undefined;
         try {
           const imgData = await postJson("/api/admin/blog-generator/generate-images", { content });
           batchImages = imgData.data;
@@ -441,26 +441,33 @@ export default function BlogGeneratorPage() {
             <CardContent>
               {images ? (
                 <div className="flex flex-col gap-4">
-                  <div className="flex gap-3 flex-wrap items-start">
-                    <img
-                      src={images.featured.url}
-                      alt={images.featured.alt}
-                      className="rounded-lg object-cover flex-shrink-0"
-                      style={{ height: "128px", aspectRatio: "16/9" }}
-                    />
-                    <div className="flex gap-2 flex-wrap">
-                      {images.body.map((img, i) => (
+                  {(["en", "es"] as const).map((locale) => (
+                    <div key={locale} className="flex flex-col gap-2">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        {locale === "en" ? "English (American)" : "Spanish (Hispanic)"}
+                      </p>
+                      <div className="flex gap-3 flex-wrap items-start">
                         <img
-                          key={i}
-                          src={img.url}
-                          alt={img.alt}
-                          className="h-32 w-32 rounded-lg object-cover flex-shrink-0"
+                          src={images[locale].featured.url}
+                          alt={images[locale].featured.alt}
+                          className="rounded-lg object-cover flex-shrink-0"
+                          style={{ height: "96px", aspectRatio: "16/9" }}
                         />
-                      ))}
+                        <div className="flex gap-2 flex-wrap">
+                          {images[locale].body.map((img, i) => (
+                            <img
+                              key={i}
+                              src={img.url}
+                              alt={img.alt}
+                              className="h-24 w-24 rounded-lg object-cover flex-shrink-0"
+                            />
+                          ))}
+                        </div>
+                      </div>
                     </div>
-                  </div>
+                  ))}
                   <p className="text-xs text-muted-foreground">
-                    Featured image + 3 body images inserted at 25%, 50%, and 75% of the post body.
+                    Each locale gets its own featured image + 3 body images (25%, 50%, 75% of post body).
                   </p>
                   <Button
                     variant="outline"
@@ -776,6 +783,8 @@ export default function BlogGeneratorPage() {
       <p className="text-muted-foreground mb-8">
         Generate a bilingual blog post from a YouTube video using AI.
       </p>
+
+
 
       <Tabs defaultValue="single">
         <TabsList className="mb-6">

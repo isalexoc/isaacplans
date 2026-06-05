@@ -129,7 +129,7 @@ export interface PublishRequest {
   extraction: YouTubeExtractionResult;
   cta?: CTASettings;
   status?: "draft" | "published";
-  images?: GeneratedImages;
+  images?: BilingualImages;
 }
 
 export interface PublishResponse {
@@ -166,13 +166,18 @@ export interface GeneratedImages {
   body: [GeneratedImage, GeneratedImage, GeneratedImage];
 }
 
+export interface BilingualImages {
+  en: GeneratedImages;
+  es: GeneratedImages;
+}
+
 export interface GenerateImagesRequest {
   content: GeneratedBlogContent;
 }
 
 export interface GenerateImagesResponse {
   success: true;
-  data: GeneratedImages;
+  data: BilingualImages;
 }
 
 export interface GenerateImagesErrorResponse {

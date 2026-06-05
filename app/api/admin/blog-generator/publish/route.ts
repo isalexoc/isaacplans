@@ -8,7 +8,7 @@ import type {
   GeneratedBlogContent,
   YouTubeExtractionResult,
   CTASettings,
-  GeneratedImages,
+  BilingualImages,
 } from "@/lib/blog-generator/types";
 
 export const maxDuration = 60;
@@ -25,7 +25,7 @@ export async function POST(
   let extraction: YouTubeExtractionResult;
   let cta: CTASettings | undefined;
   let status: "draft" | "published";
-  let images: GeneratedImages | undefined;
+  let images: BilingualImages | undefined;
   try {
     const body = await request.json();
     content = body?.content;
