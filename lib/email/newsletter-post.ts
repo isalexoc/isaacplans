@@ -1,4 +1,5 @@
 import { createClient } from "next-sanity";
+import sgMail from "@sendgrid/mail";
 import nodemailer from "nodemailer";
 import type SMTPTransport from "nodemailer/lib/smtp-transport";
 import { db } from "@/lib/db";
@@ -372,14 +373,14 @@ export async function sendNewsletterPost(
     errors: [],
   };
 
+  sgMail.setApiKey(process.env.SENDGRID_API_KEY ?? "");
+
   const sendBatch = async (
     subscribers: typeof enSubscribers,
     locale: "en" | "es"
   ) => {
     const postDoc = postsByLocale[locale];
     if (!postDoc || subscribers.length === 0) return;
-
-    const transporter = createTransporter();
 
     for (const subscriber of subscribers) {
       if (!subscriber.unsubscribeToken) continue;
@@ -400,19 +401,13 @@ export async function sendNewsletterPost(
           },
         });
 
-        const sendTimeoutMs = parseInt(process.env.EMAIL_SEND_TIMEOUT_MS || "90000", 10);
-        await Promise.race([
-          transporter.sendMail({
-            from: `"Isaac Plans Insurance" <${process.env.EMAIL_USER_INFO}>`,
-            to: subscriber.email,
-            subject: emailData.subject,
-            html: emailData.html,
-            text: emailData.text,
-          }),
-          new Promise<never>((_, reject) =>
-            setTimeout(() => reject(new Error("Email send timeout")), sendTimeoutMs)
-          ),
-        ]);
+        await sgMail.send({
+          from: `"Isaac Plans Insurance" <${process.env.EMAIL_USER_INFO}>`,
+          to: subscriber.email,
+          subject: emailData.subject,
+          html: emailData.html,
+          text: emailData.text,
+        });
 
         if (locale === "en") result.enSent++;
         else result.esSent++;
