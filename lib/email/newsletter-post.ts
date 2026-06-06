@@ -123,6 +123,9 @@ export function buildNewsletterPostEmail(data: NewsletterPostData): {
     { year: "numeric", month: "long", day: "numeric" }
   );
 
+  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME ?? "isaacplans";
+  const logoUrl = `https://res.cloudinary.com/${cloudName}/image/upload/f_png,q_auto:best,h_100,c_fit/isaacplanslogo_tkraak`;
+
   const bodyHtml = portableTextToEmailHtml(post.body);
 
   const featuredImageHtml = post.imageUrl
@@ -151,7 +154,7 @@ export function buildNewsletterPostEmail(data: NewsletterPostData): {
           <tr>
             <td style="background-color:#0077B6;padding:20px 32px;">
               <a href="${baseUrl}" style="text-decoration:none;">
-                <span style="color:#ffffff;font-size:20px;font-weight:700;letter-spacing:-0.5px;">Isaac Plans Insurance</span>
+                <img src="${logoUrl}" alt="Isaac Plans Insurance" style="height:50px;width:auto;display:block;" />
               </a>
             </td>
           </tr>
@@ -192,7 +195,7 @@ export function buildNewsletterPostEmail(data: NewsletterPostData): {
           <!-- Footer -->
           <tr>
             <td style="background-color:#f9fafb;border-top:1px solid #e5e7eb;padding:20px 32px;text-align:center;">
-              <p style="margin:0 0 8px 0;font-size:12px;color:#9ca3af;">Isaac Plans Insurance &nbsp;·&nbsp; Florida, USA</p>
+              <p style="margin:0 0 8px 0;font-size:12px;color:#9ca3af;">Isaac Plans Insurance</p>
               <p style="margin:0;font-size:12px;color:#9ca3af;">
                 <a href="${unsubscribeUrl}" style="color:#6b7280;text-decoration:underline;">${unsubscribeLabel}</a>
                 &nbsp;·&nbsp;

@@ -8,27 +8,30 @@ export const portableTextComponents: PortableTextComponents = {
   types: {
     image: ({ value }) => {
       if (!value?.asset) return null;
-      // Use fit('max') to maintain aspect ratio and show entire image
-      // Max width of 500px, height will scale proportionally to maintain aspect ratio
-      const imageUrl = urlFor(value).width(500).fit('max').url();
+      const imageUrl = urlFor(value)
+        .width(840)
+        .fit('max')
+        .auto('format')
+        .quality(85)
+        .url();
       return (
-        <div className="my-8 flex justify-center">
-          <div className="w-full" style={{ maxWidth: '500px' }}>
+        <figure className="my-10 flex flex-col items-center">
+          <div className="max-w-[420px] w-full overflow-hidden rounded-2xl shadow-md ring-1 ring-gray-200 dark:ring-gray-700 transition-shadow hover:shadow-xl">
             <Image
               src={imageUrl}
               alt={value.alt || "Blog post image"}
-              width={500}
-              height={600}
-              className="rounded-lg w-full h-auto shadow-lg"
-              style={{ objectFit: 'contain', maxWidth: '500px', height: 'auto' }}
+              width={840}
+              height={560}
+              className="w-full h-auto block"
+              sizes="(max-width: 640px) 90vw, 420px"
             />
-            {value.caption && (
-              <p className="text-sm text-gray-600 dark:text-gray-400 text-center mt-2 italic">
-                {value.caption}
-              </p>
-            )}
           </div>
-        </div>
+          {value.caption && (
+            <figcaption className="mt-3 text-sm text-gray-500 dark:text-gray-400 text-center italic max-w-[420px] px-2">
+              {value.caption}
+            </figcaption>
+          )}
+        </figure>
       );
     },
   },
