@@ -163,7 +163,6 @@ export function buildNewsletterPostEmail(data: NewsletterPostData): {
                   <td style="vertical-align:middle;border-left:2px solid #e5e7eb;padding-left:16px;">
                     <a href="${baseUrl}" style="text-decoration:none;">
                       <span style="color:#0077B6;font-size:17px;font-weight:700;letter-spacing:-0.3px;display:block;line-height:1.2;">isaacplans.com</span>
-                      <span style="color:#9ca3af;font-size:11px;letter-spacing:0.06em;text-transform:uppercase;display:block;margin-top:3px;">Insurance Consultation</span>
                     </a>
                   </td>
                 </tr>

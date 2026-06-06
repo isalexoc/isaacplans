@@ -53,12 +53,12 @@ export function portableTextToEmailHtml(blocks: unknown[]): string {
         image: ({ value }) => {
           const ref = value?.asset?._ref;
           if (!ref) return "";
-          const src = sanityImageUrl(ref);
+          const src = sanityImageUrl(ref) + "?w=840&fit=max&auto=format&q=85";
           const alt = value?.alt || "";
-          const caption = value?.caption
-            ? `<p style="margin:4px 0 16px 0;font-size:13px;color:#6b7280;text-align:center;">${value.caption}</p>`
+          const captionHtml = value?.caption
+            ? `<p style="margin:8px auto 0;font-size:13px;color:#6b7280;text-align:center;font-style:italic;max-width:420px;">${value.caption}</p>`
             : "";
-          return `<img src="${src}" alt="${alt}" style="max-width:100%;height:auto;border-radius:6px;margin:16px 0;display:block;" />${caption}`;
+          return `<table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="margin:20px 0;"><tr><td align="center"><img src="${src}" alt="${alt}" style="max-width:420px;width:100%;height:auto;border-radius:10px;display:block;border:1px solid #e5e7eb;" />${captionHtml}</td></tr></table>`;
         },
       },
       hardBreak: () => "<br />",
