@@ -124,7 +124,7 @@ export function buildNewsletterPostEmail(data: NewsletterPostData): {
   );
 
   const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME ?? "isaacplans";
-  const logoUrl = `https://res.cloudinary.com/${cloudName}/image/upload/f_png,q_auto:best,h_100,c_fit/isaacplanslogo_tkraak`;
+  const logoUrl = `https://res.cloudinary.com/${cloudName}/image/upload/f_png,q_auto:best,h_88,c_fit/isaacplanslogo_tkraak`;
 
   const bodyHtml = portableTextToEmailHtml(post.body);
 
@@ -152,10 +152,22 @@ export function buildNewsletterPostEmail(data: NewsletterPostData): {
 
           <!-- Header -->
           <tr>
-            <td style="background-color:#0077B6;padding:20px 32px;">
-              <a href="${baseUrl}" style="text-decoration:none;">
-                <img src="${logoUrl}" alt="Isaac Plans Insurance" style="height:50px;width:auto;display:block;" />
-              </a>
+            <td style="background-color:#ffffff;padding:18px 32px;border-bottom:3px solid #0077B6;">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td style="vertical-align:middle;padding-right:16px;">
+                    <a href="${baseUrl}" style="text-decoration:none;display:block;">
+                      <img src="${logoUrl}" alt="Isaac Plans" style="height:44px;width:auto;display:block;" />
+                    </a>
+                  </td>
+                  <td style="vertical-align:middle;border-left:2px solid #e5e7eb;padding-left:16px;">
+                    <a href="${baseUrl}" style="text-decoration:none;">
+                      <span style="color:#0077B6;font-size:17px;font-weight:700;letter-spacing:-0.3px;display:block;line-height:1.2;">isaacplans.com</span>
+                      <span style="color:#9ca3af;font-size:11px;letter-spacing:0.06em;text-transform:uppercase;display:block;margin-top:3px;">Insurance Consultation</span>
+                    </a>
+                  </td>
+                </tr>
+              </table>
             </td>
           </tr>
 
