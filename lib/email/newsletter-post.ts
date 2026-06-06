@@ -400,6 +400,7 @@ export async function sendNewsletterPost(
           },
         });
 
+        const sendTimeoutMs = parseInt(process.env.EMAIL_SEND_TIMEOUT_MS || "90000", 10);
         await Promise.race([
           transporter.sendMail({
             from: `"Isaac Plans Insurance" <${process.env.EMAIL_USER_INFO}>`,
@@ -409,7 +410,7 @@ export async function sendNewsletterPost(
             text: emailData.text,
           }),
           new Promise<never>((_, reject) =>
-            setTimeout(() => reject(new Error("Email send timeout")), 55000)
+            setTimeout(() => reject(new Error("Email send timeout")), sendTimeoutMs)
           ),
         ]);
 
