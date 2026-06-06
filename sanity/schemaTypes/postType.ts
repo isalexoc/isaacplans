@@ -331,6 +331,20 @@ export const postType = defineType({
       readOnly: true,
     }),
     defineField({
+      name: 'newsletterSentCount',
+      type: 'number',
+      title: 'Newsletter Delivered',
+      description: 'Total emails successfully delivered. Set automatically.',
+      readOnly: true,
+    }),
+    defineField({
+      name: 'newsletterFailedCount',
+      type: 'number',
+      title: 'Newsletter Failed',
+      description: 'Total emails that failed to send. Set automatically.',
+      readOnly: true,
+    }),
+    defineField({
       name: 'status',
       type: 'string',
       title: 'Status',

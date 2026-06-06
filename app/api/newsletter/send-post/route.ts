@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import { sendNewsletterPost } from "@/lib/email/newsletter-post";
-
-export const maxDuration = 300; // bulk email sends can take several minutes
+import { waitUntil } from "@vercel/functions";
+import { canSendNewsletterPost, sendNewsletterPost } from "@/lib/email/newsletter-post";
 
 // POST /api/newsletter/send-post
-// Sends a Sanity blog post as a newsletter to all confirmed subscribers.
-// Segments by locale: EN post → EN subscribers, ES post → ES subscribers.
-// Requires Clerk authentication.
+// Validates the post synchronously, then fires the send in the background
+// via waitUntil() so the response returns immediately instead of blocking
+// for the full send duration. Results are written to Sanity and emailed
+// to the admin when the background job finishes.
 export async function POST(request: NextRequest) {
   const { userId } = await auth();
   if (!userId) {
@@ -37,12 +37,9 @@ export async function POST(request: NextRequest) {
 
   console.log(`[NEWSLETTER_POST] Send request for postId=${postId} force=${force} userId=${userId}`);
 
+  // Validate synchronously so the caller gets a proper error response immediately
   try {
-    const result = await sendNewsletterPost(postId, force);
-
-    console.log(`[NEWSLETTER_POST] Send complete:`, result);
-
-    return NextResponse.json({ success: true, result });
+    await canSendNewsletterPost(postId, force);
   } catch (err: any) {
     if (err.message === "already_sent") {
       return NextResponse.json(
@@ -62,11 +59,19 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-
-    console.error("[NEWSLETTER_POST] Unexpected error:", err);
+    console.error("[NEWSLETTER_POST] Unexpected validation error:", err);
     return NextResponse.json(
-      { success: false, error: err.message || "Failed to send newsletter" },
+      { success: false, error: err.message || "Validation failed" },
       { status: 500 }
     );
   }
+
+  // Validation passed — run the send in the background and return immediately
+  waitUntil(
+    sendNewsletterPost(postId, force).catch((err) => {
+      console.error("[NEWSLETTER_POST] Background send failed:", err);
+    })
+  );
+
+  return NextResponse.json({ success: true, status: "sending" });
 }

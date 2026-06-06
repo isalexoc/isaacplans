@@ -238,6 +238,34 @@ export function buildNewsletterPostEmail(data: NewsletterPostData): {
   return { subject, html, text };
 }
 
+// ---------- Pre-flight validation ----------
+
+export async function canSendNewsletterPost(postId: string, force = false): Promise<void> {
+  const readClient = createClient({
+    projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID ?? "anetxoet",
+    dataset: process.env.NEXT_PUBLIC_SANITY_DATASET ?? "production",
+    apiVersion: "2024-01-01",
+    useCdn: false,
+  });
+
+  const post = await readClient.fetch<{
+    _id: string;
+    status: string;
+    newsletterSentAt?: string;
+  } | null>(
+    `*[_type == "post" && _id == $id][0]{ _id, status, newsletterSentAt }`,
+    { id: postId }
+  );
+
+  if (!post) throw new Error("Post not found in Sanity");
+  if (post.status !== "published") throw new Error("Post must be published before sending");
+  if (post.newsletterSentAt && !force) {
+    const err = new Error("already_sent") as Error & { sentAt: string };
+    err.sentAt = post.newsletterSentAt;
+    throw err;
+  }
+}
+
 // ---------- Orchestrator ----------
 
 export async function sendNewsletterPost(
@@ -399,15 +427,55 @@ export async function sendNewsletterPost(
   await sendBatch(enSubscribers, "en");
   await sendBatch(esSubscribers, "es");
 
-  // 6. Write newsletterSentAt back to Sanity
+  // 6. Write results back to Sanity
   try {
     const writeClient = getWriteClient();
     await writeClient
       .patch(postId)
-      .set({ newsletterSentAt: new Date().toISOString() })
+      .set({
+        newsletterSentAt: new Date().toISOString(),
+        newsletterSentCount: result.enSent + result.esSent,
+        newsletterFailedCount: result.enFailed + result.esFailed,
+      })
       .commit();
   } catch (err: any) {
-    console.error("[NEWSLETTER_POST] Failed to update newsletterSentAt in Sanity:", err.message);
+    console.error("[NEWSLETTER_POST] Failed to update newsletter stats in Sanity:", err.message);
+  }
+
+  // 7. Send admin summary email
+  try {
+    const adminEmail = process.env.EMAIL_USER_INFO;
+    if (adminEmail) {
+      const total = result.enSent + result.esSent;
+      const failed = result.enFailed + result.esFailed;
+      const hasErrors = failed > 0;
+      const errorRows = result.errors
+        .slice(0, 10)
+        .map((e) => `<li style="margin-bottom:4px;">${e.email}: ${e.error}</li>`)
+        .join("");
+      const notifier = createTransporter();
+      await notifier.sendMail({
+        from: `"Isaac Plans" <${adminEmail}>`,
+        to: adminEmail,
+        subject: `[Newsletter ${hasErrors ? "sent with errors" : "sent"}] ${post.title} — ${total} delivered`,
+        html: `<!DOCTYPE html><html><head><meta charset="utf-8"></head>
+<body style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:480px;margin:0 auto;padding:24px;color:#374151;">
+  <h2 style="margin:0 0 4px;color:#111827;">${hasErrors ? "⚠️" : "✅"} Newsletter ${hasErrors ? "sent with errors" : "sent"}</h2>
+  <p style="margin:0 0 24px;font-size:14px;color:#6b7280;">${post.title}</p>
+  <table style="width:100%;border-collapse:collapse;font-size:14px;">
+    <tr style="background:#f9fafb;"><td style="padding:10px 12px;border:1px solid #e5e7eb;">EN delivered</td><td style="padding:10px 12px;font-weight:600;color:#111827;border:1px solid #e5e7eb;">${result.enSent}</td></tr>
+    <tr><td style="padding:10px 12px;border:1px solid #e5e7eb;">EN failed</td><td style="padding:10px 12px;font-weight:600;color:${result.enFailed > 0 ? "#dc2626" : "#111827"};border:1px solid #e5e7eb;">${result.enFailed}</td></tr>
+    <tr style="background:#f9fafb;"><td style="padding:10px 12px;border:1px solid #e5e7eb;">ES delivered</td><td style="padding:10px 12px;font-weight:600;color:#111827;border:1px solid #e5e7eb;">${result.esSent}</td></tr>
+    <tr><td style="padding:10px 12px;border:1px solid #e5e7eb;">ES failed</td><td style="padding:10px 12px;font-weight:600;color:${result.esFailed > 0 ? "#dc2626" : "#111827"};border:1px solid #e5e7eb;">${result.esFailed}</td></tr>
+    <tr style="background:#f0fdf4;"><td style="padding:10px 12px;font-weight:600;border:1px solid #e5e7eb;">Total delivered</td><td style="padding:10px 12px;font-weight:700;color:#16a34a;border:1px solid #e5e7eb;">${total}</td></tr>
+  </table>
+  ${result.errors.length > 0 ? `<p style="margin-top:20px;font-size:13px;font-weight:600;color:#dc2626;">Failed addresses (first 10):</p><ul style="margin:0;padding-left:20px;font-size:13px;">${errorRows}</ul>` : ""}
+</body></html>`,
+        text: `Newsletter: ${post.title}\n\nEN: ${result.enSent} sent, ${result.enFailed} failed\nES: ${result.esSent} sent, ${result.esFailed} failed\nTotal: ${total} sent, ${failed} failed${result.errors.length > 0 ? "\n\nFailed:\n" + result.errors.slice(0, 10).map((e) => `${e.email}: ${e.error}`).join("\n") : ""}`,
+      });
+    }
+  } catch (err: any) {
+    console.error("[NEWSLETTER_POST] Failed to send admin summary email:", err.message);
   }
 
   return result;
