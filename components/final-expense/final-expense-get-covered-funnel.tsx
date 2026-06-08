@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import {
   FINAL_EXPENSE_GET_COVERED_AGENT_HEADSHOT,
   FINAL_EXPENSE_GET_COVERED_VCARD_URL,
-  GET_COVERED_FAST_HERO_IMAGE,
+  getFinalExpenseGetCoveredHeroImageUrl,
 } from "@/lib/get-covered-fast/constants";
 import { shortTermMedicalFormSchema, capitalizeName } from "@/lib/validation/shortTermMedicalSchema";
 import { trackLead, updateAdvancedMatching } from "@/lib/facebook-pixel";
@@ -409,7 +409,7 @@ export default function FinalExpenseGetCoveredFunnel() {
       el.id = "fe-get-covered-street-address";
       el.style.width = "100%";
       el.style.display = "block";
-      el.style.colorScheme = "light";
+      el.style.colorScheme = document.documentElement.classList.contains("dark") ? "dark" : "light";
       el.style.boxSizing = "border-box";
       el.style.border = "none";
       el.style.backgroundColor = "transparent";
@@ -876,7 +876,7 @@ export default function FinalExpenseGetCoveredFunnel() {
       <div className="relative z-10 mx-auto flex min-h-0 max-w-6xl flex-col lg:min-h-[min(100vh,920px)] lg:flex-row lg:items-stretch">
         <div className="relative hidden overflow-hidden bg-slate-900 lg:sticky lg:block lg:top-0 lg:min-h-[min(100vh,920px)] lg:w-[46%] lg:shrink-0">
           <Image
-            src={GET_COVERED_FAST_HERO_IMAGE}
+            src={getFinalExpenseGetCoveredHeroImageUrl(locale)}
             alt=""
             fill
             priority
@@ -904,7 +904,19 @@ export default function FinalExpenseGetCoveredFunnel() {
 
         <div className="flex min-w-0 flex-1 flex-col px-4 pb-16 pt-6 sm:px-6 sm:pb-20 sm:pt-8 lg:justify-center lg:px-10 lg:py-12 xl:px-14">
           <div className="mx-auto w-full max-w-lg">
-            <h1 className="sr-only lg:hidden">{t("hero.title")}</h1>
+            {/* Mobile-only hero — desktop uses the split image panel */}
+            <div className="mb-6 lg:hidden">
+              <p className="mb-3 inline-flex items-center gap-2 rounded-full border border-[hsl(var(--custom))] bg-[hsl(var(--custom)/0.1)] px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-[hsl(var(--custom))] dark:bg-[hsl(var(--custom)/0.2)]">
+                <Shield className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                {t("hero.badge")}
+              </p>
+              <h1 className="text-2xl font-bold leading-tight tracking-tight text-slate-900 dark:text-white sm:text-3xl">
+                {t("hero.title")}
+              </h1>
+              <p className="mt-2 text-sm leading-snug text-slate-600 dark:text-slate-400 sm:text-base">
+                {t("hero.mobileSubtitle")}
+              </p>
+            </div>
 
             <div className="mb-1 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
               <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400 sm:text-xs">
@@ -948,10 +960,6 @@ export default function FinalExpenseGetCoveredFunnel() {
             <div className="mt-7 rounded-2xl border border-slate-200/80 bg-white/95 p-5 shadow-[0_4px_40px_-12px_rgba(15,23,42,0.12)] backdrop-blur-sm dark:border-slate-700/80 dark:bg-slate-900/85 sm:p-7 sm:px-8">
               {phase === "contact" && (
                 <form onSubmit={handleContactSubmit} className="space-y-4">
-                  <p className="text-center text-base leading-relaxed text-slate-700 dark:text-slate-300">
-                    {t("contact.intro")}
-                  </p>
-
                   {submitError && (
                     <div className="rounded-lg border-2 border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300">
                       {submitError}
@@ -1149,6 +1157,9 @@ export default function FinalExpenseGetCoveredFunnel() {
                     {addressFieldErrors.addressLine1 && (
                       <p className={fieldErrorBase}>{addressFieldErrors.addressLine1}</p>
                     )}
+                    <p className="mt-1.5 text-xs leading-snug text-slate-500 dark:text-slate-400">
+                      {t("address.line1Note")}
+                    </p>
                   </div>
 
                   {submitError && (
@@ -1418,7 +1429,10 @@ export default function FinalExpenseGetCoveredFunnel() {
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="text-sm font-semibold leading-snug text-slate-900 dark:text-white sm:text-base">
-                          {t("done.headshotAlt")}
+                          {t("done.agentName")}
+                        </p>
+                        <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400 sm:text-sm">
+                          {t("done.agentTitle")}
                         </p>
                       </div>
                     </div>
@@ -1508,6 +1522,18 @@ export default function FinalExpenseGetCoveredFunnel() {
                     )}
                   </div>
                 </div>
+              )}
+
+              {phase !== "done" && (
+                <p className="mt-5 text-center text-xs text-slate-400 dark:text-slate-500">
+                  {t("helpLine")}{" "}
+                  <a
+                    href={CRM_PHONE_TEL}
+                    className="font-medium text-[hsl(var(--custom))] underline-offset-2 hover:underline"
+                  >
+                    {CRM_PHONE_DISPLAY}
+                  </a>
+                </p>
               )}
             </div>
           </div>

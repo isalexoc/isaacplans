@@ -6,6 +6,18 @@ export const HEALTH_SHERPA_AGENT_URL =
 export const GET_COVERED_FAST_HERO_IMAGE =
   "https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_1600,h_1200,c_fill,g_center/pexels-wanda-yanery-villarraga-tole-584965425-17052722_ewanjk.jpg";
 
+/** Locale-specific hero images for the Final Expense get-covered funnel (desktop split panel). */
+const FINAL_EXPENSE_GET_COVERED_HERO_PUBLIC_ID_EN = "pexels-gustavo-fring-4894565_seqt6k";
+const FINAL_EXPENSE_GET_COVERED_HERO_PUBLIC_ID_ES = "pexels-wanda-yanery-villarraga-tole-584965425-17052722_ewanjk";
+
+export function getFinalExpenseGetCoveredHeroImageUrl(locale: string): string {
+  const isEs = locale.toLowerCase().startsWith("es");
+  const publicId = isEs
+    ? FINAL_EXPENSE_GET_COVERED_HERO_PUBLIC_ID_ES
+    : FINAL_EXPENSE_GET_COVERED_HERO_PUBLIC_ID_EN;
+  return `${CLOUDINARY_ISAAC}/f_auto,q_auto,w_1600,h_1200,c_fill,g_auto/${publicId}`;
+}
+
 /** Open Graph / Twitter card (1200×630) — aligned with hero art for social previews. */
 export const GET_COVERED_FAST_OG_IMAGE =
   "https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_1200,h_630,c_fill,g_center/pexels-wanda-yanery-villarraga-tole-584965425-17052722_ewanjk.jpg";

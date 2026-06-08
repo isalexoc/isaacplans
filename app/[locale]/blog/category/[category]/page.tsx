@@ -8,8 +8,10 @@ import {
   withLocalePrefix,
   type SupportedLocale,
 } from "@/lib/seo/i18n";
+import { cloudinaryOgImageUrl } from "@/lib/blog-featured-image";
 import { BlogPagination } from "@/components/blog-pagination";
 import { BlogPostCard } from "@/components/blog-post-card";
+import BlogCategoryCTA from "@/components/blog-category-cta";
 
 const POSTS_PER_PAGE = 12;
 
@@ -63,21 +65,38 @@ export async function generateMetadata({
   const currentPage = paramsSearch?.page ? parseInt(paramsSearch.page, 10) : 1;
   
   const categoryLabel = getBlogCategoryLabel(category, locale);
+  const altLocale = locale === "en" ? "es" : "en";
 
-  const baseTitle = `${categoryLabel} Blog Posts | Isaac Plans Insurance`;
+  const baseTitle = locale === "en"
+    ? `${categoryLabel} Insurance Articles | Isaac Plans`
+    : `Artículos de ${categoryLabel} | Isaac Plans`;
   const title = currentPage > 1 ? `${baseTitle} - Page ${currentPage}` : baseTitle;
-  const description = `Browse all ${categoryLabel} blog posts and articles from Isaac Plans Insurance.`;
+  const description = locale === "en"
+    ? `Expert ${categoryLabel} insurance articles from licensed agent Isaac Orraiz. Learn what you need to know and get a free quote.`
+    : `Artículos expertos sobre ${categoryLabel} del agente licenciado Isaac Orraiz. Aprende lo que necesitas saber y obtén una cotización gratuita.`;
+  const keywords = locale === "en"
+    ? `${categoryLabel.toLowerCase()}, ${categoryLabel.toLowerCase()} insurance, insurance articles, Isaac Plans`
+    : `${categoryLabel.toLowerCase()}, seguro ${categoryLabel.toLowerCase()}, artículos de seguros, Isaac Plans`;
 
   const baseUrl = `/${locale}/blog/category/${category}`;
-  const canonical = currentPage === 1 
+  const altBaseUrl = `/${altLocale}/blog/category/${category}`;
+  const canonical = currentPage === 1
     ? withLocalePrefix(locale as SupportedLocale, baseUrl)
     : `${withLocalePrefix(locale as SupportedLocale, baseUrl)}?page=${currentPage}`;
+  const altCanonical = withLocalePrefix(altLocale as SupportedLocale, altBaseUrl);
+  const ogImage = cloudinaryOgImageUrl("https://www.isaacplans.com/images/blog.png");
 
   return {
     title,
     description,
+    keywords,
     alternates: {
       canonical,
+      languages: {
+        [locale]: canonical,
+        [altLocale]: altCanonical,
+        "x-default": withLocalePrefix("en", `/${locale === "en" ? locale : "en"}/blog/category/${category}`),
+      },
     },
     openGraph: {
       title,
@@ -85,7 +104,15 @@ export async function generateMetadata({
       url: canonical,
       siteName: "Isaac Plans Insurance",
       locale: ogLocaleOf(locale as SupportedLocale),
+      alternateLocale: locale === "en" ? ["es_ES"] : ["en_US"],
       type: "website",
+      images: [{ url: ogImage, width: 1200, height: 630, alt: `${categoryLabel} insurance articles` }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [{ url: ogImage, alt: `${categoryLabel} insurance articles` }],
     },
   };
 }
@@ -167,6 +194,11 @@ export default async function CategoryPage({
             ? `All posts about ${categoryLabel.toLowerCase()}`
             : `Todas las publicaciones sobre ${categoryLabel.toLowerCase()}`}
         </p>
+      </div>
+
+      {/* Category CTA — converts readers into leads */}
+      <div className="mb-10">
+        <BlogCategoryCTA category={category} />
       </div>
 
       {posts.length === 0 ? (

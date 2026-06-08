@@ -11,6 +11,10 @@ import ServicePageTracker from "@/components/service-page-tracker";
 import type { Metadata } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
 import { getFePageLd, getFeBreadcrumbLd } from "@/lib/seo/jsonld";
+import Link from "next/link";
+import { type SanityDocument } from "next-sanity";
+import { sanityFetch } from "@/sanity/lib/live";
+import { BlogPostCard } from "@/components/blog-post-card";
 
 import { cloudinaryOgImageUrl } from "@/lib/blog-featured-image";
 import {
@@ -20,6 +24,16 @@ import {
   languageAlternatesPrefixed,
   type SupportedLocale,
 } from "@/lib/seo/i18n";
+
+const FE_POSTS_QUERY = `*[
+  _type == "post"
+  && defined(slug.current)
+  && locale == $locale
+  && status == "published"
+  && category == "final-expense"
+]|order(publishedAt desc)[0...3]{
+  _id, title, slug, publishedAt, image, locale, category, excerpt, readingTime
+}`;
 
 /* ───────── SEO ───────── */
 export async function generateMetadata(): Promise<Metadata> {
@@ -74,6 +88,12 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function FinalExpensePage() {
   const locale = await getLocale();
   const t = await getTranslations({ locale, namespace: "FEpage" });
+
+  const fePostsResult = await sanityFetch({
+    query: FE_POSTS_QUERY,
+    params: { locale },
+  });
+  const fePosts: SanityDocument[] = fePostsResult.data || [];
 
   const pageLd = getFePageLd(locale, t("hero.title"), t("hero.description"));
   const crumbLd = getFeBreadcrumbLd(
@@ -212,6 +232,38 @@ export default async function FinalExpensePage() {
         }))}
         imagePublicId="tmpft70mt0j_1_hppsqh"
       />
+
+      {/* RELATED BLOG ARTICLES ----------------------------------------- */}
+      {fePosts.length > 0 && (
+        <section className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16">
+          <div className="flex items-end justify-between mb-8 gap-4 flex-wrap">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-widest text-blue-600 dark:text-blue-400 mb-1">
+                {locale === "en" ? "Learn More" : "Aprende Más"}
+              </p>
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
+                {locale === "en"
+                  ? "Final Expense Insurance Articles"
+                  : "Artículos sobre Seguros de Gastos Finales"}
+              </h2>
+            </div>
+            <Link
+              href={`/${locale}/blog/category/final-expense`}
+              className="shrink-0 inline-flex items-center gap-1.5 text-sm font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
+            >
+              {locale === "en" ? "View all articles" : "Ver todos los artículos"}
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {fePosts.map((post) => (
+              <BlogPostCard key={post._id} post={post} locale={locale} titleAs="h3" />
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* CTA BANNER ----------------------------------------------------- */}
       <CTABanner

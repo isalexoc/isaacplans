@@ -2273,20 +2273,22 @@
       "breadcrumbPage": "Final expense — get covered"
     },
     "funnel": {
-      "banner": "Licensed guidance · Final expense insurance",
+      "banner": "Licensed guidance · Final expense",
       "hero": {
-        "badge": "Licensed agents · Personal guidance",
+        "badge": "No exam required · State-approved plans",
         "title": "Final expense coverage that fits your life",
+        "mobileSubtitle": "Most seniors qualify. No medical exam required.",
         "subtitle": "Help cushion your loved ones from funeral and burial costs. Tell us how to reach you, then confirm your mailing address so we can share state-approved plans and next steps."
       },
       "secureNote": "Secure · No obligation · Your data stays private",
+      "helpLine": "Need help? Call us at",
       "progress": {
         "step": "Step {current} of {total}",
         "done": "Complete"
       },
       "contact": {
         "intro": "Your state-approved Final Expense plans and benefits.",
-        "cta": "Continue"
+        "cta": "See My Plans"
       },
       "address": {
         "dob": "Date of birth",
@@ -2300,25 +2302,26 @@
         "state": "State",
         "chooseState": "Choose state",
         "zip": "ZIP code",
-        "cta": "Submit",
+        "cta": "Get My Options",
         "requiredDob": "Please enter your date of birth.",
         "invalidDob": "Enter a complete, valid birth date (it cannot be in the future).",
         "required": "Please fill in all required address fields.",
         "invalidZip": "Enter a valid U.S. ZIP code (e.g. 12345 or 12345-6789).",
+        "line1Note": "Required to check state-approved plans available at your address.",
         "searchPlaceholder": "Start typing your street address...",
         "searchUnavailable": "Address autocomplete is temporarily unavailable. Please enter your address manually."
       },
       "done": {
         "title": "You’re all set",
-        "body": "Thank you. We received your information and will be in touch.",
+        "body": "We received your info. Expect Isaac's call within 24 hours.",
         "optionIntro": "What would you like to do next?",
         "bookCta": "Schedule your appointment",
         "callCta": "Call now",
         "callAria": "Call Isaac Plans Insurance at 540-426-1804",
         "whatsappCta": "Message us on WhatsApp",
         "whatsappAria": "Open WhatsApp with Isaac Plans Insurance",
-        "callerIntro": "Your designated specialist for this case",
-        "callerSubline": "This agent will call you. Please save his contact info.",
+        "callerIntro": "Your personal benefits advisor",
+        "callerSubline": "Isaac will call you within 24 hours from 540-426-1804. Save his number so you don't miss it.",
         "agentName": "Isaac Orraiz",
         "agentTitle": "Senior benefits coordinator",
         "agentPhoneLine": "This agent will call you from this number 540-426-1804. Please save his contact info.",

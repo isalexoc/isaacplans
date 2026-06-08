@@ -1,6 +1,5 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { getLocale, getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 import { type SanityDocument } from "next-sanity";
 import { sanityFetch } from "@/sanity/lib/live";
@@ -9,10 +8,9 @@ import { PortableText } from "@portabletext/react";
 import { portableTextComponents } from "@/components/portable-text-components";
 import {
   ogLocaleOf,
-  withLocalePrefix,
   type SupportedLocale,
 } from "@/lib/seo/i18n";
-import { getBlogPostArticleLd, getBlogPostBreadcrumbLd } from "@/lib/seo/jsonld";
+import { getBlogPostArticleLd, getBlogPostBreadcrumbLd, getBlogPostFaqLd } from "@/lib/seo/jsonld";
 import Image from "next/image";
 import Script from "next/script";
 import BlogCTA from "@/components/blog-cta";
@@ -42,24 +40,24 @@ const POST_QUERY = `*[_type == "post" && slug.current == $slug && locale == $loc
   readingTime,
   seo,
   leadCapture,
-  relatedPost->{
-    slug,
-    locale,
-    title
-  },
-  relatedPosts[]->{
-    _id,
-    title,
-    slug,
-    image,
-    category,
-    publishedAt
+  faqs,
+  relatedPost->{ slug, locale, title },
+  relatedPosts[]->{ _id, title, slug, image, category, publishedAt },
+  "autoRelatedPosts": *[
+    _type == "post"
+    && defined(slug.current)
+    && locale == ^.locale
+    && status == "published"
+    && category == ^.category
+    && slug.current != ^.slug.current
+  ]|order(publishedAt desc)[0...3]{
+    _id, title, slug, image, category, publishedAt
   }
 }`;
 
 // Query to find a post in target locale that references the source slug
 const FIND_RELATED_QUERY = `*[
-  _type == "post" 
+  _type == "post"
   && locale == $targetLocale
   && relatedPost->slug.current == $slug
   && relatedPost->locale == $sourceLocale
@@ -80,46 +78,21 @@ const FIND_RELATED_QUERY = `*[
   readingTime,
   seo,
   leadCapture,
-  relatedPost->{
-    slug,
-    locale,
-    title
-  },
-  relatedPosts[]->{
-    _id,
-    title,
-    slug,
-    image,
-    category,
-    publishedAt
+  faqs,
+  relatedPost->{ slug, locale, title },
+  relatedPosts[]->{ _id, title, slug, image, category, publishedAt },
+  "autoRelatedPosts": *[
+    _type == "post"
+    && defined(slug.current)
+    && locale == ^.locale
+    && status == "published"
+    && category == ^.category
+    && slug.current != ^.slug.current
+  ]|order(publishedAt desc)[0...3]{
+    _id, title, slug, image, category, publishedAt
   }
 }`;
 
-// Query to get posts from the same category
-const RELATED_CATEGORY_POSTS_QUERY = `*[
-  _type == "post"
-  && defined(slug.current)
-  && locale == $locale
-  && status == "published"
-  && category == $category
-  && slug.current != $currentSlug
-]|order(publishedAt desc)[0...3]{
-  _id,
-  title,
-  slug,
-  image,
-  category,
-  publishedAt
-}`;
-
-// ISR with 1 hour fallback - on-demand revalidation via webhook is preferred
-// Tags allow granular revalidation of specific posts
-const options = { 
-  next: { 
-    revalidate: 3600, // 1 hour fallback
-    tags: ['blog-listing'] // Will be overridden per-post below
-  } 
-};
 
 export async function generateMetadata({
   params,
@@ -166,7 +139,6 @@ export async function generateMetadata({
   }
 
   // Use SEO fields if available, otherwise fallback to defaults
-  const metaTitle = post.seo?.metaTitle || post.title;
   const metaDescription =
     post.seo?.metaDescription ||
     post.excerpt ||
@@ -275,7 +247,6 @@ export default async function BlogPostPage({
   params: Promise<{ slug: string; locale: string }>;
 }) {
   const { slug, locale } = await params;
-  const t = await getTranslations({ locale, namespace: "blogPage" });
   
   // Use post-specific tags for granular revalidation
   const postOptions = { 
@@ -319,6 +290,21 @@ export default async function BlogPostPage({
   if (!post) {
     notFound();
   }
+
+  // Auto-calculate reading time if not set manually (~200 wpm)
+  const calcReadingTime = (body: any[]): number => {
+    if (!Array.isArray(body)) return 1;
+    const words = body
+      .filter((b) => b._type === "block" && Array.isArray(b.children))
+      .flatMap((b) => b.children)
+      .filter((c: any) => c._type === "span" && c.text)
+      .map((c: any) => c.text as string)
+      .join(" ")
+      .split(/\s+/)
+      .filter(Boolean).length;
+    return Math.max(1, Math.ceil(words / 200));
+  };
+  const readingTime: number = post.readingTime || calcReadingTime(post.body);
 
   /** Sanity source URL (high ceiling), then Cloudinary fetch → 16:9 + auto gradient gutters */
   const featuredImageSource = post.ogImage || post.image;
@@ -377,40 +363,14 @@ export default async function BlogPostPage({
   const showBottomCTA =
     post.leadCapture?.enableCTA && post.leadCapture?.ctaPosition === "bottom";
 
-  // Get related posts from same category if we don't have enough related posts
-  let relatedPosts = post.relatedPosts || [];
-  if (!Array.isArray(relatedPosts)) {
-    relatedPosts = [];
-  }
-
-  // If we have less than 3 related posts, fetch from same category
-  if (relatedPosts.length < 3 && post.category) {
-    const categoryOptions = { 
-      next: { 
-        revalidate: 3600,
-        tags: [`blog-category-${post.category}`, 'blog-listing']
-      } 
-    };
-    
-    const categoryPostsResult = await sanityFetch({
-      query: RELATED_CATEGORY_POSTS_QUERY,
-      params: {
-        locale,
-        category: post.category,
-        currentSlug: post.slug.current,
-      },
-      ...categoryOptions
-    });
-    const categoryPosts: SanityDocument[] = categoryPostsResult.data || [];
-
-    // Merge and deduplicate
-    const existingIds = new Set(relatedPosts.map((p: any) => p._id));
-    const additionalPosts = categoryPosts
-      .filter((p) => !existingIds.has(p._id))
-      .slice(0, 3 - relatedPosts.length);
-    
-    relatedPosts = [...relatedPosts, ...additionalPosts];
-  }
+  // Merge explicit relatedPosts with auto-filled category posts, deduplicated
+  const explicitRelated: SanityDocument[] = Array.isArray(post.relatedPosts) ? post.relatedPosts : [];
+  const autoRelated: SanityDocument[] = Array.isArray(post.autoRelatedPosts) ? post.autoRelatedPosts : [];
+  const seenIds = new Set(explicitRelated.map((p: any) => p._id));
+  const relatedPosts = [
+    ...explicitRelated,
+    ...autoRelated.filter((p) => !seenIds.has(p._id)),
+  ].slice(0, 3);
 
   // Prepare metadata for JSON-LD
   const metaDescription =
@@ -495,8 +455,48 @@ export default async function BlogPostPage({
           __html: JSON.stringify(breadcrumbLd),
         }}
       />
+      {Array.isArray(post.faqs) && post.faqs.length > 0 && (
+        <Script
+          id="faq-jsonld"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(getBlogPostFaqLd(post.faqs)),
+          }}
+        />
+      )}
 
       <article className="container mx-auto min-h-screen max-w-4xl p-4 sm:p-8">
+      {/* Breadcrumbs */}
+      <nav aria-label="Breadcrumb" className="mb-4">
+        <ol className="flex flex-wrap items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
+          <li>
+            <Link href={`/${locale}`} className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+              {locale === "en" ? "Home" : "Inicio"}
+            </Link>
+          </li>
+          <li aria-hidden>/</li>
+          <li>
+            <Link href={`/${locale}/blog`} className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+              Blog
+            </Link>
+          </li>
+          {post.category && categoryLabel && (
+            <>
+              <li aria-hidden>/</li>
+              <li>
+                <Link href={`/${locale}/blog/category/${post.category}`} className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                  {categoryLabel}
+                </Link>
+              </li>
+            </>
+          )}
+          <li aria-hidden>/</li>
+          <li className="text-gray-700 dark:text-gray-300 line-clamp-1 max-w-[200px] sm:max-w-xs" aria-current="page">
+            {post.title}
+          </li>
+        </ol>
+      </nav>
+
       {/* Language switcher and User Auth */}
       <div className="mb-6 flex items-center justify-between flex-wrap gap-4">
         {relatedPost && relatedPost.slug ? (
@@ -594,7 +594,7 @@ export default async function BlogPostPage({
               day: "numeric",
             })}
           </time>
-          {post.readingTime && (
+          {readingTime && (
             <span className="flex items-center gap-2">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
@@ -604,33 +604,45 @@ export default async function BlogPostPage({
                   d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                 />
               </svg>
-              {post.readingTime} {locale === "en" ? "min read" : "min lectura"}
+              {readingTime} {locale === "en" ? "min read" : "min lectura"}
             </span>
           )}
         </div>
 
-        {/* Author Section */}
+        {/* Author Section — E-E-A-T */}
         {post.author && (
-          <div className="mb-6 flex items-center gap-3">
-            <div className="relative flex-shrink-0">
+          <div className="mb-6 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4 flex items-start gap-4">
+            <Link href={`/${locale}/blog/author`} className="shrink-0">
               <Image
-                src="https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_40,h_40,c_fill,g_face,r_max/isaacpic_c8kca5_3_hz35qm"
+                src="https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_64,h_64,c_fill,g_face,r_max/isaacpic_c8kca5_3_hz35qm"
                 alt={post.author}
-                width={40}
-                height={40}
-                className="rounded-full"
+                width={64}
+                height={64}
+                className="rounded-full ring-2 ring-blue-100 dark:ring-blue-900"
               />
-            </div>
-            <div>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mb-0.5">
-                {locale === "en" ? "Author" : "Autor"}
+            </Link>
+            <div className="min-w-0">
+              <p className="text-[11px] font-semibold uppercase tracking-widest text-blue-600 dark:text-blue-400 mb-0.5">
+                {locale === "en" ? "Written by" : "Escrito por"}
               </p>
-              <p className="text-sm font-medium text-gray-900 dark:text-white">
+              <Link href={`/${locale}/blog/author`} className="text-sm font-bold text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                 {post.author}
+              </Link>
+              <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">
+                {locale === "en"
+                  ? "Licensed Insurance Agent · Certified Health Care Reform Specialist"
+                  : "Agente de Seguros Licenciado · Especialista Certificado en Reforma de Salud"}
               </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                {locale === "en" ? "Insurance Specialist" : "Especialista en Seguros"}
-              </p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 text-[10px] font-semibold text-blue-700 dark:text-blue-300">
+                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20" aria-hidden><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>
+                  {locale === "en" ? "Licensed in 30+ states" : "Licenciado en 30+ estados"}
+                </span>
+                <span className="inline-flex items-center gap-1 rounded-full bg-green-50 dark:bg-green-900/30 px-2 py-0.5 text-[10px] font-semibold text-green-700 dark:text-green-300">
+                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20" aria-hidden><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
+                  {locale === "en" ? "10+ years experience" : "10+ años de experiencia"}
+                </span>
+              </div>
             </div>
           </div>
         )}
@@ -740,9 +752,24 @@ export default async function BlogPostPage({
       {/* Related Posts */}
       {relatedPosts && relatedPosts.length > 0 && (
         <section className="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700">
-          <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">
-            {locale === "en" ? "Related Posts" : "Publicaciones Relacionadas"}
-          </h2>
+          <div className="flex items-center justify-between gap-4 mb-6 flex-wrap">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+              {locale === "en" ? "Related Posts" : "Publicaciones Relacionadas"}
+            </h2>
+            {post.category && (
+              <Link
+                href={`/${locale}/blog/category/${post.category}`}
+                className="shrink-0 inline-flex items-center gap-1.5 text-sm font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
+              >
+                {locale === "en"
+                  ? `All ${categoryLabel || "category"} posts`
+                  : `Todos los artículos de ${categoryLabel || "categoría"}`}
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
+            )}
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {relatedPosts.slice(0, 3).map((related: any) => {
                 const relatedImageUrl = related.image
@@ -791,6 +818,23 @@ export default async function BlogPostPage({
             </div>
           </section>
         )}
+
+      {/* Category hub link — shown when there are no related posts to host it */}
+      {(!relatedPosts || relatedPosts.length === 0) && post.category && (
+        <div className="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700">
+          <Link
+            href={`/${locale}/blog/category/${post.category}`}
+            className="inline-flex items-center gap-2 text-sm font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H7.83l4.88-4.88c.39-.39.39-1.03 0-1.42-.39-.39-1.02-.39-1.41 0l-6.59 6.59c-.39.39-.39 1.02 0 1.41l6.59 6.59c.39.39 1.02.39 1.41 0 .39-.39.39-1.03 0-1.42L7.83 13H19c.55 0 1-.45 1-1s-.45-1-1-1z" />
+            </svg>
+            {locale === "en"
+              ? `More ${categoryLabel || ""} articles`
+              : `Más artículos de ${categoryLabel || ""}`}
+          </Link>
+        </div>
+      )}
 
       {/* Back to Blog Button - Bottom */}
       <div className="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700">

@@ -1046,7 +1046,7 @@ export const getBlogPostArticleLd = (
     "@type": "Person",
     "@id": `${BASE_URL}/#isaacOrraiz`,
     name: post.author.trim(), // Only the name, no additional info
-    url: `${BASE_URL}/about`, // Link to author's profile page for disambiguation
+    url: `${BASE_URL}/${post.locale}/blog/author`,
   };
 
   // Publisher as Organization (separate from author)
@@ -1085,6 +1085,22 @@ export const getBlogPostArticleLd = (
     url: url, // Canonical URL of the article
   } as WithContext<Article>;
 };
+
+/* ───────────── Blog Post FAQ JSON-LD ───────────── */
+export const getBlogPostFaqLd = (
+  faqs: { question: string; answer: string }[]
+) => ({
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: faqs.map((f) => ({
+    "@type": "Question",
+    name: f.question,
+    acceptedAnswer: {
+      "@type": "Answer",
+      text: f.answer,
+    },
+  })),
+});
 
 /* ───────────── Blog Post Breadcrumb JSON-LD ───────────── */
 export const getBlogPostBreadcrumbLd = (

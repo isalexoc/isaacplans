@@ -20,9 +20,7 @@ interface SearchResult {
   author?: any;
 }
 
-// Sanity GROQ query for searching posts
-// Uses match() for full-text search across title, excerpt, and tags
-const SEARCH_POSTS_QUERY = `*[
+const SEARCH_FILTER = `
   _type == "post"
   && defined(slug.current)
   && locale == $locale
@@ -31,13 +29,16 @@ const SEARCH_POSTS_QUERY = `*[
     title match $searchTerm
     || excerpt match $searchTerm
     || count(tags[@ match $searchTerm]) > 0
+    || pt::text(body) match $searchTerm
   )
-]|order(publishedAt desc)[$start...$end]{
-  _id, 
-  title, 
-  slug, 
-  publishedAt, 
-  image, 
+`;
+
+const SEARCH_POSTS_QUERY = `*[${SEARCH_FILTER}]|order(publishedAt desc)[$start...$end]{
+  _id,
+  title,
+  slug,
+  publishedAt,
+  image,
   locale,
   category,
   excerpt,
@@ -47,17 +48,7 @@ const SEARCH_POSTS_QUERY = `*[
   author
 }`;
 
-const SEARCH_POSTS_COUNT_QUERY = `count(*[
-  _type == "post"
-  && defined(slug.current)
-  && locale == $locale
-  && status == "published"
-  && (
-    title match $searchTerm
-    || excerpt match $searchTerm
-    || count(tags[@ match $searchTerm]) > 0
-  )
-])`;
+const SEARCH_POSTS_COUNT_QUERY = `count(*[${SEARCH_FILTER}])`;
 
 export async function GET(request: NextRequest) {
   try {

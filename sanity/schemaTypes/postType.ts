@@ -96,7 +96,8 @@ export const postType = defineType({
               name: 'alt',
               type: 'string',
               title: 'Alt Text',
-              description: 'Important for SEO and accessibility',
+              description: 'Required for SEO and accessibility',
+              validation: (rule: any) => rule.required().warning('Alt text is required for SEO and accessibility'),
             },
             {
               name: 'caption',
@@ -375,6 +376,39 @@ export const postType = defineType({
       of: [{type: 'reference', to: [{type: 'post'}]}],
     },
     
+    // ========== FAQ (for Google rich results) ==========
+    {
+      name: 'faqs',
+      type: 'array',
+      title: 'FAQ — Frequently Asked Questions',
+      description: 'Add Q&A pairs to enable Google FAQ rich result snippets in search. Keep answers concise (2–3 sentences).',
+      of: [
+        {
+          type: 'object',
+          title: 'Question & Answer',
+          fields: [
+            {
+              name: 'question',
+              type: 'string',
+              title: 'Question',
+              validation: (rule: any) => rule.required(),
+            },
+            {
+              name: 'answer',
+              type: 'text',
+              title: 'Answer',
+              rows: 3,
+              validation: (rule: any) => rule.required(),
+            },
+          ],
+          preview: {
+            select: { title: 'question' },
+            prepare: (value: Record<string, any>) => ({ title: value.title as string }),
+          },
+        },
+      ],
+    },
+
     // ========== ANALYTICS & TRACKING ==========
     {
       name: 'tracking',

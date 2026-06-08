@@ -2266,18 +2266,20 @@
     "funnel": {
       "banner": "Asesoría con licencia · Gastos finales",
       "hero": {
-        "badge": "Agentes con licencia · Atención personal",
+        "badge": "Sin examen médico · Planes aprobados en su estado",
         "title": "Cobertura de gastos finales pensada para usted",
+        "mobileSubtitle": "La mayoría de los adultos mayores califican. Sin examen médico.",
         "subtitle": "Ayude a aliviar a su familia frente a costos de funeral y sepultura. Indíquenos cómo contactarlo y confirme su dirección postal para compartir planes autorizados en su estado y próximos pasos."
       },
       "secureNote": "Seguro · Sin compromiso · Sus datos son privados",
+      "helpLine": "¿Necesita ayuda? Llámenos al",
       "progress": {
         "step": "Paso {current} de {total}",
         "done": "Listo"
       },
       "contact": {
         "intro": "Planes y beneficios de gastos finales aprobados en su estado.",
-        "cta": "Continuar"
+        "cta": "Ver mis planes"
       },
       "address": {
         "dob": "Fecha de nacimiento",
@@ -2291,25 +2293,26 @@
         "state": "Estado",
         "chooseState": "Seleccione el estado",
         "zip": "Código postal",
-        "cta": "Enviar",
+        "cta": "Ver mis opciones",
         "requiredDob": "Ingrese su fecha de nacimiento.",
         "invalidDob": "Ingrese una fecha completa y válida (no puede ser futura).",
         "required": "Complete todos los campos obligatorios de la dirección.",
         "invalidZip": "Ingrese un código postal válido en EE. UU. (ej. 12345 o 12345-6789).",
+        "line1Note": "Necesaria para verificar los planes aprobados disponibles en su área.",
         "searchPlaceholder": "Empiece a escribir su dirección...",
         "searchUnavailable": "La autocompletación de direcciones no está disponible temporalmente. Ingrese su dirección manualmente."
       },
       "done": {
         "title": "Listo",
-        "body": "Gracias. Recibimos su información y nos pondremos en contacto.",
+        "body": "Recibimos su información. Isaac le llamará en las próximas 24 horas.",
         "optionIntro": "¿Qué desea hacer ahora?",
         "bookCta": "Agendar su cita",
         "callCta": "Llamar ahora",
         "callAria": "Llamar a Isaac Plans Insurance al 540-426-1804",
         "whatsappCta": "Contactar por WhatsApp",
         "whatsappAria": "Abrir WhatsApp con Isaac Plans Insurance",
-        "callerIntro": "Especialista designado para su caso",
-        "callerSubline": "Este agente le llamará desde este número 540-426-1804. Guarde su información de contacto.",
+        "callerIntro": "Su asesor personal de beneficios",
+        "callerSubline": "Isaac le llamará en las próximas 24 horas desde el 540-426-1804. Guarde su número para no perder la llamada.",
         "agentName": "Isaac Orraiz",
         "agentTitle": "Coordinador de beneficios senior",
         "agentPhoneLine": "Este agente le llamará desde este número 540-426-1804. Guarde su información de contacto.",
