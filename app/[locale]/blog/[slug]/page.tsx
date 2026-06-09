@@ -22,8 +22,24 @@ import { BlogSocialLinks } from "@/components/blog-social-links";
 import { BlogNewsletter } from "@/components/blog-newsletter";
 import BlogPostTracker from "@/components/blog-post-tracker";
 import { BlogModalOverride } from "@/components/blog-modal-override";
-import { cloudinaryFetchedFeaturedHeroUrl, cloudinaryOgImageUrl } from "@/lib/blog-featured-image";
+import { cloudinaryFetchedFeaturedHeroUrl, cloudinaryOgImageUrl, cloudinaryFetchedImageUrl } from "@/lib/blog-featured-image";
 import { getLicensedStateCount } from "@/lib/licensed-states";
+import { BlogScrollFloatingCTA } from "@/components/blog-scroll-floating-cta";
+import { client } from "@/sanity/lib/client";
+
+const ALL_POST_SLUGS_QUERY = `*[_type == "post" && status == "published" && defined(slug.current) && defined(locale)]{
+  "slug": slug.current,
+  locale
+}`;
+
+export async function generateStaticParams() {
+  const posts = await client.fetch<{ slug: string; locale: string }[]>(
+    ALL_POST_SLUGS_QUERY,
+    {},
+    { next: { revalidate: false } }
+  );
+  return posts.map(({ slug, locale }) => ({ slug, locale }));
+}
 
 const POST_QUERY = `*[_type == "post" && slug.current == $slug && locale == $locale][0]{
   _id,
@@ -445,6 +461,7 @@ export default async function BlogPostPage({
         postCategory={post.category}
       />
       <BlogModalOverride category={post.category ?? "general"} />
+      <BlogScrollFloatingCTA category={post.category ?? "general"} />
       {/* JSON-LD Structured Data */}
       <Script
         id="article-jsonld"
@@ -805,7 +822,7 @@ export default async function BlogPostPage({
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {relatedPosts.slice(0, 3).map((related: any) => {
                 const relatedImageUrl = related.image
-                  ? urlFor(related.image).width(600).height(400).fit('crop').crop('top').url()
+                  ? cloudinaryFetchedImageUrl(urlFor(related.image).width(800).url(), 600, 400)
                   : null;
                 return (
                   <Link

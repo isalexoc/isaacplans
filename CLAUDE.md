@@ -221,6 +221,20 @@ Both require CRON_SECRET header for auth.
 
 ---
 
+## Context & AI Guidelines
+
+The `context/` folder contains working instructions and standards that apply to every session:
+
+- [context/ai-interaction.md](context/ai-interaction.md): Workflow rules (branch → implement → test → commit), commit conventions, when to ask vs. proceed
+- [context/coding-standards.md](context/coding-standards.md): TypeScript, React, Next.js, naming, styling, error handling standards
+- [context/current-feature.md](context/current-feature.md): Active feature spec + completed feature history
+
+Feature specs (archived after merge):
+- [context/features/blog-generation/](context/features/blog-generation/): Blog generation from YouTube (phases 1–6)
+- [context/features/blogpost-to-newsletter/](context/features/blogpost-to-newsletter/): Blog post → newsletter email (phases 1–2)
+
+---
+
 For feature-specific setup, see root markdown files:
 - CALL_SUMMARY_SETUP.md: Agent CRM call summaries
 - META_CAPI_SETUP.md: Meta Conversions API

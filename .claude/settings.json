@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git merge *)",
+      "Bash(git branch *)",
+      "Bash(git commit *)",
+      "Bash(git push *)",
+      "Bash(pnpm tsc *)",
+      "Bash(pnpm add *)",
+      "PowerShell(pnpm tsc --noEmit 2>&1)",
+      "Bash(git diff *)"
+    ]
+  },
+  "enabledPlugins": {
+    "cloudinary@claude-plugins-official": true
+  }
+}

@@ -16,6 +16,22 @@ const CLOUD_NAME = "isaacdev";
 const W = 1600;
 const H = 900;
 
+/**
+ * Generic Cloudinary fetch URL for any w×h target.
+ * Serves WebP/AVIF automatically (`f_auto`) with smart-gravity crop (`g_auto`).
+ */
+export function cloudinaryFetchedImageUrl(
+  remoteImageUrl: string,
+  w: number,
+  h: number
+): string | null {
+  const trimmed = remoteImageUrl?.trim();
+  if (!trimmed || !/^https:\/\//i.test(trimmed)) return null;
+
+  const transformations = `f_auto,q_auto,c_fill,g_auto,w_${w},h_${h}`;
+  return `https://res.cloudinary.com/${CLOUD_NAME}/image/fetch/${transformations}/${encodeURIComponent(trimmed)}`;
+}
+
 export function cloudinaryFetchedFeaturedHeroUrl(remoteImageUrl: string): string | null {
   const trimmed = remoteImageUrl?.trim();
   if (!trimmed || !/^https:\/\//i.test(trimmed)) {

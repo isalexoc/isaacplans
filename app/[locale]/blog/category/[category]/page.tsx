@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Script from "next/script";
 import type { Metadata } from "next";
 import { type SanityDocument } from "next-sanity";
 import { sanityFetch } from "@/sanity/lib/live";
@@ -12,6 +13,10 @@ import { cloudinaryOgImageUrl } from "@/lib/blog-featured-image";
 import { BlogPagination } from "@/components/blog-pagination";
 import { BlogPostCard } from "@/components/blog-post-card";
 import BlogCategoryCTA from "@/components/blog-category-cta";
+import {
+  getBlogCategoryCollectionPageLd,
+  getBlogCategoryBreadcrumbLd,
+} from "@/lib/seo/jsonld";
 
 const POSTS_PER_PAGE = 12;
 
@@ -164,7 +169,33 @@ export default async function CategoryPage({
     console.log(`Category Page ${currentPage}: Fetched ${allPosts.length} posts, Displaying ${posts.length} posts, Total: ${totalPosts}, Range: [${start}...${fetchEnd}]`);
   }
 
+  const description = locale === "en"
+    ? `Expert ${categoryLabel} insurance articles from licensed agent Isaac Orraiz. Learn what you need to know and get a free quote.`
+    : `Artículos expertos sobre ${categoryLabel} del agente licenciado Isaac Orraiz. Aprende lo que necesitas saber y obtén una cotización gratuita.`;
+
+  const collectionLd = getBlogCategoryCollectionPageLd({
+    locale,
+    category,
+    categoryLabel,
+    description,
+    posts: posts.map((p) => ({ title: p.title, slug: p.slug.current })),
+    currentPage,
+  });
+
+  const breadcrumbLd = getBlogCategoryBreadcrumbLd(locale, category, categoryLabel);
+
   return (
+    <>
+    <Script
+      id="category-collection-jsonld"
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionLd) }}
+    />
+    <Script
+      id="category-breadcrumb-jsonld"
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
+    />
     <main className="container mx-auto min-h-screen max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
       <div className="mb-8">
         <Link
@@ -240,6 +271,7 @@ export default async function CategoryPage({
         </>
       )}
     </main>
+    </>
   );
 }
 

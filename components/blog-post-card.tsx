@@ -3,6 +3,7 @@ import Image from "next/image";
 import { type SanityDocument } from "next-sanity";
 import { urlFor } from "@/sanity/lib/image";
 import { getBlogCategoryLabel } from "@/lib/blog-category-labels";
+import { cloudinaryFetchedImageUrl } from "@/lib/blog-featured-image";
 
 type TitleHeading = "h2" | "h3";
 
@@ -18,7 +19,7 @@ export function BlogPostCard({
   titleAs?: TitleHeading;
 }) {
   const imageUrl = post.image
-    ? urlFor(post.image).width(600).height(400).fit("crop").crop("top").url()
+    ? cloudinaryFetchedImageUrl(urlFor(post.image).width(800).url(), 600, 400)
     : null;
 
   const categoryLabel = getBlogCategoryLabel(post.category, locale);

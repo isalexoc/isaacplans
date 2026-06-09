@@ -813,6 +813,41 @@ export const getFeBreadcrumbLd = (
   };
 };
 
+/** Final Expense state page — WebPage JSON-LD */
+export const getFeStatePageLd = (
+  locale: string,
+  stateSlug: string,
+  title: string,
+  description: string
+): WithContext<WebPage> => ({
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": `${BASE_URL}/${locale}/final-expense/${stateSlug}#webpage`,
+  url: `${BASE_URL}/${locale}/final-expense/${stateSlug}`,
+  name: title,
+  description,
+  inLanguage: locale,
+  about: { "@id": `${BASE_URL}/#organization` },
+  isPartOf: { "@id": `${BASE_URL}/#website` },
+});
+
+/** Final Expense state page — BreadcrumbList (Home → Final Expense → [State]) */
+export const getFeStateBreadcrumbLd = (
+  locale: string,
+  stateSlug: string,
+  homeLabel: string,
+  feLabel: string,
+  stateLabel: string
+): WithContext<BreadcrumbList> => ({
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: homeLabel,  item: `${BASE_URL}/${locale}` },
+    { "@type": "ListItem", position: 2, name: feLabel,    item: `${BASE_URL}/${locale}/final-expense` },
+    { "@type": "ListItem", position: 3, name: stateLabel, item: `${BASE_URL}/${locale}/final-expense/${stateSlug}` },
+  ],
+});
+
 /** Get Covered Fast quiz funnel — locale slug from `routing.pathnames["/get-covered-fast"]`. */
 const getCoveredFastPathFor = (locale: string) =>
   locale?.toLowerCase().startsWith("es") ? "cobertura-rapida" : "get-covered-fast";
@@ -1100,6 +1135,78 @@ export const getBlogPostFaqLd = (
       text: f.answer,
     },
   })),
+});
+
+/* ───────────── Blog Category CollectionPage JSON-LD ───────────── */
+export const getBlogCategoryCollectionPageLd = ({
+  locale,
+  category,
+  categoryLabel,
+  description,
+  posts,
+  currentPage,
+}: {
+  locale: string;
+  category: string;
+  categoryLabel: string;
+  description: string;
+  posts: { title: string; slug: string }[];
+  currentPage: number;
+}) => {
+  const pageUrl =
+    currentPage === 1
+      ? `${BASE_URL}/${locale}/blog/category/${category}`
+      : `${BASE_URL}/${locale}/blog/category/${category}?page=${currentPage}`;
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "@id": `${pageUrl}#collection`,
+    name: categoryLabel,
+    description,
+    url: pageUrl,
+    inLanguage: locale,
+    publisher: { "@id": `${BASE_URL}/#organization` },
+    isPartOf: { "@id": `${BASE_URL}/#website` },
+    mainEntity: {
+      "@type": "ItemList",
+      itemListElement: posts.map((post, i) => ({
+        "@type": "ListItem",
+        position: i + 1,
+        url: `${BASE_URL}/${locale}/blog/${post.slug}`,
+        name: post.title,
+      })),
+    },
+  };
+};
+
+export const getBlogCategoryBreadcrumbLd = (
+  locale: string,
+  category: string,
+  categoryLabel: string
+): WithContext<BreadcrumbList> => ({
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    {
+      "@type": "ListItem",
+      position: 1,
+      name: locale === "en" ? "Home" : "Inicio",
+      item: `${BASE_URL}/${locale}`,
+    },
+    {
+      "@type": "ListItem",
+      position: 2,
+      name: "Blog",
+      item: `${BASE_URL}/${locale}/blog`,
+    },
+    {
+      "@type": "ListItem",
+      position: 3,
+      name: categoryLabel,
+      item: `${BASE_URL}/${locale}/blog/category/${category}`,
+    },
+  ],
 });
 
 /* ───────────── Blog Post Breadcrumb JSON-LD ───────────── */
