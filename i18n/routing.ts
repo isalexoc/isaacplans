@@ -191,6 +191,10 @@ export const routing = defineRouting({
       en: "/final-expense/get-covered",
       es: "/gastos-finales/obtener-cobertura",
     },
+    "/final-expense/[state]": {
+      en: "/final-expense/[state]",
+      es: "/final-expense/[state]",
+    },
     "/faq": {
       en: "/faq",
       es: "/preguntas-frecuentes",
@@ -246,6 +250,10 @@ export const routing = defineRouting({
     "/admin/blog-generator": {
       en: "/admin/blog-generator",
       es: "/admin/blog-generator",
+    },
+    "/lead-magnets/[slug]": {
+      en: "/lead-magnets/[slug]",
+      es: "/imanes-de-leads/[slug]",
     },
   },
 });
