@@ -1,18 +1,32 @@
-# Current Feature
-
-<!-- Feature Name -->
+# Current Feature: Lead Magnet Generator — Phase 2
 
 ## Status
 
-Not Started
+In Progress
 
 ## Goals
 
-<!-- Goals & requirements -->
+- `POST /api/admin/lead-magnet-generator/generate-outline` with a valid `LeadMagnetPromptInput` returns a `LeadMagnetOutline` with all required fields
+- `sections` array always has 6–8 items
+- `keyBenefits` always has exactly 5 items
+- `category` in the response always matches `category` in the request (enforced programmatically)
+- Route returns 401 if the user is not authenticated via Clerk
+- A missing or invalid `OPENAI_API_KEY` returns `{ success: false, error: "OPENAI_API_KEY is not configured" }` — not a 500
+- `pnpm tsc --noEmit` passes — no TypeScript errors in new files
 
 ## Notes
 
-<!-- Any extra notes -->
+**3 new files:**
+
+1. `lib/lead-magnet-generator/prompts.ts` — `LEAD_MAGNET_SYSTEM_PROMPT` constant + `buildOutlinePrompt(input)` builder
+2. `lib/lead-magnet-generator/outline-generator.ts` — `generateLeadMagnetOutline(input)` calling OpenAI with `response_format: { type: "json_object" }`, full validation + normalization (truncate title/subtitle, override category, enforce 5 keyBenefits, enforce 6–8 sections, recompute word count/pages locally)
+3. `app/api/admin/lead-magnet-generator/generate-outline/route.ts` — Clerk-authenticated POST, `maxDuration = 30`
+
+**Key references:**
+- `lib/lead-magnet-generator/types.ts` — `LeadMagnetPromptInput`, `LeadMagnetOutline`, `LeadMagnetSection`
+- `lib/blog-generator/content-generator.ts` — OpenAI call pattern to replicate
+- `app/api/admin/blog-generator/generate/route.ts` — Clerk auth pattern to replicate
+- OpenAI model: `process.env.OPENAI_MODEL ?? "gpt-4o"`; use `response_format: { type: "json_object" }`
 
 ## History
 
