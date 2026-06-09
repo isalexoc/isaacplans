@@ -1,35 +1,20 @@
-# Current Feature: Lead Magnet Generator — Phase 2
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- `POST /api/admin/lead-magnet-generator/generate-outline` with a valid `LeadMagnetPromptInput` returns a `LeadMagnetOutline` with all required fields
-- `sections` array always has 6–8 items
-- `keyBenefits` always has exactly 5 items
-- `category` in the response always matches `category` in the request (enforced programmatically)
-- Route returns 401 if the user is not authenticated via Clerk
-- A missing or invalid `OPENAI_API_KEY` returns `{ success: false, error: "OPENAI_API_KEY is not configured" }` — not a 500
-- `pnpm tsc --noEmit` passes — no TypeScript errors in new files
+<!-- Goals & requirements -->
 
 ## Notes
 
-**3 new files:**
-
-1. `lib/lead-magnet-generator/prompts.ts` — `LEAD_MAGNET_SYSTEM_PROMPT` constant + `buildOutlinePrompt(input)` builder
-2. `lib/lead-magnet-generator/outline-generator.ts` — `generateLeadMagnetOutline(input)` calling OpenAI with `response_format: { type: "json_object" }`, full validation + normalization (truncate title/subtitle, override category, enforce 5 keyBenefits, enforce 6–8 sections, recompute word count/pages locally)
-3. `app/api/admin/lead-magnet-generator/generate-outline/route.ts` — Clerk-authenticated POST, `maxDuration = 30`
-
-**Key references:**
-- `lib/lead-magnet-generator/types.ts` — `LeadMagnetPromptInput`, `LeadMagnetOutline`, `LeadMagnetSection`
-- `lib/blog-generator/content-generator.ts` — OpenAI call pattern to replicate
-- `app/api/admin/blog-generator/generate/route.ts` — Clerk auth pattern to replicate
-- OpenAI model: `process.env.OPENAI_MODEL ?? "gpt-4o"`; use `response_format: { type: "json_object" }`
+<!-- Any extra notes -->
 
 ## History
 
+- 2026-06-09: **Lead Magnet Generator — Phase 2** completed. `lib/lead-magnet-generator/prompts.ts` — `LEAD_MAGNET_SYSTEM_PROMPT` + `buildOutlinePrompt()` user prompt builder. `lib/lead-magnet-generator/outline-generator.ts` — `generateLeadMagnetOutline()` calls OpenAI with `response_format: { type: "json_object" }`, validates and normalizes all fields (title ≤80 chars, subtitle ≤160 chars, category override from input, keyBenefits sliced to 5, sections 6–8 enforced, word/page counts recomputed locally). `app/api/admin/lead-magnet-generator/generate-outline/route.ts` — Clerk-authenticated POST, `maxDuration = 30`, returns 401 for unauthenticated and 400 for missing `OPENAI_API_KEY`. Merged to main on branch `feature/lead-magnet-generator-phase-2`.
 - 2026-06-09: **Lead Magnet Generator — Phase 1** completed. `sanity/schemaTypes/leadMagnetType.ts` — full Sanity document schema with 6 field groups (identity, content, leadForm, seo, generation, dates) and 18 fields; registered in `sanity/schemaTypes/index.ts`; custom sidebar entry added to `sanity/structure.ts` with `defaultOrdering` by `publishedAt` desc. `lib/lead-magnet-generator/types.ts` — all TypeScript contracts for phases 1–8 (`LeadMagnetPromptInput`, `LeadMagnetOutline`, `GeneratedLeadMagnet`, `LeadMagnetImages`, `PublishedLeadMagnet`, `LeadMagnetApiResponse`, etc.). `/lead-magnets/[slug]` + `es: /imanes-de-leads/[slug]` added to `i18n/routing.ts`. Merged to main on branch `feature/lead-magnet-generator-phase-1`.
 - 2026-06-05: **Blog Post to Newsletter — Phase 2** completed. `sanity/actions/sendNewsletterAction.tsx` — custom Studio document action with confirmation dialog (live EN/ES subscriber counts, already-sent warning, success/error states); registered in `sanity.config.ts` for `post` type only; added `@sanity/ui` and `@sanity/icons` as direct deps. Merged to main on branch `feature/blogpost-to-newsletter-phase-2`.
 - 2026-06-05: **Blog Post to Newsletter — Phase 1** completed. `newsletterSentAt` field added to Sanity post schema; `@portabletext/to-html` installed; `lib/email/portable-text-to-html.ts` (portable text → inline email HTML); `lib/email/newsletter-post.ts` (bilingual email template + `sendNewsletterPost()` orchestrator); `GET /api/newsletter/subscriber-counts` (Clerk-auth); `POST /api/newsletter/send-post` (locale-segmented send, duplicate prevention, force override). Merged to main on branch `feature/blogpost-to-newsletter-phase-1`.
