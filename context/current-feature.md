@@ -1,16 +1,33 @@
-# Current Feature
+# Current Feature: Lead Magnet Generator — Phase 4
 
 ## Status
 
-Not Started
+In Progress
 
 ## Goals
 
-<!-- Goals & requirements -->
+- `POST /api/admin/lead-magnet-generator/generate-images` with a valid `LeadMagnetOutline` returns `LeadMagnetImages` with a non-empty `coverImage` Cloudinary URL
+- `sectionImages` array length always matches `selectSectionIndices(outline.sections.length)` — 3–4 items
+- All returned URLs are Cloudinary HTTPS URLs (not temporary DALL-E URLs)
+- If DALL-E fails for a section image, route returns 200 with `""` for that image and the error in `warnings`
+- If ALL image generation fails, route still returns `{ success: true, data: { coverImage: "", sectionImages: [...] }, warnings: [...] }` — never 500 for image failures
+- Route returns 401 if unauthenticated
+- `pnpm tsc --noEmit` passes
 
 ## Notes
 
-<!-- Any extra notes -->
+**2 new files:**
+
+1. `lib/lead-magnet-generator/image-generator.ts` — `generateLeadMagnetImages(outline)`: cover image (DALL-E 3, `1792x1024`, `quality: "standard"`) + 3–4 section images (`1024x1024`) at strategic positions; each step is non-fatal (try/catch, empty string on failure, warnings array); upload via `cloudinary.uploader.upload(dalleUrl, { folder, public_id, resource_type: "image" })` returning `secure_url`
+2. `app/api/admin/lead-magnet-generator/generate-images/route.ts` — Clerk auth, `maxDuration = 120`, always `success: true` unless 401 or bad body
+
+**Key implementation details:**
+- Cloudinary client: `import cloudinary from "@/config/cloudinary"` (already configured, v2 SDK)
+- DALL-E 3 API: `client.images.generate({ model: "dall-e-3", size, quality: "standard", n: 1 })` — returns `data[0].url`
+- Cover folder: `lead-magnets/{category}/`, public_id: `cover-{Date.now()}`
+- Section folder: `lead-magnets/{category}/sections/`, public_id: `section-{index}-{Date.now()}`
+- Section selection: `selectSectionIndices(n)` → indices at ~20%, 45%, 70%, 90% (or all if ≤4)
+- `LeadMagnetSuccessResponse<LeadMagnetImages>` shape includes `warnings?: string[]`
 
 ## History
 
