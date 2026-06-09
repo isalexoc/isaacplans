@@ -52,6 +52,7 @@
     "@radix-ui/react-toggle-group": "1.1.1",
     "@radix-ui/react-tooltip": "1.1.6",
     "@radix-ui/react-visually-hidden": "^1.2.3",
+    "@react-pdf/renderer": "^4.5.1",
     "@sanity/icons": "^3.7.4",
     "@sanity/image-url": "^1.2.0",
     "@sanity/ui": "^3.2.0",
