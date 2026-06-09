@@ -104,6 +104,20 @@ export async function publishBilingualPost(
     ? { enableCTA: true, ctaType: cta.ctaType, ctaText: cta.ctaText, ctaPosition: cta.ctaPosition }
     : { enableCTA: false };
 
+  const enFaqs = (enContent.faqs ?? []).map((f) => ({
+    _type: "object",
+    _key: generateKey(),
+    question: f.question,
+    answer: f.answer,
+  }));
+
+  const esFaqs = (esContent.faqs ?? []).map((f) => ({
+    _type: "object",
+    _key: generateKey(),
+    question: f.question,
+    answer: f.answer,
+  }));
+
   const postEn = await client.create({
     _type: "post",
     locale: "en",
@@ -119,6 +133,7 @@ export async function publishBilingualPost(
     featured: false,
     tags: enContent.tags,
     readingTime: enContent.readingTime,
+    faqs: enFaqs,
     leadCapture,
     seo: {
       metaTitle: enContent.seo.metaTitle,
@@ -143,6 +158,7 @@ export async function publishBilingualPost(
     featured: false,
     tags: esContent.tags,
     readingTime: enContent.readingTime,
+    faqs: esFaqs,
     leadCapture,
     seo: {
       metaTitle: esContent.seo.metaTitle,

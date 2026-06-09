@@ -20,6 +20,7 @@ import {
 import {
   VALID_CATEGORIES,
   type BlogCategory,
+  type FaqItem,
   type YouTubeExtractionResult,
   type GeneratedBlogContent,
   type SanityPublishResult,
@@ -46,6 +47,7 @@ interface ReviewForm {
   tags: string;
   readingTime: number;
   bodyMarkdown: string;
+  faqs: FaqItem[];
   seo: {
     metaTitle: string;
     metaDescription: string;
@@ -70,6 +72,7 @@ const EMPTY_FORM: ReviewForm = {
   tags: "",
   readingTime: 5,
   bodyMarkdown: "",
+  faqs: [],
   seo: { metaTitle: "", metaDescription: "", focusKeyword: "", keywords: "" },
   cta: { enableCTA: false, ctaType: "consultation", ctaText: "Schedule a Free Consultation", ctaPosition: "bottom" },
   publishStatus: "published",
@@ -162,6 +165,7 @@ export default function BlogGeneratorPage() {
       category: form.category,
       tags: form.tags.split(",").map((t) => t.trim()).filter(Boolean),
       readingTime: form.readingTime,
+      faqs: form.faqs,
       seo: {
         metaTitle: form.seo.metaTitle,
         metaDescription: form.seo.metaDescription,
@@ -190,6 +194,7 @@ export default function BlogGeneratorPage() {
         tags: content.tags.join(", "),
         readingTime: content.readingTime,
         bodyMarkdown: content.bodyMarkdown,
+        faqs: content.faqs ?? [],
         seo: {
           metaTitle: content.seo.metaTitle,
           metaDescription: content.seo.metaDescription,
@@ -629,6 +634,80 @@ export default function BlogGeneratorPage() {
                 className="font-mono text-sm"
               />
               {fieldErrors.body && <p className="text-xs text-red-600 mt-1">{fieldErrors.body}</p>}
+            </CardContent>
+          </Card>
+
+          {/* FAQs */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
+                  FAQs <span className="normal-case font-normal text-xs">(Google rich snippets)</span>
+                </CardTitle>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 px-2 text-xs font-normal"
+                  onClick={() =>
+                    setForm((prev) => ({
+                      ...prev,
+                      faqs: [...prev.faqs, { question: "", answer: "" }],
+                    }))
+                  }
+                >
+                  + Add FAQ
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="flex flex-col gap-4">
+              {form.faqs.length === 0 && (
+                <p className="text-sm text-muted-foreground">No FAQs generated. Click "+ Add FAQ" to add one manually.</p>
+              )}
+              {form.faqs.map((faq, idx) => (
+                <div key={idx} className="flex flex-col gap-2 rounded-md border p-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-medium text-muted-foreground">FAQ {idx + 1}</span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 px-2 text-xs text-red-500 hover:text-red-600"
+                      onClick={() =>
+                        setForm((prev) => ({
+                          ...prev,
+                          faqs: prev.faqs.filter((_, i) => i !== idx),
+                        }))
+                      }
+                    >
+                      Remove
+                    </Button>
+                  </div>
+                  <Input
+                    placeholder="Question"
+                    value={faq.question}
+                    onChange={(e) =>
+                      setForm((prev) => ({
+                        ...prev,
+                        faqs: prev.faqs.map((f, i) =>
+                          i === idx ? { ...f, question: e.target.value } : f
+                        ),
+                      }))
+                    }
+                  />
+                  <Textarea
+                    rows={2}
+                    placeholder="Answer (2–3 sentences)"
+                    value={faq.answer}
+                    onChange={(e) =>
+                      setForm((prev) => ({
+                        ...prev,
+                        faqs: prev.faqs.map((f, i) =>
+                          i === idx ? { ...f, answer: e.target.value } : f
+                        ),
+                      }))
+                    }
+                  />
+                </div>
+              ))}
             </CardContent>
           </Card>
 

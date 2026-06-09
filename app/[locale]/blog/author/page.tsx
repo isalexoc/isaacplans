@@ -12,6 +12,7 @@ import {
   type SupportedLocale,
 } from "@/lib/seo/i18n";
 import { cloudinaryOgImageUrl } from "@/lib/blog-featured-image";
+import { getLicensedStateCount } from "@/lib/licensed-states";
 import Script from "next/script";
 
 const AUTHOR_POSTS_QUERY = `*[
@@ -33,13 +34,14 @@ const AUTHOR_POSTS_COUNT_QUERY = `count(*[
 export async function generateMetadata(): Promise<Metadata> {
   const locale = (await getLocale()) as SupportedLocale;
   const altLocale = locale === "en" ? "es" : "en";
+  const stateCount = await getLicensedStateCount();
 
   const title = locale === "en"
     ? "Isaac Orraiz — Licensed Insurance Agent | Isaac Plans Blog"
     : "Isaac Orraiz — Agente de Seguros Licenciado | Blog Isaac Plans";
   const description = locale === "en"
-    ? "Isaac Orraiz is a licensed insurance agent and Certified Health Care Reform Specialist. Licensed in 30+ states, 10+ years helping families find the right coverage."
-    : "Isaac Orraiz es un agente de seguros licenciado y Especialista Certificado en Reforma de Salud. Licenciado en 30+ estados, 10+ años ayudando a familias a encontrar la cobertura adecuada.";
+    ? `Isaac Orraiz is a licensed insurance agent and Certified Health Care Reform Specialist. Licensed in ${stateCount} states, 10+ years helping families find the right coverage.`
+    : `Isaac Orraiz es un agente de seguros licenciado y Especialista Certificado en Reforma de Salud. Licenciado en ${stateCount} estados, 10+ años ayudando a familias a encontrar la cobertura adecuada.`;
 
   const canonical = withLocalePrefix(locale, `/${locale}/blog/author`);
   const altCanonical = withLocalePrefix(altLocale as SupportedLocale, `/${altLocale}/blog/author`);
@@ -80,9 +82,10 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function AuthorPage() {
   const locale = (await getLocale()) as SupportedLocale;
 
-  const [postsResult, countResult] = await Promise.all([
+  const [postsResult, countResult, stateCount] = await Promise.all([
     sanityFetch({ query: AUTHOR_POSTS_QUERY, params: { locale } }),
     sanityFetch({ query: AUTHOR_POSTS_COUNT_QUERY, params: { locale } }),
+    getLicensedStateCount(),
   ]);
 
   const posts: SanityDocument[] = postsResult.data || [];
@@ -91,8 +94,8 @@ export default async function AuthorPage() {
   const personLd = getIsaacPersonLd(locale);
 
   const credentials = locale === "en"
-    ? ["Licensed Insurance Agent", "Certified Health Care Reform Specialist", "Licensed in 30+ States", "10+ Years Experience"]
-    : ["Agente de Seguros Licenciado", "Especialista Certificado en Reforma de Salud", "Licenciado en 30+ Estados", "10+ Años de Experiencia"];
+    ? ["Licensed Insurance Agent", "Certified Health Care Reform Specialist", `Licensed in ${stateCount} States`, "10+ Years Experience"]
+    : ["Agente de Seguros Licenciado", "Especialista Certificado en Reforma de Salud", `Licenciado en ${stateCount} Estados`, "10+ Años de Experiencia"];
 
   const bio = locale === "en"
     ? "Isaac Orraiz is a licensed insurance agent specializing in ACA Marketplace, Final Expense, Dental & Vision, Hospital Indemnity, and IUL. His mission is to cut through the jargon and help families find plans that actually fit their lives and budgets — in English and Spanish."

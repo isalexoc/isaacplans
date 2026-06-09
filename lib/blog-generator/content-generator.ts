@@ -3,6 +3,7 @@ import { textToBlocks } from "./portable-text";
 import {
   VALID_CATEGORIES,
   type BlogCategory,
+  type FaqItem,
   type GeneratedBlogContent,
   type YouTubeExtractionResult,
 } from "./types";
@@ -78,6 +79,9 @@ Generate a complete blog post JSON with this exact structure:
   "category": "...",
   "tags": ["..."],
   "readingTime": 0,
+  "faqs": [
+    { "question": "...", "answer": "..." }
+  ],
   "seo": {
     "metaTitle": "...",
     "metaDescription": "...",
@@ -93,6 +97,7 @@ Field rules:
 - category: exactly one of: aca | temporary-health-insurance | dental-vision | hospital-indemnity | iul | final-expense | cancer-plans | heart-stroke | general | tips-guides | news
 - tags: 8–12 specific tags (mix of topic tags and insurance product tags)
 - readingTime: estimated reading time in minutes (integer)
+- faqs: 4–6 Q&A pairs covering the most common questions readers would have about this topic; each answer must be 2–3 sentences — concise enough for Google FAQ rich result snippets; questions should use natural language that matches how people search
 - seo.metaTitle: max 60 chars, different wording from the post title, includes focus keyword
 - seo.metaDescription: 140–160 chars — compelling snippet that includes the focus keyword and a subtle benefit/CTA
 - seo.focusKeyword: the single best-ranking keyword phrase for this post (2–5 words)
@@ -108,6 +113,7 @@ interface RawGeneratedPost {
   category: string;
   tags: string[];
   readingTime: number;
+  faqs: Array<{ question: string; answer: string }>;
   seo: {
     metaTitle: string;
     metaDescription: string;
@@ -135,6 +141,12 @@ function validateAndNormalize(raw: RawGeneratedPost): Omit<GeneratedBlogContent,
     ? (raw.category as BlogCategory)
     : "general";
 
+  const faqs: FaqItem[] = Array.isArray(raw.faqs)
+    ? raw.faqs
+        .filter((f) => f && typeof f.question === "string" && typeof f.answer === "string")
+        .map((f) => ({ question: f.question.trim(), answer: f.answer.trim() }))
+    : [];
+
   return {
     title: raw.title.slice(0, 70),
     excerpt: raw.excerpt.slice(0, 200),
@@ -142,6 +154,7 @@ function validateAndNormalize(raw: RawGeneratedPost): Omit<GeneratedBlogContent,
     category,
     tags: Array.isArray(raw.tags) ? raw.tags : [],
     readingTime: Math.max(1, Math.round(Number(raw.readingTime) || 1)),
+    faqs,
     seo: {
       metaTitle: raw.seo.metaTitle.slice(0, 60),
       metaDescription: raw.seo.metaDescription.slice(0, 160),

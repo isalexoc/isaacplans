@@ -71,6 +71,11 @@ export const VALID_CATEGORIES: BlogCategory[] = [
   "news",
 ];
 
+export interface FaqItem {
+  question: string;
+  answer: string;
+}
+
 export interface GeneratedBlogContent {
   title: string;
   excerpt: string;
@@ -79,6 +84,7 @@ export interface GeneratedBlogContent {
   category: BlogCategory;
   tags: string[];
   readingTime: number;
+  faqs: FaqItem[];
   seo: {
     metaTitle: string;
     metaDescription: string;
@@ -109,6 +115,7 @@ export interface TranslatedBlogContent {
   bodyMarkdown: string;
   bodyBlocks: PortableTextBlock[];
   tags: string[];
+  faqs: FaqItem[];
   seo: {
     metaTitle: string;
     metaDescription: string;

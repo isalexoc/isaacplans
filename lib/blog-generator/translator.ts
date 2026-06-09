@@ -1,6 +1,6 @@
 import OpenAI from "openai";
 import { textToBlocks } from "./portable-text";
-import type { GeneratedBlogContent, TranslatedBlogContent } from "./types";
+import type { FaqItem, GeneratedBlogContent, TranslatedBlogContent } from "./types";
 
 const SYSTEM_PROMPT = `You are a professional translator specializing in insurance content for a U.S.-based bilingual insurance agency targeting Spanish-speaking clients.
 
@@ -20,6 +20,7 @@ function buildTranslationPrompt(content: GeneratedBlogContent): string {
     excerpt: content.excerpt,
     body: content.bodyMarkdown,
     tags: content.tags,
+    faqs: content.faqs,
     seo: {
       metaTitle: content.seo.metaTitle,
       metaDescription: content.seo.metaDescription,
@@ -40,6 +41,7 @@ interface RawTranslation {
   excerpt: string;
   body: string;
   tags: string[];
+  faqs: Array<{ question: string; answer: string }>;
   seo: {
     metaTitle: string;
     metaDescription: string;
@@ -88,12 +90,19 @@ export async function translateBlogContent(
     }
   }
 
+  const faqs: FaqItem[] = Array.isArray(parsed.faqs)
+    ? parsed.faqs
+        .filter((f) => f && typeof f.question === "string" && typeof f.answer === "string")
+        .map((f) => ({ question: f.question.trim(), answer: f.answer.trim() }))
+    : [];
+
   return {
     title: parsed.title.slice(0, 70),
     excerpt: parsed.excerpt.slice(0, 200),
     bodyMarkdown: parsed.body,
     bodyBlocks: textToBlocks(parsed.body),
     tags: Array.isArray(parsed.tags) ? parsed.tags : [],
+    faqs,
     seo: {
       metaTitle: parsed.seo.metaTitle.slice(0, 60),
       metaDescription: parsed.seo.metaDescription.slice(0, 160),
