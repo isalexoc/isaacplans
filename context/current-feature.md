@@ -1,16 +1,33 @@
-# Current Feature
+# Current Feature: Lead Magnet Generator — Phase 3
 
 ## Status
 
-Not Started
+In Progress
 
 ## Goals
 
-<!-- Goals & requirements -->
+- `POST /api/admin/lead-magnet-generator/generate-section` with valid `outline`, `sectionIndex: 0`, and `completedSections: []` returns section content with `wordCount >= 500`
+- Each subsequent call with `completedSections` populated does not repeat topics from earlier sections
+- `POST /api/admin/lead-magnet-generator/generate-intro-conclusion` returns both `introduction` and `conclusion` as non-empty strings with `introductionBlocks` and `conclusionBlocks` arrays
+- `contentBlocks` from both routes are valid Portable Text (each block has `_type`, `_key`, `style`, `children`)
+- Both routes return 401 if unauthenticated
+- `pnpm tsc --noEmit` passes
+- Calling `generate-section` per section (6–8 calls) + `generate-intro-conclusion` produces a fully populated `GeneratedLeadMagnet`
 
 ## Notes
 
-<!-- Any extra notes -->
+**Files to create/update:**
+
+1. `lib/lead-magnet-generator/prompts.ts` — **extend** with: `SECTION_GENERATION_SYSTEM_PROMPT`, `buildSectionPrompt()`, `INTRO_CONCLUSION_SYSTEM_PROMPT`, `buildIntroConclusionPrompt()`
+2. `lib/lead-magnet-generator/section-generator.ts` — `generateSection()` (single section, markdown → Portable Text, `wordCount >= 500` enforced) + `generateIntroConclusion()` (JSON mode, both fields → Portable Text)
+3. `app/api/admin/lead-magnet-generator/generate-section/route.ts` — Clerk auth, `maxDuration = 60`, validates `outline`/`sectionIndex`/`completedSections`
+4. `app/api/admin/lead-magnet-generator/generate-intro-conclusion/route.ts` — Clerk auth, `maxDuration = 60`, validates `generatedContent.outline` and `generatedContent.sections`
+
+**Key implementation details:**
+- `generateSection()`: no `response_format` JSON mode — plain completion, `max_tokens: 2000`; use `textToBlocks()` from `lib/blog-generator/portable-text.ts`
+- `generateIntroConclusion()`: use `response_format: { type: "json_object" }`; parse `{ introduction, conclusion }` then convert both to Portable Text
+- Reuse `textToBlocks()` — do not duplicate logic
+- OpenAI model: `process.env.OPENAI_MODEL ?? "gpt-4o"`
 
 ## History
 
