@@ -13,12 +13,14 @@ import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { usePathname } from "@/i18n/navigation";
 import { getHeaderQuoteModalKind } from "@/lib/header-quote-modal";
+import { useBlogModalKind } from "@/components/blog-modal-context";
 
 const CTAButtonMain = () => {
   const [openModal, setOpenModal] = useState(false);
   const nav = useTranslations("header.nav");
   const pathname = usePathname() ?? "/";
-  const quoteKind = getHeaderQuoteModalKind(pathname);
+  const { blogModalKind } = useBlogModalKind();
+  const quoteKind = blogModalKind ?? getHeaderQuoteModalKind(pathname);
 
   useEffect(() => {
     setOpenModal(false);

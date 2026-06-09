@@ -21,6 +21,7 @@ import BlogCategoryCTA from "@/components/blog-category-cta";
 import { BlogSocialLinks } from "@/components/blog-social-links";
 import { BlogNewsletter } from "@/components/blog-newsletter";
 import BlogPostTracker from "@/components/blog-post-tracker";
+import { BlogModalOverride } from "@/components/blog-modal-override";
 import { cloudinaryFetchedFeaturedHeroUrl, cloudinaryOgImageUrl } from "@/lib/blog-featured-image";
 import { getLicensedStateCount } from "@/lib/licensed-states";
 
@@ -438,11 +439,12 @@ export default async function BlogPostPage({
 
   return (
     <>
-      <BlogPostTracker 
+      <BlogPostTracker
         postTitle={post.title || "Blog Post"}
         postSlug={slug}
         postCategory={post.category}
       />
+      <BlogModalOverride category={post.category ?? "general"} />
       {/* JSON-LD Structured Data */}
       <Script
         id="article-jsonld"

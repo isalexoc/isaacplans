@@ -12,6 +12,26 @@ export type HeaderQuoteModalKind =
   | "fe"
   | "general";
 
+export function getBlogCategoryModalKind(category: string): HeaderQuoteModalKind {
+  switch (category) {
+    case "aca":
+      return "aca";
+    case "temporary-health-insurance":
+    case "short-term-medical":
+      return "stm";
+    case "dental-vision":
+      return "dental";
+    case "hospital-indemnity":
+      return "hi";
+    case "iul":
+      return "iul";
+    case "final-expense":
+      return "fe";
+    default:
+      return "general";
+  }
+}
+
 export function getHeaderQuoteModalKind(pathname: string): HeaderQuoteModalKind {
   const p = pathname.startsWith("/") ? pathname : `/${pathname}`;
 

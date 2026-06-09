@@ -22,6 +22,7 @@ import AgentCrmExternalTracking from "@/components/agent-crm-external-tracking";
 import { GoogleAnalytics } from '@next/third-parties/google'
 import { getLicensedStateCount } from "@/lib/licensed-states";
 import { cloudinaryOgImageUrl } from "@/lib/blog-featured-image";
+import { BlogModalProvider } from "@/components/blog-modal-context";
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
@@ -136,6 +137,7 @@ export default async function LocaleLayout({
         >
         <ClerkThemeProvider localization={clerkLocale}>
         <NextIntlClientProvider locale={locale} messages={messages}>
+          <BlogModalProvider>
           <SanityLive />
           <Header />
           <main className="flex-1 w-full">{children}</main>
@@ -154,6 +156,7 @@ export default async function LocaleLayout({
               debug={agentCrmTrackingDebug}
             />
           ) : null}
+          </BlogModalProvider>
         </NextIntlClientProvider>
         </ClerkThemeProvider>
         </ThemeProvider>
