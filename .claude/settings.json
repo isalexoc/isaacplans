@@ -10,7 +10,15 @@
       "Bash(pnpm tsc *)",
       "Bash(pnpm add *)",
       "PowerShell(pnpm tsc --noEmit 2>&1)",
-      "Bash(git diff *)"
+      "Bash(git diff *)",
+      "Bash(mkdir -p \"app/[locale]/lead-magnets/[slug]\")",
+      "Bash(pnpm build *)",
+      "WebSearch",
+      "WebFetch(domain:help.gohighlevel.com)",
+      "WebFetch(domain:services.leadconnectorhq.com)"
+    ],
+    "additionalDirectories": [
+      "C:\\develop\\projects\\isaacplans\\isaacplans\\app\\[locale]\\lead-magnets"
     ]
   },
   "enabledPlugins": {
