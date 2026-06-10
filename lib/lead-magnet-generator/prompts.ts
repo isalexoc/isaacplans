@@ -20,9 +20,11 @@ Guide structure requirements:
 - Title: Compelling, specific, benefit-driven (no clickbait)
 - Subtitle: One sentence explaining who the guide is for and what they'll gain
 - Introduction: Hook paragraph + what reader will learn + why it matters now
-- Sections: 6–8 deep-dive sections that progress logically from foundational to advanced
+- Sections: EXACTLY 6 to 8 sections — no more, no fewer. Merge related topics if needed.
 - Each section: 800–1,200 words, ends with an "Action Step" for the reader
 - Conclusion: Recaps key takeaways, positions a free consultation as the logical next step
+
+CRITICAL: The sections array must contain between 6 and 8 objects. If you have more than 8 key topics, combine the most closely related ones into a single section. Never return 9 or 10 sections.
 
 Tone options:
 - educational: Professional, clear, empathetic — like a knowledgeable friend explaining insurance
@@ -57,7 +59,7 @@ Return a JSON object with this exact structure:
     "...",
     "..."
   ],
-  "sections": [                // 6–8 sections
+  "sections": [                // EXACTLY 6–8 sections — never 9 or 10
     {
       "sectionTitle": "...",   // clear, specific H2 title (not generic like "Introduction")
       "keyPoints": [           // 4–6 bullet points of what this section covers
@@ -83,18 +85,20 @@ You are a lead generation specialist and insurance educator writing for Isaac Pl
 You are writing one section of a comprehensive consumer guide.
 
 Section writing rules:
-- Length: 800–1,200 words for this section
-- Open with 1–2 sentences that connect to the previous section (or to the intro if this is the first section)
-- Use ## for the section title (H2), ### for sub-headings (H3)
-- Use bullet lists (- item) for key items — never numbered lists, never tables
-- Include 1–2 relatable real-world examples or scenarios (fictional but realistic)
-- End EVERY section with a callout block formatted exactly as:
-  > **Action Step:** [specific, concrete action the reader can take today]
-- Facts only — no fabricated statistics, specific dollar amounts, or external quotes unless they were provided in the outline key points
-- Tone must match the guide's specified tone
-- Do NOT summarize what was covered — move the reader forward
+- Length: 900–1,200 words. Write fully — do not stop early.
+- Open with 1–2 sentences that smoothly connect to the previous section (or to the intro for section 1)
+- Use ## for the section title (H2), ### for sub-headings (H3) — use 2–3 sub-headings per section
+- Use bullet lists (- item) for 3–5 item groupings. No numbered lists, no tables.
+- Include at least one relatable real-world scenario (fictional family or individual, realistic situation)
+- Be specific: name real product types, real processes, real questions consumers actually ask
+- NEVER repeat content or examples from prior sections — each section must deliver new value
+- End EVERY section with this callout block formatted exactly as:
+  > **Action Step:** [specific, concrete action the reader can take today — not vague advice]
+- Facts only — never fabricate statistics, specific dollar amounts, or external quotes unless they were provided in the outline key points
+- Tone must match the guide's specified tone throughout — no tonal drift
+- Do NOT summarize what was covered — move the reader forward toward the next idea
 
-Output format: markdown only. No JSON wrapper. No preamble.
+Output format: markdown only. No JSON wrapper. No preamble. Start directly with the ## heading.
 `;
 
 export function buildSectionPrompt(params: {
@@ -142,21 +146,23 @@ You are a lead generation specialist and insurance educator writing for Isaac Pl
 You are writing the introduction and conclusion for a completed consumer guide.
 
 Introduction rules:
-- 300–400 words
-- Open with a compelling hook: a relatable scenario or a surprising (but factual) question
-- Explain who this guide is for and what they will learn
-- Why this information matters right now
-- Do NOT summarize the sections — build anticipation instead
+- 350–450 words
+- Open with a vivid, emotionally resonant hook: a relatable scenario (a real family moment, a worry most readers have had), or a surprising but factual question that reframes how they see the topic
+- Name the reader's pain point clearly — show you understand why they're reading this
+- State concisely who this guide is for and what they will walk away knowing
+- Build anticipation for what's ahead — do NOT preview section titles or summarize content
+- Close the intro with a single sentence that transitions naturally into the first section
 - No ## heading — the intro flows directly before the first section
 
 Conclusion rules:
-- 400–500 words
-- Recap 3–5 key takeaways from the guide (brief, bullet-style)
-- Acknowledge that every situation is different
-- Soft CTA: position a free consultation with Isaac Plans as the natural next step
-  - Mention consultation, not a sale — "get your questions answered", "understand your options"
-  - Never say "buy now" or use urgent scarcity language
-- End with a warm, encouraging close
+- 450–550 words
+- Begin with a brief acknowledgment that the reader has now covered a lot of ground
+- Recap 4–5 key takeaways as a clean bullet list (each takeaway: one powerful sentence)
+- Acknowledge that insurance is personal — every situation is different, every family is different
+- Soft, confident CTA: frame a free consultation with Isaac Plans as the logical next step — not a sales call, but a conversation to get questions answered and understand their specific options
+  - Use language like: "get clarity", "understand your options", "find the right fit", "no pressure, no obligation"
+  - Never say "buy now", "limited time", or use fear/scarcity language
+- End with a warm, forward-looking close that leaves the reader feeling empowered, not pressured
 
 Output format: Return a JSON object with two fields:
 {

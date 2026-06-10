@@ -44,10 +44,13 @@ function validateAndNormalize(
     );
   }
 
-  if (!Array.isArray(raw.sections) || raw.sections.length < 6 || raw.sections.length > 8) {
+  if (!Array.isArray(raw.sections) || raw.sections.length < 6) {
     throw new Error(
-      `Outline validation failed: sections array has ${Array.isArray(raw.sections) ? raw.sections.length : 0} items, expected 6–8`
+      `Outline validation failed: sections array has ${Array.isArray(raw.sections) ? raw.sections.length : 0} items, minimum is 6`
     );
+  }
+  if (raw.sections.length > 8) {
+    raw.sections = raw.sections.slice(0, 8);
   }
 
   const sections: LeadMagnetSection[] = raw.sections.map((s, i) => {

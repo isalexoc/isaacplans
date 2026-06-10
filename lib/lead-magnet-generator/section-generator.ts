@@ -32,7 +32,7 @@ export async function generateSection(params: {
   try {
     const response = await client.chat.completions.create({
       model,
-      max_tokens: 2000,
+      max_tokens: 2500,
       messages: [
         { role: "system", content: SECTION_GENERATION_SYSTEM_PROMPT },
         { role: "user", content: buildSectionPrompt(params) },
