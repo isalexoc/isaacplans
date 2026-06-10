@@ -213,8 +213,8 @@ async function generateImageSetForLocale(
     ),
   ]);
 
-  // Step 4: generate promo cards (requires coverUrl from step 3)
-  const promoImages = coverUrl
+  // Step 4: generate EN promo card only — ES title comes from translation at publish time
+  const promoImages = (locale === "en" && coverUrl)
     ? await generatePromoImages(outline, coverUrl, locale).catch((err) => {
         warnings.push(`[${locale}] Promo image generation failed: ${err instanceof Error ? err.message : String(err)}`);
         return undefined;

@@ -1,9 +1,11 @@
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { publishBilingualLeadMagnet } from "@/lib/lead-magnet-generator/sanity-publisher";
+import { generatePromoImages } from "@/lib/lead-magnet-generator/promo-image-generator";
 import type {
   BilingualLeadMagnetPublishInput,
   TranslatedLeadMagnet,
+  BilingualLeadMagnetImages,
 } from "@/lib/lead-magnet-generator/types";
 
 export const maxDuration = 300;
@@ -25,7 +27,7 @@ export async function POST(request: Request) {
   const {
     outline,
     generatedContent,
-    images,
+    images: rawImages,
     enPdfUrl,
     status,
     originalPromptInput,
@@ -35,7 +37,7 @@ export async function POST(request: Request) {
     esPdfUrl,
   } = body;
 
-  if (!outline || !generatedContent || !images || !enPdfUrl || !status || !originalPromptInput || !esContent || !esPdfUrl) {
+  if (!outline || !generatedContent || !rawImages || !enPdfUrl || !status || !originalPromptInput || !esContent || !esPdfUrl) {
     return NextResponse.json(
       { success: false, error: "Missing required fields" },
       { status: 400 }
@@ -53,6 +55,21 @@ export async function POST(request: Request) {
     ctaButtonText: "Download Free Guide",
     successMessage: "Your guide is downloading now!",
   };
+
+  // Generate ES promo with the correct translated title (not available during the images step)
+  let images: BilingualLeadMagnetImages = rawImages;
+  if (rawImages.es.coverImage && esContent.outline.title) {
+    try {
+      const esPromo = await generatePromoImages(
+        { ...outline, title: esContent.outline.title },
+        rawImages.es.coverImage,
+        "es"
+      );
+      images = { ...rawImages, es: { ...rawImages.es, promoImages: esPromo } };
+    } catch (err) {
+      console.warn("[publish] ES promo generation failed (non-fatal):", err instanceof Error ? err.message : String(err));
+    }
+  }
 
   try {
     console.log("[publish] START — saving EN+ES docs to Sanity");

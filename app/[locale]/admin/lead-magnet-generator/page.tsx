@@ -754,43 +754,49 @@ function ImagesStep({
               <CardTitle className="text-sm uppercase tracking-wide text-muted-foreground">Social Media Promo Cards</CardTitle>
             </CardHeader>
             <CardContent>
-              {activeImages?.promoImages ? (
-                <div className="flex flex-col gap-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {/* Square */}
-                    <div className="flex flex-col gap-2">
-                      <img
-                        src={activeImages.promoImages.square}
-                        alt="Promo card square"
-                        className="w-full aspect-square object-cover rounded-md border"
-                      />
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="text-xs text-muted-foreground">1080 × 1080 — Instagram</span>
-                        <CopyButton url={activeImages.promoImages.square} />
-                      </div>
+              {(() => {
+                const promoSource = activeImages?.promoImages ?? bilingualImages?.en.promoImages;
+                const isEsFallback = activeTab === "es" && !activeImages?.promoImages && !!bilingualImages?.en.promoImages;
+                if (generating) {
+                  return (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground py-4">
+                      <Loader2 className="h-4 w-4 animate-spin" /> Generating promo cards alongside images...
                     </div>
-                    {/* Landscape */}
-                    <div className="flex flex-col gap-2">
-                      <img
-                        src={activeImages.promoImages.landscape}
-                        alt="Promo card landscape"
-                        className="w-full object-cover rounded-md border"
-                        style={{ aspectRatio: "1200 / 630" }}
-                      />
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="text-xs text-muted-foreground">1200 × 630 — Facebook / LinkedIn</span>
-                        <CopyButton url={activeImages.promoImages.landscape} />
+                  );
+                }
+                if (!promoSource) {
+                  return (
+                    <div className="text-sm text-muted-foreground py-4">
+                      Promo cards unavailable — cover image generation may have failed.
+                    </div>
+                  );
+                }
+                return (
+                  <div className="flex flex-col gap-4">
+                    {isEsFallback && (
+                      <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-3 py-2">
+                        Spanish promo cards will be generated with the translated title at publish time. Preview below uses the English design.
+                      </p>
+                    )}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="flex flex-col gap-2">
+                        <img src={promoSource.square} alt="Promo card square" className="w-full aspect-square object-cover rounded-md border" />
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-xs text-muted-foreground">1080 × 1080 — Instagram</span>
+                          {!isEsFallback && <CopyButton url={promoSource.square} />}
+                        </div>
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <img src={promoSource.landscape} alt="Promo card landscape" className="w-full object-cover rounded-md border" style={{ aspectRatio: "1200 / 630" }} />
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-xs text-muted-foreground">1200 × 630 — Facebook / LinkedIn</span>
+                          {!isEsFallback && <CopyButton url={promoSource.landscape} />}
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ) : (
-                <div className="flex items-center gap-2 text-sm text-muted-foreground py-4">
-                  {generating
-                    ? <><Loader2 className="h-4 w-4 animate-spin" /> Generating promo cards alongside images...</>
-                    : "Promo cards unavailable — cover image generation may have failed."}
-                </div>
-              )}
+                );
+              })()}
             </CardContent>
           </Card>
         </div>
