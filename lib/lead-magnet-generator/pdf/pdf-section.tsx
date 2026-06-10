@@ -67,7 +67,13 @@ export function PdfSection({
   locale = "en",
 }: PdfSectionProps) {
   const sectionLabel = locale === "es" ? `Sección ${sectionNumber}` : `Section ${sectionNumber}`;
-  const lines = parseLines(content);
+  const rawLines = parseLines(content);
+  const firstH2Index = rawLines.findIndex((l) => l.type === "h2");
+  const lines =
+    firstH2Index !== -1 &&
+    rawLines[firstH2Index].text.trim().toLowerCase() === sectionTitle.trim().toLowerCase()
+      ? rawLines.filter((_, i) => i !== firstH2Index)
+      : rawLines;
 
   return (
     <Page size="A4" style={styles.page}>
