@@ -150,6 +150,45 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.isaacplans.com";
 const PHONE = process.env.NEXT_PUBLIC_PHONE_NUMBER ?? "";
 
+const UI_TEXT = {
+  en: {
+    freeDownload: "FREE DOWNLOAD",
+    whatYoullLearn: "What You'll Learn",
+    aboutThisGuide: "About This Guide",
+    writtenFor: "Written for:",
+    downloadedSingular: "person has downloaded this guide",
+    downloadedPlural: "people have downloaded this guide",
+    byAgency: "By Isaac Plans Insurance — Licensed Insurance Agency",
+    preferToSpeak: "Prefer to speak with someone?",
+    browseAll: "Browse all free guides →",
+    guidesPath: "lead-magnets",
+    defaultCta: {
+      ctaHeadline: "Get Your Free Guide",
+      ctaSubtext: "Enter your info below to download instantly — no spam, ever.",
+      ctaButtonText: "Download Free Guide",
+      successMessage: "Your guide is downloading now!",
+    },
+  },
+  es: {
+    freeDownload: "DESCARGA GRATIS",
+    whatYoullLearn: "Lo Que Aprenderás",
+    aboutThisGuide: "Sobre Esta Guía",
+    writtenFor: "Escrito para:",
+    downloadedSingular: "persona ha descargado esta guía",
+    downloadedPlural: "personas han descargado esta guía",
+    byAgency: "Por Isaac Plans Insurance — Agencia de Seguros con Licencia",
+    preferToSpeak: "¿Prefiere hablar con alguien?",
+    browseAll: "Ver todas las guías gratuitas →",
+    guidesPath: "imanes-de-leads",
+    defaultCta: {
+      ctaHeadline: "Obtén Tu Guía Gratis",
+      ctaSubtext: "Ingresa tus datos para descargar al instante — sin spam, nunca.",
+      ctaButtonText: "Descargar Guía Gratis",
+      successMessage: "¡Tu guía se está descargando ahora!",
+    },
+  },
+} as const;
+
 export default async function LeadMagnetPage({ params }: Props) {
   const { slug, locale } = await params;
   const fetchOptions = { next: { revalidate: 3600, tags: [`lead-magnet-${slug}`] } };
@@ -183,18 +222,13 @@ export default async function LeadMagnetPage({ params }: Props) {
   const alternateLocale = locale === "en" ? "es" : "en";
   const alternatePathPrefix = alternateLocale === "es" ? "imanes-de-leads" : "lead-magnets";
 
+  const t = UI_TEXT[locale === "es" ? "es" : "en"];
+
   const coverImageUrl = guide.coverImage?.asset?.url ?? null;
   const coverImageAlt = guide.coverImage?.alt ?? guide.title;
   const downloadCount = guide.downloadCount ?? 0;
 
-  const defaultLeadFormSettings = {
-    ctaHeadline: "Get Your Free Guide",
-    ctaSubtext: "Enter your info below to download instantly — no spam, ever.",
-    ctaButtonText: "Download Free Guide",
-    successMessage: "Your guide is downloading now!",
-  };
-
-  const leadFormSettings = guide.leadFormSettings ?? defaultLeadFormSettings;
+  const leadFormSettings = guide.leadFormSettings ?? t.defaultCta;
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -235,7 +269,7 @@ export default async function LeadMagnetPage({ params }: Props) {
         <div className="absolute inset-0 flex flex-col justify-end p-6 sm:p-12 max-w-4xl mx-auto w-full">
           <span className="inline-flex items-center gap-1.5 bg-blue-500 text-white text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full w-fit mb-4">
             <Download className="w-3 h-3" />
-            FREE DOWNLOAD
+            {t.freeDownload}
           </span>
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-tight mb-3">
             {guide.title}
@@ -249,7 +283,7 @@ export default async function LeadMagnetPage({ params }: Props) {
         {guide.keyBenefits && guide.keyBenefits.length > 0 && (
           <section>
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-8">
-              What You&apos;ll Learn
+              {t.whatYoullLearn}
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {guide.keyBenefits.map((benefit, i) => (
@@ -266,7 +300,7 @@ export default async function LeadMagnetPage({ params }: Props) {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* About */}
           <section>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">About This Guide</h2>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">{t.aboutThisGuide}</h2>
             {guide.description && Array.isArray(guide.description) && guide.description.length > 0 && (
               <div className="prose prose-gray dark:prose-invert max-w-none">
                 <PortableText value={guide.description as any} components={descriptionComponents} />
@@ -274,7 +308,7 @@ export default async function LeadMagnetPage({ params }: Props) {
             )}
             {guide.targetAudience && (
               <div className="mt-6 bg-blue-50 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-800 rounded-lg px-4 py-3 text-sm text-blue-900 dark:text-blue-200">
-                <span className="font-semibold">Written for:</span> {guide.targetAudience}
+                <span className="font-semibold">{t.writtenFor}</span> {guide.targetAudience}
               </div>
             )}
           </section>
@@ -300,10 +334,10 @@ export default async function LeadMagnetPage({ params }: Props) {
           {downloadCount > 0 && (
             <p className="text-gray-600 dark:text-gray-400 text-sm">
               <span className="font-semibold text-gray-900 dark:text-white">{downloadCount.toLocaleString()}</span>{" "}
-              {downloadCount === 1 ? "person has" : "people have"} downloaded this guide
+              {downloadCount === 1 ? t.downloadedSingular : t.downloadedPlural}
             </p>
           )}
-          <p className="text-sm text-gray-500 dark:text-gray-400">By Isaac Plans Insurance — Licensed Insurance Agency</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{t.byAgency}</p>
           <div className="flex justify-center gap-0.5">
             {Array.from({ length: 5 }).map((_, i) => (
               <Star key={i} className="w-5 h-5 fill-yellow-400 text-yellow-400" />
@@ -313,7 +347,7 @@ export default async function LeadMagnetPage({ params }: Props) {
 
         {/* 6. Footer CTA */}
         <section className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-8 text-center space-y-3 border border-gray-100 dark:border-gray-700">
-          <p className="text-gray-700 dark:text-gray-300 font-medium">Prefer to speak with someone?</p>
+          <p className="text-gray-700 dark:text-gray-300 font-medium">{t.preferToSpeak}</p>
           {PHONE && (
             <a
               href={`tel:${PHONE}`}
@@ -324,10 +358,10 @@ export default async function LeadMagnetPage({ params }: Props) {
           )}
           <div className="pt-2">
             <Link
-              href={`/${locale}/lead-magnets`}
+              href={`/${locale}/${t.guidesPath}`}
               className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 underline"
             >
-              Browse all free guides →
+              {t.browseAll}
             </Link>
           </div>
         </section>
