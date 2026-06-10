@@ -58,12 +58,10 @@ async function buildSectionPrompt(
   );
 }
 
-async function generateAndUpload(
+async function generateImage(
   client: OpenAI,
   prompt: string,
-  size: "1536x1024" | "1024x1024",
-  folder: string,
-  publicId: string
+  size: "1536x1024" | "1024x1024"
 ): Promise<string> {
   const response = (await (client.images.generate as unknown as (
     body: Record<string, unknown>
@@ -78,7 +76,14 @@ async function generateAndUpload(
 
   const b64 = response.data?.[0]?.b64_json;
   if (!b64) throw new Error("gpt-image-2 returned no image data");
+  return b64;
+}
 
+async function uploadToCloudinary(
+  b64: string,
+  folder: string,
+  publicId: string
+): Promise<string> {
   const uploaded = await cloudinary.uploader.upload(`data:image/png;base64,${b64}`, {
     folder,
     public_id: publicId,
@@ -107,38 +112,56 @@ export async function generateLeadMagnetImages(
   const warnings: string[] = [];
   const { category } = outline;
   const sectionIndices = selectSectionIndices(outline.sections.length);
+  const ts = Date.now();
 
-  let coverImage = "";
-  try {
-    const prompt = await buildCoverPrompt(client, outline);
-    coverImage = await generateAndUpload(
-      client,
-      prompt,
-      "1536x1024",
-      `lead-magnets/${category}`,
-      `cover-${Date.now()}`
-    );
-  } catch (err) {
-    warnings.push(`Cover image failed: ${err instanceof Error ? err.message : String(err)}`);
-  }
+  // Step 1: build all prompts in parallel
+  const [coverPrompt, ...sectionPrompts] = await Promise.all([
+    buildCoverPrompt(client, outline).catch((err) => {
+      warnings.push(`Cover prompt failed: ${err instanceof Error ? err.message : String(err)}`);
+      return `Professional insurance guide cover for ${category}, warm lighting, photorealistic, no text`;
+    }),
+    ...sectionIndices.map((idx) =>
+      buildSectionPrompt(client, outline, idx).catch((err) => {
+        warnings.push(`Section ${idx} prompt failed: ${err instanceof Error ? err.message : String(err)}`);
+        return `Insurance professional illustration, ${category}, warm lighting, photorealistic, no text`;
+      })
+    ),
+  ]);
 
-  const sectionImages: string[] = [];
-  for (const idx of sectionIndices) {
-    try {
-      const prompt = await buildSectionPrompt(client, outline, idx);
-      const url = await generateAndUpload(
-        client,
-        prompt,
-        "1024x1024",
-        `lead-magnets/${category}/sections`,
-        `section-${idx}-${Date.now()}`
-      );
-      sectionImages.push(url);
-    } catch (err) {
-      warnings.push(`Section ${idx} image failed: ${err instanceof Error ? err.message : String(err)}`);
-      sectionImages.push("");
-    }
-  }
+  // Step 2: generate all images in parallel
+  const [coverB64, ...sectionB64s] = await Promise.all([
+    generateImage(client, coverPrompt, "1536x1024").catch((err) => {
+      warnings.push(`Cover image generation failed: ${err instanceof Error ? err.message : String(err)}`);
+      return null;
+    }),
+    ...sectionPrompts.map((prompt, i) =>
+      generateImage(client, prompt, "1024x1024").catch((err) => {
+        warnings.push(`Section ${sectionIndices[i]} image generation failed: ${err instanceof Error ? err.message : String(err)}`);
+        return null;
+      })
+    ),
+  ]);
 
-  return { images: { coverImage, sectionImages }, warnings };
+  // Step 3: upload all to Cloudinary in parallel
+  const [coverUrl, ...sectionUrls] = await Promise.all([
+    coverB64
+      ? uploadToCloudinary(coverB64, `lead-magnets/${category}`, `cover-${ts}`).catch((err) => {
+          warnings.push(`Cover upload failed: ${err instanceof Error ? err.message : String(err)}`);
+          return "";
+        })
+      : Promise.resolve(""),
+    ...sectionB64s.map((b64, i) =>
+      b64
+        ? uploadToCloudinary(b64, `lead-magnets/${category}/sections`, `section-${sectionIndices[i]}-${ts}`).catch((err) => {
+            warnings.push(`Section ${sectionIndices[i]} upload failed: ${err instanceof Error ? err.message : String(err)}`);
+            return "";
+          })
+        : Promise.resolve("")
+    ),
+  ]);
+
+  return {
+    images: { coverImage: coverUrl, sectionImages: sectionUrls },
+    warnings,
+  };
 }
