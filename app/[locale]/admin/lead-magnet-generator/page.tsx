@@ -638,7 +638,7 @@ function ImagesStep({
       {generating && (
         <div className="flex flex-col items-center gap-3 py-12 text-muted-foreground">
           <Loader2 className="h-8 w-8 animate-spin" />
-          <p className="text-sm">Generating images with DALL-E 3 (this takes ~30 seconds)...</p>
+          <p className="text-sm">Generating images with AI (this takes ~30 seconds)...</p>
         </div>
       )}
 
