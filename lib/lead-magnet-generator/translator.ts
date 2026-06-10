@@ -77,18 +77,12 @@ async function translateMetadata(
   return parsed;
 }
 
-async function translateSections(
+async function translateOneSection(
   client: OpenAI,
   model: string,
-  sections: GeneratedLeadMagnet["sections"]
-): Promise<SectionTranslation[]> {
-  const input = sections.map((s) => ({ sectionTitle: s.sectionTitle, content: s.content ?? "" }));
-
-  const totalChars = input.reduce((sum, s) => sum + s.content.length, 0);
-  const inputTokenEstimate = totalChars / 4;
-  console.log(`[translator] translateSections START — model=${model} sections=${sections.length} ~${Math.round(inputTokenEstimate)} input tokens (~${Math.round(totalChars / 5)} words)`);
-  const t0 = Date.now();
-
+  section: { sectionTitle: string; content: string },
+  index: number
+): Promise<SectionTranslation> {
   const response = await client.chat.completions.create({
     model,
     response_format: { type: "json_object" },
@@ -96,15 +90,38 @@ async function translateSections(
       { role: "system", content: SYSTEM_PROMPT },
       {
         role: "user",
-        content: `Translate these English insurance guide sections to Latin American Spanish. Return JSON: { "sections": [ { "sectionTitle": "...", "content": "...markdown..." }, ... ] }\n\n${JSON.stringify(input, null, 2)}`,
+        content: `Translate this English insurance guide section to Latin American Spanish. Return JSON: { "sectionTitle": "...", "content": "...markdown..." }\n\n${JSON.stringify(section, null, 2)}`,
       },
     ],
   });
+  const raw = response.choices[0]?.message?.content ?? "";
+  const parsed: SectionTranslation = JSON.parse(raw);
+  return parsed;
+}
+
+async function translateSections(
+  client: OpenAI,
+  model: string,
+  sections: GeneratedLeadMagnet["sections"]
+): Promise<SectionTranslation[]> {
+  const totalChars = sections.reduce((sum, s) => sum + (s.content?.length ?? 0), 0);
+  const inputTokenEstimate = totalChars / 4;
+  console.log(`[translator] translateSections START — model=${model} sections=${sections.length} ~${Math.round(inputTokenEstimate)} input tokens (~${Math.round(totalChars / 5)} words)`);
+  const t0 = Date.now();
+
+  const results = await Promise.all(
+    sections.map((s, i) =>
+      translateOneSection(client, model, { sectionTitle: s.sectionTitle, content: s.content ?? "" }, i).catch(
+        (err) => {
+          console.warn(`[translator] section ${i} failed: ${err instanceof Error ? err.message : String(err)}`);
+          return { sectionTitle: s.sectionTitle, content: s.content ?? "" };
+        }
+      )
+    )
+  );
 
   console.log(`[translator] translateSections DONE — ${Date.now() - t0}ms`);
-  const raw = response.choices[0]?.message?.content ?? "";
-  const parsed: { sections: SectionTranslation[] } = JSON.parse(raw);
-  return parsed.sections;
+  return results;
 }
 
 export async function translateLeadMagnet(
