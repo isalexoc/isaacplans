@@ -1,14 +1,13 @@
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { translateLeadMagnet } from "@/lib/lead-magnet-generator/translator";
-import { generateAndUploadPdf } from "@/lib/lead-magnet-generator/pdf-generator";
 import type {
   GeneratedLeadMagnet,
   BilingualLeadMagnetImages,
   LeadMagnetOutline,
 } from "@/lib/lead-magnet-generator/types";
 
-export const maxDuration = 120;
+export const maxDuration = 60;
 
 export async function POST(request: Request) {
   const { userId } = await auth();
@@ -39,6 +38,8 @@ export async function POST(request: Request) {
   try {
     const esContent = await translateLeadMagnet(generatedContent, enSeoOverride, enLeadFormOverride);
 
+    // Build the ES outline and GeneratedLeadMagnet shapes so the client can
+    // pass them directly to /generate-pdf without a round-trip to re-derive them.
     const esOutline: LeadMagnetOutline = {
       ...outline,
       title: esContent.outline.title,
@@ -63,19 +64,12 @@ export async function POST(request: Request) {
       conclusionBlocks: esContent.conclusionBlocks,
     };
 
-    const { pdfUrl: esPdfUrl } = await generateAndUploadPdf({
-      generatedContent: esGeneratedContent,
-      images: images.es,
-      outline: esOutline,
-      locale: "es",
-    });
-
-    return NextResponse.json({ success: true, data: { esContent, esPdfUrl } });
+    return NextResponse.json({ success: true, data: { esContent, esOutline, esGeneratedContent } });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     console.error("[lead-magnet-generator/translate-es]", err);
     return NextResponse.json(
-      { success: false, error: `Translation/ES PDF generation failed: ${message}` },
+      { success: false, error: `Translation failed: ${message}` },
       { status: 500 }
     );
   }

@@ -780,7 +780,7 @@ function PublishStep({
 
   const [generatingPdf, setGeneratingPdf] = useState(false);
   const [pdfError, setPdfError] = useState<string | null>(null);
-  const [publishPhase, setPublishPhase] = useState<"idle" | "translating" | "saving">("idle");
+  const [publishPhase, setPublishPhase] = useState<"idle" | "translating" | "pdf-es" | "saving">("idle");
   const [publishError, setPublishError] = useState<string | null>(null);
   const publishing = publishPhase !== "idle";
 
@@ -818,6 +818,7 @@ function PublishStep({
     const updatedContent = { ...generatedContent, outline: updatedOutline };
 
     try {
+      // Phase 1: translate EN → ES (~15-30s with gpt-4o-mini)
       setPublishPhase("translating");
       const translateData = await postJson("/api/admin/lead-magnet-generator/translate-es", {
         generatedContent: updatedContent,
@@ -826,8 +827,21 @@ function PublishStep({
         enSeoOverride,
         enLeadFormOverride,
       });
-      const { esContent, esPdfUrl } = translateData.data;
+      const { esContent, esOutline, esGeneratedContent } = translateData.data;
 
+      // Phase 2: generate ES PDF (~20-40s)
+      setPublishPhase("pdf-es");
+      const esPdfData = await postJson("/api/admin/lead-magnet-generator/generate-pdf", {
+        generatedContent: updatedContent,
+        images: state.images,
+        outline: updatedOutline,
+        locale: "es",
+        esGeneratedContent,
+        esOutline,
+      });
+      const esPdfUrl = esPdfData.data.pdfUrl;
+
+      // Phase 3: publish both to Sanity (~10s)
       setPublishPhase("saving");
       const publishData = await postJson("/api/admin/lead-magnet-generator/publish", {
         outline: updatedOutline,
@@ -984,7 +998,9 @@ function PublishStep({
         title={!enPdfUrl ? "Generate the PDF first" : undefined}
       >
         {publishPhase === "translating"
-          ? <><Loader2 className="h-4 w-4 animate-spin mr-2" />Translating to Spanish &amp; generating ES PDF (~60–90s)...</>
+          ? <><Loader2 className="h-4 w-4 animate-spin mr-2" />Translating to Spanish (~15–30s)...</>
+          : publishPhase === "pdf-es"
+          ? <><Loader2 className="h-4 w-4 animate-spin mr-2" />Generating Spanish PDF (~20–40s)...</>
           : publishPhase === "saving"
           ? <><Loader2 className="h-4 w-4 animate-spin mr-2" />Saving both guides to Sanity...</>
           : "Publish (EN + ES) →"}

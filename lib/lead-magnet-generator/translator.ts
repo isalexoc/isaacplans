@@ -103,7 +103,7 @@ export async function translateLeadMagnet(
 ): Promise<TranslatedLeadMagnet> {
   if (!process.env.OPENAI_API_KEY) throw new Error("OPENAI_API_KEY is not configured");
 
-  const model = process.env.OPENAI_MODEL ?? "gpt-4o";
+  const model = process.env.OPENAI_TRANSLATION_MODEL ?? "gpt-4o-mini";
   const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
   const [meta, translatedSections] = await Promise.all([

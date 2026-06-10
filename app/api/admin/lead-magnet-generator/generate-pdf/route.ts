@@ -19,6 +19,10 @@ export async function POST(request: Request) {
     generatedContent: GeneratedLeadMagnet;
     images: BilingualLeadMagnetImages;
     outline: LeadMagnetOutline;
+    locale?: "en" | "es";
+    // ES-specific content passed directly when locale=es
+    esGeneratedContent?: GeneratedLeadMagnet;
+    esOutline?: LeadMagnetOutline;
   };
 
   try {
@@ -27,7 +31,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: false, error: "Invalid JSON body" }, { status: 400 });
   }
 
-  const { generatedContent, images, outline } = body;
+  const { generatedContent, images, outline, locale = "en", esGeneratedContent, esOutline } = body;
 
   if (!generatedContent || !images || !outline) {
     return NextResponse.json(
@@ -37,11 +41,12 @@ export async function POST(request: Request) {
   }
 
   try {
+    const isEs = locale === "es";
     const result = await generateAndUploadPdf({
-      generatedContent,
-      images: images.en,
-      outline,
-      locale: "en",
+      generatedContent: isEs ? (esGeneratedContent ?? generatedContent) : generatedContent,
+      images: isEs ? images.es : images.en,
+      outline: isEs ? (esOutline ?? outline) : outline,
+      locale,
     });
     return NextResponse.json({ success: true, data: result });
   } catch (err) {
