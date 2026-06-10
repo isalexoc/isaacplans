@@ -1,14 +1,12 @@
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { publishBilingualLeadMagnet } from "@/lib/lead-magnet-generator/sanity-publisher";
-import { translateLeadMagnet } from "@/lib/lead-magnet-generator/translator";
-import { generateAndUploadPdf } from "@/lib/lead-magnet-generator/pdf-generator";
 import type {
   BilingualLeadMagnetPublishInput,
-  LeadMagnetOutline,
+  TranslatedLeadMagnet,
 } from "@/lib/lead-magnet-generator/types";
 
-export const maxDuration = 120;
+export const maxDuration = 30;
 
 export async function POST(request: Request) {
   const { userId } = await auth();
@@ -16,7 +14,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
   }
 
-  let body: BilingualLeadMagnetPublishInput;
+  let body: BilingualLeadMagnetPublishInput & { esContent: TranslatedLeadMagnet; esPdfUrl: string };
 
   try {
     body = await request.json();
@@ -33,9 +31,11 @@ export async function POST(request: Request) {
     originalPromptInput,
     enSeoOverride,
     enLeadFormOverride,
+    esContent,
+    esPdfUrl,
   } = body;
 
-  if (!outline || !generatedContent || !images || !enPdfUrl || !status || !originalPromptInput) {
+  if (!outline || !generatedContent || !images || !enPdfUrl || !status || !originalPromptInput || !esContent || !esPdfUrl) {
     return NextResponse.json(
       { success: false, error: "Missing required fields" },
       { status: 400 }
@@ -55,48 +55,6 @@ export async function POST(request: Request) {
   };
 
   try {
-    // Step 1: translate EN → ES
-    const esContent = await translateLeadMagnet(
-      generatedContent,
-      seoOverride,
-      leadFormOverride
-    );
-
-    // Step 2: build ES outline shape for PDF generator
-    const esOutline: LeadMagnetOutline = {
-      ...outline,
-      title: esContent.outline.title,
-      subtitle: esContent.outline.subtitle,
-      keyBenefits: esContent.outline.keyBenefits,
-      sections: esContent.outline.sections.map((s, i) => ({
-        ...outline.sections[i],
-        sectionTitle: s.sectionTitle,
-        keyPoints: s.keyPoints,
-        content: esContent.sections[i]?.content ?? "",
-        contentBlocks: esContent.sections[i]?.contentBlocks ?? [],
-        sectionImage: images.es.sectionImages[i] ?? "",
-      })),
-    };
-
-    // Step 3: build GeneratedLeadMagnet-shaped object for ES PDF renderer
-    const esGeneratedContent = {
-      outline: esOutline,
-      sections: esOutline.sections,
-      introduction: esContent.introduction,
-      conclusion: esContent.conclusion,
-      introductionBlocks: esContent.introductionBlocks,
-      conclusionBlocks: esContent.conclusionBlocks,
-    };
-
-    // Step 4: generate ES PDF
-    const { pdfUrl: esPdfUrl } = await generateAndUploadPdf({
-      generatedContent: esGeneratedContent,
-      images: images.es,
-      outline: esOutline,
-      locale: "es",
-    });
-
-    // Step 5: publish both Sanity docs
     const result = await publishBilingualLeadMagnet({
       outline,
       generatedContent,

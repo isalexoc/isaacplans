@@ -780,8 +780,9 @@ function PublishStep({
 
   const [generatingPdf, setGeneratingPdf] = useState(false);
   const [pdfError, setPdfError] = useState<string | null>(null);
-  const [publishing, setPublishing] = useState(false);
+  const [publishPhase, setPublishPhase] = useState<"idle" | "translating" | "saving">("idle");
   const [publishError, setPublishError] = useState<string | null>(null);
+  const publishing = publishPhase !== "idle";
 
   const enPdfUrl = state.enPdfUrl;
 
@@ -805,7 +806,6 @@ function PublishStep({
 
   async function handlePublish() {
     if (!enPdfUrl || !state.images || !state.promptInput) return;
-    setPublishing(true);
     setPublishError(null);
 
     const updatedOutline: LeadMagnetOutline = {
@@ -813,23 +813,39 @@ function PublishStep({
       title: title.trim() || outline.title,
       subtitle: subtitle.trim() || outline.subtitle,
     };
+    const enSeoOverride = { metaTitle, metaDescription, focusKeyword };
+    const enLeadFormOverride = { ctaHeadline, ctaSubtext, ctaButtonText, successMessage };
+    const updatedContent = { ...generatedContent, outline: updatedOutline };
 
     try {
-      const data = await postJson("/api/admin/lead-magnet-generator/publish", {
+      setPublishPhase("translating");
+      const translateData = await postJson("/api/admin/lead-magnet-generator/translate-es", {
+        generatedContent: updatedContent,
+        images: state.images,
         outline: updatedOutline,
-        generatedContent: { ...generatedContent, outline: updatedOutline },
+        enSeoOverride,
+        enLeadFormOverride,
+      });
+      const { esContent, esPdfUrl } = translateData.data;
+
+      setPublishPhase("saving");
+      const publishData = await postJson("/api/admin/lead-magnet-generator/publish", {
+        outline: updatedOutline,
+        generatedContent: updatedContent,
         images: state.images,
         enPdfUrl,
         status: publishStatus,
         originalPromptInput: state.promptInput,
-        enSeoOverride: { metaTitle, metaDescription, focusKeyword },
-        enLeadFormOverride: { ctaHeadline, ctaSubtext, ctaButtonText, successMessage },
+        enSeoOverride,
+        enLeadFormOverride,
+        esContent,
+        esPdfUrl,
       });
-      setState((prev) => ({ ...prev, publishedResult: data.data, step: "success" }));
+      setState((prev) => ({ ...prev, publishedResult: publishData.data, step: "success" }));
     } catch (err) {
       setPublishError(err instanceof Error ? err.message : "Publish failed");
     } finally {
-      setPublishing(false);
+      setPublishPhase("idle");
     }
   }
 
@@ -967,8 +983,10 @@ function PublishStep({
         size="lg"
         title={!enPdfUrl ? "Generate the PDF first" : undefined}
       >
-        {publishing
-          ? <><Loader2 className="h-4 w-4 animate-spin mr-2" />Translating &amp; publishing both guides (~60s)...</>
+        {publishPhase === "translating"
+          ? <><Loader2 className="h-4 w-4 animate-spin mr-2" />Translating to Spanish &amp; generating ES PDF (~60–90s)...</>
+          : publishPhase === "saving"
+          ? <><Loader2 className="h-4 w-4 animate-spin mr-2" />Saving both guides to Sanity...</>
           : "Publish (EN + ES) →"}
       </Button>
 
