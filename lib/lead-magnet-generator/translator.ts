@@ -55,6 +55,10 @@ async function translateMetadata(
     leadFormSettings: enLeadFormOverride,
   };
 
+  const inputTokenEstimate = JSON.stringify(input).length / 4;
+  console.log(`[translator] translateMetadata START — model=${model} ~${Math.round(inputTokenEstimate)} input tokens`);
+  const t0 = Date.now();
+
   const response = await client.chat.completions.create({
     model,
     response_format: { type: "json_object" },
@@ -67,6 +71,7 @@ async function translateMetadata(
     ],
   });
 
+  console.log(`[translator] translateMetadata DONE — ${Date.now() - t0}ms`);
   const raw = response.choices[0]?.message?.content ?? "";
   const parsed: MetadataTranslation = JSON.parse(raw);
   return parsed;
@@ -78,6 +83,11 @@ async function translateSections(
   sections: GeneratedLeadMagnet["sections"]
 ): Promise<SectionTranslation[]> {
   const input = sections.map((s) => ({ sectionTitle: s.sectionTitle, content: s.content ?? "" }));
+
+  const totalChars = input.reduce((sum, s) => sum + s.content.length, 0);
+  const inputTokenEstimate = totalChars / 4;
+  console.log(`[translator] translateSections START — model=${model} sections=${sections.length} ~${Math.round(inputTokenEstimate)} input tokens (~${Math.round(totalChars / 5)} words)`);
+  const t0 = Date.now();
 
   const response = await client.chat.completions.create({
     model,
@@ -91,6 +101,7 @@ async function translateSections(
     ],
   });
 
+  console.log(`[translator] translateSections DONE — ${Date.now() - t0}ms`);
   const raw = response.choices[0]?.message?.content ?? "";
   const parsed: { sections: SectionTranslation[] } = JSON.parse(raw);
   return parsed.sections;
@@ -106,10 +117,15 @@ export async function translateLeadMagnet(
   const model = process.env.OPENAI_TRANSLATION_MODEL ?? "gpt-4o-mini";
   const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
+  console.log(`[translator] translateLeadMagnet START — model=${model} sections=${content.sections.length}`);
+  const t0 = Date.now();
+
   const [meta, translatedSections] = await Promise.all([
     translateMetadata(client, model, content, enSeoOverride, enLeadFormOverride),
     translateSections(client, model, content.sections),
   ]);
+
+  console.log(`[translator] translateLeadMagnet DONE — total=${Date.now() - t0}ms`);
 
   return {
     outline: {

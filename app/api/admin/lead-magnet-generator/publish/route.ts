@@ -55,6 +55,8 @@ export async function POST(request: Request) {
   };
 
   try {
+    console.log("[publish] START — saving EN+ES docs to Sanity");
+    const t0 = Date.now();
     const result = await publishBilingualLeadMagnet({
       outline,
       generatedContent,
@@ -68,6 +70,7 @@ export async function POST(request: Request) {
       esPdfUrl,
     });
 
+    console.log(`[publish] DONE — ${Date.now() - t0}ms en=${result.en.slug} es=${result.es.slug}`);
     return NextResponse.json({ success: true, data: result });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);

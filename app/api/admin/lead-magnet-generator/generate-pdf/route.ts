@@ -42,12 +42,15 @@ export async function POST(request: Request) {
 
   try {
     const isEs = locale === "es";
+    console.log(`[generate-pdf] START — locale=${locale} sections=${outline.sections.length}`);
+    const t0 = Date.now();
     const result = await generateAndUploadPdf({
       generatedContent: isEs ? (esGeneratedContent ?? generatedContent) : generatedContent,
       images: isEs ? images.es : images.en,
       outline: isEs ? (esOutline ?? outline) : outline,
       locale,
     });
+    console.log(`[generate-pdf] DONE — ${Date.now() - t0}ms pdfUrl=${result.pdfUrl}`);
     return NextResponse.json({ success: true, data: result });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);

@@ -36,7 +36,11 @@ export async function POST(request: Request) {
   }
 
   try {
+    console.log("[translate-es] START");
+    const t0 = Date.now();
+
     const esContent = await translateLeadMagnet(generatedContent, enSeoOverride, enLeadFormOverride);
+    console.log(`[translate-es] translation done — ${Date.now() - t0}ms`);
 
     // Build the ES outline and GeneratedLeadMagnet shapes so the client can
     // pass them directly to /generate-pdf without a round-trip to re-derive them.
@@ -64,6 +68,7 @@ export async function POST(request: Request) {
       conclusionBlocks: esContent.conclusionBlocks,
     };
 
+    console.log(`[translate-es] DONE — total=${Date.now() - t0}ms`);
     return NextResponse.json({ success: true, data: { esContent, esOutline, esGeneratedContent } });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);

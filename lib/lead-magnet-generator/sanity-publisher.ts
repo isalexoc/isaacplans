@@ -190,14 +190,19 @@ export async function publishBilingualLeadMagnet(
 
   const client = getWriteClient();
   const now = new Date().toISOString();
+  const t0 = Date.now();
+  console.log("[sanity-publisher] publishBilingualLeadMagnet START");
 
   // Step 1: generate unique slugs in parallel (ES slug based on translated title)
+  console.log("[sanity-publisher] step 1 — generating slugs");
   const [enSlug, esSlug] = await Promise.all([
     generateUniqueSlug(outline.title, client),
     generateUniqueSlug(esContent.outline.title, client),
   ]);
+  console.log(`[sanity-publisher] slugs done — en="${enSlug}" es="${esSlug}" ${Date.now() - t0}ms`);
 
   // Step 2: upload cover images + build sections in parallel
+  console.log(`[sanity-publisher] step 2 — uploading images + building sections (en sections=${generatedContent.sections.length} es sections=${esContent.sections.length})`);
   const enSectionImages = images.en.sectionImages;
   const esSectionImages = images.es.sectionImages;
 
@@ -227,7 +232,10 @@ export async function publishBilingualLeadMagnet(
     ),
   ]);
 
+  console.log(`[sanity-publisher] images+sections done — ${Date.now() - t0}ms`);
+
   // Step 3: build and create both documents in parallel
+  console.log("[sanity-publisher] step 3 — creating Sanity documents");
   const buildDoc = (
     locale: "en" | "es",
     slug: string,
@@ -310,11 +318,15 @@ export async function publishBilingualLeadMagnet(
     client.create(esDoc),
   ]);
 
+  console.log(`[sanity-publisher] docs created — en=${enResult._id} es=${esResult._id} ${Date.now() - t0}ms`);
+
   // Wire cross-references so the language toggle can navigate between pairs
+  console.log("[sanity-publisher] step 4 — patching cross-references");
   await Promise.all([
     client.patch(enResult._id).set({ relatedGuide: { _type: "reference", _ref: esResult._id } }).commit(),
     client.patch(esResult._id).set({ relatedGuide: { _type: "reference", _ref: enResult._id } }).commit(),
   ]);
+  console.log(`[sanity-publisher] DONE — total=${Date.now() - t0}ms`);
 
   return {
     en: {
