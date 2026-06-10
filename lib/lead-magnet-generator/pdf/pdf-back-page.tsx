@@ -1,7 +1,31 @@
 import { Page, View, Text } from "@react-pdf/renderer";
 import { BRAND, FONT_SIZES } from "./pdf-styles";
 
-export function PdfBackPage() {
+const LABELS = {
+  en: {
+    headline: "Ready to Protect What Matters Most?",
+    subtext: "Get a free consultation with an Isaac Plans insurance specialist —\nno pressure, just answers.",
+    bullets: [
+      "📞  No-obligation phone consultation",
+      "✉   Personalized coverage recommendations by email",
+      "✓   Licensed agents — real answers, no sales scripts",
+    ],
+    footer: "Licensed Insurance Agency",
+  },
+  es: {
+    headline: "¿Listo para Proteger lo que Más Importa?",
+    subtext: "Obtén una consulta gratuita con un especialista de Isaac Plans —\nsin presión, solo respuestas.",
+    bullets: [
+      "📞  Consulta telefónica sin obligación",
+      "✉   Recomendaciones de cobertura personalizadas por email",
+      "✓   Agentes con licencia — respuestas reales, sin guiones de ventas",
+    ],
+    footer: "Agencia de Seguros con Licencia",
+  },
+};
+
+export function PdfBackPage({ locale = "en" }: { locale?: "en" | "es" }) {
+  const t = LABELS[locale];
   return (
     <Page size="A4" style={{ backgroundColor: BRAND.blue, padding: 0 }}>
       <View
@@ -32,7 +56,7 @@ export function PdfBackPage() {
             marginBottom: 20,
           }}
         >
-          Ready to Protect What Matters Most?
+          {t.headline}
         </Text>
 
         {/* Subtext */}
@@ -45,16 +69,11 @@ export function PdfBackPage() {
             opacity: 0.9,
           }}
         >
-          Get a free consultation with an Isaac Plans insurance specialist —{"\n"}
-          no pressure, just answers.
+          {t.subtext}
         </Text>
 
         {/* Benefit bullets */}
-        {[
-          "📞  No-obligation phone consultation",
-          "✉   Personalized coverage recommendations by email",
-          "✓   Licensed agents — real answers, no sales scripts",
-        ].map((item, i) => (
+        {t.bullets.map((item, i) => (
           <Text
             key={i}
             style={{
@@ -126,7 +145,7 @@ export function PdfBackPage() {
             opacity: 0.7,
           }}
         >
-          Licensed Insurance Agency
+          {t.footer}
         </Text>
       </View>
     </Page>

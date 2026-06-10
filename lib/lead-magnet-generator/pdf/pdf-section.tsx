@@ -8,6 +8,7 @@ interface PdfSectionProps {
   sectionImage: string;
   guideTitle: string;
   sectionNumber: number;
+  locale?: "en" | "es";
 }
 
 interface ParsedLine {
@@ -63,7 +64,9 @@ export function PdfSection({
   sectionImage,
   guideTitle,
   sectionNumber,
+  locale = "en",
 }: PdfSectionProps) {
+  const sectionLabel = locale === "es" ? `Sección ${sectionNumber}` : `Section ${sectionNumber}`;
   const lines = parseLines(content);
 
   return (
@@ -87,7 +90,7 @@ export function PdfSection({
             fontFamily: "Helvetica-Bold",
           }}
         >
-          Section {sectionNumber}
+          {sectionLabel}
         </Text>
         <Text style={styles.h2}>{sectionTitle}</Text>
       </View>
@@ -123,7 +126,7 @@ export function PdfSection({
               const body = stripActionStepPrefix(line.text);
               return (
                 <View key={i} style={styles.actionStep}>
-                  <Text style={styles.actionStepLabel}>ACTION STEP</Text>
+                  <Text style={styles.actionStepLabel}>{locale === "es" ? "PASO DE ACCIÓN" : "ACTION STEP"}</Text>
                   <Text style={styles.body}>{renderInlineBold(body)}</Text>
                 </View>
               );

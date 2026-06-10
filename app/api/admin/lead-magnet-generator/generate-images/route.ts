@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import { generateLeadMagnetImages } from "@/lib/lead-magnet-generator/image-generator";
+import { generateBilingualLeadMagnetImages } from "@/lib/lead-magnet-generator/image-generator";
 import type {
   LeadMagnetApiResponse,
-  LeadMagnetImages,
+  BilingualLeadMagnetImages,
   LeadMagnetOutline,
 } from "@/lib/lead-magnet-generator/types";
 
@@ -11,7 +11,7 @@ export const maxDuration = 120;
 
 export async function POST(
   request: NextRequest
-): Promise<NextResponse<LeadMagnetApiResponse<LeadMagnetImages>>> {
+): Promise<NextResponse<LeadMagnetApiResponse<BilingualLeadMagnetImages>>> {
   const { userId } = await auth();
   if (!userId) {
     return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
@@ -33,8 +33,8 @@ export async function POST(
   }
 
   try {
-    const { images, warnings } = await generateLeadMagnetImages(outline);
-    const response: LeadMagnetApiResponse<LeadMagnetImages> = {
+    const { images, warnings } = await generateBilingualLeadMagnetImages(outline);
+    const response: LeadMagnetApiResponse<BilingualLeadMagnetImages> = {
       success: true,
       data: images,
       ...(warnings.length > 0 && { warnings }),
@@ -45,7 +45,7 @@ export async function POST(
     console.error("[lead-magnet-generator/generate-images]", err);
     return NextResponse.json({
       success: true,
-      data: { coverImage: "", sectionImages: [] },
+      data: { en: { coverImage: "", sectionImages: [] }, es: { coverImage: "", sectionImages: [] } },
       warnings: [message],
     });
   }

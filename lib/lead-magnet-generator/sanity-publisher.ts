@@ -1,6 +1,13 @@
 import { createClient } from "next-sanity";
 import { createSlug, generateKey } from "@/lib/blog-generator/portable-text";
-import type { LeadMagnetPublishInput, PublishedLeadMagnet } from "./types";
+import type {
+  LeadMagnetPublishInput,
+  PublishedLeadMagnet,
+  LeadMagnetSection,
+  BilingualLeadMagnetPublishInput,
+  BilingualPublishedLeadMagnet,
+  TranslatedLeadMagnet,
+} from "./types";
 
 function getWriteClient() {
   if (!process.env.SANITY_API_WRITE_TOKEN) {
@@ -50,21 +57,21 @@ async function generateUniqueSlug(title: string, client: WriteClient): Promise<s
 }
 
 async function buildSections(
-  params: Pick<LeadMagnetPublishInput, "generatedContent">,
+  sections: LeadMagnetSection[],
+  sectionImages: string[],
   client: WriteClient
 ): Promise<Record<string, unknown>[]> {
-  const { generatedContent } = params;
   const results: Record<string, unknown>[] = [];
 
-  for (let i = 0; i < generatedContent.sections.length; i++) {
-    const section = generatedContent.sections[i];
+  for (let i = 0; i < sections.length; i++) {
+    const section = sections[i];
     const sectionDoc: Record<string, unknown> = {
       _key: generateKey(),
       sectionTitle: section.sectionTitle,
       content: section.contentBlocks ?? [],
     };
 
-    const imageUrl = section.sectionImage ?? "";
+    const imageUrl = sectionImages[i] ?? "";
     if (imageUrl) {
       try {
         const assetId = await uploadImageToSanity(
@@ -106,7 +113,11 @@ export async function publishLeadMagnet(
     );
   }
 
-  const sections = await buildSections({ generatedContent }, client);
+  const sections = await buildSections(
+    generatedContent.sections,
+    generatedContent.sections.map((s) => s.sectionImage ?? ""),
+    client
+  );
 
   const doc: Record<string, unknown> & { _type: string } = {
     _type: "leadMagnet",
@@ -155,5 +166,162 @@ export async function publishLeadMagnet(
     slug,
     pdfUrl,
     publicUrl: `/lead-magnets/${slug}`,
+  };
+}
+
+export async function publishBilingualLeadMagnet(
+  params: BilingualLeadMagnetPublishInput & {
+    esContent: TranslatedLeadMagnet;
+    esPdfUrl: string;
+  }
+): Promise<BilingualPublishedLeadMagnet> {
+  const {
+    outline,
+    generatedContent,
+    images,
+    enPdfUrl,
+    status,
+    originalPromptInput,
+    enSeoOverride,
+    enLeadFormOverride,
+    esContent,
+    esPdfUrl,
+  } = params;
+
+  const client = getWriteClient();
+  const now = new Date().toISOString();
+
+  // Step 1: generate unique slugs in parallel (ES slug based on translated title)
+  const [enSlug, esSlug] = await Promise.all([
+    generateUniqueSlug(outline.title, client),
+    generateUniqueSlug(esContent.outline.title, client),
+  ]);
+
+  // Step 2: upload cover images + build sections in parallel
+  const enSectionImages = images.en.sectionImages;
+  const esSectionImages = images.es.sectionImages;
+
+  const [
+    enCoverAssetId,
+    esCoverAssetId,
+    enSections,
+    esSections,
+  ] = await Promise.all([
+    images.en.coverImage
+      ? uploadImageToSanity(images.en.coverImage, client, `cover-en-${enSlug}.jpg`).catch(() => "")
+      : Promise.resolve(""),
+    images.es.coverImage
+      ? uploadImageToSanity(images.es.coverImage, client, `cover-es-${esSlug}.jpg`).catch(() => "")
+      : Promise.resolve(""),
+    buildSections(generatedContent.sections, enSectionImages, client),
+    buildSections(
+      esContent.sections.map((s, i) => ({
+        sectionTitle: s.sectionTitle,
+        keyPoints: esContent.outline.sections[i]?.keyPoints ?? [],
+        content: s.content,
+        contentBlocks: s.contentBlocks,
+        sectionImage: esSectionImages[i] ?? "",
+      })),
+      esSectionImages,
+      client
+    ),
+  ]);
+
+  // Step 3: build and create both documents in parallel
+  const buildDoc = (
+    locale: "en" | "es",
+    slug: string,
+    title: string,
+    subtitle: string,
+    keyBenefits: string[],
+    introBlocks: unknown[],
+    seo: { metaTitle: string; metaDescription: string; focusKeyword: string; keywords: string[] },
+    leadFormSettings: { ctaHeadline: string; ctaSubtext: string; ctaButtonText: string; successMessage: string },
+    sections: Record<string, unknown>[],
+    coverAssetId: string,
+    pdfUrl: string
+  ) => {
+    const doc: Record<string, unknown> & { _type: string } = {
+      _type: "leadMagnet",
+      title,
+      slug: { _type: "slug", current: slug },
+      locale,
+      category: outline.category,
+      status,
+      subtitle,
+      description: introBlocks,
+      sections,
+      keyBenefits,
+      targetAudience: outline.targetAudience,
+      leadFormSettings,
+      seo,
+      generationPrompt: JSON.stringify(originalPromptInput),
+      generatedPdfUrl: pdfUrl,
+      pdfGeneratedAt: now,
+      downloadCount: 0,
+      publishedAt: status === "published" ? now : null,
+      updatedAt: now,
+    };
+    if (coverAssetId) {
+      doc.coverImage = {
+        _type: "image",
+        asset: { _type: "reference", _ref: coverAssetId },
+        alt: title,
+      };
+    }
+    return doc;
+  };
+
+  const enDoc = buildDoc(
+    "en",
+    enSlug,
+    outline.title,
+    outline.subtitle,
+    outline.keyBenefits,
+    generatedContent.introductionBlocks,
+    {
+      metaTitle: enSeoOverride.metaTitle.slice(0, 60),
+      metaDescription: enSeoOverride.metaDescription.slice(0, 160),
+      focusKeyword: enSeoOverride.focusKeyword,
+      keywords: outline.keyBenefits.map((b) => b.split(" ").slice(0, 3).join(" ")),
+    },
+    enLeadFormOverride,
+    enSections,
+    enCoverAssetId,
+    enPdfUrl
+  );
+
+  const esDoc = buildDoc(
+    "es",
+    esSlug,
+    esContent.outline.title,
+    esContent.outline.subtitle,
+    esContent.outline.keyBenefits,
+    esContent.introductionBlocks,
+    esContent.seo,
+    esContent.leadFormSettings,
+    esSections,
+    esCoverAssetId,
+    esPdfUrl
+  );
+
+  const [enResult, esResult] = await Promise.all([
+    client.create(enDoc),
+    client.create(esDoc),
+  ]);
+
+  return {
+    en: {
+      sanityDocumentId: enResult._id,
+      slug: enSlug,
+      pdfUrl: enPdfUrl,
+      publicUrl: `/lead-magnets/${enSlug}`,
+    },
+    es: {
+      sanityDocumentId: esResult._id,
+      slug: esSlug,
+      pdfUrl: esPdfUrl,
+      publicUrl: `/imanes-de-leads/${esSlug}`,
+    },
   };
 }

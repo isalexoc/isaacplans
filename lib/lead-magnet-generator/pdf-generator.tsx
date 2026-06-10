@@ -15,8 +15,8 @@ import { PdfToc } from "./pdf/pdf-toc";
 import { PdfSection } from "./pdf/pdf-section";
 import { PdfBackPage } from "./pdf/pdf-back-page";
 
-function formatDate(): string {
-  return new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" });
+function formatDate(locale: "en" | "es" = "en"): string {
+  return new Date().toLocaleDateString(locale === "es" ? "es-MX" : "en-US", { month: "long", year: "numeric" });
 }
 
 function portableTextToMarkdown(blocks: GeneratedLeadMagnet["introductionBlocks"]): string {
@@ -62,11 +62,14 @@ function buildDocument(params: {
   generatedContent: GeneratedLeadMagnet;
   images: LeadMagnetImages;
   outline: LeadMagnetOutline;
+  locale?: "en" | "es";
 }): ReactElement<DocumentProps> {
-  const { generatedContent, images, outline } = params;
+  const { generatedContent, images, outline, locale = "en" } = params;
   const { sections, introductionBlocks, conclusionBlocks } = generatedContent;
   const guideTitle = outline.title;
-  const publishedAt = formatDate();
+  const publishedAt = formatDate(locale);
+  const introLabel = locale === "es" ? "Introducción" : "Introduction";
+  const conclusionLabel = locale === "es" ? "Conclusión" : "Conclusion";
 
   const introMarkdown = portableTextToMarkdown(introductionBlocks);
   const conclusionMarkdown = portableTextToMarkdown(conclusionBlocks);
@@ -78,15 +81,17 @@ function buildDocument(params: {
         subtitle={outline.subtitle}
         coverImageUrl={images.coverImage}
         publishedAt={publishedAt}
+        locale={locale}
       />
 
       <PdfToc
         guideTitle={guideTitle}
         sectionTitles={sections.map((s) => s.sectionTitle)}
+        locale={locale}
       />
 
       <Page size="A4" style={styles.page}>
-        <Text style={styles.h1}>Introduction</Text>
+        <Text style={styles.h1}>{introLabel}</Text>
         <View style={{ height: 3, backgroundColor: BRAND.accent, marginBottom: 20, marginTop: 4 }} />
         {introductionBlocks.length > 0
           ? renderMarkdownLines(introMarkdown)
@@ -104,11 +109,12 @@ function buildDocument(params: {
           sectionImage={images.sectionImages[i] ?? ""}
           guideTitle={guideTitle}
           sectionNumber={i + 1}
+          locale={locale}
         />
       ))}
 
       <Page size="A4" style={styles.page}>
-        <Text style={styles.h1}>Conclusion</Text>
+        <Text style={styles.h1}>{conclusionLabel}</Text>
         <View style={{ height: 3, backgroundColor: BRAND.accent, marginBottom: 20, marginTop: 4 }} />
         {conclusionBlocks.length > 0
           ? renderMarkdownLines(conclusionMarkdown)
@@ -118,7 +124,7 @@ function buildDocument(params: {
         <Text style={styles.pageNumber} render={({ pageNumber }) => `${pageNumber}`} fixed />
       </Page>
 
-      <PdfBackPage />
+      <PdfBackPage locale={locale} />
     </Document>
   );
 }
@@ -127,6 +133,7 @@ export async function assemblePdf(params: {
   generatedContent: GeneratedLeadMagnet;
   images: LeadMagnetImages;
   outline: LeadMagnetOutline;
+  locale?: "en" | "es";
 }): Promise<Buffer> {
   const document = buildDocument(params);
   return renderToBuffer(document);
@@ -136,7 +143,8 @@ export async function uploadPdfToCloudinary(
   pdfBuffer: Buffer,
   category: LeadMagnetCategory,
   title: string,
-  sectionCount: number
+  sectionCount: number,
+  locale: "en" | "es" = "en"
 ): Promise<{ pdfUrl: string; pageCount: number }> {
   const base64 = pdfBuffer.toString("base64");
   const publicId = createSlug(title) + "-" + Date.now();
@@ -146,7 +154,7 @@ export async function uploadPdfToCloudinary(
     {
       resource_type: "raw",
       format: "pdf",
-      folder: "lead-magnets/" + category,
+      folder: `lead-magnets/${category}/${locale}`,
       public_id: publicId,
     }
   );
@@ -159,12 +167,15 @@ export async function generateAndUploadPdf(params: {
   generatedContent: GeneratedLeadMagnet;
   images: LeadMagnetImages;
   outline: LeadMagnetOutline;
+  locale?: "en" | "es";
 }): Promise<{ pdfUrl: string; pageCount: number }> {
+  const { locale = "en" } = params;
   const pdfBuffer = await assemblePdf(params);
   return uploadPdfToCloudinary(
     pdfBuffer,
     params.outline.category,
     params.outline.title,
-    params.generatedContent.sections.length
+    params.generatedContent.sections.length,
+    locale
   );
 }

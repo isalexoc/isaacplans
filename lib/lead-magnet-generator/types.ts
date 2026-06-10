@@ -104,6 +104,53 @@ export interface PublishedLeadMagnet {
   publicUrl: string;
 }
 
+// ─── Bilingual Images ─────────────────────────────────────────────────────────
+
+export interface BilingualLeadMagnetImages {
+  en: LeadMagnetImages;
+  es: LeadMagnetImages;
+}
+
+// ─── Translation ──────────────────────────────────────────────────────────────
+
+export interface TranslatedLeadMagnet {
+  outline: {
+    title: string;
+    subtitle: string;
+    keyBenefits: string[];
+    sections: Array<{ sectionTitle: string; keyPoints: string[] }>;
+  };
+  sections: Array<{
+    sectionTitle: string;
+    content: string;
+    contentBlocks: PortableTextBlock[];
+  }>;
+  introduction: string;
+  conclusion: string;
+  introductionBlocks: PortableTextBlock[];
+  conclusionBlocks: PortableTextBlock[];
+  seo: { metaTitle: string; metaDescription: string; focusKeyword: string; keywords: string[] };
+  leadFormSettings: { ctaHeadline: string; ctaSubtext: string; ctaButtonText: string; successMessage: string };
+}
+
+// ─── Bilingual Publishing ─────────────────────────────────────────────────────
+
+export interface BilingualPublishedLeadMagnet {
+  en: PublishedLeadMagnet;
+  es: PublishedLeadMagnet;
+}
+
+export interface BilingualLeadMagnetPublishInput {
+  outline: LeadMagnetOutline;
+  generatedContent: GeneratedLeadMagnet;
+  images: BilingualLeadMagnetImages;
+  enPdfUrl: string;
+  status: LeadMagnetStatus;
+  originalPromptInput: LeadMagnetPromptInput;
+  enSeoOverride: { metaTitle: string; metaDescription: string; focusKeyword: string };
+  enLeadFormOverride: { ctaHeadline: string; ctaSubtext: string; ctaButtonText: string; successMessage: string };
+}
+
 // ─── API Response Shapes ──────────────────────────────────────────────────────
 
 export interface LeadMagnetSuccessResponse<T> {

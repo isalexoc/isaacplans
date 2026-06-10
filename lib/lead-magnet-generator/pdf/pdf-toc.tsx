@@ -4,25 +4,30 @@ import { BRAND, FONT_SIZES, styles } from "./pdf-styles";
 interface PdfTocProps {
   guideTitle: string;
   sectionTitles: string[];
+  locale?: "en" | "es";
 }
 
 function dotLeader(length: number): string {
   return " " + ".".repeat(Math.max(0, length)) + " ";
 }
 
-export function PdfToc({ guideTitle, sectionTitles }: PdfTocProps) {
+export function PdfToc({ guideTitle, sectionTitles, locale = "en" }: PdfTocProps) {
+  const introLabel = locale === "es" ? "Introducción" : "Introduction";
+  const conclusionLabel = locale === "es" ? "Conclusión" : "Conclusion";
+  const contentsHeading = locale === "es" ? "Contenido" : "Contents";
+
   const allItems = [
-    { label: "Introduction", pageEst: 3 },
+    { label: introLabel, pageEst: 3 },
     ...sectionTitles.map((title, i) => ({
       label: title,
       pageEst: 3 + (i + 1) * 2,
     })),
-    { label: "Conclusion", pageEst: 3 + (sectionTitles.length + 1) * 2 },
+    { label: conclusionLabel, pageEst: 3 + (sectionTitles.length + 1) * 2 },
   ];
 
   return (
     <Page size="A4" style={styles.page}>
-      <Text style={styles.h1}>Contents</Text>
+      <Text style={styles.h1}>{contentsHeading}</Text>
 
       <View
         style={{

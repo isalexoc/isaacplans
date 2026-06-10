@@ -1,7 +1,11 @@
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { generateAndUploadPdf } from "@/lib/lead-magnet-generator/pdf-generator";
-import type { GeneratedLeadMagnet, LeadMagnetImages, LeadMagnetOutline } from "@/lib/lead-magnet-generator/types";
+import type {
+  GeneratedLeadMagnet,
+  BilingualLeadMagnetImages,
+  LeadMagnetOutline,
+} from "@/lib/lead-magnet-generator/types";
 
 export const maxDuration = 60;
 
@@ -13,7 +17,7 @@ export async function POST(request: Request) {
 
   let body: {
     generatedContent: GeneratedLeadMagnet;
-    images: LeadMagnetImages;
+    images: BilingualLeadMagnetImages;
     outline: LeadMagnetOutline;
   };
 
@@ -33,7 +37,12 @@ export async function POST(request: Request) {
   }
 
   try {
-    const result = await generateAndUploadPdf({ generatedContent, images, outline });
+    const result = await generateAndUploadPdf({
+      generatedContent,
+      images: images.en,
+      outline,
+      locale: "en",
+    });
     return NextResponse.json({ success: true, data: result });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);

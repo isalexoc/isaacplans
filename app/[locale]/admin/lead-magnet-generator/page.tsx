@@ -23,8 +23,8 @@ import type {
   LeadMagnetOutline,
   LeadMagnetSection,
   GeneratedLeadMagnet,
-  LeadMagnetImages,
-  PublishedLeadMagnet,
+  BilingualLeadMagnetImages,
+  BilingualPublishedLeadMagnet,
 } from "@/lib/lead-magnet-generator/types";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -38,10 +38,10 @@ interface GeneratorState {
   completedSections?: LeadMagnetSection[];
   currentSectionIndex?: number;
   generatedContent?: GeneratedLeadMagnet;
-  images?: LeadMagnetImages;
-  pdfUrl?: string;
+  images?: BilingualLeadMagnetImages;
+  enPdfUrl?: string;
   pageCount?: number;
-  publishedResult?: PublishedLeadMagnet;
+  publishedResult?: BilingualPublishedLeadMagnet;
   error?: string;
 }
 
@@ -596,18 +596,21 @@ function ImagesStep({
   state: GeneratorState;
   setState: React.Dispatch<React.SetStateAction<GeneratorState>>;
   onBack: () => void;
-  onContinue: (images: LeadMagnetImages) => void;
+  onContinue: (images: BilingualLeadMagnetImages) => void;
 }) {
   const [generating, setGenerating] = useState(false);
   const [imageWarnings, setImageWarnings] = useState<string[]>([]);
+  const [activeTab, setActiveTab] = useState<"en" | "es">("en");
 
-  const images = state.images;
+  const bilingualImages = state.images;
+  const activeImages = bilingualImages ? bilingualImages[activeTab] : undefined;
   const outline = state.outline!;
   const sectionIndices = selectSectionIndices(outline.sections.length);
 
   useEffect(() => {
     if (state.step !== "images" || state.images) return;
     generateImages();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.step]);
 
   async function generateImages() {
@@ -616,7 +619,7 @@ function ImagesStep({
     setState((prev) => ({ ...prev, error: undefined }));
     try {
       const data = await postJson("/api/admin/lead-magnet-generator/generate-images", { outline });
-      setState((prev) => ({ ...prev, images: data.data }));
+      setState((prev) => ({ ...prev, images: data.data as BilingualLeadMagnetImages }));
       if (data.warnings?.length) setImageWarnings(data.warnings);
     } catch (err) {
       setState((prev) => ({ ...prev, error: err instanceof Error ? err.message : "Image generation failed" }));
@@ -638,7 +641,7 @@ function ImagesStep({
       {generating && (
         <div className="flex flex-col items-center gap-3 py-12 text-muted-foreground">
           <Loader2 className="h-8 w-8 animate-spin" />
-          <p className="text-sm">Generating images with AI (this takes ~30 seconds)...</p>
+          <p className="text-sm">Generating EN + ES images with AI (this takes ~30–60 seconds)...</p>
         </div>
       )}
 
@@ -655,8 +658,26 @@ function ImagesStep({
         </div>
       )}
 
-      {images && !generating && (
+      {bilingualImages && !generating && (
         <div className="flex flex-col gap-4">
+          {/* Locale tab toggle */}
+          <div className="flex gap-2">
+            <Button
+              variant={activeTab === "en" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setActiveTab("en")}
+            >
+              English (EN)
+            </Button>
+            <Button
+              variant={activeTab === "es" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setActiveTab("es")}
+            >
+              Spanish (ES)
+            </Button>
+          </div>
+
           {/* Cover image */}
           <Card>
             <CardHeader>
@@ -668,9 +689,9 @@ function ImagesStep({
               </div>
             </CardHeader>
             <CardContent>
-              {images.coverImage ? (
+              {activeImages?.coverImage ? (
                 <img
-                  src={images.coverImage}
+                  src={activeImages.coverImage}
                   alt="Guide cover"
                   className="w-full max-h-48 object-cover rounded-md"
                 />
@@ -683,14 +704,14 @@ function ImagesStep({
           </Card>
 
           {/* Section images */}
-          {images.sectionImages.length > 0 && (
+          {(activeImages?.sectionImages.length ?? 0) > 0 && (
             <Card>
               <CardHeader>
                 <CardTitle className="text-sm uppercase tracking-wide text-muted-foreground">Section Images</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                  {images.sectionImages.map((url, i) => {
+                  {(activeImages?.sectionImages ?? []).map((url, i) => {
                     const sectionIdx = sectionIndices[i];
                     const sectionTitle = outline.sections[sectionIdx]?.sectionTitle ?? `Section ${sectionIdx + 1}`;
                     return (
@@ -714,11 +735,11 @@ function ImagesStep({
       )}
 
       <div className="flex gap-3">
-        <Button variant="ghost" size="sm" onClick={() => onContinue(images ?? { coverImage: "", sectionImages: [] })}>
+        <Button variant="ghost" size="sm" onClick={() => onContinue(bilingualImages ?? { en: { coverImage: "", sectionImages: [] }, es: { coverImage: "", sectionImages: [] } })}>
           Skip Images
         </Button>
         <Button
-          onClick={() => onContinue(images ?? { coverImage: "", sectionImages: [] })}
+          onClick={() => onContinue(bilingualImages ?? { en: { coverImage: "", sectionImages: [] }, es: { coverImage: "", sectionImages: [] } })}
           disabled={generating}
           size="lg"
           className="flex-1"
@@ -762,7 +783,7 @@ function PublishStep({
   const [publishing, setPublishing] = useState(false);
   const [publishError, setPublishError] = useState<string | null>(null);
 
-  const pdfUrl = state.pdfUrl;
+  const enPdfUrl = state.enPdfUrl;
 
   async function handleGeneratePdf() {
     if (!state.images) return;
@@ -774,7 +795,7 @@ function PublishStep({
         images: state.images,
         outline,
       });
-      setState((prev) => ({ ...prev, pdfUrl: data.data.pdfUrl, pageCount: data.data.pageCount }));
+      setState((prev) => ({ ...prev, enPdfUrl: data.data.pdfUrl, pageCount: data.data.pageCount }));
     } catch (err) {
       setPdfError(err instanceof Error ? err.message : "PDF generation failed");
     } finally {
@@ -783,7 +804,7 @@ function PublishStep({
   }
 
   async function handlePublish() {
-    if (!pdfUrl || !state.images || !state.promptInput) return;
+    if (!enPdfUrl || !state.images || !state.promptInput) return;
     setPublishing(true);
     setPublishError(null);
 
@@ -798,9 +819,11 @@ function PublishStep({
         outline: updatedOutline,
         generatedContent: { ...generatedContent, outline: updatedOutline },
         images: state.images,
-        pdfUrl,
+        enPdfUrl,
         status: publishStatus,
         originalPromptInput: state.promptInput,
+        enSeoOverride: { metaTitle, metaDescription, focusKeyword },
+        enLeadFormOverride: { ctaHeadline, ctaSubtext, ctaButtonText, successMessage },
       });
       setState((prev) => ({ ...prev, publishedResult: data.data, step: "success" }));
     } catch (err) {
@@ -883,9 +906,9 @@ function PublishStep({
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle className="text-sm uppercase tracking-wide text-muted-foreground">
-              PDF {state.pageCount ? `(~${state.pageCount} pages)` : ""}
+              English PDF {state.pageCount ? `(~${state.pageCount} pages)` : ""}
             </CardTitle>
-            {pdfUrl && (
+            {enPdfUrl && (
               <Button variant="ghost" size="sm" className="text-xs" onClick={handleGeneratePdf} disabled={generatingPdf}>
                 <RotateCcw className="h-3 w-3 mr-1" />Regenerate
               </Button>
@@ -893,20 +916,20 @@ function PublishStep({
           </div>
         </CardHeader>
         <CardContent>
-          {!pdfUrl && !generatingPdf && (
+          {!enPdfUrl && !generatingPdf && (
             <Button onClick={handleGeneratePdf} variant="outline" className="w-full">
-              Generate PDF
+              Generate PDF Preview
             </Button>
           )}
           {generatingPdf && (
             <div className="flex items-center justify-center gap-2 py-8 text-muted-foreground">
               <Loader2 className="h-5 w-5 animate-spin" />
-              <span className="text-sm">Assembling PDF (15–40 seconds)...</span>
+              <span className="text-sm">Assembling English PDF (15–40 seconds)...</span>
             </div>
           )}
           {pdfError && <ErrorBox message={pdfError} onRetry={handleGeneratePdf} />}
-          {pdfUrl && !generatingPdf && (
-            <iframe src={pdfUrl} className="w-full h-96 rounded border" title="PDF preview" />
+          {enPdfUrl && !generatingPdf && (
+            <iframe src={enPdfUrl} className="w-full h-96 rounded border" title="PDF preview" />
           )}
         </CardContent>
       </Card>
@@ -930,21 +953,27 @@ function PublishStep({
         </Button>
       </div>
 
+      <div className="rounded-md border border-blue-200 bg-blue-50 px-4 py-3">
+        <p className="text-sm text-blue-800">
+          Spanish (ES) version will be automatically translated and published alongside the English guide.
+        </p>
+      </div>
+
       {publishError && <ErrorBox message={publishError} onRetry={handlePublish} />}
 
       <Button
         onClick={handlePublish}
-        disabled={publishing || !pdfUrl}
+        disabled={publishing || !enPdfUrl}
         size="lg"
-        title={!pdfUrl ? "Generate the PDF first" : undefined}
+        title={!enPdfUrl ? "Generate the PDF first" : undefined}
       >
         {publishing
-          ? <><Loader2 className="h-4 w-4 animate-spin mr-2" />Saving to Sanity...</>
-          : "Save to Sanity →"}
+          ? <><Loader2 className="h-4 w-4 animate-spin mr-2" />Translating &amp; publishing both guides (~60s)...</>
+          : "Publish (EN + ES) →"}
       </Button>
 
-      {!pdfUrl && (
-        <p className="text-xs text-muted-foreground text-center">Generate the PDF before publishing.</p>
+      {!enPdfUrl && (
+        <p className="text-xs text-muted-foreground text-center">Generate the PDF preview before publishing.</p>
       )}
     </div>
   );
@@ -952,12 +981,63 @@ function PublishStep({
 
 // ─── Success ──────────────────────────────────────────────────────────────────
 
+function SuccessLocaleCard({
+  label,
+  result,
+  publishStatus,
+}: {
+  label: string;
+  result: { sanityDocumentId: string; slug: string; pdfUrl: string; publicUrl: string };
+  publishStatus: "draft" | "published";
+}) {
+  return (
+    <div className="flex flex-col gap-3 rounded-md border p-4">
+      <Badge variant="outline" className="w-fit">{label}</Badge>
+      <div>
+        <p className="text-xs font-medium text-muted-foreground mb-1">Sanity Studio</p>
+        <a
+          href={`/studio/structure/leadMagnet;${result.sanityDocumentId}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-600 hover:underline text-sm"
+        >
+          View in Studio →
+        </a>
+      </div>
+      {publishStatus === "published" && (
+        <div>
+          <p className="text-xs font-medium text-muted-foreground mb-1">Public landing page</p>
+          <a
+            href={result.publicUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 hover:underline text-sm"
+          >
+            {result.publicUrl}
+          </a>
+        </div>
+      )}
+      <div>
+        <p className="text-xs font-medium text-muted-foreground mb-1">PDF</p>
+        <a
+          href={result.pdfUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-600 hover:underline text-sm"
+        >
+          Download PDF →
+        </a>
+      </div>
+    </div>
+  );
+}
+
 function SuccessView({
   result,
   publishStatus,
   onReset,
 }: {
-  result: PublishedLeadMagnet;
+  result: BilingualPublishedLeadMagnet;
   publishStatus: "draft" | "published";
   onReset: () => void;
 }) {
@@ -966,48 +1046,15 @@ function SuccessView({
       <div className="flex items-center gap-2 text-green-600">
         <CheckCircle2 className="h-5 w-5" />
         <h2 className="text-xl font-semibold">
-          Lead magnet {publishStatus === "published" ? "published" : "saved as draft"} in Sanity
+          Lead magnet {publishStatus === "published" ? "published" : "saved as draft"} — EN + ES
         </h2>
       </div>
 
       <Card>
         <CardContent className="pt-6 flex flex-col gap-4">
-          <div>
-            <p className="text-sm font-medium text-muted-foreground mb-1">Sanity Studio</p>
-            <a
-              href={`/studio/structure/leadMagnet;${result.sanityDocumentId}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-600 hover:underline text-sm"
-            >
-              View in Sanity Studio →
-            </a>
-          </div>
-
-          {publishStatus === "published" && (
-            <div>
-              <p className="text-sm font-medium text-muted-foreground mb-1">Public landing page</p>
-              <a
-                href={result.publicUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 hover:underline text-sm"
-              >
-                {result.publicUrl}
-              </a>
-            </div>
-          )}
-
-          <div>
-            <p className="text-sm font-medium text-muted-foreground mb-1">PDF</p>
-            <a
-              href={result.pdfUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-600 hover:underline text-sm"
-            >
-              Download PDF →
-            </a>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <SuccessLocaleCard label="English (EN)" result={result.en} publishStatus={publishStatus} />
+            <SuccessLocaleCard label="Spanish (ES)" result={result.es} publishStatus={publishStatus} />
           </div>
 
           <Button onClick={onReset} variant="outline" className="w-fit">
@@ -1066,13 +1113,11 @@ export default function LeadMagnetGeneratorPage() {
     }));
   }
 
-  function handleImagesContinue(images: LeadMagnetImages) {
+  function handleImagesContinue(images: BilingualLeadMagnetImages) {
     setState((prev) => ({ ...prev, images, step: "publish" }));
   }
 
-  const publishStatus = state.step === "success" && state.publishedResult
-    ? (state.outline?.title ? "draft" : "draft")
-    : "draft";
+  const publishStatus: "draft" | "published" = "draft";
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">

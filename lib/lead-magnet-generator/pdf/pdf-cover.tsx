@@ -6,9 +6,10 @@ interface PdfCoverProps {
   subtitle: string;
   coverImageUrl: string;
   publishedAt: string;
+  locale?: "en" | "es";
 }
 
-export function PdfCover({ title, subtitle, coverImageUrl, publishedAt }: PdfCoverProps) {
+export function PdfCover({ title, subtitle, coverImageUrl, publishedAt, locale = "en" }: PdfCoverProps) {
   return (
     <Page size="A4" style={{ backgroundColor: BRAND.blue, padding: 0 }}>
       {/* Top white band */}
@@ -30,7 +31,7 @@ export function PdfCover({ title, subtitle, coverImageUrl, publishedAt }: PdfCov
             textTransform: "uppercase",
           }}
         >
-          A FREE GUIDE FROM
+          {locale === "es" ? "GUÍA GRATUITA DE" : "A FREE GUIDE FROM"}
         </Text>
         <Text
           style={{
