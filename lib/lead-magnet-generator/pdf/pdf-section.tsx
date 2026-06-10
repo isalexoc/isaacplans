@@ -12,7 +12,7 @@ interface PdfSectionProps {
 }
 
 interface ParsedLine {
-  type: "h2" | "h3" | "bullet" | "actionStep" | "body";
+  type: "h2" | "h3" | "h4" | "bullet" | "actionStep" | "body";
   text: string;
 }
 
@@ -28,6 +28,8 @@ function parseLines(markdown: string): ParsedLine[] {
       result.push({ type: "h2", text: line.slice(3).trim() });
     } else if (line.startsWith("### ")) {
       result.push({ type: "h3", text: line.slice(4).trim() });
+    } else if (line.startsWith("#### ")) {
+      result.push({ type: "h4", text: line.slice(5).trim() });
     } else if (line.startsWith("- ")) {
       result.push({ type: "bullet", text: line.slice(2).trim() });
     } else if (line.startsWith("> ")) {
@@ -58,6 +60,16 @@ function stripActionStepPrefix(text: string): string {
   return text.replace(/^\*\*Action Step:\*\*\s*/i, "").replace(/^Action Step:\s*/i, "");
 }
 
+function titlesAreSimilar(a: string, b: string): boolean {
+  const words = (s: string) =>
+    new Set(s.toLowerCase().replace(/[^\w\s]/g, " ").split(/\s+/).filter(Boolean));
+  const wa = words(a);
+  const wb = words(b);
+  const intersection = [...wa].filter((w) => wb.has(w)).length;
+  const union = new Set([...wa, ...wb]).size;
+  return union > 0 && intersection / union >= 0.65;
+}
+
 export function PdfSection({
   sectionTitle,
   content,
@@ -70,8 +82,7 @@ export function PdfSection({
   const rawLines = parseLines(content);
   const firstH2Index = rawLines.findIndex((l) => l.type === "h2");
   const lines =
-    firstH2Index !== -1 &&
-    rawLines[firstH2Index].text.trim().toLowerCase() === sectionTitle.trim().toLowerCase()
+    firstH2Index !== -1 && titlesAreSimilar(rawLines[firstH2Index].text, sectionTitle)
       ? rawLines.filter((_, i) => i !== firstH2Index)
       : rawLines;
 
@@ -116,6 +127,13 @@ export function PdfSection({
             if (line.type === "h3") {
               return (
                 <Text key={i} style={styles.h3}>
+                  {line.text}
+                </Text>
+              );
+            }
+            if (line.type === "h4") {
+              return (
+                <Text key={i} style={styles.h4}>
                   {line.text}
                 </Text>
               );

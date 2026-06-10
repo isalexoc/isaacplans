@@ -56,6 +56,13 @@ export const styles = StyleSheet.create({
     marginBottom: 4,
     marginTop: 14,
   },
+  h4: {
+    fontSize: FONT_SIZES.h4,
+    fontFamily: "Helvetica-Bold",
+    color: BRAND.dark,
+    marginBottom: 4,
+    marginTop: 10,
+  },
   body: {
     fontSize: FONT_SIZES.body,
     color: BRAND.dark,

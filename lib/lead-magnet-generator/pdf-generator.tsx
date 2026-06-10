@@ -51,6 +51,9 @@ function renderMarkdownLines(markdown: string): ReactElement[] {
       if (line.startsWith("### ")) {
         return <Text key={i} style={styles.h3}>{line.slice(4)}</Text>;
       }
+      if (line.startsWith("#### ")) {
+        return <Text key={i} style={styles.h4}>{line.slice(5)}</Text>;
+      }
       if (line.startsWith("- ")) {
         return <Text key={i} style={styles.bulletItem}>{"• " + line.slice(2)}</Text>;
       }
