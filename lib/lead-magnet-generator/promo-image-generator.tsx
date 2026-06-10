@@ -3,8 +3,10 @@ import cloudinary from "@/config/cloudinary";
 import type { LeadMagnetOutline, PromoImages } from "./types";
 
 // ─── Font cache (persists across requests in the same process) ────────────────
-// satori requires TTF/OTF — not WOFF2. Use an old IE UA so Google Fonts
-// returns a truetype URL instead of woff2.
+// The bundled opentype.js in next/og accepts: TTF (\x00\x01\x00\x00 / "true"),
+// OTF ("OTTO"), and WOFF with TrueType flavor — but NOT WOFF2 or EOT.
+// iOS 7 Safari UA makes Google Fonts return WOFF (not WOFF2).
+// Inter uses TrueType outlines so its WOFF flavor byte is \x00\x01\x00\x00, which passes.
 
 let cachedFontBold: ArrayBuffer | null = null;
 
@@ -15,7 +17,10 @@ async function loadFont(): Promise<ArrayBuffer> {
     "https://fonts.googleapis.com/css2?family=Inter:wght@900&display=swap",
     {
       headers: {
-        "User-Agent": "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)",
+        // iOS 7 Safari UA → Google Fonts returns WOFF (accepted by satori's opentype.js)
+        // IE6 UA returns EOT, modern UA returns WOFF2 — both rejected
+        "User-Agent":
+          "Mozilla/5.0 (iPhone; CPU iPhone OS 7_0 like Mac OS X) AppleWebKit/537.51.1 (KHTML, like Gecko) Version/7.0 Mobile/11A465 Safari/9537.53",
       },
     }
   );
