@@ -81,9 +81,15 @@ export interface GeneratedLeadMagnet {
 
 // ─── Images ───────────────────────────────────────────────────────────────────
 
+export interface PromoImages {
+  square: string;     // 1080×1080
+  landscape: string;  // 1200×630
+}
+
 export interface LeadMagnetImages {
   coverImage: string;
   sectionImages: string[];
+  promoImages?: PromoImages;
 }
 
 // ─── Publishing ───────────────────────────────────────────────────────────────

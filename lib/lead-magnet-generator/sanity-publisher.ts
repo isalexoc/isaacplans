@@ -247,7 +247,8 @@ export async function publishBilingualLeadMagnet(
     leadFormSettings: { ctaHeadline: string; ctaSubtext: string; ctaButtonText: string; successMessage: string },
     sections: Record<string, unknown>[],
     coverAssetId: string,
-    pdfUrl: string
+    pdfUrl: string,
+    promoImages?: { square?: string; landscape?: string }
   ) => {
     const doc: Record<string, unknown> & { _type: string } = {
       _type: "leadMagnet",
@@ -277,6 +278,12 @@ export async function publishBilingualLeadMagnet(
         alt: title,
       };
     }
+    if (promoImages?.square || promoImages?.landscape) {
+      doc.promoImages = {
+        square: promoImages.square ?? "",
+        landscape: promoImages.landscape ?? "",
+      };
+    }
     return doc;
   };
 
@@ -296,7 +303,8 @@ export async function publishBilingualLeadMagnet(
     enLeadFormOverride,
     enSections,
     enCoverAssetId,
-    enPdfUrl
+    enPdfUrl,
+    images.en.promoImages
   );
 
   const esDoc = buildDoc(
@@ -310,7 +318,8 @@ export async function publishBilingualLeadMagnet(
     esContent.leadFormSettings,
     esSections,
     esCoverAssetId,
-    esPdfUrl
+    esPdfUrl,
+    images.es.promoImages
   );
 
   const [enResult, esResult] = await Promise.all([

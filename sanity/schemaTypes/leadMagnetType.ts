@@ -295,6 +295,17 @@ export const leadMagnetType = defineType({
       initialValue: 0,
       readOnly: true,
     }),
+    {
+      name: 'promoImages',
+      type: 'object',
+      title: 'Promo / Social Images',
+      group: 'generation',
+      description: 'Auto-generated social media cards (Cloudinary URLs — use in Meta Ads, social schedulers, DMs)',
+      fields: [
+        defineField({ name: 'square',    type: 'url', title: 'Square 1080×1080 (Instagram)' }),
+        defineField({ name: 'landscape', type: 'url', title: 'Landscape 1200×630 (Facebook / LinkedIn)' }),
+      ],
+    },
 
     // ========== DATES ==========
     defineField({

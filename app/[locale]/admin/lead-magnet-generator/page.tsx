@@ -25,6 +25,7 @@ import type {
   GeneratedLeadMagnet,
   BilingualLeadMagnetImages,
   BilingualPublishedLeadMagnet,
+  PromoImages,
 } from "@/lib/lead-magnet-generator/types";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -99,6 +100,21 @@ function ErrorBox({ message, onRetry }: { message: string; onRetry?: () => void 
         </Button>
       )}
     </div>
+  );
+}
+
+function CopyButton({ url, label }: { url: string; label?: string }) {
+  const [copied, setCopied] = useState(false);
+  function copy() {
+    navigator.clipboard.writeText(url).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }
+  return (
+    <Button variant="outline" size="sm" onClick={copy} className="text-xs shrink-0">
+      {copied ? "Copied!" : (label ?? "Copy URL")}
+    </Button>
   );
 }
 
@@ -731,6 +747,52 @@ function ImagesStep({
               </CardContent>
             </Card>
           )}
+
+          {/* Promo cards */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm uppercase tracking-wide text-muted-foreground">Social Media Promo Cards</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {activeImages?.promoImages ? (
+                <div className="flex flex-col gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {/* Square */}
+                    <div className="flex flex-col gap-2">
+                      <img
+                        src={activeImages.promoImages.square}
+                        alt="Promo card square"
+                        className="w-full aspect-square object-cover rounded-md border"
+                      />
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-xs text-muted-foreground">1080 × 1080 — Instagram</span>
+                        <CopyButton url={activeImages.promoImages.square} />
+                      </div>
+                    </div>
+                    {/* Landscape */}
+                    <div className="flex flex-col gap-2">
+                      <img
+                        src={activeImages.promoImages.landscape}
+                        alt="Promo card landscape"
+                        className="w-full object-cover rounded-md border"
+                        style={{ aspectRatio: "1200 / 630" }}
+                      />
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-xs text-muted-foreground">1200 × 630 — Facebook / LinkedIn</span>
+                        <CopyButton url={activeImages.promoImages.landscape} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground py-4">
+                  {generating
+                    ? <><Loader2 className="h-4 w-4 animate-spin" /> Generating promo cards alongside images...</>
+                    : "Promo cards unavailable — cover image generation may have failed."}
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
       )}
 
@@ -1070,11 +1132,19 @@ function SuccessView({
   result,
   publishStatus,
   onReset,
+  images,
 }: {
   result: BilingualPublishedLeadMagnet;
   publishStatus: "draft" | "published";
   onReset: () => void;
+  images?: BilingualLeadMagnetImages;
 }) {
+  const promoCards: Array<{ label: string; size: string; platform: string; url: string }> = [];
+  if (images?.en.promoImages?.square)    promoCards.push({ label: "EN", size: "1080×1080", platform: "Instagram",        url: images.en.promoImages.square });
+  if (images?.en.promoImages?.landscape) promoCards.push({ label: "EN", size: "1200×630",  platform: "Facebook/LinkedIn", url: images.en.promoImages.landscape });
+  if (images?.es.promoImages?.square)    promoCards.push({ label: "ES", size: "1080×1080", platform: "Instagram",        url: images.es.promoImages.square });
+  if (images?.es.promoImages?.landscape) promoCards.push({ label: "ES", size: "1200×630",  platform: "Facebook/LinkedIn", url: images.es.promoImages.landscape });
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center gap-2 text-green-600">
@@ -1096,6 +1166,36 @@ function SuccessView({
           </Button>
         </CardContent>
       </Card>
+
+      {promoCards.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm uppercase tracking-wide text-muted-foreground">Social Media Promo Cards</CardTitle>
+            <p className="text-xs text-muted-foreground mt-1">Use these in Meta Ads, a social scheduler, or DMs to drive traffic to the guide landing page.</p>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              {promoCards.map((card, i) => (
+                <div key={i} className="flex flex-col gap-2">
+                  <img
+                    src={card.url}
+                    alt={`${card.label} ${card.size} promo card`}
+                    className="w-full object-cover rounded-md border"
+                    style={{ aspectRatio: card.size === "1080×1080" ? "1 / 1" : "1200 / 630" }}
+                  />
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className="text-xs">{card.label}</Badge>
+                      <span className="text-xs text-muted-foreground">{card.size} — {card.platform}</span>
+                    </div>
+                    <CopyButton url={card.url} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
@@ -1207,6 +1307,7 @@ export default function LeadMagnetGeneratorPage() {
           result={state.publishedResult}
           publishStatus="draft"
           onReset={reset}
+          images={state.images}
         />
       )}
     </div>

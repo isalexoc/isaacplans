@@ -1,5 +1,6 @@
 import OpenAI from "openai";
 import cloudinary from "@/config/cloudinary";
+import { generatePromoImages } from "./promo-image-generator";
 import type { LeadMagnetOutline, LeadMagnetImages, BilingualLeadMagnetImages } from "./types";
 
 type ImageGenResult = { data?: Array<{ b64_json?: string; url?: string; revised_prompt?: string }> };
@@ -212,7 +213,15 @@ async function generateImageSetForLocale(
     ),
   ]);
 
-  return { images: { coverImage: coverUrl, sectionImages: sectionUrls }, warnings };
+  // Step 4: generate promo cards (requires coverUrl from step 3)
+  const promoImages = coverUrl
+    ? await generatePromoImages(outline, coverUrl, locale).catch((err) => {
+        warnings.push(`[${locale}] Promo image generation failed: ${err instanceof Error ? err.message : String(err)}`);
+        return undefined;
+      })
+    : undefined;
+
+  return { images: { coverImage: coverUrl, sectionImages: sectionUrls, promoImages }, warnings };
 }
 
 // ─── Public exports ───────────────────────────────────────────────────────────

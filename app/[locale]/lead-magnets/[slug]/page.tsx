@@ -40,6 +40,10 @@ const LEAD_MAGNET_QUERY = `*[_type == "leadMagnet" && slug.current == $slug && l
     ctaButtonText,
     successMessage,
     agentCrmWorkflowId
+  },
+  promoImages {
+    square,
+    landscape
   }
 }`;
 
@@ -78,6 +82,7 @@ type LeadMagnet = {
     successMessage: string;
     agentCrmWorkflowId?: string;
   } | null;
+  promoImages?: { square?: string; landscape?: string } | null;
 };
 
 const descriptionComponents: PortableTextComponents = {
