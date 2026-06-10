@@ -260,7 +260,7 @@ export default async function LeadMagnetPage({ params }: Props) {
             src={coverImageUrl}
             alt={coverImageAlt}
             fill
-            className="object-cover object-center opacity-60"
+            className="object-cover object-top opacity-60"
             priority
             sizes="100vw"
           />
