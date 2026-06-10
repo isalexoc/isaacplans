@@ -1209,6 +1209,43 @@ export const getBlogCategoryBreadcrumbLd = (
   ],
 });
 
+/* ───────────── Lead Magnet Breadcrumb JSON-LD ───────────── */
+export const getLeadMagnetBreadcrumbLd = (opts: {
+  locale: string;
+  slug: string;
+  guideTitle: string;
+}): WithContext<BreadcrumbList> => {
+  const { locale, slug, guideTitle } = opts;
+  const pathPrefix = locale === "es" ? "imanes-de-leads" : "lead-magnets";
+  const homeLabel = locale === "en" ? "Home" : "Inicio";
+  const sectionLabel = locale === "en" ? "Free Guides" : "Guías Gratuitas";
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: homeLabel,
+        item: `${BASE_URL}/${locale}`,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: sectionLabel,
+        item: `${BASE_URL}/${locale}/${pathPrefix}`,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: guideTitle,
+        item: `${BASE_URL}/${locale}/${pathPrefix}/${slug}`,
+      },
+    ],
+  };
+};
+
 /* ───────────── Blog Post Breadcrumb JSON-LD ───────────── */
 export const getBlogPostBreadcrumbLd = (
   locale: string,

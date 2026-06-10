@@ -7,6 +7,10 @@ import { CheckCircle, Star, Download } from "lucide-react";
 import { PortableText, type PortableTextComponents } from "@portabletext/react";
 import { sanityFetch } from "@/sanity/lib/live";
 import { LeadMagnetForm } from "@/components/lead-magnet-form";
+import { cloudinaryOgImageUrl } from "@/lib/blog-featured-image";
+import { ogLocaleOf } from "@/lib/seo/i18n";
+import { getLeadMagnetBreadcrumbLd } from "@/lib/seo/jsonld";
+import { ShareButton } from "@/components/share-button";
 
 export const revalidate = 3600;
 
@@ -122,7 +126,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const title = guide.seo?.metaTitle ?? guide.title;
   const description = guide.seo?.metaDescription ?? guide.subtitle;
-  const ogImage = guide.coverImage?.asset?.url ?? "";
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.isaacplans.com";
   const pathPrefix = locale === "es" ? "imanes-de-leads" : "lead-magnets";
   const canonical = `${siteUrl}/${locale}/${pathPrefix}/${slug}`;
@@ -134,6 +137,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     ? `${siteUrl}/${alternateLocale}/${alternatePathPrefix}/${relatedGuide.slug.current}`
     : undefined;
 
+  // OG image: prefer pre-generated landscape promo (1200×630) → Cloudinary crop → empty
+  const rawOgImage =
+    guide.promoImages?.landscape ||
+    (guide.coverImage?.asset?.url ? cloudinaryOgImageUrl(guide.coverImage.asset.url) : "");
+  const ogImageAlt = `${title} — Isaac Plans Insurance`;
+
   return {
     title,
     description,
@@ -144,10 +153,33 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         ? { languages: { [locale]: canonical, [alternateLocale]: alternateUrl } }
         : {}),
     },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+      },
+    },
     openGraph: {
       title,
       description,
-      images: ogImage ? [{ url: ogImage }] : [],
+      url: canonical,
+      siteName: "Isaac Plans Insurance",
+      type: "website",
+      locale: ogLocaleOf(locale),
+      alternateLocale: ogLocaleOf(alternateLocale),
+      images: rawOgImage
+        ? [{ url: rawOgImage, width: 1200, height: 630, alt: ogImageAlt }]
+        : [],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: rawOgImage ? [rawOgImage] : [],
     },
   };
 }
@@ -235,27 +267,51 @@ export default async function LeadMagnetPage({ params }: Props) {
 
   const leadFormSettings = guide.leadFormSettings ?? t.defaultCta;
 
-  const jsonLd = {
+  const pathPrefix = locale === "es" ? "imanes-de-leads" : "lead-magnets";
+  const canonicalUrl = `${SITE_URL}/${locale}/${pathPrefix}/${slug}`;
+  const ogImageUrl =
+    guide.promoImages?.landscape ||
+    (coverImageUrl ? cloudinaryOgImageUrl(coverImageUrl) : "");
+
+  const bookLd = {
     "@context": "https://schema.org",
     "@type": "Book",
-    "@id": `${SITE_URL}/${locale}/lead-magnets/${slug}#guide`,
+    "@id": `${canonicalUrl}#guide`,
     name: guide.title,
     description: guide.subtitle,
-    url: `${SITE_URL}/${locale}/lead-magnets/${slug}`,
+    url: canonicalUrl,
+    inLanguage: locale === "es" ? "es-ES" : "en-US",
+    ...(ogImageUrl ? { image: ogImageUrl } : {}),
+    datePublished: guide.publishedAt,
+    author: {
+      "@type": "Person",
+      name: "Isaac Orraiz",
+      url: SITE_URL,
+    },
     publisher: {
       "@type": "Organization",
       name: "Isaac Plans Insurance",
+      url: SITE_URL,
     },
-    ...(coverImageUrl ? { image: coverImageUrl } : {}),
-    datePublished: guide.publishedAt,
   };
+
+  const breadcrumbLd = getLeadMagnetBreadcrumbLd({
+    locale,
+    slug,
+    guideTitle: guide.title,
+  });
 
   return (
     <>
       <Script
         id="lead-magnet-jsonld"
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(bookLd) }}
+      />
+      <Script
+        id="lead-magnet-breadcrumb-jsonld"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
       />
 
       {/* 1. Hero */}
@@ -279,7 +335,8 @@ export default async function LeadMagnetPage({ params }: Props) {
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-tight mb-3">
             {guide.title}
           </h1>
-          <p className="text-lg sm:text-xl text-gray-200 max-w-2xl">{guide.subtitle}</p>
+          <p className="text-lg sm:text-xl text-gray-200 max-w-2xl mb-4">{guide.subtitle}</p>
+          <ShareButton title={guide.title} url={canonicalUrl} locale={locale} />
         </div>
       </div>
 
