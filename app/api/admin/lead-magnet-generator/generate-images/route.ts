@@ -7,7 +7,7 @@ import type {
   LeadMagnetOutline,
 } from "@/lib/lead-magnet-generator/types";
 
-export const maxDuration = 120;
+export const maxDuration = 300;
 
 export async function POST(
   request: NextRequest
