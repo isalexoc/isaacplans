@@ -310,6 +310,12 @@ export async function publishBilingualLeadMagnet(
     client.create(esDoc),
   ]);
 
+  // Wire cross-references so the language toggle can navigate between pairs
+  await Promise.all([
+    client.patch(enResult._id).set({ relatedGuide: { _type: "reference", _ref: esResult._id } }).commit(),
+    client.patch(esResult._id).set({ relatedGuide: { _type: "reference", _ref: enResult._id } }).commit(),
+  ]);
+
   return {
     en: {
       sanityDocumentId: enResult._id,

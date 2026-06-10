@@ -14,10 +14,11 @@ type Props = {
   params: Promise<{ slug: string; locale: string }>;
 };
 
-const LEAD_MAGNET_QUERY = `*[_type == "leadMagnet" && slug.current == $slug && status == "published"][0] {
+const LEAD_MAGNET_QUERY = `*[_type == "leadMagnet" && slug.current == $slug && locale == $locale && status == "published"][0] {
   _id,
   title,
   subtitle,
+  locale,
   description,
   coverImage { asset->{ url }, alt },
   keyBenefits,
@@ -26,6 +27,7 @@ const LEAD_MAGNET_QUERY = `*[_type == "leadMagnet" && slug.current == $slug && s
   generatedPdfUrl,
   publishedAt,
   category,
+  relatedGuide->{ slug, locale },
   seo {
     metaTitle,
     metaDescription,
@@ -41,10 +43,19 @@ const LEAD_MAGNET_QUERY = `*[_type == "leadMagnet" && slug.current == $slug && s
   }
 }`;
 
+const FIND_RELATED_QUERY = `*[
+  _type == "leadMagnet"
+  && locale == $targetLocale
+  && status == "published"
+  && relatedGuide->slug.current == $slug
+  && relatedGuide->locale == $sourceLocale
+][0]{ slug }`;
+
 type LeadMagnet = {
   _id: string;
   title: string;
   subtitle: string;
+  locale: string;
   description: unknown[];
   coverImage: { asset: { url: string }; alt: string } | null;
   keyBenefits: string[];
@@ -53,6 +64,7 @@ type LeadMagnet = {
   generatedPdfUrl: string;
   publishedAt: string;
   category: string;
+  relatedGuide: { slug: { current: string }; locale: string } | null;
   seo: {
     metaTitle?: string;
     metaDescription?: string;
@@ -91,12 +103,12 @@ const descriptionComponents: PortableTextComponents = {
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { slug } = await params;
+  const { slug, locale } = await params;
   const fetchOptions = { next: { revalidate: 3600, tags: [`lead-magnet-${slug}`] } };
 
   const result = await sanityFetch({
     query: LEAD_MAGNET_QUERY,
-    params: { slug },
+    params: { slug, locale },
     ...fetchOptions,
   });
 
@@ -106,11 +118,27 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const title = guide.seo?.metaTitle ?? guide.title;
   const description = guide.seo?.metaDescription ?? guide.subtitle;
   const ogImage = guide.coverImage?.asset?.url ?? "";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.isaacplans.com";
+  const pathPrefix = locale === "es" ? "imanes-de-leads" : "lead-magnets";
+  const canonical = `${siteUrl}/${locale}/${pathPrefix}/${slug}`;
+
+  const relatedGuide = guide.relatedGuide;
+  const alternateLocale = locale === "en" ? "es" : "en";
+  const alternatePathPrefix = alternateLocale === "es" ? "imanes-de-leads" : "lead-magnets";
+  const alternateUrl = relatedGuide?.slug?.current
+    ? `${siteUrl}/${alternateLocale}/${alternatePathPrefix}/${relatedGuide.slug.current}`
+    : undefined;
 
   return {
     title,
     description,
     keywords: guide.seo?.keywords ?? [],
+    alternates: {
+      canonical,
+      ...(alternateUrl
+        ? { languages: { [locale]: canonical, [alternateLocale]: alternateUrl } }
+        : {}),
+    },
     openGraph: {
       title,
       description,
@@ -126,14 +154,35 @@ export default async function LeadMagnetPage({ params }: Props) {
   const { slug, locale } = await params;
   const fetchOptions = { next: { revalidate: 3600, tags: [`lead-magnet-${slug}`] } };
 
-  const result = await sanityFetch({
-    query: LEAD_MAGNET_QUERY,
-    params: { slug },
-    ...fetchOptions,
-  });
+  let guide = (
+    await sanityFetch({ query: LEAD_MAGNET_QUERY, params: { slug, locale }, ...fetchOptions })
+  ).data as LeadMagnet | null;
 
-  const guide = result.data as LeadMagnet | null;
+  // Fallback: the header LocaleSwitcher may land on the same slug in the new locale.
+  // If no direct match, find the paired guide via relatedGuide and redirect to its slug.
+  if (!guide) {
+    const alternateLocale = locale === "en" ? "es" : "en";
+    const related = (
+      await sanityFetch({
+        query: FIND_RELATED_QUERY,
+        params: { slug, sourceLocale: alternateLocale, targetLocale: locale },
+        ...fetchOptions,
+      })
+    ).data as { slug: { current: string } } | null;
+
+    if (related?.slug?.current) {
+      const { redirect } = await import("next/navigation");
+      const pathPrefix = locale === "es" ? "imanes-de-leads" : "lead-magnets";
+      redirect(`/${locale}/${pathPrefix}/${related.slug.current}`);
+    }
+  }
+
   if (!guide) notFound();
+
+  const relatedGuide = guide.relatedGuide;
+  const alternateLocale = locale === "en" ? "es" : "en";
+  const alternatePathPrefix = alternateLocale === "es" ? "imanes-de-leads" : "lead-magnets";
+  const alternateText = locale === "en" ? "Leer en español" : "Read in English";
 
   const coverImageUrl = guide.coverImage?.asset?.url ?? null;
   const coverImageAlt = guide.coverImage?.alt ?? guide.title;
@@ -185,10 +234,23 @@ export default async function LeadMagnetPage({ params }: Props) {
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-gray-900/90 via-gray-900/40 to-transparent" />
         <div className="absolute inset-0 flex flex-col justify-end p-6 sm:p-12 max-w-4xl mx-auto w-full">
-          <span className="inline-flex items-center gap-1.5 bg-blue-500 text-white text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full w-fit mb-4">
-            <Download className="w-3 h-3" />
-            FREE DOWNLOAD
-          </span>
+          <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
+            <span className="inline-flex items-center gap-1.5 bg-blue-500 text-white text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full">
+              <Download className="w-3 h-3" />
+              FREE DOWNLOAD
+            </span>
+            {relatedGuide?.slug?.current && (
+              <Link
+                href={`/${alternateLocale}/${alternatePathPrefix}/${relatedGuide.slug.current}`}
+                className="inline-flex items-center gap-2 text-sm text-white/80 hover:text-white transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+                </svg>
+                {alternateText}
+              </Link>
+            )}
+          </div>
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-tight mb-3">
             {guide.title}
           </h1>

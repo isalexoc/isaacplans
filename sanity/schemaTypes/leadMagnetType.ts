@@ -82,6 +82,14 @@ export const leadMagnetType = defineType({
       initialValue: 'draft',
       validation: (rule) => rule.required(),
     }),
+    {
+      name: 'relatedGuide',
+      type: 'reference',
+      title: 'Related Guide (Other Language)',
+      group: 'identity',
+      to: [{ type: 'leadMagnet' }],
+      description: 'Link to the same guide in the other language',
+    },
 
     // ========== CONTENT ==========
     defineField({
