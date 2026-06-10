@@ -123,6 +123,7 @@ export interface TranslatedLeadMagnet {
   outline: {
     title: string;
     subtitle: string;
+    targetAudience: string;
     keyBenefits: string[];
     sections: Array<{ sectionTitle: string; keyPoints: string[] }>;
   };

@@ -17,6 +17,7 @@ Rules:
 interface MetadataTranslation {
   title: string;
   subtitle: string;
+  targetAudience: string;
   keyBenefits: string[];
   sectionTitles: string[];
   sectionKeyPoints: string[][];
@@ -41,6 +42,7 @@ async function translateMetadata(
   const input = {
     title: content.outline.title,
     subtitle: content.outline.subtitle,
+    targetAudience: content.outline.targetAudience,
     keyBenefits: content.outline.keyBenefits,
     sectionTitles: content.outline.sections.map((s) => s.sectionTitle),
     sectionKeyPoints: content.outline.sections.map((s) => s.keyPoints),
@@ -148,6 +150,7 @@ export async function translateLeadMagnet(
     outline: {
       title: meta.title,
       subtitle: meta.subtitle,
+      targetAudience: meta.targetAudience ?? "",
       keyBenefits: meta.keyBenefits,
       sections: (meta.sectionTitles ?? []).map((title, i) => ({
         sectionTitle: title,

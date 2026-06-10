@@ -265,12 +265,12 @@ export default async function LeadMagnetPage({ params }: Props) {
             src={coverImageUrl}
             alt={coverImageAlt}
             fill
-            className="object-cover object-top opacity-60"
+            className="object-cover object-center opacity-70"
             priority
             sizes="100vw"
           />
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-gray-900/90 via-gray-900/40 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/60 to-gray-900/20" />
         <div className="absolute inset-0 flex flex-col justify-end p-6 sm:p-12 max-w-4xl mx-auto w-full">
           <span className="inline-flex items-center gap-1.5 bg-blue-500 text-white text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full w-fit mb-4">
             <Download className="w-3 h-3" />
@@ -308,7 +308,7 @@ export default async function LeadMagnetPage({ params }: Props) {
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">{t.aboutThisGuide}</h2>
             {guide.description && Array.isArray(guide.description) && guide.description.length > 0 && (
               <div className="prose prose-gray dark:prose-invert max-w-none">
-                <PortableText value={guide.description as any} components={descriptionComponents} />
+                <PortableText value={(guide.description as any[]).slice(0, 2)} components={descriptionComponents} />
               </div>
             )}
             {guide.targetAudience && (
