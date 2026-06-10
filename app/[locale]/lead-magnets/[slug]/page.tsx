@@ -71,18 +71,18 @@ type LeadMagnet = {
 const descriptionComponents: PortableTextComponents = {
   block: {
     normal: ({ children }) => (
-      <p className="text-gray-700 leading-relaxed mb-4">{children}</p>
+      <p className="text-gray-700 dark:text-gray-300 leading-relaxed mb-4">{children}</p>
     ),
     h2: ({ children }) => (
-      <h2 className="text-xl font-bold text-gray-900 mt-6 mb-3">{children}</h2>
+      <h2 className="text-xl font-bold text-gray-900 dark:text-white mt-6 mb-3">{children}</h2>
     ),
     h3: ({ children }) => (
-      <h3 className="text-lg font-semibold text-gray-900 mt-4 mb-2">{children}</h3>
+      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mt-4 mb-2">{children}</h3>
     ),
   },
   list: {
     bullet: ({ children }) => (
-      <ul className="list-disc list-inside space-y-1 text-gray-700 mb-4">{children}</ul>
+      <ul className="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300 mb-4">{children}</ul>
     ),
   },
   listItem: {
@@ -200,14 +200,14 @@ export default async function LeadMagnetPage({ params }: Props) {
         {/* 2. What You'll Learn */}
         {guide.keyBenefits && guide.keyBenefits.length > 0 && (
           <section>
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-8">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-8">
               What You&apos;ll Learn
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {guide.keyBenefits.map((benefit, i) => (
                 <div key={i} className="flex items-start gap-3">
-                  <CheckCircle className="w-5 h-5 text-blue-600 mt-0.5 shrink-0" />
-                  <span className="text-gray-700">{benefit}</span>
+                  <CheckCircle className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 shrink-0" />
+                  <span className="text-gray-700 dark:text-gray-300">{benefit}</span>
                 </div>
               ))}
             </div>
@@ -218,14 +218,14 @@ export default async function LeadMagnetPage({ params }: Props) {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* About */}
           <section>
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">About This Guide</h2>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">About This Guide</h2>
             {guide.description && Array.isArray(guide.description) && guide.description.length > 0 && (
-              <div className="prose prose-gray max-w-none">
+              <div className="prose prose-gray dark:prose-invert max-w-none">
                 <PortableText value={guide.description as any} components={descriptionComponents} />
               </div>
             )}
             {guide.targetAudience && (
-              <div className="mt-6 bg-blue-50 border border-blue-100 rounded-lg px-4 py-3 text-sm text-blue-900">
+              <div className="mt-6 bg-blue-50 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-800 rounded-lg px-4 py-3 text-sm text-blue-900 dark:text-blue-200">
                 <span className="font-semibold">Written for:</span> {guide.targetAudience}
               </div>
             )}
@@ -233,11 +233,11 @@ export default async function LeadMagnetPage({ params }: Props) {
 
           {/* 4. Lead Capture Form */}
           <section>
-            <div className="bg-white border border-gray-200 rounded-2xl shadow-lg p-6 sm:p-8 sticky top-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-1">
+            <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-lg p-6 sm:p-8 sticky top-6">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-1">
                 {leadFormSettings.ctaHeadline}
               </h2>
-              <p className="text-sm text-gray-500 mb-6">{leadFormSettings.ctaSubtext}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">{leadFormSettings.ctaSubtext}</p>
               <LeadMagnetForm
                 slug={slug}
                 category={guide.category}
@@ -248,14 +248,14 @@ export default async function LeadMagnetPage({ params }: Props) {
         </div>
 
         {/* 5. Trust section */}
-        <section className="border-t border-gray-200 pt-10 text-center space-y-3">
+        <section className="border-t border-gray-200 dark:border-gray-700 pt-10 text-center space-y-3">
           {downloadCount > 0 && (
-            <p className="text-gray-600 text-sm">
-              <span className="font-semibold text-gray-900">{downloadCount.toLocaleString()}</span>{" "}
+            <p className="text-gray-600 dark:text-gray-400 text-sm">
+              <span className="font-semibold text-gray-900 dark:text-white">{downloadCount.toLocaleString()}</span>{" "}
               {downloadCount === 1 ? "person has" : "people have"} downloaded this guide
             </p>
           )}
-          <p className="text-sm text-gray-500">By Isaac Plans Insurance — Licensed Insurance Agency</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">By Isaac Plans Insurance — Licensed Insurance Agency</p>
           <div className="flex justify-center gap-0.5">
             {Array.from({ length: 5 }).map((_, i) => (
               <Star key={i} className="w-5 h-5 fill-yellow-400 text-yellow-400" />
@@ -264,12 +264,12 @@ export default async function LeadMagnetPage({ params }: Props) {
         </section>
 
         {/* 6. Footer CTA */}
-        <section className="bg-gray-50 rounded-2xl p-8 text-center space-y-3 border border-gray-100">
-          <p className="text-gray-700 font-medium">Prefer to speak with someone?</p>
+        <section className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-8 text-center space-y-3 border border-gray-100 dark:border-gray-700">
+          <p className="text-gray-700 dark:text-gray-300 font-medium">Prefer to speak with someone?</p>
           {PHONE && (
             <a
               href={`tel:${PHONE}`}
-              className="inline-block text-blue-600 hover:underline font-semibold text-lg"
+              className="inline-block text-blue-600 dark:text-blue-400 hover:underline font-semibold text-lg"
             >
               {PHONE}
             </a>
@@ -277,7 +277,7 @@ export default async function LeadMagnetPage({ params }: Props) {
           <div className="pt-2">
             <Link
               href={`/${locale}/lead-magnets`}
-              className="text-sm text-gray-500 hover:text-gray-700 underline"
+              className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 underline"
             >
               Browse all free guides →
             </Link>

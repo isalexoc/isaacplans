@@ -6,25 +6,35 @@ const LABELS = {
     headline: "Ready to Protect What Matters Most?",
     subtext: "Get a free consultation with an Isaac Plans insurance specialist —\nno pressure, just answers.",
     bullets: [
-      "📞  No-obligation phone consultation",
-      "✉   Personalized coverage recommendations by email",
-      "✓   Licensed agents — real answers, no sales scripts",
+      "No-obligation phone consultation",
+      "Personalized coverage recommendations by email",
+      "Licensed agents — real answers, no sales scripts",
     ],
+    callLabel: "Call us:",
+    visitLabel: "Visit:",
     footer: "Licensed Insurance Agency",
   },
   es: {
     headline: "¿Listo para Proteger lo que Más Importa?",
     subtext: "Obtén una consulta gratuita con un especialista de Isaac Plans —\nsin presión, solo respuestas.",
     bullets: [
-      "📞  Consulta telefónica sin obligación",
-      "✉   Recomendaciones de cobertura personalizadas por email",
-      "✓   Agentes con licencia — respuestas reales, sin guiones de ventas",
+      "Consulta telefónica sin obligación",
+      "Recomendaciones de cobertura personalizadas por email",
+      "Agentes con licencia — respuestas reales, sin guiones de ventas",
     ],
+    callLabel: "Llámanos:",
+    visitLabel: "Visita:",
     footer: "Agencia de Seguros con Licencia",
   },
 };
 
-export function PdfBackPage({ locale = "en" }: { locale?: "en" | "es" }) {
+export function PdfBackPage({
+  locale = "en",
+  phone = "540-426-1804",
+}: {
+  locale?: "en" | "es";
+  phone?: string;
+}) {
   const t = LABELS[locale];
   return (
     <Page size="A4" style={{ backgroundColor: BRAND.blue, padding: 0 }}>
@@ -72,19 +82,35 @@ export function PdfBackPage({ locale = "en" }: { locale?: "en" | "es" }) {
           {t.subtext}
         </Text>
 
-        {/* Benefit bullets */}
+        {/* Benefit bullets — colored square + text (PDF-safe, no emoji) */}
         {t.bullets.map((item, i) => (
-          <Text
+          <View
             key={i}
             style={{
-              fontSize: FONT_SIZES.body,
-              color: BRAND.white,
-              marginBottom: 8,
-              opacity: 0.9,
+              flexDirection: "row",
+              alignItems: "center",
+              marginBottom: 10,
             }}
           >
-            {item}
-          </Text>
+            <View
+              style={{
+                width: 7,
+                height: 7,
+                backgroundColor: BRAND.accent,
+                marginRight: 10,
+                flexShrink: 0,
+              }}
+            />
+            <Text
+              style={{
+                fontSize: FONT_SIZES.body,
+                color: BRAND.white,
+                opacity: 0.9,
+              }}
+            >
+              {item}
+            </Text>
+          </View>
         ))}
 
         {/* CTA box */}
@@ -104,7 +130,7 @@ export function PdfBackPage({ locale = "en" }: { locale?: "en" | "es" }) {
               marginBottom: 8,
             }}
           >
-            Call us: (800) 000-0000
+            {t.callLabel} {phone}
           </Text>
           <Text
             style={{
@@ -112,7 +138,7 @@ export function PdfBackPage({ locale = "en" }: { locale?: "en" | "es" }) {
               color: BRAND.gray,
             }}
           >
-            Visit: isaacplans.com
+            {t.visitLabel} isaacplans.com
           </Text>
         </View>
       </View>

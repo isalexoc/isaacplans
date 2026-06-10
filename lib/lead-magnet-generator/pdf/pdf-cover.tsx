@@ -1,6 +1,12 @@
 import { Page, View, Text, Image } from "@react-pdf/renderer";
 import { BRAND, FONT_SIZES } from "./pdf-styles";
 
+function coverTitleSize(title: string): number {
+  if (title.length > 80) return 20;
+  if (title.length > 55) return 23;
+  return 28;
+}
+
 interface PdfCoverProps {
   title: string;
   subtitle: string;
@@ -91,7 +97,7 @@ export function PdfCover({ title, subtitle, coverImageUrl, publishedAt, locale =
         />
         <Text
           style={{
-            fontSize: FONT_SIZES.h1,
+            fontSize: coverTitleSize(title),
             fontFamily: "Helvetica-Bold",
             color: BRAND.dark,
             marginBottom: 8,

@@ -6,7 +6,7 @@ import LeadMagnetsListingClient, { type LeadMagnetCard } from "@/components/lead
 
 export const revalidate = 3600;
 
-const LISTING_QUERY = `*[_type == "leadMagnet" && status == "published"] | order(publishedAt desc) {
+const LISTING_QUERY = `*[_type == "leadMagnet" && status == "published" && locale == $locale] | order(publishedAt desc) {
   _id,
   title,
   subtitle,
@@ -38,7 +38,7 @@ export default async function LeadMagnetsPage() {
   const locale = await getLocale();
   const isES = locale.startsWith("es");
 
-  const result = await sanityFetch({ query: LISTING_QUERY });
+  const result = await sanityFetch({ query: LISTING_QUERY, params: { locale: isES ? "es" : "en" } });
 
   const guides = (result.data ?? []) as LeadMagnetCard[];
 
