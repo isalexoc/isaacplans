@@ -599,6 +599,7 @@ function ImagesStep({
   onContinue: (images: LeadMagnetImages) => void;
 }) {
   const [generating, setGenerating] = useState(false);
+  const [imageWarnings, setImageWarnings] = useState<string[]>([]);
 
   const images = state.images;
   const outline = state.outline!;
@@ -611,10 +612,12 @@ function ImagesStep({
 
   async function generateImages() {
     setGenerating(true);
+    setImageWarnings([]);
     setState((prev) => ({ ...prev, error: undefined }));
     try {
       const data = await postJson("/api/admin/lead-magnet-generator/generate-images", { outline });
       setState((prev) => ({ ...prev, images: data.data }));
+      if (data.warnings?.length) setImageWarnings(data.warnings);
     } catch (err) {
       setState((prev) => ({ ...prev, error: err instanceof Error ? err.message : "Image generation failed" }));
     } finally {
@@ -641,6 +644,15 @@ function ImagesStep({
 
       {state.error && !generating && (
         <ErrorBox message={state.error} onRetry={generateImages} />
+      )}
+
+      {imageWarnings.length > 0 && !generating && (
+        <div className="rounded-md border border-yellow-300 bg-yellow-50 p-4 flex flex-col gap-1">
+          <p className="text-sm font-medium text-yellow-800">Image generation warnings:</p>
+          {imageWarnings.map((w, i) => (
+            <p key={i} className="text-xs text-yellow-700">{w}</p>
+          ))}
+        </div>
       )}
 
       {images && !generating && (

@@ -87,6 +87,15 @@ export async function generateLeadMagnetImages(
   if (!process.env.OPENAI_API_KEY) {
     throw new Error("OPENAI_API_KEY is not configured");
   }
+  if (!process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME) {
+    throw new Error("NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME is not configured");
+  }
+  if (!process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY && !process.env.CLOUDINARY_API_KEY) {
+    throw new Error("Cloudinary API key is not configured (set NEXT_PUBLIC_CLOUDINARY_API_KEY or CLOUDINARY_API_KEY)");
+  }
+  if (!process.env.CLOUDINARY_API_SECRET) {
+    throw new Error("CLOUDINARY_API_SECRET is not configured");
+  }
 
   const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
   const warnings: string[] = [];
