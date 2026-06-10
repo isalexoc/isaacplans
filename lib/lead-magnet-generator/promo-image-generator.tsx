@@ -3,16 +3,31 @@ import cloudinary from "@/config/cloudinary";
 import type { LeadMagnetOutline, PromoImages } from "./types";
 
 // ─── Font cache (persists across requests in the same process) ────────────────
+// satori requires TTF/OTF — not WOFF2. Use an old IE UA so Google Fonts
+// returns a truetype URL instead of woff2.
 
 let cachedFontBold: ArrayBuffer | null = null;
 
 async function loadFont(): Promise<ArrayBuffer> {
   if (cachedFontBold) return cachedFontBold;
-  const res = await fetch(
-    "https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.17/files/inter-latin-900-normal.woff2"
+
+  const cssRes = await fetch(
+    "https://fonts.googleapis.com/css2?family=Inter:wght@900&display=swap",
+    {
+      headers: {
+        "User-Agent": "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)",
+      },
+    }
   );
-  if (!res.ok) throw new Error(`Font fetch failed: ${res.status}`);
-  cachedFontBold = await res.arrayBuffer();
+  if (!cssRes.ok) throw new Error(`Google Fonts CSS fetch failed: ${cssRes.status}`);
+  const css = await cssRes.text();
+
+  const fontUrl = css.match(/src:\s*url\(([^)]+)\)/)?.[1];
+  if (!fontUrl) throw new Error("Could not parse font URL from Google Fonts CSS response");
+
+  const fontRes = await fetch(fontUrl);
+  if (!fontRes.ok) throw new Error(`Font file fetch failed: ${fontRes.status}`);
+  cachedFontBold = await fontRes.arrayBuffer();
   return cachedFontBold;
 }
 
