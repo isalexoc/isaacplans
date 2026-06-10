@@ -92,6 +92,7 @@ export function LeadMagnetForm({ slug, leadFormSettings }: LeadMagnetFormProps) 
           smsConsent,
           marketingConsent,
           slug,
+          locale,
         }),
       });
 

@@ -5,6 +5,15 @@ import { sendMetaCapiEvent, generateEventId } from "@/lib/meta-capi";
 const CRM_BASE = "https://services.leadconnectorhq.com";
 const CRM_VERSION = "2021-07-28";
 
+const CATEGORY_DATA_KEY: Record<string, string> = {
+  aca: "acaData",
+  shortTerm: "shortTermMedicalData",
+  dentalVision: "dentalVisionData",
+  hospitalIndemnity: "hospitalIndemnityData",
+  iul: "iulLeadGenData",
+  finalExpense: "finalExpenseData",
+};
+
 function crmHeaders(token: string): HeadersInit {
   return {
     Accept: "application/json",
@@ -60,6 +69,7 @@ export async function POST(request: NextRequest) {
       email,
       phone,
       slug,
+      locale,
       smsConsent,
       marketingConsent,
     } = body as {
@@ -69,6 +79,7 @@ export async function POST(request: NextRequest) {
       email?: string;
       phone?: string;
       slug?: string;
+      locale?: string;
       smsConsent?: boolean;
       marketingConsent?: boolean;
     };
@@ -107,36 +118,40 @@ export async function POST(request: NextRequest) {
     const normalizedEmail = email.trim().toLowerCase();
     const cleanedSlug = slug.trim();
 
-    // 3. Create Agent CRM contact (non-fatal)
+    // 3. Create Agent CRM contact via /api/create-contact (non-fatal)
+    // Routes through the shared contact handler so tags, custom fields, duplicate detection,
+    // and category-specific workflow enrollment all work the same as landing page forms.
     let contactId: string | null = null;
     try {
-      const piToken = process.env.AGENT_CRM_PI;
-      const locationId = process.env.AGENT_CRM_LOCATION_ID;
-      if (piToken && locationId) {
-        const crmRes = await fetch(`${CRM_BASE}/contacts/`, {
+      if (phone?.trim()) {
+        const siteUrl =
+          process.env.NODE_ENV === "development"
+            ? `http://localhost:${process.env.PORT || 3000}`
+            : process.env.NEXT_PUBLIC_SITE_URL ||
+              (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null) ||
+              "http://localhost:3000";
+
+        const dataKey = CATEGORY_DATA_KEY[guide.category] ?? "finalExpenseData";
+        const leadTypeData = {
+          language: locale?.startsWith("es") ? "es" : "en",
+          source: `lead-magnet-${cleanedSlug}`,
+          smsConsent: smsConsent ?? false,
+          marketingConsent: marketingConsent ?? false,
+        };
+
+        const crmRes = await fetch(`${siteUrl}/api/create-contact`, {
           method: "POST",
-          headers: crmHeaders(piToken),
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             firstName,
             lastName,
             email: normalizedEmail,
-            ...(phone?.trim() ? { phone: phone.trim() } : {}),
-            locationId,
-            source: `lead-magnet-${cleanedSlug}`,
-            tags: [
-              "lead-magnet",
-              `lead-magnet-${guide.category}`,
-              `lead-magnet-${cleanedSlug}`,
-            ],
-            customField: {
-              sms_consent: smsConsent ?? false,
-              marketing_consent: marketingConsent ?? false,
-            },
+            phone: phone.trim(),
+            [dataKey]: leadTypeData,
           }),
         });
         const crmData = await crmRes.json().catch(() => ({}));
-        contactId = (crmData as { contact?: { id?: string }; id?: string })?.contact?.id ??
-          (crmData as { id?: string })?.id ?? null;
+        contactId = (crmData as { contactId?: string })?.contactId ?? null;
         if (!crmRes.ok) {
           console.warn("[lead-magnet/download] CRM contact creation failed:", crmRes.status, crmData);
         }
@@ -145,20 +160,19 @@ export async function POST(request: NextRequest) {
       console.error("[lead-magnet/download] CRM contact error (non-fatal):", err);
     }
 
-    // 4. Trigger Agent CRM workflow (non-fatal)
+    // 4. Trigger guide-specific workflow from Sanity leadFormSettings (non-fatal)
+    // Category workflows are already handled by /api/create-contact above.
     try {
       const piToken = process.env.AGENT_CRM_PI;
       const locationId = process.env.AGENT_CRM_LOCATION_ID;
-      const workflowId =
-        guide.leadFormSettings?.agentCrmWorkflowId ||
-        process.env.AGENT_CRM_LEAD_MAGNET_WORKFLOW_ID;
+      const workflowId = guide.leadFormSettings?.agentCrmWorkflowId;
       if (piToken && locationId && workflowId && contactId) {
         const wfRes = await fetch(
           `${CRM_BASE}/contacts/${contactId}/workflow/${workflowId}?locationId=${locationId}`,
           { method: "POST", headers: crmHeaders(piToken) }
         );
         if (!wfRes.ok) {
-          console.warn("[lead-magnet/download] Workflow enrollment failed (non-fatal):", wfRes.status);
+          console.warn("[lead-magnet/download] Guide workflow enrollment failed (non-fatal):", wfRes.status);
         }
       }
     } catch (err) {
