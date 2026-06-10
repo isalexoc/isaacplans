@@ -5,12 +5,21 @@ import { sendMetaCapiEvent, generateEventId } from "@/lib/meta-capi";
 const CRM_BASE = "https://services.leadconnectorhq.com";
 const CRM_VERSION = "2021-07-28";
 
+// Maps Sanity leadMagnet `category` values → create-contact payload key.
+// Sanity stores kebab-case slugs; also accept the legacy camelCase forms used
+// in consumer-guide-crm.ts so both flows stay in sync.
 const CATEGORY_DATA_KEY: Record<string, string> = {
+  // Sanity kebab-case values (canonical)
   aca: "acaData",
+  "temporary-health-insurance": "shortTermMedicalData",
+  "dental-vision": "dentalVisionData",
+  "hospital-indemnity": "hospitalIndemnityData",
+  iul: "iulLeadGenData",
+  "final-expense": "finalExpenseData",
+  // Legacy camelCase aliases (consumer-guide-crm.ts compat)
   shortTerm: "shortTermMedicalData",
   dentalVision: "dentalVisionData",
   hospitalIndemnity: "hospitalIndemnityData",
-  iul: "iulLeadGenData",
   finalExpense: "finalExpenseData",
 };
 
@@ -131,7 +140,12 @@ export async function POST(request: NextRequest) {
               (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null) ||
               "http://localhost:3000";
 
-        const dataKey = CATEGORY_DATA_KEY[guide.category] ?? "finalExpenseData";
+        const dataKey = CATEGORY_DATA_KEY[guide.category ?? ""] ?? (() => {
+          console.error(
+            `[lead-magnet/download] Unknown guide category "${guide.category}" for slug "${cleanedSlug}" — falling back to finalExpenseData. Fix the category in Sanity.`
+          );
+          return "finalExpenseData";
+        })();
         const leadTypeData = {
           language: locale?.startsWith("es") ? "es" : "en",
           source: `lead-magnet-${cleanedSlug}`,
