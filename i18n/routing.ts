@@ -251,6 +251,10 @@ export const routing = defineRouting({
       en: "/admin/blog-generator",
       es: "/admin/blog-generator",
     },
+    "/lead-magnets": {
+      en: "/lead-magnets",
+      es: "/imanes-de-leads",
+    },
     "/lead-magnets/[slug]": {
       en: "/lead-magnets/[slug]",
       es: "/imanes-de-leads/[slug]",

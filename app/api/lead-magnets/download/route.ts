@@ -53,16 +53,35 @@ function getClientIp(req: NextRequest): string | undefined {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { name, email, phone, slug } = body as {
+    const {
+      firstName: rawFirst,
+      lastName: rawLast,
+      name,
+      email,
+      phone,
+      slug,
+      smsConsent,
+      marketingConsent,
+    } = body as {
+      firstName?: string;
+      lastName?: string;
       name?: string;
       email?: string;
       phone?: string;
       slug?: string;
+      smsConsent?: boolean;
+      marketingConsent?: boolean;
     };
 
+    // Resolve firstName / lastName — accept split fields or legacy full name
+    const resolvedFirst = rawFirst?.trim() || (name?.trim().split(/\s+/)[0] ?? "");
+    const resolvedLast =
+      rawLast?.trim() ||
+      (name?.trim().split(/\s+/).slice(1).join(" ") || resolvedFirst);
+
     // 1. Validate inputs
-    if (!name?.trim()) {
-      return NextResponse.json({ success: false, error: "Name is required." }, { status: 400 });
+    if (!resolvedFirst) {
+      return NextResponse.json({ success: false, error: "First name is required." }, { status: 400 });
     }
     if (!email?.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
       return NextResponse.json({ success: false, error: "Email address is required." }, { status: 400 });
@@ -83,9 +102,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: "Guide not found." }, { status: 404 });
     }
 
-    const nameParts = name.trim().split(/\s+/);
-    const firstName = nameParts[0];
-    const lastName = nameParts.length > 1 ? nameParts.slice(1).join(" ") : firstName;
+    const firstName = resolvedFirst;
+    const lastName = resolvedLast;
     const normalizedEmail = email.trim().toLowerCase();
     const cleanedSlug = slug.trim();
 
@@ -110,6 +128,10 @@ export async function POST(request: NextRequest) {
               `lead-magnet-${guide.category}`,
               `lead-magnet-${cleanedSlug}`,
             ],
+            customField: {
+              sms_consent: smsConsent ?? false,
+              marketing_consent: marketingConsent ?? false,
+            },
           }),
         });
         const crmData = await crmRes.json().catch(() => ({}));

@@ -9,6 +9,30 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: false,
   },
+  async redirects() {
+    return [
+      {
+        source: "/:locale/consumer-guides",
+        destination: "/:locale/lead-magnets",
+        permanent: true,
+      },
+      {
+        source: "/:locale/consumer-guides/:path*",
+        destination: "/:locale/lead-magnets",
+        permanent: true,
+      },
+      {
+        source: "/:locale/guias-para-consumidores",
+        destination: "/:locale/imanes-de-leads",
+        permanent: true,
+      },
+      {
+        source: "/:locale/guias-para-consumidores/:path*",
+        destination: "/:locale/imanes-de-leads",
+        permanent: true,
+      },
+    ];
+  },
   images: {
     remotePatterns: [
       {
