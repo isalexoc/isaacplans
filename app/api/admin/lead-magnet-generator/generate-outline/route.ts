@@ -7,7 +7,7 @@ import type {
   LeadMagnetPromptInput,
 } from "@/lib/lead-magnet-generator/types";
 
-export const maxDuration = 30;
+export const maxDuration = 300;
 
 export async function POST(
   request: NextRequest

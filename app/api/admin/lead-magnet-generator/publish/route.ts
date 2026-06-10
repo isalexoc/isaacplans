@@ -6,7 +6,7 @@ import type {
   TranslatedLeadMagnet,
 } from "@/lib/lead-magnet-generator/types";
 
-export const maxDuration = 30;
+export const maxDuration = 300;
 
 export async function POST(request: Request) {
   const { userId } = await auth();

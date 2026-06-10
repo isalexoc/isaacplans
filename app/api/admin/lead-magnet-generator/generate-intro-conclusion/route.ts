@@ -8,7 +8,7 @@ import type {
   PortableTextBlock,
 } from "@/lib/lead-magnet-generator/types";
 
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 type IntroConclusionResult = {
   introduction: string;
