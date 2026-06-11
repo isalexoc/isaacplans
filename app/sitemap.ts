@@ -9,7 +9,7 @@ import {
 } from "@/lib/allstate-product-routes";
 import { MANHATTAN_PRODUCT_SLUGS } from "@/lib/manhattan-product-routes";
 import { UHONE_PRODUCT_PAGE_SLUGS } from "@/lib/uhone-product-slugs";
-import { FE_STATE_SLUGS } from "@/lib/final-expense-states";
+import { getStatesWithPages } from "@/lib/licensed-states";
 import { sanityFetch } from "@/sanity/lib/live";
 import type { SanityDocument } from "next-sanity";
 
@@ -289,12 +289,23 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       })
     );
 
-  const feStateEntries: MetadataRoute.Sitemap = FE_STATE_SLUGS.map((state) => ({
-    url: `${HOST}/en/final-expense/${state}`,
-    lastModified: now,
-    changeFrequency: "monthly" as const,
-    priority: 0.75,
-  }));
+  const statePages = await getStatesWithPages();
+  const lobStatePaths = [
+    "aca",
+    "short-term-medical",
+    "hospital-indemnity",
+    "dental-vision",
+    "iul",
+    "final-expense",
+  ] as const;
+  const lobStateEntries: MetadataRoute.Sitemap = lobStatePaths.flatMap((lob) =>
+    statePages.map(({ slug }) => ({
+      url: `${HOST}/en/${lob}/${slug}`,
+      lastModified: now,
+      changeFrequency: "monthly" as const,
+      priority: 0.75,
+    }))
+  );
 
   return [
     ...staticEntries,
@@ -304,6 +315,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...allstateSeniorEntries,
     ...allstateIndividualEntries,
     ...manhattanProductEntries,
-    ...feStateEntries,
+    ...lobStateEntries,
   ];
 }

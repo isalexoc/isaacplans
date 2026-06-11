@@ -848,6 +848,43 @@ export const getFeStateBreadcrumbLd = (
   ],
 });
 
+/** Generic LOB state page — WebPage JSON-LD (works for any LOB path) */
+export const getLobStatePageLd = (
+  lobPath: string,
+  locale: string,
+  stateSlug: string,
+  title: string,
+  description: string
+): WithContext<WebPage> => ({
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "@id": `${BASE_URL}/${locale}/${lobPath}/${stateSlug}#webpage`,
+  url: `${BASE_URL}/${locale}/${lobPath}/${stateSlug}`,
+  name: title,
+  description,
+  inLanguage: locale,
+  about: { "@id": `${BASE_URL}/#organization` },
+  isPartOf: { "@id": `${BASE_URL}/#website` },
+});
+
+/** Generic LOB state page — BreadcrumbList (Home → LOB → [State]) */
+export const getLobStateBreadcrumbLd = (
+  lobPath: string,
+  locale: string,
+  stateSlug: string,
+  homeLabel: string,
+  lobLabel: string,
+  stateLabel: string
+): WithContext<BreadcrumbList> => ({
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: homeLabel,  item: `${BASE_URL}/${locale}` },
+    { "@type": "ListItem", position: 2, name: lobLabel,   item: `${BASE_URL}/${locale}/${lobPath}` },
+    { "@type": "ListItem", position: 3, name: stateLabel, item: `${BASE_URL}/${locale}/${lobPath}/${stateSlug}` },
+  ],
+});
+
 /** Get Covered Fast quiz funnel — locale slug from `routing.pathnames["/get-covered-fast"]`. */
 const getCoveredFastPathFor = (locale: string) =>
   locale?.toLowerCase().startsWith("es") ? "cobertura-rapida" : "get-covered-fast";

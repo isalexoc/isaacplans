@@ -35,6 +35,13 @@ export const stateType = defineType({
       initialValue: true,
       validation: (rule) => rule.required(),
     }),
+    defineField({
+      name: 'statePages',
+      type: 'boolean',
+      title: 'State Landing Pages',
+      description: 'Enable state-specific landing pages for all six lines of business (ACA, Short-Term Medical, Hospital Indemnity, Dental & Vision, IUL, Final Expense)',
+      initialValue: false,
+    }),
   ],
   preview: {
     select: {
