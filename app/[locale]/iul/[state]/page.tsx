@@ -11,7 +11,9 @@ import { getTranslations } from "next-intl/server";
 import { getLobStatePageLd, getLobStateBreadcrumbLd } from "@/lib/seo/jsonld";
 import Link from "next/link";
 import { type SanityDocument } from "next-sanity";
-import { sanityFetch } from "@/sanity/lib/live";
+import { client } from "@/sanity/lib/client";
+
+export const dynamic = 'force-dynamic';
 import { BlogPostCard } from "@/components/blog-post-card";
 import { cloudinaryOgImageUrl } from "@/lib/blog-featured-image";
 import { type SupportedLocale } from "@/lib/seo/i18n";
@@ -125,8 +127,7 @@ export default async function IulStatePage({
   const t = await getTranslations({ locale: supportedLocale, namespace: "iulPage" });
   const content = buildStateContent(stateInfo);
 
-  const postsResult = await sanityFetch({ query: IUL_POSTS_QUERY, params: { locale } });
-  const posts: SanityDocument[] = postsResult.data || [];
+  const posts: SanityDocument[] = await client.fetch(IUL_POSTS_QUERY, { locale }) ?? [];
 
   const pageLd = getLobStatePageLd("iul", locale, state, content.metaTitle, content.metaDescription);
   const crumbLd = getLobStateBreadcrumbLd("iul", locale, state, "Home", "IUL (Indexed Universal Life)", stateInfo.name);
