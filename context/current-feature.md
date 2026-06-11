@@ -1,12 +1,35 @@
-# Current Feature
+# Current Feature: Social Media Content Studio — Phase 7
 
 ## Status
 
-Not Started
+In Progress
 
 ## Goals
 
+- `POST /api/admin/social-media-studio/publish` saves a complete `socialPost` document to Sanity CMS (source + copies + images + optional video script)
+- Saved document contains all 10 `generatedCopies` entries (5 platforms × 2 locales), image URLs, and optional video script
+- `/en/admin/social-media-studio/history` renders a list of all saved social posts (title, type badge, status, date, platforms)
+- "View in Studio →" links open the correct Sanity document
+- "Generate New Post" links back to the wizard
+- Publish route returns 401 for unauthenticated requests; history page redirects unauthenticated users to `/sign-in`
+- `pnpm tsc --noEmit` passes; `pnpm build` passes with no new errors
+
 ## Notes
+
+**3 files to create:**
+1. `lib/social-media-studio/sanity-publisher.ts` — `getWriteClient()`, `generateUniqueSlug()`, `publishSocialPost()`
+2. `app/api/admin/social-media-studio/publish/route.ts` — Clerk-auth POST, `maxDuration = 30`, validates `source.title` + `copies` + `SANITY_API_WRITE_TOKEN`
+3. `app/[locale]/admin/social-media-studio/history/page.tsx` — Server Component, GROQ `*[_type == "socialPost"] | order(createdAt desc) [0...50]`
+
+**1 file to edit:**
+- `app/[locale]/admin/social-media-studio/page.tsx` — add "View History →" link in the page header
+
+**Key references:**
+- `lib/lead-magnet-generator/sanity-publisher.ts` — replicate `getWriteClient()` + `generateUniqueSlug()` pattern exactly
+- `lib/social-media-studio/types.ts` — `SocialPostPublishRequest`, `PublishedSocialPost`, `SocialStudioResponse`
+- `sanity/schemaTypes/socialPostType.ts` — field names must match schema exactly
+- Sanity doc field mapping: `generatedCopies` array items use `_type: "object"`, `_key: "${platform}_${locale}"`; video script maps `onScreenTextSuggestions → onScreenText`, `brollSuggestions`, etc.
+- No new env vars needed — `SANITY_API_WRITE_TOKEN`, `NEXT_PUBLIC_SANITY_PROJECT_ID`, `NEXT_PUBLIC_SANITY_DATASET` already configured
 
 ## History
 
