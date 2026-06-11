@@ -2,51 +2,15 @@
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-**Social Media Content Studio — Phase 4: AI Image Generation**
-
-Build the Cloudinary-based image generation service that produces two branded creative images per social post package: a 1:1 square (1080×1080) and a 9:16 vertical (1080×1920). Uses existing source image or generates a DALL-E 3 background; applies text overlays and brand watermark via Cloudinary URL transformations.
-
-- `lib/social-media-studio/image-generator.ts` — `generateSocialImages(req)`: uploads source image or generates via DALL-E 3, builds Cloudinary transformation URLs for both ratios; `encodeCloudinaryText()` for headline; `buildTransformUrl()` for URL construction; `CATEGORY_SCENES` map + `buildDallePrompt()`
-- `app/api/admin/social-media-studio/generate-images/route.ts` — Clerk-auth POST; `maxDuration = 120`; 401 if unauthenticated, 400 if `headline` missing; always returns `success: true` (failures go to `warnings[]`)
-
-**Success criteria:**
-1. POST with `headline` + valid `sourceImageUrl` returns `SocialCreativeImages` with non-empty `square` and `vertical` Cloudinary URLs
-2. `square` URL opens as 1080×1080 image with headline text + "Isaac Plans" watermark
-3. `vertical` URL opens as 1080×1920 image with same overlays
-4. With `generateNew: true`, calls DALL-E 3 and produces a brand-appropriate scene (no text in generated image)
-5. If DALL-E fails, route still returns `success: true` with empty `square`/`vertical` and a non-empty `warnings` array (never 500)
-6. 401 for unauthenticated, 400 if `headline` missing
-7. `pnpm tsc --noEmit` passes
-
 ## Notes
-
-- Cloudinary transformation chain: `c_fill,w_{w},h_{h},g_auto` → `e_gradient_fade,y_-0.5,b_rgb:000000` → headline text layer (`g_south`) → "Isaac Plans" watermark (`g_north_east`, `o_80`)
-- Headline URL-encoding for Cloudinary: spaces → `_`, commas → `%2C`, slashes → `%2F` (use `encodeCloudinaryText()`)
-- 1:1: `w_1080,h_1080`, font 52px bold, text `y_120`; 9:16: `w_1080,h_1920`, font 56px bold, text `y_200`
-- DALL-E 3: `size: "1024x1024"`, `quality: "standard"`, 1024×1024 square base works for both crops
-- Cloudinary folders: `social-media/{category}/sources/` (uploaded source images), `social-media/{category}/backgrounds/` (DALL-E backgrounds)
-- Non-fatal: source upload failure falls through to DALL-E; DALL-E failure returns empty URLs with warnings (no 500)
-- Route always wraps response in `SocialStudioResponse<SocialCreativeImages>` with `success: true`; warnings surfaced via `data.warnings` (actually check: the `SocialStudioSuccess<T>` type has optional `warnings?: string[]` at top level)
-- Check Cloudinary env var names by looking at `lib/lead-magnet-generator/image-generator.ts`
-- Spec file: `context/features/social-media-studio/social-media-studio-spec-phase-4.md`
-
-**Overall feature phases:**
-| Phase | Description | Status |
-|---|---|---|
-| 1 | TypeScript types + Sanity `socialPost` schema | **Complete** |
-| 2 | Content source API (fetch blog posts + lead magnets from Sanity) | **Complete** |
-| 3 | AI copy generation — GPT-4o, 5 platforms × EN + ES | **Complete** |
-| 4 | AI image generation — DALL-E 3 + Cloudinary overlays (1:1 + 9:16) | **In Progress** |
-| 5 | Video script generator — 30/60s TikTok/Reel scripts | Not Started |
-| 6 | Admin UI wizard — multi-step page at `/admin/social-media-studio/` | Not Started |
-| 7 | Sanity publish + content history page | Not Started |
 
 ## History
 
+- 2026-06-11: **Social Media Content Studio — Phase 4** completed. `lib/social-media-studio/image-generator.ts` — `CATEGORY_SCENES` (11-entry map keyed by insurance category slug); `buildDallePrompt(sourceTitle, category?)` (constructs DALL-E prompt with category-specific scene, brand color palette, no-text instruction); `encodeCloudinaryText(text)` (spaces→`_`, commas→`%2C`, slashes→`%2F`); `buildTransformUrl(publicId, ratio, encodedHeadline, brandName)` (builds `https://res.cloudinary.com/{cloud}/image/upload/` URL with transformation chain: `c_fill,w_N,h_N,g_auto` → `e_gradient_fade,y_-0.5,b_rgb:000000` → headline text layer `g_south` → Isaac Plans watermark `g_north_east,o_80`; 1:1: 1080×1080, font 52px, textY 120; 9:16: 1080×1920, font 56px, textY 200); `generateSocialImages(req)` returns `{ images: SocialCreativeImages, warnings: string[] }` — if `!req.generateNew && req.sourceImageUrl`: uploads to `social-media/{category}/sources/` via `cloudinary.uploader.upload()`; on failure pushes warning and falls through to DALL-E; DALL-E call: `model: "dall-e-3"`, `size: "1024x1024"`, `quality: "standard"`, uploads to `social-media/{category}/backgrounds/`; if DALL-E also fails returns empty `{ square: "", vertical: "", ... }` with warnings; uses `import cloudinary from "@/config/cloudinary"` (centralized config). Fix applied: `response.data?.[0]?.url` (optional chain for possibly-undefined `data`). `app/api/admin/social-media-studio/generate-images/route.ts` — Clerk-auth POST; `maxDuration = 120`; 401 if unauthenticated; 400 if `headline` missing; always returns `success: true`; warnings surfaced at top level of `SocialStudioSuccess<T>`. `pnpm tsc --noEmit` clean. Merged to main on branch `feature/social-media-studio-phase-4`.
 - 2026-06-11: **Social Media Content Studio — Phase 3** completed. `lib/social-media-studio/prompts.ts` — `COPY_GENERATION_SYSTEM_PROMPT` (brand voice, insurance compliance rules, CRITICAL Latin American Spanish section with specific term preferences and tone guidance); `PLATFORM_SPECS` record (per-platform character targets, hashtag rules, tone styles, and hook examples for all 5 platforms); `buildCopyPrompt(source, platforms, locales)` (assembles user prompt with source content, platform spec strings joined by `---`, and explicit JSON shape instructions including `fullPost` assembly rules). `lib/social-media-studio/copy-generator.ts` — `generateSocialCopy(source, platforms?, locales?)` (single GPT-4o call, `response_format: { type: "json_object" }`, `max_tokens: 6000`, `temperature: 0.75`, model from `OPENAI_MODEL ?? "gpt-4o"`; parses `raw.copies` array; throws if empty); `validateAndNormalizeCopy(raw, index)` (throws on missing `platform`, `locale`, `hook`, `fullPost`; strips `#` prefix from hashtags; falls back `characterCount` to `fullPost.length`). `app/api/admin/social-media-studio/generate-copy/route.ts` — Clerk-auth POST; `maxDuration = 60`; 401 if unauthenticated; 400 if `source.title` missing or `OPENAI_API_KEY` not set; 500 on generation error; returns `{ success: true, data: { copies } }`. `pnpm tsc --noEmit` clean. Merged to main on branch `feature/social-media-studio-phase-3`.
 - 2026-06-11: **Social Media Content Studio — Phase 2** completed. `lib/social-media-studio/source-fetcher.ts` — `portableTextToPlainText()` (walks Portable Text blocks, extracts plain text via `.children[].text` join); `fetchSourceList(options)` (runs blog-posts + lead-magnets GROQ in parallel via `Promise.all`; blog GROQ: `locale`, `title match $q + "*"`, `category`, ordered by `publishedAt desc`, returns `{ _id, title, slug, excerpt, category, featuredImageUrl: image.asset->url, publishedAt }`; lead magnet GROQ: `status == "published"`, same filters, returns `{ _id, title, subtitle, slug, category, coverImageUrl: coverImage.asset->url, publishedAt }`); `fetchBlogPostContent(id)` (fetches full post, calls `portableTextToPlainText(body).slice(0, 3000)`, builds `SocialPostSource` with `publicUrl: https://isaacplans.com/{locale}/blog/{slug}`; throws `"Blog post not found: {id}"` on null); `fetchLeadMagnetContent(id)` (fetches full lead magnet, builds `bodyText` from targetAudience + keyBenefits bullets + `description` plain text (1,500 char limit), builds `SocialPostSource` with `publicUrl: https://isaacplans.com/en/lead-magnets/{slug}`; throws `"Lead magnet not found: {id}"` on null). Field name fix: blog post uses `image.asset->url` (not `mainImage`). `app/api/admin/social-media-studio/sources/route.ts` — Clerk-auth `GET`; accepts `q`, `category`, `locale` (default "en"), `limit` (default 30) query params; returns `{ success: true, data: { blogPosts, leadMagnets } }`. `app/api/admin/social-media-studio/sources/[type]/[id]/route.ts` — Clerk-auth `GET`; dispatches to `fetchBlogPostContent` or `fetchLeadMagnetContent` based on `type`; 400 for unknown type; 404 if error message includes "not found"; otherwise 500; `params` awaited as `Promise` per Next.js 15 convention. `pnpm tsc --noEmit` clean. Merged to main on branch `feature/social-media-studio-phase-2`.
 - 2026-06-11: **Social Media Content Studio — Phase 1** completed. `lib/social-media-studio/types.ts` — all TypeScript contracts for all 7 phases: `SocialPlatform` union ("facebook" | "instagram" | "tiktok" | "threads" | "google_business"); `SocialLocale` ("en" | "es"); `SourceType` ("blog_post" | "lead_magnet" | "direct_topic"); `SocialPostStatus` ("draft" | "published" | "archived"); `PLATFORM_COPY_LIMITS` (min/max char counts per platform); `PLATFORM_LABELS`; `ALL_PLATFORMS`; `ALL_LOCALES`; `SocialPostSource` (normalized AI input from blog/lead magnet/topic); `BlogPostSummary` + `LeadMagnetSummary` (Phase 2 list items); `SocialPostCopy` (hook + body + cta + hashtags + fullPost + characterCount per platform/locale); `SocialCreativeImages` (square/vertical Cloudinary URLs + overlay headline); `VideoScript` (30|60s duration, hookScript, fullScript, onScreenTextSuggestions, brollSuggestions, voiceoverTips, suggestedCaption); `GeneratedSocialPackage` (full output: source + 10 copies + images + optional script); request types (`CopyGenerationRequest`, `ImageGenerationRequest`, `VideoScriptRequest`, `SocialPostPublishRequest`); response shapes (`SocialStudioSuccess<T>`, `SocialStudioError`, `SocialStudioResponse<T>`); `PublishedSocialPost`. `sanity/schemaTypes/socialPostType.ts` — `socialPost` Sanity document schema with 5 field groups: **source** (sourceType, sourceId, sourceTitle, sourceSlug, sourceUrl, sourceImageUrl, sourceCategory); **copies** (generatedCopies array — platform × locale objects with hook/body/cta/hashtags/fullPost/characterCount); **images** (squareImageUrl, verticalImageUrl, imageHeadline); **video** (videoScript object — duration/hookScript/fullScript/onScreenText/brollSuggestions/voiceoverTips/suggestedCaption); **meta** (status, tags, createdAt, updatedAt). `ShareIcon` from `@sanity/icons`, ordered by `createdAt` desc. Pattern fix: used plain object literals (not `defineField`) for `array` and `object` type nested fields — same pattern as `leadMagnetType.ts`. `sanity/schemaTypes/index.ts` + `sanity/structure.ts` updated to register and surface "Social Media Posts" in Studio sidebar. `pnpm tsc --noEmit` clean. Merged to main on branch `feature/social-media-studio-phase-1`.
