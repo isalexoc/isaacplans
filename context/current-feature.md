@@ -1,12 +1,34 @@
-# Current Feature
+# Current Feature: Social Media Content Studio — Phase 6
 
 ## Status
 
-Not Started
+In Progress
 
 ## Goals
 
+- Navigating to `/en/admin/social-media-studio` (authenticated) renders the Source Picker step
+- Blog post search (debounced 400ms) returns results; clicking "Select →" triggers copy generation and advances to Step 2 with spinner
+- Step 2 shows all 5 platform tabs with EN/ES toggle — copy is editable; "Copy Full Post" copies assembled text to clipboard
+- Step 3 auto-starts image generation; both Cloudinary image previews appear; "Regenerate Images" re-calls the image API
+- Step 4 auto-starts script generation (30s default); duration toggle + "Regenerate" returns a new script
+- Step 5 shows all generated assets; "Copy for Metricool" copies the correct `fullPost` text
+- Unauthenticated visit redirects to sign-in
+- `pnpm tsc --noEmit` passes
+
 ## Notes
+
+- Single file: `app/[locale]/admin/social-media-studio/page.tsx` — Client Component (`"use client"`), all step sub-components inline
+- State: `useState<StudioState>` — single object with `step`, `source`, `copies`, `images`, `videoScript`, plus `isGenerating*`/`*Error` flags per step
+- Steps: `source → copy → images → script → export`
+- Step 1 (Source Picker): tab switcher (Blog Post / Lead Magnet / Direct Topic); search debounced 400ms → `/sources?q=`; selecting a result fetches `/sources/{type}/{id}` then POSTs to `/generate-copy` and advances immediately (copy generates in background)
+- Step 2 (Copy Review): platform tabs + EN/ES toggle; editable textareas (changes saved to `state.copies`); live character counter (red when over limit); per-field copy buttons (2s "Copied!" feedback); hashtag pills (×/+ edit); "Regenerate All ↺" with confirm dialog
+- Step 3 (Image Studio): `useEffect` auto-starts if `!state.images && !state.isGeneratingImages`; editable headline input; source/AI background toggle; 1:1 + 9:16 previews; "Shorten" button (inline GPT → 3 chip options); "Regenerate Images ↺"; download links open in new tab
+- Step 4 (Video Script): `useEffect` auto-starts if no script and not generating; duration toggle (does NOT auto-regenerate — explicit "Regenerate" button required); hook, full script, on-screen text, b-roll, delivery tips, caption — all with copy buttons; "Skip to Export" available
+- Step 5 (Export): read-only platform copy with "Copy for Metricool"; image thumbnails + download links; video script preview (expandable); Sanity save form (draft/published toggle + tags) calling Phase 7 publish route; "Generate Another Post" resets to `{ step: "source" }`
+- StepIndicator: completed steps green + ✓, current step blue, future steps gray
+- Reference: `app/[locale]/admin/lead-magnet-generator/page.tsx` for state/step/effect patterns; `components/ui/` for shadcn components
+- Verify `middleware.ts` protects all `/admin/*` routes — add social-media-studio path if needed
+- No new API routes in this phase
 
 ## History
 

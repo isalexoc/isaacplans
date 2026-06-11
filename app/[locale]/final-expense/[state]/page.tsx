@@ -13,6 +13,8 @@ import { getFeStatePageLd, getFeStateBreadcrumbLd } from "@/lib/seo/jsonld";
 import Link from "next/link";
 import { type SanityDocument } from "next-sanity";
 import { client } from "@/sanity/lib/client";
+
+export const dynamic = 'force-dynamic';
 import { BlogPostCard } from "@/components/blog-post-card";
 import { cloudinaryOgImageUrl } from "@/lib/blog-featured-image";
 import { type SupportedLocale } from "@/lib/seo/i18n";

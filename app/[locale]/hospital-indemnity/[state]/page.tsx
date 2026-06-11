@@ -11,7 +11,9 @@ import { getTranslations } from "next-intl/server";
 import { getLobStatePageLd, getLobStateBreadcrumbLd } from "@/lib/seo/jsonld";
 import Link from "next/link";
 import { type SanityDocument } from "next-sanity";
-import { sanityFetch } from "@/sanity/lib/live";
+import { client } from "@/sanity/lib/client";
+
+export const dynamic = 'force-dynamic';
 import { BlogPostCard } from "@/components/blog-post-card";
 import { cloudinaryOgImageUrl } from "@/lib/blog-featured-image";
 import { type SupportedLocale } from "@/lib/seo/i18n";
@@ -125,8 +127,7 @@ export default async function HospitalIndemnityStatePage({
   const t = await getTranslations({ locale: supportedLocale, namespace: "HIpage" });
   const content = buildStateContent(stateInfo);
 
-  const postsResult = await sanityFetch({ query: HI_POSTS_QUERY, params: { locale } });
-  const posts: SanityDocument[] = postsResult.data || [];
+  const posts: SanityDocument[] = await client.fetch(HI_POSTS_QUERY, { locale }) ?? [];
 
   const pageLd = getLobStatePageLd("hospital-indemnity", locale, state, content.metaTitle, content.metaDescription);
   const crumbLd = getLobStateBreadcrumbLd("hospital-indemnity", locale, state, "Home", "Hospital Indemnity Insurance", stateInfo.name);

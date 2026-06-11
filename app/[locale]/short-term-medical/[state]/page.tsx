@@ -10,7 +10,9 @@ import type { Metadata } from "next";
 import { getLobStatePageLd, getLobStateBreadcrumbLd } from "@/lib/seo/jsonld";
 import Link from "next/link";
 import { type SanityDocument } from "next-sanity";
-import { sanityFetch } from "@/sanity/lib/live";
+import { client } from "@/sanity/lib/client";
+
+export const dynamic = 'force-dynamic';
 import { BlogPostCard } from "@/components/blog-post-card";
 import { cloudinaryOgImageUrl } from "@/lib/blog-featured-image";
 import {
@@ -131,8 +133,7 @@ export default async function ShortTermMedicalStatePage({
 
   const content = buildStateContent(stateInfo);
 
-  const postsResult = await sanityFetch({ query: STM_POSTS_QUERY, params: { locale } });
-  const posts: SanityDocument[] = postsResult.data || [];
+  const posts: SanityDocument[] = await client.fetch(STM_POSTS_QUERY, { locale }) ?? [];
 
   const pageLd = getLobStatePageLd("short-term-medical", locale, state, content.metaTitle, content.metaDescription);
   const crumbLd = getLobStateBreadcrumbLd("short-term-medical", locale, state, "Home", "Short-Term Medical Insurance", stateInfo.name);
