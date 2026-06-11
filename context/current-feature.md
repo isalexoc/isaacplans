@@ -2,34 +2,52 @@
 
 ## Status
 
-Not Started
+In Progress
 
 ## Goals
 
-Build the **Social Media Content Studio** — a 7-phase admin tool that converts any existing blog post or lead magnet into a complete, ready-to-schedule social media package: platform-specific copy (EN + ES) for Facebook, Instagram, TikTok, Threads, and Google Business; branded 1:1 and 9:16 creative images; and a TikTok/Reel video script. Output is designed to paste directly into Metricool.
+**Social Media Content Studio — Phase 3: AI Copy Generation**
 
-Feature spec folder: `context/features/social-media-studio/`
+Build the GPT-4o copy generation service that produces 10 `SocialPostCopy` objects (5 platforms × 2 locales) from a single `SocialPostSource` in one JSON-mode API call.
 
-## Phases
+- `lib/social-media-studio/prompts.ts` — system prompt + per-platform spec strings + `buildCopyPrompt()` user prompt builder
+- `lib/social-media-studio/copy-generator.ts` — `generateSocialCopy(source, platforms?, locales?)` calling GPT-4o in JSON mode; validates and normalizes each copy object
+- `app/api/admin/social-media-studio/generate-copy/route.ts` — Clerk-auth POST; `maxDuration = 60`; 401 if unauthenticated, 400 if `source.title` missing or no `OPENAI_API_KEY`
 
+**Success criteria:**
+1. POST returns exactly 10 `SocialPostCopy` objects for 5 platforms × 2 locales
+2. Each copy has non-empty `hook`, `body`, `cta`, `fullPost`
+3. `characterCount` within ±100 of platform target range
+4. `hashtags` is empty for `threads` and `google_business`
+5. Spanish copy is native Latin American Spanish (not a translation)
+6. `fullPost` assembled: hook → blank line → body → blank line → cta → blank line → hashtags
+7. 401 for unauthenticated, 400 for missing title or missing API key
+8. `pnpm tsc --noEmit` passes
+
+## Notes
+
+- Single GPT-4o call in JSON mode (`response_format: { type: "json_object" }`), `max_tokens: 6000`, `temperature: 0.75`
+- Model: `process.env.OPENAI_MODEL ?? "gpt-4o"`
+- Platforms: facebook, instagram, tiktok, threads, google_business — each with distinct char targets, tone, hashtag rules, CTA styles
+- Facebook: 400–600 chars, 3–5 hashtags, engagement question at end
+- Instagram: 150–300 body chars, 5–8 hashtags on new line, first sentence is hook before "more" cutoff
+- TikTok: 80–150 chars total, 3–5 hashtags, caption-only (video does storytelling)
+- Threads: 200–400 chars, NO hashtags, hot-take/opinion style, ends with open question
+- Google Business: 200–350 chars, NO hashtags, professional/local tone, CTA with phone or website
+- `validateAndNormalizeCopy()` strips `#` prefix from hashtags, falls back `characterCount` to `fullPost.length`
+- Spec file: `context/features/social-media-studio/social-media-studio-spec-phase-3.md`
+- Reference files: `lib/social-media-studio/types.ts`, `lib/lead-magnet-generator/prompts.ts`, `lib/lead-magnet-generator/outline-generator.ts`
+
+**Overall feature phases:**
 | Phase | Description | Status |
 |---|---|---|
 | 1 | TypeScript types + Sanity `socialPost` schema | **Complete** |
 | 2 | Content source API (fetch blog posts + lead magnets from Sanity) | **Complete** |
-| 3 | AI copy generation — GPT-4o, 5 platforms × EN + ES | Not Started |
+| 3 | AI copy generation — GPT-4o, 5 platforms × EN + ES | **In Progress** |
 | 4 | AI image generation — DALL-E 3 + Cloudinary overlays (1:1 + 9:16) | Not Started |
 | 5 | Video script generator — 30/60s TikTok/Reel scripts | Not Started |
 | 6 | Admin UI wizard — multi-step page at `/admin/social-media-studio/` | Not Started |
 | 7 | Sanity publish + content history page | Not Started |
-
-## Notes
-
-- New API routes live under `/api/admin/social-media-studio/`
-- New admin page: `app/[locale]/admin/social-media-studio/page.tsx`
-- New lib folder: `lib/social-media-studio/`
-- New Sanity schema type: `socialPost` (registered in `sanity/schemaTypes/index.ts`)
-- Uses existing: OpenAI (`gpt-4o`, `dall-e-3`), Cloudinary, Clerk auth, Sanity write client
-- No new npm packages expected — all dependencies already installed
 
 ## History
 
