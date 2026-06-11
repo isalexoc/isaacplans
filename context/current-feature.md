@@ -2,55 +2,15 @@
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-**Social Media Content Studio — Phase 3: AI Copy Generation**
-
-Build the GPT-4o copy generation service that produces 10 `SocialPostCopy` objects (5 platforms × 2 locales) from a single `SocialPostSource` in one JSON-mode API call.
-
-- `lib/social-media-studio/prompts.ts` — system prompt + per-platform spec strings + `buildCopyPrompt()` user prompt builder
-- `lib/social-media-studio/copy-generator.ts` — `generateSocialCopy(source, platforms?, locales?)` calling GPT-4o in JSON mode; validates and normalizes each copy object
-- `app/api/admin/social-media-studio/generate-copy/route.ts` — Clerk-auth POST; `maxDuration = 60`; 401 if unauthenticated, 400 if `source.title` missing or no `OPENAI_API_KEY`
-
-**Success criteria:**
-1. POST returns exactly 10 `SocialPostCopy` objects for 5 platforms × 2 locales
-2. Each copy has non-empty `hook`, `body`, `cta`, `fullPost`
-3. `characterCount` within ±100 of platform target range
-4. `hashtags` is empty for `threads` and `google_business`
-5. Spanish copy is native Latin American Spanish (not a translation)
-6. `fullPost` assembled: hook → blank line → body → blank line → cta → blank line → hashtags
-7. 401 for unauthenticated, 400 for missing title or missing API key
-8. `pnpm tsc --noEmit` passes
-
 ## Notes
-
-- Single GPT-4o call in JSON mode (`response_format: { type: "json_object" }`), `max_tokens: 6000`, `temperature: 0.75`
-- Model: `process.env.OPENAI_MODEL ?? "gpt-4o"`
-- Platforms: facebook, instagram, tiktok, threads, google_business — each with distinct char targets, tone, hashtag rules, CTA styles
-- Facebook: 400–600 chars, 3–5 hashtags, engagement question at end
-- Instagram: 150–300 body chars, 5–8 hashtags on new line, first sentence is hook before "more" cutoff
-- TikTok: 80–150 chars total, 3–5 hashtags, caption-only (video does storytelling)
-- Threads: 200–400 chars, NO hashtags, hot-take/opinion style, ends with open question
-- Google Business: 200–350 chars, NO hashtags, professional/local tone, CTA with phone or website
-- `validateAndNormalizeCopy()` strips `#` prefix from hashtags, falls back `characterCount` to `fullPost.length`
-- Spec file: `context/features/social-media-studio/social-media-studio-spec-phase-3.md`
-- Reference files: `lib/social-media-studio/types.ts`, `lib/lead-magnet-generator/prompts.ts`, `lib/lead-magnet-generator/outline-generator.ts`
-
-**Overall feature phases:**
-| Phase | Description | Status |
-|---|---|---|
-| 1 | TypeScript types + Sanity `socialPost` schema | **Complete** |
-| 2 | Content source API (fetch blog posts + lead magnets from Sanity) | **Complete** |
-| 3 | AI copy generation — GPT-4o, 5 platforms × EN + ES | **In Progress** |
-| 4 | AI image generation — DALL-E 3 + Cloudinary overlays (1:1 + 9:16) | Not Started |
-| 5 | Video script generator — 30/60s TikTok/Reel scripts | Not Started |
-| 6 | Admin UI wizard — multi-step page at `/admin/social-media-studio/` | Not Started |
-| 7 | Sanity publish + content history page | Not Started |
 
 ## History
 
+- 2026-06-11: **Social Media Content Studio — Phase 3** completed. `lib/social-media-studio/prompts.ts` — `COPY_GENERATION_SYSTEM_PROMPT` (brand voice, insurance compliance rules, CRITICAL Latin American Spanish section with specific term preferences and tone guidance); `PLATFORM_SPECS` record (per-platform character targets, hashtag rules, tone styles, and hook examples for all 5 platforms); `buildCopyPrompt(source, platforms, locales)` (assembles user prompt with source content, platform spec strings joined by `---`, and explicit JSON shape instructions including `fullPost` assembly rules). `lib/social-media-studio/copy-generator.ts` — `generateSocialCopy(source, platforms?, locales?)` (single GPT-4o call, `response_format: { type: "json_object" }`, `max_tokens: 6000`, `temperature: 0.75`, model from `OPENAI_MODEL ?? "gpt-4o"`; parses `raw.copies` array; throws if empty); `validateAndNormalizeCopy(raw, index)` (throws on missing `platform`, `locale`, `hook`, `fullPost`; strips `#` prefix from hashtags; falls back `characterCount` to `fullPost.length`). `app/api/admin/social-media-studio/generate-copy/route.ts` — Clerk-auth POST; `maxDuration = 60`; 401 if unauthenticated; 400 if `source.title` missing or `OPENAI_API_KEY` not set; 500 on generation error; returns `{ success: true, data: { copies } }`. `pnpm tsc --noEmit` clean. Merged to main on branch `feature/social-media-studio-phase-3`.
 - 2026-06-11: **Social Media Content Studio — Phase 2** completed. `lib/social-media-studio/source-fetcher.ts` — `portableTextToPlainText()` (walks Portable Text blocks, extracts plain text via `.children[].text` join); `fetchSourceList(options)` (runs blog-posts + lead-magnets GROQ in parallel via `Promise.all`; blog GROQ: `locale`, `title match $q + "*"`, `category`, ordered by `publishedAt desc`, returns `{ _id, title, slug, excerpt, category, featuredImageUrl: image.asset->url, publishedAt }`; lead magnet GROQ: `status == "published"`, same filters, returns `{ _id, title, subtitle, slug, category, coverImageUrl: coverImage.asset->url, publishedAt }`); `fetchBlogPostContent(id)` (fetches full post, calls `portableTextToPlainText(body).slice(0, 3000)`, builds `SocialPostSource` with `publicUrl: https://isaacplans.com/{locale}/blog/{slug}`; throws `"Blog post not found: {id}"` on null); `fetchLeadMagnetContent(id)` (fetches full lead magnet, builds `bodyText` from targetAudience + keyBenefits bullets + `description` plain text (1,500 char limit), builds `SocialPostSource` with `publicUrl: https://isaacplans.com/en/lead-magnets/{slug}`; throws `"Lead magnet not found: {id}"` on null). Field name fix: blog post uses `image.asset->url` (not `mainImage`). `app/api/admin/social-media-studio/sources/route.ts` — Clerk-auth `GET`; accepts `q`, `category`, `locale` (default "en"), `limit` (default 30) query params; returns `{ success: true, data: { blogPosts, leadMagnets } }`. `app/api/admin/social-media-studio/sources/[type]/[id]/route.ts` — Clerk-auth `GET`; dispatches to `fetchBlogPostContent` or `fetchLeadMagnetContent` based on `type`; 400 for unknown type; 404 if error message includes "not found"; otherwise 500; `params` awaited as `Promise` per Next.js 15 convention. `pnpm tsc --noEmit` clean. Merged to main on branch `feature/social-media-studio-phase-2`.
 - 2026-06-11: **Social Media Content Studio — Phase 1** completed. `lib/social-media-studio/types.ts` — all TypeScript contracts for all 7 phases: `SocialPlatform` union ("facebook" | "instagram" | "tiktok" | "threads" | "google_business"); `SocialLocale` ("en" | "es"); `SourceType` ("blog_post" | "lead_magnet" | "direct_topic"); `SocialPostStatus` ("draft" | "published" | "archived"); `PLATFORM_COPY_LIMITS` (min/max char counts per platform); `PLATFORM_LABELS`; `ALL_PLATFORMS`; `ALL_LOCALES`; `SocialPostSource` (normalized AI input from blog/lead magnet/topic); `BlogPostSummary` + `LeadMagnetSummary` (Phase 2 list items); `SocialPostCopy` (hook + body + cta + hashtags + fullPost + characterCount per platform/locale); `SocialCreativeImages` (square/vertical Cloudinary URLs + overlay headline); `VideoScript` (30|60s duration, hookScript, fullScript, onScreenTextSuggestions, brollSuggestions, voiceoverTips, suggestedCaption); `GeneratedSocialPackage` (full output: source + 10 copies + images + optional script); request types (`CopyGenerationRequest`, `ImageGenerationRequest`, `VideoScriptRequest`, `SocialPostPublishRequest`); response shapes (`SocialStudioSuccess<T>`, `SocialStudioError`, `SocialStudioResponse<T>`); `PublishedSocialPost`. `sanity/schemaTypes/socialPostType.ts` — `socialPost` Sanity document schema with 5 field groups: **source** (sourceType, sourceId, sourceTitle, sourceSlug, sourceUrl, sourceImageUrl, sourceCategory); **copies** (generatedCopies array — platform × locale objects with hook/body/cta/hashtags/fullPost/characterCount); **images** (squareImageUrl, verticalImageUrl, imageHeadline); **video** (videoScript object — duration/hookScript/fullScript/onScreenText/brollSuggestions/voiceoverTips/suggestedCaption); **meta** (status, tags, createdAt, updatedAt). `ShareIcon` from `@sanity/icons`, ordered by `createdAt` desc. Pattern fix: used plain object literals (not `defineField`) for `array` and `object` type nested fields — same pattern as `leadMagnetType.ts`. `sanity/schemaTypes/index.ts` + `sanity/structure.ts` updated to register and surface "Social Media Posts" in Studio sidebar. `pnpm tsc --noEmit` clean. Merged to main on branch `feature/social-media-studio-phase-1`.
 - 2026-06-09: **Lead Magnet Generator — Phase 7** completed. `app/[locale]/admin/lead-magnet-generator/page.tsx` — 1,123-line single-file multi-step wizard (Client Component, `"use client"`). `StepIndicator` breadcrumb (Prompt → Outline → Generate → Images → Publish). Step 1 `PromptStep`: 6 fields (topic, category, targetAudience, keyTopics textarea, tone radio, additionalContext), calls `/generate-outline` on submit. Step 2 `OutlineStep`: editable title/subtitle/keyBenefits/section titles, add (max 8) / remove (min 4) sections, word count + page count badges. Step 3 `GeneratingStep`: `useEffect` on `[state.step, state.currentSectionIndex]` drives sequential `/generate-section` calls, then `/generate-intro-conclusion`; collapsible completed section cards with Regenerate, progress bar, inline error with Retry without clearing progress. Step 4 `ImagesStep`: `useEffect` auto-starts `/generate-images` on enter, cover image + section image grid with section title labels, "Skip Images" link, "Continue to Publish →". Step 5 `PublishStep`: editable title/subtitle/SEO/lead form fields, draft/published toggle, "Generate PDF" → iframe preview (`<iframe src={pdfUrl}>`), "Save to Sanity →" calls `/publish`, shows 500 errors inline. `SuccessView`: Sanity Studio deep link, public landing page link (if published), PDF download link, "Generate Another Guide" reset. Auth: `useAuth()` redirects unauthenticated to `/sign-in`. TypeScript clean. Merged to main on branch `feature/lead-magnet-generator-phase-7`.
