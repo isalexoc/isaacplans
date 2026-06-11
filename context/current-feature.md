@@ -2,11 +2,48 @@
 
 ## Status
 
-Not Started
+In Progress
 
 ## Goals
 
+**Social Media Content Studio — Phase 4: AI Image Generation**
+
+Build the Cloudinary-based image generation service that produces two branded creative images per social post package: a 1:1 square (1080×1080) and a 9:16 vertical (1080×1920). Uses existing source image or generates a DALL-E 3 background; applies text overlays and brand watermark via Cloudinary URL transformations.
+
+- `lib/social-media-studio/image-generator.ts` — `generateSocialImages(req)`: uploads source image or generates via DALL-E 3, builds Cloudinary transformation URLs for both ratios; `encodeCloudinaryText()` for headline; `buildTransformUrl()` for URL construction; `CATEGORY_SCENES` map + `buildDallePrompt()`
+- `app/api/admin/social-media-studio/generate-images/route.ts` — Clerk-auth POST; `maxDuration = 120`; 401 if unauthenticated, 400 if `headline` missing; always returns `success: true` (failures go to `warnings[]`)
+
+**Success criteria:**
+1. POST with `headline` + valid `sourceImageUrl` returns `SocialCreativeImages` with non-empty `square` and `vertical` Cloudinary URLs
+2. `square` URL opens as 1080×1080 image with headline text + "Isaac Plans" watermark
+3. `vertical` URL opens as 1080×1920 image with same overlays
+4. With `generateNew: true`, calls DALL-E 3 and produces a brand-appropriate scene (no text in generated image)
+5. If DALL-E fails, route still returns `success: true` with empty `square`/`vertical` and a non-empty `warnings` array (never 500)
+6. 401 for unauthenticated, 400 if `headline` missing
+7. `pnpm tsc --noEmit` passes
+
 ## Notes
+
+- Cloudinary transformation chain: `c_fill,w_{w},h_{h},g_auto` → `e_gradient_fade,y_-0.5,b_rgb:000000` → headline text layer (`g_south`) → "Isaac Plans" watermark (`g_north_east`, `o_80`)
+- Headline URL-encoding for Cloudinary: spaces → `_`, commas → `%2C`, slashes → `%2F` (use `encodeCloudinaryText()`)
+- 1:1: `w_1080,h_1080`, font 52px bold, text `y_120`; 9:16: `w_1080,h_1920`, font 56px bold, text `y_200`
+- DALL-E 3: `size: "1024x1024"`, `quality: "standard"`, 1024×1024 square base works for both crops
+- Cloudinary folders: `social-media/{category}/sources/` (uploaded source images), `social-media/{category}/backgrounds/` (DALL-E backgrounds)
+- Non-fatal: source upload failure falls through to DALL-E; DALL-E failure returns empty URLs with warnings (no 500)
+- Route always wraps response in `SocialStudioResponse<SocialCreativeImages>` with `success: true`; warnings surfaced via `data.warnings` (actually check: the `SocialStudioSuccess<T>` type has optional `warnings?: string[]` at top level)
+- Check Cloudinary env var names by looking at `lib/lead-magnet-generator/image-generator.ts`
+- Spec file: `context/features/social-media-studio/social-media-studio-spec-phase-4.md`
+
+**Overall feature phases:**
+| Phase | Description | Status |
+|---|---|---|
+| 1 | TypeScript types + Sanity `socialPost` schema | **Complete** |
+| 2 | Content source API (fetch blog posts + lead magnets from Sanity) | **Complete** |
+| 3 | AI copy generation — GPT-4o, 5 platforms × EN + ES | **Complete** |
+| 4 | AI image generation — DALL-E 3 + Cloudinary overlays (1:1 + 9:16) | **In Progress** |
+| 5 | Video script generator — 30/60s TikTok/Reel scripts | Not Started |
+| 6 | Admin UI wizard — multi-step page at `/admin/social-media-studio/` | Not Started |
+| 7 | Sanity publish + content history page | Not Started |
 
 ## History
 
