@@ -138,3 +138,88 @@ Return a JSON object with this exact shape:
 }
   `.trim();
 }
+
+// ─── Video Script Prompts ─────────────────────────────────────────────────────
+
+export const VIDEO_SCRIPT_SYSTEM_PROMPT = `
+You are a short-form video script writer for Isaac Plans, an insurance agency run by Isaac — a bilingual (English/Spanish) licensed insurance agent who records TikTok and Instagram Reel videos from his phone.
+
+Isaac's video style:
+- Talking head, direct to camera, casual but knowledgeable
+- Phone camera quality — no studio production
+- Uses hand gestures and natural pauses for emphasis
+- Occasionally uses a simple graphic or text overlay
+- Speaks in a warm, conversational tone — like explaining something to a friend
+
+Your scripts must:
+1. Open with a hook that captures attention in the first 3 seconds (before someone scrolls past)
+2. Deliver real educational value — not empty hype
+3. End with one clear action (follow, comment, DM, link in bio)
+4. Be written exactly as Isaac would speak — natural, not scripted-sounding
+5. Fit the requested duration when read at a natural, unhurried pace (roughly 130–150 words per minute)
+
+IMPORTANT: Write the full script in English only. The [suggestedCaption] field should use the English TikTok caption generated in the copy phase — just pick or adapt the most punchy version for short-form.
+
+Return a JSON object with a "script" key. Do not wrap in markdown code fences.
+`.trim();
+
+export function buildVideoScriptPrompt(
+  source: SocialPostSource,
+  duration: 30 | 60
+): string {
+  const wordTarget = duration === 30
+    ? "65–75 words (30 seconds at natural pace)"
+    : "130–150 words (60 seconds at natural pace)";
+
+  const structureBlock = duration === 30 ? `
+[0:00–0:03] HOOK (1–2 powerful sentences)
+[0:03–0:15] PROBLEM (relatable pain point or knowledge gap — 2–3 sentences)
+[0:15–0:25] SOLUTION (key insight or what to do — 2–3 sentences)
+[0:25–0:30] CTA (single action — 1 sentence)
+`.trim() : `
+[0:00–0:05] HOOK (1–2 powerful sentences)
+[0:05–0:20] PROBLEM (relatable scenario or surprising stat — 3–4 sentences)
+[0:20–0:40] SOLUTION/VALUE (teach the main insight — 4–5 sentences)
+[0:40–0:50] PROOF/CREDIBILITY (experience point or outcome — 2 sentences)
+[0:50–0:60] CTA (single clear action — 1–2 sentences)
+`.trim();
+
+  return `
+Generate a ${duration}-second TikTok/Instagram Reel script for the following content:
+
+SOURCE TYPE: ${source.type === "blog_post" ? "Blog Post" : source.type === "lead_magnet" ? "Free Guide" : "Topic"}
+TITLE: ${source.title}
+${source.subtitle ? `SUBTITLE: ${source.subtitle}` : ""}
+CATEGORY: ${source.category ?? "general insurance"}
+${source.bodyText ? `CONTENT CONTEXT:\n${source.bodyText.slice(0, 1500)}` : ""}
+${source.publicUrl ? `LINK FOR CTA: ${source.publicUrl}` : ""}
+
+DURATION: ${duration} seconds
+WORD TARGET: ${wordTarget}
+
+Script structure to follow:
+${structureBlock}
+
+Return this exact JSON shape:
+{
+  "script": {
+    "duration": ${duration},
+    "hookScript": "The opening hook lines only (first scene)",
+    "fullScript": "The complete timed script with [MM:SS–MM:SS] marks for each scene. Include all spoken words.",
+    "onScreenTextSuggestions": [
+      "SCENE NAME: Text to display on screen during that scene",
+      "HOOK: 'Did you know...?'",
+      "PROBLEM: 'The Gap: $12,000'",
+      "CTA: 'Follow for more'"
+    ],
+    "brollSuggestions": [
+      "Close-up of hands holding insurance documents",
+      "Family sitting at kitchen table reviewing paperwork",
+      "Text message notification on phone"
+    ],
+    "voiceoverTips": "Coaching note for delivery — where to pause, what to emphasize, pace notes.",
+    "suggestedCaption": "The TikTok caption to post with this video (80–150 chars + 3-5 hashtags)"
+  }
+}
+  `.trim();
+}
