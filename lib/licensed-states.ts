@@ -1,5 +1,4 @@
 import { cache } from "react";
-import { sanityFetch } from "@/sanity/lib/live";
 import { client } from "@/sanity/lib/client";
 
 /** Full list of active licensed states (same filter as About / map). */
@@ -19,20 +18,20 @@ export const LICENSED_STATE_COUNT_QUERY = `count(*[_type == "state" && active ==
 export const statesSanityFetchOptions = {
   next: {
     revalidate: 3600,
-    tags: ["states"] as const,
+    tags: ["states"] as string[],
   },
-} as const;
+};
 
 /**
  * Full list of active licensed states for rendering any state-specific page.
  * Cached per request.
  */
 export const getLicensedStates = cache(async (): Promise<FeStateInfo[]> => {
-  const result = await sanityFetch({
-    query: LICENSED_STATES_LIST_QUERY,
-    ...statesSanityFetchOptions,
-  });
-  const rows = result.data as Array<{ name: string; code: string }> | null;
+  const rows = await client.fetch<Array<{ name: string; code: string }>>(
+    LICENSED_STATES_LIST_QUERY,
+    {},
+    statesSanityFetchOptions
+  );
   return (rows ?? []).map((s) => ({
     slug: stateNameToSlug(s.name),
     name: s.name,
@@ -45,11 +44,11 @@ export const getLicensedStates = cache(async (): Promise<FeStateInfo[]> => {
  * Cached per request so layout, hero, footer, etc. share one fetch.
  */
 export const getLicensedStateCount = cache(async (): Promise<number> => {
-  const result = await sanityFetch({
-    query: LICENSED_STATE_COUNT_QUERY,
-    ...statesSanityFetchOptions,
-  });
-  const n = result.data;
+  const n = await client.fetch<number>(
+    LICENSED_STATE_COUNT_QUERY,
+    {},
+    statesSanityFetchOptions
+  );
   return typeof n === "number" && Number.isFinite(n) ? n : 0;
 });
 
@@ -82,11 +81,11 @@ export const STATE_PAGES_QUERY = `*[
  * Cached per request; use in server components only.
  */
 export const getStatesWithPages = cache(async (): Promise<FeStateInfo[]> => {
-  const result = await sanityFetch({
-    query: STATE_PAGES_QUERY,
-    ...statesSanityFetchOptions,
-  });
-  const rows = result.data as Array<{ name: string; code: string }> | null;
+  const rows = await client.fetch<Array<{ name: string; code: string }>>(
+    STATE_PAGES_QUERY,
+    {},
+    statesSanityFetchOptions
+  );
   return (rows ?? []).map((s) => ({
     slug: stateNameToSlug(s.name),
     name: s.name,
