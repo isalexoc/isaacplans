@@ -12,12 +12,11 @@ import { getTranslations } from "next-intl/server";
 import { getFeStatePageLd, getFeStateBreadcrumbLd } from "@/lib/seo/jsonld";
 import Link from "next/link";
 import { type SanityDocument } from "next-sanity";
-import { sanityFetch } from "@/sanity/lib/live";
+import { client } from "@/sanity/lib/client";
 import { BlogPostCard } from "@/components/blog-post-card";
 import { cloudinaryOgImageUrl } from "@/lib/blog-featured-image";
 import { type SupportedLocale } from "@/lib/seo/i18n";
 import {
-  getFinalExpenseStates,
   getFinalExpenseStatesForBuild,
   getFeStateInfo,
   type FeStateInfo,
@@ -125,11 +124,7 @@ export default async function FinalExpenseStatePage({
   const t = await getTranslations({ locale: supportedLocale, namespace: "FEpage" });
   const content = buildStateContent(stateInfo);
 
-  const fePostsResult = await sanityFetch({
-    query: FE_POSTS_QUERY,
-    params: { locale },
-  });
-  const fePosts: SanityDocument[] = fePostsResult.data || [];
+  const fePosts: SanityDocument[] = await client.fetch(FE_POSTS_QUERY, { locale }) ?? [];
 
   const pageLd = getFeStatePageLd(locale, state, content.metaTitle, content.metaDescription);
   const crumbLd = getFeStateBreadcrumbLd(

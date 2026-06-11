@@ -18,7 +18,10 @@
       "WebFetch(domain:services.leadconnectorhq.com)",
       "Bash(sleep 3 && cat /tmp/claude/c--develop-projects-isaacplans-isaacplans/350e43b3-d0e4-41e7-8465-c36d9536d432/tasks/b1ow71se4.output 2>/dev/null || echo \"File not ready\")",
       "Read(//tmp/claude/c--develop-projects-isaacplans-isaacplans/350e43b3-d0e4-41e7-8465-c36d9536d432/tasks/**)",
-      "Bash(npx tsc *)"
+      "Bash(npx tsc *)",
+      "Bash(python -c ' *)",
+      "Bash(Remove-Item -Recurse -Force .next -ErrorAction SilentlyContinue)",
+      "Bash(node -e ' *)"
     ],
     "additionalDirectories": [
       "C:\\develop\\projects\\isaacplans\\isaacplans\\app\\[locale]\\lead-magnets"
