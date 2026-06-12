@@ -1,71 +1,49 @@
 import OpenAI from "openai";
 import cloudinary from "@/config/cloudinary";
+import { renderSocialImages } from "./image-renderer";
 import type { ImageGenerationRequest, SocialCreativeImages } from "./types";
 
 const CATEGORY_SCENES: Record<string, string> = {
-  "final-expense":              "warm home setting with an elderly couple reviewing documents together, natural light, peaceful and reassuring atmosphere",
-  "aca":                        "healthy diverse family outdoors on a sunny day, smiling, optimistic and bright energy",
-  "temporary-health-insurance": "young professional working from a modern home office, relaxed and confident",
-  "dental-vision":              "smiling person at a bright modern dental clinic, warm and professional environment",
-  "hospital-indemnity":         "caring doctor with a patient in a clean hospital room, reassuring and hopeful",
-  "iul":                        "family celebrating a milestone together, subtle financial growth symbolism, warm tones",
-  "cancer-plans":               "person surrounded by a loving support network, hopeful and uplifting atmosphere",
-  "heart-stroke":               "active senior exercising outdoors, vibrant and healthy lifestyle",
-  "general":                    "professional consultation between two people at a desk, modern office, trust and clarity",
-  "tips-guides":                "person reading and taking notes at a clean organized desk, focused and empowered",
-  "news":                       "clean editorial background, subtle infographic elements, professional and modern",
+  "final-expense":              "tender moment between an elderly man and woman holding hands on a park bench, warm afternoon sunlight filtering through trees, genuine loving expressions on their faces",
+  "aca":                        "vibrant healthy family of four — parents and two children — laughing together in a sunny outdoor park, genuine authentic joy on their faces",
+  "temporary-health-insurance": "confident smiling young man or woman in casual professional attire, bright airy modern living space or café, relaxed and optimistic expression",
+  "dental-vision":              "close-up portrait of a person flashing a wide radiant genuine smile, soft studio lighting, bright and clean aesthetic, face filling the upper frame",
+  "hospital-indemnity":         "empathetic doctor in white coat leaning forward with a reassuring smile toward a patient, warm and trustworthy expression, clean bright clinic",
+  "iul":                        "joyful multigenerational family — grandparents, parents, and children — embracing warmly outdoors in a garden, golden hour light on their happy faces",
+  "cancer-plans":               "person with a strong hopeful expression being warmly embraced by a partner or close friend, soft natural outdoor light, warmth and resilience on their faces",
+  "heart-stroke":               "energetic senior man or woman in athletic wear smiling while jogging or walking in a lush green park, vitality and good health radiating from their expression",
+  "general":                    "a professional advisor and a client sitting across from each other, both smiling warmly during a conversation at a bright modern desk, trust and confidence",
+  "tips-guides":                "focused young professional reading important documents at a clean organized desk by a sunny window, engaged confident expression, warm natural light",
+  "news":                       "business professional in smart attire reviewing documents at a modern glass-and-wood desk, thoughtful confident expression, bright contemporary office",
 };
 
-function buildDallePrompt(sourceTitle: string, category?: string): string {
+function buildImagePrompt(headline: string, category?: string): string {
   const scene = CATEGORY_SCENES[category ?? ""] ?? CATEGORY_SCENES["general"];
   return [
-    `Professional editorial illustration for an insurance blog: ${scene}.`,
-    `Color palette: deep ocean blue (#0077B6) and clean white with light blue (#00B4D8) accents.`,
-    `Style: clean, minimal, corporate digital illustration. Magazine editorial quality.`,
-    `IMPORTANT: No text, no words, no numbers, no logos anywhere in the image.`,
-    `Aspect: neutral composition that works cropped to both square and vertical formats.`,
+    `Cinematic professional portrait photograph: ${scene}.`,
+    `Camera: Canon EOS R5, 85mm f/1.4 portrait lens, natural soft window light or warm golden hour.`,
+    `Mood: emotionally authentic, warm color grading, shallow depth of field with soft bokeh background.`,
+    `CRITICAL COMPOSITION — this square image will be displayed in a tall portrait frame where the bottom half is hidden by a text overlay:`,
+    `Place ALL faces and upper bodies in the TOP THIRD of the square frame only.`,
+    `The BOTTOM HALF of the image must be completely open — blurred background, bokeh, soft ground, or empty space only. No faces or subjects below the midpoint.`,
+    `PROHIBITED: No text, words, numbers, signs, logos, watermarks, or graphic overlays of any kind anywhere in the image.`,
+    `STYLE: Hyper-realistic professional photograph. Absolutely NOT an illustration, NOT vector art, NOT a painting, NOT CGI render, NOT digital art. Real photography only.`,
   ].join(" ");
-}
-
-// Encode text for Cloudinary text layers: spaces → underscores, commas/slashes → percent-encoded
-function encodeCloudinaryText(text: string): string {
-  return text
-    .replace(/,/g, "%2C")
-    .replace(/\//g, "%2F")
-    .replace(/ /g, "_");
-}
-
-function buildTransformUrl(
-  publicId: string,
-  ratio: "1:1" | "9:16",
-  encodedHeadline: string,
-  brandName: string
-): string {
-  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME!;
-  const [w, h]    = ratio === "1:1" ? [1080, 1080] : [1080, 1920];
-  const fontSize  = ratio === "1:1" ? 52 : 56;
-  const brandSize = ratio === "1:1" ? 24 : 28;
-  const textY     = ratio === "1:1" ? 120 : 200;
-
-  const transforms = [
-    `c_fill,w_${w},h_${h},g_auto`,
-    `e_gradient_fade,y_-0.5,b_rgb:000000`,
-    `l_text:Arial_${fontSize}_bold:${encodedHeadline},co_white,g_south,y_${textY},w_${w - 180},c_fit`,
-    `l_text:Arial_${brandSize}:${brandName},co_white,g_north_east,x_30,y_30,o_80`,
-  ].join("/");
-
-  return `https://res.cloudinary.com/${cloudName}/image/upload/${transforms}/${publicId}`;
 }
 
 export async function generateSocialImages(
   req: ImageGenerationRequest
 ): Promise<{ images: SocialCreativeImages; warnings: string[] }> {
   const warnings: string[] = [];
-  let basePublicId: string | null = null;
   let sourceImageUrl = req.sourceImageUrl ?? "";
   let generatedByAI = false;
 
-  // ─── Step 1: Obtain a Cloudinary public_id for the base image ─────────────
+  // ─── Step 1: Resolve the base image URL ───────────────────────────────────────
+  // For "use source image": upload to Cloudinary to get a stable CDN-hosted URL,
+  // then use that as the background for the rendered card.
+  // For "generate new": create via DALL-E 3 and use the returned URL directly.
+
+  let resolvedImageUrl: string | null = null;
 
   if (!req.generateNew && req.sourceImageUrl) {
     try {
@@ -73,35 +51,37 @@ export async function generateSocialImages(
         folder:        `social-media/${req.category ?? "general"}/sources`,
         resource_type: "image",
       });
-      basePublicId = uploadResult.public_id;
+      resolvedImageUrl = uploadResult.secure_url;
     } catch (err) {
       warnings.push(`Source image upload failed: ${(err as Error).message}. Will generate via AI.`);
     }
   }
 
-  if (!basePublicId) {
+  if (!resolvedImageUrl) {
     try {
       const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
       const response = await openai.images.generate({
-        model:   "dall-e-3",
-        prompt:  buildDallePrompt(req.sourceTitle ?? req.headline, req.category),
+        model:   (process.env.OPENAI_IMAGE_MODEL ?? "gpt-image-1") as "gpt-image-1",
+        prompt:  buildImagePrompt(req.sourceTitle ?? req.headline, req.category),
+        quality: "high",
         size:    "1024x1024",
-        quality: "standard",
         n:       1,
-      });
+      } as Parameters<typeof openai.images.generate>[0]);
 
-      const dalleUrl = response.data?.[0]?.url;
-      if (!dalleUrl) throw new Error("DALL-E returned no image URL");
+      // gpt-image-1 (and gpt-image-2) return base64 data, not a URL
+      const b64 = response.data?.[0]?.b64_json;
+      if (!b64) throw new Error("Image model returned no image data");
 
-      const uploadResult = await cloudinary.uploader.upload(dalleUrl, {
-        folder:        `social-media/${req.category ?? "general"}/backgrounds`,
-        resource_type: "image",
-      });
+      const uploadResult = await cloudinary.uploader.upload(
+        `data:image/png;base64,${b64}`,
+        { folder: `social-media/${req.category ?? "general"}/backgrounds`, resource_type: "image" }
+      );
 
-      basePublicId   = uploadResult.public_id;
-      sourceImageUrl = dalleUrl;
-      generatedByAI  = true;
+      resolvedImageUrl = uploadResult.secure_url;
+      sourceImageUrl   = uploadResult.secure_url;
+      generatedByAI    = true;
     } catch (err) {
+      console.error("[generate-social-images] DALL-E/Cloudinary step failed:", err);
       warnings.push(`AI image generation failed: ${(err as Error).message}`);
       return {
         images: {
@@ -116,13 +96,15 @@ export async function generateSocialImages(
     }
   }
 
-  // ─── Step 2: Build Cloudinary transformation URLs ──────────────────────────
+  // ─── Step 2: Render branded card images via next/og and upload to Cloudinary ──
 
-  const encodedHeadline = encodeCloudinaryText(req.headline);
-  const brandName       = "Isaac%20Plans";
-
-  const square   = buildTransformUrl(basePublicId, "1:1",  encodedHeadline, brandName);
-  const vertical = buildTransformUrl(basePublicId, "9:16", encodedHeadline, brandName);
+  const { square, vertical } = await renderSocialImages(
+    req.headline,
+    resolvedImageUrl,
+    req.category ?? "general",
+    `social-media/${req.category ?? "general"}/cards`,
+    Date.now()
+  );
 
   return {
     images: {

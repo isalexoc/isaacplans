@@ -27,13 +27,20 @@ export async function POST(req: Request) {
     );
   }
 
-  // Always returns success: true — failures surface as empty URLs + warnings
-  const { images, warnings } = await generateSocialImages(body);
+  try {
+    const { images, warnings } = await generateSocialImages(body);
 
-  const response: SocialStudioResponse<SocialCreativeImages> = {
-    success: true,
-    data:    images,
-    ...(warnings.length > 0 ? { warnings } : {}),
-  };
-  return NextResponse.json(response);
+    const response: SocialStudioResponse<SocialCreativeImages> = {
+      success: true,
+      data:    images,
+      ...(warnings.length > 0 ? { warnings } : {}),
+    };
+    return NextResponse.json(response);
+  } catch (err) {
+    console.error("[generate-images] unhandled error:", err);
+    return NextResponse.json(
+      { success: false, error: (err as Error).message ?? "Image generation failed" },
+      { status: 500 }
+    );
+  }
 }

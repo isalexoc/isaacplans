@@ -66,6 +66,7 @@ export interface BlogPostSummary {
   _id: string;
   title: string;
   slug: string;
+  locale?: SocialLocale;
   excerpt?: string;
   category?: string;
   featuredImageUrl?: string;
@@ -77,6 +78,7 @@ export interface LeadMagnetSummary {
   title: string;
   subtitle?: string;
   slug: string;
+  locale?: SocialLocale;
   category?: string;
   coverImageUrl?: string;
   publishedAt?: string;

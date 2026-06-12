@@ -35,10 +35,11 @@ export async function POST(req: Request) {
   }
 
   try {
+    const locales = body.locales ?? (body.source.locale ? [body.source.locale] : ["en"]);
     const copies = await generateSocialCopy(
       body.source,
       body.platforms,
-      body.locales
+      locales
     );
 
     const response: SocialStudioResponse<{ copies: SocialPostCopy[] }> = {

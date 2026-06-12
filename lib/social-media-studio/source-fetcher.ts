@@ -46,7 +46,6 @@ export async function fetchSourceList(
     client.fetch<BlogPostSummary[]>(
       `*[
         _type == "post"
-        && locale == $locale
         && defined(slug.current)
         && ($q == null || title match $q + "*")
         && ($category == null || category == $category)
@@ -54,6 +53,7 @@ export async function fetchSourceList(
         _id,
         title,
         "slug": slug.current,
+        locale,
         excerpt,
         category,
         "featuredImageUrl": image.asset->url,
@@ -73,6 +73,7 @@ export async function fetchSourceList(
         title,
         subtitle,
         "slug": slug.current,
+        locale,
         category,
         "coverImageUrl": coverImage.asset->url,
         publishedAt
@@ -134,6 +135,7 @@ export async function fetchLeadMagnetContent(id: string): Promise<SocialPostSour
     title: string;
     subtitle?: string;
     slug: string;
+    locale?: string;
     category?: string;
     coverImageUrl?: string;
     keyBenefits?: string[];
@@ -145,6 +147,7 @@ export async function fetchLeadMagnetContent(id: string): Promise<SocialPostSour
       title,
       subtitle,
       "slug": slug.current,
+      locale,
       category,
       "coverImageUrl": coverImage.asset->url,
       keyBenefits,
@@ -175,7 +178,7 @@ export async function fetchLeadMagnetContent(id: string): Promise<SocialPostSour
     bodyText: parts.join("\n\n"),
     category: doc.category ?? undefined,
     imageUrl: doc.coverImageUrl ?? undefined,
-    publicUrl: `https://isaacplans.com/en/lead-magnets/${doc.slug}`,
-    locale: "en",
+    publicUrl: `https://isaacplans.com/${doc.locale ?? "en"}/lead-magnets/${doc.slug}`,
+    locale: (doc.locale as SocialLocale) ?? "en",
   };
 }

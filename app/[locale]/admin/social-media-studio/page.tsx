@@ -66,16 +66,16 @@ interface StudioState {
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const CATEGORY_OPTIONS = [
-  { value: "aca",                       label: "ACA / Health Insurance" },
-  { value: "temporary-health-insurance", label: "Temporary Health Insurance" },
-  { value: "dental-vision",             label: "Dental & Vision" },
-  { value: "hospital-indemnity",        label: "Hospital Indemnity" },
-  { value: "iul",                       label: "IUL (Life Insurance)" },
-  { value: "final-expense",             label: "Final Expense" },
-  { value: "cancer-plans",              label: "Cancer Plans" },
-  { value: "heart-stroke",              label: "Heart & Stroke" },
-  { value: "general",                   label: "General Insurance" },
-  { value: "tips-guides",               label: "Tips & Guides" },
+  { value: "aca",                       label: "ACA / Health Plans" },
+  { value: "temporary-health-insurance", label: "Short-Term Health Plans" },
+  { value: "dental-vision",             label: "Dental & Vision Plans" },
+  { value: "hospital-indemnity",        label: "Hospital Benefits" },
+  { value: "iul",                       label: "IUL / Wealth Building" },
+  { value: "final-expense",             label: "Final Expense Plans" },
+  { value: "cancer-plans",              label: "Cancer Protection Plans" },
+  { value: "heart-stroke",              label: "Heart & Stroke Plans" },
+  { value: "general",                   label: "Financial Protection" },
+  { value: "tips-guides",               label: "Planning Tips & Guides" },
 ] as const;
 
 const STEPS: { key: StudioStep; label: string }[] = [
@@ -232,6 +232,7 @@ function SourcePickerStep({
   // Direct topic form
   const [topicTitle, setTopicTitle] = useState("");
   const [topicCategory, setTopicCategory] = useState("general");
+  const [topicLocale, setTopicLocale] = useState<SocialLocale>("en");
   const [topicDescription, setTopicDescription] = useState("");
   const [topicCtaUrl, setTopicCtaUrl] = useState("");
   const [topicError, setTopicError] = useState<string | null>(null);
@@ -317,6 +318,7 @@ function SourcePickerStep({
       title: topicTitle.trim(),
       subtitle: topicDescription.trim() || undefined,
       category: topicCategory,
+      locale: topicLocale,
       publicUrl: topicCtaUrl.trim() || undefined,
     };
     triggerCopyGeneration(source);
@@ -401,9 +403,16 @@ function SourcePickerStep({
                     {subtitle && (
                       <p className="text-xs text-muted-foreground truncate mt-0.5">{subtitle}</p>
                     )}
-                    {item.category && (
-                      <Badge variant="outline" className="text-xs mt-1">{item.category}</Badge>
-                    )}
+                    <div className="flex gap-1 flex-wrap mt-1">
+                      {item.category && (
+                        <Badge variant="outline" className="text-xs">{item.category}</Badge>
+                      )}
+                      {(item as BlogPostSummary | LeadMagnetSummary).locale && (
+                        <Badge variant="outline" className="text-xs uppercase">
+                          {(item as BlogPostSummary | LeadMagnetSummary).locale}
+                        </Badge>
+                      )}
+                    </div>
                   </div>
                   <Button
                     size="sm"
@@ -465,6 +474,24 @@ function SourcePickerStep({
               placeholder="https://isaacplans.com/..."
             />
           </div>
+          <div className="flex flex-col gap-1.5">
+            <Label>Post language</Label>
+            <div className="flex gap-2">
+              {(["en", "es"] as SocialLocale[]).map((l) => (
+                <button
+                  key={l}
+                  type="button"
+                  onClick={() => setTopicLocale(l)}
+                  className={cn(
+                    "px-4 py-1.5 rounded-md text-sm font-medium border transition-colors",
+                    topicLocale === l ? "bg-blue-600 text-white border-blue-600" : "border-border hover:bg-muted"
+                  )}
+                >
+                  {l === "en" ? "English" : "Spanish"}
+                </button>
+              ))}
+            </div>
+          </div>
           {topicError && <ErrorBox message={topicError} />}
           <Button onClick={submitDirectTopic} disabled={isSubmitting} size="lg">
             {isSubmitting
@@ -487,7 +514,7 @@ function CopyReviewStep({
   setState: Dispatch<SetStateAction<StudioState>>;
 }) {
   const [platform, setPlatform] = useState<SocialPlatform>("facebook");
-  const [locale, setLocale] = useState<SocialLocale>("en");
+  const [locale] = useState<SocialLocale>(state.source?.locale ?? "en");
   const [newTag, setNewTag] = useState("");
   const [showTagInput, setShowTagInput] = useState(false);
 
@@ -547,7 +574,7 @@ function CopyReviewStep({
         </div>
         <div className="flex flex-col items-center gap-3 py-16 text-muted-foreground">
           <Loader2 className="h-8 w-8 animate-spin" />
-          <p className="text-sm">Generating social media copy for all 5 platforms in EN + ES...</p>
+          <p className="text-sm">Generating social media copy for all 5 platforms in {(state.source?.locale ?? "en").toUpperCase()}...</p>
           <p className="text-xs">This takes about 15–30 seconds.</p>
         </div>
       </div>
@@ -586,22 +613,6 @@ function CopyReviewStep({
             <RotateCcw className="h-3 w-3 mr-1" /> Regenerate All
           </Button>
         </div>
-      </div>
-
-      {/* Locale toggle */}
-      <div className="flex gap-2">
-        {(["en", "es"] as SocialLocale[]).map((l) => (
-          <button
-            key={l}
-            onClick={() => setLocale(l)}
-            className={cn(
-              "px-4 py-1.5 rounded-md text-sm font-medium border transition-colors",
-              locale === l ? "bg-blue-600 text-white border-blue-600" : "border-border hover:bg-muted"
-            )}
-          >
-            {l.toUpperCase()}
-          </button>
-        ))}
       </div>
 
       {/* Platform tabs */}
@@ -745,9 +756,16 @@ function ImageStudioStep({
         category: state.source?.category,
         sourceTitle: state.source?.title,
       });
+      const images = result.data as SocialCreativeImages;
+      // Surface server-side warnings (e.g. DALL-E failure) as a visible error
+      if (!images.square && !images.vertical) {
+        const msg = result.warnings?.[0] ?? "Image generation failed. Please try again.";
+        setState((prev) => ({ ...prev, imageError: msg, isGeneratingImages: false }));
+        return;
+      }
       setState((prev) => ({
         ...prev,
-        images: result.data.images as SocialCreativeImages,
+        images,
         isGeneratingImages: false,
       }));
     } catch (err) {
@@ -1145,7 +1163,7 @@ function ExportStep({
   setState: Dispatch<SetStateAction<StudioState>>;
 }) {
   const [platform, setPlatform] = useState<SocialPlatform>("facebook");
-  const [locale, setLocale] = useState<SocialLocale>("en");
+  const [locale] = useState<SocialLocale>(state.source?.locale ?? "en");
   const [saveStatus, setSaveStatus] = useState<"draft" | "published">("draft");
   const [tags, setTags] = useState<string[]>([]);
   const [newTag, setNewTag] = useState("");
@@ -1196,20 +1214,6 @@ function ExportStep({
       {/* Platform copy */}
       <div className="flex flex-col gap-4">
         <h3 className="font-medium text-sm uppercase tracking-wide text-muted-foreground">Platform Copy</h3>
-        <div className="flex gap-2">
-          {(["en", "es"] as SocialLocale[]).map((l) => (
-            <button
-              key={l}
-              onClick={() => setLocale(l)}
-              className={cn(
-                "px-3 py-1 rounded-md text-sm font-medium border transition-colors",
-                locale === l ? "bg-blue-600 text-white border-blue-600" : "border-border hover:bg-muted"
-              )}
-            >
-              {l.toUpperCase()}
-            </button>
-          ))}
-        </div>
         <div className="flex gap-0 flex-wrap border-b">
           {ALL_PLATFORMS.map((p) => (
             <button
