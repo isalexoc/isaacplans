@@ -69,7 +69,8 @@ export async function generateSocialImages(
       } as Parameters<typeof openai.images.generate>[0]);
 
       // gpt-image-1 (and gpt-image-2) return base64 data, not a URL
-      const b64 = response.data?.[0]?.b64_json;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const b64 = (response as any).data?.[0]?.b64_json;
       if (!b64) throw new Error("Image model returned no image data");
 
       const uploadResult = await cloudinary.uploader.upload(

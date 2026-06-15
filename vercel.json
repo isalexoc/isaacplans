@@ -7,6 +7,14 @@
     {
       "path": "/api/cron/kixie-call-summary",
       "schedule": "*/3 * * * *"
+    },
+    {
+      "path": "/api/cron/social-publish",
+      "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/api/cron/social-token-refresh",
+      "schedule": "0 8 * * 1"
     }
   ]
 }

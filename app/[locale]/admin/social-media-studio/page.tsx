@@ -42,6 +42,7 @@ import {
   PLATFORM_COPY_LIMITS,
   ALL_PLATFORMS,
 } from "@/lib/social-media-studio/types";
+import { PublishToSocialSection } from "@/components/social-publishing/PublishToSocialSection";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -1304,7 +1305,7 @@ function ExportStep({
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           {state.savedResult ? (
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-4">
               <div className="flex items-center gap-2 text-green-600">
                 <CheckCircle2 className="h-4 w-4" />
                 <span className="text-sm font-medium">Saved successfully!</span>
@@ -1317,6 +1318,16 @@ function ExportStep({
               >
                 View in Sanity Studio →
               </a>
+              <div className="pt-2 border-t">
+                <p className="text-sm font-medium mb-3">Publish to Social Platforms</p>
+                <PublishToSocialSection
+                  sanityPostId={state.savedResult.sanityDocumentId}
+                  copies={state.copies ?? []}
+                  squareImageUrl={state.images?.square}
+                  verticalImageUrl={state.images?.vertical}
+                  locale={state.source?.locale ?? "en"}
+                />
+              </div>
             </div>
           ) : (
             <>

@@ -36,6 +36,13 @@
       "when": 1764432043318,
       "tag": "0004_thick_moondragon",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1781485259515,
+      "tag": "0005_plain_hellfire_club",
+      "breakpoints": true
     }
   ]
 }

@@ -197,4 +197,59 @@ export type CallSummaryJobState = {
 
 export type CallSummarySource = "kixie" | "ghl_workflow" | "ghl_backfill" | "ghl_native";
 
+// ─── Social Publishing ────────────────────────────────────────────────────────
+
+/** One row per platform per user — OAuth connection with encrypted tokens. */
+export const socialPlatformConnections = pgTable("social_platform_connections", {
+  id:                  text("id").primaryKey(),
+  userId:              text("user_id").notNull(),
+  platform:            text("platform").notNull(), // 'facebook'|'instagram'|'threads'|'google_business'|'tiktok'
+  status:              text("status").notNull().default("active"), // 'active'|'revoked'
+  accessToken:         text("access_token").notNull(),   // AES-256-GCM encrypted
+  refreshToken:        text("refresh_token"),             // encrypted; null for FB Page tokens
+  tokenExpiresAt:      timestamp("token_expires_at"),     // null = never (FB Page tokens)
+  platformUserId:      text("platform_user_id"),
+  platformAccountName: text("platform_account_name"),
+  platformMetadata:    jsonb("platform_metadata"),        // page ID, IG user ID, GBP location, etc.
+  connectedAt:         timestamp("connected_at").defaultNow().notNull(),
+  updatedAt:           timestamp("updated_at").defaultNow().notNull(),
+}, (t) => ({
+  uniq:    uniqueIndex("spc_user_platform_idx").on(t.userId, t.platform),
+  userIdx: index("spc_user_id_idx").on(t.userId),
+}));
+
+/** Short-lived CSRF state rows for OAuth flows (10-minute TTL, single-use). */
+export const socialOauthStates = pgTable("social_oauth_states", {
+  state:        text("state").primaryKey(),
+  userId:       text("user_id").notNull(),
+  platform:     text("platform").notNull(),
+  codeVerifier: text("code_verifier"),      // TikTok PKCE only
+  expiresAt:    timestamp("expires_at").notNull(),
+  createdAt:    timestamp("created_at").defaultNow().notNull(),
+});
+
+/** One row per (sanityPostId × platform) publishing job. */
+export const socialScheduledPosts = pgTable("social_scheduled_posts", {
+  id:              text("id").primaryKey(),
+  userId:          text("user_id").notNull(),
+  sanityPostId:    text("sanity_post_id").notNull(),
+  sanityPostTitle: text("sanity_post_title"),
+  platform:        text("platform").notNull(),
+  locale:          text("locale").notNull(),
+  scheduledFor:    timestamp("scheduled_for").notNull(),
+  publishedAt:     timestamp("published_at"),
+  status:          text("status").notNull().default("pending"), // pending|publishing|published|failed|cancelled
+  platformPostId:  text("platform_post_id"),
+  errorMessage:    text("error_message"),
+  attemptCount:    integer("attempt_count").notNull().default(0),
+  nextRetryAt:     timestamp("next_retry_at"),
+  copySnapshot:    jsonb("copy_snapshot"),   // SocialPostCopy snapshot
+  imageUrl:        text("image_url"),
+  createdAt:       timestamp("created_at").defaultNow().notNull(),
+  updatedAt:       timestamp("updated_at").defaultNow().notNull(),
+}, (t) => ({
+  pendingIdx: index("ssp_pending_idx").on(t.status, t.scheduledFor),
+  sanityIdx:  index("ssp_sanity_idx").on(t.sanityPostId),
+  userIdx:    index("ssp_user_idx").on(t.userId, t.status),
+}));
 

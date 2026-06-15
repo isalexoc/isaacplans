@@ -191,6 +191,15 @@ export const socialPostType = defineType({
       group: "meta",
       of: [{ type: "string" }],
     },
+    {
+      name: "publishedPlatforms",
+      title: "Published Platforms",
+      type: "array",
+      group: "meta",
+      of: [{ type: "string" }],
+      description: "Platforms where this post has been successfully published (written by the publish pipeline)",
+      readOnly: true,
+    },
     defineField({
       name: "createdAt",
       title: "Created At",
