@@ -5,7 +5,7 @@ export function buildMetaAuthUrl(state: string): string {
   const params = new URLSearchParams({
     client_id:     process.env.META_APP_ID!,
     redirect_uri:  process.env.META_OAUTH_REDIRECT_URI!,
-    scope:         "pages_show_list,pages_manage_posts,pages_read_engagement",
+    scope:         "pages_show_list,pages_manage_posts,pages_read_engagement,business_management",
     state,
     response_type: "code",
   });
@@ -50,6 +50,14 @@ export async function getPageToken(userAccessToken: string): Promise<{
   pageName: string;
   pageAccessToken: string;
 }> {
+  // 0. Check granted permissions so we can give a precise error if pages_show_list is missing
+  const permRes = await fetch(`${GRAPH}/me/permissions?access_token=${userAccessToken}`);
+  const permData = await permRes.json();
+  const grantedPerms: string[] = (permData.data ?? [])
+    .filter((p: { permission: string; status: string }) => p.status === "granted")
+    .map((p: { permission: string }) => p.permission);
+  console.error("[getPageToken] Granted permissions:", grantedPerms);
+
   // 1. Standard endpoint — works for most personal-account page admins
   const res = await fetch(
     `${GRAPH}/me/accounts?fields=id,name,access_token&limit=25&access_token=${userAccessToken}`
@@ -66,27 +74,37 @@ export async function getPageToken(userAccessToken: string): Promise<{
     return { pageId: page.id, pageName: page.name, pageAccessToken: page.access_token };
   }
 
-  // 2. Fetch user ID, then try /{userId}/accounts — sometimes differs from /me for Business accounts
-  const meRes = await fetch(`${GRAPH}/me?fields=id,name&access_token=${userAccessToken}`);
-  const meData = await meRes.json();
-  console.error("[getPageToken] /me/accounts returned 0 pages. User info:", meData, "Raw /me/accounts:", data);
+  console.error("[getPageToken] /me/accounts returned 0 pages. Granted perms:", grantedPerms);
 
-  if (!meData.error && meData.id) {
-    const res2 = await fetch(
-      `${GRAPH}/${meData.id}/accounts?fields=id,name,access_token&limit=25&access_token=${userAccessToken}`
-    );
-    const data2 = await res2.json();
-    if (!data2.error && data2.data?.length) {
-      const page = data2.data[0];
-      return { pageId: page.id, pageName: page.name, pageAccessToken: page.access_token };
+  // 2. Business Manager fallback — pages owned by a Business account
+  const bizRes = await fetch(
+    `${GRAPH}/me/businesses?fields=id,name,owned_pages{id,name,access_token}&limit=10&access_token=${userAccessToken}`
+  );
+  const bizData = await bizRes.json();
+  console.error("[getPageToken] /me/businesses:", JSON.stringify(bizData).slice(0, 500));
+
+  if (!bizData.error) {
+    for (const biz of bizData.data ?? []) {
+      const pages = biz.owned_pages?.data ?? [];
+      if (pages.length) {
+        const page = pages[0];
+        return { pageId: page.id, pageName: page.name, pageAccessToken: page.access_token };
+      }
     }
-    console.error("[getPageToken] /{userId}/accounts also empty:", data2);
+  }
+
+  if (!grantedPerms.includes("pages_show_list")) {
+    throw new Error(
+      `Facebook did not grant the "pages_show_list" permission. ` +
+      `When reconnecting, look for the page-selection step in the Facebook dialog ` +
+      `and make sure to select your Business Page before clicking Continue.`
+    );
   }
 
   throw new Error(
-    `No Facebook Pages found. In the Facebook permission dialog, click "Edit Settings" ` +
-    `and explicitly select your Business Page — don't just click "Continue as [Name]". ` +
-    `Also confirm your Facebook account is an Admin of the Page.`
+    `No Facebook Pages found. Your token has pages_show_list but no pages are returned. ` +
+    `Make sure your Facebook account (Isaac Orraiz) is listed as a Page Admin directly — ` +
+    `not just a Business Manager user. Check facebook.com/pages to see which pages you admin.`
   );
 }
 
