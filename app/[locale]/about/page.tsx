@@ -51,7 +51,9 @@ export async function generateMetadata(): Promise<Metadata> {
       locale: ogLocale,
       alternateLocale: ogLocale === "en_US" ? ["es_ES"] : ["en_US"],
       type: "article",
-      images: [{ url: cloudinaryOgImageUrl(image), width: 1200, height: 630, alt }],
+      images: [
+        { url: cloudinaryOgImageUrl(image), width: 1200, height: 630, alt },
+      ],
     },
     twitter: {
       card: "summary_large_image",
@@ -67,21 +69,21 @@ export default async function AboutPage() {
   const locale = (await getLocale()) as SupportedLocale;
   const t = await getTranslations({ locale, namespace: "aboutPage" });
 
-  // Use routing-derived slug (no leading "/") for your JSON-LD helpers
+  // Use routing-derived slug (no leading "/") for your JSON-LD helpers.
   const aboutSlug = localizedSlug("/about", locale).replace(/^\//, "");
 
   const pageLd = getAboutPageLd(
     locale,
     t("hero.heading"),
     t("meta.description"),
-    aboutSlug
+    aboutSlug,
   );
 
   const crumbLd = getAboutBreadcrumbLd(
     locale,
     t("meta.breadcrumbs.home"),
     t("about.links.missionVision.title"),
-    aboutSlug
+    aboutSlug,
   );
 
   return (
