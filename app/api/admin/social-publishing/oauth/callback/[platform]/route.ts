@@ -111,16 +111,30 @@ export async function GET(
 
     } else if (platform === "google_business") {
       const { accessToken, refreshToken, expiresAt } = await exchangeGoogleCode(code);
-      const loc = await getGbpLocation(accessToken);
+
+      // GBP API has a low default QPM quota — retry once after a short delay
+      let loc: Awaited<ReturnType<typeof getGbpLocation>> | null = null;
+      try {
+        loc = await getGbpLocation(accessToken);
+      } catch (firstErr) {
+        console.error("[GBP] First location lookup failed, retrying in 3s:", firstErr);
+        await new Promise((r) => setTimeout(r, 3000));
+        try {
+          loc = await getGbpLocation(accessToken);
+        } catch (secondErr) {
+          console.error("[GBP] Second location lookup failed — saving tokens without location:", secondErr);
+        }
+      }
+
       await upsertConnection({
         userId,
         platform:            "google_business",
         accessToken,
         refreshToken,
         tokenExpiresAt:      expiresAt,
-        platformUserId:      loc.locationId,
-        platformAccountName: loc.locationName,
-        platformMetadata:    loc,
+        platformUserId:      loc?.locationId   ?? "pending",
+        platformAccountName: loc?.locationName ?? "Google Business Profile",
+        platformMetadata:    loc ?? { locationPending: true },
       });
 
     } else if (platform === "tiktok") {
