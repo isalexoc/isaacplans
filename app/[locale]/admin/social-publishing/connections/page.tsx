@@ -64,7 +64,13 @@ export default function SocialConnectionsPage() {
     try {
       const res = await fetch("/api/admin/social-publishing/connections");
       const data = await res.json();
-      if (data.success) setConnections(data.data);
+      if (data.success) {
+        setConnections(data.data);
+      } else {
+        setToast({ type: "error", msg: `Failed to load connections: ${data.error ?? "Unknown error"}` });
+      }
+    } catch (err) {
+      setToast({ type: "error", msg: `Network error loading connections: ${err instanceof Error ? err.message : String(err)}` });
     } finally {
       setLoading(false);
     }
