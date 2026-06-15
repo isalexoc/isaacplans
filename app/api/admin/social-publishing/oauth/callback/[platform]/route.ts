@@ -145,6 +145,7 @@ export async function GET(
     }
   } catch (err) {
     const msg = err instanceof Error ? err.message : "OAuth exchange failed";
+    console.error(`[social-publishing/oauth/callback/${platform}] Error for userId=${userId}:`, err);
     return errRedirect(msg);
   }
 

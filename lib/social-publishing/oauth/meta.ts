@@ -44,20 +44,50 @@ export async function exchangeMetaCode(code: string): Promise<{
   return { userAccessToken: llData.access_token, expiresAt };
 }
 
-/** Get all Facebook Pages the user manages; returns first one (agent typically has one page). */
+/** Get all Facebook Pages the user manages; returns first one. */
 export async function getPageToken(userAccessToken: string): Promise<{
   pageId: string;
   pageName: string;
   pageAccessToken: string;
 }> {
+  // 1. Standard endpoint — works for most personal-account page admins
   const res = await fetch(
-    `${GRAPH}/me/accounts?access_token=${userAccessToken}`
+    `${GRAPH}/me/accounts?fields=id,name,access_token&limit=25&access_token=${userAccessToken}`
   );
   const data = await res.json();
-  if (data.error) throw new Error(data.error.message);
-  if (!data.data?.length) throw new Error("No Facebook Pages found for this account");
-  const page = data.data[0];
-  return { pageId: page.id, pageName: page.name, pageAccessToken: page.access_token };
+
+  if (data.error) {
+    console.error("[getPageToken] /me/accounts API error:", data.error);
+    throw new Error(`Facebook API error: ${data.error.message}`);
+  }
+
+  if (data.data?.length) {
+    const page = data.data[0];
+    return { pageId: page.id, pageName: page.name, pageAccessToken: page.access_token };
+  }
+
+  // 2. Fetch user ID, then try /{userId}/accounts — sometimes differs from /me for Business accounts
+  const meRes = await fetch(`${GRAPH}/me?fields=id,name&access_token=${userAccessToken}`);
+  const meData = await meRes.json();
+  console.error("[getPageToken] /me/accounts returned 0 pages. User info:", meData, "Raw /me/accounts:", data);
+
+  if (!meData.error && meData.id) {
+    const res2 = await fetch(
+      `${GRAPH}/${meData.id}/accounts?fields=id,name,access_token&limit=25&access_token=${userAccessToken}`
+    );
+    const data2 = await res2.json();
+    if (!data2.error && data2.data?.length) {
+      const page = data2.data[0];
+      return { pageId: page.id, pageName: page.name, pageAccessToken: page.access_token };
+    }
+    console.error("[getPageToken] /{userId}/accounts also empty:", data2);
+  }
+
+  throw new Error(
+    `No Facebook Pages found. In the Facebook permission dialog, click "Edit Settings" ` +
+    `and explicitly select your Business Page — don't just click "Continue as [Name]". ` +
+    `Also confirm your Facebook account is an Admin of the Page.`
+  );
 }
 
 /** Derive Instagram Business Account ID from the connected Facebook Page. */
