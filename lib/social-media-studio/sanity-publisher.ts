@@ -73,6 +73,7 @@ export async function publishSocialPost(
     sourceId:         req.source.id ?? null,
     sourceTitle:      req.source.title,
     sourceSlug:       req.source.slug ?? null,
+    sourceLocale:     req.source.locale ?? "en",
     sourceUrl:        req.source.publicUrl ?? null,
     sourceImageUrl:   req.source.imageUrl ?? null,
     sourceCategory:   req.source.category ?? null,

@@ -9,6 +9,7 @@ const DETAIL_QUERY = `*[_type == "socialPost" && _id == $id][0] {
   sourceType,
   sourceTitle,
   sourceCategory,
+  sourceLocale,
   sourceUrl,
   sourceImageUrl,
   status,
@@ -40,6 +41,7 @@ interface SocialPostDetail {
   sourceType?: string;
   sourceTitle?: string;
   sourceCategory?: string;
+  sourceLocale?: string;
   sourceUrl?: string;
   sourceImageUrl?: string;
   status?: string;
@@ -80,11 +82,19 @@ export default async function SocialPostDetailPage({
   const { userId } = await auth();
   if (!userId) redirect("/sign-in");
 
-  const { locale, id } = await params;
+  const { id } = await params;
   const post: SocialPostDetail | null = await client.fetch(DETAIL_QUERY, { id });
   if (!post) notFound();
 
-  const uniquePlatforms = [...new Set((post.generatedCopies ?? []).map((c) => c.platform))];
+  // Determine the post's content locale. Prefer the saved sourceLocale field; for older
+  // posts that predate that field, infer from sourceUrl (e.g. /es/blog/... → "es").
+  const postLocale: "en" | "es" =
+    (post.sourceLocale === "es" || post.sourceUrl?.includes("/es/")) ? "es" : "en";
+
+  const allCopies = post.generatedCopies ?? [];
+  // Only show / use copies that match the source locale
+  const localeCopies = allCopies.filter((c) => c.locale === postLocale);
+  const uniquePlatforms = [...new Set(localeCopies.map((c) => c.platform))];
   const publishedSet = new Set(post.publishedPlatforms ?? []);
 
   return (
@@ -167,12 +177,13 @@ export default async function SocialPostDetailPage({
         </section>
       )}
 
-      {/* Generated Copies */}
+      {/* Generated Copies — filtered to source locale only */}
       {uniquePlatforms.length > 0 && (
         <section className="space-y-4">
           <h2 className="text-lg font-semibold">Generated Copy</h2>
           {uniquePlatforms.map((platform) => {
-            const copies = (post.generatedCopies ?? []).filter((c) => c.platform === platform);
+            const copy = localeCopies.find((c) => c.platform === platform);
+            if (!copy) return null;
             return (
               <div key={platform} className="border border-border rounded-lg overflow-hidden">
                 <div className="flex items-center gap-2 px-4 py-3 bg-muted/50 border-b border-border">
@@ -184,31 +195,22 @@ export default async function SocialPostDetailPage({
                     </span>
                   )}
                 </div>
-                <div className="divide-y divide-border">
-                  {copies.map((copy) => (
-                    <div key={copy.locale} className="p-4 space-y-2">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                          {copy.locale === "en" ? "English" : "Spanish"}
+                <div className="p-4 space-y-2">
+                  {copy.characterCount && (
+                    <span className="text-xs text-muted-foreground">{copy.characterCount} chars</span>
+                  )}
+                  <pre className="text-sm whitespace-pre-wrap font-sans text-foreground leading-relaxed">
+                    {copy.fullPost}
+                  </pre>
+                  {copy.hashtags && copy.hashtags.length > 0 && (
+                    <div className="flex flex-wrap gap-1 pt-1">
+                      {copy.hashtags.map((tag) => (
+                        <span key={tag} className="text-xs text-blue-600 dark:text-blue-400">
+                          #{tag}
                         </span>
-                        {copy.characterCount && (
-                          <span className="text-xs text-muted-foreground">· {copy.characterCount} chars</span>
-                        )}
-                      </div>
-                      <pre className="text-sm whitespace-pre-wrap font-sans text-foreground leading-relaxed">
-                        {copy.fullPost}
-                      </pre>
-                      {copy.hashtags && copy.hashtags.length > 0 && (
-                        <div className="flex flex-wrap gap-1 pt-1">
-                          {copy.hashtags.map((tag) => (
-                            <span key={tag} className="text-xs text-blue-600 dark:text-blue-400">
-                              #{tag}
-                            </span>
-                          ))}
-                        </div>
-                      )}
+                      ))}
                     </div>
-                  ))}
+                  )}
                 </div>
               </div>
             );
@@ -282,10 +284,10 @@ export default async function SocialPostDetailPage({
         <h2 className="text-lg font-semibold">Publish to Social</h2>
         <PublishToSocialSection
           sanityPostId={post._id}
-          copies={(post.generatedCopies ?? []) as SocialPostCopy[]}
+          copies={localeCopies as SocialPostCopy[]}
           squareImageUrl={post.squareImageUrl}
           verticalImageUrl={post.verticalImageUrl}
-          locale={locale}
+          locale={postLocale}
           publishedPlatforms={post.publishedPlatforms ?? []}
         />
       </section>
