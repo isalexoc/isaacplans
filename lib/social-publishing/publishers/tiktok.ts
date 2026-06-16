@@ -8,6 +8,12 @@ export async function publishToTikTok(
 ): Promise<PublishResult> {
   // Sandbox requires SELF_ONLY; production can use PUBLIC_TO_EVERYONE
   const privacyLevel = process.env.TIKTOK_PRIVACY_LEVEL ?? "SELF_ONLY";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.isaacplans.com";
+
+  // TikTok requires URL ownership verification — proxy Cloudinary images through our domain
+  const proxiedImageUrl = imageUrl.includes("res.cloudinary.com")
+    ? `${siteUrl}/api/media-proxy?url=${encodeURIComponent(imageUrl)}`
+    : imageUrl;
 
   const requestBody = {
     post_info: {
@@ -19,7 +25,7 @@ export async function publishToTikTok(
     },
     source_info: {
       source:            "PULL_FROM_URL",
-      photo_images:      [imageUrl],
+      photo_images:      [proxiedImageUrl],
       photo_cover_index: 0,
     },
     media_type: "PHOTO",
