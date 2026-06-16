@@ -1416,8 +1416,8 @@ export default function SocialMediaStudioPage() {
     <div className="max-w-5xl mx-auto p-6 space-y-6">
       <header className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Social Media Content Studio</h1>
-          <p className="text-gray-500 text-sm">
+          <h1 className="text-2xl font-bold text-foreground">Social Media Content Studio</h1>
+          <p className="text-muted-foreground text-sm">
             Generate a complete post package from any blog post or guide.
           </p>
         </div>
