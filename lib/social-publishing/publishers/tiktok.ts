@@ -57,5 +57,42 @@ export async function publishToTikTok(
     return { success: false, error: `TikTok error [${initData.error.code}]: ${msg}` };
   }
 
-  return { success: true, platformPostId: initData.data?.publish_id };
+  const publishId = initData.data?.publish_id;
+
+  // Poll status — PULL_FROM_URL is async; TikTok fetches and processes the image
+  const finalStatus = await pollTikTokStatus(publishId, accessToken);
+  console.log("[TikTok] Final publish status:", JSON.stringify(finalStatus, null, 2));
+
+  if (finalStatus.status === "FAILED") {
+    return { success: false, error: `TikTok processing failed: ${finalStatus.failReason ?? "unknown reason"}` };
+  }
+
+  return { success: true, platformPostId: publishId };
+}
+
+async function pollTikTokStatus(
+  publishId: string,
+  accessToken: string,
+  maxAttempts = 10
+): Promise<{ status: string; failReason?: string }> {
+  for (let i = 0; i < maxAttempts; i++) {
+    await new Promise((r) => setTimeout(r, 3000));
+    const res = await fetch("https://open.tiktokapis.com/v2/post/publish/status/fetch/", {
+      method: "POST",
+      headers: {
+        Authorization:  `Bearer ${accessToken}`,
+        "Content-Type": "application/json; charset=UTF-8",
+      },
+      body: JSON.stringify({ publish_id: publishId }),
+    });
+    const data = await res.json();
+    console.log(`[TikTok] Status poll ${i + 1}:`, JSON.stringify(data, null, 2));
+
+    const status = data.data?.status;
+    if (status === "PUBLISH_COMPLETE") return { status: "PUBLISHED" };
+    if (status === "FAILED")           return { status: "FAILED", failReason: data.data?.fail_reason };
+    // PROCESSING_DOWNLOAD / PROCESSING_UPLOAD / SENDING_TO_USER_INBOX — keep polling
+  }
+  // Timed out but not failed — treat as success since init was accepted
+  return { status: "UNKNOWN" };
 }
