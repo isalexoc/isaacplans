@@ -54,7 +54,8 @@ FACEBOOK:
 - Use 2–3 short paragraphs with line breaks between them
 - Open with a relatable scenario, a surprising stat, or a "did you know" moment that creates instant connection
 - Middle paragraph: the real value — the thing they didn't know, the thing that protects them
-- End with a soft curiosity-driven CTA and an engagement question (drives comment algorithm)
+- End with a soft curiosity-driven CTA followed by an engagement question (drives comment algorithm)
+- IMPORTANT: If a CTA LINK is provided, you MUST include it as a clickable URL at the end of the cta field (e.g. "Read more: https://…" or "Get the full guide: https://…"). Links ARE clickable on Facebook.
 - Hashtags: 3–5, placed at the very end after a line break — NO hashtag should contain the word "insurance"
 - Example hook styles:
   "Most families don't find out about this state-approved plan until it's too late."
@@ -68,6 +69,7 @@ INSTAGRAM:
 - The very first sentence is the hook — it must make someone stop mid-scroll and think "wait, what?"
 - First sentence ends before a line break so it appears before the "more" cutoff
 - Body is 2–3 short lines: hook → revelation → action
+- IMPORTANT: Instagram does NOT make links in captions clickable. End the cta with "→ Link in bio" — do NOT paste a URL in the cta field.
 - Hashtags: 5–8 on a separate line at the end — NO hashtag should contain the word "insurance"
 - Suggested branded hashtags: #IsaacPlans #HealthPlans #FamilyProtection
 - Avoid long paragraphs — use short punchy lines with white space
@@ -83,6 +85,7 @@ TIKTOK:
 - This is a caption, not the story — the video does the storytelling
 - Use 1–2 sentences maximum
 - Casual, almost text-message tone — create curiosity to watch the video
+- IMPORTANT: TikTok does NOT make links in captions clickable. Do NOT paste a URL in the cta field. Instead use "link in bio" or "comment INFO".
 - Hashtags: 3–5 at the end — NO hashtag should contain the word "insurance"
 - Example styles:
   "POV: You just found out your family qualifies for this 👀 #HealthPlans"
@@ -95,7 +98,8 @@ THREADS:
 - Target length: 200–400 characters
 - Feels like a hot take or a thought someone shares with close friends
 - Conversational and opinion-based — "Here's what I think about X" or "Unpopular opinion: Y"
-- End with an open question that invites people to share their story
+- End with an open question OR a direct link to learn more
+- IMPORTANT: If a CTA LINK is provided, you MUST include it at the end of the cta field (e.g. "Read the full guide: https://…"). Links ARE clickable on Threads.
 - NO hashtags — Threads deprioritizes them
 - Example styles:
   "Most families I talk to think they can't afford coverage. Then I show them what they actually qualify for. The look on their face every time."
@@ -108,7 +112,7 @@ GOOGLE BUSINESS:
 - Target length: 200–350 characters
 - Professional, clear, and community-focused tone
 - Highlight a specific benefit, answer a common concern, or share an actionable tip
-- Include a strong CTA — call, visit, or get a free quote
+- IMPORTANT: If a CTA LINK is provided, you MUST include it at the end of the cta field (e.g. "Learn more: https://…" or "Get your free guide: https://…"). Links ARE clickable on Google Business posts.
 - NO hashtags
 - Slightly more formal — use "you" and "your family" but no slang
 - Focus on trust: state-approved, licensed advisor, free consultation, compare plans
@@ -124,6 +128,7 @@ YOUTUBE SHORTS:
 - Use 1–2 sentences max — create curiosity to watch, like, and subscribe
 - The video does the storytelling; this text hooks the viewer before and after watching
 - Tone: casual, direct, slightly more polished than TikTok — YouTube audience expects slightly more value signals
+- IMPORTANT: If a CTA LINK is provided, you MUST include it at the end of the cta field (e.g. "Full guide: https://…"). Links ARE clickable in YouTube descriptions.
 - Do NOT include #Shorts — it is added automatically by the publisher
 - Hashtags: 3–5 at the end — NO hashtag should contain the word "insurance"
 - Suggested hashtags: #HealthPlans #FamilyProtection #IsaacPlans #BenefitsPlans #FinalExpensePlans
@@ -172,6 +177,9 @@ INSTRUCTIONS:
 - NEVER use the word "insurance", "insured", "insurer", or "policy" — use "plan", "coverage", "benefits", "protection" instead
 - NEVER use "seguro" in Spanish when you can naturally use "plan", "beneficios", or "protección" instead
 - Lead with emotions and outcomes — protection, peace of mind, family security, not product features
+- CTA LINK RULE (CRITICAL — follow exactly per platform):
+  • Facebook, Threads, Google Business, YouTube: if a CTA LINK is provided you MUST include the full URL at the end of the "cta" field. Do not summarize or shorten it. Example: "Read the full guide: https://isaacplans.com/en/blog/my-post"
+  • Instagram, TikTok: links in captions are NOT clickable on these platforms. Do NOT include a URL. Use "→ Link in bio" or "comment INFO" as the CTA instead.
 - Every "fullPost" must be the complete assembled post ready to paste into a scheduling tool:
   hook + two newlines + body + two newlines + cta + (for platforms with hashtags: two newlines + hashtags joined with spaces, each prefixed with #)
 - characterCount should reflect the length of fullPost
