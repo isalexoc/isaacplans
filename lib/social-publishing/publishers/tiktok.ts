@@ -43,10 +43,10 @@ export async function publishToTikTok(
   if (initData.error?.code && initData.error.code !== "ok") {
     const msg = initData.error.message ?? "TikTok post failed";
     if (initData.error.code === "access_token_invalid" || initData.error.code === "scope_not_authorized") {
-      return {
-        success: false,
-        error: "TikTok publishing is pending developer app approval. The app needs to be approved by TikTok before publishing is enabled.",
-      };
+      return { success: false, error: "TikTok: app not yet approved for publishing. Submit an audit in the TikTok developer portal." };
+    }
+    if (initData.error.code === "unaudited_client_can_only_post_to_private_accounts") {
+      return { success: false, error: "TikTok: your app is unaudited — set your TikTok account to Private in the TikTok app, or submit an audit at developers.tiktok.com to enable public posting." };
     }
     return { success: false, error: `TikTok error [${initData.error.code}]: ${msg}` };
   }
