@@ -5,7 +5,7 @@ export function buildMetaAuthUrl(state: string): string {
   const params = new URLSearchParams({
     client_id:     process.env.META_APP_ID!,
     redirect_uri:  process.env.META_OAUTH_REDIRECT_URI!,
-    scope:         "pages_show_list,pages_manage_posts,pages_read_engagement,business_management,instagram_basic,instagram_content_publish",
+    scope:         "pages_show_list,pages_manage_posts,pages_read_engagement,business_management,instagram_content_publish",
     state,
     response_type: "code",
   });

@@ -18,6 +18,7 @@ interface Props {
   squareImageUrl?: string;
   verticalImageUrl?: string;
   locale: string;
+  publishedPlatforms?: string[];
 }
 
 interface ConnectionInfo {
@@ -41,7 +42,8 @@ const PLATFORM_ICONS: Record<SocialPlatform, string> = {
   tiktok:          "🎵",
 };
 
-export function PublishToSocialSection({ sanityPostId, copies, squareImageUrl, verticalImageUrl, locale }: Props) {
+export function PublishToSocialSection({ sanityPostId, copies, squareImageUrl, verticalImageUrl, locale, publishedPlatforms = [] }: Props) {
+  const alreadyPublished = new Set(publishedPlatforms);
   const [connections, setConnections] = useState<ConnectionInfo[]>([]);
   const [loadingConns, setLoadingConns] = useState(true);
   const [platformStates, setPlatformStates] = useState<Record<SocialPlatform, PlatformPublishState>>(
@@ -231,7 +233,7 @@ export function PublishToSocialSection({ sanityPostId, copies, squareImageUrl, v
                 {(state === "idle" || state === "error") && (
                   <Button size="sm" variant="outline" onClick={() => handlePublish(platform)}>
                     {scheduleState.mode === "now"
-                      ? <><Send className="h-3 w-3 mr-1" />Publish</>
+                      ? <><Send className="h-3 w-3 mr-1" />{alreadyPublished.has(platform) ? "Republish" : "Publish"}</>
                       : <><Clock className="h-3 w-3 mr-1" />Schedule</>
                     }
                   </Button>

@@ -12,6 +12,7 @@ const HISTORY_QUERY = `*[_type == "socialPost"] | order(createdAt desc) [0...50]
   createdAt,
   "platforms": generatedCopies[].platform,
   "locales": generatedCopies[].locale,
+  publishedPlatforms,
   squareImageUrl,
 }`;
 
@@ -25,6 +26,7 @@ interface SocialPostListItem {
   createdAt?: string;
   platforms?: string[];
   locales?: string[];
+  publishedPlatforms?: string[];
   squareImageUrl?: string;
 }
 
@@ -52,6 +54,7 @@ export default async function SocialHistoryPage() {
       <div className="space-y-3">
         {posts.map((post) => {
           const uniquePlatforms = [...new Set(post.platforms ?? [])];
+          const publishedSet = new Set(post.publishedPlatforms ?? []);
           return (
             <a
               key={post._id}
@@ -104,7 +107,14 @@ export default async function SocialHistoryPage() {
 
               <div className="flex items-center gap-1 flex-wrap">
                 {uniquePlatforms.map((p) => (
-                  <span key={p} className="bg-muted text-muted-foreground text-xs px-2 py-0.5 rounded capitalize">
+                  <span
+                    key={p}
+                    className={`text-xs px-2 py-0.5 rounded capitalize ${
+                      publishedSet.has(p)
+                        ? "bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400 font-medium"
+                        : "bg-muted text-muted-foreground"
+                    }`}
+                  >
                     {p.replace("_", " ")}
                   </span>
                 ))}

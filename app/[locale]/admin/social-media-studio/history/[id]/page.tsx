@@ -284,6 +284,7 @@ export default async function SocialPostDetailPage({
           squareImageUrl={post.squareImageUrl}
           verticalImageUrl={post.verticalImageUrl}
           locale={locale}
+          publishedPlatforms={post.publishedPlatforms ?? []}
         />
       </section>
     </div>
