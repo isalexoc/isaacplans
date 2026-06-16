@@ -7,6 +7,7 @@ import { buildMetaAuthUrl } from "@/lib/social-publishing/oauth/meta";
 import { buildThreadsAuthUrl } from "@/lib/social-publishing/oauth/threads";
 import { buildGoogleAuthUrl } from "@/lib/social-publishing/oauth/google";
 import { buildTikTokAuthUrl, generatePkce } from "@/lib/social-publishing/oauth/tiktok";
+import { buildYouTubeAuthUrl } from "@/lib/social-publishing/oauth/youtube";
 
 export async function GET(
   req: NextRequest,
@@ -32,6 +33,8 @@ export async function GET(
     const pkce = generatePkce();
     codeVerifier = pkce.codeVerifier;
     url = buildTikTokAuthUrl(state, pkce.codeChallenge);
+  } else if (platform === "youtube") {
+    url = buildYouTubeAuthUrl(state);
   } else {
     return NextResponse.json({ error: `Unknown platform: ${platform}` }, { status: 400 });
   }

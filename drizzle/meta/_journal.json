@@ -43,6 +43,13 @@
       "when": 1781485259515,
       "tag": "0005_plain_hellfire_club",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1781645524152,
+      "tag": "0006_ancient_toad",
+      "breakpoints": true
     }
   ]
 }

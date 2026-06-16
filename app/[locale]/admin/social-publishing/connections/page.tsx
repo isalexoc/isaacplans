@@ -27,6 +27,7 @@ const PLATFORM_ICONS: Record<SocialPlatform, string> = {
   threads:         "🧵",
   google_business: "🔍",
   tiktok:          "🎵",
+  youtube:         "▶️",
 };
 
 const PLATFORM_CONNECT_NOTE: Record<SocialPlatform, string> = {
@@ -35,6 +36,7 @@ const PLATFORM_CONNECT_NOTE: Record<SocialPlatform, string> = {
   threads:         "Requires a separate Threads developer app enrollment.",
   google_business: "Uses your Google Cloud project. Connects to your GBP location.",
   tiktok:          "TikTok publishing requires developer app approval.",
+  youtube:         "Posts as YouTube Shorts. Provide a 9:16 video URL at publish time.",
 };
 
 export default function SocialConnectionsPage() {

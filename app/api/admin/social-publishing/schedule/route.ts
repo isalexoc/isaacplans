@@ -22,6 +22,7 @@ export async function POST(req: NextRequest) {
     locale: string;
     scheduledFor: string; // ISO
     imageUrl?: string;
+    videoUrl?: string;
     copySnapshot?: SocialPostCopy;
   };
 
@@ -42,6 +43,7 @@ export async function POST(req: NextRequest) {
     locale:          body.locale ?? "en",
     scheduledFor,
     imageUrl:        body.imageUrl,
+    videoUrl:        body.videoUrl,
     copySnapshot:    body.copySnapshot,
   });
 

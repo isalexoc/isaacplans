@@ -5,6 +5,7 @@ import { socialPlatformConnections } from "@/lib/db/schema";
 import { encryptToken, decryptToken } from "./token-crypto";
 import { refreshGoogleToken } from "./oauth/google";
 import { refreshTikTokToken } from "./oauth/tiktok";
+import { refreshYouTubeToken } from "./oauth/youtube";
 import type { SocialPlatform, SocialConnection } from "./types";
 
 function rowToConnection(row: typeof socialPlatformConnections.$inferSelect): SocialConnection {
@@ -121,6 +122,10 @@ export async function refreshTokenIfNeeded(conn: SocialConnection): Promise<Soci
     newAccess  = result.accessToken;
     newExpires = result.accessExpiresAt;
     newRefresh = result.refreshToken;
+  } else if (conn.platform === "youtube" && conn.refreshToken) {
+    const result = await refreshYouTubeToken(conn.refreshToken);
+    newAccess  = result.accessToken;
+    newExpires = result.expiresAt;
   } else {
     return conn; // can't refresh — caller will deal with the expired token
   }

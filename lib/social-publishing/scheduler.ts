@@ -21,6 +21,7 @@ function rowToScheduled(row: typeof socialScheduledPosts.$inferSelect): Schedule
     attemptCount:    row.attemptCount,
     nextRetryAt:     row.nextRetryAt ?? null,
     imageUrl:        row.imageUrl ?? null,
+    videoUrl:        row.videoUrl ?? null,
     createdAt:       row.createdAt,
     updatedAt:       row.updatedAt,
   };
@@ -34,6 +35,7 @@ export async function createScheduledPost(params: {
   locale: string;
   scheduledFor: Date;
   imageUrl?: string;
+  videoUrl?: string;
   copySnapshot?: SocialPostCopy;
 }): Promise<ScheduledPost> {
   const now = new Date();
@@ -53,6 +55,7 @@ export async function createScheduledPost(params: {
     nextRetryAt:     null,
     copySnapshot:    params.copySnapshot ?? null,
     imageUrl:        params.imageUrl ?? null,
+    videoUrl:        params.videoUrl ?? null,
     createdAt:       now,
     updatedAt:       now,
   };

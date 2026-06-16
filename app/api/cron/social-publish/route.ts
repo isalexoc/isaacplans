@@ -18,8 +18,10 @@ export async function GET(req: NextRequest) {
 
     const caption  = (post as unknown as { copySnapshot?: SocialPostCopy }).copySnapshot?.fullPost ?? "";
     const imageUrl = post.imageUrl ?? "";
+    const videoUrl = post.videoUrl ?? undefined;
 
-    if (!caption || !imageUrl) {
+    const isYouTube = post.platform === "youtube";
+    if (!caption || (!isYouTube && !imageUrl)) {
       await markFailed(post.id, "Missing caption or image URL in snapshot", post.attemptCount);
       results.push({ id: post.id, platform: post.platform, success: false, error: "Missing data" });
       continue;
@@ -31,6 +33,7 @@ export async function GET(req: NextRequest) {
       platform:    post.platform as SocialPlatform,
       caption,
       imageUrl,
+      videoUrl,
     });
 
     if (result.success) {

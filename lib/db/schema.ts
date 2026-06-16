@@ -245,6 +245,7 @@ export const socialScheduledPosts = pgTable("social_scheduled_posts", {
   nextRetryAt:     timestamp("next_retry_at"),
   copySnapshot:    jsonb("copy_snapshot"),   // SocialPostCopy snapshot
   imageUrl:        text("image_url"),
+  videoUrl:        text("video_url"),
   createdAt:       timestamp("created_at").defaultNow().notNull(),
   updatedAt:       timestamp("updated_at").defaultNow().notNull(),
 }, (t) => ({

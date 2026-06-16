@@ -24,6 +24,7 @@ interface PublishJobParams {
   platform: SocialPlatform;
   caption: string;
   imageUrl: string;
+  videoUrl?: string;
   scheduledPostId?: string; // present for scheduled-post runs
 }
 
@@ -76,7 +77,7 @@ export async function runPublishJob(params: PublishJobParams): Promise<PublishJo
     }
   }
 
-  const result = await publishToPlatform(freshConn, params.caption, params.imageUrl);
+  const result = await publishToPlatform(freshConn, params.caption, params.imageUrl, params.videoUrl);
 
   if (result.success && params.sanityPostId) {
     try {

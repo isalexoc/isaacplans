@@ -1,0 +1,1 @@
+ALTER TABLE "social_scheduled_posts" ADD COLUMN "video_url" text;

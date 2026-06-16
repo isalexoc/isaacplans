@@ -14,6 +14,10 @@ import {
   exchangeTikTokCode,
   getTikTokDisplayName,
 } from "@/lib/social-publishing/oauth/tiktok";
+import {
+  exchangeYouTubeCode,
+  getYouTubeChannelInfo,
+} from "@/lib/social-publishing/oauth/youtube";
 import { encryptToken } from "@/lib/social-publishing/token-crypto";
 import type { SocialPlatform } from "@/lib/social-publishing/types";
 
@@ -147,6 +151,20 @@ export async function GET(
         platformUserId:      openId,
         platformAccountName: displayName,
         platformMetadata:    { openId, displayName },
+      });
+
+    } else if (platform === "youtube") {
+      const { accessToken, refreshToken, expiresAt } = await exchangeYouTubeCode(code);
+      const { channelId, channelTitle } = await getYouTubeChannelInfo(accessToken);
+      await upsertConnection({
+        userId,
+        platform:            "youtube",
+        accessToken,
+        refreshToken,
+        tokenExpiresAt:      expiresAt,
+        platformUserId:      channelId,
+        platformAccountName: channelTitle,
+        platformMetadata:    { channelId, channelTitle },
       });
 
     } else {

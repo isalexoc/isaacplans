@@ -12,10 +12,14 @@ export async function POST(req: NextRequest) {
     platform: SocialPlatform;
     caption: string;
     imageUrl: string;
+    videoUrl?: string;
   };
 
-  if (!body.sanityPostId || !body.platform || !body.caption || !body.imageUrl) {
+  if (!body.sanityPostId || !body.platform || !body.caption) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+  }
+  if (body.platform !== "youtube" && !body.imageUrl) {
+    return NextResponse.json({ error: "imageUrl is required for non-YouTube platforms" }, { status: 400 });
   }
 
   const result = await runPublishJob({
@@ -23,7 +27,8 @@ export async function POST(req: NextRequest) {
     sanityPostId: body.sanityPostId,
     platform:     body.platform,
     caption:      body.caption,
-    imageUrl:     body.imageUrl,
+    imageUrl:     body.imageUrl ?? "",
+    videoUrl:     body.videoUrl,
   });
 
   if (!result.success) {

@@ -40,6 +40,7 @@ const PLATFORM_ICONS: Record<SocialPlatform, string> = {
   threads:         "🧵",
   google_business: "🔍",
   tiktok:          "🎵",
+  youtube:         "▶️",
 };
 
 export function PublishToSocialSection({ sanityPostId, copies, squareImageUrl, verticalImageUrl, locale, publishedPlatforms = [] }: Props) {
@@ -50,6 +51,7 @@ export function PublishToSocialSection({ sanityPostId, copies, squareImageUrl, v
     {} as Record<SocialPlatform, PlatformPublishState>
   );
   const [platformErrors, setPlatformErrors] = useState<Partial<Record<SocialPlatform, string>>>({});
+  const [youtubeVideoUrl, setYoutubeVideoUrl] = useState("");
   const [scheduleState, setScheduleState] = useState<ScheduleState>({
     mode: "now",
     scheduledFor: new Date(Date.now() + 60 * 60 * 1000).toISOString().slice(0, 16),
@@ -81,7 +83,12 @@ export function PublishToSocialSection({ sanityPostId, copies, squareImageUrl, v
   async function publishNow(platform: SocialPlatform) {
     const caption  = getCaptionForPlatform(platform);
     const imageUrl = getImageForPlatform(platform);
-    if (!caption || !imageUrl) {
+    if (platform === "youtube") {
+      if (!caption || !youtubeVideoUrl) {
+        setPlatformErrors((prev) => ({ ...prev, [platform]: "Paste a video URL above before publishing to YouTube" }));
+        return;
+      }
+    } else if (!caption || !imageUrl) {
       setPlatformErrors((prev) => ({ ...prev, [platform]: "Missing copy or image for this platform" }));
       return;
     }
@@ -90,10 +97,12 @@ export function PublishToSocialSection({ sanityPostId, copies, squareImageUrl, v
     setPlatformErrors((prev) => { const n = { ...prev }; delete n[platform]; return n; });
 
     try {
+      const body: Record<string, string> = { sanityPostId, platform, caption, imageUrl };
+      if (platform === "youtube") body.videoUrl = youtubeVideoUrl;
       const res = await fetch("/api/admin/social-publishing/publish", {
         method:  "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sanityPostId, platform, caption, imageUrl }),
+        body: JSON.stringify(body),
       });
       const contentType = res.headers.get("content-type") ?? "";
       if (!contentType.includes("application/json")) {
@@ -115,7 +124,12 @@ export function PublishToSocialSection({ sanityPostId, copies, squareImageUrl, v
   async function schedulePost(platform: SocialPlatform) {
     const caption  = getCaptionForPlatform(platform);
     const imageUrl = getImageForPlatform(platform);
-    if (!caption || !imageUrl) {
+    if (platform === "youtube") {
+      if (!caption || !youtubeVideoUrl) {
+        setPlatformErrors((prev) => ({ ...prev, [platform]: "Paste a video URL above before scheduling to YouTube" }));
+        return;
+      }
+    } else if (!caption || !imageUrl) {
       setPlatformErrors((prev) => ({ ...prev, [platform]: "Missing copy or image" }));
       return;
     }
@@ -123,18 +137,20 @@ export function PublishToSocialSection({ sanityPostId, copies, squareImageUrl, v
     setPlatformState(platform, "publishing");
 
     try {
+      const scheduleBody: Record<string, unknown> = {
+        sanityPostId,
+        sanityPostTitle: copies[0]?.hook?.slice(0, 80) ?? sanityPostId,
+        platform,
+        locale,
+        scheduledFor: new Date(scheduleState.scheduledFor).toISOString(),
+        imageUrl,
+        copySnapshot: copies.find((c) => c.platform === platform && c.locale === locale),
+      };
+      if (platform === "youtube") scheduleBody.videoUrl = youtubeVideoUrl;
       const res = await fetch("/api/admin/social-publishing/schedule", {
         method:  "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          sanityPostId,
-          sanityPostTitle: copies[0]?.hook?.slice(0, 80) ?? sanityPostId,
-          platform,
-          locale,
-          scheduledFor: new Date(scheduleState.scheduledFor).toISOString(),
-          imageUrl,
-          copySnapshot: copies.find((c) => c.platform === platform && c.locale === locale),
-        }),
+        body: JSON.stringify(scheduleBody),
       });
       const contentType = res.headers.get("content-type") ?? "";
       if (!contentType.includes("application/json")) {
@@ -211,6 +227,20 @@ export function PublishToSocialSection({ sanityPostId, copies, squareImageUrl, v
           />
         )}
       </div>
+
+      {/* YouTube video URL input — only shown when YouTube is connected */}
+      {connectedPlatforms.has("youtube") && (
+        <div className="flex flex-col gap-1">
+          <label className="text-xs font-medium text-muted-foreground">▶️ YouTube video URL (9:16 mp4)</label>
+          <input
+            type="url"
+            placeholder="https://res.cloudinary.com/…/video.mp4"
+            value={youtubeVideoUrl}
+            onChange={(e) => setYoutubeVideoUrl(e.target.value)}
+            className="border rounded-md px-3 py-1.5 text-sm w-full"
+          />
+        </div>
+      )}
 
       {/* Platform rows */}
       <div className="flex flex-col gap-2">

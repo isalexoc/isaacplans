@@ -3,13 +3,15 @@ import { publishToInstagram } from "./instagram";
 import { publishToThreads } from "./threads";
 import { publishToGoogleBusiness } from "./google-business";
 import { publishToTikTok } from "./tiktok";
+import { publishToYouTube } from "./youtube";
 import type { SocialConnection, PublishResult } from "../types";
-import type { FacebookMetadata, InstagramMetadata, ThreadsMetadata, GoogleBusinessMetadata, TikTokMetadata } from "../types";
+import type { FacebookMetadata, InstagramMetadata, ThreadsMetadata, GoogleBusinessMetadata, TikTokMetadata, YoutubeMetadata } from "../types";
 
 export async function publishToPlatform(
   conn: SocialConnection,
   caption: string,
-  imageUrl: string
+  imageUrl: string,
+  videoUrl?: string
 ): Promise<PublishResult> {
   switch (conn.platform) {
     case "facebook": {
@@ -43,6 +45,12 @@ export async function publishToPlatform(
       const meta = conn.platformMetadata as TikTokMetadata | null;
       const openId = meta?.openId ?? conn.platformUserId ?? "";
       return publishToTikTok(openId, conn.accessToken, caption, imageUrl);
+    }
+
+    case "youtube": {
+      const meta = conn.platformMetadata as YoutubeMetadata | null;
+      const channelId = meta?.channelId ?? conn.platformUserId ?? "";
+      return publishToYouTube(channelId, conn.accessToken, caption, videoUrl ?? "");
     }
 
     default:

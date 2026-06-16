@@ -24,6 +24,7 @@ const PLATFORM_EMOJI: Record<SocialPlatform, string> = {
   threads:         "🧵",
   google_business: "🔍",
   tiktok:          "🎵",
+  youtube:         "▶️",
 };
 
 function getDaysInMonth(year: number, month: number) {

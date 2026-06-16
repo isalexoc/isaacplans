@@ -3,7 +3,8 @@ export type SocialPlatform =
   | "instagram"
   | "threads"
   | "google_business"
-  | "tiktok";
+  | "tiktok"
+  | "youtube";
 
 export const ALL_SOCIAL_PLATFORMS: SocialPlatform[] = [
   "facebook",
@@ -11,6 +12,7 @@ export const ALL_SOCIAL_PLATFORMS: SocialPlatform[] = [
   "threads",
   "google_business",
   "tiktok",
+  "youtube",
 ];
 
 export const SOCIAL_PLATFORM_LABELS: Record<SocialPlatform, string> = {
@@ -19,6 +21,7 @@ export const SOCIAL_PLATFORM_LABELS: Record<SocialPlatform, string> = {
   threads:         "Threads",
   google_business: "Google Business",
   tiktok:          "TikTok",
+  youtube:         "YouTube",
 };
 
 // ─── Platform metadata shapes ────────────────────────────────────────────────
@@ -49,12 +52,18 @@ export type TikTokMetadata = {
   displayName: string;
 };
 
+export type YoutubeMetadata = {
+  channelId: string;
+  channelTitle: string;
+};
+
 export type PlatformMetadata =
   | FacebookMetadata
   | InstagramMetadata
   | ThreadsMetadata
   | GoogleBusinessMetadata
-  | TikTokMetadata;
+  | TikTokMetadata
+  | YoutubeMetadata;
 
 // ─── Connection ───────────────────────────────────────────────────────────────
 
@@ -92,6 +101,7 @@ export interface ScheduledPost {
   attemptCount: number;
   nextRetryAt: Date | null;
   imageUrl: string | null;
+  videoUrl: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
