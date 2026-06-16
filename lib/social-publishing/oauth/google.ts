@@ -1,7 +1,9 @@
 const BASE  = "https://accounts.google.com/o/oauth2/v2/auth";
 const TOKEN = "https://oauth2.googleapis.com/token";
-const GBP   = "https://mybusinessaccountmanagement.googleapis.com/v1";
-const LOCS  = "https://mybusinessbusinessinformation.googleapis.com/v1";
+// Use the v4 API for account/location lookups — the newer split APIs
+// (mybusinessaccountmanagement / mybusinessbusinessinformation) require
+// explicit allowlisting and have a 0 QPM quota until approved.
+const MYB   = "https://mybusiness.googleapis.com/v4";
 
 export function buildGoogleAuthUrl(state: string): string {
   const params = new URLSearchParams({
@@ -69,7 +71,7 @@ export async function getGbpLocation(accessToken: string): Promise<{
   locationId: string;
   locationName: string;
 }> {
-  const accountsRes = await fetch(`${GBP}/accounts`, {
+  const accountsRes = await fetch(`${MYB}/accounts`, {
     headers: { Authorization: `Bearer ${accessToken}` },
   });
   const accountsData = await accountsRes.json();
@@ -79,7 +81,7 @@ export async function getGbpLocation(accessToken: string): Promise<{
   const account = accountsData.accounts[0];
   const accountId = account.name; // e.g. "accounts/123"
 
-  const locsRes = await fetch(`${LOCS}/${accountId}/locations?readMask=name,title`, {
+  const locsRes = await fetch(`${MYB}/${accountId}/locations`, {
     headers: { Authorization: `Bearer ${accessToken}` },
   });
   const locsData = await locsRes.json();
@@ -89,7 +91,7 @@ export async function getGbpLocation(accessToken: string): Promise<{
   const loc = locsData.locations[0];
   return {
     accountId,
-    locationId:   loc.name,  // e.g. "accounts/123/locations/456"
-    locationName: loc.title ?? loc.name,
+    locationId:   loc.name,           // e.g. "accounts/123/locations/456"
+    locationName: loc.locationName ?? loc.name,
   };
 }
