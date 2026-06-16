@@ -1,10 +1,11 @@
 import { eq } from "drizzle-orm";
 import { createClient } from "next-sanity";
 import { db } from "@/lib/db";
-import { socialScheduledPosts } from "@/lib/db/schema";
+import { socialPlatformConnections, socialScheduledPosts } from "@/lib/db/schema";
 import { getConnection, refreshTokenIfNeeded } from "./connection-manager";
+import { getGbpLocation } from "./oauth/google";
 import { publishToPlatform } from "./publishers";
-import type { SocialPlatform } from "./types";
+import type { SocialPlatform, GoogleBusinessMetadata } from "./types";
 
 function getSanityWriteClient() {
   if (!process.env.SANITY_API_WRITE_TOKEN) return null;
@@ -44,6 +45,31 @@ export async function runPublishJob(params: PublishJobParams): Promise<PublishJo
   } catch (err) {
     console.error(`[publish-job] Token refresh failed for ${params.platform}:`, err);
     // Continue with existing token; publish will return an auth error if it's expired
+  }
+
+  // If the GBP location was not resolved during OAuth, attempt to resolve it now
+  if (params.platform === "google_business") {
+    const meta = freshConn.platformMetadata as GoogleBusinessMetadata | null;
+    const locationId = meta?.locationId ?? freshConn.platformUserId ?? "";
+    if (!locationId || locationId === "pending" || (meta as Record<string, unknown> | null)?.locationPending) {
+      try {
+        const loc = await getGbpLocation(freshConn.accessToken);
+        await db
+          .update(socialPlatformConnections)
+          .set({
+            platformUserId:      loc.locationId,
+            platformAccountName: loc.locationName,
+            platformMetadata:    loc,
+            updatedAt:           new Date(),
+          })
+          .where(eq(socialPlatformConnections.id, freshConn.id));
+        freshConn = { ...freshConn, platformUserId: loc.locationId, platformAccountName: loc.locationName, platformMetadata: loc };
+        console.log("[publish-job] Resolved pending GBP location:", loc.locationId);
+      } catch (err) {
+        console.error("[publish-job] Failed to resolve GBP location:", err);
+        return { success: false, error: "Could not find your Google Business location. Please disconnect and reconnect in Connections." };
+      }
+    }
   }
 
   const result = await publishToPlatform(freshConn, params.caption, params.imageUrl);
