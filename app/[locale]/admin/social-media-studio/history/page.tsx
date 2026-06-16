@@ -2,6 +2,24 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { client } from "@/sanity/lib/client";
 
+const PLATFORM_ICONS: Record<string, string> = {
+  facebook:        "🔵",
+  instagram:       "📷",
+  threads:         "🧵",
+  google_business: "🔍",
+  tiktok:          "🎵",
+  youtube:         "▶️",
+};
+
+const PLATFORM_LABELS: Record<string, string> = {
+  facebook:        "Facebook",
+  instagram:       "Instagram",
+  threads:         "Threads",
+  google_business: "Google Business",
+  tiktok:          "TikTok",
+  youtube:         "YouTube",
+};
+
 const HISTORY_QUERY = `*[_type == "socialPost"] | order(createdAt desc) [0...50] {
   _id,
   sourceType,
@@ -105,19 +123,24 @@ export default async function SocialHistoryPage() {
                 )}
               </div>
 
-              <div className="flex items-center gap-1 flex-wrap">
-                {uniquePlatforms.map((p) => (
-                  <span
-                    key={p}
-                    className={`text-xs px-2 py-0.5 rounded capitalize ${
-                      publishedSet.has(p)
-                        ? "bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400 font-medium"
-                        : "bg-muted text-muted-foreground"
-                    }`}
-                  >
-                    {p.replace("_", " ")}
-                  </span>
-                ))}
+              <div className="flex items-center gap-1 flex-wrap justify-end">
+                {uniquePlatforms.map((p) => {
+                  const published = publishedSet.has(p);
+                  return (
+                    <span
+                      key={p}
+                      title={`${PLATFORM_LABELS[p] ?? p} — ${published ? "published" : "not published"}`}
+                      className={`inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full border ${
+                        published
+                          ? "bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400 border-green-300 dark:border-green-700 font-medium"
+                          : "bg-muted text-muted-foreground border-transparent opacity-40"
+                      }`}
+                    >
+                      <span>{PLATFORM_ICONS[p] ?? "📣"}</span>
+                      {published && <span>✓</span>}
+                    </span>
+                  );
+                })}
               </div>
 
               <span className="text-sm text-blue-500 flex-shrink-0">View →</span>
