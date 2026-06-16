@@ -60,6 +60,7 @@ const PLATFORM_LABELS: Record<string, string> = {
   threads:         "Threads",
   google_business: "Google Business",
   tiktok:          "TikTok",
+  youtube:         "YouTube",
 };
 
 const PLATFORM_ICONS: Record<string, string> = {
@@ -68,6 +69,7 @@ const PLATFORM_ICONS: Record<string, string> = {
   threads:         "🧵",
   google_business: "🔍",
   tiktok:          "🎵",
+  youtube:         "▶️",
 };
 
 export default async function SocialPostDetailPage({

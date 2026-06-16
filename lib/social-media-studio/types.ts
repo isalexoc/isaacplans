@@ -5,7 +5,8 @@ export type SocialPlatform =
   | "instagram"
   | "tiktok"
   | "threads"
-  | "google_business";
+  | "google_business"
+  | "youtube";
 
 export type SocialLocale = "en" | "es";
 
@@ -21,6 +22,7 @@ export const PLATFORM_COPY_LIMITS: Record<SocialPlatform, { min: number; max: nu
   tiktok:          { min: 80,  max: 150 },
   threads:         { min: 150, max: 400 },
   google_business: { min: 200, max: 350 },
+  youtube:         { min: 80,  max: 200 },
 };
 
 export const PLATFORM_LABELS: Record<SocialPlatform, string> = {
@@ -29,6 +31,7 @@ export const PLATFORM_LABELS: Record<SocialPlatform, string> = {
   tiktok:          "TikTok",
   threads:         "Threads",
   google_business: "Google Business",
+  youtube:         "YouTube",
 };
 
 export const ALL_PLATFORMS: SocialPlatform[] = [
@@ -37,6 +40,7 @@ export const ALL_PLATFORMS: SocialPlatform[] = [
   "tiktok",
   "threads",
   "google_business",
+  "youtube",
 ];
 
 export const ALL_LOCALES: SocialLocale[] = ["en", "es"];

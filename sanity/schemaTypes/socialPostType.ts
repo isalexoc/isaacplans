@@ -88,7 +88,7 @@ export const socialPostType = defineType({
               name: "platform",
               title: "Platform",
               type: "string",
-              options: { list: ["facebook", "instagram", "tiktok", "threads", "google_business"] },
+              options: { list: ["facebook", "instagram", "tiktok", "threads", "google_business", "youtube"] },
             },
             {
               name: "locale",

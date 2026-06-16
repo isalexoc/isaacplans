@@ -116,6 +116,22 @@ GOOGLE BUSINESS:
   "Looking for affordable health coverage for your family? We compare state-approved plans from 30+ carriers to find the right fit. Free consultation — call Isaac today."
   "Final expense plans start at just a few dollars a day. Protect your family from unexpected costs. No medical exam required for many plans. Call us for a free quote."
   `.trim(),
+
+  youtube: `
+YOUTUBE SHORTS:
+- Target length: 80–200 characters total (this is the video description — short and punchy)
+- This is a caption for a short-form vertical video (YouTube Short), NOT the video content itself
+- Use 1–2 sentences max — create curiosity to watch, like, and subscribe
+- The video does the storytelling; this text hooks the viewer before and after watching
+- Tone: casual, direct, slightly more polished than TikTok — YouTube audience expects slightly more value signals
+- Do NOT include #Shorts — it is added automatically by the publisher
+- Hashtags: 3–5 at the end — NO hashtag should contain the word "insurance"
+- Suggested hashtags: #HealthPlans #FamilyProtection #IsaacPlans #BenefitsPlans #FinalExpensePlans
+- Example styles:
+  "Most families qualify for this state-approved plan — and it costs less than your phone bill. 👀 #HealthPlans #FamilyProtection #IsaacPlans"
+  "The one thing I wish every family knew before open enrollment. 💙 #BenefitsPlans #IsaacPlans"
+  "Nobody told you about this option. I will. Watch to the end. #FamilyProtection #HealthPlans"
+  `.trim(),
 };
 
 export function buildCopyPrompt(
