@@ -65,15 +65,33 @@ export async function refreshGoogleToken(refreshToken: string): Promise<{
   };
 }
 
-/** Get the first GBP account + first location associated with the token. */
+/** Get the first GBP account + first location associated with the token.
+ *
+ * Set GOOGLE_BUSINESS_LOCATION_ID in your env to bypass the API lookup
+ * (needed until the project is allowlisted for the Account Management API).
+ * Format: "accounts/{accountId}/locations/{locationId}"
+ */
 export async function getGbpLocation(accessToken: string): Promise<{
   accountId: string;
   locationId: string;
   locationName: string;
 }> {
+  const envLocationId = process.env.GOOGLE_BUSINESS_LOCATION_ID;
+  if (envLocationId) {
+    const accountId = envLocationId.split("/locations/")[0] ?? envLocationId;
+    return {
+      accountId,
+      locationId:   envLocationId,
+      locationName: process.env.GOOGLE_BUSINESS_LOCATION_NAME ?? "Isaac Plans Insurance",
+    };
+  }
+
   const accountsRes = await fetch(`${MYB}/accounts`, {
     headers: { Authorization: `Bearer ${accessToken}` },
   });
+  if (!accountsRes.headers.get("content-type")?.includes("application/json")) {
+    throw new Error(`GBP accounts API returned HTTP ${accountsRes.status} (not JSON). Set GOOGLE_BUSINESS_LOCATION_ID env var to bypass.`);
+  }
   const accountsData = await accountsRes.json();
   if (accountsData.error) throw new Error(accountsData.error.message);
   if (!accountsData.accounts?.length) throw new Error("No Google Business accounts found");
@@ -84,6 +102,9 @@ export async function getGbpLocation(accessToken: string): Promise<{
   const locsRes = await fetch(`${MYB}/${accountId}/locations`, {
     headers: { Authorization: `Bearer ${accessToken}` },
   });
+  if (!locsRes.headers.get("content-type")?.includes("application/json")) {
+    throw new Error(`GBP locations API returned HTTP ${locsRes.status} (not JSON). Set GOOGLE_BUSINESS_LOCATION_ID env var to bypass.`);
+  }
   const locsData = await locsRes.json();
   if (locsData.error) throw new Error(locsData.error.message);
   if (!locsData.locations?.length) throw new Error("No Google Business locations found");
@@ -91,7 +112,7 @@ export async function getGbpLocation(accessToken: string): Promise<{
   const loc = locsData.locations[0];
   return {
     accountId,
-    locationId:   loc.name,           // e.g. "accounts/123/locations/456"
+    locationId:   loc.name,
     locationName: loc.locationName ?? loc.name,
   };
 }
