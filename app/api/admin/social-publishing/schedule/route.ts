@@ -4,6 +4,8 @@ import { createScheduledPost, listScheduledPosts } from "@/lib/social-publishing
 import type { SocialPlatform } from "@/lib/social-publishing/types";
 import type { SocialPostCopy } from "@/lib/social-media-studio/types";
 
+export const maxDuration = 300;
+
 export async function GET() {
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

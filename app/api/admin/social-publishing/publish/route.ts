@@ -3,6 +3,8 @@ import { auth } from "@clerk/nextjs/server";
 import { runPublishJob } from "@/lib/social-publishing/publish-job";
 import type { SocialPlatform } from "@/lib/social-publishing/types";
 
+export const maxDuration = 300;
+
 export async function POST(req: NextRequest) {
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
