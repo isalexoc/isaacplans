@@ -41,8 +41,9 @@ export async function runPublishJob(params: PublishJobParams): Promise<PublishJo
   let freshConn = conn;
   try {
     freshConn = await refreshTokenIfNeeded(conn);
-  } catch {
-    // Use existing token — publish attempt will surface the auth error
+  } catch (err) {
+    console.error(`[publish-job] Token refresh failed for ${params.platform}:`, err);
+    // Continue with existing token; publish will return an auth error if it's expired
   }
 
   const result = await publishToPlatform(freshConn, params.caption, params.imageUrl);

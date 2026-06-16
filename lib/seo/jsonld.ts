@@ -16,22 +16,13 @@ const PHONE = "+15404261804";
 const LOGO_URL = `${BASE_URL}/images/logo_ip.png`;
 
 /* ─────────────────────────  Social Media Links ─────────────────────── */
-const getSocialLinks = (locale: string) => {
-  const isES = locale === "es";
-  return {
-    facebook: isES
-      ? "https://www.facebook.com/isaacplanses"
-      : "https://www.facebook.com/isaacplansi",
-    instagram: isES
-      ? "https://www.instagram.com/isaacplans_es"
-      : "https://www.instagram.com/isalexoc",
-    youtube: isES
-      ? "https://www.youtube.com/@isaacplans_es"
-      : "https://www.youtube.com/@isaacplans",
-    linkedin: isES
-      ? "https://www.linkedin.com/in/isaacplans-es"
-      : "https://www.linkedin.com/in/isaacplans",
-  };
+const SOCIAL_LINKS = {
+  facebook:  "https://www.facebook.com/isaacplansi",
+  instagram: "https://www.instagram.com/isalexoc",
+  youtube:   "https://www.youtube.com/@isaacplans",
+  linkedin:  "https://www.linkedin.com/in/isaacplans",
+  tiktok:    "https://www.tiktok.com/@isaacplans.com",
+  threads:   "https://www.threads.com/@isalexoc",
 };
 
 /* Opening hours (7 days, 08–20) */
@@ -52,7 +43,6 @@ const weekdayHours: OpeningHoursSpecification = {
 
 /* ───────────── InsuranceAgency (Organization / LocalBusiness) ────── */
 export const getAgencyLd = (locale: string = "en"): WithContext<InsuranceAgency> => {
-  const socialLinks = getSocialLinks(locale);
   return {
   "@context": "https://schema.org",
   "@type": "InsuranceAgency",
@@ -101,10 +91,12 @@ export const getAgencyLd = (locale: string = "en"): WithContext<InsuranceAgency>
 
   /* Social links */
   sameAs: [
-    socialLinks.facebook,
-    socialLinks.instagram,
-    socialLinks.linkedin,
-    socialLinks.youtube,
+    SOCIAL_LINKS.facebook,
+    SOCIAL_LINKS.instagram,
+    SOCIAL_LINKS.linkedin,
+    SOCIAL_LINKS.youtube,
+    SOCIAL_LINKS.tiktok,
+    SOCIAL_LINKS.threads,
   ],
 
   /* Reference to person (no duplication) */
@@ -193,7 +185,6 @@ export const getRootBreadcrumbLd = (
 
 /* ───────────── Person (global) ───────────── */
 export const getIsaacPersonLd = (locale: string = "en"): WithContext<Person> => {
-  const socialLinks = getSocialLinks(locale);
   return {
   "@context": "https://schema.org",
   "@type": "Person",
@@ -210,10 +201,12 @@ export const getIsaacPersonLd = (locale: string = "en"): WithContext<Person> => 
   telephone: PHONE,
 
   sameAs: [
-    socialLinks.facebook,
-    socialLinks.instagram,
-    socialLinks.linkedin,
-    socialLinks.youtube,
+    SOCIAL_LINKS.facebook,
+    SOCIAL_LINKS.instagram,
+    SOCIAL_LINKS.linkedin,
+    SOCIAL_LINKS.youtube,
+    SOCIAL_LINKS.tiktok,
+    SOCIAL_LINKS.threads,
   ],
 
   knowsLanguage: ["English", "Spanish"],

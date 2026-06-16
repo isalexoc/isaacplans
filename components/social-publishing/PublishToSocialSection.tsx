@@ -89,17 +89,26 @@ export function PublishToSocialSection({ sanityPostId, copies, squareImageUrl, v
     setPlatformState(platform, "publishing");
     setPlatformErrors((prev) => { const n = { ...prev }; delete n[platform]; return n; });
 
-    const res = await fetch("/api/admin/social-publishing/publish", {
-      method:  "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ sanityPostId, platform, caption, imageUrl }),
-    });
-    const data = await res.json();
-    if (data.success) {
-      setPlatformState(platform, "success");
-    } else {
+    try {
+      const res = await fetch("/api/admin/social-publishing/publish", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sanityPostId, platform, caption, imageUrl }),
+      });
+      const contentType = res.headers.get("content-type") ?? "";
+      if (!contentType.includes("application/json")) {
+        throw new Error(`Server error (HTTP ${res.status})`);
+      }
+      const data = await res.json();
+      if (data.success) {
+        setPlatformState(platform, "success");
+      } else {
+        setPlatformState(platform, "error");
+        setPlatformErrors((prev) => ({ ...prev, [platform]: data.error ?? "Publish failed" }));
+      }
+    } catch (err) {
       setPlatformState(platform, "error");
-      setPlatformErrors((prev) => ({ ...prev, [platform]: data.error ?? "Publish failed" }));
+      setPlatformErrors((prev) => ({ ...prev, [platform]: err instanceof Error ? err.message : "Publish failed" }));
     }
   }
 
@@ -112,25 +121,35 @@ export function PublishToSocialSection({ sanityPostId, copies, squareImageUrl, v
     }
 
     setPlatformState(platform, "publishing");
-    const res = await fetch("/api/admin/social-publishing/schedule", {
-      method:  "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        sanityPostId,
-        sanityPostTitle: copies[0]?.hook?.slice(0, 80) ?? sanityPostId,
-        platform,
-        locale,
-        scheduledFor: new Date(scheduleState.scheduledFor).toISOString(),
-        imageUrl,
-        copySnapshot: copies.find((c) => c.platform === platform && c.locale === locale),
-      }),
-    });
-    const data = await res.json();
-    if (data.success) {
-      setPlatformState(platform, "scheduled");
-    } else {
+
+    try {
+      const res = await fetch("/api/admin/social-publishing/schedule", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sanityPostId,
+          sanityPostTitle: copies[0]?.hook?.slice(0, 80) ?? sanityPostId,
+          platform,
+          locale,
+          scheduledFor: new Date(scheduleState.scheduledFor).toISOString(),
+          imageUrl,
+          copySnapshot: copies.find((c) => c.platform === platform && c.locale === locale),
+        }),
+      });
+      const contentType = res.headers.get("content-type") ?? "";
+      if (!contentType.includes("application/json")) {
+        throw new Error(`Server error (HTTP ${res.status})`);
+      }
+      const data = await res.json();
+      if (data.success) {
+        setPlatformState(platform, "scheduled");
+      } else {
+        setPlatformState(platform, "error");
+        setPlatformErrors((prev) => ({ ...prev, [platform]: data.error ?? "Schedule failed" }));
+      }
+    } catch (err) {
       setPlatformState(platform, "error");
-      setPlatformErrors((prev) => ({ ...prev, [platform]: data.error ?? "Schedule failed" }));
+      setPlatformErrors((prev) => ({ ...prev, [platform]: err instanceof Error ? err.message : "Schedule failed" }));
     }
   }
 
