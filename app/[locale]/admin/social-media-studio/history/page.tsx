@@ -34,8 +34,6 @@ export default async function SocialHistoryPage() {
 
   const posts: SocialPostListItem[] = await client.fetch(HISTORY_QUERY);
 
-  const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID ?? "anetxoet";
-
   return (
     <div className="max-w-5xl mx-auto p-6">
       <div className="flex items-center justify-between mb-6">
@@ -55,9 +53,10 @@ export default async function SocialHistoryPage() {
         {posts.map((post) => {
           const uniquePlatforms = [...new Set(post.platforms ?? [])];
           return (
-            <div
+            <a
               key={post._id}
-              className="border border-border rounded-lg p-4 flex items-center gap-4 bg-card"
+              href={`/en/admin/social-media-studio/history/${post._id}`}
+              className="border border-border rounded-lg p-4 flex items-center gap-4 bg-card hover:bg-muted/50 transition-colors cursor-pointer"
             >
               {post.squareImageUrl ? (
                 <img
@@ -111,15 +110,8 @@ export default async function SocialHistoryPage() {
                 ))}
               </div>
 
-              <a
-                href={`https://www.sanity.io/manage/project/${projectId}/dataset/production/document/${post._id}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm text-blue-500 hover:underline flex-shrink-0"
-              >
-                View in Studio →
-              </a>
-            </div>
+              <span className="text-sm text-blue-500 flex-shrink-0">View →</span>
+            </a>
           );
         })}
       </div>
