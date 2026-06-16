@@ -247,6 +247,10 @@ export const routing = defineRouting({
       en: "/newsletter",
       es: "/boletín",
     },
+    "/admin": {
+      en: "/admin",
+      es: "/admin",
+    },
     "/admin/blog-generator": {
       en: "/admin/blog-generator",
       es: "/admin/blog-generator",
