@@ -68,7 +68,17 @@ export function PublishToSocialSection({ sanityPostId, copies, squareImageUrl, v
     const copy = copies.find((c) => c.platform === platform && c.locale === locale)
       ?? copies.find((c) => c.platform === platform && c.locale === "en")
       ?? copies.find((c) => c.platform === platform);
-    return copy?.fullPost ?? "";
+    if (copy) return copy.fullPost;
+    // For YouTube, fall back to TikTok or Instagram copy (old posts may lack a youtube entry)
+    if (platform === "youtube") {
+      const fallback =
+        copies.find((c) => c.platform === "tiktok" && c.locale === locale)
+        ?? copies.find((c) => c.platform === "tiktok")
+        ?? copies.find((c) => c.platform === "instagram" && c.locale === locale)
+        ?? copies.find((c) => c.platform === "instagram");
+      return fallback?.fullPost ?? "";
+    }
+    return "";
   }
 
   function getImageForPlatform(platform: SocialPlatform): string {
@@ -84,7 +94,7 @@ export function PublishToSocialSection({ sanityPostId, copies, squareImageUrl, v
     const caption  = getCaptionForPlatform(platform);
     const imageUrl = getImageForPlatform(platform);
     if (platform === "youtube") {
-      if (!caption || !youtubeVideoUrl) {
+      if (!youtubeVideoUrl) {
         setPlatformErrors((prev) => ({ ...prev, [platform]: "Paste a video URL above before publishing to YouTube" }));
         return;
       }
@@ -125,7 +135,7 @@ export function PublishToSocialSection({ sanityPostId, copies, squareImageUrl, v
     const caption  = getCaptionForPlatform(platform);
     const imageUrl = getImageForPlatform(platform);
     if (platform === "youtube") {
-      if (!caption || !youtubeVideoUrl) {
+      if (!youtubeVideoUrl) {
         setPlatformErrors((prev) => ({ ...prev, [platform]: "Paste a video URL above before scheduling to YouTube" }));
         return;
       }
