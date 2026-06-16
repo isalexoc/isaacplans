@@ -40,8 +40,8 @@ export default async function SocialHistoryPage() {
     <div className="max-w-5xl mx-auto p-6">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Content History</h1>
-          <p className="text-gray-500 text-sm">{posts.length} packages generated</p>
+          <h1 className="text-2xl font-bold text-foreground">Content History</h1>
+          <p className="text-muted-foreground text-sm">{posts.length} packages generated</p>
         </div>
         <a
           href="/en/admin/social-media-studio"
@@ -57,7 +57,7 @@ export default async function SocialHistoryPage() {
           return (
             <div
               key={post._id}
-              className="border border-gray-200 rounded-lg p-4 flex items-center gap-4 bg-white"
+              className="border border-border rounded-lg p-4 flex items-center gap-4 bg-card"
             >
               {post.squareImageUrl ? (
                 <img
@@ -66,34 +66,34 @@ export default async function SocialHistoryPage() {
                   className="w-16 h-16 rounded object-cover flex-shrink-0"
                 />
               ) : (
-                <div className="w-16 h-16 rounded bg-gray-100 flex-shrink-0" />
+                <div className="w-16 h-16 rounded bg-muted flex-shrink-0" />
               )}
 
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-gray-900 truncate">
+                <p className="font-medium text-card-foreground truncate">
                   {post.sourceTitle ?? "Untitled"}
                 </p>
                 <div className="flex items-center gap-2 mt-1 flex-wrap">
-                  <span className="text-xs text-gray-500 capitalize">
+                  <span className="text-xs text-muted-foreground capitalize">
                     {post.sourceType?.replace("_", " ")}
                   </span>
                   {post.sourceCategory && (
-                    <span className="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded">
+                    <span className="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 px-2 py-0.5 rounded">
                       {post.sourceCategory}
                     </span>
                   )}
                   <span
                     className={`text-xs px-2 py-0.5 rounded ${
                       post.status === "published"
-                        ? "bg-green-50 text-green-700"
-                        : "bg-gray-100 text-gray-600"
+                        ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"
+                        : "bg-muted text-muted-foreground"
                     }`}
                   >
                     {post.status ?? "draft"}
                   </span>
                 </div>
                 {post.createdAt && (
-                  <p className="text-xs text-gray-400 mt-1">
+                  <p className="text-xs text-muted-foreground mt-1">
                     {new Date(post.createdAt).toLocaleDateString("en-US", {
                       month: "short",
                       day: "numeric",
@@ -105,7 +105,7 @@ export default async function SocialHistoryPage() {
 
               <div className="flex items-center gap-1 flex-wrap">
                 {uniquePlatforms.map((p) => (
-                  <span key={p} className="bg-gray-100 text-gray-600 text-xs px-2 py-0.5 rounded capitalize">
+                  <span key={p} className="bg-muted text-muted-foreground text-xs px-2 py-0.5 rounded capitalize">
                     {p.replace("_", " ")}
                   </span>
                 ))}
@@ -115,7 +115,7 @@ export default async function SocialHistoryPage() {
                 href={`https://www.sanity.io/manage/project/${projectId}/dataset/production/document/${post._id}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-sm text-blue-600 hover:underline flex-shrink-0"
+                className="text-sm text-blue-500 hover:underline flex-shrink-0"
               >
                 View in Studio →
               </a>
@@ -125,11 +125,11 @@ export default async function SocialHistoryPage() {
       </div>
 
       {posts.length === 0 && (
-        <div className="text-center py-12 text-gray-400">
+        <div className="text-center py-12 text-muted-foreground">
           <p>No posts generated yet.</p>
           <a
             href="/en/admin/social-media-studio"
-            className="text-blue-600 hover:underline mt-2 inline-block"
+            className="text-blue-500 hover:underline mt-2 inline-block"
           >
             Generate your first post →
           </a>
