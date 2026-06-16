@@ -66,7 +66,11 @@ export async function runPublishJob(params: PublishJobParams): Promise<PublishJo
         freshConn = { ...freshConn, platformUserId: loc.locationId, platformAccountName: loc.locationName, platformMetadata: loc };
         console.log("[publish-job] Resolved pending GBP location:", loc.locationId);
       } catch (err) {
+        const msg = (err as Error)?.message ?? "";
         console.error("[publish-job] Failed to resolve GBP location:", err);
+        if (msg.includes("Quota exceeded") || msg.includes("quota")) {
+          return { success: false, error: "Google Business API rate limit hit. Wait 1–2 minutes and try publishing again." };
+        }
         return { success: false, error: "Could not find your Google Business location. Please disconnect and reconnect in Connections." };
       }
     }

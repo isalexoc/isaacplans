@@ -112,18 +112,13 @@ export async function GET(
     } else if (platform === "google_business") {
       const { accessToken, refreshToken, expiresAt } = await exchangeGoogleCode(code);
 
-      // GBP API has a low default QPM quota — retry once after a short delay
+      // GBP Account Management API has a very low QPM quota; if it fails here
+      // the location will be resolved lazily on the first publish attempt.
       let loc: Awaited<ReturnType<typeof getGbpLocation>> | null = null;
       try {
         loc = await getGbpLocation(accessToken);
-      } catch (firstErr) {
-        console.error("[GBP] First location lookup failed, retrying in 3s:", firstErr);
-        await new Promise((r) => setTimeout(r, 3000));
-        try {
-          loc = await getGbpLocation(accessToken);
-        } catch (secondErr) {
-          console.error("[GBP] Second location lookup failed — saving tokens without location:", secondErr);
-        }
+      } catch (err) {
+        console.warn("[GBP] Location lookup failed during OAuth — will resolve at publish time:", (err as Error)?.message);
       }
 
       await upsertConnection({
