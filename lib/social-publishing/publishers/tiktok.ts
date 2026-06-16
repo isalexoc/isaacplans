@@ -11,7 +11,6 @@ export async function publishToTikTok(
 
   const requestBody = {
     post_info: {
-      title:           caption.slice(0, 150),
       description:     caption.slice(0, 2200),
       privacy_level:   privacyLevel,
       disable_duet:    false,
