@@ -14,12 +14,19 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "URL not allowed" }, { status: 403 });
   }
 
-  const res = await fetch(url);
+  // TikTok only accepts JPEG or WebP — force JPEG via Cloudinary's f_jpg transformation.
+  // Insert transformation after /upload/ in the Cloudinary URL.
+  const fetchUrl = url.replace(
+    /\/image\/upload\//,
+    "/image/upload/f_jpg,q_90/"
+  );
+
+  const res = await fetch(fetchUrl);
   if (!res.ok) {
     return NextResponse.json({ error: "Failed to fetch media" }, { status: 502 });
   }
 
-  const contentType = res.headers.get("content-type") ?? "image/jpeg";
+  const contentType = "image/jpeg";
   const buffer = await res.arrayBuffer();
 
   return new NextResponse(buffer, {
