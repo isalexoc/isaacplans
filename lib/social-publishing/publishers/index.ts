@@ -44,7 +44,7 @@ export async function publishToPlatform(
     case "tiktok": {
       const meta = conn.platformMetadata as TikTokMetadata | null;
       const openId = meta?.openId ?? conn.platformUserId ?? "";
-      return publishToTikTok(openId, conn.accessToken, caption, imageUrl);
+      return publishToTikTok(openId, conn.accessToken, caption, imageUrl, videoUrl);
     }
 
     case "youtube": {

@@ -45,6 +45,7 @@ export function VideoImageStudio({
   onStoryboardChange,
 }: VideoImageStudioProps) {
   const [voiceLang, setVoiceLang]   = useState<SocialLocale>(defaultLocale);
+  const [presenter, setPresenter]   = useState<boolean>(Boolean(initialStoryboard?.presenter));
   const [storyboard, setStoryboard] = useState<VideoStoryboard | undefined>(initialStoryboard);
   const [phase, setPhase]           = useState<Phase>(initialVideoUrl ? "done" : "idle");
   const [videoUrl, setVideoUrl]     = useState<string>(initialVideoUrl ?? "");
@@ -63,6 +64,12 @@ export function VideoImageStudio({
     onStoryboardChange?.(next);
   }
 
+  // Toggle the HeyGen presenter; persist onto the storyboard when one already exists.
+  function togglePresenter(value: boolean) {
+    setPresenter(value);
+    if (storyboard) commitStoryboard({ ...storyboard, presenter: value });
+  }
+
   function setSceneBusy(idx: number, busy: boolean) {
     setRegenIdx((prev) => {
       const n = new Set(prev);
@@ -78,7 +85,7 @@ export function VideoImageStudio({
     try {
       const sb = await generateImages(voiceLang);
       if (!aliveRef.current) return;
-      commitStoryboard(sb);
+      commitStoryboard({ ...sb, presenter }); // carry the current presenter choice onto the new storyboard
     } catch (err) {
       if (aliveRef.current) setError(err instanceof Error ? err.message : "Image generation failed");
     } finally {
@@ -144,7 +151,8 @@ export function VideoImageStudio({
     setVideoUrl("");
     setPhase("rendering");
     try {
-      const { projectId, durationSeconds } = await renderVideo(storyboard);
+      const renderStoryboard = { ...storyboard, presenter };
+      const { projectId, durationSeconds } = await renderVideo(renderStoryboard);
       for (let i = 0; i < MAX_POLLS; i++) {
         await new Promise((r) => setTimeout(r, POLL_INTERVAL_MS));
         if (!aliveRef.current) return;
@@ -196,6 +204,27 @@ export function VideoImageStudio({
             </button>
           ))}
         </div>
+      </div>
+
+      {/* Human presenter (HeyGen) toggle */}
+      <div className="flex items-center gap-3 flex-wrap">
+        <span className="text-xs font-medium text-muted-foreground">Human presenter:</span>
+        <button
+          type="button"
+          role="switch"
+          aria-checked={presenter}
+          disabled={anyBusy}
+          onClick={() => togglePresenter(!presenter)}
+          className={cn(
+            "relative inline-flex h-5 w-9 items-center rounded-full transition-colors disabled:opacity-50",
+            presenter ? "bg-blue-600" : "bg-muted-foreground/30"
+          )}
+        >
+          <span className={cn("inline-block h-4 w-4 transform rounded-full bg-white transition-transform", presenter ? "translate-x-4" : "translate-x-0.5")} />
+        </button>
+        <span className="text-xs text-muted-foreground">
+          {presenter ? "AI spokesperson in the corner (uses HeyGen credits)" : "Adds an AI spokesperson in the corner (uses HeyGen credits)"}
+        </span>
       </div>
 
       {/* Phase A trigger / image controls */}
@@ -274,7 +303,7 @@ export function VideoImageStudio({
           {/* Phase B trigger */}
           <Button onClick={createVideo} disabled={anyBusy} className="w-fit">
             {phase === "rendering"
-              ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Rendering video… (30–120s)</>
+              ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> {presenter ? "Rendering presenter + video… (1–5 min)" : "Rendering video… (30–120s)"}</>
               : phase === "done"
                 ? <><RotateCcw className="h-4 w-4 mr-2" /> Regenerate video</>
                 : <><Film className="h-4 w-4 mr-2" /> Create Video</>}

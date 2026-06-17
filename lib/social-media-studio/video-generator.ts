@@ -2,6 +2,7 @@ import OpenAI from "openai";
 import cloudinary from "@/config/cloudinary";
 import { getDemographicHint, pickVariationMood } from "./image-generator";
 import { musicUrlForCategory } from "./video-music";
+import { HEYGEN_CHROMA_COLOR } from "./heygen-presenter";
 import type {
   SocialPostSource,
   VideoScript,
@@ -267,10 +268,34 @@ export async function generateVideoSceneImages(
 // Ken Burns motion directions cycled per scene so a single background image still feels alive.
 const PAN_DIRECTIONS = ["top-left", "bottom-right", "top-right", "bottom-left", "left", "right"] as const;
 
-function buildMovieJson(storyboard: VideoStoryboard) {
-  const voice       = elevenLabsVoiceFor(storyboard.voiceLanguage);
-  const connection  = process.env.JSON2VIDEO_ELEVENLABS_CONNECTION;
-  const bgMusicUrl  = musicUrlForCategory(storyboard.category);
+// Presenter corner inset geometry on the 1080×1920 canvas (9:16 source kept by height:-1).
+const PRESENTER_INSET_WIDTH = 330;
+const PRESENTER_MARGIN_X    = 30;
+const PRESENTER_MARGIN_Y    = 40;
+
+// Distribute the presenter clip's total length across scenes, weighted by narration word
+// count so background images roughly track the spoken narration. The last scene absorbs any
+// rounding remainder so the scene durations sum exactly to the presenter length.
+function presenterSceneDurations(scenes: VideoScene[], totalSec: number): number[] {
+  const words = scenes.map((s) => Math.max(1, s.narration.trim().split(/\s+/).filter(Boolean).length));
+  const totalWords = words.reduce((a, b) => a + b, 0);
+  const durations = words.map((w) => Math.max(1, Math.round((totalSec * w) / totalWords)));
+  const drift = totalSec - durations.reduce((a, b) => a + b, 0);
+  durations[durations.length - 1] = Math.max(1, durations[durations.length - 1] + drift);
+  return durations;
+}
+
+function buildMovieJson(
+  storyboard: VideoStoryboard,
+  presenter?: { url: string; durationSec: number }
+) {
+  const voice        = elevenLabsVoiceFor(storyboard.voiceLanguage);
+  const connection   = process.env.JSON2VIDEO_ELEVENLABS_CONNECTION;
+  const bgMusicUrl   = musicUrlForCategory(storyboard.category);
+  const usePresenter = Boolean(storyboard.presenter && presenter);
+  const sceneDurations = usePresenter
+    ? presenterSceneDurations(storyboard.scenes, presenter!.durationSec)
+    : [];
 
   const scenes = storyboard.scenes.map((scene, i) => ({
     elements: [
@@ -278,7 +303,9 @@ function buildMovieJson(storyboard: VideoStoryboard) {
       {
         type:           "image",
         src:            scene.imageUrl,
-        duration:       -2, // match the scene length (driven by the voice element)
+        // Presenter on → explicit word-weighted duration (no voice element to size the scene);
+        // off → -2 matches the scene length driven by the voice element.
+        duration:       usePresenter ? sceneDurations[i] : -2,
         resize:         "cover",
         pan:            PAN_DIRECTIONS[i % PAN_DIRECTIONS.length],
         zoom:           2,
@@ -286,16 +313,26 @@ function buildMovieJson(storyboard: VideoStoryboard) {
         "fade-in":      0.4,
         "fade-out":     0.4,
       },
-      // ElevenLabs voiceover — its natural length defines the scene duration.
-      {
-        type:    "voice",
-        text:    scene.narration,
-        model:   "elevenlabs",
-        voice,
-        ...(connection ? { connection } : {}),
-      },
+      // ElevenLabs voiceover — its natural length defines the scene duration. Omitted when a
+      // presenter is used: the HeyGen clip is the master audio (avoids overlapping voices).
+      ...(usePresenter
+        ? []
+        : [{
+            type:    "voice",
+            text:    scene.narration,
+            model:   "elevenlabs",
+            voice,
+            ...(connection ? { connection } : {}),
+          }]),
     ],
   }));
+
+  // Corner placement on the 1080×1920 canvas (9:16 inset → displayed height ≈ width × 16/9).
+  const placement  = storyboard.presenterPlacement ?? "bottom-right";
+  const presenterX = placement === "bottom-left"
+    ? PRESENTER_MARGIN_X
+    : 1080 - PRESENTER_INSET_WIDTH - PRESENTER_MARGIN_X;
+  const presenterY = 1920 - Math.round((PRESENTER_INSET_WIDTH * 16) / 9) - PRESENTER_MARGIN_Y;
 
   const movie: Record<string, unknown> = {
     resolution: "custom",
@@ -304,6 +341,23 @@ function buildMovieJson(storyboard: VideoStoryboard) {
     quality:    "high",
     scenes,
     elements: [
+      // HeyGen presenter inset (green background chroma-keyed out) — master audio for the Short.
+      ...(usePresenter
+        ? [{
+            type:        "video",
+            src:         presenter!.url,
+            position:    "custom",
+            x:           presenterX,
+            y:           presenterY,
+            width:       PRESENTER_INSET_WIDTH,
+            height:      -1,
+            start:       0,
+            duration:    presenter!.durationSec,
+            "chroma-key": { color: HEYGEN_CHROMA_COLOR, tolerance: 25 },
+            "fade-in":   0.4,
+            "fade-out":  0.4,
+          }]
+        : []),
       // Auto-transcribed karaoke captions (Shorts are watched on mute).
       {
         type:     "subtitles",
@@ -313,11 +367,9 @@ function buildMovieJson(storyboard: VideoStoryboard) {
           style:                "classic-progressive",
           "font-family":        "Oswald",
           "font-size":          90,
-          // Raise captions into the lower-third (custom y), clear of the platform's
-          // bottom UI (title/buttons) that was covering bottom-center subtitles.
-          position:             "custom",
-          x:                    40,
-          y:                    1320,
+          // mid-bottom-center keeps captions horizontally CENTERED while sitting in the
+          // lower-third — raised clear of the platform's bottom UI, not pinned to the edge.
+          position:             "mid-bottom-center",
           "word-color":         "#00B4D8",
           "line-color":         "#FFFFFF",
           "outline-color":      "#000000",
@@ -336,12 +388,13 @@ function buildMovieJson(storyboard: VideoStoryboard) {
 }
 
 export async function submitVideoRender(
-  storyboard: VideoStoryboard
+  storyboard: VideoStoryboard,
+  presenter?: { url: string; durationSec: number }
 ): Promise<{ projectId: string }> {
   const apiKey = process.env.JSON2VIDEO_API_KEY;
   if (!apiKey) throw new Error("JSON2VIDEO_API_KEY is not configured");
 
-  const movie = buildMovieJson(storyboard);
+  const movie = buildMovieJson(storyboard, presenter);
 
   const res = await fetch(JSON2VIDEO_BASE, {
     method:  "POST",

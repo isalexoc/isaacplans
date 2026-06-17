@@ -67,6 +67,8 @@ interface SocialPostDetail {
     voiceLanguage?: string;
     durationSeconds?: number;
     category?: string;
+    presenter?: boolean;
+    presenterPlacement?: string;
     scenes?: { narration?: string; onScreenText?: string; imageConcept?: string; imageUrl?: string }[];
   };
 }
@@ -117,6 +119,8 @@ export default async function SocialPostDetailPage({
         voiceLanguage:   post.videoStoryboard.voiceLanguage === "es" ? "es" : "en",
         durationSeconds: post.videoStoryboard.durationSeconds === 60 ? 60 : 30,
         category:        post.videoStoryboard.category,
+        presenter:       post.videoStoryboard.presenter ?? false,
+        presenterPlacement: post.videoStoryboard.presenterPlacement === "bottom-left" ? "bottom-left" : "bottom-right",
         scenes: post.videoStoryboard.scenes.map((s) => ({
           narration:    s.narration ?? "",
           onScreenText: s.onScreenText ?? "",

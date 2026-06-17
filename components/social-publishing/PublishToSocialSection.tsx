@@ -53,11 +53,11 @@ export function PublishToSocialSection({ sanityPostId, copies, squareImageUrl, v
     {} as Record<SocialPlatform, PlatformPublishState>
   );
   const [platformErrors, setPlatformErrors] = useState<Partial<Record<SocialPlatform, string>>>({});
-  const [youtubeVideoUrl, setYoutubeVideoUrl] = useState(initialYoutubeVideoUrl ?? "");
+  const [videoUrl, setVideoUrl] = useState(initialYoutubeVideoUrl ?? "");
 
   // Keep the field in sync when an AI video finishes generating after mount.
   useEffect(() => {
-    if (initialYoutubeVideoUrl) setYoutubeVideoUrl(initialYoutubeVideoUrl);
+    if (initialYoutubeVideoUrl) setVideoUrl(initialYoutubeVideoUrl);
   }, [initialYoutubeVideoUrl]);
   const [scheduleState, setScheduleState] = useState<ScheduleState>({
     mode: "now",
@@ -91,8 +91,13 @@ export function PublishToSocialSection({ sanityPostId, copies, squareImageUrl, v
     const caption  = getCaptionForPlatform(platform);
     const imageUrl = getImageForPlatform(platform);
     if (platform === "youtube") {
-      if (!youtubeVideoUrl) {
+      if (!videoUrl) {
         setPlatformErrors((prev) => ({ ...prev, [platform]: "Paste a video URL above before publishing to YouTube" }));
+        return;
+      }
+    } else if (platform === "tiktok") {
+      if (!videoUrl && (!caption || !imageUrl)) {
+        setPlatformErrors((prev) => ({ ...prev, [platform]: "TikTok needs a video URL above, or copy + image" }));
         return;
       }
     } else if (!caption || !imageUrl) {
@@ -105,7 +110,7 @@ export function PublishToSocialSection({ sanityPostId, copies, squareImageUrl, v
 
     try {
       const body: Record<string, string> = { sanityPostId, platform, caption, imageUrl };
-      if (platform === "youtube") body.videoUrl = youtubeVideoUrl;
+      if ((platform === "youtube" || platform === "tiktok") && videoUrl) body.videoUrl = videoUrl;
       const res = await fetch("/api/admin/social-publishing/publish", {
         method:  "POST",
         headers: { "Content-Type": "application/json" },
@@ -132,8 +137,13 @@ export function PublishToSocialSection({ sanityPostId, copies, squareImageUrl, v
     const caption  = getCaptionForPlatform(platform);
     const imageUrl = getImageForPlatform(platform);
     if (platform === "youtube") {
-      if (!youtubeVideoUrl) {
+      if (!videoUrl) {
         setPlatformErrors((prev) => ({ ...prev, [platform]: "Paste a video URL above before scheduling to YouTube" }));
+        return;
+      }
+    } else if (platform === "tiktok") {
+      if (!videoUrl && (!caption || !imageUrl)) {
+        setPlatformErrors((prev) => ({ ...prev, [platform]: "TikTok needs a video URL above, or copy + image" }));
         return;
       }
     } else if (!caption || !imageUrl) {
@@ -153,7 +163,7 @@ export function PublishToSocialSection({ sanityPostId, copies, squareImageUrl, v
         imageUrl,
         copySnapshot: copies.find((c) => c.platform === platform && c.locale === locale),
       };
-      if (platform === "youtube") scheduleBody.videoUrl = youtubeVideoUrl;
+      if ((platform === "youtube" || platform === "tiktok") && videoUrl) scheduleBody.videoUrl = videoUrl;
       const res = await fetch("/api/admin/social-publishing/schedule", {
         method:  "POST",
         headers: { "Content-Type": "application/json" },
@@ -235,32 +245,26 @@ export function PublishToSocialSection({ sanityPostId, copies, squareImageUrl, v
         )}
       </div>
 
-      {/* YouTube video URL input — only shown when YouTube is connected */}
-      {connectedPlatforms.has("youtube") && (
+      {/* Video URL input — shown when YouTube and/or TikTok are connected (both post video) */}
+      {(connectedPlatforms.has("youtube") || connectedPlatforms.has("tiktok")) && (
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-medium text-muted-foreground">▶️ YouTube video URL (9:16 mp4)</label>
+          <label className="text-xs font-medium text-muted-foreground">
+            🎬 Video URL (9:16 mp4)
+            {" — used for "}
+            {connectedPlatforms.has("youtube") && connectedPlatforms.has("tiktok")
+              ? "YouTube & TikTok"
+              : connectedPlatforms.has("youtube") ? "YouTube" : "TikTok"}
+          </label>
           <input
             type="url"
             placeholder="https://res.cloudinary.com/…/video.mp4"
-            value={youtubeVideoUrl}
-            onChange={(e) => setYoutubeVideoUrl(e.target.value)}
+            value={videoUrl}
+            onChange={(e) => setVideoUrl(e.target.value)}
             className="border rounded-md px-3 py-1.5 text-sm w-full"
           />
-          {/* Caption preview so the user can verify what description will be uploaded */}
-          {(() => {
-            const ytCaption = getCaptionForPlatform("youtube");
-            return ytCaption ? (
-              <div className="rounded-md border border-dashed bg-muted/40 px-3 py-2">
-                <p className="text-xs font-medium text-muted-foreground mb-1">Description that will be sent to YouTube:</p>
-                <p className="text-xs whitespace-pre-wrap text-foreground">{ytCaption}</p>
-              </div>
-            ) : (
-              <p className="text-xs text-amber-600">
-                No YouTube copy found for this post. The video will be uploaded with title "YouTube Short".
-                Regenerate the copy in the studio to add a description.
-              </p>
-            );
-          })()}
+          <p className="text-xs text-muted-foreground">
+            Auto-filled from the AI video above. TikTok will post this as a video when set; otherwise it posts the image.
+          </p>
         </div>
       )}
 

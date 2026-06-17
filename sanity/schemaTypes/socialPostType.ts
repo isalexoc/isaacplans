@@ -221,6 +221,8 @@ export const socialPostType = defineType({
         { name: "voiceLanguage",   title: "Voice Language",    type: "string" },
         { name: "durationSeconds", title: "Duration (s)",      type: "number" },
         { name: "category",        title: "Category",          type: "string" },
+        { name: "presenter",          title: "HeyGen Presenter",  type: "boolean", description: "Short rendered with an AI presenter in the corner" },
+        { name: "presenterPlacement", title: "Presenter Corner",  type: "string" },
         {
           name: "scenes",
           title: "Scenes",

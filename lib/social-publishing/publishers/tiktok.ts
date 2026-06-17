@@ -4,16 +4,23 @@ export async function publishToTikTok(
   _openId: string,
   accessToken: string,
   caption: string,
-  imageUrl: string
+  imageUrl: string,
+  videoUrl?: string
 ): Promise<PublishResult> {
   // Sandbox requires SELF_ONLY; production can use PUBLIC_TO_EVERYONE
   const privacyLevel = process.env.TIKTOK_PRIVACY_LEVEL ?? "SELF_ONLY";
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.isaacplans.com";
 
+  const proxy = (u: string) =>
+    u.includes("res.cloudinary.com") ? `${siteUrl}/api/media-proxy?url=${encodeURIComponent(u)}` : u;
+
+  // If a generated video is available, post it as a TikTok VIDEO (its native format).
+  if (videoUrl) {
+    return publishTikTokVideo(accessToken, caption, proxy(videoUrl), privacyLevel);
+  }
+
   // TikTok requires URL ownership verification — proxy Cloudinary images through our domain
-  const proxiedImageUrl = imageUrl.includes("res.cloudinary.com")
-    ? `${siteUrl}/api/media-proxy?url=${encodeURIComponent(imageUrl)}`
-    : imageUrl;
+  const proxiedImageUrl = proxy(imageUrl);
 
   const requestBody = {
     post_info: {
@@ -67,6 +74,61 @@ export async function publishToTikTok(
     return { success: false, error: `TikTok processing failed: ${finalStatus.failReason ?? "unknown reason"}` };
   }
 
+  return { success: true, platformPostId: publishId };
+}
+
+async function publishTikTokVideo(
+  accessToken: string,
+  caption: string,
+  videoUrl: string,
+  privacyLevel: string
+): Promise<PublishResult> {
+  const requestBody = {
+    post_info: {
+      title:           caption.slice(0, 2200),
+      privacy_level:   privacyLevel,
+      disable_duet:    false,
+      disable_stitch:  false,
+      disable_comment: false,
+    },
+    source_info: {
+      source:    "PULL_FROM_URL",
+      video_url: videoUrl,
+    },
+  };
+
+  console.log("[TikTok] POST /v2/post/publish/video/init/ body:", JSON.stringify(requestBody, null, 2));
+
+  const initRes = await fetch("https://open.tiktokapis.com/v2/post/publish/video/init/", {
+    method: "POST",
+    headers: {
+      Authorization:  `Bearer ${accessToken}`,
+      "Content-Type": "application/json; charset=UTF-8",
+    },
+    body: JSON.stringify(requestBody),
+  });
+
+  const initData = await initRes.json();
+  console.log("[TikTok] Video response status:", initRes.status, "body:", JSON.stringify(initData, null, 2));
+
+  if (initData.error?.code && initData.error.code !== "ok") {
+    const msg = initData.error.message ?? "TikTok video post failed";
+    if (initData.error.code === "access_token_invalid" || initData.error.code === "scope_not_authorized") {
+      return { success: false, error: "TikTok: app not yet approved for publishing. Submit an audit in the TikTok developer portal." };
+    }
+    if (initData.error.code === "unaudited_client_can_only_post_to_private_accounts") {
+      return { success: false, error: "TikTok: your app is unaudited — set your TikTok account to Private, or submit an audit at developers.tiktok.com to enable public posting." };
+    }
+    return { success: false, error: `TikTok error [${initData.error.code}]: ${msg}` };
+  }
+
+  const publishId = initData.data?.publish_id;
+  const finalStatus = await pollTikTokStatus(publishId, accessToken);
+  console.log("[TikTok] Final video publish status:", JSON.stringify(finalStatus, null, 2));
+
+  if (finalStatus.status === "FAILED") {
+    return { success: false, error: `TikTok processing failed: ${finalStatus.failReason ?? "unknown reason"}` };
+  }
   return { success: true, platformPostId: publishId };
 }
 

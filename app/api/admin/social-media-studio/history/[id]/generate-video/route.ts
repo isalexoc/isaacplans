@@ -1,22 +1,109 @@
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
-import { submitVideoRender } from "@/lib/social-media-studio/video-generator";
+import { createClient } from "next-sanity";
+import { buildVideoStoryboard, submitVideoRender } from "@/lib/social-media-studio/video-generator";
 import type {
   VideoRenderRequest,
+  VideoStoryboard,
+  VideoScript,
+  SocialPostSource,
   SocialStudioResponse,
   SocialLocale,
 } from "@/lib/social-media-studio/types";
 
 export const maxDuration = 60;
 
-export async function POST(req: Request) {
+function getWriteClient() {
+  if (!process.env.SANITY_API_WRITE_TOKEN) throw new Error("SANITY_API_WRITE_TOKEN is not configured");
+  return createClient({
+    projectId:  process.env.NEXT_PUBLIC_SANITY_PROJECT_ID ?? "anetxoet",
+    dataset:    process.env.NEXT_PUBLIC_SANITY_DATASET ?? "production",
+    apiVersion: "2024-01-01",
+    token:      process.env.SANITY_API_WRITE_TOKEN,
+    useCdn:     false,
+  });
+}
+
+const POST_QUERY = `*[_type == "socialPost" && _id == $id][0]{
+  sourceTitle, sourceCategory, sourceLocale, sourceUrl, videoScript
+}`;
+
+// Rebuild scene narration from the latest saved script while KEEPING the curated images
+// (mapped by index, reused cyclically if the scene count changed). This guarantees the
+// video always speaks the user's most recently edited script.
+async function rebuildFromLatestScript(
+  id: string,
+  current: VideoStoryboard
+): Promise<VideoStoryboard> {
+  const sanity = getWriteClient();
+  const post = await sanity.fetch(POST_QUERY, { id });
+  if (!post?.videoScript?.fullScript) return current; // nothing saved → keep as-is
+
+  const locale: SocialLocale = current.voiceLanguage;
+  const source: SocialPostSource = {
+    type:      "direct_topic",
+    title:     post.sourceTitle ?? "",
+    category:  post.sourceCategory,
+    locale,
+    publicUrl: post.sourceUrl,
+  };
+  const videoScript: VideoScript = {
+    duration:                post.videoScript.duration === 60 ? 60 : 30,
+    hookScript:              post.videoScript.hookScript ?? "",
+    fullScript:              post.videoScript.fullScript ?? "",
+    onScreenTextSuggestions: post.videoScript.onScreenText ?? [],
+    brollSuggestions:        [],
+    voiceoverTips:           "",
+    suggestedCaption:        post.videoScript.suggestedCaption ?? "",
+  };
+
+  const fresh = await buildVideoStoryboard(source, videoScript, locale);
+  const images = current.scenes.map((s) => s.imageUrl).filter(Boolean);
+  if (images.length === 0) return current;
+
+  // Fresh narration + concepts, but reuse the existing images by index (cyclic fill).
+  fresh.scenes = fresh.scenes.map((scene, i) => ({
+    ...scene,
+    imageUrl: images[i] ?? images[i % images.length],
+  }));
+  fresh.presenter = current.presenter;
+  fresh.presenterPlacement = current.presenterPlacement;
+
+  // Persist the refreshed active storyboard.
+  await sanity
+    .patch(id)
+    .set({
+      videoStoryboard: {
+        voiceLanguage:   fresh.voiceLanguage,
+        durationSeconds: fresh.durationSeconds,
+        category:        fresh.category ?? null,
+        scenes: fresh.scenes.map((s, i) => ({
+          _key:         `sc_${i}`,
+          narration:    s.narration,
+          onScreenText: s.onScreenText,
+          imageConcept: s.imageConcept,
+          imageUrl:     s.imageUrl,
+        })),
+      },
+      updatedAt: new Date().toISOString(),
+    })
+    .commit();
+
+  return fresh;
+}
+
+export async function POST(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
   const { userId } = await auth();
   if (!userId) {
     return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
   }
 
+  const { id } = await params;
   const body: VideoRenderRequest = await req.json();
-  const storyboard = body.storyboard;
+  let storyboard = body.storyboard;
 
   if (!storyboard?.scenes?.length) {
     return NextResponse.json(
@@ -31,8 +118,19 @@ export async function POST(req: Request) {
     );
   }
 
+  const presenter =
+    storyboard.presenter && body.presenterVideoUrl && body.presenterDurationSec
+      ? { url: body.presenterVideoUrl, durationSec: body.presenterDurationSec }
+      : undefined;
+
   try {
-    const { projectId } = await submitVideoRender(storyboard);
+    // Faceless renders rebuild narration from the latest saved script (presenter renders
+    // already have their HeyGen audio generated from the client storyboard, so keep as-is).
+    if (!storyboard.presenter) {
+      storyboard = await rebuildFromLatestScript(id, storyboard);
+    }
+
+    const { projectId } = await submitVideoRender(storyboard, presenter);
 
     const response: SocialStudioResponse<{
       projectId: string;

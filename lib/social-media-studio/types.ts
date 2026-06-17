@@ -144,6 +144,8 @@ export interface VideoStoryboard {
   voiceLanguage: SocialLocale; // "en" | "es" — drives ElevenLabs voice + caption lang
   durationSeconds: 30 | 60;    // target length (from the source video script)
   category?: string;           // insurance category → music + Cloudinary folder
+  presenter?: boolean;         // true → composite a HeyGen AI presenter in the corner
+  presenterPlacement?: "bottom-right" | "bottom-left"; // corner for the presenter (default bottom-right)
 }
 
 /**
@@ -230,6 +232,8 @@ export interface VideoImagesResult {
 // Phase B — render the video from a ready storyboard.
 export interface VideoRenderRequest {
   storyboard: VideoStoryboard;
+  presenterVideoUrl?: string;    // HeyGen presenter clip (green bg) to chroma-key into the corner
+  presenterDurationSec?: number; // presenter clip length → drives scene timing when presenter is on
 }
 
 // Regenerate a single scene image (quick re-roll or an edited concept).

@@ -31,8 +31,13 @@ export async function POST(req: Request) {
     );
   }
 
+  const presenter =
+    storyboard.presenter && body.presenterVideoUrl && body.presenterDurationSec
+      ? { url: body.presenterVideoUrl, durationSec: body.presenterDurationSec }
+      : undefined;
+
   try {
-    const { projectId } = await submitVideoRender(storyboard);
+    const { projectId } = await submitVideoRender(storyboard, presenter);
 
     const response: SocialStudioResponse<{
       projectId: string;

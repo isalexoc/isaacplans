@@ -89,9 +89,11 @@ export async function publishSocialPost(
     ...(req.videoStoryboard
       ? {
           videoStoryboard: {
-            voiceLanguage:   req.videoStoryboard.voiceLanguage,
-            durationSeconds: req.videoStoryboard.durationSeconds,
-            category:        req.videoStoryboard.category ?? null,
+            voiceLanguage:      req.videoStoryboard.voiceLanguage,
+            durationSeconds:    req.videoStoryboard.durationSeconds,
+            category:           req.videoStoryboard.category ?? null,
+            presenter:          req.videoStoryboard.presenter ?? false,
+            presenterPlacement: req.videoStoryboard.presenterPlacement ?? null,
             scenes: req.videoStoryboard.scenes.map((s, i) => ({
               _key:         `sc_${i}`,
               narration:    s.narration,

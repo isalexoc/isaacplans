@@ -1,6 +1,7 @@
 "use client";
 
 import { VideoImageStudio } from "./VideoImageStudio";
+import { runPresenterPhase } from "./runPresenterPhase";
 import type { SocialLocale, VideoStoryboard } from "@/lib/social-media-studio/types";
 
 /** Sanity-shaped video script (uses `onScreenText`, optional fields). */
@@ -64,7 +65,11 @@ export function HistoryVideoGenerator({
         return data.url as string;
       }}
       renderVideo={async (storyboard) => {
-        const data = await postJson(`${base}/generate-video`, { storyboard });
+        // Presenter on → render the HeyGen clip first, then composite it in JSON2Video.
+        const presenter = storyboard.presenter
+          ? await runPresenterPhase(storyboard, storyboard.voiceLanguage)
+          : {};
+        const data = await postJson(`${base}/generate-video`, { storyboard, ...presenter });
         return { projectId: data.projectId as string, durationSeconds: data.durationSeconds as number };
       }}
       pollStatus={async (projectId) => {
