@@ -3,7 +3,10 @@ import { redirect, notFound } from "next/navigation";
 import { client } from "@/sanity/lib/client";
 import { HistoryImageRegenerator } from "@/components/social-media-studio/HistoryImageRegenerator";
 import { HistoryVideoPublishSection } from "@/components/social-media-studio/HistoryVideoPublishSection";
-import type { SocialPostCopy } from "@/lib/social-media-studio/types";
+import { EditablePostTitle } from "@/components/social-media-studio/EditablePostTitle";
+import { EditableCopies } from "@/components/social-media-studio/EditableCopies";
+import { EditableVideoScript } from "@/components/social-media-studio/EditableVideoScript";
+import type { SocialPostCopy, VideoStoryboard } from "@/lib/social-media-studio/types";
 
 const DETAIL_QUERY = `*[_type == "socialPost" && _id == $id][0] {
   _id,
@@ -24,7 +27,8 @@ const DETAIL_QUERY = `*[_type == "socialPost" && _id == $id][0] {
   imageHeadline,
   videoScript,
   videoUrl,
-  videoImages
+  videoImages,
+  videoStoryboard
 }`;
 
 type GeneratedCopy = Partial<SocialPostCopy> & { platform: string; locale: string };
@@ -59,6 +63,12 @@ interface SocialPostDetail {
   videoScript?: VideoScript;
   videoUrl?: string;
   videoImages?: { url?: string; concept?: string; createdAt?: string }[];
+  videoStoryboard?: {
+    voiceLanguage?: string;
+    durationSeconds?: number;
+    category?: string;
+    scenes?: { narration?: string; onScreenText?: string; imageConcept?: string; imageUrl?: string }[];
+  };
 }
 
 const PLATFORM_LABELS: Record<string, string> = {
@@ -99,8 +109,22 @@ export default async function SocialPostDetailPage({
   const allCopies = post.generatedCopies ?? [];
   // Only show / use copies that match the source locale
   const localeCopies = allCopies.filter((c) => c.locale === postLocale);
-  const uniquePlatforms = [...new Set(localeCopies.map((c) => c.platform))];
   const publishedSet = new Set(post.publishedPlatforms ?? []);
+
+  // Restore the active video storyboard (the image set used to render the Short).
+  const initialStoryboard: VideoStoryboard | undefined = post.videoStoryboard?.scenes?.length
+    ? {
+        voiceLanguage:   post.videoStoryboard.voiceLanguage === "es" ? "es" : "en",
+        durationSeconds: post.videoStoryboard.durationSeconds === 60 ? 60 : 30,
+        category:        post.videoStoryboard.category,
+        scenes: post.videoStoryboard.scenes.map((s) => ({
+          narration:    s.narration ?? "",
+          onScreenText: s.onScreenText ?? "",
+          imageConcept: s.imageConcept ?? "",
+          imageUrl:     s.imageUrl ?? "",
+        })),
+      }
+    : undefined;
 
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-8">
@@ -116,7 +140,7 @@ export default async function SocialPostDetailPage({
       {/* Header */}
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">{post.sourceTitle ?? "Untitled"}</h1>
+          <EditablePostTitle postId={post._id} initialTitle={post.sourceTitle ?? "Untitled"} />
           <div className="flex items-center gap-2 mt-2 flex-wrap">
             {post.sourceType && (
               <span className="text-xs text-muted-foreground capitalize">
@@ -165,87 +189,27 @@ export default async function SocialPostDetailPage({
         />
       </section>
 
-      {/* Generated Copies — filtered to source locale only */}
-      {uniquePlatforms.length > 0 && (
+      {/* Generated Copies — editable, filtered to source locale only */}
+      {localeCopies.length > 0 && (
         <section className="space-y-4">
           <h2 className="text-lg font-semibold">Generated Copy</h2>
-          {uniquePlatforms.map((platform) => {
-            const copy = localeCopies.find((c) => c.platform === platform);
-            if (!copy) return null;
-            return (
-              <div key={platform} className="border border-border rounded-lg overflow-hidden">
-                <div className="flex items-center gap-2 px-4 py-3 bg-muted/50 border-b border-border">
-                  <span>{PLATFORM_ICONS[platform] ?? "📣"}</span>
-                  <span className="font-medium text-sm">{PLATFORM_LABELS[platform] ?? platform}</span>
-                  {publishedSet.has(platform) && (
-                    <span className="ml-auto text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-0.5 rounded">
-                      Published
-                    </span>
-                  )}
-                </div>
-                <div className="p-4 space-y-2">
-                  {copy.characterCount && (
-                    <span className="text-xs text-muted-foreground">{copy.characterCount} chars</span>
-                  )}
-                  <pre className="text-sm whitespace-pre-wrap font-sans text-foreground leading-relaxed">
-                    {copy.fullPost}
-                  </pre>
-                  {copy.hashtags && copy.hashtags.length > 0 && (
-                    <div className="flex flex-wrap gap-1 pt-1">
-                      {copy.hashtags.map((tag) => (
-                        <span key={tag} className="text-xs text-blue-600 dark:text-blue-400">
-                          #{tag}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            );
-          })}
+          <EditableCopies postId={post._id} locale={postLocale} initialCopies={localeCopies as SocialPostCopy[]} />
         </section>
       )}
 
-      {/* Video Script */}
+      {/* Video Script — editable */}
       {post.videoScript && (
         <section className="space-y-3">
           <h2 className="text-lg font-semibold">Video Script</h2>
-          <div className="border border-border rounded-lg divide-y divide-border">
-            {post.videoScript.duration && (
-              <div className="px-4 py-3 flex items-center gap-2">
-                <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Duration</span>
-                <span className="text-sm">{post.videoScript.duration}s</span>
-              </div>
-            )}
-            {post.videoScript.hookScript && (
-              <div className="p-4 space-y-1">
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Hook</p>
-                <p className="text-sm whitespace-pre-wrap">{post.videoScript.hookScript}</p>
-              </div>
-            )}
-            {post.videoScript.fullScript && (
-              <div className="p-4 space-y-1">
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Full Script</p>
-                <pre className="text-sm whitespace-pre-wrap font-sans">{post.videoScript.fullScript}</pre>
-              </div>
-            )}
-            {post.videoScript.onScreenText && post.videoScript.onScreenText.length > 0 && (
-              <div className="p-4 space-y-1">
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">On-Screen Text</p>
-                <ul className="text-sm space-y-1 list-disc list-inside">
-                  {post.videoScript.onScreenText.map((t, i) => (
-                    <li key={i}>{t}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            {post.videoScript.suggestedCaption && (
-              <div className="p-4 space-y-1">
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Suggested Caption</p>
-                <p className="text-sm whitespace-pre-wrap">{post.videoScript.suggestedCaption}</p>
-              </div>
-            )}
-          </div>
+          <EditableVideoScript
+            postId={post._id}
+            initial={{
+              duration:         post.videoScript.duration,
+              hookScript:       post.videoScript.hookScript,
+              fullScript:       post.videoScript.fullScript,
+              suggestedCaption: post.videoScript.suggestedCaption,
+            }}
+          />
         </section>
       )}
 
@@ -270,17 +234,13 @@ export default async function SocialPostDetailPage({
       {/* AI Video + Publish to Social (shared state: a finished render auto-fills YouTube) */}
       <HistoryVideoPublishSection
         postId={post._id}
-        sourceTitle={post.sourceTitle ?? "Untitled"}
         sourceCategory={post.sourceCategory}
         sourceLocale={postLocale}
-        sourcePublicUrl={post.sourceUrl}
         videoScript={post.videoScript}
         squareImageUrl={post.squareImageUrl}
         verticalImageUrl={post.verticalImageUrl}
         initialVideoUrl={post.videoUrl}
-        initialVideoImages={(post.videoImages ?? [])
-          .filter((img): img is { url: string; concept?: string; createdAt?: string } => Boolean(img.url))
-          .map((img) => ({ url: img.url, concept: img.concept ?? "", createdAt: img.createdAt ?? "" }))}
+        initialStoryboard={initialStoryboard}
         copies={localeCopies as SocialPostCopy[]}
         publishLocale={postLocale}
         publishedPlatforms={post.publishedPlatforms ?? []}

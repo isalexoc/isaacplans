@@ -32,7 +32,7 @@ import type {
   SocialCreativeImages,
   VideoScript,
   GeneratedVideo,
-  VideoImage,
+  VideoStoryboard,
   PublishedSocialPost,
   SocialPlatform,
   SocialLocale,
@@ -65,7 +65,7 @@ interface StudioState {
   isGeneratingScript?: boolean;
   scriptError?: string;
   generatedVideo?: GeneratedVideo;
-  generatedVideoImages?: VideoImage[];
+  generatedVideoStoryboard?: VideoStoryboard;
   savedResult?: PublishedSocialPost;
 }
 
@@ -1196,7 +1196,10 @@ function ExportStep({
         images: images ?? { square: "", vertical: "", sourceImageUrl: "", headline: "", generatedByAI: false },
         videoScript: script,
         videoUrl: state.generatedVideo?.url,
-        videoImages: state.generatedVideoImages,
+        videoStoryboard: state.generatedVideoStoryboard,
+        videoImages: state.generatedVideoStoryboard?.scenes
+          .filter((s) => s.imageUrl)
+          .map((s) => ({ url: s.imageUrl, concept: s.imageConcept, createdAt: new Date().toISOString() })),
         status: saveStatus,
         tags,
       });
@@ -1315,8 +1318,9 @@ function ExportStep({
           videoScript={state.videoScript}
           defaultLocale={state.source.locale ?? "en"}
           initialVideoUrl={state.generatedVideo?.url}
+          initialStoryboard={state.generatedVideoStoryboard}
           onVideoReady={(video) => setState((prev) => ({ ...prev, generatedVideo: video }))}
-          onImagesReady={(imgs) => setState((prev) => ({ ...prev, generatedVideoImages: imgs }))}
+          onStoryboardChange={(sb) => setState((prev) => ({ ...prev, generatedVideoStoryboard: sb }))}
         />
       )}
 

@@ -3,19 +3,17 @@
 import { useState } from "react";
 import { PublishToSocialSection } from "@/components/social-publishing/PublishToSocialSection";
 import { HistoryVideoGenerator, type SanityVideoScript } from "./HistoryVideoGenerator";
-import type { SocialPostCopy, SocialLocale, VideoImage } from "@/lib/social-media-studio/types";
+import type { SocialPostCopy, SocialLocale, VideoStoryboard } from "@/lib/social-media-studio/types";
 
 interface Props {
   postId: string;
-  sourceTitle: string;
   sourceCategory?: string;
   sourceLocale: SocialLocale;
-  sourcePublicUrl?: string;
   videoScript?: SanityVideoScript;
   squareImageUrl?: string;
   verticalImageUrl?: string;
   initialVideoUrl?: string;
-  initialVideoImages?: VideoImage[];
+  initialStoryboard?: VideoStoryboard;
   copies: SocialPostCopy[];
   publishLocale: SocialLocale;
   publishedPlatforms: string[];
@@ -35,13 +33,11 @@ export function HistoryVideoPublishSection(props: Props) {
         <h2 className="text-lg font-semibold">AI Video</h2>
         <HistoryVideoGenerator
           postId={props.postId}
-          sourceTitle={props.sourceTitle}
           sourceCategory={props.sourceCategory}
           sourceLocale={props.sourceLocale}
-          sourcePublicUrl={props.sourcePublicUrl}
           videoScript={props.videoScript}
           initialVideoUrl={props.initialVideoUrl}
-          initialImages={props.initialVideoImages}
+          initialStoryboard={props.initialStoryboard}
           onVideoReady={setVideoUrl}
         />
       </section>

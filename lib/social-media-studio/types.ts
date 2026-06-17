@@ -208,6 +208,7 @@ export interface SocialPostPublishRequest {
   videoScript?: VideoScript;
   videoUrl?: string;             // generated YouTube Short URL (Cloudinary mp4)
   videoImages?: VideoImage[];    // portrait images generated for the video (stacks)
+  videoStoryboard?: VideoStoryboard; // active scene set used to render the video
   status: SocialPostStatus;
   tags?: string[];               // optional manual tags for Sanity filtering
 }
@@ -229,6 +230,14 @@ export interface VideoImagesResult {
 // Phase B — render the video from a ready storyboard.
 export interface VideoRenderRequest {
   storyboard: VideoStoryboard;
+}
+
+// Regenerate a single scene image (quick re-roll or an edited concept).
+export interface SingleVideoImageRequest {
+  concept: string;
+  category?: string;
+  locale?: SocialLocale;
+  sceneIndex?: number;   // history: which storyboard scene to update
 }
 
 // ─── API Response Shapes ──────────────────────────────────────────────────────

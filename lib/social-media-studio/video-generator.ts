@@ -152,6 +152,16 @@ async function generateOneSceneImage(
   return upload.secure_url;
 }
 
+// Regenerate a single portrait image from a concept (quick re-roll or an edited prompt).
+export async function regenerateSceneImage(
+  concept: string,
+  category?: string,
+  locale?: string
+): Promise<string> {
+  const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  return generateOneSceneImage(openai, concept, category ?? "general", locale);
+}
+
 // Generate scene images in parallel with a small concurrency cap, tolerating partial
 // failures. Mutates storyboard scenes (sets imageUrl) and returns the persisted batch.
 export async function generateVideoSceneImages(
@@ -232,23 +242,6 @@ function buildMovieJson(storyboard: VideoStoryboard) {
         voice,
         ...(connection ? { connection } : {}),
       },
-      // On-screen headline (distinct from the bottom karaoke subtitles).
-      // JSON2Video requires text styling to live inside a `settings` object.
-      ...(scene.onScreenText
-        ? [{
-            type:     "text",
-            text:     scene.onScreenText,
-            duration: -2,
-            settings: {
-              "font-family":         "Oswald",
-              "font-size":           "64px",
-              "font-color":          "#FFFFFF",
-              "vertical-position":   "top",
-              "horizontal-position": "center",
-              "text-align":          "center",
-            },
-          }]
-        : []),
     ],
   }));
 
@@ -268,7 +261,11 @@ function buildMovieJson(storyboard: VideoStoryboard) {
           style:                "classic-progressive",
           "font-family":        "Oswald",
           "font-size":          90,
-          position:             "bottom-center",
+          // Raise captions into the lower-third (custom y), clear of the platform's
+          // bottom UI (title/buttons) that was covering bottom-center subtitles.
+          position:             "custom",
+          x:                    40,
+          y:                    1320,
           "word-color":         "#00B4D8",
           "line-color":         "#FFFFFF",
           "outline-color":      "#000000",

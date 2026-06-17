@@ -86,6 +86,22 @@ export async function publishSocialPost(
     ...(req.videoImages?.length
       ? { videoImages: req.videoImages.map((img, i) => ({ _key: `${Date.now().toString(36)}_${i}`, ...img })) }
       : {}),
+    ...(req.videoStoryboard
+      ? {
+          videoStoryboard: {
+            voiceLanguage:   req.videoStoryboard.voiceLanguage,
+            durationSeconds: req.videoStoryboard.durationSeconds,
+            category:        req.videoStoryboard.category ?? null,
+            scenes: req.videoStoryboard.scenes.map((s, i) => ({
+              _key:         `sc_${i}`,
+              narration:    s.narration,
+              onScreenText: s.onScreenText,
+              imageConcept: s.imageConcept,
+              imageUrl:     s.imageUrl,
+            })),
+          },
+        }
+      : {}),
     status:           req.status,
     tags:             req.tags ?? [],
     createdAt:        now,

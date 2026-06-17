@@ -211,6 +211,35 @@ export const socialPostType = defineType({
         },
       ],
     },
+    {
+      name: "videoStoryboard",
+      title: "Active Video Storyboard",
+      type: "object",
+      group: "video",
+      description: "The scene set currently used to render the video (narration + chosen images)",
+      fields: [
+        { name: "voiceLanguage",   title: "Voice Language",    type: "string" },
+        { name: "durationSeconds", title: "Duration (s)",      type: "number" },
+        { name: "category",        title: "Category",          type: "string" },
+        {
+          name: "scenes",
+          title: "Scenes",
+          type: "array",
+          of: [
+            {
+              type: "object",
+              fields: [
+                { name: "narration",    title: "Narration",      type: "text", rows: 2 },
+                { name: "onScreenText", title: "On-Screen Text", type: "string" },
+                { name: "imageConcept", title: "Image Concept",  type: "text", rows: 2 },
+                { name: "imageUrl",     title: "Image URL",      type: "url" },
+              ],
+              preview: { select: { title: "narration", media: "imageUrl" } },
+            },
+          ],
+        },
+      ],
+    },
 
     // ─── META ─────────────────────────────────────────────────────────────────
     defineField({
