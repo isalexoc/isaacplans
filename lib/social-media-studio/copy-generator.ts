@@ -23,7 +23,7 @@ export async function generateSocialCopy(
       { role: "system", content: COPY_GENERATION_SYSTEM_PROMPT },
       { role: "user",   content: buildCopyPrompt(source, platforms, locales) },
     ],
-    max_tokens: 8000,
+    max_tokens: 12000,
     temperature: 0.75,
   });
 
