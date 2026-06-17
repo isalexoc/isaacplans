@@ -14,6 +14,19 @@ export async function generateSocialCopy(
   platforms: SocialPlatform[] = ALL_PLATFORMS,
   locales: SocialLocale[] = ALL_LOCALES
 ): Promise<SocialPostCopy[]> {
+  // One call per locale in parallel — keeps each prompt focused on 6 copies
+  // instead of 12, preventing the model from omitting the last platform
+  const results = await Promise.all(
+    locales.map((locale) => generateForLocale(source, platforms, locale))
+  );
+  return results.flat();
+}
+
+async function generateForLocale(
+  source: SocialPostSource,
+  platforms: SocialPlatform[],
+  locale: SocialLocale
+): Promise<SocialPostCopy[]> {
   const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
   const completion = await client.chat.completions.create({
@@ -21,33 +34,29 @@ export async function generateSocialCopy(
     response_format: { type: "json_object" },
     messages: [
       { role: "system", content: COPY_GENERATION_SYSTEM_PROMPT },
-      { role: "user",   content: buildCopyPrompt(source, platforms, locales) },
+      { role: "user",   content: buildCopyPrompt(source, platforms, [locale]) },
     ],
-    max_tokens: 12000,
+    max_tokens: 7000,
     temperature: 0.75,
   });
 
   const raw = JSON.parse(completion.choices[0].message.content ?? "{}");
-
   const copies: unknown[] = raw.copies ?? [];
 
   if (!copies.length) {
-    throw new Error("AI returned no copy variants. Check the prompt or try again.");
+    throw new Error(`AI returned no copy for locale "${locale}". Please try again.`);
   }
 
   const result = copies.map((item, i) => validateAndNormalizeCopy(item, i));
 
-  // Verify every requested platform+locale combination is present
-  const missing: string[] = [];
-  for (const platform of platforms) {
-    for (const locale of locales) {
-      if (!result.find((c) => c.platform === platform && c.locale === locale)) {
-        missing.push(`${platform}/${locale}`);
-      }
-    }
-  }
+  // Verify every platform is present for this locale
+  const missing = platforms.filter(
+    (p) => !result.find((c) => c.platform === p && c.locale === locale)
+  );
   if (missing.length > 0) {
-    throw new Error(`AI did not generate copy for: ${missing.join(", ")}. Please try again.`);
+    throw new Error(
+      `AI did not generate copy for: ${missing.map((p) => `${p}/${locale}`).join(", ")}. Please try again.`
+    );
   }
 
   return result;
