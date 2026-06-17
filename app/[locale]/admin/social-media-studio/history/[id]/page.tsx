@@ -2,6 +2,7 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect, notFound } from "next/navigation";
 import { client } from "@/sanity/lib/client";
 import { PublishToSocialSection } from "@/components/social-publishing/PublishToSocialSection";
+import { HistoryImageRegenerator } from "@/components/social-media-studio/HistoryImageRegenerator";
 import type { SocialPostCopy } from "@/lib/social-media-studio/types";
 
 const DETAIL_QUERY = `*[_type == "socialPost" && _id == $id][0] {
@@ -145,37 +146,20 @@ export default async function SocialPostDetailPage({
         </div>
       </div>
 
-      {/* Images */}
-      {(post.squareImageUrl || post.verticalImageUrl) && (
-        <section className="space-y-3">
-          <h2 className="text-lg font-semibold">Creative Images</h2>
-          {post.imageHeadline && (
-            <p className="text-sm text-muted-foreground italic">"{post.imageHeadline}"</p>
-          )}
-          <div className="flex gap-4 flex-wrap">
-            {post.squareImageUrl && (
-              <div className="space-y-1">
-                <img
-                  src={post.squareImageUrl}
-                  alt="Square 1:1"
-                  className="w-40 h-40 rounded-lg object-cover border border-border"
-                />
-                <p className="text-xs text-muted-foreground text-center">Square (1:1)</p>
-              </div>
-            )}
-            {post.verticalImageUrl && (
-              <div className="space-y-1">
-                <img
-                  src={post.verticalImageUrl}
-                  alt="Vertical 9:16"
-                  className="w-24 h-40 rounded-lg object-cover border border-border"
-                />
-                <p className="text-xs text-muted-foreground text-center">Vertical (9:16)</p>
-              </div>
-            )}
-          </div>
-        </section>
-      )}
+      {/* Creative Images — with AI regeneration */}
+      <section className="space-y-3">
+        <h2 className="text-lg font-semibold">Creative Images</h2>
+        <HistoryImageRegenerator
+          postId={post._id}
+          initialHeadline={post.imageHeadline ?? post.sourceTitle ?? ""}
+          initialSquareUrl={post.squareImageUrl ?? ""}
+          initialVerticalUrl={post.verticalImageUrl ?? ""}
+          sourceTitle={post.sourceTitle}
+          sourceCategory={post.sourceCategory}
+          sourceLocale={post.sourceLocale}
+          sourceImageUrl={post.sourceImageUrl}
+        />
+      </section>
 
       {/* Generated Copies — filtered to source locale only */}
       {uniquePlatforms.length > 0 && (
