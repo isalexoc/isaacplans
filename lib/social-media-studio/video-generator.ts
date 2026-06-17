@@ -45,6 +45,7 @@ Rules:
 - "narration" is the exact words the voiceover will SPEAK for that scene — natural spoken sentences only. NO timestamps, NO stage directions, NO brackets, NO emojis, NO hashtags.
 - "onScreenText" is a SHORT punchy caption/headline (max ~6 words) burned on screen for that scene. Title Case. No ending period.
 - "imageConcept" is a SPECIFIC 1-2 sentence photographic scene description for a vertical background image that visually matches THIS scene's narration (subjects, emotion, setting, key visual detail). Each scene's imageConcept MUST be visually DISTINCT from the others. Do NOT use the word "insurance". No text or graphics in the scene.
+- CRITICAL IMAGE SAFETY: imageConcept must always be WHOLESOME, POSITIVE and HOPEFUL — happy, healthy, dignified people in warm everyday settings (family at home, outdoors, a friendly advisor meeting, a person smiling). NEVER describe death, dying, funerals, coffins, caskets, graves, cemeteries, grief, crying, illness, disease, hospital beds, medical procedures, blood, injury, frailty, or anything somber, morbid or distressing — even if the narration mentions them. For sensitive topics, show the POSITIVE outcome (a protected, joyful family; peace of mind; a loving moment) instead.
 - The FIRST scene must be a scroll-stopping hook.
 - Keep total narration tight so the whole video fits the target duration when spoken at a natural pace (~2.5 words/second).
 - Write narration AND onScreenText in the SAME language as the source script (English or Spanish). imageConcept is always in English (it prompts an image model).
@@ -120,19 +121,33 @@ function buildVideoImagePrompt(concept: string, locale?: string): string {
     `Cinematic vertical (9:16) professional photograph: ${concept}.`,
     `Lighting: ${mood}.`,
     `Camera: Canon EOS R5, 35mm f/1.8, natural depth of field, full-frame composition that fills a tall vertical portrait frame top to bottom.`,
-    `Mood: emotionally authentic, warm color grading, hyper-realistic.`,
+    `Mood: warm, positive, hopeful, emotionally authentic, hyper-realistic. Healthy, happy, dignified people in a bright, wholesome everyday setting.`,
     demographic,
+    `PROHIBITED CONTENT: nothing morbid or distressing — no death, funerals, coffins, graves, illness, hospitals, injury, blood, or grief.`,
     `PROHIBITED: No text, words, numbers, signs, logos, watermarks, captions, or graphic overlays anywhere in the image.`,
     `STYLE: Hyper-realistic professional photograph. Absolutely NOT an illustration, NOT vector art, NOT a painting, NOT a CGI render, NOT digital art. Real photography only.`,
   ].join(" ");
 }
 
-async function generateOneSceneImage(
-  openai: OpenAI,
-  concept: string,
-  category: string,
-  locale?: string
-): Promise<string> {
+// A guaranteed-safe, wholesome fallback used when a concept is rejected by moderation.
+const SAFE_FALLBACK_CONCEPT =
+  "a happy, healthy multigenerational family smiling together in a bright, warm living room at home, genuine joyful expressions, cozy and hopeful atmosphere";
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function describeError(err: any): { status?: number; message: string; safety: boolean } {
+  const status = err?.status ?? err?.statusCode ?? err?.http_code;
+  const message =
+    err?.error?.message ??
+    err?.message ??
+    err?.response?.data?.error?.message ??
+    (typeof err === "string" ? err : (() => { try { return JSON.stringify(err); } catch { return "unknown error"; } })());
+  const safety = /safety|moderation|rejected|content[_ ]policy/i.test(String(message));
+  return { status, message: String(message), safety };
+}
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+async function generateImageOnce(openai: OpenAI, concept: string, category: string, locale?: string): Promise<string> {
   const response = await openai.images.generate({
     model:   (process.env.OPENAI_IMAGE_MODEL ?? "gpt-image-1") as "gpt-image-1",
     prompt:  buildVideoImagePrompt(concept, locale),
@@ -150,6 +165,42 @@ async function generateOneSceneImage(
     resource_type: "image",
   });
   return upload.secure_url;
+}
+
+// Resilient single-image generation: retries transient/rate-limit errors with backoff,
+// and falls back to a wholesome safe concept if moderation rejects the prompt.
+async function generateOneSceneImage(
+  openai: OpenAI,
+  concept: string,
+  category: string,
+  locale?: string
+): Promise<string> {
+  const MAX_ATTEMPTS = 3;
+  let currentConcept = concept;
+  let lastError = "";
+
+  for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+    try {
+      return await generateImageOnce(openai, currentConcept, category, locale);
+    } catch (err) {
+      const { status, message, safety } = describeError(err);
+      lastError = `(${status ?? "?"}) ${message}`;
+      console.warn(`[video-image] attempt ${attempt + 1} failed: ${lastError}`);
+
+      if (safety) {
+        // Prompt was moderated → swap to the guaranteed-safe concept and retry.
+        currentConcept = SAFE_FALLBACK_CONCEPT;
+        continue;
+      }
+      // Rate limit (429) or transient 5xx/network → backoff and retry.
+      if (attempt < MAX_ATTEMPTS - 1 && (status === 429 || status === undefined || (status ?? 0) >= 500)) {
+        await sleep(2000 * (attempt + 1));
+        continue;
+      }
+      break;
+    }
+  }
+  throw new Error(lastError || "Image generation failed");
 }
 
 // Regenerate a single portrait image from a concept (quick re-roll or an edited prompt).
@@ -173,7 +224,8 @@ export async function generateVideoSceneImages(
   const locale   = storyboard.voiceLanguage;
   const now      = new Date().toISOString();
 
-  const CONCURRENCY = 4;
+  // Keep concurrency low — gpt-image-1 has tight rate limits at high quality.
+  const CONCURRENCY = 2;
   const results: (string | null)[] = new Array(storyboard.scenes.length).fill(null);
 
   for (let start = 0; start < storyboard.scenes.length; start += CONCURRENCY) {
@@ -185,7 +237,7 @@ export async function generateVideoSceneImages(
         try {
           results[idx] = await generateOneSceneImage(openai, concept, category, locale);
         } catch (err) {
-          console.warn(`[generateVideoSceneImages] scene ${idx} failed:`, (err as Error).message);
+          console.warn(`[generateVideoSceneImages] scene ${idx} failed: ${(err as Error).message}`);
           results[idx] = null;
         }
       })
