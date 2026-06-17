@@ -257,15 +257,19 @@ function SocialVerticalCard({
         }}
       />
 
-      {/* Single cinematic full-frame gradient — no separate scrims.
-          Creates a natural portrait-lighting feel with no visible band cut:
-            y=0   (0%):  28% dark — top vignette keeps watermark legible
-            y=346 (18%): 5%  dark — near-clear face zone
-            y=499 (26%): 0%  dark — peak clarity at subject area
-            y=806 (42%): 72% dark — smooth 307 px descent into text zone
-            y=979 (51%): 92% dark — solid text readability
-            y=1094(57%): 97% dark — opaque below safe zone boundary
-          Nothing branded goes below y=1100 — platform UI lives there. */}
+      {/* Single cinematic full-frame gradient.
+          Darkens for watermark at top, clears at subject face zone, descends
+          smoothly into the dark text band, then RECOVERS below the text so the
+          photo remains visible in the lower portion — no solid black void:
+            y=0    (0%):  28% — top vignette, watermark legible
+            y=346  (18%):  5% — near-clear face zone
+            y=499  (26%):  0% — peak clarity at subject
+            y=806  (42%): 72% — 307 px smooth descent (no band cut)
+            y=979  (51%): 92% — solid text readability
+            y=1094 (57%): 95% — peak dark (text ends ~y=1109)
+            y=1286 (67%): 45% — photo opens back up below text
+            y=1536 (80%): 20% — photo clearly visible
+            y=1920 (100%):18% — subtle bottom vignette              */}
       <div
         style={{
           position: "absolute",
@@ -274,7 +278,7 @@ function SocialVerticalCard({
           width: 1080,
           height: 1920,
           background:
-            "linear-gradient(to bottom, rgba(0,0,0,0.28) 0%, rgba(0,0,0,0.05) 18%, rgba(0,0,0,0.00) 26%, rgba(0,0,0,0.72) 42%, rgba(0,0,0,0.92) 51%, rgba(0,0,0,0.97) 57%, rgba(0,0,0,0.97) 100%)",
+            "linear-gradient(to bottom, rgba(0,0,0,0.28) 0%, rgba(0,0,0,0.05) 18%, rgba(0,0,0,0.00) 26%, rgba(0,0,0,0.72) 42%, rgba(0,0,0,0.92) 51%, rgba(0,0,0,0.95) 57%, rgba(0,0,0,0.45) 67%, rgba(0,0,0,0.20) 80%, rgba(0,0,0,0.18) 100%)",
         }}
       />
 
