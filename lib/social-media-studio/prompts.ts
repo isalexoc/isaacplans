@@ -170,9 +170,11 @@ LANGUAGES TO GENERATE: ${locales.join(", ")}
 PLATFORM SPECIFICATIONS:
 ${platformSpecsText}
 
+REQUIRED COMBINATIONS — generate ALL of the following (do not skip any):
+${platforms.flatMap((p) => locales.map((l) => `- ${p} / ${l}`)).join("\n")}
+
 INSTRUCTIONS:
-- Generate exactly ${platforms.length * locales.length} copy objects — one per platform+locale combination
-- For each platform, generate both EN and ES versions (unless only one locale is requested)
+- Generate exactly ${platforms.length * locales.length} copy objects — one for each combination listed above
 - Spanish versions must be original writing adapted for Latin American Spanish — not translations
 - NEVER use the word "insurance", "insured", "insurer", or "policy" — use "plan", "coverage", "benefits", "protection" instead
 - NEVER use "seguro" in Spanish when you can naturally use "plan", "beneficios", or "protección" instead
@@ -185,12 +187,12 @@ INSTRUCTIONS:
 - characterCount should reflect the length of fullPost
 - Hashtags must NOT contain the word "insurance" — use: HealthPlans, FamilyProtection, StateApprovedPlans, BenefitsPlans, FinalExpensePlans, LifeProtection, IsaacPlans
 
-Return a JSON object with this exact shape:
+Return a JSON object with this exact shape (one entry per required combination above):
 {
   "copies": [
     {
-      "platform": "facebook",
-      "locale": "en",
+      "platform": "${platforms[0]}",
+      "locale": "${locales[0]}",
       "hook": "...",
       "body": "...",
       "cta": "...",
@@ -198,7 +200,7 @@ Return a JSON object with this exact shape:
       "fullPost": "...",
       "characterCount": 487
     },
-    ...
+    ... (continue for every combination listed above)
   ]
 }
   `.trim();
