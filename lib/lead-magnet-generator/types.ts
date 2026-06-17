@@ -117,6 +117,32 @@ export interface BilingualLeadMagnetImages {
   es: LeadMagnetImages;
 }
 
+// ─── Image Regeneration ──────────────────────────────────────────────────────
+
+export type LeadMagnetImageSlot = "cover" | `section-${number}`;
+
+export interface LeadMagnetRegenerateImageRequest {
+  locale: "en" | "es";
+  slot: LeadMagnetImageSlot;
+  outline: LeadMagnetOutline;
+  promptInput?: LeadMagnetPromptInput;
+  generatedContent?: GeneratedLeadMagnet;
+}
+
+export interface LeadMagnetRegenerateImageResponse {
+  success: true;
+  data: {
+    locale: "en" | "es";
+    slot: LeadMagnetImageSlot;
+    imageUrl: string;
+  };
+}
+
+export interface LeadMagnetRegenerateImageErrorResponse {
+  success: false;
+  error: string;
+}
+
 // ─── Translation ──────────────────────────────────────────────────────────────
 
 export interface TranslatedLeadMagnet {

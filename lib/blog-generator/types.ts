@@ -180,6 +180,7 @@ export interface BilingualImages {
 
 export interface GenerateImagesRequest {
   content: GeneratedBlogContent;
+  extraction?: YouTubeExtractionResult;
 }
 
 export interface GenerateImagesResponse {
@@ -206,6 +207,31 @@ export interface RegenerateResponse {
 }
 
 export interface RegenerateErrorResponse {
+  success: false;
+  error: string;
+}
+
+// --- Image regeneration types ---
+
+export type ImageSlot = "featured" | "body1" | "body2" | "body3";
+
+export interface RegenerateImageRequest {
+  locale: "en" | "es";
+  slot: ImageSlot;
+  content: GeneratedBlogContent;
+  extraction: YouTubeExtractionResult;
+}
+
+export interface RegenerateImageResponse {
+  success: true;
+  data: {
+    locale: "en" | "es";
+    slot: ImageSlot;
+    image: GeneratedImage;
+  };
+}
+
+export interface RegenerateImageErrorResponse {
   success: false;
   error: string;
 }

@@ -5,6 +5,8 @@ import type {
   LeadMagnetApiResponse,
   BilingualLeadMagnetImages,
   LeadMagnetOutline,
+  LeadMagnetPromptInput,
+  GeneratedLeadMagnet,
 } from "@/lib/lead-magnet-generator/types";
 
 export const maxDuration = 300;
@@ -18,9 +20,13 @@ export async function POST(
   }
 
   let outline: LeadMagnetOutline;
+  let promptInput: LeadMagnetPromptInput | undefined;
+  let generatedContent: GeneratedLeadMagnet | undefined;
   try {
     const body = await request.json();
     outline = body?.outline;
+    promptInput = body?.promptInput;
+    generatedContent = body?.generatedContent;
   } catch {
     return NextResponse.json({ success: false, error: "Invalid request body" }, { status: 400 });
   }
@@ -33,7 +39,11 @@ export async function POST(
   }
 
   try {
-    const { images, warnings } = await generateBilingualLeadMagnetImages(outline);
+    const { images, warnings } = await generateBilingualLeadMagnetImages({
+      outline,
+      promptInput,
+      generatedContent,
+    });
     const response: LeadMagnetApiResponse<BilingualLeadMagnetImages> = {
       success: true,
       data: images,

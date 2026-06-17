@@ -26,6 +26,7 @@ import type {
   BilingualLeadMagnetImages,
   BilingualPublishedLeadMagnet,
   PromoImages,
+  LeadMagnetImageSlot,
 } from "@/lib/lead-magnet-generator/types";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -617,6 +618,7 @@ function ImagesStep({
   const [generating, setGenerating] = useState(false);
   const [imageWarnings, setImageWarnings] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState<"en" | "es">("en");
+  const [regeneratingSlot, setRegeneratingSlot] = useState<{ locale: "en" | "es"; slot: string } | null>(null);
 
   const bilingualImages = state.images;
   const activeImages = bilingualImages ? bilingualImages[activeTab] : undefined;
@@ -634,13 +636,56 @@ function ImagesStep({
     setImageWarnings([]);
     setState((prev) => ({ ...prev, error: undefined }));
     try {
-      const data = await postJson("/api/admin/lead-magnet-generator/generate-images", { outline });
+      const data = await postJson("/api/admin/lead-magnet-generator/generate-images", {
+        outline,
+        promptInput: state.promptInput,
+        generatedContent: state.generatedContent,
+      });
       setState((prev) => ({ ...prev, images: data.data as BilingualLeadMagnetImages }));
       if (data.warnings?.length) setImageWarnings(data.warnings);
     } catch (err) {
       setState((prev) => ({ ...prev, error: err instanceof Error ? err.message : "Image generation failed" }));
     } finally {
       setGenerating(false);
+    }
+  }
+
+  async function handleRegenerateImage(locale: "en" | "es", slot: LeadMagnetImageSlot) {
+    if (!state.images) return;
+    setRegeneratingSlot({ locale, slot });
+    setState((prev) => ({ ...prev, error: undefined }));
+    try {
+      const data = await postJson("/api/admin/lead-magnet-generator/regenerate-image", {
+        locale,
+        slot,
+        outline,
+        promptInput: state.promptInput,
+        generatedContent: state.generatedContent,
+      });
+      const newUrl = data.data.imageUrl as string;
+      setState((prev) => {
+        if (!prev.images) return prev;
+        const localeImages = { ...prev.images[locale] };
+        if (slot === "cover") {
+          localeImages.coverImage = newUrl;
+        } else {
+          const sectionIdx = parseInt(slot.replace("section-", ""));
+          const imageIdx = sectionIndices.indexOf(sectionIdx);
+          if (imageIdx >= 0) {
+            const newSectionImages = [...localeImages.sectionImages];
+            newSectionImages[imageIdx] = newUrl;
+            localeImages.sectionImages = newSectionImages;
+          }
+        }
+        return { ...prev, images: { ...prev.images, [locale]: localeImages } };
+      });
+    } catch (err) {
+      setState((prev) => ({
+        ...prev,
+        error: err instanceof Error ? err.message : `Failed to regenerate ${slot} image`,
+      }));
+    } finally {
+      setRegeneratingSlot(null);
     }
   }
 
@@ -699,18 +744,36 @@ function ImagesStep({
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle className="text-sm uppercase tracking-wide text-muted-foreground">Cover Image</CardTitle>
-                <Button variant="ghost" size="sm" className="text-xs" onClick={generateImages} disabled={generating}>
+                <Button variant="ghost" size="sm" className="text-xs" onClick={generateImages} disabled={generating || !!regeneratingSlot}>
                   <RotateCcw className="h-3 w-3 mr-1" />Regenerate all
                 </Button>
               </div>
             </CardHeader>
             <CardContent>
               {activeImages?.coverImage ? (
-                <img
-                  src={activeImages.coverImage}
-                  alt="Guide cover"
-                  className="w-full max-h-48 object-cover rounded-md"
-                />
+                <div className="relative group">
+                  {regeneratingSlot?.locale === activeTab && regeneratingSlot?.slot === "cover" ? (
+                    <div className="w-full h-48 bg-muted rounded-md flex items-center justify-center">
+                      <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                    </div>
+                  ) : (
+                    <>
+                      <img
+                        src={activeImages.coverImage}
+                        alt="Guide cover"
+                        className="w-full max-h-48 object-cover rounded-md"
+                      />
+                      <button
+                        onClick={() => handleRegenerateImage(activeTab, "cover")}
+                        disabled={!!regeneratingSlot || generating}
+                        className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-md opacity-0 group-hover:opacity-100 transition-opacity disabled:pointer-events-none"
+                        title="Regenerate cover image"
+                      >
+                        <RotateCcw className="h-5 w-5 text-white" />
+                      </button>
+                    </>
+                  )}
+                </div>
               ) : (
                 <div className="w-full h-32 bg-muted rounded-md flex items-center justify-center text-sm text-muted-foreground">
                   Generation failed
@@ -729,21 +792,42 @@ function ImagesStep({
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   {(activeImages?.sectionImages ?? []).map((url, i) => {
                     const sectionIdx = sectionIndices[i];
+                    const slot = `section-${sectionIdx}` as LeadMagnetImageSlot;
+                    const isRegenerating = regeneratingSlot?.locale === activeTab && regeneratingSlot?.slot === slot;
                     const sectionTitle = outline.sections[sectionIdx]?.sectionTitle ?? `Section ${sectionIdx + 1}`;
                     return (
                       <div key={i} className="flex flex-col gap-1">
-                        {url ? (
-                          <img src={url} alt={sectionTitle} className="w-full aspect-square object-cover rounded-md" />
-                        ) : (
-                          <div className="w-full aspect-square bg-muted rounded-md flex items-center justify-center text-xs text-muted-foreground">
-                            Failed
-                          </div>
-                        )}
+                        <div className="relative group">
+                          {isRegenerating ? (
+                            <div className="w-full aspect-square bg-muted rounded-md flex items-center justify-center">
+                              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                            </div>
+                          ) : url ? (
+                            <>
+                              <img src={url} alt={sectionTitle} className="w-full aspect-square object-cover rounded-md" />
+                              <button
+                                onClick={() => handleRegenerateImage(activeTab, slot)}
+                                disabled={!!regeneratingSlot || generating}
+                                className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-md opacity-0 group-hover:opacity-100 transition-opacity disabled:pointer-events-none"
+                                title="Regenerate this image"
+                              >
+                                <RotateCcw className="h-4 w-4 text-white" />
+                              </button>
+                            </>
+                          ) : (
+                            <div className="w-full aspect-square bg-muted rounded-md flex items-center justify-center text-xs text-muted-foreground">
+                              Failed
+                            </div>
+                          )}
+                        </div>
                         <p className="text-xs text-muted-foreground truncate">{sectionTitle}</p>
                       </div>
                     );
                   })}
                 </div>
+                <p className="text-xs text-muted-foreground mt-3">
+                  Hover over any image to regenerate it individually. Use &quot;Regenerate all&quot; to regenerate all images including promo cards.
+                </p>
               </CardContent>
             </Card>
           )}

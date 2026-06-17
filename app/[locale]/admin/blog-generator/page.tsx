@@ -23,9 +23,11 @@ import {
   type FaqItem,
   type YouTubeExtractionResult,
   type GeneratedBlogContent,
+  type GeneratedImage,
   type SanityPublishResult,
   type CTASettings,
   type BilingualImages,
+  type ImageSlot,
 } from "@/lib/blog-generator/types";
 import { CATEGORY_CTA } from "@/lib/blog-generator/cta-config";
 
@@ -122,6 +124,12 @@ export default function BlogGeneratorPage() {
   const [regenerating, setRegenerating] = useState({ title: false, excerpt: false, body: false });
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<RegenerableField, string>>>({});
   const [generatingImages, setGeneratingImages] = useState(false);
+  const [regeneratingImage, setRegeneratingImage] = useState<
+    Record<"en" | "es", Record<ImageSlot, boolean>>
+  >({
+    en: { featured: false, body1: false, body2: false, body3: false },
+    es: { featured: false, body1: false, body2: false, body3: false },
+  });
 
   const [batchUrls, setBatchUrls] = useState("");
   const [batchItems, setBatchItems] = useState<BatchItem[]>([]);
@@ -208,7 +216,7 @@ export default function BlogGeneratorPage() {
       // Image generation — non-fatal
       setStage("generating-images");
       try {
-        const imagesData = await postJson("/api/admin/blog-generator/generate-images", { content });
+        const imagesData = await postJson("/api/admin/blog-generator/generate-images", { content, extraction: extractData.data });
         setImages(imagesData.data);
       } catch {
         setImages(null);
@@ -270,12 +278,48 @@ export default function BlogGeneratorPage() {
     try {
       const data = await postJson("/api/admin/blog-generator/generate-images", {
         content: buildContentFromForm(),
+        extraction: extraction ?? undefined,
       });
       setImages(data.data);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Image generation failed");
     } finally {
       setGeneratingImages(false);
+    }
+  }
+
+  async function handleRegenerateImage(locale: "en" | "es", slot: ImageSlot) {
+    if (!extraction || !images) return;
+    setRegeneratingImage((prev) => ({
+      ...prev,
+      [locale]: { ...prev[locale], [slot]: true },
+    }));
+    setError(null);
+    try {
+      const data = await postJson("/api/admin/blog-generator/regenerate-image", {
+        locale,
+        slot,
+        content: buildContentFromForm(),
+        extraction,
+      });
+      setImages((prev) => {
+        if (!prev) return prev;
+        const localeImages = prev[locale];
+        if (slot === "featured") {
+          return { ...prev, [locale]: { ...localeImages, featured: data.data.image } };
+        }
+        const bodyIndex = parseInt(slot.replace("body", "")) - 1;
+        const newBody = [...localeImages.body] as [GeneratedImage, GeneratedImage, GeneratedImage];
+        newBody[bodyIndex] = data.data.image;
+        return { ...prev, [locale]: { ...localeImages, body: newBody } };
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : `Failed to regenerate ${locale} ${slot} image`);
+    } finally {
+      setRegeneratingImage((prev) => ({
+        ...prev,
+        [locale]: { ...prev[locale], [slot]: false },
+      }));
     }
   }
 
@@ -303,7 +347,7 @@ export default function BlogGeneratorPage() {
 
         let batchImages: BilingualImages | undefined;
         try {
-          const imgData = await postJson("/api/admin/blog-generator/generate-images", { content });
+          const imgData = await postJson("/api/admin/blog-generator/generate-images", { content, extraction: extractData.data });
           batchImages = imgData.data;
         } catch {
           batchImages = undefined;
@@ -452,36 +496,97 @@ export default function BlogGeneratorPage() {
                         {locale === "en" ? "English (American)" : "Spanish (Hispanic)"}
                       </p>
                       <div className="flex gap-3 flex-wrap items-start">
-                        <img
-                          src={images[locale].featured.url}
-                          alt={images[locale].featured.alt}
-                          className="rounded-lg object-cover flex-shrink-0"
-                          style={{ height: "96px", aspectRatio: "16/9" }}
-                        />
+                        {/* Featured image */}
+                        <div className="relative group">
+                          {regeneratingImage[locale].featured ? (
+                            <div
+                              className="flex items-center justify-center bg-muted rounded-lg"
+                              style={{ height: "96px", aspectRatio: "16/9" }}
+                            >
+                              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                            </div>
+                          ) : (
+                            <>
+                              <img
+                                src={images[locale].featured.url}
+                                alt={images[locale].featured.alt}
+                                className="rounded-lg object-cover flex-shrink-0"
+                                style={{ height: "96px", aspectRatio: "16/9" }}
+                              />
+                              <button
+                                onClick={() => handleRegenerateImage(locale, "featured")}
+                                className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                                title="Regenerate this image"
+                              >
+                                <RotateCcw className="h-4 w-4 text-white" />
+                              </button>
+                            </>
+                          )}
+                          <p className="text-[10px] text-muted-foreground mt-1">Featured</p>
+                        </div>
+                        {/* Body images */}
                         <div className="flex gap-2 flex-wrap">
-                          {images[locale].body.map((img, i) => (
-                            <img
-                              key={i}
-                              src={img.url}
-                              alt={img.alt}
-                              className="h-24 w-24 rounded-lg object-cover flex-shrink-0"
-                            />
-                          ))}
+                          {images[locale].body.map((img, i) => {
+                            const slot = `body${i + 1}` as ImageSlot;
+                            return (
+                              <div key={i} className="relative group">
+                                {regeneratingImage[locale][slot] ? (
+                                  <div className="h-24 w-24 flex items-center justify-center bg-muted rounded-lg">
+                                    <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                                  </div>
+                                ) : (
+                                  <>
+                                    <img
+                                      src={img.url}
+                                      alt={img.alt}
+                                      className="h-24 w-24 rounded-lg object-cover flex-shrink-0"
+                                    />
+                                    <button
+                                      onClick={() => handleRegenerateImage(locale, slot)}
+                                      className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                                      title="Regenerate this image"
+                                    >
+                                      <RotateCcw className="h-4 w-4 text-white" />
+                                    </button>
+                                  </>
+                                )}
+                                <p className="text-[10px] text-muted-foreground mt-1">
+                                  {i === 0 ? "25%" : i === 1 ? "50%" : "75%"}
+                                </p>
+                              </div>
+                            );
+                          })}
                         </div>
                       </div>
                     </div>
                   ))}
                   <p className="text-xs text-muted-foreground">
-                    Each locale gets its own featured image + 3 body images (25%, 50%, 75% of post body).
+                    Each locale gets its own featured image + 3 body images (25%, 50%, 75% of post body). Hover over an image to regenerate it individually.
                   </p>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-fit"
-                    onClick={() => setImages(null)}
-                  >
-                    Remove Images
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-fit"
+                      onClick={handleGenerateImages}
+                      disabled={generatingImages}
+                    >
+                      {generatingImages ? (
+                        <><Loader2 className="h-3 w-3 animate-spin mr-1" />Regenerating All...</>
+                      ) : (
+                        <><RotateCcw className="h-3 w-3 mr-1" />Regenerate All Images</>
+                      )}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-fit text-red-600 hover:text-red-700"
+                      onClick={() => setImages(null)}
+                      disabled={generatingImages}
+                    >
+                      Remove Images
+                    </Button>
+                  </div>
                 </div>
               ) : (
                 <div className="flex items-center gap-4">

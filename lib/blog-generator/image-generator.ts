@@ -1,7 +1,14 @@
 import OpenAI, { APIError } from "openai";
 import { createClient } from "next-sanity";
 import { createSlug, generateKey } from "./portable-text";
-import type { GeneratedBlogContent, GeneratedImages, BilingualImages } from "./types";
+import type {
+  GeneratedBlogContent,
+  GeneratedImage,
+  GeneratedImages,
+  BilingualImages,
+  YouTubeExtractionResult,
+  ImageSlot,
+} from "./types";
 
 const IMAGE_SYSTEM_PROMPT_ES = `You are a creative director for a professional insurance agency blog targeting Hispanic/Latino families in the United States. Your job is to write image prompts that produce warm, trustworthy, photorealistic photographs.
 
@@ -29,8 +36,20 @@ Rules for ALL prompts:
 - Mood: warm, trustworthy, hopeful, professional
 - Style: editorial photography, 4K quality`;
 
-// Large pool of distinct subject archetypes. Four unique entries are sampled
-// per post so every set of images looks different from every other post.
+const CATEGORY_DESCRIPTIONS: Record<string, string> = {
+  aca: "ACA / Obamacare — Affordable Care Act marketplace health insurance with subsidies and open enrollment",
+  "temporary-health-insurance": "Short-Term / Temporary Health Insurance — bridge coverage for gaps between jobs or life transitions",
+  "dental-vision": "Dental & Vision Insurance — preventive care, cleanings, eye exams, glasses, and oral health",
+  "hospital-indemnity": "Hospital Indemnity Insurance — cash benefits paid directly when hospitalized, covers out-of-pocket costs",
+  iul: "Indexed Universal Life (IUL) — life insurance with tax-advantaged cash value growth tied to market indexes",
+  "final-expense": "Final Expense / Burial Insurance — whole life policies covering funeral costs and end-of-life expenses",
+  "cancer-plans": "Cancer Insurance Plans — supplemental coverage paying cash benefits upon cancer diagnosis and treatment",
+  "heart-stroke": "Heart Attack & Stroke Insurance — supplemental coverage for cardiovascular emergencies and recovery",
+  general: "General Insurance Education — helping families understand insurance options and make informed decisions",
+  "tips-guides": "Insurance Tips & Guides — practical advice for navigating insurance choices and saving money",
+  news: "Insurance Industry News — updates on regulations, enrollment periods, and market changes",
+};
+
 const SUBJECT_ARCHETYPES_ES = [
   "a single Latina woman in her 40s, professional blazer, reviewing documents at a kitchen table",
   "a young Latino man in his late 20s, alone at a modern desk with a laptop",
@@ -73,20 +92,94 @@ const SUBJECT_ARCHETYPES_EN = [
   "an Asian American teacher in her 30s at a desk with books and papers",
 ];
 
-function pickUniqueArchetypes(pool: string[], count: number): string[] {
-  const shuffled = [...pool].sort(() => Math.random() - 0.5);
-  return shuffled.slice(0, count);
+const SLOT_DESCRIPTIONS: Record<ImageSlot, string> = {
+  featured: "Hero image — wide landscape mood, conveys the post's core theme",
+  body1: "Opening-section image — scene supports the article's introduction",
+  body2: "Mid-article image — scene supports the article's middle section",
+  body3: "Conclusion/CTA image — scene conveys action, resolution, or next step",
+};
+
+function summarizeTranscript(transcript: string | undefined): string | undefined {
+  if (!transcript || transcript.length < 100) return undefined;
+  const truncated = transcript.slice(0, 2000);
+  const lastPeriod = truncated.lastIndexOf(".");
+  return lastPeriod > 500 ? truncated.slice(0, lastPeriod + 1) : truncated;
 }
 
-function buildImageUserPrompt(content: GeneratedBlogContent, locale: "en" | "es"): string {
-  const pool = locale === "es" ? SUBJECT_ARCHETYPES_ES : SUBJECT_ARCHETYPES_EN;
-  const [s1, s2, s3, s4] = pickUniqueArchetypes(pool, 4);
+function extractBodyThemes(bodyMarkdown: string): string {
+  const headings = bodyMarkdown
+    .split("\n")
+    .filter((line) => line.startsWith("## "))
+    .map((line) => line.replace(/^##\s+/, ""))
+    .join(", ");
 
-  return `Generate image prompts for this insurance blog post.
+  const firstParagraph = bodyMarkdown
+    .split("\n\n")
+    .find((block) => block.trim().length > 50 && !block.startsWith("#"));
+
+  return `Section topics: ${headings}\nIntro: ${firstParagraph?.slice(0, 300) ?? ""}`;
+}
+
+function pickRelevantArchetypes(
+  pool: string[],
+  count: number,
+  content: GeneratedBlogContent
+): string[] {
+  const keywords = [
+    content.seo?.focusKeyword?.toLowerCase() ?? "",
+    ...(content.tags?.map((t) => t.toLowerCase()) ?? []),
+    content.category,
+    content.title.toLowerCase(),
+  ].join(" ");
+
+  const scored = pool.map((archetype) => {
+    let score = Math.random() * 0.3;
+    const lower = archetype.toLowerCase();
+    if ((keywords.includes("senior") || keywords.includes("retire") || keywords.includes("final expense") || keywords.includes("elderly")) && (lower.includes("70s") || lower.includes("60s"))) score += 1;
+    if ((keywords.includes("young") || keywords.includes("millennial") || keywords.includes("college") || keywords.includes("student")) && (lower.includes("20s") || lower.includes("college"))) score += 1;
+    if ((keywords.includes("family") || keywords.includes("child") || keywords.includes("parent")) && (lower.includes("father") || lower.includes("mother") || lower.includes("toddler") || lower.includes("daughter") || lower.includes("teenager"))) score += 1;
+    if ((keywords.includes("professional") || keywords.includes("business") || keywords.includes("self-employed")) && (lower.includes("office") || lower.includes("blazer") || lower.includes("meeting") || lower.includes("professional"))) score += 1;
+    if ((keywords.includes("health") || keywords.includes("medical") || keywords.includes("hospital") || keywords.includes("cancer") || keywords.includes("heart")) && (lower.includes("nurse") || lower.includes("healthcare") || lower.includes("clinical"))) score += 1;
+    if ((keywords.includes("worker") || keywords.includes("labor") || keywords.includes("construction")) && (lower.includes("construction") || lower.includes("tradesman") || lower.includes("work gear"))) score += 1;
+    if ((keywords.includes("couple") || keywords.includes("spouse") || keywords.includes("marriage")) && lower.includes("couple")) score += 1;
+    if ((keywords.includes("education") || keywords.includes("learn") || keywords.includes("teacher")) && (lower.includes("teacher") || lower.includes("books") || lower.includes("desk"))) score += 1;
+    return { archetype, score };
+  });
+
+  scored.sort((a, b) => b.score - a.score);
+  return scored.slice(0, count).map((s) => s.archetype);
+}
+
+function buildImageUserPrompt(
+  content: GeneratedBlogContent,
+  locale: "en" | "es",
+  extraction?: YouTubeExtractionResult
+): string {
+  const pool = locale === "es" ? SUBJECT_ARCHETYPES_ES : SUBJECT_ARCHETYPES_EN;
+  const [s1, s2, s3, s4] = pickRelevantArchetypes(pool, 4, content);
+
+  const categoryDesc = CATEGORY_DESCRIPTIONS[content.category] ?? content.category;
+  const themes = content.bodyMarkdown ? extractBodyThemes(content.bodyMarkdown) : "";
+  const transcriptContext = summarizeTranscript(extraction?.transcript);
+  const tags = content.tags?.length ? content.tags.join(", ") : "";
+  const focusKeyword = content.seo?.focusKeyword ?? "";
+  const seoKeywords = content.seo?.keywords?.length ? content.seo.keywords.join(", ") : "";
+
+  let contextBlock = `Generate image prompts for this insurance blog post.
 
 Title: ${content.title}
-Category: ${content.category}
-Excerpt: ${content.excerpt}
+Category: ${categoryDesc}
+Excerpt: ${content.excerpt}`;
+
+  if (focusKeyword) contextBlock += `\nFocus Keyword: ${focusKeyword}`;
+  if (seoKeywords) contextBlock += `\nSEO Keywords: ${seoKeywords}`;
+  if (tags) contextBlock += `\nTags: ${tags}`;
+  if (themes) contextBlock += `\nArticle Themes:\n${themes}`;
+  if (transcriptContext) contextBlock += `\nVideo Context (from source YouTube video):\n${transcriptContext}`;
+
+  return `${contextBlock}
+
+Each image MUST visually represent a DIFFERENT aspect or section of the article. Vary the setting, mood, and activity across all four images — avoid repetitive scenes.
 
 IMPORTANT — each slot has a required subject. Build the scene around that person; do NOT swap them for a group or family.
 
@@ -108,6 +201,46 @@ Return exactly this JSON — no explanation:
     "prompt": "conclusion/CTA image — subject: ${s4} — scene conveys action, resolution, or next step",
     "alt": "descriptive alt text (max 125 chars)"
   }
+}`;
+}
+
+function buildSingleImagePrompt(
+  content: GeneratedBlogContent,
+  locale: "en" | "es",
+  slot: ImageSlot,
+  extraction?: YouTubeExtractionResult
+): string {
+  const pool = locale === "es" ? SUBJECT_ARCHETYPES_ES : SUBJECT_ARCHETYPES_EN;
+  const [archetype] = pickRelevantArchetypes(pool, 1, content);
+
+  const categoryDesc = CATEGORY_DESCRIPTIONS[content.category] ?? content.category;
+  const themes = content.bodyMarkdown ? extractBodyThemes(content.bodyMarkdown) : "";
+  const transcriptContext = summarizeTranscript(extraction?.transcript);
+  const tags = content.tags?.length ? content.tags.join(", ") : "";
+  const focusKeyword = content.seo?.focusKeyword ?? "";
+  const seoKeywords = content.seo?.keywords?.length ? content.seo.keywords.join(", ") : "";
+
+  let contextBlock = `Generate ONE image prompt for the "${slot}" slot of this insurance blog post.
+
+Title: ${content.title}
+Category: ${categoryDesc}
+Excerpt: ${content.excerpt}`;
+
+  if (focusKeyword) contextBlock += `\nFocus Keyword: ${focusKeyword}`;
+  if (seoKeywords) contextBlock += `\nSEO Keywords: ${seoKeywords}`;
+  if (tags) contextBlock += `\nTags: ${tags}`;
+  if (themes) contextBlock += `\nArticle Themes:\n${themes}`;
+  if (transcriptContext) contextBlock += `\nVideo Context (from source YouTube video):\n${transcriptContext}`;
+
+  return `${contextBlock}
+
+Slot: ${SLOT_DESCRIPTIONS[slot]}
+Required subject: ${archetype}
+
+Return exactly this JSON — no explanation:
+{
+  "prompt": "${SLOT_DESCRIPTIONS[slot]} — subject: ${archetype}",
+  "alt": "descriptive alt text for accessibility (max 125 chars)"
 }`;
 }
 
@@ -177,12 +310,12 @@ async function generateImageSet(
   openai: OpenAI,
   model: string,
   content: GeneratedBlogContent,
-  locale: "en" | "es"
+  locale: "en" | "es",
+  extraction?: YouTubeExtractionResult
 ): Promise<GeneratedImages> {
   const systemPrompt = locale === "en" ? IMAGE_SYSTEM_PROMPT_EN : IMAGE_SYSTEM_PROMPT_ES;
   const localeSuffix = locale;
 
-  // Generate prompts
   let prompts: ImagePromptSet;
   try {
     const raw = await openai.chat.completions.create({
@@ -190,7 +323,7 @@ async function generateImageSet(
       response_format: { type: "json_object" },
       messages: [
         { role: "system", content: systemPrompt },
-        { role: "user", content: buildImageUserPrompt(content, locale) },
+        { role: "user", content: buildImageUserPrompt(content, locale, extraction) },
       ],
     });
     prompts = JSON.parse(raw.choices[0].message.content ?? "{}");
@@ -206,7 +339,6 @@ async function generateImageSet(
   const baseSlug = createSlug(content.title).slice(0, 40);
   const suffix = generateKey().slice(0, 6);
 
-  // Generate 4 images in parallel
   let featuredDalle: { buffer: Buffer; revisedPrompt: string };
   let body1Dalle: { buffer: Buffer; revisedPrompt: string };
   let body2Dalle: { buffer: Buffer; revisedPrompt: string };
@@ -234,7 +366,6 @@ async function generateImageSet(
     throw new Error(`[${locale}] Image generation failed: ${msg}`);
   }
 
-  // Upload 4 images to Sanity in parallel
   const [featured, body1, body2, body3] = await Promise.all([
     uploadImageToSanity(featuredDalle.buffer, `${baseSlug}-${localeSuffix}-featured-${suffix}.png`),
     uploadImageToSanity(body1Dalle.buffer, `${baseSlug}-${localeSuffix}-body-1-${suffix}.png`),
@@ -280,7 +411,8 @@ async function generateImageSet(
 }
 
 export async function generateBlogImages(
-  content: GeneratedBlogContent
+  content: GeneratedBlogContent,
+  extraction?: YouTubeExtractionResult
 ): Promise<BilingualImages> {
   if (!process.env.OPENAI_API_KEY) {
     throw new Error("OPENAI_API_KEY is not configured");
@@ -290,9 +422,77 @@ export async function generateBlogImages(
   const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
   const [en, es] = await Promise.all([
-    generateImageSet(openai, model, content, "en"),
-    generateImageSet(openai, model, content, "es"),
+    generateImageSet(openai, model, content, "en", extraction),
+    generateImageSet(openai, model, content, "es", extraction),
   ]);
 
   return { en, es };
+}
+
+export async function regenerateSingleImage(
+  content: GeneratedBlogContent,
+  extraction: YouTubeExtractionResult,
+  locale: "en" | "es",
+  slot: ImageSlot
+): Promise<GeneratedImage> {
+  if (!process.env.OPENAI_API_KEY) {
+    throw new Error("OPENAI_API_KEY is not configured");
+  }
+
+  const model = process.env.OPENAI_MODEL ?? "gpt-4o";
+  const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  const systemPrompt = locale === "en" ? IMAGE_SYSTEM_PROMPT_EN : IMAGE_SYSTEM_PROMPT_ES;
+
+  let promptItem: ImagePromptItem;
+  try {
+    const raw = await openai.chat.completions.create({
+      model,
+      response_format: { type: "json_object" },
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: buildSingleImagePrompt(content, locale, slot, extraction) },
+      ],
+    });
+    promptItem = JSON.parse(raw.choices[0].message.content ?? "{}");
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    throw new Error(`[${locale}/${slot}] Failed to generate image prompt: ${msg}`);
+  }
+
+  if (!promptItem?.prompt) {
+    throw new Error(`[${locale}/${slot}] GPT returned empty image prompt`);
+  }
+
+  const size: "1536x1024" | "1024x1024" = slot === "featured" ? "1536x1024" : "1024x1024";
+
+  let dalleResult: { buffer: Buffer; revisedPrompt: string };
+  try {
+    dalleResult = await generateDalleImage(openai, promptItem.prompt, size);
+  } catch (err) {
+    if (err instanceof APIError) {
+      console.error(`[image-generator/${locale}/${slot}] OpenAI APIError:`, {
+        status: err.status,
+        message: err.message,
+        code: err.code,
+        type: err.type,
+      });
+    }
+    const msg = err instanceof Error ? err.message : String(err);
+    throw new Error(`[${locale}/${slot}] Image generation failed: ${msg}`);
+  }
+
+  const baseSlug = createSlug(content.title).slice(0, 40);
+  const suffix = generateKey().slice(0, 6);
+  const slotLabel = slot === "featured" ? "featured" : `body-${slot.replace("body", "")}`;
+  const filename = `${baseSlug}-${locale}-${slotLabel}-${suffix}.png`;
+
+  const uploaded = await uploadImageToSanity(dalleResult.buffer, filename);
+
+  return {
+    assetId: uploaded.id,
+    url: uploaded.url,
+    prompt: promptItem.prompt,
+    revisedPrompt: dalleResult.revisedPrompt,
+    alt: promptItem.alt,
+  };
 }

@@ -5,6 +5,7 @@ import type {
   GenerateImagesResponse,
   GenerateImagesErrorResponse,
   GeneratedBlogContent,
+  YouTubeExtractionResult,
 } from "@/lib/blog-generator/types";
 
 export const maxDuration = 120;
@@ -18,9 +19,11 @@ export async function POST(
   }
 
   let content: GeneratedBlogContent;
+  let extraction: YouTubeExtractionResult | undefined;
   try {
     const body = await request.json();
     content = body?.content;
+    extraction = body?.extraction;
   } catch {
     return NextResponse.json({ success: false, error: "Invalid request body" }, { status: 400 });
   }
@@ -33,7 +36,7 @@ export async function POST(
   }
 
   try {
-    const images = await generateBlogImages(content);
+    const images = await generateBlogImages(content, extraction);
     return NextResponse.json({ success: true, data: images });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Image generation failed";
