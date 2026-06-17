@@ -123,6 +123,40 @@ export interface VideoScript {
   suggestedCaption: string;          // TikTok/Reel caption to pair with the video
 }
 
+// ─── Generated Video (faceless assembly: images + voiceover + captions) ───────
+
+/**
+ * A single scene in the auto-generated YouTube Short. Produced by the GPT
+ * "video director" step from the existing video script + creative images.
+ */
+export interface VideoScene {
+  narration: string;       // clean spoken text for this scene (no [MM:SS] markers)
+  onScreenText: string;    // short caption/headline burned over the scene
+  imageUrl: string;        // background image (Cloudinary) — Ken Burns motion applied
+}
+
+/**
+ * Render-ready storyboard handed to the JSON2Video assembly step.
+ */
+export interface VideoStoryboard {
+  scenes: VideoScene[];
+  voiceLanguage: SocialLocale; // "en" | "es" — drives ElevenLabs voice + caption lang
+  durationSeconds: 30 | 60;    // target length (from the source video script)
+}
+
+/**
+ * Result of a completed render — the canonical Cloudinary-hosted Short.
+ */
+export interface GeneratedVideo {
+  url: string;                 // Cloudinary mp4 URL (stable, used for YouTube upload)
+  durationSeconds: number;
+  projectId: string;           // JSON2Video render project id
+  voiceLanguage: SocialLocale;
+}
+
+/** Status of an async JSON2Video render job. */
+export type VideoRenderStatus = "running" | "done" | "error";
+
 // ─── Full Generated Package ───────────────────────────────────────────────────
 
 export interface GeneratedSocialPackage {
@@ -161,8 +195,18 @@ export interface SocialPostPublishRequest {
   copies: SocialPostCopy[];
   images: SocialCreativeImages;
   videoScript?: VideoScript;
+  videoUrl?: string;             // generated YouTube Short URL (Cloudinary mp4)
   status: SocialPostStatus;
   tags?: string[];               // optional manual tags for Sanity filtering
+}
+
+// ─── Video generation request bodies ──────────────────────────────────────────
+
+export interface VideoGenerationRequest {
+  source: SocialPostSource;
+  videoScript: VideoScript;
+  images: SocialCreativeImages;
+  locale?: SocialLocale;         // voice language; defaults to source locale
 }
 
 // ─── API Response Shapes ──────────────────────────────────────────────────────

@@ -181,6 +181,13 @@ export const socialPostType = defineType({
         { name: "suggestedCaption", title: "Suggested Caption", type: "text",    rows: 3 },
       ],
     },
+    defineField({
+      name: "videoUrl",
+      title: "Generated Video (9:16 mp4)",
+      type: "url",
+      group: "video",
+      description: "AI-generated YouTube Short — Cloudinary mp4 URL used for publishing",
+    }),
 
     // ─── META ─────────────────────────────────────────────────────────────────
     defineField({

@@ -19,6 +19,8 @@ interface Props {
   verticalImageUrl?: string;
   locale: string;
   publishedPlatforms?: string[];
+  /** Pre-fills the YouTube video URL field (e.g. from an auto-generated AI Short). */
+  initialYoutubeVideoUrl?: string;
 }
 
 interface ConnectionInfo {
@@ -43,7 +45,7 @@ const PLATFORM_ICONS: Record<SocialPlatform, string> = {
   youtube:         "▶️",
 };
 
-export function PublishToSocialSection({ sanityPostId, copies, squareImageUrl, verticalImageUrl, locale, publishedPlatforms = [] }: Props) {
+export function PublishToSocialSection({ sanityPostId, copies, squareImageUrl, verticalImageUrl, locale, publishedPlatforms = [], initialYoutubeVideoUrl }: Props) {
   const alreadyPublished = new Set(publishedPlatforms);
   const [connections, setConnections] = useState<ConnectionInfo[]>([]);
   const [loadingConns, setLoadingConns] = useState(true);
@@ -51,7 +53,12 @@ export function PublishToSocialSection({ sanityPostId, copies, squareImageUrl, v
     {} as Record<SocialPlatform, PlatformPublishState>
   );
   const [platformErrors, setPlatformErrors] = useState<Partial<Record<SocialPlatform, string>>>({});
-  const [youtubeVideoUrl, setYoutubeVideoUrl] = useState("");
+  const [youtubeVideoUrl, setYoutubeVideoUrl] = useState(initialYoutubeVideoUrl ?? "");
+
+  // Keep the field in sync when an AI video finishes generating after mount.
+  useEffect(() => {
+    if (initialYoutubeVideoUrl) setYoutubeVideoUrl(initialYoutubeVideoUrl);
+  }, [initialYoutubeVideoUrl]);
   const [scheduleState, setScheduleState] = useState<ScheduleState>({
     mode: "now",
     scheduledFor: new Date(Date.now() + 60 * 60 * 1000).toISOString().slice(0, 16),

@@ -31,6 +31,7 @@ import type {
   SocialPostCopy,
   SocialCreativeImages,
   VideoScript,
+  GeneratedVideo,
   PublishedSocialPost,
   SocialPlatform,
   SocialLocale,
@@ -43,6 +44,7 @@ import {
   ALL_PLATFORMS,
 } from "@/lib/social-media-studio/types";
 import { PublishToSocialSection } from "@/components/social-publishing/PublishToSocialSection";
+import { VideoGenerator } from "@/components/social-media-studio/VideoGenerator";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -61,6 +63,7 @@ interface StudioState {
   scriptDuration?: 30 | 60;
   isGeneratingScript?: boolean;
   scriptError?: string;
+  generatedVideo?: GeneratedVideo;
   savedResult?: PublishedSocialPost;
 }
 
@@ -1190,6 +1193,7 @@ function ExportStep({
         copies,
         images: images ?? { square: "", vertical: "", sourceImageUrl: "", headline: "", generatedByAI: false },
         videoScript: script,
+        videoUrl: state.generatedVideo?.url,
         status: saveStatus,
         tags,
       });
@@ -1301,6 +1305,18 @@ function ExportStep({
         </div>
       )}
 
+      {/* AI Video — auto-generates the YouTube Short from the script + images */}
+      {state.source && (
+        <VideoGenerator
+          source={state.source}
+          videoScript={state.videoScript}
+          images={state.images}
+          defaultLocale={state.source.locale ?? "en"}
+          initialVideoUrl={state.generatedVideo?.url}
+          onVideoReady={(video) => setState((prev) => ({ ...prev, generatedVideo: video }))}
+        />
+      )}
+
       {/* Save to Sanity */}
       <Card>
         <CardHeader>
@@ -1329,6 +1345,7 @@ function ExportStep({
                   squareImageUrl={state.images?.square}
                   verticalImageUrl={state.images?.vertical}
                   locale={state.source?.locale ?? "en"}
+                  initialYoutubeVideoUrl={state.generatedVideo?.url}
                 />
               </div>
             </div>

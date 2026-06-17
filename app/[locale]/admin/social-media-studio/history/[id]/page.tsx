@@ -1,8 +1,8 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect, notFound } from "next/navigation";
 import { client } from "@/sanity/lib/client";
-import { PublishToSocialSection } from "@/components/social-publishing/PublishToSocialSection";
 import { HistoryImageRegenerator } from "@/components/social-media-studio/HistoryImageRegenerator";
+import { HistoryVideoPublishSection } from "@/components/social-media-studio/HistoryVideoPublishSection";
 import type { SocialPostCopy } from "@/lib/social-media-studio/types";
 
 const DETAIL_QUERY = `*[_type == "socialPost" && _id == $id][0] {
@@ -22,7 +22,8 @@ const DETAIL_QUERY = `*[_type == "socialPost" && _id == $id][0] {
   squareImageUrl,
   verticalImageUrl,
   imageHeadline,
-  videoScript
+  videoScript,
+  videoUrl
 }`;
 
 type GeneratedCopy = Partial<SocialPostCopy> & { platform: string; locale: string };
@@ -55,6 +56,7 @@ interface SocialPostDetail {
   verticalImageUrl?: string;
   imageHeadline?: string;
   videoScript?: VideoScript;
+  videoUrl?: string;
 }
 
 const PLATFORM_LABELS: Record<string, string> = {
@@ -263,18 +265,23 @@ export default async function SocialPostDetailPage({
         </section>
       )}
 
-      {/* Publish to Social */}
-      <section className="space-y-3">
-        <h2 className="text-lg font-semibold">Publish to Social</h2>
-        <PublishToSocialSection
-          sanityPostId={post._id}
-          copies={localeCopies as SocialPostCopy[]}
-          squareImageUrl={post.squareImageUrl}
-          verticalImageUrl={post.verticalImageUrl}
-          locale={postLocale}
-          publishedPlatforms={post.publishedPlatforms ?? []}
-        />
-      </section>
+      {/* AI Video + Publish to Social (shared state: a finished render auto-fills YouTube) */}
+      <HistoryVideoPublishSection
+        postId={post._id}
+        sourceTitle={post.sourceTitle ?? "Untitled"}
+        sourceCategory={post.sourceCategory}
+        sourceLocale={postLocale}
+        sourcePublicUrl={post.sourceUrl}
+        videoScript={post.videoScript}
+        sourceImageUrl={post.sourceImageUrl}
+        squareImageUrl={post.squareImageUrl}
+        verticalImageUrl={post.verticalImageUrl}
+        imageHeadline={post.imageHeadline}
+        initialVideoUrl={post.videoUrl}
+        copies={localeCopies as SocialPostCopy[]}
+        publishLocale={postLocale}
+        publishedPlatforms={post.publishedPlatforms ?? []}
+      />
     </div>
   );
 }

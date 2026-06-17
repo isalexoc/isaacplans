@@ -82,6 +82,7 @@ export async function publishSocialPost(
     verticalImageUrl: req.images.vertical,
     imageHeadline:    req.images.headline,
     ...(videoScript ? { videoScript } : {}),
+    ...(req.videoUrl ? { videoUrl: req.videoUrl } : {}),
     status:           req.status,
     tags:             req.tags ?? [],
     createdAt:        now,
