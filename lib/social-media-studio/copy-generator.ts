@@ -23,7 +23,7 @@ export async function generateSocialCopy(
       { role: "system", content: COPY_GENERATION_SYSTEM_PROMPT },
       { role: "user",   content: buildCopyPrompt(source, platforms, locales) },
     ],
-    max_tokens: 6000,
+    max_tokens: 8000,
     temperature: 0.75,
   });
 
@@ -35,7 +35,22 @@ export async function generateSocialCopy(
     throw new Error("AI returned no copy variants. Check the prompt or try again.");
   }
 
-  return copies.map((item, i) => validateAndNormalizeCopy(item, i));
+  const result = copies.map((item, i) => validateAndNormalizeCopy(item, i));
+
+  // Verify every requested platform+locale combination is present
+  const missing: string[] = [];
+  for (const platform of platforms) {
+    for (const locale of locales) {
+      if (!result.find((c) => c.platform === platform && c.locale === locale)) {
+        missing.push(`${platform}/${locale}`);
+      }
+    }
+  }
+  if (missing.length > 0) {
+    throw new Error(`AI did not generate copy for: ${missing.join(", ")}. Please try again.`);
+  }
+
+  return result;
 }
 
 function validateAndNormalizeCopy(raw: unknown, index: number): SocialPostCopy {
