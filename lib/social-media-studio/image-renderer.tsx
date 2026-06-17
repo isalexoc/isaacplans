@@ -257,34 +257,24 @@ function SocialVerticalCard({
         }}
       />
 
-      {/* Scrim 1 — narrow top vignette (y=0–180) keeps the watermark pill legible
-          without darkening the subject area below. */}
+      {/* Single cinematic full-frame gradient — no separate scrims.
+          Creates a natural portrait-lighting feel with no visible band cut:
+            y=0   (0%):  28% dark — top vignette keeps watermark legible
+            y=346 (18%): 5%  dark — near-clear face zone
+            y=499 (26%): 0%  dark — peak clarity at subject area
+            y=806 (42%): 72% dark — smooth 307 px descent into text zone
+            y=979 (51%): 92% dark — solid text readability
+            y=1094(57%): 97% dark — opaque below safe zone boundary
+          Nothing branded goes below y=1100 — platform UI lives there. */}
       <div
         style={{
           position: "absolute",
           top: 0,
           left: 0,
           width: 1080,
-          height: 180,
-          background: "linear-gradient(to bottom, rgba(0,0,0,0.58) 0%, transparent 100%)",
-        }}
-      />
-
-      {/* Scrim 2 — mid safe-zone content band (y=580–1100).
-          Reels safe zone per template: y≈200–1100 on a 1920px canvas.
-          Subjects (top-third of frame) land at y=0–640, so the scrim fades in
-          BELOW the subject area. The content block sits at y=780–1083,
-          comfortably inside the safe zone and 140 px below the last subject pixel.
-          Nothing branded goes below y=1100 — that's where platform UI lives. */}
-      <div
-        style={{
-          position: "absolute",
-          top: 580,
-          left: 0,
-          width: 1080,
-          height: 520,
+          height: 1920,
           background:
-            "linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.88) 35%, rgba(0,0,0,0.95) 100%)",
+            "linear-gradient(to bottom, rgba(0,0,0,0.28) 0%, rgba(0,0,0,0.05) 18%, rgba(0,0,0,0.00) 26%, rgba(0,0,0,0.72) 42%, rgba(0,0,0,0.92) 51%, rgba(0,0,0,0.97) 57%, rgba(0,0,0,0.97) 100%)",
         }}
       />
 
@@ -316,10 +306,12 @@ function SocialVerticalCard({
         </span>
       </div>
 
-      {/* Content block — anchored in the lower safe zone (y=780–1083).
-          Sits 140 px below the subject area (top-third ends at y≈640) and
-          ends 32 px above the platform-UI boundary at y≈1115.
-          Scrim is fully dark (>88%) from y=783 onward — text is fully legible. */}
+      {/* Content block — lower safe zone (y=780–≈1085).
+          At y=780 the gradient is ~66% dark; at headline start (~y=832) it's
+          ~75% dark — both are fully legible with 900-weight white text.
+          Headline font is 64 px (smaller than square's 68 px) so that even
+          long Spanish titles wrap to 3 lines and stay within y≈1085,
+          comfortably inside the safe zone boundary at y≈1100. */}
       <div
         style={{
           position: "absolute",
@@ -338,14 +330,14 @@ function SocialVerticalCard({
             alignSelf: "flex-start",
             backgroundColor: "#0077B6",
             borderRadius: 100,
-            padding: "12px 28px",
-            marginBottom: 28,
+            padding: "10px 24px",
+            marginBottom: 22,
           }}
         >
           <span
             style={{
               color: "white",
-              fontSize: 26,
+              fontSize: 22,
               fontWeight: 900,
               letterSpacing: 2,
             }}
@@ -354,14 +346,14 @@ function SocialVerticalCard({
           </span>
         </div>
 
-        {/* Headline */}
+        {/* Headline — 64 px keeps long titles within the safe zone */}
         <span
           style={{
             color: "white",
-            fontSize: 74,
+            fontSize: 64,
             fontWeight: 900,
-            lineHeight: 1.1,
-            marginBottom: 28,
+            lineHeight: 1.08,
+            marginBottom: 22,
           }}
         >
           {headline}
@@ -371,7 +363,7 @@ function SocialVerticalCard({
         <span
           style={{
             color: "#00B4D8",
-            fontSize: 28,
+            fontSize: 26,
             fontWeight: 900,
             letterSpacing: 2,
             textTransform: "uppercase",

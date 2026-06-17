@@ -109,8 +109,8 @@ function buildImagePrompt(scene: string, locale?: string): string {
     `Camera: Canon EOS R5, 85mm f/1.4 portrait lens, shallow depth of field with soft bokeh background.`,
     `Mood: emotionally authentic, warm color grading.`,
     demographic,
-    `CRITICAL COMPOSITION — place ALL faces and upper bodies in the TOP THIRD of the square frame only.`,
-    `The BOTTOM HALF of the image must be completely open — blurred background, bokeh, soft ground, or empty space only. No faces or subjects below the midpoint.`,
+    `CRITICAL COMPOSITION — place ALL faces and upper bodies strictly in the TOP 28% of the square frame only (upper quarter-plus; approximately the top 287 pixels of a 1024 px image).`,
+    `The BOTTOM 55% of the image must be completely open — soft bokeh, blurred background, empty environment only. Absolutely no faces, hands, or subjects anywhere below the midpoint.`,
     `PROHIBITED: No text, words, numbers, signs, logos, watermarks, or graphic overlays of any kind anywhere in the image.`,
     `STYLE: Hyper-realistic professional photograph. Absolutely NOT an illustration, NOT vector art, NOT a painting, NOT CGI render, NOT digital art. Real photography only.`,
   ].join(" ");
