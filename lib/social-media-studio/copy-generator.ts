@@ -9,6 +9,9 @@ import {
   ALL_LOCALES,
 } from "./types";
 
+// Platforms where the exact publicUrl must appear in the cta/fullPost
+const URL_REQUIRED_PLATFORMS: SocialPlatform[] = ["facebook", "threads", "google_business"];
+
 export async function generateSocialCopy(
   source: SocialPostSource,
   platforms: SocialPlatform[] = ALL_PLATFORMS,
@@ -47,7 +50,9 @@ async function generateForLocale(
     throw new Error(`AI returned no copy for locale "${locale}". Please try again.`);
   }
 
-  const result = copies.map((item, i) => validateAndNormalizeCopy(item, i));
+  const result = copies
+    .map((item, i) => validateAndNormalizeCopy(item, i))
+    .map((copy) => enforceCtaUrl(copy, source.publicUrl));
 
   // Verify every platform is present for this locale
   const missing = platforms.filter(
@@ -60,6 +65,25 @@ async function generateForLocale(
   }
 
   return result;
+}
+
+// Ensures the exact publicUrl appears in cta + fullPost for link-clickable platforms.
+// If the AI mangled the URL, this replaces the wrong one; if it omitted it, appends it.
+function enforceCtaUrl(copy: SocialPostCopy, publicUrl: string | undefined): SocialPostCopy {
+  if (!publicUrl || !URL_REQUIRED_PLATFORMS.includes(copy.platform)) return copy;
+  if (copy.cta.includes(publicUrl) && copy.fullPost.includes(publicUrl)) return copy;
+
+  // Fix cta: replace any mangled http URL, or append if none present
+  const cta = copy.cta.match(/https?:\/\/\S+/)
+    ? copy.cta.replace(/https?:\/\/\S+/g, publicUrl)
+    : `${copy.cta.trimEnd()} ${publicUrl}`;
+
+  // Fix fullPost: same replacement strategy
+  const fullPost = copy.fullPost.match(/https?:\/\/\S+/)
+    ? copy.fullPost.replace(/https?:\/\/\S+/g, publicUrl)
+    : `${copy.fullPost.trimEnd()} ${publicUrl}`;
+
+  return { ...copy, cta, fullPost, characterCount: fullPost.length };
 }
 
 function validateAndNormalizeCopy(raw: unknown, index: number): SocialPostCopy {

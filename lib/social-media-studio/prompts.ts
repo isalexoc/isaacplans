@@ -179,8 +179,9 @@ INSTRUCTIONS:
 - NEVER use the word "insurance", "insured", "insurer", or "policy" — use "plan", "coverage", "benefits", "protection" instead
 - NEVER use "seguro" in Spanish when you can naturally use "plan", "beneficios", or "protección" instead
 - Lead with emotions and outcomes — protection, peace of mind, family security, not product features
-- CTA LINK RULE (CRITICAL — follow exactly per platform):
-  • Facebook, Threads, Google Business: if a CTA LINK is provided you MUST include the full URL at the end of the "cta" field. Do not summarize or shorten it. Example: "Read the full guide: https://isaacplans.com/en/blog/my-post"
+- CTA LINK RULE — URL INTEGRITY IS CRITICAL:
+  The CTA LINK${source.publicUrl ? ` (${source.publicUrl})` : ""} must be copied CHARACTER FOR CHARACTER into the cta field. NEVER modify, paraphrase, shorten, rewrite, or alter ANY part of the URL — not the domain, not the path, not the slug. A wrong URL breaks the link for real users. Copy it exactly as given.
+  • Facebook, Threads, Google Business: include the exact URL at the end of the "cta" field. Example: "Read the full guide: ${source.publicUrl ?? "https://isaacplans.com/en/blog/example"}"
   • Instagram, TikTok, YouTube Shorts: links are NOT clickable. Do NOT include a URL. The cta must end with exactly: "comment INFO to know more" (English) or "comenta INFO para saber más" (Spanish).
 - Every "fullPost" must be the complete assembled post ready to paste into a scheduling tool:
   hook + two newlines + body + two newlines + cta + (for platforms with hashtags: two newlines + hashtags joined with spaces, each prefixed with #)
