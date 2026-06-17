@@ -145,7 +145,9 @@ export interface ImageGenerationRequest {
   generateNew?: boolean;         // force DALL-E even if sourceImageUrl provided
   headline: string;              // text to overlay on both image sizes
   category?: string;             // used for DALL-E prompt scene selection
-  sourceTitle?: string;          // used for DALL-E prompt context
+  sourceTitle?: string;          // post/lead magnet title for visual concept generation
+  subtitle?: string;             // post excerpt or lead magnet subtitle
+  bodyText?: string;             // plain text body excerpt (first ~500 chars) for concept
 }
 
 export interface VideoScriptRequest {

@@ -3,6 +3,8 @@ import cloudinary from "@/config/cloudinary";
 import { renderSocialImages } from "./image-renderer";
 import type { ImageGenerationRequest, SocialCreativeImages } from "./types";
 
+// ─── Fallback scenes (used when GPT concept generation fails or no content available) ──
+
 const CATEGORY_SCENES: Record<string, string> = {
   "final-expense":              "tender moment between an elderly man and woman holding hands on a park bench, warm afternoon sunlight filtering through trees, genuine loving expressions on their faces",
   "aca":                        "vibrant healthy family of four — parents and two children — laughing together in a sunny outdoor park, genuine authentic joy on their faces",
@@ -17,12 +19,81 @@ const CATEGORY_SCENES: Record<string, string> = {
   "news":                       "business professional in smart attire reviewing documents at a modern glass-and-wood desk, thoughtful confident expression, bright contemporary office",
 };
 
-function buildImagePrompt(headline: string, category?: string): string {
-  const scene = CATEGORY_SCENES[category ?? ""] ?? CATEGORY_SCENES["general"];
+// ─── Variation seeds ────────────────────────────────────────────────────────────
+// Appended randomly to every prompt so regenerations produce different lighting/mood,
+// even when the visual concept and category are identical.
+
+const VARIATION_MOODS = [
+  "golden hour sunlight, rich amber warmth",
+  "soft diffused morning light, fresh and bright",
+  "gentle overcast natural light, clean airy feel",
+  "late afternoon sun, warm honey-toned glow",
+  "soft indoor window light, intimate and calm",
+  "dappled outdoor shade, vibrant and lush",
+  "early morning mist, serene and hopeful",
+  "bright midday sun, energetic and vivid",
+];
+
+function pickVariationMood(): string {
+  return VARIATION_MOODS[Math.floor(Math.random() * VARIATION_MOODS.length)];
+}
+
+// ─── GPT visual concept generator ──────────────────────────────────────────────
+// Calls GPT-4o-mini to synthesize a specific photographic scene from post content.
+// Returns a 1–2 sentence scene description tailored to the article/lead magnet.
+
+async function generateVisualConcept(
+  openai: OpenAI,
+  title: string,
+  category: string,
+  subtitle?: string,
+  bodyText?: string
+): Promise<string | null> {
+  const contentSnippet = [
+    title,
+    subtitle ?? "",
+    (bodyText ?? "").slice(0, 500),
+  ]
+    .filter(Boolean)
+    .join("\n\n")
+    .trim();
+
+  if (!contentSnippet) return null;
+
+  const categoryHint = CATEGORY_SCENES[category] ? `Insurance niche: ${category.replace(/-/g, " ")}.` : "";
+
+  const userMessage = `Create a photographic scene description for a professional social media ad image based on this insurance content:\n\n${contentSnippet}\n\n${categoryHint}\n\nReturn ONLY the scene description. No preamble, no quotes, no extra text.`;
+
+  try {
+    const completion = await openai.chat.completions.create({
+      model:       process.env.OPENAI_MODEL ?? "gpt-4o-mini",
+      max_tokens:  120,
+      temperature: 0.9,
+      messages: [
+        {
+          role:    "system",
+          content:
+            "You are a professional art director. Return ONLY a 1–2 sentence photographic scene description (subjects, emotion, setting, key visual detail) appropriate for a hyper-realistic professional social media ad photograph. Be specific to the content provided. Do NOT use the word 'insurance'.",
+        },
+        { role: "user", content: userMessage },
+      ],
+    });
+    return completion.choices[0]?.message?.content?.trim() ?? null;
+  } catch (err) {
+    console.warn("[generate-social-images] GPT concept generation failed, using fallback:", (err as Error).message);
+    return null;
+  }
+}
+
+// ─── DALL-E prompt builder ──────────────────────────────────────────────────────
+
+function buildImagePrompt(scene: string): string {
+  const mood = pickVariationMood();
   return [
     `Cinematic professional portrait photograph: ${scene}.`,
-    `Camera: Canon EOS R5, 85mm f/1.4 portrait lens, natural soft window light or warm golden hour.`,
-    `Mood: emotionally authentic, warm color grading, shallow depth of field with soft bokeh background.`,
+    `Lighting: ${mood}.`,
+    `Camera: Canon EOS R5, 85mm f/1.4 portrait lens, shallow depth of field with soft bokeh background.`,
+    `Mood: emotionally authentic, warm color grading.`,
     `CRITICAL COMPOSITION — this square image will be displayed in a tall portrait frame where the bottom half is hidden by a text overlay:`,
     `Place ALL faces and upper bodies in the TOP THIRD of the square frame only.`,
     `The BOTTOM HALF of the image must be completely open — blurred background, bokeh, soft ground, or empty space only. No faces or subjects below the midpoint.`,
@@ -38,10 +109,9 @@ export async function generateSocialImages(
   let sourceImageUrl = req.sourceImageUrl ?? "";
   let generatedByAI = false;
 
-  // ─── Step 1: Resolve the base image URL ───────────────────────────────────────
-  // For "use source image": upload to Cloudinary to get a stable CDN-hosted URL,
-  // then use that as the background for the rendered card.
-  // For "generate new": create via DALL-E 3 and use the returned URL directly.
+  // ─── Step 1: Resolve the base image URL ────────────────────────────────────
+  // For "use source image": upload to Cloudinary to get a stable CDN-hosted URL.
+  // For "generate new": build a content-aware prompt then call DALL-E.
 
   let resolvedImageUrl: string | null = null;
 
@@ -60,15 +130,29 @@ export async function generateSocialImages(
   if (!resolvedImageUrl) {
     try {
       const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+      // Generate content-aware visual concept from post data; fall back to category scene.
+      const generatedConcept = await generateVisualConcept(
+        openai,
+        req.sourceTitle ?? req.headline,
+        req.category ?? "general",
+        req.subtitle,
+        req.bodyText
+      );
+      const scene =
+        generatedConcept ??
+        CATEGORY_SCENES[req.category ?? ""] ??
+        CATEGORY_SCENES["general"];
+
       const response = await openai.images.generate({
         model:   (process.env.OPENAI_IMAGE_MODEL ?? "gpt-image-1") as "gpt-image-1",
-        prompt:  buildImagePrompt(req.sourceTitle ?? req.headline, req.category),
+        prompt:  buildImagePrompt(scene),
         quality: "high",
         size:    "1024x1024",
         n:       1,
       } as Parameters<typeof openai.images.generate>[0]);
 
-      // gpt-image-1 (and gpt-image-2) return base64 data, not a URL
+      // gpt-image-1 returns base64 data, not a URL
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const b64 = (response as any).data?.[0]?.b64_json;
       if (!b64) throw new Error("Image model returned no image data");
@@ -97,7 +181,7 @@ export async function generateSocialImages(
     }
   }
 
-  // ─── Step 2: Render branded card images via next/og and upload to Cloudinary ──
+  // ─── Step 2: Render branded card images via next/og and upload to Cloudinary ─
 
   const { square, vertical } = await renderSocialImages(
     req.headline,

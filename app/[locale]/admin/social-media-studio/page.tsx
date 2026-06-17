@@ -756,6 +756,8 @@ function ImageStudioStep({
         generateNew: newBg,
         category: state.source?.category,
         sourceTitle: state.source?.title,
+        subtitle: state.source?.subtitle,
+        bodyText: state.source?.bodyText,
       });
       const images = result.data as SocialCreativeImages;
       // Surface server-side warnings (e.g. DALL-E failure) as a visible error

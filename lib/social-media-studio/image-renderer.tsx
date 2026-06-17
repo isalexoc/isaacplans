@@ -257,40 +257,40 @@ function SocialVerticalCard({
         }}
       />
 
-      {/* Scrim 1 — narrow top vignette (y=0–380) so the watermark pill is
-          readable against any photo without darkening the whole image */}
+      {/* Scrim 1 — narrow top vignette (y=0–160) for watermark readability only.
+          Stays tight so the photographic subject area stays fully clear. */}
       <div
         style={{
           position: "absolute",
           top: 0,
           left: 0,
           width: 1080,
-          height: 380,
-          background: "linear-gradient(to bottom, rgba(0,0,0,0.50) 0%, transparent 100%)",
+          height: 160,
+          background: "linear-gradient(to bottom, rgba(0,0,0,0.55) 0%, transparent 100%)",
         }}
       />
 
-      {/* Scrim 2 — focused content band (y=500–1120, i.e. bottom of safe zone).
-          Photo is 100% clear above y=500 and below y=1120 (unsafe zone).
-          Fades in from transparent → full dark in the first 28% of its height. */}
+      {/* Scrim 2 — bottom text band (y=1300–1920).
+          Photo is crystal-clear from y=160 to y=1350; subjects (top third of
+          the DALL-E image) land at y=0–640, far above any overlay. */}
       <div
         style={{
           position: "absolute",
-          top: 500,
+          top: 1300,
           left: 0,
           width: 1080,
           height: 620,
           background:
-            "linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.88) 28%, rgba(0,0,0,0.92) 100%)",
+            "linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.90) 35%, rgba(0,0,0,0.96) 100%)",
         }}
       />
 
-      {/* Watermark pill — top-right inside the top vignette zone */}
+      {/* Watermark pill — top-right, inside the narrow top vignette */}
       <div
         style={{
           position: "absolute",
-          top: 244,
-          right: 52,
+          top: 28,
+          right: 48,
           display: "flex",
           alignItems: "center",
           gap: 14,
@@ -313,18 +313,18 @@ function SocialVerticalCard({
         </span>
       </div>
 
-      {/* Content block — sits inside the focused content scrim (safe zone bottom).
-          Starts at y=648 where the scrim is already ~90% dark; ends ≈y=1110,
-          comfortably inside the safe zone before the platform-UI zone at y≈1120. */}
+      {/* Content block — bottom-anchored, inside the bottom scrim band.
+          Text sits at the very bottom (standard Instagram Stories / TikTok layout).
+          Subject area (top 33% of frame) is 890 px above the text zone. */}
       <div
         style={{
           position: "absolute",
-          top: 648,
+          bottom: 0,
           left: 0,
           right: 0,
           display: "flex",
           flexDirection: "column",
-          padding: "0 72px",
+          padding: "0 72px 88px 72px",
         }}
       >
         {/* Category pill */}
