@@ -18,14 +18,17 @@ import type {
 
 const JSON2VIDEO_BASE = "https://api.json2video.com/v2/movies";
 
-// Default ElevenLabs multilingual voices (handle both EN and ES). Override per-locale via env.
-const DEFAULT_VOICE_EN = "21m00Tcm4TlvDq8ikWAM"; // Rachel (multilingual)
-const DEFAULT_VOICE_ES = "21m00Tcm4TlvDq8ikWAM";
+// Default ElevenLabs voices. IMPORTANT: JSON2Video's managed ElevenLabs (no connection)
+// requires a voice NAME (e.g. "Rachel"), NOT a raw voice id. Raw ids only work when you
+// supply your own ElevenLabs key via JSON2VIDEO_ELEVENLABS_CONNECTION. The multilingual
+// model speaks Spanish in any voice, so the same name works for EN and ES text.
+const DEFAULT_VOICE_EN = "Rachel";
+const DEFAULT_VOICE_ES = "Rachel";
 
 function elevenLabsVoiceFor(locale: SocialLocale): string {
   return locale === "es"
-    ? process.env.ELEVENLABS_VOICE_ID_ES ?? DEFAULT_VOICE_ES
-    : process.env.ELEVENLABS_VOICE_ID_EN ?? DEFAULT_VOICE_EN;
+    ? process.env.ELEVENLABS_VOICE_ID_ES || DEFAULT_VOICE_ES
+    : process.env.ELEVENLABS_VOICE_ID_EN || DEFAULT_VOICE_EN;
 }
 
 // ─── Step 1: Storyboard (GPT "video director") ───────────────────────────────────
@@ -149,14 +152,12 @@ function buildMovieJson(storyboard: VideoStoryboard) {
             text:     scene.onScreenText,
             duration: -2,
             settings: {
-              "font-family":        "Oswald",
-              "font-size":          "64px",
-              "font-weight":        "700",
-              "font-color":         "#FFFFFF",
-              "text-shadow":        "0 4px 18px rgba(0,0,0,0.85)",
-              "vertical-position":  "top",
+              "font-family":         "Oswald",
+              "font-size":           "64px",
+              "font-color":          "#FFFFFF",
+              "vertical-position":   "top",
               "horizontal-position": "center",
-              "text-align":         "center",
+              "text-align":          "center",
             },
           }]
         : []),
