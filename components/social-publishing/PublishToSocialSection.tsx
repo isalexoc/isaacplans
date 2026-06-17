@@ -68,17 +68,7 @@ export function PublishToSocialSection({ sanityPostId, copies, squareImageUrl, v
     const copy = copies.find((c) => c.platform === platform && c.locale === locale)
       ?? copies.find((c) => c.platform === platform && c.locale === "en")
       ?? copies.find((c) => c.platform === platform);
-    if (copy) return copy.fullPost;
-    // For YouTube, fall back to TikTok or Instagram copy (old posts may lack a youtube entry)
-    if (platform === "youtube") {
-      const fallback =
-        copies.find((c) => c.platform === "tiktok" && c.locale === locale)
-        ?? copies.find((c) => c.platform === "tiktok")
-        ?? copies.find((c) => c.platform === "instagram" && c.locale === locale)
-        ?? copies.find((c) => c.platform === "instagram");
-      return fallback?.fullPost ?? "";
-    }
-    return "";
+    return copy?.fullPost ?? "";
   }
 
   function getImageForPlatform(platform: SocialPlatform): string {
@@ -240,7 +230,7 @@ export function PublishToSocialSection({ sanityPostId, copies, squareImageUrl, v
 
       {/* YouTube video URL input — only shown when YouTube is connected */}
       {connectedPlatforms.has("youtube") && (
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-1.5">
           <label className="text-xs font-medium text-muted-foreground">▶️ YouTube video URL (9:16 mp4)</label>
           <input
             type="url"
@@ -249,6 +239,21 @@ export function PublishToSocialSection({ sanityPostId, copies, squareImageUrl, v
             onChange={(e) => setYoutubeVideoUrl(e.target.value)}
             className="border rounded-md px-3 py-1.5 text-sm w-full"
           />
+          {/* Caption preview so the user can verify what description will be uploaded */}
+          {(() => {
+            const ytCaption = getCaptionForPlatform("youtube");
+            return ytCaption ? (
+              <div className="rounded-md border border-dashed bg-muted/40 px-3 py-2">
+                <p className="text-xs font-medium text-muted-foreground mb-1">Description that will be sent to YouTube:</p>
+                <p className="text-xs whitespace-pre-wrap text-foreground">{ytCaption}</p>
+              </div>
+            ) : (
+              <p className="text-xs text-amber-600">
+                No YouTube copy found for this post. The video will be uploaded with title "YouTube Short".
+                Regenerate the copy in the studio to add a description.
+              </p>
+            );
+          })()}
         </div>
       )}
 

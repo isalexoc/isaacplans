@@ -52,6 +52,14 @@ export const socialPostType = defineType({
       readOnly: true,
     }),
     defineField({
+      name: "sourceLocale",
+      title: "Source Locale",
+      type: "string",
+      group: "source",
+      options: { list: [{ title: "English", value: "en" }, { title: "Spanish", value: "es" }] },
+      readOnly: true,
+    }),
+    defineField({
       name: "sourceUrl",
       title: "Source Public URL",
       type: "url",
