@@ -257,31 +257,34 @@ function SocialVerticalCard({
         }}
       />
 
-      {/* Scrim 1 — narrow top vignette (y=0–160) for watermark readability only.
-          Stays tight so the photographic subject area stays fully clear. */}
+      {/* Scrim 1 — narrow top vignette (y=0–180) keeps the watermark pill legible
+          without darkening the subject area below. */}
       <div
         style={{
           position: "absolute",
           top: 0,
           left: 0,
           width: 1080,
-          height: 160,
-          background: "linear-gradient(to bottom, rgba(0,0,0,0.55) 0%, transparent 100%)",
+          height: 180,
+          background: "linear-gradient(to bottom, rgba(0,0,0,0.58) 0%, transparent 100%)",
         }}
       />
 
-      {/* Scrim 2 — bottom text band (y=1300–1920).
-          Photo is crystal-clear from y=160 to y=1350; subjects (top third of
-          the DALL-E image) land at y=0–640, far above any overlay. */}
+      {/* Scrim 2 — mid safe-zone content band (y=580–1100).
+          Reels safe zone per template: y≈200–1100 on a 1920px canvas.
+          Subjects (top-third of frame) land at y=0–640, so the scrim fades in
+          BELOW the subject area. The content block sits at y=780–1083,
+          comfortably inside the safe zone and 140 px below the last subject pixel.
+          Nothing branded goes below y=1100 — that's where platform UI lives. */}
       <div
         style={{
           position: "absolute",
-          top: 1300,
+          top: 580,
           left: 0,
           width: 1080,
-          height: 620,
+          height: 520,
           background:
-            "linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.90) 35%, rgba(0,0,0,0.96) 100%)",
+            "linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.88) 35%, rgba(0,0,0,0.95) 100%)",
         }}
       />
 
@@ -313,18 +316,19 @@ function SocialVerticalCard({
         </span>
       </div>
 
-      {/* Content block — bottom-anchored, inside the bottom scrim band.
-          Text sits at the very bottom (standard Instagram Stories / TikTok layout).
-          Subject area (top 33% of frame) is 890 px above the text zone. */}
+      {/* Content block — anchored in the lower safe zone (y=780–1083).
+          Sits 140 px below the subject area (top-third ends at y≈640) and
+          ends 32 px above the platform-UI boundary at y≈1115.
+          Scrim is fully dark (>88%) from y=783 onward — text is fully legible. */}
       <div
         style={{
           position: "absolute",
-          bottom: 0,
+          top: 780,
           left: 0,
           right: 0,
           display: "flex",
           flexDirection: "column",
-          padding: "0 72px 88px 72px",
+          padding: "0 72px",
         }}
       >
         {/* Category pill */}

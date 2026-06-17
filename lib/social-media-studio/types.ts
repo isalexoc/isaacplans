@@ -148,6 +148,7 @@ export interface ImageGenerationRequest {
   sourceTitle?: string;          // post/lead magnet title for visual concept generation
   subtitle?: string;             // post excerpt or lead magnet subtitle
   bodyText?: string;             // plain text body excerpt (first ~500 chars) for concept
+  locale?: string;               // "en" = diverse American subjects; "es" = Hispanic/Latino subjects
 }
 
 export interface VideoScriptRequest {

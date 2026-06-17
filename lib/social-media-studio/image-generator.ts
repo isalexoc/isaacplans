@@ -42,10 +42,22 @@ function pickVariationMood(): string {
 // Calls GPT-4o-mini to synthesize a specific photographic scene from post content.
 // Returns a 1–2 sentence scene description tailored to the article/lead magnet.
 
+// ─── Locale-based demographic instructions ──────────────────────────────────────
+// Spanish-locale content targets the Hispanic/Latino market → subjects should
+// reflect that community. English-locale content uses diverse American subjects.
+
+function getDemographicHint(locale?: string): string {
+  if (locale === "es") {
+    return "Subjects must be Latino/Hispanic — warm brown skin tones, dark hair, authentic Hispanic warmth and family culture.";
+  }
+  return "Subjects should be diverse American — reflecting the broad multicultural United States population.";
+}
+
 async function generateVisualConcept(
   openai: OpenAI,
   title: string,
   category: string,
+  locale?: string,
   subtitle?: string,
   bodyText?: string
 ): Promise<string | null> {
@@ -61,8 +73,9 @@ async function generateVisualConcept(
   if (!contentSnippet) return null;
 
   const categoryHint = CATEGORY_SCENES[category] ? `Insurance niche: ${category.replace(/-/g, " ")}.` : "";
+  const demographicHint = getDemographicHint(locale);
 
-  const userMessage = `Create a photographic scene description for a professional social media ad image based on this insurance content:\n\n${contentSnippet}\n\n${categoryHint}\n\nReturn ONLY the scene description. No preamble, no quotes, no extra text.`;
+  const userMessage = `Create a photographic scene description for a professional social media ad image based on this insurance content:\n\n${contentSnippet}\n\n${categoryHint}\n${demographicHint}\n\nReturn ONLY the scene description. No preamble, no quotes, no extra text.`;
 
   try {
     const completion = await openai.chat.completions.create({
@@ -87,15 +100,16 @@ async function generateVisualConcept(
 
 // ─── DALL-E prompt builder ──────────────────────────────────────────────────────
 
-function buildImagePrompt(scene: string): string {
+function buildImagePrompt(scene: string, locale?: string): string {
   const mood = pickVariationMood();
+  const demographic = getDemographicHint(locale);
   return [
     `Cinematic professional portrait photograph: ${scene}.`,
     `Lighting: ${mood}.`,
     `Camera: Canon EOS R5, 85mm f/1.4 portrait lens, shallow depth of field with soft bokeh background.`,
     `Mood: emotionally authentic, warm color grading.`,
-    `CRITICAL COMPOSITION — this square image will be displayed in a tall portrait frame where the bottom half is hidden by a text overlay:`,
-    `Place ALL faces and upper bodies in the TOP THIRD of the square frame only.`,
+    demographic,
+    `CRITICAL COMPOSITION — place ALL faces and upper bodies in the TOP THIRD of the square frame only.`,
     `The BOTTOM HALF of the image must be completely open — blurred background, bokeh, soft ground, or empty space only. No faces or subjects below the midpoint.`,
     `PROHIBITED: No text, words, numbers, signs, logos, watermarks, or graphic overlays of any kind anywhere in the image.`,
     `STYLE: Hyper-realistic professional photograph. Absolutely NOT an illustration, NOT vector art, NOT a painting, NOT CGI render, NOT digital art. Real photography only.`,
@@ -136,6 +150,7 @@ export async function generateSocialImages(
         openai,
         req.sourceTitle ?? req.headline,
         req.category ?? "general",
+        req.locale,
         req.subtitle,
         req.bodyText
       );
@@ -146,7 +161,7 @@ export async function generateSocialImages(
 
       const response = await openai.images.generate({
         model:   (process.env.OPENAI_IMAGE_MODEL ?? "gpt-image-1") as "gpt-image-1",
-        prompt:  buildImagePrompt(scene),
+        prompt:  buildImagePrompt(scene, req.locale),
         quality: "high",
         size:    "1024x1024",
         n:       1,

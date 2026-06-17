@@ -758,6 +758,7 @@ function ImageStudioStep({
         sourceTitle: state.source?.title,
         subtitle: state.source?.subtitle,
         bodyText: state.source?.bodyText,
+        locale: state.source?.locale,
       });
       const images = result.data as SocialCreativeImages;
       // Surface server-side warnings (e.g. DALL-E failure) as a visible error
