@@ -71,8 +71,10 @@ export default async function SocialHistoryPage() {
 
       <div className="space-y-3">
         {posts.map((post) => {
-          const uniquePlatforms = [...new Set(post.platforms ?? [])];
           const publishedSet = new Set(post.publishedPlatforms ?? []);
+          // Union of generated-copy platforms + published platforms so that a platform
+          // published without a stored copy (e.g. YouTube on old posts) still appears.
+          const uniquePlatforms = [...new Set([...(post.platforms ?? []), ...publishedSet])];
           return (
             <a
               key={post._id}
