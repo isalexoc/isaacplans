@@ -128,7 +128,7 @@ YOUTUBE SHORTS:
 - Use 1–2 sentences max — create curiosity to watch, like, and subscribe
 - The video does the storytelling; this text hooks the viewer before and after watching
 - Tone: casual, direct, slightly more polished than TikTok — YouTube audience expects slightly more value signals
-- IMPORTANT: If a CTA LINK is provided, you MUST include it at the end of the cta field (e.g. "Full guide: https://…"). Links ARE clickable in YouTube descriptions.
+- IMPORTANT: YouTube Shorts are watched in the mobile Shorts player where links in descriptions are NOT tappable. Do NOT paste a URL. Use "Link in bio" or "Check description" as the CTA instead.
 - Do NOT include #Shorts — it is added automatically by the publisher
 - Hashtags: 3–5 at the end — NO hashtag should contain the word "insurance"
 - Suggested hashtags: #HealthPlans #FamilyProtection #IsaacPlans #BenefitsPlans #FinalExpensePlans
@@ -180,8 +180,8 @@ INSTRUCTIONS:
 - NEVER use "seguro" in Spanish when you can naturally use "plan", "beneficios", or "protección" instead
 - Lead with emotions and outcomes — protection, peace of mind, family security, not product features
 - CTA LINK RULE (CRITICAL — follow exactly per platform):
-  • Facebook, Threads, Google Business, YouTube: if a CTA LINK is provided you MUST include the full URL at the end of the "cta" field. Do not summarize or shorten it. Example: "Read the full guide: https://isaacplans.com/en/blog/my-post"
-  • Instagram, TikTok: links in captions are NOT clickable on these platforms. Do NOT include a URL. Use "→ Link in bio" or "comment INFO" as the CTA instead.
+  • Facebook, Threads, Google Business: if a CTA LINK is provided you MUST include the full URL at the end of the "cta" field. Do not summarize or shorten it. Example: "Read the full guide: https://isaacplans.com/en/blog/my-post"
+  • Instagram, TikTok, YouTube Shorts: links are NOT clickable in the player. Do NOT include a URL. Use "→ Link in bio", "Link in description", or "comment INFO" as the CTA instead.
 - Every "fullPost" must be the complete assembled post ready to paste into a scheduling tool:
   hook + two newlines + body + two newlines + cta + (for platforms with hashtags: two newlines + hashtags joined with spaces, each prefixed with #)
 - characterCount should reflect the length of fullPost
