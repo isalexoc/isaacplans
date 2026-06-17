@@ -69,7 +69,7 @@ INSTAGRAM:
 - The very first sentence is the hook — it must make someone stop mid-scroll and think "wait, what?"
 - First sentence ends before a line break so it appears before the "more" cutoff
 - Body is 2–3 short lines: hook → revelation → action
-- IMPORTANT: Instagram does NOT make links in captions clickable. End the cta with "→ Link in bio" — do NOT paste a URL in the cta field.
+- IMPORTANT: Instagram does NOT make links in captions clickable. Do NOT paste a URL. The cta must end with exactly: "comment INFO to know more" (English) or "comenta INFO para saber más" (Spanish).
 - Hashtags: 5–8 on a separate line at the end — NO hashtag should contain the word "insurance"
 - Suggested branded hashtags: #IsaacPlans #HealthPlans #FamilyProtection
 - Avoid long paragraphs — use short punchy lines with white space
@@ -85,7 +85,7 @@ TIKTOK:
 - This is a caption, not the story — the video does the storytelling
 - Use 1–2 sentences maximum
 - Casual, almost text-message tone — create curiosity to watch the video
-- IMPORTANT: TikTok does NOT make links in captions clickable. Do NOT paste a URL in the cta field. Instead use "link in bio" or "comment INFO".
+- IMPORTANT: TikTok does NOT make links in captions clickable. Do NOT paste a URL. The cta must end with exactly: "comment INFO to know more" (English) or "comenta INFO para saber más" (Spanish).
 - Hashtags: 3–5 at the end — NO hashtag should contain the word "insurance"
 - Example styles:
   "POV: You just found out your family qualifies for this 👀 #HealthPlans"
@@ -128,7 +128,7 @@ YOUTUBE SHORTS:
 - Use 1–2 sentences max — create curiosity to watch, like, and subscribe
 - The video does the storytelling; this text hooks the viewer before and after watching
 - Tone: casual, direct, slightly more polished than TikTok — YouTube audience expects slightly more value signals
-- IMPORTANT: YouTube Shorts are watched in the mobile Shorts player where links in descriptions are NOT tappable. Do NOT paste a URL. Use "Link in bio" or "Check description" as the CTA instead.
+- IMPORTANT: YouTube Shorts are watched in the mobile Shorts player where links are NOT tappable. Do NOT paste a URL. The cta must end with exactly: "comment INFO to know more" (English) or "comenta INFO para saber más" (Spanish).
 - Do NOT include #Shorts — it is added automatically by the publisher
 - Hashtags: 3–5 at the end — NO hashtag should contain the word "insurance"
 - Suggested hashtags: #HealthPlans #FamilyProtection #IsaacPlans #BenefitsPlans #FinalExpensePlans
@@ -181,7 +181,7 @@ INSTRUCTIONS:
 - Lead with emotions and outcomes — protection, peace of mind, family security, not product features
 - CTA LINK RULE (CRITICAL — follow exactly per platform):
   • Facebook, Threads, Google Business: if a CTA LINK is provided you MUST include the full URL at the end of the "cta" field. Do not summarize or shorten it. Example: "Read the full guide: https://isaacplans.com/en/blog/my-post"
-  • Instagram, TikTok, YouTube Shorts: links are NOT clickable in the player. Do NOT include a URL. Use "→ Link in bio", "Link in description", or "comment INFO" as the CTA instead.
+  • Instagram, TikTok, YouTube Shorts: links are NOT clickable. Do NOT include a URL. The cta must end with exactly: "comment INFO to know more" (English) or "comenta INFO para saber más" (Spanish).
 - Every "fullPost" must be the complete assembled post ready to paste into a scheduling tool:
   hook + two newlines + body + two newlines + cta + (for platforms with hashtags: two newlines + hashtags joined with spaces, each prefixed with #)
 - characterCount should reflect the length of fullPost
