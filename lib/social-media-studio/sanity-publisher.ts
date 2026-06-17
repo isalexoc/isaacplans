@@ -83,6 +83,9 @@ export async function publishSocialPost(
     imageHeadline:    req.images.headline,
     ...(videoScript ? { videoScript } : {}),
     ...(req.videoUrl ? { videoUrl: req.videoUrl } : {}),
+    ...(req.videoImages?.length
+      ? { videoImages: req.videoImages.map((img, i) => ({ _key: `${Date.now().toString(36)}_${i}`, ...img })) }
+      : {}),
     status:           req.status,
     tags:             req.tags ?? [],
     createdAt:        now,

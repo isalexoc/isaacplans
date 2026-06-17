@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Loader2, Film, RotateCcw, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import type { SocialLocale } from "@/lib/social-media-studio/types";
+import type { SocialLocale, VideoImage } from "@/lib/social-media-studio/types";
 
 /** Sanity-shaped video script (uses `onScreenText`, optional fields). */
 export interface SanityVideoScript {
@@ -22,16 +22,14 @@ interface Props {
   sourceLocale: SocialLocale;
   sourcePublicUrl?: string;
   videoScript?: SanityVideoScript;
-  sourceImageUrl?: string;
-  verticalImageUrl?: string;
-  squareImageUrl?: string;
-  imageHeadline?: string;
   initialVideoUrl?: string;
+  /** Existing portrait images saved on the post (shown until a new batch is generated). */
+  initialImages?: VideoImage[];
   /** Lifts the finished video URL up so the publish section can auto-fill YouTube. */
   onVideoReady: (url: string) => void;
 }
 
-type GenState = "idle" | "submitting" | "rendering" | "done" | "error";
+type GenState = "idle" | "images" | "rendering" | "done" | "error";
 
 const POLL_INTERVAL_MS = 4000;
 const MAX_POLLS = 90;
@@ -43,26 +41,22 @@ export function HistoryVideoGenerator({
   sourceLocale,
   sourcePublicUrl,
   videoScript,
-  sourceImageUrl,
-  verticalImageUrl,
-  squareImageUrl,
-  imageHeadline,
   initialVideoUrl,
+  initialImages = [],
   onVideoReady,
 }: Props) {
   const [voiceLang, setVoiceLang] = useState<SocialLocale>(sourceLocale);
   const [state, setState]         = useState<GenState>(initialVideoUrl ? "done" : "idle");
   const [videoUrl, setVideoUrl]   = useState<string>(initialVideoUrl ?? "");
+  const [images, setImages]       = useState<VideoImage[]>(initialImages);
   const [error, setError]         = useState<string | undefined>();
   const aliveRef = useRef(true);
 
   useEffect(() => () => { aliveRef.current = false; }, []);
 
-  const hasScript = Boolean(videoScript?.fullScript);
-  const hasImage  = Boolean(sourceImageUrl || verticalImageUrl || squareImageUrl);
-  const canGenerate = hasScript && hasImage;
+  const canGenerate = Boolean(videoScript?.fullScript);
 
-  function buildBody() {
+  function buildImagesBody() {
     const duration: 30 | 60 = videoScript?.duration === 60 ? 60 : 30;
     return {
       source: {
@@ -80,13 +74,6 @@ export function HistoryVideoGenerator({
         brollSuggestions:        [],
         voiceoverTips:           "",
         suggestedCaption:        videoScript?.suggestedCaption ?? "",
-      },
-      images: {
-        square:         squareImageUrl ?? "",
-        vertical:       verticalImageUrl ?? "",
-        sourceImageUrl: sourceImageUrl ?? "",
-        headline:       imageHeadline ?? "",
-        generatedByAI:  false,
       },
       locale: voiceLang,
     };
@@ -113,18 +100,31 @@ export function HistoryVideoGenerator({
   }
 
   async function generate() {
-    setState("submitting");
     setError(undefined);
+    setVideoUrl("");
+    setState("images");
     try {
-      const res = await fetch(`/api/admin/social-media-studio/history/${postId}/generate-video`, {
+      // Phase A — generate portrait images (server also stacks them into Sanity).
+      const imgRes = await fetch(`/api/admin/social-media-studio/history/${postId}/generate-video-images`, {
         method:  "POST",
         headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify(buildBody()),
+        body:    JSON.stringify(buildImagesBody()),
       });
-      const data = await res.json();
-      if (!data.success) throw new Error(data.error ?? "Could not start video generation");
+      const imgData = await imgRes.json();
+      if (!imgData.success) throw new Error(imgData.error ?? "Image generation failed");
+      if (!aliveRef.current) return;
+      setImages(imgData.data.images);
+
+      // Phase B — render the video from the storyboard.
       setState("rendering");
-      await poll(data.data.projectId);
+      const renderRes = await fetch(`/api/admin/social-media-studio/history/${postId}/generate-video`, {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({ storyboard: imgData.data.storyboard }),
+      });
+      const renderData = await renderRes.json();
+      if (!renderData.success) throw new Error(renderData.error ?? "Could not start video render");
+      await poll(renderData.data.projectId);
     } catch (err) {
       if (!aliveRef.current) return;
       setState("error");
@@ -132,20 +132,18 @@ export function HistoryVideoGenerator({
     }
   }
 
-  const busy = state === "submitting" || state === "rendering";
+  const busy = state === "images" || state === "rendering";
 
   return (
     <div className="flex flex-col gap-4 rounded-lg border border-border p-4">
       <div className="flex items-center gap-2">
         <Film className="h-4 w-4 text-blue-600" />
         <h3 className="font-medium text-sm">AI YouTube Short</h3>
-        <span className="text-xs text-muted-foreground">— images + voiceover + captions, 9:16</span>
+        <span className="text-xs text-muted-foreground">— AI portrait images + voiceover + captions + music, 9:16</span>
       </div>
 
       {!canGenerate && (
-        <p className="text-xs text-amber-600">
-          {hasScript ? "This post has no image to build a video from." : "This post has no video script yet."}
-        </p>
+        <p className="text-xs text-amber-600">This post has no video script yet.</p>
       )}
 
       <div className="flex items-center gap-3 flex-wrap">
@@ -168,8 +166,8 @@ export function HistoryVideoGenerator({
       </div>
 
       <Button onClick={generate} disabled={!canGenerate || busy} className="w-fit">
-        {state === "submitting" ? (
-          <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Starting render…</>
+        {state === "images" ? (
+          <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Generating images… (~60–90s)</>
         ) : state === "rendering" ? (
           <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Rendering video… (30–120s)</>
         ) : state === "done" ? (
@@ -178,6 +176,23 @@ export function HistoryVideoGenerator({
           <><Film className="h-4 w-4 mr-2" /> Generate AI Video</>
         )}
       </Button>
+
+      {images.length > 0 && (
+        <div className="flex flex-col gap-1.5">
+          <p className="text-xs text-muted-foreground">{images.length} portrait images for this video:</p>
+          <div className="grid grid-cols-5 gap-1.5">
+            {images.map((img, i) => (
+              <img
+                key={i}
+                src={img.url}
+                alt={`Scene ${i + 1}`}
+                className="w-full rounded border bg-muted object-cover"
+                style={{ aspectRatio: "9 / 16" }}
+              />
+            ))}
+          </div>
+        </div>
+      )}
 
       {state === "error" && error && (
         <div className="flex items-center gap-3 rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">

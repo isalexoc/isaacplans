@@ -23,7 +23,7 @@ const CATEGORY_SCENES: Record<string, string> = {
 // Appended randomly to every prompt so regenerations produce different lighting/mood,
 // even when the visual concept and category are identical.
 
-const VARIATION_MOODS = [
+export const VARIATION_MOODS = [
   "golden hour sunlight, rich amber warmth",
   "soft diffused morning light, fresh and bright",
   "gentle overcast natural light, clean airy feel",
@@ -34,7 +34,7 @@ const VARIATION_MOODS = [
   "bright midday sun, energetic and vivid",
 ];
 
-function pickVariationMood(): string {
+export function pickVariationMood(): string {
   return VARIATION_MOODS[Math.floor(Math.random() * VARIATION_MOODS.length)];
 }
 
@@ -46,7 +46,7 @@ function pickVariationMood(): string {
 // Spanish-locale content targets the Hispanic/Latino market → subjects should
 // reflect that community. English-locale content uses diverse American subjects.
 
-function getDemographicHint(locale?: string): string {
+export function getDemographicHint(locale?: string): string {
   if (locale === "es") {
     return "Subjects must be Latino/Hispanic — warm brown skin tones, dark hair, authentic Hispanic warmth and family culture.";
   }

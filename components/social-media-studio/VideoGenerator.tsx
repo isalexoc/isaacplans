@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type {
   SocialPostSource,
-  SocialCreativeImages,
   VideoScript,
+  VideoImage,
   GeneratedVideo,
   SocialLocale,
 } from "@/lib/social-media-studio/types";
@@ -15,37 +15,37 @@ import type {
 interface Props {
   source: SocialPostSource;
   videoScript?: VideoScript;
-  images?: SocialCreativeImages;
   defaultLocale: SocialLocale;
   /** Lifts the finished video up so the publish step can auto-fill the YouTube URL. */
   onVideoReady: (video: GeneratedVideo) => void;
+  /** Lifts the generated portrait images up so they persist on Save to Sanity. */
+  onImagesReady: (images: VideoImage[]) => void;
   initialVideoUrl?: string;
 }
 
-type GenState = "idle" | "submitting" | "rendering" | "done" | "error";
+type GenState = "idle" | "images" | "rendering" | "done" | "error";
 
 const POLL_INTERVAL_MS = 4000;
-const MAX_POLLS = 90; // ~6 minutes safety cap
+const MAX_POLLS = 90;
 
 export function VideoGenerator({
   source,
   videoScript,
-  images,
   defaultLocale,
   onVideoReady,
+  onImagesReady,
   initialVideoUrl,
 }: Props) {
   const [voiceLang, setVoiceLang] = useState<SocialLocale>(defaultLocale);
   const [state, setState]         = useState<GenState>(initialVideoUrl ? "done" : "idle");
   const [videoUrl, setVideoUrl]   = useState<string>(initialVideoUrl ?? "");
+  const [images, setImages]       = useState<VideoImage[]>([]);
   const [error, setError]         = useState<string | undefined>();
   const aliveRef = useRef(true);
 
   useEffect(() => () => { aliveRef.current = false; }, []);
 
-  const hasScript = Boolean(videoScript?.fullScript);
-  const hasImage  = Boolean(images?.sourceImageUrl || images?.vertical || images?.square);
-  const canGenerate = hasScript && hasImage;
+  const canGenerate = Boolean(videoScript?.fullScript);
 
   async function poll(projectId: string, durationSeconds: number) {
     const category = source.category;
@@ -60,12 +60,7 @@ export function VideoGenerator({
         if (!aliveRef.current) return;
         setVideoUrl(data.data.videoUrl);
         setState("done");
-        onVideoReady({
-          url:             data.data.videoUrl,
-          durationSeconds,
-          projectId,
-          voiceLanguage:   voiceLang,
-        });
+        onVideoReady({ url: data.data.videoUrl, durationSeconds, projectId, voiceLanguage: voiceLang });
         return;
       }
     }
@@ -73,19 +68,34 @@ export function VideoGenerator({
   }
 
   async function generate() {
-    if (!videoScript || !images) return;
-    setState("submitting");
+    if (!videoScript) return;
     setError(undefined);
+    setVideoUrl("");
+    setImages([]);
+    setState("images");
     try {
-      const res = await fetch("/api/admin/social-media-studio/generate-video", {
+      // Phase A — generate the portrait scene images + storyboard.
+      const imgRes = await fetch("/api/admin/social-media-studio/generate-video-images", {
         method:  "POST",
         headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({ source, videoScript, images, locale: voiceLang }),
+        body:    JSON.stringify({ source, videoScript, locale: voiceLang }),
       });
-      const data = await res.json();
-      if (!data.success) throw new Error(data.error ?? "Could not start video generation");
+      const imgData = await imgRes.json();
+      if (!imgData.success) throw new Error(imgData.error ?? "Image generation failed");
+      if (!aliveRef.current) return;
+      setImages(imgData.data.images);
+      onImagesReady(imgData.data.images);
+
+      // Phase B — render the video from the storyboard.
       setState("rendering");
-      await poll(data.data.projectId, data.data.durationSeconds);
+      const renderRes = await fetch("/api/admin/social-media-studio/generate-video", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({ storyboard: imgData.data.storyboard }),
+      });
+      const renderData = await renderRes.json();
+      if (!renderData.success) throw new Error(renderData.error ?? "Could not start video render");
+      await poll(renderData.data.projectId, renderData.data.durationSeconds);
     } catch (err) {
       if (!aliveRef.current) return;
       setState("error");
@@ -93,23 +103,20 @@ export function VideoGenerator({
     }
   }
 
-  const busy = state === "submitting" || state === "rendering";
+  const busy = state === "images" || state === "rendering";
 
   return (
     <div className="flex flex-col gap-4 rounded-lg border p-4">
       <div className="flex items-center gap-2">
         <Film className="h-4 w-4 text-blue-600" />
         <h3 className="font-medium text-sm">AI YouTube Short</h3>
-        <span className="text-xs text-muted-foreground">— images + voiceover + captions, 9:16</span>
+        <span className="text-xs text-muted-foreground">— AI portrait images + voiceover + captions + music, 9:16</span>
       </div>
 
       {!canGenerate && (
-        <p className="text-xs text-amber-600">
-          {hasScript ? "Generate images first" : "Generate a video script first"} to enable AI video.
-        </p>
+        <p className="text-xs text-amber-600">Generate a video script first to enable AI video.</p>
       )}
 
-      {/* Voice language */}
       <div className="flex items-center gap-3 flex-wrap">
         <span className="text-xs font-medium text-muted-foreground">Voiceover language:</span>
         <div className="flex gap-2">
@@ -129,10 +136,9 @@ export function VideoGenerator({
         </div>
       </div>
 
-      {/* Generate button */}
       <Button onClick={generate} disabled={!canGenerate || busy} className="w-fit">
-        {state === "submitting" ? (
-          <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Starting render…</>
+        {state === "images" ? (
+          <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Generating images… (~60–90s)</>
         ) : state === "rendering" ? (
           <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Rendering video… (30–120s)</>
         ) : state === "done" ? (
@@ -142,7 +148,24 @@ export function VideoGenerator({
         )}
       </Button>
 
-      {/* Error */}
+      {/* Thumbnail grid of the generated portrait images */}
+      {images.length > 0 && (
+        <div className="flex flex-col gap-1.5">
+          <p className="text-xs text-muted-foreground">{images.length} portrait images generated for this video:</p>
+          <div className="grid grid-cols-5 gap-1.5">
+            {images.map((img, i) => (
+              <img
+                key={i}
+                src={img.url}
+                alt={`Scene ${i + 1}`}
+                className="w-full rounded border bg-muted object-cover"
+                style={{ aspectRatio: "9 / 16" }}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
       {state === "error" && error && (
         <div className="flex items-center gap-3 rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
           <span className="flex-1">{error}</span>
@@ -150,7 +173,6 @@ export function VideoGenerator({
         </div>
       )}
 
-      {/* Preview */}
       {state === "done" && videoUrl && (
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2 text-xs text-green-600">

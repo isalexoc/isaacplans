@@ -188,6 +188,29 @@ export const socialPostType = defineType({
       group: "video",
       description: "AI-generated YouTube Short — Cloudinary mp4 URL used for publishing",
     }),
+    {
+      name: "videoImages",
+      title: "Generated Video Images (portrait)",
+      type: "array",
+      group: "video",
+      description: "Portrait 9:16 images generated for videos — stacks with each generation",
+      of: [
+        {
+          type: "object",
+          fields: [
+            { name: "url",       title: "Image URL", type: "url" },
+            { name: "concept",   title: "Concept",   type: "text", rows: 2 },
+            { name: "createdAt", title: "Created At", type: "datetime" },
+          ],
+          preview: {
+            select: { subtitle: "concept", media: "url" },
+            prepare({ subtitle }: { subtitle?: string }) {
+              return { title: "Video image", subtitle: subtitle ?? "" };
+            },
+          },
+        },
+      ],
+    },
 
     // ─── META ─────────────────────────────────────────────────────────────────
     defineField({

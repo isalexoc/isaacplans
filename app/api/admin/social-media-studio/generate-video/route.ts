@@ -1,8 +1,8 @@
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
-import { buildVideoStoryboard, submitVideoRender } from "@/lib/social-media-studio/video-generator";
+import { submitVideoRender } from "@/lib/social-media-studio/video-generator";
 import type {
-  VideoGenerationRequest,
+  VideoRenderRequest,
   SocialStudioResponse,
   SocialLocale,
 } from "@/lib/social-media-studio/types";
@@ -15,31 +15,23 @@ export async function POST(req: Request) {
     return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
   }
 
-  const body: VideoGenerationRequest = await req.json();
+  const body: VideoRenderRequest = await req.json();
+  const storyboard = body.storyboard;
 
-  if (!body.source?.title) {
-    return NextResponse.json({ success: false, error: "source.title is required" }, { status: 400 });
-  }
-  if (!body.videoScript?.fullScript) {
+  if (!storyboard?.scenes?.length) {
     return NextResponse.json(
-      { success: false, error: "A video script is required. Generate the script first." },
+      { success: false, error: "A storyboard with scenes is required. Generate the video images first." },
       { status: 400 }
     );
   }
-  if (!body.images?.sourceImageUrl && !body.images?.vertical && !body.images?.square) {
+  if (storyboard.scenes.some((s) => !s.imageUrl)) {
     return NextResponse.json(
-      { success: false, error: "An image is required. Generate images first." },
+      { success: false, error: "Every scene needs an image. Re-run the image step." },
       { status: 400 }
     );
   }
 
   try {
-    const storyboard = await buildVideoStoryboard(
-      body.source,
-      body.videoScript,
-      body.images,
-      body.locale
-    );
     const { projectId } = await submitVideoRender(storyboard);
 
     const response: SocialStudioResponse<{

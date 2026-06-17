@@ -1,11 +1,13 @@
 import OpenAI from "openai";
 import cloudinary from "@/config/cloudinary";
+import { getDemographicHint, pickVariationMood } from "./image-generator";
+import { musicUrlForCategory } from "./video-music";
 import type {
   SocialPostSource,
-  SocialCreativeImages,
   VideoScript,
   VideoScene,
   VideoStoryboard,
+  VideoImage,
   VideoRenderStatus,
   SocialLocale,
 } from "./types";
@@ -39,12 +41,13 @@ function elevenLabsVoiceFor(locale: SocialLocale): string {
 const STORYBOARD_SYSTEM_PROMPT = `You are a short-form video director for an insurance brand. You convert a talking-head video script into a clean storyboard for a vertical (9:16) YouTube Short built from still images + AI voiceover + on-screen captions.
 
 Rules:
-- Output ONLY valid JSON: { "scenes": [ { "narration": string, "onScreenText": string } ] }.
+- Output ONLY valid JSON: { "scenes": [ { "narration": string, "onScreenText": string, "imageConcept": string } ] }.
 - "narration" is the exact words the voiceover will SPEAK for that scene — natural spoken sentences only. NO timestamps, NO stage directions, NO brackets, NO emojis, NO hashtags.
 - "onScreenText" is a SHORT punchy caption/headline (max ~6 words) burned on screen for that scene. Title Case. No ending period.
+- "imageConcept" is a SPECIFIC 1-2 sentence photographic scene description for a vertical background image that visually matches THIS scene's narration (subjects, emotion, setting, key visual detail). Each scene's imageConcept MUST be visually DISTINCT from the others. Do NOT use the word "insurance". No text or graphics in the scene.
 - The FIRST scene must be a scroll-stopping hook.
 - Keep total narration tight so the whole video fits the target duration when spoken at a natural pace (~2.5 words/second).
-- Write narration in the SAME language as the source script (English or Spanish).
+- Write narration AND onScreenText in the SAME language as the source script (English or Spanish). imageConcept is always in English (it prompts an image model).
 - Do not mention you are an AI. Do not add a disclaimer.`;
 
 function buildStoryboardUserPrompt(
@@ -70,11 +73,11 @@ function buildStoryboardUserPrompt(
 export async function buildVideoStoryboard(
   source: SocialPostSource,
   videoScript: VideoScript,
-  images: SocialCreativeImages,
   locale?: SocialLocale
 ): Promise<VideoStoryboard> {
   const voiceLanguage: SocialLocale = locale ?? source.locale ?? "en";
-  const sceneCount = videoScript.duration === 60 ? 6 : 4;
+  // One distinct portrait image per scene → guarantee at least 10 images per video.
+  const sceneCount = videoScript.duration === 60 ? 12 : 10;
 
   const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
   const completion = await client.chat.completions.create({
@@ -84,7 +87,7 @@ export async function buildVideoStoryboard(
       { role: "system", content: STORYBOARD_SYSTEM_PROMPT },
       { role: "user",   content: buildStoryboardUserPrompt(source, videoScript, sceneCount) },
     ],
-    max_tokens:  1500,
+    max_tokens:  2500,
     temperature: 0.7,
   });
 
@@ -92,24 +95,109 @@ export async function buildVideoStoryboard(
   const rawScenes: unknown[] = Array.isArray(raw.scenes) ? raw.scenes : [];
   if (rawScenes.length === 0) throw new Error("AI returned no storyboard scenes");
 
-  // The branded card images already have text burned in, which would clash with the
-  // subtitles/headline. Prefer the raw (overlay-free) source image as the background for
-  // every scene, varying Ken Burns motion per scene for visual movement.
-  const baseImage = images.sourceImageUrl || images.vertical || images.square;
-  if (!baseImage) throw new Error("No image available to build the video. Generate images first.");
-
   const scenes: VideoScene[] = rawScenes.map((s) => {
     const o = s as Record<string, unknown>;
     return {
       narration:    String(o.narration ?? "").trim(),
       onScreenText: String(o.onScreenText ?? "").trim(),
-      imageUrl:     baseImage,
+      imageConcept: String(o.imageConcept ?? "").trim(),
+      imageUrl:     "", // filled by generateVideoSceneImages (Phase A)
     };
   }).filter((s) => s.narration.length > 0);
 
   if (scenes.length === 0) throw new Error("Storyboard produced no usable narration");
 
-  return { scenes, voiceLanguage, durationSeconds: videoScript.duration };
+  return { scenes, voiceLanguage, durationSeconds: videoScript.duration, category: source.category };
+}
+
+// ─── Step 1b: Generate one portrait image per scene (Phase A) ─────────────────────
+
+// Portrait, full-frame cinematic prompt — NO card-overlay composition rules, NO text.
+function buildVideoImagePrompt(concept: string, locale?: string): string {
+  const mood = pickVariationMood();
+  const demographic = getDemographicHint(locale);
+  return [
+    `Cinematic vertical (9:16) professional photograph: ${concept}.`,
+    `Lighting: ${mood}.`,
+    `Camera: Canon EOS R5, 35mm f/1.8, natural depth of field, full-frame composition that fills a tall vertical portrait frame top to bottom.`,
+    `Mood: emotionally authentic, warm color grading, hyper-realistic.`,
+    demographic,
+    `PROHIBITED: No text, words, numbers, signs, logos, watermarks, captions, or graphic overlays anywhere in the image.`,
+    `STYLE: Hyper-realistic professional photograph. Absolutely NOT an illustration, NOT vector art, NOT a painting, NOT a CGI render, NOT digital art. Real photography only.`,
+  ].join(" ");
+}
+
+async function generateOneSceneImage(
+  openai: OpenAI,
+  concept: string,
+  category: string,
+  locale?: string
+): Promise<string> {
+  const response = await openai.images.generate({
+    model:   (process.env.OPENAI_IMAGE_MODEL ?? "gpt-image-1") as "gpt-image-1",
+    prompt:  buildVideoImagePrompt(concept, locale),
+    quality: "high",
+    size:    "1024x1536", // portrait (2:3) — lightly cover-cropped to 9:16 by JSON2Video
+    n:       1,
+  } as Parameters<typeof openai.images.generate>[0]);
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const b64 = (response as any).data?.[0]?.b64_json;
+  if (!b64) throw new Error("Image model returned no image data");
+
+  const upload = await cloudinary.uploader.upload(`data:image/png;base64,${b64}`, {
+    folder:        `social-media/${category}/video-images`,
+    resource_type: "image",
+  });
+  return upload.secure_url;
+}
+
+// Generate scene images in parallel with a small concurrency cap, tolerating partial
+// failures. Mutates storyboard scenes (sets imageUrl) and returns the persisted batch.
+export async function generateVideoSceneImages(
+  storyboard: VideoStoryboard,
+  source: SocialPostSource
+): Promise<VideoImage[]> {
+  const openai   = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  const category = source.category ?? storyboard.category ?? "general";
+  const locale   = storyboard.voiceLanguage;
+  const now      = new Date().toISOString();
+
+  const CONCURRENCY = 4;
+  const results: (string | null)[] = new Array(storyboard.scenes.length).fill(null);
+
+  for (let start = 0; start < storyboard.scenes.length; start += CONCURRENCY) {
+    const batch = storyboard.scenes.slice(start, start + CONCURRENCY);
+    await Promise.all(
+      batch.map(async (scene, j) => {
+        const idx = start + j;
+        const concept = scene.imageConcept || source.title;
+        try {
+          results[idx] = await generateOneSceneImage(openai, concept, category, locale);
+        } catch (err) {
+          console.warn(`[generateVideoSceneImages] scene ${idx} failed:`, (err as Error).message);
+          results[idx] = null;
+        }
+      })
+    );
+  }
+
+  const succeeded = results.filter((u): u is string => Boolean(u));
+  if (succeeded.length < Math.min(6, storyboard.scenes.length)) {
+    throw new Error("Too many image generations failed. Please try again.");
+  }
+
+  // Fill any gaps by reusing a succeeded image so every scene has a portrait background.
+  let fillCursor = 0;
+  storyboard.scenes.forEach((scene, idx) => {
+    scene.imageUrl = results[idx] ?? succeeded[fillCursor++ % succeeded.length];
+  });
+
+  // The stacked library only records the genuinely generated images (not the fills).
+  return storyboard.scenes
+    .map((scene, idx) => ({ scene, url: results[idx] }))
+    .filter((x): x is { scene: VideoScene; url: string } => Boolean(x.url))
+    .map(({ scene, url }) => ({ url, concept: scene.imageConcept, createdAt: now }));
 }
 
 // ─── Step 2: Build JSON2Video movie + submit render ──────────────────────────────
@@ -120,7 +208,7 @@ const PAN_DIRECTIONS = ["top-left", "bottom-right", "top-right", "bottom-left", 
 function buildMovieJson(storyboard: VideoStoryboard) {
   const voice       = elevenLabsVoiceFor(storyboard.voiceLanguage);
   const connection  = process.env.JSON2VIDEO_ELEVENLABS_CONNECTION;
-  const bgMusicUrl  = process.env.JSON2VIDEO_BG_MUSIC_URL;
+  const bgMusicUrl  = musicUrlForCategory(storyboard.category);
 
   const scenes = storyboard.scenes.map((scene, i) => ({
     elements: [
@@ -188,9 +276,9 @@ function buildMovieJson(storyboard: VideoStoryboard) {
           "max-words-per-line": 4,
         },
       },
-      // Optional background music bed (low volume) if configured.
+      // Subtle category-matched background music bed (low volume) if configured.
       ...(bgMusicUrl
-        ? [{ type: "audio", src: bgMusicUrl, volume: 0.12, "fade-out": 1.5 }]
+        ? [{ type: "audio", src: bgMusicUrl, volume: 0.12, "fade-in": 1.0, "fade-out": 1.5 }]
         : []),
     ],
   };

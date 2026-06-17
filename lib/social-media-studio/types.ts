@@ -132,7 +132,8 @@ export interface VideoScript {
 export interface VideoScene {
   narration: string;       // clean spoken text for this scene (no [MM:SS] markers)
   onScreenText: string;    // short caption/headline burned over the scene
-  imageUrl: string;        // background image (Cloudinary) — Ken Burns motion applied
+  imageConcept: string;    // photographic scene description → drives this scene's image
+  imageUrl: string;        // portrait background image (Cloudinary) — filled in Phase A
 }
 
 /**
@@ -142,6 +143,16 @@ export interface VideoStoryboard {
   scenes: VideoScene[];
   voiceLanguage: SocialLocale; // "en" | "es" — drives ElevenLabs voice + caption lang
   durationSeconds: 30 | 60;    // target length (from the source video script)
+  category?: string;           // insurance category → music + Cloudinary folder
+}
+
+/**
+ * A portrait image generated specifically for a video (stacked in Sanity `videoImages`).
+ */
+export interface VideoImage {
+  url: string;
+  concept: string;
+  createdAt: string;
 }
 
 /**
@@ -196,17 +207,28 @@ export interface SocialPostPublishRequest {
   images: SocialCreativeImages;
   videoScript?: VideoScript;
   videoUrl?: string;             // generated YouTube Short URL (Cloudinary mp4)
+  videoImages?: VideoImage[];    // portrait images generated for the video (stacks)
   status: SocialPostStatus;
   tags?: string[];               // optional manual tags for Sanity filtering
 }
 
 // ─── Video generation request bodies ──────────────────────────────────────────
 
-export interface VideoGenerationRequest {
+// Phase A — generate portrait scene images: builds the storyboard + N images.
+export interface VideoImagesRequest {
   source: SocialPostSource;
   videoScript: VideoScript;
-  images: SocialCreativeImages;
-  locale?: SocialLocale;         // voice language; defaults to source locale
+  locale?: SocialLocale;         // voice/subject language; defaults to source locale
+}
+
+export interface VideoImagesResult {
+  storyboard: VideoStoryboard;   // scenes now carry imageUrl
+  images: VideoImage[];
+}
+
+// Phase B — render the video from a ready storyboard.
+export interface VideoRenderRequest {
+  storyboard: VideoStoryboard;
 }
 
 // ─── API Response Shapes ──────────────────────────────────────────────────────

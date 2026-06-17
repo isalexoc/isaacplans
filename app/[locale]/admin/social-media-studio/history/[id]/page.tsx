@@ -23,7 +23,8 @@ const DETAIL_QUERY = `*[_type == "socialPost" && _id == $id][0] {
   verticalImageUrl,
   imageHeadline,
   videoScript,
-  videoUrl
+  videoUrl,
+  videoImages
 }`;
 
 type GeneratedCopy = Partial<SocialPostCopy> & { platform: string; locale: string };
@@ -57,6 +58,7 @@ interface SocialPostDetail {
   imageHeadline?: string;
   videoScript?: VideoScript;
   videoUrl?: string;
+  videoImages?: { url?: string; concept?: string; createdAt?: string }[];
 }
 
 const PLATFORM_LABELS: Record<string, string> = {
@@ -273,11 +275,12 @@ export default async function SocialPostDetailPage({
         sourceLocale={postLocale}
         sourcePublicUrl={post.sourceUrl}
         videoScript={post.videoScript}
-        sourceImageUrl={post.sourceImageUrl}
         squareImageUrl={post.squareImageUrl}
         verticalImageUrl={post.verticalImageUrl}
-        imageHeadline={post.imageHeadline}
         initialVideoUrl={post.videoUrl}
+        initialVideoImages={(post.videoImages ?? [])
+          .filter((img): img is { url: string; concept?: string; createdAt?: string } => Boolean(img.url))
+          .map((img) => ({ url: img.url, concept: img.concept ?? "", createdAt: img.createdAt ?? "" }))}
         copies={localeCopies as SocialPostCopy[]}
         publishLocale={postLocale}
         publishedPlatforms={post.publishedPlatforms ?? []}
