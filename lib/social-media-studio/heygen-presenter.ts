@@ -39,16 +39,18 @@ function heygenVoiceFor(locale: SocialLocale): string | undefined {
  */
 export async function submitPresenterVideo(
   narration: string,
-  locale: SocialLocale
+  locale: SocialLocale,
+  opts?: { avatarId?: string; voiceId?: string }
 ): Promise<{ videoId: string }> {
   const apiKey = process.env.HEYGEN_API_KEY;
   if (!apiKey) throw new Error("HEYGEN_API_KEY is not configured — disable the presenter toggle to render faceless.");
 
-  const avatarId = heygenAvatarFor(locale);
-  if (!avatarId) throw new Error("HEYGEN_AVATAR_ID is not configured — set a stock avatar id (or HEYGEN_AVATAR_ID_ES).");
+  // An explicit in-app pick wins; otherwise fall back to the env-configured default.
+  const avatarId = opts?.avatarId || heygenAvatarFor(locale);
+  if (!avatarId) throw new Error("No HeyGen avatar selected — pick one in the studio or set HEYGEN_AVATAR_ID.");
 
-  const voiceId = heygenVoiceFor(locale);
-  if (!voiceId) throw new Error("HEYGEN_VOICE_ID_EN is not configured — set a HeyGen voice id (or HEYGEN_VOICE_ID_ES).");
+  const voiceId = opts?.voiceId || heygenVoiceFor(locale);
+  if (!voiceId) throw new Error("No HeyGen voice selected — pick one in the studio or set HEYGEN_VOICE_ID_EN.");
 
   const text = narration.trim();
   if (!text) throw new Error("No narration text to send to the presenter.");
@@ -121,4 +123,120 @@ export async function getPresenterStatus(videoId: string): Promise<PresenterStat
 
   const durationSeconds = typeof d.duration === "number" ? d.duration : undefined;
   return { status: "done", url, durationSeconds };
+}
+
+// ─── Avatar & voice catalogs (for the in-app picker) ─────────────────────────────
+// Lists are large and effectively static, so the raw HeyGen responses are cached
+// module-level for an hour to avoid re-fetching on every keystroke.
+
+const HEYGEN_AVATARS_URL = "https://api.heygen.com/v2/avatars";
+const HEYGEN_VOICES_URL  = "https://api.heygen.com/v2/voices";
+const CATALOG_TTL_MS = 60 * 60 * 1000;
+
+export interface HeyGenAvatar {
+  avatarId: string;
+  name: string;
+  gender?: string;
+  previewImageUrl?: string;
+  previewVideoUrl?: string;
+}
+
+export interface HeyGenVoice {
+  voiceId: string;
+  name: string;
+  language?: string;
+  gender?: string;
+  previewAudio?: string;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let avatarCache: { at: number; data: any[] } | null = null;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let voiceCache: { at: number; data: any[] } | null = null;
+
+async function fetchHeyGen(url: string): Promise<unknown> {
+  const apiKey = process.env.HEYGEN_API_KEY;
+  if (!apiKey) throw new Error("HEYGEN_API_KEY is not configured");
+  const res = await fetch(url, { headers: { "x-api-key": apiKey } });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    throw new Error(`HeyGen request failed (HTTP ${res.status}): ${(data as any)?.message ?? "unknown error"}`);
+  }
+  return data;
+}
+
+export async function listHeyGenAvatars(
+  search?: string,
+  gender?: string,
+  offset = 0,
+  limit = 40
+): Promise<{ avatars: HeyGenAvatar[]; total: number }> {
+  if (!avatarCache || Date.now() - avatarCache.at > CATALOG_TTL_MS) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const data = (await fetchHeyGen(HEYGEN_AVATARS_URL)) as any;
+    avatarCache = { at: Date.now(), data: Array.isArray(data?.data?.avatars) ? data.data.avatars : [] };
+  }
+
+  const q = (search ?? "").trim().toLowerCase();
+  const g = (gender ?? "").trim().toLowerCase();
+
+  // Filter the full (cached) list, then return only the requested page — the heavy list
+  // never leaves the server, so the client only ever holds one page at a time.
+  const filtered = avatarCache.data.filter((a: Record<string, unknown>) => {
+    const name = String(a.avatar_name ?? "").toLowerCase();
+    if (q && !name.includes(q) && !String(a.avatar_id ?? "").toLowerCase().includes(q)) return false;
+    if (g && String(a.gender ?? "").toLowerCase() !== g) return false;
+    return true;
+  });
+
+  const safeOffset = Math.max(0, offset);
+  const avatars = filtered
+    .slice(safeOffset, safeOffset + limit)
+    .map((a: Record<string, unknown>): HeyGenAvatar => ({
+      avatarId:        String(a.avatar_id),
+      name:            String(a.avatar_name ?? a.avatar_id),
+      gender:          a.gender ? String(a.gender) : undefined,
+      previewImageUrl: a.preview_image_url ? String(a.preview_image_url) : undefined,
+      previewVideoUrl: a.preview_video_url ? String(a.preview_video_url) : undefined,
+    }));
+
+  return { avatars, total: filtered.length };
+}
+
+export async function listHeyGenVoices(
+  opts: { language?: string; gender?: string; search?: string; limit?: number } = {}
+): Promise<{ voices: HeyGenVoice[]; languages: string[] }> {
+  if (!voiceCache || Date.now() - voiceCache.at > CATALOG_TTL_MS) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const data = (await fetchHeyGen(HEYGEN_VOICES_URL)) as any;
+    voiceCache = { at: Date.now(), data: Array.isArray(data?.data?.voices) ? data.data.voices : [] };
+  }
+
+  const lang = (opts.language ?? "").trim().toLowerCase();
+  const g    = (opts.gender ?? "").trim().toLowerCase();
+  const q    = (opts.search ?? "").trim().toLowerCase();
+
+  // Distinct languages across the whole catalog → powers the language dropdown.
+  const languages = Array.from(
+    new Set(voiceCache.data.map((v: Record<string, unknown>) => String(v.language ?? "").trim()).filter(Boolean))
+  ).sort();
+
+  const voices = voiceCache.data
+    .filter((v: Record<string, unknown>) => {
+      if (lang && String(v.language ?? "").toLowerCase() !== lang) return false;
+      if (g && String(v.gender ?? "").toLowerCase() !== g) return false;
+      if (q && !String(v.name ?? "").toLowerCase().includes(q)) return false;
+      return true;
+    })
+    .slice(0, opts.limit ?? 300)
+    .map((v: Record<string, unknown>): HeyGenVoice => ({
+      voiceId:      String(v.voice_id),
+      name:         String(v.name ?? v.voice_id),
+      language:     v.language ? String(v.language) : undefined,
+      gender:       v.gender ? String(v.gender) : undefined,
+      previewAudio: v.preview_audio ? String(v.preview_audio) : undefined,
+    }));
+
+  return { voices, languages };
 }

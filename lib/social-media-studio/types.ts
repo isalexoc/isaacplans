@@ -134,6 +134,7 @@ export interface VideoScene {
   onScreenText: string;    // short caption/headline burned over the scene
   imageConcept: string;    // photographic scene description → drives this scene's image
   imageUrl: string;        // portrait background image (Cloudinary) — filled in Phase A
+  videoClipUrl?: string;   // optional Veo cinematic clip (Cloudinary) — used when cinematic on
 }
 
 /**
@@ -144,8 +145,16 @@ export interface VideoStoryboard {
   voiceLanguage: SocialLocale; // "en" | "es" — drives ElevenLabs voice + caption lang
   durationSeconds: 30 | 60;    // target length (from the source video script)
   category?: string;           // insurance category → music + Cloudinary folder
+  musicUrl?: string;           // AI-generated (ElevenLabs Music) bg track; falls back to MUSIC_*_URL env
   presenter?: boolean;         // true → composite a HeyGen AI presenter in the corner
   presenterPlacement?: "bottom-right" | "bottom-left"; // corner for the presenter (default bottom-right)
+  presenterAvatarId?: string;  // in-app picked HeyGen avatar (overrides env default)
+  presenterAvatarName?: string; // display label for the picked avatar
+  presenterVoiceId?: string;   // in-app picked HeyGen voice (overrides env default)
+  presenterVoiceName?: string; // display label for the picked voice
+  cinematic?: boolean;         // true → animated scenes use their Veo clip instead of the still
+  veoTier?: "lite" | "fast" | "standard"; // Veo quality tier for cinematic motion (default lite)
+  veoDurationSec?: 4 | 6 | 8;  // Veo clip length per scene (default 6)
 }
 
 /**

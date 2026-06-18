@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Loader2, Film, RotateCcw, CheckCircle2, RefreshCw, Pencil, X } from "lucide-react";
+import { Loader2, Film, RotateCcw, CheckCircle2, RefreshCw, Pencil, X, Clapperboard, Video as VideoIcon, Undo2, Music } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
+import { PresenterPicker, type PresenterSelection } from "./PresenterPicker";
 import type { VideoStoryboard, SocialLocale } from "@/lib/social-media-studio/types";
 
 export interface VideoImageStudioProps {
@@ -24,12 +25,25 @@ export interface VideoImageStudioProps {
   onVideoReady: (videoUrl: string, projectId: string, durationSeconds: number, voiceLanguage: SocialLocale) => void;
   /** Fired whenever the active storyboard changes (so the wizard can persist it on Save). */
   onStoryboardChange?: (storyboard: VideoStoryboard) => void;
+  /** Cinematic (Veo) — submit a scene-clip render; returns the long-running operation name. */
+  submitClip?: (imageUrl: string, imageConcept: string, sceneIndex: number, tier: VeoTier, durationSec: 4 | 6 | 8) => Promise<{ operationName: string }>;
+  /** Cinematic (Veo) — poll a clip operation; returns the Cloudinary URL when done. */
+  pollClip?: (operationName: string, sceneIndex: number) => Promise<{ status: string; videoUrl?: string }>;
+  /** AI background music (ElevenLabs) — generate a category-matched track; returns its URL. */
+  generateMusic?: (durationSeconds: number) => Promise<string>;
 }
 
 type Phase = "idle" | "images" | "rendering" | "done";
+type VeoTier = "lite" | "fast" | "standard";
 
 const POLL_INTERVAL_MS = 4000;
 const MAX_POLLS = 90;
+
+// $/sec by Veo tier (client-side copy for the cost estimate; the server is the source of truth).
+const VEO_RATE: Record<VeoTier, number> = { lite: 0.05, fast: 0.15, standard: 0.40 };
+const VEO_TIER_LABEL: Record<VeoTier, string> = { lite: "Lite", fast: "Fast", standard: "Standard" };
+const CLIP_POLL_MS  = 8000;
+const MAX_CLIP_POLLS = 60; // ~8 min per clip
 
 export function VideoImageStudio({
   defaultLocale,
@@ -43,9 +57,19 @@ export function VideoImageStudio({
   pollStatus,
   onVideoReady,
   onStoryboardChange,
+  submitClip,
+  pollClip,
+  generateMusic,
 }: VideoImageStudioProps) {
   const [voiceLang, setVoiceLang]   = useState<SocialLocale>(defaultLocale);
   const [presenter, setPresenter]   = useState<boolean>(Boolean(initialStoryboard?.presenter));
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [presenterSel, setPresenterSel] = useState<PresenterSelection>({
+    avatarId:   initialStoryboard?.presenterAvatarId,
+    avatarName: initialStoryboard?.presenterAvatarName,
+    voiceId:    initialStoryboard?.presenterVoiceId,
+    voiceName:  initialStoryboard?.presenterVoiceName,
+  });
   const [storyboard, setStoryboard] = useState<VideoStoryboard | undefined>(initialStoryboard);
   const [phase, setPhase]           = useState<Phase>(initialVideoUrl ? "done" : "idle");
   const [videoUrl, setVideoUrl]     = useState<string>(initialVideoUrl ?? "");
@@ -54,20 +78,94 @@ export function VideoImageStudio({
   const [editIdx, setEditIdx]       = useState<number | null>(null);
   const [editText, setEditText]     = useState("");
   const [error, setError]           = useState<string | undefined>();
+
+  // Cinematic motion (Veo 3.1)
+  const cinematicSupported = Boolean(submitClip && pollClip);
+  const [cinematic, setCinematic]     = useState<boolean>(Boolean(initialStoryboard?.cinematic));
+  const [veoTier, setVeoTier]         = useState<VeoTier>((initialStoryboard?.veoTier as VeoTier) ?? "lite");
+  const [veoDuration, setVeoDuration] = useState<4 | 6 | 8>((initialStoryboard?.veoDurationSec as 4 | 6 | 8) ?? 6);
+  const [clipIdx, setClipIdx]         = useState<Set<number>>(new Set());
+
+  // AI background music (ElevenLabs) — always generated once images exist, regenerable.
+  const musicSupported = Boolean(generateMusic);
+  const [musicBusy, setMusicBusy]     = useState(false);
+  const [musicError, setMusicError]   = useState<string | undefined>();
+  const musicTriedRef = useRef(false);
+
   const aliveRef = useRef(true);
   useEffect(() => () => { aliveRef.current = false; }, []);
+  // Synchronous source of truth for the storyboard so concurrent clip jobs don't clobber each other.
+  const sbRef = useRef<VideoStoryboard | undefined>(initialStoryboard);
 
   const category = storyboard?.category;
 
   function commitStoryboard(next: VideoStoryboard) {
+    sbRef.current = next;
     setStoryboard(next);
     onStoryboardChange?.(next);
+  }
+
+  // Stamp the current presenter toggle + avatar/voice selection onto a storyboard.
+  function withPresenter(
+    sb: VideoStoryboard,
+    p: boolean = presenter,
+    s: PresenterSelection = presenterSel
+  ): VideoStoryboard {
+    return {
+      ...sb,
+      presenter:           p,
+      presenterAvatarId:   s.avatarId,
+      presenterAvatarName: s.avatarName,
+      presenterVoiceId:    s.voiceId,
+      presenterVoiceName:  s.voiceName,
+    };
   }
 
   // Toggle the HeyGen presenter; persist onto the storyboard when one already exists.
   function togglePresenter(value: boolean) {
     setPresenter(value);
-    if (storyboard) commitStoryboard({ ...storyboard, presenter: value });
+    if (storyboard) commitStoryboard(withPresenter(storyboard, value));
+  }
+
+  // Switching language resets the presenter pick so EN/ES stay matched to the right voice.
+  function changeVoiceLang(l: SocialLocale) {
+    setVoiceLang(l);
+    setPresenterSel({});
+    if (storyboard) commitStoryboard(withPresenter(storyboard, presenter, {}));
+  }
+
+  // Apply a fresh avatar/voice pick from the modal.
+  function applyPresenterSelection(sel: PresenterSelection) {
+    setPresenterSel(sel);
+    if (storyboard) commitStoryboard(withPresenter(storyboard, presenter, sel));
+  }
+
+  // Stamp the cinematic toggle + Veo settings onto a storyboard.
+  function withCinematic(
+    sb: VideoStoryboard,
+    c: boolean = cinematic,
+    t: VeoTier = veoTier,
+    d: 4 | 6 | 8 = veoDuration
+  ): VideoStoryboard {
+    return { ...sb, cinematic: c, veoTier: t, veoDurationSec: d };
+  }
+
+  // Apply both presenter + cinematic settings onto a (possibly fresh) storyboard.
+  function decorate(sb: VideoStoryboard): VideoStoryboard {
+    return withCinematic(withPresenter(sb));
+  }
+
+  function toggleCinematic(value: boolean) {
+    setCinematic(value);
+    if (storyboard) commitStoryboard(withCinematic(storyboard, value));
+  }
+  function changeTier(t: VeoTier) {
+    setVeoTier(t);
+    if (storyboard) commitStoryboard(withCinematic(storyboard, cinematic, t));
+  }
+  function changeDuration(d: 4 | 6 | 8) {
+    setVeoDuration(d);
+    if (storyboard) commitStoryboard(withCinematic(storyboard, cinematic, veoTier, d));
   }
 
   function setSceneBusy(idx: number, busy: boolean) {
@@ -78,14 +176,102 @@ export function VideoImageStudio({
     });
   }
 
+  function setClipBusy(idx: number, busy: boolean) {
+    setClipIdx((prev) => {
+      const n = new Set(prev);
+      if (busy) n.add(idx); else n.delete(idx);
+      return n;
+    });
+  }
+
+  // ── Cinematic: animate one scene image into a Veo clip ─────────────────────
+  async function animateScene(idx: number) {
+    const cur = sbRef.current;
+    const scene = cur?.scenes[idx];
+    if (!cur || !scene?.imageUrl || !submitClip || !pollClip) return;
+    setError(undefined);
+    setClipBusy(idx, true);
+    try {
+      const { operationName } = await submitClip(scene.imageUrl, scene.imageConcept, idx, veoTier, veoDuration);
+      for (let p = 0; p < MAX_CLIP_POLLS; p++) {
+        await new Promise((r) => setTimeout(r, CLIP_POLL_MS));
+        if (!aliveRef.current) return;
+        const st = await pollClip(operationName, idx);
+        if (st.status === "done" && st.videoUrl) {
+          const latest = sbRef.current!;
+          commitStoryboard({
+            ...latest,
+            scenes: latest.scenes.map((s, i) => (i === idx ? { ...s, videoClipUrl: st.videoUrl } : s)),
+          });
+          return;
+        }
+      }
+      throw new Error("Veo clip timed out. Please try again.");
+    } catch (err) {
+      if (aliveRef.current) setError(err instanceof Error ? err.message : "Cinematic motion failed");
+    } finally {
+      if (aliveRef.current) setClipBusy(idx, false);
+    }
+  }
+
+  async function animateAll() {
+    const cur = sbRef.current;
+    if (!cur) return;
+    const CONCURRENCY = 2;
+    for (let start = 0; start < cur.scenes.length; start += CONCURRENCY) {
+      const idxs = cur.scenes.map((_, i) => i).slice(start, start + CONCURRENCY);
+      await Promise.all(idxs.map((i) => animateScene(i)));
+      if (!aliveRef.current) return;
+    }
+  }
+
+  // Drop a scene's clip → it renders as the static Ken Burns image again.
+  function revertScene(idx: number) {
+    const cur = sbRef.current;
+    if (!cur) return;
+    commitStoryboard({
+      ...cur,
+      scenes: cur.scenes.map((s, i) => (i === idx ? { ...s, videoClipUrl: undefined } : s)),
+    });
+  }
+
+  // ── AI background music: generate a category-matched track ─────────────────
+  async function generateMusicTrack() {
+    const cur = sbRef.current;
+    if (!cur || !generateMusic) return;
+    setMusicError(undefined);
+    setMusicBusy(true);
+    try {
+      const url = await generateMusic(cur.durationSeconds);
+      if (!aliveRef.current) return;
+      commitStoryboard({ ...sbRef.current!, musicUrl: url });
+    } catch (err) {
+      if (aliveRef.current) setMusicError(err instanceof Error ? err.message : "Music generation failed");
+    } finally {
+      if (aliveRef.current) setMusicBusy(false);
+    }
+  }
+
+  // Auto-generate the track once images exist and none is set yet (no toggle).
+  const hasImagesForMusic = Boolean(storyboard?.scenes.length);
+  useEffect(() => {
+    if (!generateMusic || !hasImagesForMusic || musicTriedRef.current) return;
+    if (storyboard?.musicUrl) return;        // restored from Sanity → keep it
+    musicTriedRef.current = true;
+    void generateMusicTrack();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasImagesForMusic, storyboard?.musicUrl]);
+
   // ── Phase A: build storyboard + all images ────────────────────────────────
   async function buildImages() {
     setError(undefined);
     setBusyImages(true);
     try {
+      const prevMusic = sbRef.current?.musicUrl;
       const sb = await generateImages(voiceLang);
       if (!aliveRef.current) return;
-      commitStoryboard({ ...sb, presenter }); // carry the current presenter choice onto the new storyboard
+      // carry presenter + cinematic settings AND the existing music track onto the new storyboard
+      commitStoryboard({ ...decorate(sb), musicUrl: prevMusic });
     } catch (err) {
       if (aliveRef.current) setError(err instanceof Error ? err.message : "Image generation failed");
     } finally {
@@ -151,7 +337,7 @@ export function VideoImageStudio({
     setVideoUrl("");
     setPhase("rendering");
     try {
-      const renderStoryboard = { ...storyboard, presenter };
+      const renderStoryboard = decorate(storyboard);
       const { projectId, durationSeconds } = await renderVideo(renderStoryboard);
       for (let i = 0; i < MAX_POLLS; i++) {
         await new Promise((r) => setTimeout(r, POLL_INTERVAL_MS));
@@ -173,8 +359,11 @@ export function VideoImageStudio({
     }
   }
 
-  const anyBusy = busyImages || regenIdx.size > 0 || phase === "rendering";
+  const anyBusy = busyImages || regenIdx.size > 0 || clipIdx.size > 0 || musicBusy || phase === "rendering";
   const hasImages = Boolean(storyboard?.scenes.length);
+  const sceneCount = storyboard?.scenes.length ?? 0;
+  const animatedCount = storyboard?.scenes.filter((s) => s.videoClipUrl).length ?? 0;
+  const animateAllCost = (sceneCount * veoDuration * VEO_RATE[veoTier]).toFixed(2);
 
   return (
     <div className="flex flex-col gap-4 rounded-lg border p-4">
@@ -194,7 +383,7 @@ export function VideoImageStudio({
             <button
               key={l}
               disabled={anyBusy}
-              onClick={() => setVoiceLang(l)}
+              onClick={() => changeVoiceLang(l)}
               className={cn(
                 "px-3 py-1 text-xs border rounded-md transition-colors disabled:opacity-50",
                 voiceLang === l ? "bg-blue-600 text-white border-blue-600" : "border-border hover:bg-muted"
@@ -227,6 +416,78 @@ export function VideoImageStudio({
         </span>
       </div>
 
+      {/* Avatar & voice selection — only when the presenter is on */}
+      {presenter && (
+        <div className="flex items-center gap-3 flex-wrap rounded-md border bg-muted/30 px-3 py-2">
+          <div className="text-xs flex-1 min-w-0">
+            <span className="text-muted-foreground">Presenter: </span>
+            <span className="font-medium">{presenterSel.avatarName ?? "Default avatar"}</span>
+            <span className="text-muted-foreground"> · voice </span>
+            <span className="font-medium">{presenterSel.voiceName ?? "Default"}</span>
+          </div>
+          <Button variant="outline" size="sm" disabled={anyBusy} onClick={() => setPickerOpen(true)}>
+            Choose avatar & voice
+          </Button>
+        </div>
+      )}
+
+      <PresenterPicker
+        open={pickerOpen}
+        onOpenChange={setPickerOpen}
+        locale={voiceLang}
+        current={presenterSel}
+        onConfirm={applyPresenterSelection}
+      />
+
+      {/* Cinematic motion (Veo 3.1) toggle */}
+      {cinematicSupported && (
+        <div className="flex items-center gap-3 flex-wrap">
+          <span className="text-xs font-medium text-muted-foreground">Cinematic motion:</span>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={cinematic}
+            disabled={anyBusy}
+            onClick={() => toggleCinematic(!cinematic)}
+            className={cn(
+              "relative inline-flex h-5 w-9 items-center rounded-full transition-colors disabled:opacity-50",
+              cinematic ? "bg-blue-600" : "bg-muted-foreground/30"
+            )}
+          >
+            <span className={cn("inline-block h-4 w-4 transform rounded-full bg-white transition-transform", cinematic ? "translate-x-4" : "translate-x-0.5")} />
+          </button>
+          <span className="text-xs text-muted-foreground">Animate scene images into real video with Google Veo 3.1 (pay-per-use)</span>
+        </div>
+      )}
+
+      {cinematicSupported && cinematic && (
+        <div className="flex items-center gap-3 flex-wrap rounded-md border bg-muted/30 px-3 py-2">
+          <span className="text-xs text-muted-foreground">Quality</span>
+          <select
+            value={veoTier}
+            onChange={(e) => changeTier(e.target.value as VeoTier)}
+            disabled={anyBusy}
+            className="border rounded-md px-2 py-1 text-xs bg-background"
+          >
+            {(["lite", "fast", "standard"] as const).map((t) => (
+              <option key={t} value={t}>{VEO_TIER_LABEL[t]} (${VEO_RATE[t].toFixed(2)}/s)</option>
+            ))}
+          </select>
+          <span className="text-xs text-muted-foreground">Clip length</span>
+          <select
+            value={veoDuration}
+            onChange={(e) => changeDuration(Number(e.target.value) as 4 | 6 | 8)}
+            disabled={anyBusy}
+            className="border rounded-md px-2 py-1 text-xs bg-background"
+          >
+            {([4, 6, 8] as const).map((d) => <option key={d} value={d}>{d}s</option>)}
+          </select>
+          <span className="text-xs text-muted-foreground ml-auto">
+            {animatedCount}/{sceneCount} animated · Animate all ≈ <span className="font-medium">${animateAllCost}</span>
+          </span>
+        </div>
+      )}
+
       {/* Phase A trigger / image controls */}
       {!hasImages ? (
         <Button onClick={buildImages} disabled={!canGenerate || busyImages} className="w-fit">
@@ -242,6 +503,12 @@ export function VideoImageStudio({
               {busyImages ? <Loader2 className="h-3 w-3 mr-1 animate-spin" /> : <RefreshCw className="h-3 w-3 mr-1" />}
               Regenerate all
             </Button>
+            {cinematicSupported && cinematic && (
+              <Button variant="outline" size="sm" onClick={animateAll} disabled={anyBusy} title={`≈ $${animateAllCost}`}>
+                {clipIdx.size > 0 ? <Loader2 className="h-3 w-3 mr-1 animate-spin" /> : <Clapperboard className="h-3 w-3 mr-1" />}
+                Animate all
+              </Button>
+            )}
             <Button variant="ghost" size="sm" onClick={buildImages} disabled={anyBusy}>
               Rebuild from script
             </Button>
@@ -250,32 +517,74 @@ export function VideoImageStudio({
           <div className="grid grid-cols-5 gap-2">
             {storyboard!.scenes.map((scene, i) => {
               const busy = regenIdx.has(i);
+              const clipBusy = clipIdx.has(i);
+              const hasClip = Boolean(scene.videoClipUrl);
               return (
                 <div key={i} className="group relative rounded border bg-muted overflow-hidden" style={{ aspectRatio: "9 / 16" }}>
-                  {scene.imageUrl && (
+                  {cinematic && hasClip ? (
+                    // eslint-disable-next-line jsx-a11y/media-has-caption
+                    <video src={scene.videoClipUrl} muted loop autoPlay playsInline className="w-full h-full object-cover" />
+                  ) : scene.imageUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={scene.imageUrl} alt={`Scene ${i + 1}`} className="w-full h-full object-cover" />
+                  ) : null}
+
+                  {cinematic && hasClip && !clipBusy && (
+                    <span className="absolute top-1 left-1 bg-blue-600 text-white text-[9px] px-1 py-0.5 rounded flex items-center gap-0.5">
+                      <VideoIcon className="h-2.5 w-2.5" /> motion
+                    </span>
                   )}
-                  {busy && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-                      <Loader2 className="h-5 w-5 animate-spin text-white" />
+
+                  {(busy || clipBusy) && (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-black/55 text-white">
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                      {clipBusy && <span className="text-[9px]">animating…</span>}
                     </div>
                   )}
-                  {!busy && !anyBusy && (
+
+                  {!busy && !clipBusy && !anyBusy && (
                     <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-black/0 group-hover:bg-black/45 opacity-0 group-hover:opacity-100 transition">
+                      {cinematic && (
+                        hasClip ? (
+                          <>
+                            <button
+                              onClick={() => animateScene(i)}
+                              title="Re-animate this scene"
+                              className="flex items-center gap-1 text-[11px] text-white bg-blue-600/90 hover:bg-blue-600 px-2 py-1 rounded"
+                            >
+                              <Clapperboard className="h-3 w-3" /> Re-animate
+                            </button>
+                            <button
+                              onClick={() => revertScene(i)}
+                              title="Use the still image instead"
+                              className="flex items-center gap-1 text-[11px] text-white bg-white/20 hover:bg-white/30 px-2 py-1 rounded"
+                            >
+                              <Undo2 className="h-3 w-3" /> Revert
+                            </button>
+                          </>
+                        ) : (
+                          <button
+                            onClick={() => animateScene(i)}
+                            title={`Animate this scene (≈ $${(veoDuration * VEO_RATE[veoTier]).toFixed(2)})`}
+                            className="flex items-center gap-1 text-[11px] text-white bg-blue-600/90 hover:bg-blue-600 px-2 py-1 rounded"
+                          >
+                            <Clapperboard className="h-3 w-3" /> Animate
+                          </button>
+                        )
+                      )}
                       <button
                         onClick={() => regenOne(i, scene.imageConcept)}
                         title="Regenerate this image"
-                        className="flex items-center gap-1 text-[11px] text-white bg-blue-600/90 hover:bg-blue-600 px-2 py-1 rounded"
+                        className="flex items-center gap-1 text-[11px] text-white bg-white/20 hover:bg-white/30 px-2 py-1 rounded"
                       >
-                        <RotateCcw className="h-3 w-3" /> Regenerate
+                        <RotateCcw className="h-3 w-3" /> Image
                       </button>
                       <button
                         onClick={() => { setEditIdx(i); setEditText(scene.imageConcept); }}
                         title="Edit the prompt"
                         className="flex items-center gap-1 text-[11px] text-white bg-white/20 hover:bg-white/30 px-2 py-1 rounded"
                       >
-                        <Pencil className="h-3 w-3" /> Edit prompt
+                        <Pencil className="h-3 w-3" /> Prompt
                       </button>
                     </div>
                   )}
@@ -298,6 +607,39 @@ export function VideoImageStudio({
                 </Button>
               </div>
             </div>
+          )}
+
+          {/* AI background music (ElevenLabs) — always generated, regenerable */}
+          {musicSupported && (
+            <div className="flex items-center gap-3 flex-wrap rounded-md border bg-muted/30 px-3 py-2">
+              <Music className="h-4 w-4 text-blue-600 shrink-0" />
+              <span className="text-xs font-medium text-muted-foreground">Background music</span>
+              {musicBusy ? (
+                <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <Loader2 className="h-3 w-3 animate-spin" /> Generating music… (~10–30s)
+                </span>
+              ) : storyboard!.musicUrl ? (
+                <>
+                  {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+                  <audio src={storyboard!.musicUrl} controls className="h-8 flex-1 min-w-[180px]" />
+                  <Button variant="outline" size="sm" onClick={() => generateMusicTrack()} disabled={anyBusy}>
+                    <RefreshCw className="h-3 w-3 mr-1" /> Regenerate
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <span className="text-xs text-muted-foreground">
+                    {musicError ? "Music generation failed — the video will use the default track." : "Mood-matched track for this category."}
+                  </span>
+                  <Button variant="outline" size="sm" onClick={() => generateMusicTrack()} disabled={anyBusy} className="ml-auto">
+                    <Music className="h-3 w-3 mr-1" /> Generate music
+                  </Button>
+                </>
+              )}
+            </div>
+          )}
+          {musicError && !musicBusy && (
+            <p className="text-xs text-amber-600">{musicError}</p>
           )}
 
           {/* Phase B trigger */}

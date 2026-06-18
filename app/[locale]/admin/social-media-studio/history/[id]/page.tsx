@@ -67,9 +67,17 @@ interface SocialPostDetail {
     voiceLanguage?: string;
     durationSeconds?: number;
     category?: string;
+    musicUrl?: string;
     presenter?: boolean;
     presenterPlacement?: string;
-    scenes?: { narration?: string; onScreenText?: string; imageConcept?: string; imageUrl?: string }[];
+    presenterAvatarId?: string;
+    presenterAvatarName?: string;
+    presenterVoiceId?: string;
+    presenterVoiceName?: string;
+    cinematic?: boolean;
+    veoTier?: string;
+    veoDurationSec?: number;
+    scenes?: { narration?: string; onScreenText?: string; imageConcept?: string; imageUrl?: string; videoClipUrl?: string }[];
   };
 }
 
@@ -119,13 +127,22 @@ export default async function SocialPostDetailPage({
         voiceLanguage:   post.videoStoryboard.voiceLanguage === "es" ? "es" : "en",
         durationSeconds: post.videoStoryboard.durationSeconds === 60 ? 60 : 30,
         category:        post.videoStoryboard.category,
+        musicUrl:        post.videoStoryboard.musicUrl,
         presenter:       post.videoStoryboard.presenter ?? false,
         presenterPlacement: post.videoStoryboard.presenterPlacement === "bottom-left" ? "bottom-left" : "bottom-right",
+        presenterAvatarId:   post.videoStoryboard.presenterAvatarId,
+        presenterAvatarName: post.videoStoryboard.presenterAvatarName,
+        presenterVoiceId:    post.videoStoryboard.presenterVoiceId,
+        presenterVoiceName:  post.videoStoryboard.presenterVoiceName,
+        cinematic:       post.videoStoryboard.cinematic ?? false,
+        veoTier:         (post.videoStoryboard.veoTier as "lite" | "fast" | "standard" | undefined),
+        veoDurationSec:  (post.videoStoryboard.veoDurationSec === 4 || post.videoStoryboard.veoDurationSec === 8 ? post.videoStoryboard.veoDurationSec : 6),
         scenes: post.videoStoryboard.scenes.map((s) => ({
           narration:    s.narration ?? "",
           onScreenText: s.onScreenText ?? "",
           imageConcept: s.imageConcept ?? "",
           imageUrl:     s.imageUrl ?? "",
+          videoClipUrl: s.videoClipUrl,
         })),
       }
     : undefined;
