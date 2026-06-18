@@ -60,36 +60,56 @@ async function rebuildFromLatestScript(
   const fresh = await buildVideoStoryboard(source, videoScript, locale);
   const images = current.scenes.map((s) => s.imageUrl).filter(Boolean);
   if (images.length === 0) return current;
+  const clips = current.scenes.map((s) => s.videoClipUrl);
 
-  // Fresh narration + concepts, but reuse the existing images by index (cyclic fill).
+  // Fresh narration + concepts, but reuse the existing images (and cinematic clips) by index.
   fresh.scenes = fresh.scenes.map((scene, i) => ({
     ...scene,
-    imageUrl: images[i] ?? images[i % images.length],
+    imageUrl:     images[i] ?? images[i % images.length],
+    videoClipUrl: clips[i],
   }));
+  fresh.musicUrl = current.musicUrl;
   fresh.presenter = current.presenter;
   fresh.presenterPlacement = current.presenterPlacement;
+  fresh.presenterAvatarId = current.presenterAvatarId;
+  fresh.presenterAvatarName = current.presenterAvatarName;
+  fresh.presenterVoiceId = current.presenterVoiceId;
+  fresh.presenterVoiceName = current.presenterVoiceName;
+  fresh.cinematic = current.cinematic;
+  fresh.veoTier = current.veoTier;
+  fresh.veoDurationSec = current.veoDurationSec;
 
   // Persist the refreshed active storyboard.
-  await sanity
-    .patch(id)
-    .set({
-      videoStoryboard: {
-        voiceLanguage:   fresh.voiceLanguage,
-        durationSeconds: fresh.durationSeconds,
-        category:        fresh.category ?? null,
-        scenes: fresh.scenes.map((s, i) => ({
-          _key:         `sc_${i}`,
-          narration:    s.narration,
-          onScreenText: s.onScreenText,
-          imageConcept: s.imageConcept,
-          imageUrl:     s.imageUrl,
-        })),
-      },
-      updatedAt: new Date().toISOString(),
-    })
-    .commit();
+  await sanity.patch(id).set({ videoStoryboard: toStoryboardDoc(fresh), updatedAt: new Date().toISOString() }).commit();
 
   return fresh;
+}
+
+// Full Sanity representation of a storyboard (used to persist faceless rebuilds + presenter renders).
+function toStoryboardDoc(sb: VideoStoryboard) {
+  return {
+    voiceLanguage:       sb.voiceLanguage,
+    durationSeconds:     sb.durationSeconds,
+    category:            sb.category ?? null,
+    musicUrl:            sb.musicUrl ?? null,
+    presenter:           sb.presenter ?? false,
+    presenterPlacement:  sb.presenterPlacement ?? null,
+    presenterAvatarId:   sb.presenterAvatarId ?? null,
+    presenterAvatarName: sb.presenterAvatarName ?? null,
+    presenterVoiceId:    sb.presenterVoiceId ?? null,
+    presenterVoiceName:  sb.presenterVoiceName ?? null,
+    cinematic:           sb.cinematic ?? false,
+    veoTier:             sb.veoTier ?? null,
+    veoDurationSec:      sb.veoDurationSec ?? null,
+    scenes: sb.scenes.map((s, i) => ({
+      _key:         `sc_${i}`,
+      narration:    s.narration,
+      onScreenText: s.onScreenText,
+      imageConcept: s.imageConcept,
+      imageUrl:     s.imageUrl,
+      videoClipUrl: s.videoClipUrl ?? null,
+    })),
+  };
 }
 
 export async function POST(
@@ -128,6 +148,14 @@ export async function POST(
     // already have their HeyGen audio generated from the client storyboard, so keep as-is).
     if (!storyboard.presenter) {
       storyboard = await rebuildFromLatestScript(id, storyboard);
+    } else {
+      // Presenter render keeps the client narration (HeyGen audio matches it) — persist the
+      // full storyboard so the presenter pick, cinematic clips, and images all survive a reload.
+      await getWriteClient()
+        .patch(id)
+        .set({ videoStoryboard: toStoryboardDoc(storyboard), updatedAt: new Date().toISOString() })
+        .commit()
+        .catch((e) => console.warn("[history/generate-video] presenter persist failed:", (e as Error).message));
     }
 
     const { projectId } = await submitVideoRender(storyboard, presenter);

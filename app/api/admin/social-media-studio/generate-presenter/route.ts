@@ -13,6 +13,8 @@ interface Body {
   narration?: string;       // full narration text (preferred)
   storyboard?: VideoStoryboard; // fallback: concatenate scene narration server-side
   locale?: SocialLocale;
+  avatarId?: string;        // in-app picked avatar (overrides env default)
+  voiceId?: string;         // in-app picked voice (overrides env default)
 }
 
 export async function POST(req: Request) {
@@ -34,8 +36,11 @@ export async function POST(req: Request) {
     );
   }
 
+  const avatarId = body.avatarId || body.storyboard?.presenterAvatarId;
+  const voiceId  = body.voiceId  || body.storyboard?.presenterVoiceId;
+
   try {
-    const { videoId } = await submitPresenterVideo(narration, locale);
+    const { videoId } = await submitPresenterVideo(narration, locale, { avatarId, voiceId });
     const response: SocialStudioResponse<{ presenterVideoId: string }> = {
       success: true,
       data: { presenterVideoId: videoId },

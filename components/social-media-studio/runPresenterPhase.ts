@@ -32,7 +32,12 @@ export async function runPresenterPhase(
   locale: SocialLocale
 ): Promise<PresenterResult> {
   const narration = storyboard.scenes.map((s) => s.narration.trim()).filter(Boolean).join(" ");
-  const submit = await postJson(PRESENTER_SUBMIT_URL, { narration, locale });
+  const submit = await postJson(PRESENTER_SUBMIT_URL, {
+    narration,
+    locale,
+    avatarId: storyboard.presenterAvatarId,
+    voiceId:  storyboard.presenterVoiceId,
+  });
   const videoId = submit.presenterVideoId as string;
 
   for (let i = 0; i < MAX_POLLS; i++) {

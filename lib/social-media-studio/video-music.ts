@@ -3,7 +3,7 @@
 // Host ~3 royalty-free tracks on Cloudinary and set the env vars below. Categories are
 // grouped into three moods; an unmapped category falls back to "uplift".
 
-type MusicMood = "reflective" | "hopeful" | "uplift";
+export type MusicMood = "reflective" | "hopeful" | "uplift";
 
 const CATEGORY_MOOD: Record<string, MusicMood> = {
   // Reflective / emotional — gentle piano
@@ -34,6 +34,17 @@ function moodUrl(mood: MusicMood): string | undefined {
 
 /** Returns a public music-track URL for the category, or undefined if none configured. */
 export function musicUrlForCategory(category?: string): string | undefined {
-  const mood = (category && CATEGORY_MOOD[category]) || "uplift";
-  return moodUrl(mood);
+  return moodUrl(moodForCategory(category));
 }
+
+/** Maps an insurance category to its emotional music mood (unmapped → "uplift"). */
+export function moodForCategory(category?: string): MusicMood {
+  return (category && CATEGORY_MOOD[category]) || "uplift";
+}
+
+// Text prompts handed to ElevenLabs Music when AI-generating a category-matched track.
+export const MUSIC_MOOD_PROMPT: Record<MusicMood, string> = {
+  reflective: "Gentle emotional solo piano with soft strings, slow and tender, cinematic and calm, no drums, no vocals.",
+  hopeful:    "Warm hopeful acoustic with light piano and soft strings, uplifting and reassuring, gentle rhythm, no vocals.",
+  uplift:     "Light optimistic corporate bed, clean soft synth and piano with a subtle beat, modern and informational, no vocals.",
+};

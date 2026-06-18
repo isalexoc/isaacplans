@@ -80,6 +80,21 @@ export function HistoryVideoGenerator({
         return { status: data.data.status as string, videoUrl: data.data.videoUrl as string | undefined };
       }}
       onVideoReady={(videoUrl) => onVideoReady(videoUrl)}
+      submitClip={async (imageUrl, imageConcept, _sceneIndex, tier, durationSec) => {
+        const data = await postJson(`${base}/generate-scene-clip`, { imageUrl, imageConcept, tier, durationSec });
+        return { operationName: data.operationName as string };
+      }}
+      pollClip={async (operationName, sceneIndex) => {
+        const url = `${base}/generate-scene-clip/status?op=${encodeURIComponent(operationName)}&sceneIndex=${sceneIndex}${sourceCategory ? `&category=${encodeURIComponent(sourceCategory)}` : ""}`;
+        const res = await fetch(url);
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error ?? "Clip failed");
+        return { status: data.data.status as string, videoUrl: data.data.videoUrl as string | undefined };
+      }}
+      generateMusic={async (durationSeconds) => {
+        const data = await postJson(`${base}/generate-music`, { durationSeconds });
+        return data.musicUrl as string;
+      }}
     />
   );
 }

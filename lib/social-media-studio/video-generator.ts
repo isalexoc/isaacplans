@@ -268,10 +268,12 @@ export async function generateVideoSceneImages(
 // Ken Burns motion directions cycled per scene so a single background image still feels alive.
 const PAN_DIRECTIONS = ["top-left", "bottom-right", "top-right", "bottom-left", "left", "right"] as const;
 
-// Presenter corner inset geometry on the 1080×1920 canvas (9:16 source kept by height:-1).
-const PRESENTER_INSET_WIDTH = 330;
-const PRESENTER_MARGIN_X    = 30;
-const PRESENTER_MARGIN_Y    = 40;
+// Presenter geometry on the 1080×1920 canvas (9:16 source scaled by width; height:-1 keeps
+// the aspect). The figure is LARGE and anchored low so its lower body runs off the bottom of
+// the frame — it reads like a person standing in the corner, not a small floating cut-out box.
+const PRESENTER_WIDTH_PX   = 600;  // displayed width (≈ 1067 tall at 9:16) — prominent
+const PRESENTER_TOP_Y      = 980;  // clip top → head lands in the lower third; bottom is cropped
+const PRESENTER_EDGE_BLEED = 120;  // pull the figure toward the screen edge so it hugs the side
 
 // Distribute the presenter clip's total length across scenes, weighted by narration word
 // count so background images roughly track the spoken narration. The last scene absorbs any
@@ -291,48 +293,67 @@ function buildMovieJson(
 ) {
   const voice        = elevenLabsVoiceFor(storyboard.voiceLanguage);
   const connection   = process.env.JSON2VIDEO_ELEVENLABS_CONNECTION;
-  const bgMusicUrl   = musicUrlForCategory(storyboard.category);
+  const bgMusicUrl   = storyboard.musicUrl || musicUrlForCategory(storyboard.category);
   const usePresenter = Boolean(storyboard.presenter && presenter);
   const sceneDurations = usePresenter
     ? presenterSceneDurations(storyboard.scenes, presenter!.durationSec)
     : [];
 
-  const scenes = storyboard.scenes.map((scene, i) => ({
-    elements: [
-      // Background image with Ken Burns motion, filling the 9:16 frame for the scene length.
-      {
-        type:           "image",
-        src:            scene.imageUrl,
-        // Presenter on → explicit word-weighted duration (no voice element to size the scene);
-        // off → -2 matches the scene length driven by the voice element.
-        duration:       usePresenter ? sceneDurations[i] : -2,
-        resize:         "cover",
-        pan:            PAN_DIRECTIONS[i % PAN_DIRECTIONS.length],
-        zoom:           2,
-        "pan-distance": 0.12,
-        "fade-in":      0.4,
-        "fade-out":     0.4,
-      },
-      // ElevenLabs voiceover — its natural length defines the scene duration. Omitted when a
-      // presenter is used: the HeyGen clip is the master audio (avoids overlapping voices).
-      ...(usePresenter
-        ? []
-        : [{
-            type:    "voice",
-            text:    scene.narration,
-            model:   "elevenlabs",
-            voice,
-            ...(connection ? { connection } : {}),
-          }]),
-    ],
-  }));
+  const cinematic = Boolean(storyboard.cinematic);
 
-  // Corner placement on the 1080×1920 canvas (9:16 inset → displayed height ≈ width × 16/9).
-  const placement  = storyboard.presenterPlacement ?? "bottom-right";
-  const presenterX = placement === "bottom-left"
-    ? PRESENTER_MARGIN_X
-    : 1080 - PRESENTER_INSET_WIDTH - PRESENTER_MARGIN_X;
-  const presenterY = 1920 - Math.round((PRESENTER_INSET_WIDTH * 16) / 9) - PRESENTER_MARGIN_Y;
+  const scenes = storyboard.scenes.map((scene, i) => {
+    // Presenter on → explicit word-weighted duration; off → -2 matches the voice-driven scene.
+    const sceneDuration = usePresenter ? sceneDurations[i] : -2;
+
+    // Cinematic scene → Veo clip (muted; its motion replaces Ken Burns). Otherwise the still.
+    const background =
+      cinematic && scene.videoClipUrl
+        ? {
+            type:       "video",
+            src:        scene.videoClipUrl,
+            duration:   sceneDuration,
+            resize:     "cover",
+            muted:      true,            // keep our ElevenLabs/HeyGen track as the only audio
+            "fade-in":  0.4,
+            "fade-out": 0.4,
+          }
+        : {
+            type:           "image",
+            src:            scene.imageUrl,
+            duration:       sceneDuration,
+            resize:         "cover",
+            pan:            PAN_DIRECTIONS[i % PAN_DIRECTIONS.length],
+            zoom:           2,
+            "pan-distance": 0.12,
+            "fade-in":      0.4,
+            "fade-out":     0.4,
+          };
+
+    return {
+      elements: [
+        background,
+        // ElevenLabs voiceover — its natural length defines the scene duration. Omitted when a
+        // presenter is used: the HeyGen clip is the master audio (avoids overlapping voices).
+        ...(usePresenter
+          ? []
+          : [{
+              type:    "voice",
+              text:    scene.narration,
+              model:   "elevenlabs",
+              voice,
+              ...(connection ? { connection } : {}),
+            }]),
+      ],
+    };
+  });
+
+  // Bottom-left by default (matches the "presenter rising from the lower-left" look). The clip
+  // is pulled toward the edge and pushed down so its lower body is cropped by the frame bottom.
+  const placement  = storyboard.presenterPlacement ?? "bottom-left";
+  const presenterX = placement === "bottom-right"
+    ? 1080 - PRESENTER_WIDTH_PX + PRESENTER_EDGE_BLEED
+    : -PRESENTER_EDGE_BLEED;
+  const presenterY = PRESENTER_TOP_Y;
 
   const movie: Record<string, unknown> = {
     resolution: "custom",
@@ -349,7 +370,7 @@ function buildMovieJson(
             position:    "custom",
             x:           presenterX,
             y:           presenterY,
-            width:       PRESENTER_INSET_WIDTH,
+            width:       PRESENTER_WIDTH_PX,
             height:      -1,
             start:       0,
             duration:    presenter!.durationSec,

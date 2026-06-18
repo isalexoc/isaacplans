@@ -83,6 +83,19 @@ export function VideoGenerator({
       onVideoReady={(videoUrl, projectId, durationSeconds, voiceLanguage) =>
         onVideoReady({ url: videoUrl, projectId, durationSeconds, voiceLanguage })
       }
+      submitClip={async (imageUrl, imageConcept, _sceneIndex, tier, durationSec) => {
+        const data = await postJson("/api/admin/social-media-studio/generate-scene-clip", {
+          imageUrl, imageConcept, tier, durationSec,
+        });
+        return { operationName: data.operationName as string };
+      }}
+      pollClip={async (operationName) => {
+        const url = `/api/admin/social-media-studio/generate-scene-clip/status?op=${encodeURIComponent(operationName)}${category ? `&category=${encodeURIComponent(category)}` : ""}`;
+        const res = await fetch(url);
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error ?? "Clip failed");
+        return { status: data.data.status as string, videoUrl: data.data.videoUrl as string | undefined };
+      }}
     />
   );
 }
