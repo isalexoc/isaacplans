@@ -1,18 +1,20 @@
-import { publishToFacebook } from "./facebook";
-import { publishToInstagram } from "./instagram";
+import { publishToFacebook, publishFacebookReel } from "./facebook";
+import { publishToInstagram, publishInstagramReel } from "./instagram";
 import { publishToThreads } from "./threads";
 import { publishToGoogleBusiness } from "./google-business";
 import { publishToTikTok } from "./tiktok";
 import { publishToYouTube } from "./youtube";
-import type { SocialConnection, PublishResult } from "../types";
+import type { SocialConnection, PublishResult, PublishFormat } from "../types";
 import type { FacebookMetadata, InstagramMetadata, ThreadsMetadata, GoogleBusinessMetadata, TikTokMetadata, YoutubeMetadata } from "../types";
 
 export async function publishToPlatform(
   conn: SocialConnection,
   caption: string,
   imageUrl: string,
-  videoUrl?: string
+  videoUrl?: string,
+  format: PublishFormat = "post"
 ): Promise<PublishResult> {
+  const asReel = format === "reel";
   switch (conn.platform) {
     case "facebook": {
       const meta = conn.platformMetadata as FacebookMetadata | null;
@@ -20,12 +22,20 @@ export async function publishToPlatform(
       const pageToken = meta?.pageAccessToken
         ? (() => { try { const { decryptToken } = require("../token-crypto"); return decryptToken(meta.pageAccessToken); } catch { return conn.accessToken; } })()
         : conn.accessToken;
+      if (asReel) {
+        if (!videoUrl) return { success: false, error: "A video URL is required to publish a Facebook reel" };
+        return publishFacebookReel(pageId, pageToken, caption, videoUrl);
+      }
       return publishToFacebook(pageId, pageToken, caption, imageUrl);
     }
 
     case "instagram": {
       const meta = conn.platformMetadata as InstagramMetadata | null;
       const igUserId = meta?.igUserId ?? conn.platformUserId ?? "";
+      if (asReel) {
+        if (!videoUrl) return { success: false, error: "A video URL is required to publish an Instagram reel" };
+        return publishInstagramReel(igUserId, conn.accessToken, caption, videoUrl);
+      }
       return publishToInstagram(igUserId, conn.accessToken, caption, imageUrl);
     }
 

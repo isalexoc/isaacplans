@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { createScheduledPost, listScheduledPosts } from "@/lib/social-publishing/scheduler";
-import type { SocialPlatform } from "@/lib/social-publishing/types";
+import type { SocialPlatform, PublishFormat } from "@/lib/social-publishing/types";
 import type { SocialPostCopy } from "@/lib/social-media-studio/types";
 
 export const maxDuration = 300;
@@ -21,6 +21,7 @@ export async function POST(req: NextRequest) {
     sanityPostId: string;
     sanityPostTitle?: string;
     platform: SocialPlatform;
+    format?: PublishFormat;
     locale: string;
     scheduledFor: string; // ISO
     imageUrl?: string;
@@ -30,6 +31,9 @@ export async function POST(req: NextRequest) {
 
   if (!body.sanityPostId || !body.platform || !body.scheduledFor) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+  }
+  if (body.format === "reel" && !body.videoUrl) {
+    return NextResponse.json({ error: "A video URL is required to schedule a reel" }, { status: 400 });
   }
 
   const scheduledFor = new Date(body.scheduledFor);
@@ -42,6 +46,7 @@ export async function POST(req: NextRequest) {
     sanityPostId:    body.sanityPostId,
     sanityPostTitle: body.sanityPostTitle,
     platform:        body.platform,
+    format:          body.format ?? "post",
     locale:          body.locale ?? "en",
     scheduledFor,
     imageUrl:        body.imageUrl,

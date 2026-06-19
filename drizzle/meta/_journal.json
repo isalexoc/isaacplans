@@ -50,6 +50,13 @@
       "when": 1781645524152,
       "tag": "0006_ancient_toad",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "5",
+      "when": 1781807607681,
+      "tag": "0007_parched_star_brand",
+      "breakpoints": true
     }
   ]
 }

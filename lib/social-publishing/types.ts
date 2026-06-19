@@ -86,12 +86,16 @@ export interface SocialConnection {
 
 export type PublishStatus = "pending" | "publishing" | "published" | "failed" | "cancelled";
 
+/** Which kind of post to publish for a given platform. Reels use the video instead of the image. */
+export type PublishFormat = "post" | "reel";
+
 export interface ScheduledPost {
   id: string;
   userId: string;
   sanityPostId: string;
   sanityPostTitle: string | null;
   platform: SocialPlatform;
+  format: PublishFormat;
   locale: string;
   scheduledFor: Date;
   publishedAt: Date | null;
