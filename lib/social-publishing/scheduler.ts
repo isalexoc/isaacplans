@@ -2,7 +2,7 @@ import { nanoid } from "nanoid";
 import { eq, and, lte, lt, inArray } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { socialScheduledPosts } from "@/lib/db/schema";
-import type { SocialPlatform, ScheduledPost, PublishStatus } from "./types";
+import type { SocialPlatform, ScheduledPost, PublishStatus, PublishFormat } from "./types";
 import type { SocialPostCopy } from "@/lib/social-media-studio/types";
 
 function rowToScheduled(row: typeof socialScheduledPosts.$inferSelect): ScheduledPost {
@@ -12,6 +12,7 @@ function rowToScheduled(row: typeof socialScheduledPosts.$inferSelect): Schedule
     sanityPostId:    row.sanityPostId,
     sanityPostTitle: row.sanityPostTitle ?? null,
     platform:        row.platform as SocialPlatform,
+    format:          (row.format as PublishFormat) ?? "post",
     locale:          row.locale,
     scheduledFor:    row.scheduledFor,
     publishedAt:     row.publishedAt ?? null,
@@ -32,6 +33,7 @@ export async function createScheduledPost(params: {
   sanityPostId: string;
   sanityPostTitle?: string;
   platform: SocialPlatform;
+  format?: PublishFormat;
   locale: string;
   scheduledFor: Date;
   imageUrl?: string;
@@ -45,6 +47,7 @@ export async function createScheduledPost(params: {
     sanityPostId:    params.sanityPostId,
     sanityPostTitle: params.sanityPostTitle ?? null,
     platform:        params.platform,
+    format:          params.format ?? "post",
     locale:          params.locale,
     scheduledFor:    params.scheduledFor,
     publishedAt:     null,

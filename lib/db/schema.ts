@@ -235,6 +235,7 @@ export const socialScheduledPosts = pgTable("social_scheduled_posts", {
   sanityPostId:    text("sanity_post_id").notNull(),
   sanityPostTitle: text("sanity_post_title"),
   platform:        text("platform").notNull(),
+  format:          text("format").notNull().default("post"), // post|reel
   locale:          text("locale").notNull(),
   scheduledFor:    timestamp("scheduled_for").notNull(),
   publishedAt:     timestamp("published_at"),

@@ -5,7 +5,7 @@ import { socialPlatformConnections, socialScheduledPosts } from "@/lib/db/schema
 import { getConnection, refreshTokenIfNeeded } from "./connection-manager";
 import { getGbpLocation } from "./oauth/google";
 import { publishToPlatform } from "./publishers";
-import type { SocialPlatform, GoogleBusinessMetadata } from "./types";
+import type { SocialPlatform, GoogleBusinessMetadata, PublishFormat } from "./types";
 
 function getSanityWriteClient() {
   if (!process.env.SANITY_API_WRITE_TOKEN) return null;
@@ -22,6 +22,7 @@ interface PublishJobParams {
   userId: string;
   sanityPostId: string;
   platform: SocialPlatform;
+  format?: PublishFormat;   // "reel" → publish the video as a reel (FB/IG); defaults to "post"
   caption: string;
   imageUrl: string;
   videoUrl?: string;
@@ -77,16 +78,18 @@ export async function runPublishJob(params: PublishJobParams): Promise<PublishJo
     }
   }
 
-  const result = await publishToPlatform(freshConn, params.caption, params.imageUrl, params.videoUrl);
+  const result = await publishToPlatform(freshConn, params.caption, params.imageUrl, params.videoUrl, params.format ?? "post");
 
   if (result.success && params.sanityPostId) {
     try {
       const sanity = getSanityWriteClient();
       if (sanity) {
+        // Track reels separately from image posts (e.g. "facebook" vs "facebook_reel").
+        const publishedKey = params.format === "reel" ? `${params.platform}_reel` : params.platform;
         await sanity
           .patch(params.sanityPostId)
           .setIfMissing({ publishedPlatforms: [] })
-          .insert("after", "publishedPlatforms[-1]", [params.platform])
+          .insert("after", "publishedPlatforms[-1]", [publishedKey])
           .set({ updatedAt: new Date().toISOString() })
           .commit({ returnDocuments: false });
       }

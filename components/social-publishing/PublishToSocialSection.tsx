@@ -9,6 +9,7 @@ import {
   ALL_SOCIAL_PLATFORMS,
   SOCIAL_PLATFORM_LABELS,
   type SocialPlatform,
+  type PublishFormat,
 } from "@/lib/social-publishing/types";
 import type { SocialPostCopy } from "@/lib/social-media-studio/types";
 
@@ -31,6 +32,15 @@ interface ConnectionInfo {
 
 type PlatformPublishState = "idle" | "publishing" | "success" | "error" | "scheduled";
 
+/** A single publishable row: an image post, or a reel (video) for FB/IG. */
+interface PublishTarget {
+  key: string;            // unique row key + published-tracking key ("facebook", "facebook_reel")
+  platform: SocialPlatform;
+  format: PublishFormat;
+  label: string;
+  icon: string;
+}
+
 interface ScheduleState {
   mode: "now" | "schedule";
   scheduledFor: string; // ISO string from datetime-local input
@@ -49,10 +59,8 @@ export function PublishToSocialSection({ sanityPostId, copies, squareImageUrl, v
   const alreadyPublished = new Set(publishedPlatforms);
   const [connections, setConnections] = useState<ConnectionInfo[]>([]);
   const [loadingConns, setLoadingConns] = useState(true);
-  const [platformStates, setPlatformStates] = useState<Record<SocialPlatform, PlatformPublishState>>(
-    {} as Record<SocialPlatform, PlatformPublishState>
-  );
-  const [platformErrors, setPlatformErrors] = useState<Partial<Record<SocialPlatform, string>>>({});
+  const [platformStates, setPlatformStates] = useState<Record<string, PlatformPublishState>>({});
+  const [platformErrors, setPlatformErrors] = useState<Record<string, string>>({});
   const [videoUrl, setVideoUrl] = useState(initialYoutubeVideoUrl ?? "");
 
   // Keep the field in sync when an AI video finishes generating after mount.
@@ -83,34 +91,42 @@ export function PublishToSocialSection({ sanityPostId, copies, squareImageUrl, v
     return squareImageUrl ?? verticalImageUrl ?? "";
   }
 
-  function setPlatformState(platform: SocialPlatform, state: PlatformPublishState) {
-    setPlatformStates((prev) => ({ ...prev, [platform]: state }));
+  function setPlatformState(key: string, state: PlatformPublishState) {
+    setPlatformStates((prev) => ({ ...prev, [key]: state }));
   }
 
-  async function publishNow(platform: SocialPlatform) {
-    const caption  = getCaptionForPlatform(platform);
-    const imageUrl = getImageForPlatform(platform);
-    if (platform === "youtube") {
-      if (!videoUrl) {
-        setPlatformErrors((prev) => ({ ...prev, [platform]: "Paste a video URL above before publishing to YouTube" }));
-        return;
-      }
-    } else if (platform === "tiktok") {
-      if (!videoUrl && (!caption || !imageUrl)) {
-        setPlatformErrors((prev) => ({ ...prev, [platform]: "TikTok needs a video URL above, or copy + image" }));
-        return;
-      }
-    } else if (!caption || !imageUrl) {
-      setPlatformErrors((prev) => ({ ...prev, [platform]: "Missing copy or image for this platform" }));
+  /** Validate a target; returns an error string, or null when good to go. */
+  function validateTarget(target: PublishTarget, caption: string, imageUrl: string): string | null {
+    if (target.format === "reel") {
+      if (!videoUrl) return "Generate or paste a video URL above before publishing a reel";
+      return null;
+    }
+    if (target.platform === "youtube") {
+      return videoUrl ? null : "Paste a video URL above before publishing to YouTube";
+    }
+    if (target.platform === "tiktok") {
+      return (!videoUrl && (!caption || !imageUrl)) ? "TikTok needs a video URL above, or copy + image" : null;
+    }
+    return (!caption || !imageUrl) ? "Missing copy or image for this platform" : null;
+  }
+
+  async function publishNow(target: PublishTarget) {
+    const caption  = getCaptionForPlatform(target.platform);
+    const imageUrl = target.format === "reel" ? "" : getImageForPlatform(target.platform);
+    const invalid = validateTarget(target, caption, imageUrl);
+    if (invalid) {
+      setPlatformErrors((prev) => ({ ...prev, [target.key]: invalid }));
       return;
     }
 
-    setPlatformState(platform, "publishing");
-    setPlatformErrors((prev) => { const n = { ...prev }; delete n[platform]; return n; });
+    setPlatformState(target.key, "publishing");
+    setPlatformErrors((prev) => { const n = { ...prev }; delete n[target.key]; return n; });
 
     try {
-      const body: Record<string, string> = { sanityPostId, platform, caption, imageUrl };
-      if ((platform === "youtube" || platform === "tiktok") && videoUrl) body.videoUrl = videoUrl;
+      const body: Record<string, string> = { sanityPostId, platform: target.platform, format: target.format, caption, imageUrl };
+      if (target.format === "reel" || target.platform === "youtube" || target.platform === "tiktok") {
+        if (videoUrl) body.videoUrl = videoUrl;
+      }
       const res = await fetch("/api/admin/social-publishing/publish", {
         method:  "POST",
         headers: { "Content-Type": "application/json" },
@@ -122,48 +138,43 @@ export function PublishToSocialSection({ sanityPostId, copies, squareImageUrl, v
       }
       const data = await res.json();
       if (data.success) {
-        setPlatformState(platform, "success");
+        setPlatformState(target.key, "success");
       } else {
-        setPlatformState(platform, "error");
-        setPlatformErrors((prev) => ({ ...prev, [platform]: data.error ?? "Publish failed" }));
+        setPlatformState(target.key, "error");
+        setPlatformErrors((prev) => ({ ...prev, [target.key]: data.error ?? "Publish failed" }));
       }
     } catch (err) {
-      setPlatformState(platform, "error");
-      setPlatformErrors((prev) => ({ ...prev, [platform]: err instanceof Error ? err.message : "Publish failed" }));
+      setPlatformState(target.key, "error");
+      setPlatformErrors((prev) => ({ ...prev, [target.key]: err instanceof Error ? err.message : "Publish failed" }));
     }
   }
 
-  async function schedulePost(platform: SocialPlatform) {
-    const caption  = getCaptionForPlatform(platform);
-    const imageUrl = getImageForPlatform(platform);
-    if (platform === "youtube") {
-      if (!videoUrl) {
-        setPlatformErrors((prev) => ({ ...prev, [platform]: "Paste a video URL above before scheduling to YouTube" }));
-        return;
-      }
-    } else if (platform === "tiktok") {
-      if (!videoUrl && (!caption || !imageUrl)) {
-        setPlatformErrors((prev) => ({ ...prev, [platform]: "TikTok needs a video URL above, or copy + image" }));
-        return;
-      }
-    } else if (!caption || !imageUrl) {
-      setPlatformErrors((prev) => ({ ...prev, [platform]: "Missing copy or image" }));
+  async function schedulePost(target: PublishTarget) {
+    const caption  = getCaptionForPlatform(target.platform);
+    const imageUrl = target.format === "reel" ? "" : getImageForPlatform(target.platform);
+    const invalid = validateTarget(target, caption, imageUrl);
+    if (invalid) {
+      setPlatformErrors((prev) => ({ ...prev, [target.key]: invalid }));
       return;
     }
 
-    setPlatformState(platform, "publishing");
+    setPlatformState(target.key, "publishing");
+    setPlatformErrors((prev) => { const n = { ...prev }; delete n[target.key]; return n; });
 
     try {
       const scheduleBody: Record<string, unknown> = {
         sanityPostId,
         sanityPostTitle: copies[0]?.hook?.slice(0, 80) ?? sanityPostId,
-        platform,
+        platform: target.platform,
+        format: target.format,
         locale,
         scheduledFor: new Date(scheduleState.scheduledFor).toISOString(),
         imageUrl,
-        copySnapshot: copies.find((c) => c.platform === platform && c.locale === locale),
+        copySnapshot: copies.find((c) => c.platform === target.platform && c.locale === locale),
       };
-      if ((platform === "youtube" || platform === "tiktok") && videoUrl) scheduleBody.videoUrl = videoUrl;
+      if (target.format === "reel" || target.platform === "youtube" || target.platform === "tiktok") {
+        if (videoUrl) scheduleBody.videoUrl = videoUrl;
+      }
       const res = await fetch("/api/admin/social-publishing/schedule", {
         method:  "POST",
         headers: { "Content-Type": "application/json" },
@@ -175,26 +186,47 @@ export function PublishToSocialSection({ sanityPostId, copies, squareImageUrl, v
       }
       const data = await res.json();
       if (data.success) {
-        setPlatformState(platform, "scheduled");
+        setPlatformState(target.key, "scheduled");
       } else {
-        setPlatformState(platform, "error");
-        setPlatformErrors((prev) => ({ ...prev, [platform]: data.error ?? "Schedule failed" }));
+        setPlatformState(target.key, "error");
+        setPlatformErrors((prev) => ({ ...prev, [target.key]: data.error ?? "Schedule failed" }));
       }
     } catch (err) {
-      setPlatformState(platform, "error");
-      setPlatformErrors((prev) => ({ ...prev, [platform]: err instanceof Error ? err.message : "Schedule failed" }));
+      setPlatformState(target.key, "error");
+      setPlatformErrors((prev) => ({ ...prev, [target.key]: err instanceof Error ? err.message : "Schedule failed" }));
     }
   }
 
-  async function handlePublish(platform: SocialPlatform) {
+  async function handlePublish(target: PublishTarget) {
     if (scheduleState.mode === "now") {
-      await publishNow(platform);
+      await publishNow(target);
     } else {
-      await schedulePost(platform);
+      await schedulePost(target);
     }
   }
 
   const connectedPlatforms = new Set(connections.filter((c) => c.status === "active").map((c) => c.platform));
+
+  // One row per publishable target: every connected platform as an image/video post, plus a
+  // separate Reel row for connected Facebook & Instagram (uses the video instead of the image).
+  const targets: PublishTarget[] = ALL_SOCIAL_PLATFORMS
+    .filter((p) => connectedPlatforms.has(p))
+    .flatMap((platform) => {
+      const post: PublishTarget = {
+        key: platform, platform, format: "post",
+        label: SOCIAL_PLATFORM_LABELS[platform], icon: PLATFORM_ICONS[platform],
+      };
+      if (platform === "facebook" || platform === "instagram") {
+        const reel: PublishTarget = {
+          key: `${platform}_reel`, platform, format: "reel",
+          label: `${SOCIAL_PLATFORM_LABELS[platform]} Reel`, icon: "🎬",
+        };
+        return [post, reel];
+      }
+      return [post];
+    });
+
+  const hasReelTarget = targets.some((t) => t.format === "reel");
 
   if (loadingConns) {
     return (
@@ -245,15 +277,11 @@ export function PublishToSocialSection({ sanityPostId, copies, squareImageUrl, v
         )}
       </div>
 
-      {/* Video URL input — shown when YouTube and/or TikTok are connected (both post video) */}
-      {(connectedPlatforms.has("youtube") || connectedPlatforms.has("tiktok")) && (
+      {/* Video URL input — shown when any video target is available (YouTube/TikTok or FB/IG Reels) */}
+      {(connectedPlatforms.has("youtube") || connectedPlatforms.has("tiktok") || hasReelTarget) && (
         <div className="flex flex-col gap-1.5">
           <label className="text-xs font-medium text-muted-foreground">
-            🎬 Video URL (9:16 mp4)
-            {" — used for "}
-            {connectedPlatforms.has("youtube") && connectedPlatforms.has("tiktok")
-              ? "YouTube & TikTok"
-              : connectedPlatforms.has("youtube") ? "YouTube" : "TikTok"}
+            🎬 Video URL (9:16 mp4) — used for YouTube, TikTok, and Facebook/Instagram Reels
           </label>
           <input
             type="url"
@@ -263,29 +291,33 @@ export function PublishToSocialSection({ sanityPostId, copies, squareImageUrl, v
             className="border rounded-md px-3 py-1.5 text-sm w-full"
           />
           <p className="text-xs text-muted-foreground">
-            Auto-filled from the AI video above. TikTok will post this as a video when set; otherwise it posts the image.
+            Auto-filled from the AI video above. Required for the Reel rows; TikTok posts it as a video when set.
           </p>
         </div>
       )}
 
-      {/* Platform rows */}
+      {/* Platform rows (image posts + Reel rows for FB/IG) */}
       <div className="flex flex-col gap-2">
-        {ALL_SOCIAL_PLATFORMS.filter((p) => connectedPlatforms.has(p)).map((platform) => {
-          const state = platformStates[platform] ?? "idle";
-          const error = platformErrors[platform];
-          const conn  = connections.find((c) => c.platform === platform);
+        {targets.map((target) => {
+          const state = platformStates[target.key] ?? "idle";
+          const error = platformErrors[target.key];
+          const conn  = connections.find((c) => c.platform === target.platform);
+          const reelNeedsVideo = target.format === "reel" && !videoUrl;
 
           return (
             <div
-              key={platform}
+              key={target.key}
               className="flex items-center justify-between gap-3 p-3 rounded-md border"
             >
               <div className="flex items-center gap-2 min-w-0">
-                <span>{PLATFORM_ICONS[platform]}</span>
+                <span>{target.icon}</span>
                 <div className="min-w-0">
-                  <p className="text-sm font-medium">{SOCIAL_PLATFORM_LABELS[platform]}</p>
+                  <p className="text-sm font-medium">{target.label}</p>
                   {conn?.platformAccountName && (
                     <p className="text-xs text-muted-foreground truncate">{conn.platformAccountName}</p>
+                  )}
+                  {reelNeedsVideo && !error && (
+                    <p className="text-xs text-muted-foreground mt-0.5">Add a video URL above to enable this reel.</p>
                   )}
                   {error && <p className="text-xs text-red-600 mt-0.5">{error}</p>}
                 </div>
@@ -306,9 +338,9 @@ export function PublishToSocialSection({ sanityPostId, copies, squareImageUrl, v
                   <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
                 )}
                 {(state === "idle" || state === "error") && (
-                  <Button size="sm" variant="outline" onClick={() => handlePublish(platform)}>
+                  <Button size="sm" variant="outline" disabled={reelNeedsVideo} onClick={() => handlePublish(target)}>
                     {scheduleState.mode === "now"
-                      ? <><Send className="h-3 w-3 mr-1" />{alreadyPublished.has(platform) ? "Republish" : "Publish"}</>
+                      ? <><Send className="h-3 w-3 mr-1" />{alreadyPublished.has(target.key) ? "Republish" : "Publish"}</>
                       : <><Clock className="h-3 w-3 mr-1" />Schedule</>
                     }
                   </Button>

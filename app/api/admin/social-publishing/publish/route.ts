@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { runPublishJob } from "@/lib/social-publishing/publish-job";
-import type { SocialPlatform } from "@/lib/social-publishing/types";
+import type { SocialPlatform, PublishFormat } from "@/lib/social-publishing/types";
 
 export const maxDuration = 300;
 
@@ -12,15 +12,21 @@ export async function POST(req: NextRequest) {
   const body = await req.json() as {
     sanityPostId: string;
     platform: SocialPlatform;
+    format?: PublishFormat;
     caption: string;
     imageUrl: string;
     videoUrl?: string;
   };
 
+  const isReel = body.format === "reel";
+
   if (!body.sanityPostId || !body.platform || !body.caption) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
-  if (body.platform !== "youtube" && !body.imageUrl) {
+  if (isReel && !body.videoUrl) {
+    return NextResponse.json({ error: "A video URL is required to publish a reel" }, { status: 400 });
+  }
+  if (!isReel && body.platform !== "youtube" && !body.imageUrl) {
     return NextResponse.json({ error: "imageUrl is required for non-YouTube platforms" }, { status: 400 });
   }
 
@@ -28,6 +34,7 @@ export async function POST(req: NextRequest) {
     userId,
     sanityPostId: body.sanityPostId,
     platform:     body.platform,
+    format:       body.format ?? "post",
     caption:      body.caption,
     imageUrl:     body.imageUrl ?? "",
     videoUrl:     body.videoUrl,

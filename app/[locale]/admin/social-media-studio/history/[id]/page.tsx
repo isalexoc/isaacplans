@@ -83,7 +83,9 @@ interface SocialPostDetail {
 
 const PLATFORM_LABELS: Record<string, string> = {
   facebook:        "Facebook",
+  facebook_reel:   "Facebook Reel",
   instagram:       "Instagram",
+  instagram_reel:  "Instagram Reel",
   threads:         "Threads",
   google_business: "Google Business",
   tiktok:          "TikTok",
@@ -92,7 +94,9 @@ const PLATFORM_LABELS: Record<string, string> = {
 
 const PLATFORM_ICONS: Record<string, string> = {
   facebook:        "🔵",
+  facebook_reel:   "🎬",
   instagram:       "📷",
+  instagram_reel:  "🎬",
   threads:         "🧵",
   google_business: "🔍",
   tiktok:          "🎵",

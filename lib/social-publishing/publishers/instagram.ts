@@ -58,3 +58,42 @@ export async function publishToInstagram(
   if (publishData.error) return { success: false, error: publishData.error.message };
   return { success: true, platformPostId: publishData.id };
 }
+
+export async function publishInstagramReel(
+  igUserId: string,
+  pageAccessToken: string,
+  caption: string,
+  videoUrl: string
+): Promise<PublishResult> {
+  // Step 1: Create a REELS media container from the hosted mp4.
+  const containerRes = await fetch(`${GRAPH}/${igUserId}/media`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      media_type:   "REELS",
+      video_url:    videoUrl,
+      caption,
+      access_token: pageAccessToken,
+    }),
+  });
+  const containerData = await containerRes.json();
+  if (containerData.error) return { success: false, error: containerData.error.message };
+  const containerId = containerData.id;
+
+  // Step 2: Wait for processing — reels transcode slower than images, so allow ~2 min.
+  try {
+    await pollContainerStatus(containerId, pageAccessToken, 40);
+  } catch (err) {
+    return { success: false, error: err instanceof Error ? err.message : "Reel container polling failed" };
+  }
+
+  // Step 3: Publish
+  const publishRes = await fetch(`${GRAPH}/${igUserId}/media_publish`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ creation_id: containerId, access_token: pageAccessToken }),
+  });
+  const publishData = await publishRes.json();
+  if (publishData.error) return { success: false, error: publishData.error.message };
+  return { success: true, platformPostId: publishData.id };
+}

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDuePosts, markPublishing, markPublished, markFailed } from "@/lib/social-publishing/scheduler";
 import { runPublishJob } from "@/lib/social-publishing/publish-job";
-import type { SocialPlatform } from "@/lib/social-publishing/types";
+import type { SocialPlatform, PublishFormat } from "@/lib/social-publishing/types";
 import type { SocialPostCopy } from "@/lib/social-media-studio/types";
 
 export async function GET(req: NextRequest) {
@@ -19,10 +19,13 @@ export async function GET(req: NextRequest) {
     const caption  = (post as unknown as { copySnapshot?: SocialPostCopy }).copySnapshot?.fullPost ?? "";
     const imageUrl = post.imageUrl ?? "";
     const videoUrl = post.videoUrl ?? undefined;
+    const format   = (post.format ?? "post") as PublishFormat;
 
+    const isReel    = format === "reel";
     const isYouTube = post.platform === "youtube";
-    if (!caption || (!isYouTube && !imageUrl)) {
-      await markFailed(post.id, "Missing caption or image URL in snapshot", post.attemptCount);
+    // Reels need a video; YouTube needs a video; everything else needs an image.
+    if (!caption || (isReel ? !videoUrl : !isYouTube && !imageUrl)) {
+      await markFailed(post.id, isReel ? "Missing caption or video URL for reel" : "Missing caption or image URL in snapshot", post.attemptCount);
       results.push({ id: post.id, platform: post.platform, success: false, error: "Missing data" });
       continue;
     }
@@ -31,6 +34,7 @@ export async function GET(req: NextRequest) {
       userId:      post.userId,
       sanityPostId: post.sanityPostId,
       platform:    post.platform as SocialPlatform,
+      format,
       caption,
       imageUrl,
       videoUrl,
