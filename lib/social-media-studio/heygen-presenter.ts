@@ -131,7 +131,10 @@ export async function getPresenterStatus(videoId: string): Promise<PresenterStat
 
 const HEYGEN_AVATARS_URL = "https://api.heygen.com/v2/avatars";
 const HEYGEN_VOICES_URL  = "https://api.heygen.com/v2/voices";
-const CATALOG_TTL_MS = 60 * 60 * 1000;
+// Catalogs are effectively static and HeyGen is slow (~60s), so cache aggressively:
+// an in-process layer for warm instances, plus the cross-instance Vercel Data Cache.
+const CATALOG_TTL_MS      = 6 * 60 * 60 * 1000; // in-memory (per warm instance)
+const CATALOG_REVALIDATE_S = 24 * 60 * 60;      // Vercel Data Cache (shared across instances)
 
 export interface HeyGenAvatar {
   avatarId: string;
@@ -157,7 +160,12 @@ let voiceCache: { at: number; data: any[] } | null = null;
 async function fetchHeyGen(url: string): Promise<unknown> {
   const apiKey = process.env.HEYGEN_API_KEY;
   if (!apiKey) throw new Error("HEYGEN_API_KEY is not configured");
-  const res = await fetch(url, { headers: { "x-api-key": apiKey } });
+  // Persist the slow catalog response in the Vercel Data Cache so cold instances don't each
+  // pay HeyGen's ~60s latency — only the (daily) revalidation does.
+  const res = await fetch(url, {
+    headers: { "x-api-key": apiKey },
+    next: { revalidate: CATALOG_REVALIDATE_S },
+  });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

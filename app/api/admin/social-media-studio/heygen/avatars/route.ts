@@ -2,7 +2,9 @@ import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { listHeyGenAvatars } from "@/lib/social-media-studio/heygen-presenter";
 
-export const maxDuration = 30;
+// HeyGen's /v2/avatars can take ~60s+ to respond (server-side, not payload size), so the
+// first uncached fetch needs generous headroom. Subsequent calls hit the cached catalog.
+export const maxDuration = 120;
 
 export async function GET(req: Request) {
   const { userId } = await auth();

@@ -2,7 +2,8 @@ import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { listHeyGenVoices } from "@/lib/social-media-studio/heygen-presenter";
 
-export const maxDuration = 30;
+// HeyGen's catalog endpoints are slow (~60s) on the first uncached fetch — give headroom.
+export const maxDuration = 120;
 
 export async function GET(req: Request) {
   const { userId } = await auth();
