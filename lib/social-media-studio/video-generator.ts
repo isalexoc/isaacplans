@@ -152,7 +152,10 @@ async function generateImageOnce(openai: OpenAI, concept: string, category: stri
   const response = await openai.images.generate({
     model:   (process.env.OPENAI_IMAGE_MODEL ?? "gpt-image-1") as "gpt-image-1",
     prompt:  buildVideoImagePrompt(concept, locale),
-    quality: "high",
+    // "medium" (not "high") — high-quality gpt-image-1 takes ~60s/image, so a ~10-scene batch
+    // blows past the 300s serverless limit. Medium roughly halves it; these are panned,
+    // caption-overlaid backgrounds where the quality drop is negligible.
+    quality: "medium",
     size:    "1024x1536", // portrait (2:3) — lightly cover-cropped to 9:16 by JSON2Video
     n:       1,
   } as Parameters<typeof openai.images.generate>[0]);
