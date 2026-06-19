@@ -401,9 +401,11 @@ function buildMovieJson(
           "max-words-per-line": 4,
         },
       },
-      // Subtle category-matched background music bed (low volume) if configured.
+      // Subtle category-matched background music bed (low volume) if configured. Loop it and
+      // stretch to the movie length (loop:-1 + duration:-2) so the bed always covers the whole
+      // Short — the generated/real video length (voice-driven) varies and the track may be shorter.
       ...(bgMusicUrl
-        ? [{ type: "audio", src: bgMusicUrl, volume: 0.12, "fade-in": 1.0, "fade-out": 1.5 }]
+        ? [{ type: "audio", src: bgMusicUrl, volume: 0.12, loop: -1, duration: -2, "fade-in": 1.0, "fade-out": 1.5 }]
         : []),
     ],
   };
