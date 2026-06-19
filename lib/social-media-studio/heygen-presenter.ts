@@ -21,6 +21,16 @@ export const HEYGEN_CHROMA_COLOR = process.env.HEYGEN_BACKGROUND_COLOR || "#00FF
 const PRESENTER_WIDTH  = 720;
 const PRESENTER_HEIGHT = 1280;
 
+// HeyGen meters API credits (402) separately from the plan's included video TIME (429).
+// Map the opaque "quota of time" message onto something actionable for the studio UI.
+function friendlyHeyGenError(raw: string, httpStatus?: number): string {
+  const s = (raw ?? "").toLowerCase();
+  if (httpStatus === 429 || s.includes("quota") || s.includes("exceeded")) {
+    return "HeyGen plan video-time is used up for this period — render faceless (turn off the presenter) or upgrade your HeyGen plan. (Note: this is a plan time limit, not your API credit balance.)";
+  }
+  return raw;
+}
+
 function heygenAvatarFor(locale: SocialLocale): string | undefined {
   return locale === "es"
     ? process.env.HEYGEN_AVATAR_ID_ES || process.env.HEYGEN_AVATAR_ID
@@ -78,7 +88,7 @@ export async function submitPresenterVideo(
   const videoId: string | undefined = data?.data?.video_id ?? data?.video_id;
   if (!res.ok || data?.error || !videoId) {
     const detail = data?.error?.message ?? data?.message ?? data?.error ?? "unknown error";
-    throw new Error(`HeyGen presenter submit failed (HTTP ${res.status}): ${detail}`);
+    throw new Error(friendlyHeyGenError(`HeyGen presenter submit failed (HTTP ${res.status}): ${detail}`, res.status));
   }
 
   return { videoId: String(videoId) };
@@ -110,7 +120,7 @@ export async function getPresenterStatus(videoId: string): Promise<PresenterStat
 
   if (status === "failed") {
     const err = (d.error as Record<string, unknown> | undefined)?.message ?? d.error;
-    throw new Error(`HeyGen presenter render failed: ${err ? String(err) : "no detail"}`);
+    throw new Error(friendlyHeyGenError(`HeyGen presenter render failed: ${err ? String(err) : "no detail"}`));
   }
 
   if (status !== "completed") {

@@ -66,11 +66,20 @@ export function HistoryVideoGenerator({
       }}
       renderVideo={async (storyboard) => {
         // Presenter on → render the HeyGen clip first, then composite it in JSON2Video.
-        const presenter = storyboard.presenter
-          ? await runPresenterPhase(storyboard, storyboard.voiceLanguage)
-          : {};
+        // If the presenter render fails (e.g. HeyGen plan time quota), fall back to a faceless
+        // render so the user never loses the whole video — and report why via `notice`.
+        let presenter: { presenterVideoUrl?: string; presenterDurationSec?: number } = {};
+        let notice: string | undefined;
+        if (storyboard.presenter) {
+          try {
+            presenter = await runPresenterPhase(storyboard, storyboard.voiceLanguage);
+          } catch (err) {
+            notice = `${err instanceof Error ? err.message : "Presenter render failed"} — rendered the video without the avatar.`;
+            presenter = {}; // no presenter clip → server renders faceless (images + voiceover + captions + music)
+          }
+        }
         const data = await postJson(`${base}/generate-video`, { storyboard, ...presenter });
-        return { projectId: data.projectId as string, durationSeconds: data.durationSeconds as number };
+        return { projectId: data.projectId as string, durationSeconds: data.durationSeconds as number, notice };
       }}
       pollStatus={async (projectId) => {
         const url = `${base}/generate-video/status?projectId=${encodeURIComponent(projectId)}${sourceCategory ? `&category=${encodeURIComponent(sourceCategory)}` : ""}`;

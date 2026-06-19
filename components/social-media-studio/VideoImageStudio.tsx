@@ -18,8 +18,9 @@ export interface VideoImageStudioProps {
   generateImages: (locale: SocialLocale) => Promise<VideoStoryboard>;
   /** Regenerate one scene's image from a concept; returns the new image URL. */
   regenerateImage: (concept: string, sceneIndex: number, locale: SocialLocale) => Promise<string>;
-  /** Phase B — render the video; returns the JSON2Video project id + duration. */
-  renderVideo: (storyboard: VideoStoryboard) => Promise<{ projectId: string; durationSeconds: number }>;
+  /** Phase B — render the video; returns the JSON2Video project id + duration. `notice` carries a
+   *  non-fatal warning (e.g. the presenter failed and we fell back to a faceless render). */
+  renderVideo: (storyboard: VideoStoryboard) => Promise<{ projectId: string; durationSeconds: number; notice?: string }>;
   /** Poll render status; returns the finished Cloudinary URL when done. */
   pollStatus: (projectId: string) => Promise<{ status: string; videoUrl?: string }>;
   onVideoReady: (videoUrl: string, projectId: string, durationSeconds: number, voiceLanguage: SocialLocale) => void;
@@ -78,6 +79,7 @@ export function VideoImageStudio({
   const [editIdx, setEditIdx]       = useState<number | null>(null);
   const [editText, setEditText]     = useState("");
   const [error, setError]           = useState<string | undefined>();
+  const [notice, setNotice]         = useState<string | undefined>(); // non-fatal warning (e.g. faceless fallback)
 
   // Cinematic motion (Veo 3.1)
   const cinematicSupported = Boolean(submitClip && pollClip);
@@ -334,11 +336,13 @@ export function VideoImageStudio({
   async function createVideo() {
     if (!storyboard) return;
     setError(undefined);
+    setNotice(undefined);
     setVideoUrl("");
     setPhase("rendering");
     try {
       const renderStoryboard = decorate(storyboard);
-      const { projectId, durationSeconds } = await renderVideo(renderStoryboard);
+      const { projectId, durationSeconds, notice: renderNotice } = await renderVideo(renderStoryboard);
+      if (renderNotice && aliveRef.current) setNotice(renderNotice);
       for (let i = 0; i < MAX_POLLS; i++) {
         await new Promise((r) => setTimeout(r, POLL_INTERVAL_MS));
         if (!aliveRef.current) return;
@@ -656,6 +660,12 @@ export function VideoImageStudio({
       {error && (
         <div className="flex items-center gap-3 rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
           <span className="flex-1">{error}</span>
+        </div>
+      )}
+
+      {notice && (
+        <div className="flex items-center gap-3 rounded-lg border border-amber-400/50 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          <span className="flex-1">{notice}</span>
         </div>
       )}
 
