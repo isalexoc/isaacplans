@@ -12,6 +12,7 @@
     "db:studio": "drizzle-kit studio",
     "create:post": "tsx scripts/create-blog-post.ts",
     "add:states": "tsx scripts/add-states-to-sanity.ts",
+    "iul:fields": "tsx scripts/create-iul-intake-fields.ts",
     "postinstall": "node node_modules/ffmpeg-static/install.js"
   },
   "dependencies": {

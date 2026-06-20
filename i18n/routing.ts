@@ -155,6 +155,18 @@ export const routing = defineRouting({
       en: "/iul/application",
       es: "/iul/aplicacion",
     },
+    "/iul/intake": {
+      en: "/iul/intake",
+      es: "/iul/admision",
+    },
+    "/iul/intake/[token]": {
+      en: "/iul/intake/[token]",
+      es: "/iul/admision/[token]",
+    },
+    "/iul/intake/[token]/view": {
+      en: "/iul/intake/[token]/view",
+      es: "/iul/admision/[token]/view",
+    },
     "/iul/referrals": {
       en: "/iul/referrals",
       es: "/iul/referidos",

@@ -1,5 +1,6 @@
 import { pgTable, text, timestamp, boolean, integer, index, uniqueIndex, jsonb } from "drizzle-orm/pg-core";
 import type { LeaveBehindQuoteData } from "@/lib/leave-behind-clients";
+import type { IntakeData } from "@/lib/iul-intake/schema";
 
 // Guides table - stores all available guides
 export const guides = pgTable("guides", {
@@ -253,5 +254,32 @@ export const socialScheduledPosts = pgTable("social_scheduled_posts", {
   pendingIdx: index("ssp_pending_idx").on(t.status, t.scheduledFor),
   sanityIdx:  index("ssp_sanity_idx").on(t.sanityPostId),
   userIdx:    index("ssp_user_idx").on(t.userId, t.status),
+}));
+
+/**
+ * IUL client intake: resumable, autosaving data-collection sessions.
+ * `data` holds the form answers (sensitive fields encrypted at rest). The CRM contact is
+ * the system of record; this table is the live working store + audit during capture.
+ */
+export const iulIntakeSessions = pgTable("iul_intake_sessions", {
+  id:            text("id").primaryKey(), // nanoid
+  token:         text("token").notNull(), // unguessable URL slug
+  ownerUserId:   text("owner_user_id").notNull(), // agent Clerk id (creator)
+  clientUserId:  text("client_user_id"), // bound on first client visit (claim)
+  crmContactId:  text("crm_contact_id"), // Agent CRM (GHL) contact id
+  contactName:   text("contact_name"),
+  contactEmail:  text("contact_email"),
+  contactPhone:  text("contact_phone"),
+  status:        text("status").notNull().default("draft"), // draft|in_progress|completed
+  data:          jsonb("data").notNull().$type<IntakeData>().default({}),
+  locale:        text("locale").default("en"), // en|es
+  completedAt:   timestamp("completed_at"),
+  createdAt:     timestamp("created_at").defaultNow().notNull(),
+  updatedAt:     timestamp("updated_at").defaultNow().notNull(),
+}, (t) => ({
+  tokenUniqueIdx: uniqueIndex("iul_intake_token_unique_idx").on(t.token),
+  ownerIdx:       index("iul_intake_owner_idx").on(t.ownerUserId, t.updatedAt),
+  clientIdx:      index("iul_intake_client_idx").on(t.clientUserId),
+  contactIdx:     index("iul_intake_contact_idx").on(t.crmContactId),
 }));
 

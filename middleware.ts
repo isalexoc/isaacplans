@@ -15,6 +15,11 @@ const isProtectedRoute = createRouteMatcher([
   '/admin(.*)',
   '/en/admin(.*)',
   '/es/admin(.*)',
+  // IUL intake (form + dashboard) requires login for both agent and client.
+  '/iul/intake(.*)',
+  '/iul/admision(.*)',
+  '/en/iul/intake(.*)',
+  '/es/iul/admision(.*)',
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
@@ -32,6 +37,7 @@ export default clerkMiddleware(async (auth, req) => {
   if (
     req.nextUrl.pathname.startsWith('/api/blog') ||
     req.nextUrl.pathname.startsWith('/api/leave-behind') ||
+    req.nextUrl.pathname.startsWith('/api/iul-intake') ||
     req.nextUrl.pathname.startsWith('/api/admin') ||
     req.nextUrl.pathname.startsWith('/api/newsletter')
   ) {
@@ -67,6 +73,7 @@ export const config = {
   matcher: [
     "/api/blog/:path*",
     "/api/leave-behind/:path*",
+    "/api/iul-intake/:path*",
     "/api/admin/:path*",
     "/api/newsletter/:path*",
     "/((?!api|trpc|_next|_vercel|studio|.*\\..*).*)"
