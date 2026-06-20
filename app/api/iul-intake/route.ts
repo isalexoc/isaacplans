@@ -12,6 +12,7 @@ import {
   agentCrmGetContactNative,
   agentCrmSearchContacts,
 } from "@/lib/agent-crm-contacts";
+import { getIsAdmin } from "@/lib/auth/admin";
 import type { IntakeData } from "@/lib/iul-intake/schema";
 
 const STATUSES: IntakeStatus[] = ["draft", "in_progress", "completed"];
@@ -26,6 +27,9 @@ export async function GET(request: NextRequest) {
     const { userId } = await auth();
     if (!userId) {
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
+    if (!(await getIsAdmin())) {
+      return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 });
     }
     const { searchParams } = new URL(request.url);
 
@@ -54,6 +58,9 @@ export async function POST(request: NextRequest) {
     const { userId } = await auth();
     if (!userId) {
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
+    if (!(await getIsAdmin())) {
+      return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 });
     }
 
     const body = await request.json().catch(() => ({}));
