@@ -1,3 +1,5 @@
+import type { SocialPostCopy } from "@/lib/social-media-studio/types";
+
 export type SocialPlatform =
   | "facebook"
   | "instagram"
@@ -106,6 +108,7 @@ export interface ScheduledPost {
   nextRetryAt: Date | null;
   imageUrl: string | null;
   videoUrl: string | null;
+  copySnapshot: SocialPostCopy | null;
   createdAt: Date;
   updatedAt: Date;
 }
