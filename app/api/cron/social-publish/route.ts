@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { getDuePosts, markPublishing, markPublished, markFailed } from "@/lib/social-publishing/scheduler";
 import { runPublishJob } from "@/lib/social-publishing/publish-job";
 import type { SocialPlatform, PublishFormat } from "@/lib/social-publishing/types";
-import type { SocialPostCopy } from "@/lib/social-media-studio/types";
 
 export async function GET(req: NextRequest) {
   const secret = req.headers.get("authorization")?.replace("Bearer ", "");
@@ -16,7 +15,7 @@ export async function GET(req: NextRequest) {
   for (const post of duePosts) {
     await markPublishing(post.id);
 
-    const caption  = (post as unknown as { copySnapshot?: SocialPostCopy }).copySnapshot?.fullPost ?? "";
+    const caption  = post.copySnapshot?.fullPost ?? "";
     const imageUrl = post.imageUrl ?? "";
     const videoUrl = post.videoUrl ?? undefined;
     const format   = (post.format ?? "post") as PublishFormat;

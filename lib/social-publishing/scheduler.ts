@@ -23,6 +23,7 @@ function rowToScheduled(row: typeof socialScheduledPosts.$inferSelect): Schedule
     nextRetryAt:     row.nextRetryAt ?? null,
     imageUrl:        row.imageUrl ?? null,
     videoUrl:        row.videoUrl ?? null,
+    copySnapshot:    (row.copySnapshot as SocialPostCopy | null) ?? null,
     createdAt:       row.createdAt,
     updatedAt:       row.updatedAt,
   };
@@ -132,7 +133,7 @@ export async function cancelPost(id: string, userId: string): Promise<boolean> {
 export async function reschedulePost(id: string, userId: string, scheduledFor: Date): Promise<boolean> {
   const result = await db
     .update(socialScheduledPosts)
-    .set({ scheduledFor, status: "pending", errorMessage: null, nextRetryAt: null, updatedAt: new Date() })
+    .set({ scheduledFor, status: "pending", errorMessage: null, nextRetryAt: null, attemptCount: 0, updatedAt: new Date() })
     .where(and(
       eq(socialScheduledPosts.id, id),
       eq(socialScheduledPosts.userId, userId),
