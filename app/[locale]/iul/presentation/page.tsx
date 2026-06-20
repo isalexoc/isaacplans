@@ -3,6 +3,7 @@
 import { getTranslations, getLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import type { Metadata } from "next";
+import { ClipboardList } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import IULWorkflowStepperWrapper from "@/components/iul-workflow-stepper-wrapper";
 import FullscreenButton from "@/components/fullscreen-button";
@@ -87,14 +88,14 @@ export default async function IULPresentationPage() {
   ];
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+    <main className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-950 dark:via-slate-900 dark:to-gray-950">
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <Button asChild variant="secondary">
             <Link href="/iul">{t("backButton")}</Link>
           </Button>
-          <h1 className="text-2xl sm:text-3xl font-bold text-center flex-1">
+          <h1 className="text-2xl sm:text-3xl font-bold text-center flex-1 text-gray-900 dark:text-gray-100">
             {t("title")}
           </h1>
           <div className="w-[110px] sm:w-[120px] flex justify-end">
@@ -107,14 +108,34 @@ export default async function IULPresentationPage() {
         </div>
 
         {/* Stepper */}
-        <div className="mb-8 rounded-lg bg-white p-6 shadow-md dark:bg-gray-950 dark:ring-1 dark:ring-gray-800">
+        <div className="mb-6 rounded-lg bg-white p-6 shadow-md dark:bg-gray-950 dark:ring-1 dark:ring-gray-800">
           <IULWorkflowStepperWrapper steps={steps} currentStep={0} />
+        </div>
+
+        {/* Client data intake CTA */}
+        <div className="mb-8 flex flex-col items-center justify-between gap-3 rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-900 dark:bg-blue-950/40 sm:flex-row">
+          <div className="text-center sm:text-left">
+            <p className="font-semibold text-gray-900 dark:text-gray-100">
+              {locale === "es" ? "Captura de datos del cliente" : "Client data collection"}
+            </p>
+            <p className="text-sm text-muted-foreground">
+              {locale === "es"
+                ? "Inicie el formulario seguro o envíe un enlace al cliente para la solicitud IUL."
+                : "Start the secure form or send the client a link for the IUL application."}
+            </p>
+          </div>
+          <Button asChild size="lg" className="shrink-0">
+            <Link href="/iul/intake">
+              <ClipboardList className="mr-2 h-5 w-5" />
+              {locale === "es" ? "Capturar datos del cliente" : "Collect client data"}
+            </Link>
+          </Button>
         </div>
 
         {/* Presentation Content Area */}
         <div
           id="presentation-content"
-          className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg shadow-lg min-h-[600px] h-[70vh] overflow-hidden relative [&:fullscreen]:h-screen [&:fullscreen]:w-screen [&:fullscreen]:rounded-none [&:fullscreen]:min-h-screen"
+          className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-950 dark:to-slate-900 dark:shadow-black/40 rounded-lg shadow-lg min-h-[600px] h-[70vh] overflow-hidden relative [&:fullscreen]:h-screen [&:fullscreen]:w-screen [&:fullscreen]:rounded-none [&:fullscreen]:min-h-screen"
         >
           <IULPresentationSlides
             slides={[

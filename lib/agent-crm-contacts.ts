@@ -237,3 +237,272 @@ export function agentCrmIsDuplicateContactError(status: number, err: AgentCrmCre
     msg.includes("duplicated")
   );
 }
+
+/** Native GHL contact fields we read/write directly (no custom field needed). */
+export type AgentCrmNativeFields = Partial<{
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  dateOfBirth: string;
+  address1: string;
+  city: string;
+  state: string;
+  postalCode: string;
+  companyName: string;
+}>;
+
+export type AgentCrmCustomFieldValue = { id: string; field_value: string };
+
+export type AgentCrmContactSummary = {
+  id: string;
+  name: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+};
+
+/** Free-text search across name/email/phone for the intake "find or create" flow. */
+export async function agentCrmSearchContacts(
+  query: string,
+  locationId: string,
+  token: string,
+  logPrefix = "[AGENT_CRM]"
+): Promise<AgentCrmContactSummary[]> {
+  const q = query.trim();
+  if (!q) return [];
+  const res = await fetch(`${AGENT_CRM_API_BASE}/contacts/search`, {
+    method: "POST",
+    headers: agentCrmJsonHeaders(token),
+    body: JSON.stringify({ locationId, page: 1, pageLimit: 15, query: q }),
+  });
+  const text = await res.text();
+  if (!res.ok) {
+    console.warn(`${logPrefix} Contact search failed:`, res.status, text);
+    return [];
+  }
+  let data: unknown;
+  try {
+    data = JSON.parse(text);
+  } catch {
+    return [];
+  }
+  const list = parseContactsSearchResponse(data) as Array<
+    LcContact & { firstName?: string; lastName?: string; contactName?: string }
+  >;
+  return list
+    .filter((c) => c.id)
+    .map((c) => {
+      const firstName = c.firstName ?? "";
+      const lastName = c.lastName ?? "";
+      const name = c.contactName ?? [firstName, lastName].filter(Boolean).join(" ");
+      return {
+        id: c.id as string,
+        name,
+        firstName,
+        lastName,
+        email: c.email ?? "",
+        phone: c.phone ?? "",
+      };
+    });
+}
+
+export type AgentCrmContactNative = {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  dateOfBirth: string;
+  address1: string;
+  city: string;
+  state: string;
+  postalCode: string;
+};
+
+/** Fetch a contact's native fields for pre-filling a new intake form. */
+export async function agentCrmGetContactNative(
+  contactId: string,
+  token: string
+): Promise<AgentCrmContactNative | null> {
+  const res = await fetch(`${AGENT_CRM_API_BASE}/contacts/${contactId}`, {
+    headers: agentCrmAuthHeaders(token),
+  });
+  if (!res.ok) return null;
+  const data = await res.json().catch(() => null);
+  const c = data?.contact ?? data;
+  if (!c?.id) return null;
+  return {
+    id: c.id,
+    firstName: c.firstName ?? "",
+    lastName: c.lastName ?? "",
+    email: c.email ?? "",
+    phone: c.phone ?? "",
+    dateOfBirth: c.dateOfBirth ?? "",
+    address1: c.address1 ?? "",
+    city: c.city ?? "",
+    state: c.state ?? "",
+    postalCode: c.postalCode ?? "",
+  };
+}
+
+/**
+ * Create or resolve a contact for an intake session. Tries email/phone lookup first to avoid
+ * duplicates, then creates a minimal contact. Returns the contact id (or null on failure).
+ */
+export async function agentCrmEnsureContact(
+  input: { email?: string; phone?: string; firstName?: string; lastName?: string },
+  locationId: string,
+  token: string,
+  logPrefix = "[AGENT_CRM]"
+): Promise<string | null> {
+  const email = input.email?.trim();
+  const phone = input.phone?.trim();
+
+  if (email) {
+    const found = await agentCrmFindContactByEmail(email, locationId, token, logPrefix);
+    if (found?.id) return found.id;
+  }
+  if (phone) {
+    const found = await agentCrmFindContactByPhone(phone, locationId, token, logPrefix);
+    if (found?.id) return found.id;
+  }
+
+  const body: Record<string, unknown> = { locationId, source: "iul_intake" };
+  if (email) body.email = email;
+  if (phone) body.phone = phone;
+  if (input.firstName?.trim()) body.firstName = input.firstName.trim();
+  if (input.lastName?.trim()) body.lastName = input.lastName.trim();
+
+  const res = await fetch(`${AGENT_CRM_API_BASE}/contacts/`, {
+    method: "POST",
+    headers: agentCrmJsonHeaders(token),
+    body: JSON.stringify(body),
+  });
+  const text = await res.text();
+  if (res.ok) {
+    try {
+      const data = JSON.parse(text);
+      const id = data?.contact?.id ?? data?.id;
+      if (typeof id === "string") return id;
+    } catch {
+      /* fall through */
+    }
+  }
+
+  // Duplicate → resolve from the error meta or a follow-up search.
+  let errBody: AgentCrmCreateContactErrorBody = {};
+  try {
+    errBody = JSON.parse(text);
+  } catch {
+    /* ignore */
+  }
+  if (agentCrmIsDuplicateContactError(res.status, errBody)) {
+    const metaId = errBody.meta?.contactId;
+    if (typeof metaId === "string") return metaId;
+    if (email) {
+      const found = await agentCrmFindContactByEmail(email, locationId, token, logPrefix);
+      if (found?.id) return found.id;
+    }
+    if (phone) {
+      const found = await agentCrmFindContactByPhone(phone, locationId, token, logPrefix);
+      if (found?.id) return found.id;
+    }
+  }
+
+  console.warn(`${logPrefix} Create contact failed:`, res.status, text);
+  return null;
+}
+
+/**
+ * Update a contact's native fields and custom fields in one PUT.
+ * `customFields` items use `{ id, field_value }` per the LeadConnector v2 contact API.
+ */
+export async function agentCrmUpdateContact(
+  contactId: string,
+  payload: { native?: AgentCrmNativeFields; customFields?: AgentCrmCustomFieldValue[] },
+  token: string,
+  logPrefix = "[AGENT_CRM]"
+): Promise<boolean> {
+  const body: Record<string, unknown> = { ...(payload.native ?? {}) };
+  if (payload.customFields && payload.customFields.length > 0) {
+    body.customFields = payload.customFields;
+  }
+  if (Object.keys(body).length === 0) return true;
+
+  const res = await fetch(`${AGENT_CRM_API_BASE}/contacts/${contactId}`, {
+    method: "PUT",
+    headers: agentCrmJsonHeaders(token),
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    console.warn(`${logPrefix} Update contact failed:`, res.status, await res.text());
+    return false;
+  }
+  return true;
+}
+
+/**
+ * Upload a file to the GHL media library (so it lives inside the CRM) and return its
+ * CRM-hosted URL. Used to populate FILE_UPLOAD custom fields.
+ */
+export async function agentCrmUploadMedia(
+  file: Blob,
+  filename: string,
+  locationId: string,
+  token: string,
+  logPrefix = "[AGENT_CRM]"
+): Promise<{ fileId: string; url: string } | null> {
+  const form = new FormData();
+  form.append("file", file, filename);
+  form.append("hosted", "false");
+  form.append("name", filename);
+  form.append("altId", locationId);
+  form.append("altType", "location");
+
+  const res = await fetch(`${AGENT_CRM_API_BASE}/medias/upload-file`, {
+    method: "POST",
+    headers: agentCrmAuthHeaders(token), // multipart boundary set automatically
+    body: form,
+  });
+  const text = await res.text();
+  if (!res.ok) {
+    console.warn(`${logPrefix} Media upload failed:`, res.status, text);
+    return null;
+  }
+  try {
+    const data = JSON.parse(text);
+    if (typeof data?.url === "string") {
+      return { fileId: data.fileId ?? "", url: data.url };
+    }
+  } catch {
+    /* fall through */
+  }
+  return null;
+}
+
+/**
+ * Set a FILE_UPLOAD custom field to the given list of CRM-hosted file URLs (full overwrite).
+ * GHL stores file fields as `field_value: [{ url }, …]`.
+ */
+export async function agentCrmSetFileField(
+  contactId: string,
+  fieldId: string,
+  urls: string[],
+  token: string,
+  logPrefix = "[AGENT_CRM]"
+): Promise<boolean> {
+  const res = await fetch(`${AGENT_CRM_API_BASE}/contacts/${contactId}`, {
+    method: "PUT",
+    headers: agentCrmJsonHeaders(token),
+    body: JSON.stringify({
+      customFields: [{ id: fieldId, field_value: urls.map((url) => ({ url })) }],
+    }),
+  });
+  if (!res.ok) {
+    console.warn(`${logPrefix} Set file field failed:`, res.status, await res.text());
+    return false;
+  }
+  return true;
+}

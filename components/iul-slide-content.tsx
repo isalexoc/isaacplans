@@ -202,7 +202,64 @@ const cardVariants = {
   },
 };
 
+/**
+ * Dark-mode remap wrapper for the IUL slide deck.
+ *
+ * The 30+ slide components below are authored for a light "slide" surface with
+ * hardcoded light palettes (gray text, pale -50/-100 gradient cards, white cards).
+ * Rather than thread `dark:` variants through every component, we remap those
+ * utility classes for descendants when the deck is shown on a dark stage:
+ *   - gray body/heading text  -> lighter grays
+ *   - pale colored heading text (-600/-700/-800/-900) -> readable light tones
+ *   - pale card backgrounds (bg-white, bg-gray-50/100, *-50/100 gradient stops) -> dark
+ * Vivid -600 gradient banners (with white text) are intentionally left untouched —
+ * they read well on a dark stage. This mirrors the final-expense presentation.
+ */
+function IULSlideThemeWrapper({ children }: { children: React.ReactNode }) {
+  return (
+    <div
+      className={cn(
+        // gray text
+        "dark:[&_.text-gray-900]:text-gray-50",
+        "dark:[&_.text-gray-800]:text-gray-100",
+        "dark:[&_.text-gray-700]:text-gray-300",
+        "dark:[&_.text-gray-600]:text-gray-400",
+        "dark:[&_.text-gray-500]:text-gray-400",
+        "dark:[&_.text-gray-400]:text-gray-500",
+        // colored heading / accent text -> readable on dark cards
+        "dark:[&_.text-blue-900]:text-sky-200 dark:[&_.text-blue-800]:text-sky-300 dark:[&_.text-blue-700]:text-sky-300 dark:[&_.text-blue-600]:text-sky-400",
+        "dark:[&_.text-green-900]:text-emerald-200 dark:[&_.text-green-800]:text-emerald-300 dark:[&_.text-green-700]:text-emerald-300 dark:[&_.text-green-600]:text-emerald-400",
+        "dark:[&_.text-purple-700]:text-purple-300 dark:[&_.text-purple-600]:text-purple-400",
+        "dark:[&_.text-orange-800]:text-amber-300 dark:[&_.text-orange-700]:text-amber-300 dark:[&_.text-orange-600]:text-amber-400",
+        "dark:[&_.text-red-800]:text-red-400 dark:[&_.text-red-700]:text-red-400 dark:[&_.text-red-600]:text-red-400",
+        // solid pale backgrounds -> dark cards
+        "dark:[&_.bg-white]:bg-gray-900 dark:[&_.bg-gray-50]:bg-gray-800 dark:[&_.bg-gray-100]:bg-gray-800",
+        // pale gradient "from" stops -> dark
+        "dark:[&_.from-blue-50]:from-gray-900 dark:[&_.from-green-50]:from-gray-900 dark:[&_.from-purple-50]:from-gray-900 dark:[&_.from-orange-50]:from-gray-900 dark:[&_.from-red-50]:from-gray-900 dark:[&_.from-gray-50]:from-gray-900",
+        "dark:[&_.from-green-100]:from-gray-900 dark:[&_.from-purple-100]:from-gray-900",
+        // pale gradient "via" stops -> dark
+        "dark:[&_.via-emerald-50]:via-gray-900 dark:[&_.via-purple-50]:via-gray-900 dark:[&_.via-amber-50]:via-gray-900 dark:[&_.via-emerald-100]:via-gray-900",
+        // pale gradient "to" stops -> dark
+        "dark:[&_.to-emerald-50]:to-slate-900 dark:[&_.to-cyan-50]:to-slate-900 dark:[&_.to-pink-50]:to-slate-900 dark:[&_.to-rose-50]:to-slate-900 dark:[&_.to-amber-50]:to-slate-900 dark:[&_.to-teal-50]:to-slate-900 dark:[&_.to-blue-50]:to-slate-900",
+        "dark:[&_.to-teal-100]:to-slate-900 dark:[&_.to-blue-100]:to-slate-900 dark:[&_.to-gray-100]:to-slate-900",
+        // pale borders -> subtle dark
+        "dark:[&_.border-gray-200]:border-gray-700 dark:[&_.border-blue-200]:border-gray-700 dark:[&_.border-green-200]:border-gray-700"
+      )}
+    >
+      {children}
+    </div>
+  );
+}
+
 export default function IULSlideContent({ slideKey }: SlideContentProps) {
+  return (
+    <IULSlideThemeWrapper>
+      <IULSlideContentInner slideKey={slideKey} />
+    </IULSlideThemeWrapper>
+  );
+}
+
+function IULSlideContentInner({ slideKey }: SlideContentProps) {
   const t = useTranslations(`iulPresentation.slides.${slideKey}`);
   const labelsT = useTranslations("iulPresentation.labels");
 
