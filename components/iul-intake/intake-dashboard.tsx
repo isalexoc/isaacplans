@@ -7,11 +7,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Search, UserPlus, Copy, Check, Pencil, Eye, ChevronDown } from "lucide-react";
+import { Loader2, Search, UserPlus, Copy, Check, Pencil, Eye, ChevronDown, RotateCcw } from "lucide-react";
 import {
   listIntakes,
   createIntake,
   searchCrmContacts,
+  resetIntakeLink,
   type CrmContactMatch,
 } from "@/lib/iul-intake-api";
 import type { IntakeSummary, IntakeStatus } from "@/lib/iul-intake/types";
@@ -45,6 +46,7 @@ export default function IntakeDashboard() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copiedToken, setCopiedToken] = useState<string | null>(null);
+  const [resettingId, setResettingId] = useState<string | null>(null);
 
   const statusLabel = useCallback(
     (s: IntakeStatus) =>
@@ -136,6 +138,21 @@ export default function IntakeDashboard() {
       setTimeout(() => setCopiedToken((t) => (t === token ? null : t)), 2000);
     } catch {
       /* clipboard blocked */
+    }
+  }
+
+  async function handleReset(s: IntakeSummary) {
+    if (!window.confirm(tr(UI.resetConfirm, locale))) return;
+    setResettingId(s.id);
+    setError(null);
+    try {
+      const updated = await resetIntakeLink(s.token);
+      setSessions((prev) => prev.map((row) => (row.id === s.id ? updated : row)));
+      await copyLink(updated.token);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Error");
+    } finally {
+      setResettingId(null);
     }
   }
 
@@ -298,6 +315,20 @@ export default function IntakeDashboard() {
                           {tr(UI.copyLink, locale)}
                         </>
                       )}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="text-amber-600 hover:text-amber-700"
+                      disabled={resettingId === s.id}
+                      onClick={() => handleReset(s)}
+                    >
+                      {resettingId === s.id ? (
+                        <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+                      ) : (
+                        <RotateCcw className="mr-1 h-4 w-4" />
+                      )}
+                      {tr(UI.resetLink, locale)}
                     </Button>
                   </div>
                 </li>
