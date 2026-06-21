@@ -136,6 +136,19 @@ export async function updateIntakeData(
   return row ?? null;
 }
 
+/**
+ * Reset a share link: rotate the token (old link dies immediately) and clear the bound
+ * client so the next person to open the new link claims it. Admin-only at the route layer.
+ */
+export async function resetIntakeLink(token: string): Promise<IntakeSessionRow | null> {
+  const [row] = await db
+    .update(iulIntakeSessions)
+    .set({ token: nanoid(24), clientUserId: null, updatedAt: new Date() })
+    .where(eq(iulIntakeSessions.token, token))
+    .returning();
+  return row ?? null;
+}
+
 export async function bindClientUser(
   token: string,
   clientUserId: string

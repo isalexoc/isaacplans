@@ -57,6 +57,12 @@ export const UI = {
   view: { en: "View", es: "Ver" } as Dict,
   copyLink: { en: "Copy link", es: "Copiar enlace" } as Dict,
   linkCopied: { en: "Link copied!", es: "¡Enlace copiado!" } as Dict,
+  resetLink: { en: "Reset link", es: "Restablecer enlace" } as Dict,
+  resetConfirm: {
+    en: "Reset this link? The old link will stop working and anyone who already opened it will lose access. A new link will be copied for you to send.",
+    es: "¿Restablecer este enlace? El enlace anterior dejará de funcionar y quien ya lo haya abierto perderá el acceso. Se copiará un nuevo enlace para que lo envíe.",
+  } as Dict,
+  linkReset: { en: "New link copied!", es: "¡Nuevo enlace copiado!" } as Dict,
   fillMyself: { en: "Fill it myself", es: "Llenarlo yo mismo" } as Dict,
   noSessions: { en: "No intakes yet. Start one above.", es: "Aún no hay registros. Inicie uno arriba." } as Dict,
   backToPresentation: { en: "Back to presentation", es: "Volver a la presentación" } as Dict,
