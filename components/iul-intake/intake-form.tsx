@@ -375,6 +375,7 @@ export default function IntakeForm({ token }: { token: string }) {
                   token={token}
                   fieldKey={field.key}
                   label={fieldLabel(field, locale)}
+                  help={fieldHelp(field, locale)}
                   locale={locale}
                   files={Array.isArray(data[field.key]) ? (data[field.key] as FileRef[]) : []}
                   onChange={(files) => setField(field.key, files)}
@@ -1000,6 +1001,7 @@ function FileUploader({
   token,
   fieldKey,
   label,
+  help,
   locale,
   files,
   onChange,
@@ -1007,6 +1009,7 @@ function FileUploader({
   token: string;
   fieldKey: string;
   label: string;
+  help?: string;
   locale: IntakeLocale;
   files: FileRef[];
   onChange: (files: FileRef[]) => void;
@@ -1044,7 +1047,8 @@ function FileUploader({
 
   return (
     <div>
-      <Label className="mb-1 block">{label}</Label>
+      <Label className="mb-0.5 block">{label}</Label>
+      {help && <p className="mb-1 text-xs font-medium text-blue-600">{help}</p>}
       {files.length > 0 && (
         <ul className="mb-2 space-y-1">
           {files.map((f) => (

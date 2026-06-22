@@ -128,8 +128,8 @@ export const UI = {
   } as Dict,
   intakeTitle: { en: "IUL Application Intake", es: "Registro de solicitud IUL" } as Dict,
   secureNote: {
-    en: "Your information is encrypted and saved automatically.",
-    es: "Su información está cifrada y se guarda automáticamente.",
+    en: "Your information is encrypted.",
+    es: "Su información está cifrada.",
   } as Dict,
   required: { en: "required", es: "requerido" } as Dict,
   reveal: { en: "Reveal", es: "Mostrar" } as Dict,
