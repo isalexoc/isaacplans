@@ -48,6 +48,7 @@ export default function IntakeDashboard() {
   const [newLastName, setNewLastName] = useState("");
   const [newEmail, setNewEmail] = useState("");
   const [newPhone, setNewPhone] = useState("");
+  const [newLang, setNewLang] = useState<"en" | "es">("en");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copiedToken, setCopiedToken] = useState<string | null>(null);
@@ -144,7 +145,7 @@ export default function IntakeDashboard() {
     setBusy(true);
     setError(null);
     try {
-      const session = await createIntake({ firstName, lastName, email, phone, locale });
+      const session = await createIntake({ firstName, lastName, email, phone, locale: newLang });
       goToForm(session.token);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Error");
@@ -314,6 +315,18 @@ export default function IntakeDashboard() {
                       value={newPhone}
                       onChange={(e) => setNewPhone(e.target.value.replace(/\D/g, "").slice(0, 11))}
                     />
+                  </div>
+                  <div>
+                    <Label htmlFor="ni-lang">{tr(UI.preferredLanguage, locale)}</Label>
+                    <select
+                      id="ni-lang"
+                      value={newLang}
+                      onChange={(e) => setNewLang(e.target.value as "en" | "es")}
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    >
+                      <option value="en">English</option>
+                      <option value="es">Español</option>
+                    </select>
                   </div>
                 </div>
                 <Button className="mt-3" disabled={busy} onClick={createAndStart}>

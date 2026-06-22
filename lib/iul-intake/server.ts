@@ -20,6 +20,7 @@ import type { IntakeSession, IntakeSummary } from "./types";
 import {
   agentCrmGetBaseCredentials,
   agentCrmUpdateContact,
+  agentCrmGetContactTags,
   type AgentCrmCustomFieldValue,
   type AgentCrmNativeFields,
 } from "@/lib/agent-crm-contacts";
@@ -27,6 +28,9 @@ import { buildIntakeShareUrl } from "./share-url";
 
 /** Tag added to the contact when the agent sends the link — triggers the GHL workflow. */
 export const IUL_INTAKE_LINK_SENT_TAG = "iul_intake_link_sent";
+
+/** Contact tag that marks a Spanish-speaking client → the saved link uses the /es locale. */
+export const IUL_SPANISH_TAG = "spanish";
 
 export type IntakeSessionRow = typeof iulIntakeSessions.$inferSelect;
 
@@ -198,17 +202,33 @@ export function clientCanEdit(row: IntakeSessionRow): boolean {
 
 /**
  * Write the session's current share link to the CRM `iul_intake_link` custom field so a GHL
- * workflow can text/email it. Best-effort — token only changes on create/reset, so call it
- * there (and at send time as a safety net). Never throws.
+ * workflow can text/email it. The link locale follows the contact's Spanish tag (tag present
+ * → /es, else /en) so the client gets the right language; pass `localeOverride` to skip the
+ * tag lookup (used at create time, when we already know the chosen language). Never throws.
  */
-export async function syncIntakeLinkToCrm(row: IntakeSessionRow): Promise<boolean> {
+export async function syncIntakeLinkToCrm(
+  row: IntakeSessionRow,
+  localeOverride?: "en" | "es"
+): Promise<boolean> {
   if (!row.crmContactId) return false;
   const fieldId = ghlFieldIds.iul_intake_link;
   if (!fieldId) return false;
   const creds = agentCrmGetBaseCredentials();
   if (!creds) return false;
   try {
-    const url = buildIntakeShareUrl(row.token, row.locale ?? "en");
+    let locale: "en" | "es";
+    if (localeOverride) {
+      locale = localeOverride;
+    } else {
+      const tags = await agentCrmGetContactTags(row.crmContactId, creds.token);
+      if (tags === null) {
+        // Couldn't read tags — fall back to the session's stored locale.
+        locale = row.locale === "es" ? "es" : "en";
+      } else {
+        locale = tags.some((t) => t.trim().toLowerCase() === IUL_SPANISH_TAG) ? "es" : "en";
+      }
+    }
+    const url = buildIntakeShareUrl(row.token, locale);
     return await agentCrmUpdateContact(
       row.crmContactId,
       { customFields: [{ id: fieldId, field_value: url }] },
