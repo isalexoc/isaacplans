@@ -4,7 +4,6 @@ import {
   getIntakeByToken,
   canAccessIntake,
   buildCrmPayloadFromData,
-  syncIntakeFilesToCrm,
   markIntakeCompleted,
   toIntakeSummary,
 } from "@/lib/iul-intake/server";
@@ -65,9 +64,8 @@ export async function POST(_request: NextRequest, context: RouteContext) {
         creds.token,
         "[IUL_INTAKE]"
       );
-
-      // Guarantee uploaded documents are on the contact (re-mirror in case an upload missed).
-      await syncIntakeFilesToCrm(row, decrypted);
+      // Note: documents are attached to their FILE_UPLOAD fields at upload time via the
+      // dedicated forms/upload-custom-files endpoint — nothing to re-sync here.
 
       try {
         const who = row.contactName || [native.firstName, native.lastName].filter(Boolean).join(" ") || "client";

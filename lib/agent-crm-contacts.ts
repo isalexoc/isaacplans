@@ -482,12 +482,87 @@ export async function agentCrmUploadMedia(
   return null;
 }
 
+/** A file attached to a FILE_UPLOAD custom field, as read back from the CRM contact. */
+export type AgentCrmFieldFile = { url: string; name: string };
+
+/** Pull the file list off a contact's FILE_UPLOAD custom field value (shape varies). */
+function parseFieldFiles(value: unknown): AgentCrmFieldFile[] {
+  const entries: unknown[] = Array.isArray(value)
+    ? value
+    : value && typeof value === "object"
+      ? Object.values(value as Record<string, unknown>)
+      : [];
+  const out: AgentCrmFieldFile[] = [];
+  for (const e of entries) {
+    if (typeof e === "string") {
+      out.push({ url: e, name: decodeURIComponent(e.split("/").pop() || "file") });
+    } else if (e && typeof e === "object") {
+      const o = e as Record<string, unknown>;
+      const meta = (o.meta && typeof o.meta === "object" ? (o.meta as Record<string, unknown>) : {}) as Record<string, unknown>;
+      const url = typeof o.url === "string" ? o.url : typeof o.fileUrl === "string" ? o.fileUrl : "";
+      if (!url) continue;
+      const name =
+        (typeof meta.name === "string" && meta.name) ||
+        (typeof o.name === "string" && o.name) ||
+        (typeof o.fileName === "string" && o.fileName) ||
+        decodeURIComponent(url.split("/").pop() || "file");
+      out.push({ url, name });
+    }
+  }
+  return out;
+}
+
+/**
+ * Upload a file directly to a contact's FILE_UPLOAD custom field via the dedicated
+ * `forms/upload-custom-files` endpoint. This is the ONLY way GHL actually attaches files to a
+ * file-upload field — setting `field_value` URLs on the contact update is accepted (200) but
+ * silently ignored. The multipart key must be `<customFieldId>_<fileId>`.
+ *
+ * Returns the field's full file list (as GHL reports it after the upload), or null on failure.
+ */
+export async function agentCrmUploadCustomFieldFile(
+  file: Blob,
+  filename: string,
+  contactId: string,
+  locationId: string,
+  customFieldId: string,
+  token: string,
+  logPrefix = "[AGENT_CRM]"
+): Promise<AgentCrmFieldFile[] | null> {
+  const fileId = (globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`);
+  const form = new FormData();
+  form.append(`${customFieldId}_${fileId}`, file, filename);
+
+  const url = `${AGENT_CRM_API_BASE}/forms/upload-custom-files?contactId=${encodeURIComponent(contactId)}&locationId=${encodeURIComponent(locationId)}`;
+  const res = await fetch(url, {
+    method: "POST",
+    headers: agentCrmAuthHeaders(token), // multipart boundary set automatically
+    body: form,
+  });
+  const text = await res.text();
+  if (!res.ok) {
+    console.warn(`${logPrefix} Upload custom-field file failed:`, res.status, text);
+    return null;
+  }
+  if (process.env.IUL_INTAKE_DEBUG === "true") {
+    console.info(`${logPrefix} Uploaded custom-field file ${customFieldId}:`, res.status, text.slice(0, 600));
+  }
+  try {
+    const data = JSON.parse(text);
+    const contact = (data?.contact ?? data) as { customFields?: Array<{ id?: string; value?: unknown }> };
+    const cf = (contact.customFields ?? []).find((c) => c?.id === customFieldId);
+    return parseFieldFiles(cf?.value);
+  } catch {
+    return [];
+  }
+}
+
 /**
  * Set a FILE_UPLOAD custom field to the given list of CRM-hosted file URLs (full overwrite).
- * GHL stores file fields as `field_value: [{ url }, …]`.
+ * NOTE: GHL accepts this (200) but does NOT render files on FILE_UPLOAD fields set this way —
+ * use `agentCrmUploadCustomFieldFile` to attach. Kept for best-effort removal/clearing.
  *
- * GHL can return 200 while silently ignoring a malformed file field, so we surface the
- * response body. Set IUL_INTAKE_DEBUG=true to log the accepted body on success too.
+ * Set IUL_INTAKE_DEBUG=true to log the response body.
  */
 export async function agentCrmSetFileField(
   contactId: string,
