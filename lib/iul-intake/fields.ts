@@ -32,10 +32,14 @@ export type IntakeFieldType =
   | "email"
   | "tel"
   | "date"
+  | "dob"
+  | "height"
   | "select"
   | "ssn"
   | "number"
   | "money"
+  | "premium"
+  | "address"
   | "textarea"
   | "beneficiaries"
   | "file";
@@ -51,6 +55,15 @@ export type IntakeOption = {
   value: string;
   labelEn: string;
   labelEs: string;
+  /** Hidden from clients; only the admin (owner) filling the form sees this option. */
+  ownerOnly?: boolean;
+};
+
+/** Where an `address` field writes the resolved city/state/zip from autocomplete. */
+export type AddressTargets = {
+  city?: string;
+  state?: string;
+  zip?: string;
 };
 
 export type IntakeField = {
@@ -60,6 +73,14 @@ export type IntakeField = {
   type: IntakeFieldType;
   required?: boolean;
   sensitive?: boolean;
+  /** Hidden from clients; only the admin (owner) sees/fills this field. */
+  ownerOnly?: boolean;
+  /** Restrict input to digits only (kept as a string to preserve leading zeros). */
+  digitsOnly?: boolean;
+  /** Maximum number of characters accepted. */
+  maxLength?: number;
+  /** For `address` fields: sibling field keys to populate from autocomplete. */
+  addressTargets?: AddressTargets;
   /** Where this value is written in the CRM. Omit for DB-only fields. */
   crm?: CrmTarget;
   options?: IntakeOption[];
@@ -78,6 +99,8 @@ export type IntakeSection = {
   titleEs: string;
   descriptionEn?: string;
   descriptionEs?: string;
+  /** Hidden from clients; only the admin (owner) sees this whole section. */
+  ownerOnly?: boolean;
   fields: IntakeField[];
 };
 
@@ -99,7 +122,7 @@ export const INTAKE_SECTIONS: IntakeSection[] = [
     fields: [
       { key: "firstName", labelEn: "First name", labelEs: "Primer nombre", type: "text", required: true, crm: native("firstName") },
       { key: "lastName", labelEn: "Last name", labelEs: "Primer apellido", type: "text", required: true, crm: native("lastName") },
-      { key: "dateOfBirth", labelEn: "Date of birth", labelEs: "Fecha de nacimiento", type: "date", required: true, crm: native("dateOfBirth") },
+      { key: "dateOfBirth", labelEn: "Date of birth", labelEs: "Fecha de nacimiento", type: "dob", required: true, crm: native("dateOfBirth") },
       {
         key: "sex", labelEn: "Sex", labelEs: "Sexo", type: "select", required: true, crm: custom("gender"),
         options: [
@@ -124,8 +147,8 @@ export const INTAKE_SECTIONS: IntakeSection[] = [
           { value: "ITIN", labelEn: "Individual Taxpayer ID (ITIN)", labelEs: "ITIN" },
         ],
       },
-      { key: "ssn", labelEn: "SSN / ITIN", labelEs: "Número de seguro social o ITIN", type: "ssn", required: true, sensitive: true, crm: custom("ssn") },
-      { key: "yearsInUsa", labelEn: "Years residing in the USA", labelEs: "Años residiendo en EE. UU.", type: "number", required: true, crm: custom("years_in_usa") },
+      { key: "ssn", labelEn: "SSN / ITIN", labelEs: "Número de seguro social o ITIN", type: "ssn", required: true, sensitive: true, digitsOnly: true, maxLength: 9, crm: custom("ssn") },
+      { key: "yearsInUsa", labelEn: "Years residing in the USA", labelEs: "Años residiendo en EE. UU.", type: "number", required: true, maxLength: 3, crm: custom("years_in_usa") },
       { key: "birthCountry", labelEn: "Birth country", labelEs: "País de nacimiento", type: "text", required: true, crm: custom("birth_country") },
       { key: "birthCityState", labelEn: "Birth city and state", labelEs: "Ciudad y estado de nacimiento", type: "text", required: true, crm: custom("birth_city_state") },
       { key: "countryOfCitizenship", labelEn: "Country of citizenship", labelEs: "País de ciudadanía", type: "text", required: true, crm: custom("country_of_citizenship") },
@@ -133,8 +156,8 @@ export const INTAKE_SECTIONS: IntakeSection[] = [
         key: "visaType", labelEn: "Type of visa", labelEs: "Tipo de visa", type: "text", crm: custom("visa_type"),
         showIf: { field: "usCitizen", equals: "no" },
       },
-      { key: "height", labelEn: "Height", labelEs: "Altura", type: "text", required: true, crm: custom("height"), placeholderEn: "e.g. 5'9\"", placeholderEs: "ej. 5'9\"" },
-      { key: "weight", labelEn: "Weight (lbs)", labelEs: "Peso (lbs)", type: "number", required: true, crm: custom("weight") },
+      { key: "height", labelEn: "Height", labelEs: "Altura", type: "height", required: true, crm: custom("height") },
+      { key: "weight", labelEn: "Weight (lbs)", labelEs: "Peso (lbs)", type: "number", required: true, maxLength: 3, crm: custom("weight") },
       { key: "driversLicense", labelEn: "Has a driver's license?", labelEs: "¿Tiene licencia de conducir?", type: "select", required: true, crm: custom("drivers_license"), options: YES_NO },
       {
         key: "dlNumber", labelEn: "Driver's license number", labelEs: "Número de licencia de conducir", type: "text", sensitive: true, crm: custom("dl_number"),
@@ -152,12 +175,16 @@ export const INTAKE_SECTIONS: IntakeSection[] = [
     titleEn: "Residence & contact",
     titleEs: "Residencia y contacto",
     fields: [
-      { key: "address1", labelEn: "Street address (no P.O. Box)", labelEs: "Dirección (no apartado postal)", type: "text", required: true, crm: native("address1") },
+      {
+        key: "address1", labelEn: "Street address (no P.O. Box)", labelEs: "Dirección (no apartado postal)", type: "address", required: true, crm: native("address1"),
+        addressTargets: { city: "city", state: "state", zip: "postalCode" },
+        placeholderEn: "Start typing your address…", placeholderEs: "Empiece a escribir su dirección…",
+      },
       { key: "city", labelEn: "City", labelEs: "Ciudad", type: "text", required: true, crm: native("city") },
       { key: "state", labelEn: "State", labelEs: "Estado", type: "text", required: true, crm: native("state") },
-      { key: "postalCode", labelEn: "Zip code", labelEs: "Código postal", type: "text", required: true, crm: native("postalCode") },
+      { key: "postalCode", labelEn: "Zip code", labelEs: "Código postal", type: "text", required: true, digitsOnly: true, maxLength: 5, crm: native("postalCode") },
       { key: "phone", labelEn: "Phone number", labelEs: "Número de teléfono", type: "tel", required: true, crm: native("phone") },
-      { key: "yearsAtAddress", labelEn: "Years at current address", labelEs: "Años en la dirección actual", type: "number", required: true, crm: custom("years_at_address") },
+      { key: "yearsAtAddress", labelEn: "Years at current address", labelEs: "Años en la dirección actual", type: "number", required: true, maxLength: 3, crm: custom("years_at_address") },
       { key: "email", labelEn: "Email", labelEs: "Correo electrónico", type: "email", required: true, crm: native("email") },
     ],
   },
@@ -169,11 +196,15 @@ export const INTAKE_SECTIONS: IntakeSection[] = [
       { key: "employed", labelEn: "Currently employed?", labelEs: "¿Está trabajando actualmente?", type: "select", required: true, crm: custom("employed"), options: YES_NO },
       { key: "employer", labelEn: "Employer", labelEs: "Empleador", type: "text", crm: native("companyName"), showIf: { field: "employed", equals: "yes" } },
       { key: "occupation", labelEn: "Occupation", labelEs: "Ocupación", type: "text", crm: custom("occupation"), showIf: { field: "employed", equals: "yes" } },
-      { key: "yearsWithEmployer", labelEn: "Years with current employer", labelEs: "Años con el empleador actual", type: "number", crm: custom("years_with_employer"), showIf: { field: "employed", equals: "yes" } },
-      { key: "employerStreet", labelEn: "Employer street address", labelEs: "Dirección del empleador", type: "text", crm: custom("employer_street"), showIf: { field: "employed", equals: "yes" } },
+      { key: "yearsWithEmployer", labelEn: "Years with current employer", labelEs: "Años con el empleador actual", type: "number", maxLength: 2, crm: custom("years_with_employer"), showIf: { field: "employed", equals: "yes" } },
+      {
+        key: "employerStreet", labelEn: "Employer street address", labelEs: "Dirección del empleador", type: "address", crm: custom("employer_street"), showIf: { field: "employed", equals: "yes" },
+        addressTargets: { city: "employerCity", state: "employerState", zip: "employerZip" },
+        placeholderEn: "Start typing the address…", placeholderEs: "Empiece a escribir la dirección…",
+      },
       { key: "employerCity", labelEn: "Employer city", labelEs: "Ciudad del empleador", type: "text", crm: custom("employer_city"), showIf: { field: "employed", equals: "yes" } },
       { key: "employerState", labelEn: "Employer state", labelEs: "Estado del empleador", type: "text", crm: custom("employer_state"), showIf: { field: "employed", equals: "yes" } },
-      { key: "employerZip", labelEn: "Employer zip code", labelEs: "Código postal del empleador", type: "text", crm: custom("employer_zip"), showIf: { field: "employed", equals: "yes" } },
+      { key: "employerZip", labelEn: "Employer zip code", labelEs: "Código postal del empleador", type: "text", digitsOnly: true, maxLength: 5, crm: custom("employer_zip"), showIf: { field: "employed", equals: "yes" } },
       { key: "workPhone", labelEn: "Work phone number", labelEs: "Teléfono del empleador", type: "tel", crm: custom("work_phone"), showIf: { field: "employed", equals: "yes" } },
     ],
   },
@@ -182,8 +213,8 @@ export const INTAKE_SECTIONS: IntakeSection[] = [
     titleEn: "Financial information",
     titleEs: "Información financiera",
     fields: [
-      { key: "grossIncomeCurrent", labelEn: "Gross income — current year", labelEs: "Ingreso bruto — año actual", type: "money", required: true, crm: custom("gross_income_current") },
-      { key: "grossIncomePrevious", labelEn: "Gross income — previous year", labelEs: "Ingreso bruto — año anterior", type: "money", required: true, crm: custom("gross_income_previous") },
+      { key: "grossIncomeCurrent", labelEn: "Gross income for {currentYear}", labelEs: "Ingreso bruto de {currentYear}", type: "money", required: true, crm: custom("gross_income_current") },
+      { key: "grossIncomePrevious", labelEn: "Gross income for {lastYear} (last year)", labelEs: "Ingreso bruto de {lastYear} (año anterior)", type: "money", required: true, crm: custom("gross_income_previous") },
       { key: "netWorth", labelEn: "Net worth", labelEs: "Patrimonio o valor neto", type: "money", required: true, crm: custom("net_worth") },
       {
         key: "sourceOfFunds", labelEn: "Source of funds", labelEs: "Fuente de fondos", type: "select", required: true, crm: custom("source_of_funds"),
@@ -220,17 +251,17 @@ export const INTAKE_SECTIONS: IntakeSection[] = [
           { value: "Other", labelEn: "Other", labelEs: "Otro" },
         ],
       },
-      { key: "bankName", labelEn: "Bank", labelEs: "Banco", type: "text", required: true, crm: custom("bank_name") },
+      { key: "bankName", labelEn: "Bank name", labelEs: "Nombre del banco", type: "text", required: true, crm: custom("bank_name") },
       {
         key: "paymentMethod", labelEn: "Payment method", labelEs: "Método de pago", type: "select", required: true, crm: custom("payment_method"),
         options: [
           { value: "Electronic (bank draft)", labelEn: "Electronic (bank draft)", labelEs: "Electrónico (débito bancario)" },
-          { value: "Credit card", labelEn: "Credit card", labelEs: "Tarjeta de crédito" },
-          { value: "Other", labelEn: "Other", labelEs: "Otro" },
+          { value: "Credit card", labelEn: "Credit card", labelEs: "Tarjeta de crédito", ownerOnly: true },
+          { value: "Other", labelEn: "Other", labelEs: "Otro", ownerOnly: true },
         ],
       },
-      { key: "routingNumber", labelEn: "Routing number", labelEs: "Número de ruta", type: "text", required: true, sensitive: true, crm: custom("routing_number") },
-      { key: "accountNumber", labelEn: "Account number", labelEs: "Número de cuenta", type: "text", required: true, sensitive: true, crm: custom("account_number") },
+      { key: "routingNumber", labelEn: "Routing number", labelEs: "Número de ruta", type: "text", required: true, sensitive: true, digitsOnly: true, maxLength: 9, crm: custom("routing_number") },
+      { key: "accountNumber", labelEn: "Account number", labelEs: "Número de cuenta", type: "text", required: true, sensitive: true, digitsOnly: true, maxLength: 17, crm: custom("account_number") },
       {
         key: "accountType", labelEn: "Account type", labelEs: "Tipo de cuenta", type: "select", required: true, crm: custom("account_type"),
         options: [
@@ -238,9 +269,9 @@ export const INTAKE_SECTIONS: IntakeSection[] = [
           { value: "Savings", labelEn: "Savings", labelEs: "Ahorros" },
         ],
       },
-      { key: "initialPlannedPremium", labelEn: "Initial planned premium", labelEs: "Prima mensual inicial", type: "money", required: true, crm: custom("initial_planned_premium") },
+      { key: "initialPlannedPremium", labelEn: "Initial planned premium (monthly payment)", labelEs: "Prima inicial planeada (pago mensual)", type: "premium", required: true, crm: custom("initial_planned_premium") },
       {
-        key: "premiumPaymentMode", labelEn: "Premium payment mode", labelEs: "Periodo de pago", type: "select", required: true, crm: custom("premium_payment_mode"),
+        key: "premiumPaymentMode", labelEn: "Premium payment mode (how often you pay)", labelEs: "Modo de pago de la prima (con qué frecuencia paga)", type: "select", required: true, crm: custom("premium_payment_mode"),
         options: [
           { value: "Monthly", labelEn: "Monthly", labelEs: "Mensual" },
           { value: "Quarterly", labelEn: "Quarterly", labelEs: "Trimestral" },
@@ -257,9 +288,17 @@ export const INTAKE_SECTIONS: IntakeSection[] = [
     fields: [
       { key: "medHeartStrokeCancer", labelEn: "In the past 12 months, treated for or experienced heart trouble, stroke, or cancer?", labelEs: "En los últimos 12 meses, ¿tratado o con problemas cardíacos, derrame o cáncer?", type: "select", required: true, crm: custom("med_heart_stroke_cancer"), options: YES_NO },
       { key: "medDiabetesBlood", labelEn: "Diabetes, anemia, or any blood disorder; sugar, protein, or blood in urine?", labelEs: "¿Diabetes, anemia o trastorno de la sangre; azúcar, proteína o sangre en la orina?", type: "select", required: true, crm: custom("med_diabetes_blood"), options: YES_NO },
-      { key: "medMedsDiet", labelEn: "Currently on prescribed medication or a prescribed diet?", labelEs: "¿Toma medicamentos recetados o dieta recetada?", type: "select", required: true, crm: custom("med_meds_diet"), options: YES_NO },
+      { key: "medMedsDiet", labelEn: "Are you currently taking any medication or prescriptions?", labelEs: "¿Toma actualmente algún medicamento o receta?", type: "select", required: true, crm: custom("med_meds_diet"), options: YES_NO },
+      {
+        key: "medsList", labelEn: "Please list your current medications", labelEs: "Por favor liste sus medicamentos actuales", type: "textarea", required: true, crm: custom("meds_list"),
+        showIf: { field: "medMedsDiet", equals: "yes" },
+        placeholderEn: "e.g. Metformin 500mg, Lisinopril 10mg…", placeholderEs: "ej. Metformina 500mg, Lisinopril 10mg…",
+      },
       { key: "doctorName", labelEn: "Primary doctor name", labelEs: "Nombre del médico primario", type: "text", required: true, crm: custom("doctor_name") },
-      { key: "doctorAddress", labelEn: "Doctor address", labelEs: "Dirección del médico", type: "text", required: true, crm: custom("doctor_address") },
+      {
+        key: "doctorAddress", labelEn: "Doctor address", labelEs: "Dirección del médico", type: "address", required: true, crm: custom("doctor_address"),
+        placeholderEn: "Start typing the address…", placeholderEs: "Empiece a escribir la dirección…",
+      },
       { key: "doctorPhone", labelEn: "Doctor phone", labelEs: "Teléfono del médico", type: "tel", required: true, crm: custom("doctor_phone") },
     ],
   },
@@ -268,7 +307,7 @@ export const INTAKE_SECTIONS: IntakeSection[] = [
     titleEn: "Family history",
     titleEs: "Historial familiar",
     fields: [
-      { key: "fatherAge", labelEn: "Father's age", labelEs: "Edad del papá", type: "number", required: true, crm: custom("father_age") },
+      { key: "fatherAge", labelEn: "Father's age", labelEs: "Edad del papá", type: "number", required: true, maxLength: 3, crm: custom("father_age") },
       {
         key: "fatherStatus", labelEn: "Father is", labelEs: "El papá está", type: "select", required: true, crm: custom("father_status"),
         options: [
@@ -276,8 +315,8 @@ export const INTAKE_SECTIONS: IntakeSection[] = [
           { value: "Deceased", labelEn: "Deceased", labelEs: "Fallecido" },
         ],
       },
-      { key: "fatherAgeAtDeath", labelEn: "Father's age at death", labelEs: "Edad del papá al fallecer", type: "number", crm: custom("father_age_at_death"), showIf: { field: "fatherStatus", equals: "Deceased" } },
-      { key: "motherAge", labelEn: "Mother's age", labelEs: "Edad de la mamá", type: "number", required: true, crm: custom("mother_age") },
+      { key: "fatherAgeAtDeath", labelEn: "Father's age at death", labelEs: "Edad del papá al fallecer", type: "number", maxLength: 3, crm: custom("father_age_at_death"), showIf: { field: "fatherStatus", equals: "Deceased" } },
+      { key: "motherAge", labelEn: "Mother's age", labelEs: "Edad de la mamá", type: "number", required: true, maxLength: 3, crm: custom("mother_age") },
       {
         key: "motherStatus", labelEn: "Mother is", labelEs: "La mamá está", type: "select", required: true, crm: custom("mother_status"),
         options: [
@@ -306,6 +345,7 @@ export const INTAKE_SECTIONS: IntakeSection[] = [
     titleEs: "Notas del agente",
     descriptionEn: "Internal — not required from the client.",
     descriptionEs: "Interno — no requerido del cliente.",
+    ownerOnly: true,
     fields: [
       { key: "additionalComments", labelEn: "Additional comments", labelEs: "Comentarios adicionales", type: "textarea", crm: custom("additional_comments") },
     ],
@@ -321,6 +361,30 @@ export const BENEFICIARY_SLUGS: GhlFieldSlug[] = [
 ];
 
 export const MAX_BENEFICIARIES = 4;
+
+/** Relationship options for the beneficiaries editor (value stored = English label). */
+export const BENEFICIARY_RELATIONSHIPS: IntakeOption[] = [
+  { value: "Spouse", labelEn: "Spouse", labelEs: "Cónyuge" },
+  { value: "Son", labelEn: "Son", labelEs: "Hijo" },
+  { value: "Daughter", labelEn: "Daughter", labelEs: "Hija" },
+  { value: "Father", labelEn: "Father", labelEs: "Padre" },
+  { value: "Mother", labelEn: "Mother", labelEs: "Madre" },
+  { value: "Brother", labelEn: "Brother", labelEs: "Hermano" },
+  { value: "Sister", labelEn: "Sister", labelEs: "Hermana" },
+  { value: "Grandfather", labelEn: "Grandfather", labelEs: "Abuelo" },
+  { value: "Grandmother", labelEn: "Grandmother", labelEs: "Abuela" },
+  { value: "Grandson", labelEn: "Grandson", labelEs: "Nieto" },
+  { value: "Granddaughter", labelEn: "Granddaughter", labelEs: "Nieta" },
+  { value: "Domestic partner", labelEn: "Domestic partner", labelEs: "Pareja de hecho" },
+  { value: "Estate/Trust", labelEn: "Estate / Trust", labelEs: "Patrimonio / Fideicomiso" },
+  { value: "Other", labelEn: "Other", labelEs: "Otro" },
+];
+
+/** Sections a given role should see/step through (clients skip owner-only sections). */
+export function visibleSections(isOwner: boolean): IntakeSection[] {
+  if (isOwner) return INTAKE_SECTIONS;
+  return INTAKE_SECTIONS.filter((s) => !s.ownerOnly);
+}
 
 export type Beneficiary = {
   firstName: string;

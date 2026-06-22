@@ -11,8 +11,10 @@ import { iulIntakeSessions } from "@/lib/db/schema";
 import {
   INTAKE_SECTIONS,
   BENEFICIARY_SLUGS,
+  allFileFields,
   isFieldVisible,
   type Beneficiary,
+  type FileRef,
 } from "./fields";
 import { ghlFieldIds } from "./ghl-field-ids";
 import type { IntakeData } from "./schema";
@@ -20,6 +22,7 @@ import type { IntakeSession, IntakeSummary } from "./types";
 import {
   agentCrmGetBaseCredentials,
   agentCrmUpdateContact,
+  agentCrmSetFileField,
   type AgentCrmCustomFieldValue,
   type AgentCrmNativeFields,
 } from "@/lib/agent-crm-contacts";
@@ -249,6 +252,39 @@ export function buildCrmPayloadFromData(data: IntakeData): {
   });
 
   return { native, customFields, skippedSlugs };
+}
+
+/**
+ * Re-sync uploaded files to their CRM FILE_UPLOAD custom fields. Files are normally mirrored
+ * on each upload, but this guarantees they land on completion even if an earlier mirror missed
+ * (transient API error). Best-effort: never throws.
+ */
+export async function syncIntakeFilesToCrm(
+  row: IntakeSessionRow,
+  decrypted: IntakeData
+): Promise<void> {
+  if (!row.crmContactId) return;
+  const creds = agentCrmGetBaseCredentials();
+  if (!creds) return;
+  for (const field of allFileFields()) {
+    if (field.crm?.kind !== "custom") continue;
+    const fieldId = ghlFieldIds[field.crm.slug];
+    if (!fieldId) continue;
+    const value = decrypted[field.key];
+    const files = Array.isArray(value) ? (value as FileRef[]) : [];
+    if (files.length === 0) continue;
+    try {
+      await agentCrmSetFileField(
+        row.crmContactId,
+        fieldId,
+        files.map((f) => f.url),
+        creds.token,
+        "[IUL_INTAKE]"
+      );
+    } catch (e) {
+      console.warn(`[iul-intake] File re-sync failed for ${field.key}:`, e);
+    }
+  }
 }
 
 /**

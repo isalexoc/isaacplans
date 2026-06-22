@@ -485,6 +485,9 @@ export async function agentCrmUploadMedia(
 /**
  * Set a FILE_UPLOAD custom field to the given list of CRM-hosted file URLs (full overwrite).
  * GHL stores file fields as `field_value: [{ url }, …]`.
+ *
+ * GHL can return 200 while silently ignoring a malformed file field, so we surface the
+ * response body. Set IUL_INTAKE_DEBUG=true to log the accepted body on success too.
  */
 export async function agentCrmSetFileField(
   contactId: string,
@@ -493,16 +496,21 @@ export async function agentCrmSetFileField(
   token: string,
   logPrefix = "[AGENT_CRM]"
 ): Promise<boolean> {
+  const body = {
+    customFields: [{ id: fieldId, field_value: urls.map((url) => ({ url })) }],
+  };
   const res = await fetch(`${AGENT_CRM_API_BASE}/contacts/${contactId}`, {
     method: "PUT",
     headers: agentCrmJsonHeaders(token),
-    body: JSON.stringify({
-      customFields: [{ id: fieldId, field_value: urls.map((url) => ({ url })) }],
-    }),
+    body: JSON.stringify(body),
   });
+  const text = await res.text();
   if (!res.ok) {
-    console.warn(`${logPrefix} Set file field failed:`, res.status, await res.text());
+    console.warn(`${logPrefix} Set file field failed:`, res.status, text);
     return false;
+  }
+  if (process.env.IUL_INTAKE_DEBUG === "true") {
+    console.info(`${logPrefix} Set file field ${fieldId} (${urls.length} url(s)):`, res.status, text.slice(0, 600));
   }
   return true;
 }

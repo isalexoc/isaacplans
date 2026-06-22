@@ -27,15 +27,30 @@ import {
 } from "@/lib/iul-intake-api";
 import { useIulIntakeAutosave } from "@/hooks/use-iul-intake-autosave";
 import IntakeBreadcrumb from "@/components/iul-intake/intake-breadcrumb";
+import IntakeAddressInput, { type ResolvedAddress } from "@/components/iul-intake/intake-address-input";
 import {
-  INTAKE_SECTIONS,
+  visibleSections,
   MAX_BENEFICIARIES,
+  BENEFICIARY_RELATIONSHIPS,
   emptyBeneficiary,
   isFieldVisible,
+  fieldByKey,
   type IntakeField,
   type Beneficiary,
   type FileRef,
 } from "@/lib/iul-intake/fields";
+import {
+  fieldFormatError,
+  beneficiaryPercentTotal,
+  type FieldErrorKey,
+} from "@/lib/iul-intake/validation";
+import {
+  parseWholeDollarInput,
+  formatWholeDollarDisplay,
+  sanitizePremiumInput,
+  formatPremiumDisplay,
+  normalizePremiumOnBlur,
+} from "@/lib/leave-behind-money-input";
 import type { IntakeData } from "@/lib/iul-intake/schema";
 import type { IntakeSession } from "@/lib/iul-intake/types";
 import {
@@ -51,6 +66,83 @@ import {
   type IntakeLocale,
 } from "@/lib/iul-intake/ui-strings";
 
+/* ------------------------------- helpers ------------------------------- */
+
+const MONTHS: Record<IntakeLocale, string[]> = {
+  en: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+  es: ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"],
+};
+
+function buildDobIso(month: string, day: string, year: string): string {
+  if (!month || !day || !year) return "";
+  const m = month.padStart(2, "0");
+  const d = day.padStart(2, "0");
+  const yNum = Number(year);
+  const mNum = Number(month);
+  const dNum = Number(day);
+  const check = new Date(yNum, mNum - 1, dNum);
+  if (
+    Number.isNaN(check.getTime()) ||
+    check.getFullYear() !== yNum ||
+    check.getMonth() !== mNum - 1 ||
+    check.getDate() !== dNum
+  ) {
+    return "";
+  }
+  return `${year}-${m}-${d}`;
+}
+
+function splitDobIso(value: string): { month: string; day: string; year: string } {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec((value ?? "").trim());
+  if (!m) return { month: "", day: "", year: "" };
+  return { year: m[1], month: String(Number(m[2])), day: String(Number(m[3])) };
+}
+
+function parseHeight(value: string): { feet: string; inches: string } {
+  const m = /(\d+)\s*'\s*(\d+)/.exec(value ?? "");
+  if (!m) return { feet: "", inches: "" };
+  return { feet: m[1], inches: m[2] };
+}
+
+function buildHeight(feet: string, inches: string): string {
+  if (!feet) return "";
+  return `${feet}'${inches || "0"}"`;
+}
+
+/** Progressive US phone format: digits → (305) 555-1234. */
+function formatUsPhone(value: string): string {
+  let d = (value ?? "").replace(/\D/g, "");
+  if (d.length === 11 && d.startsWith("1")) d = d.slice(1);
+  d = d.slice(0, 10);
+  if (d.length === 0) return "";
+  if (d.length < 4) return `(${d}`;
+  if (d.length < 7) return `(${d.slice(0, 3)}) ${d.slice(3)}`;
+  return `(${d.slice(0, 3)}) ${d.slice(3, 6)}-${d.slice(6)}`;
+}
+
+function errorMessageFor(key: FieldErrorKey, locale: IntakeLocale): string {
+  switch (key) {
+    case "email":
+      return tr(UI.errEmail, locale);
+    case "phone":
+      return tr(UI.errPhone, locale);
+    case "zip":
+      return tr(UI.errZip, locale);
+    case "ssn":
+      return tr(UI.errSsn, locale);
+    case "routing":
+      return tr(UI.errRouting, locale);
+    case "age":
+      return tr(UI.errAge, locale);
+    case "dob":
+      return tr(UI.errDob, locale);
+    default:
+      return tr(UI.fixErrors, locale);
+  }
+}
+
+/* ------------------------------- component ------------------------------- */
+
 export default function IntakeForm({ token }: { token: string }) {
   const locale = pickLocale(useLocale());
 
@@ -61,6 +153,7 @@ export default function IntakeForm({ token }: { token: string }) {
   const [completing, setCompleting] = useState(false);
   const [completed, setCompleted] = useState(false);
   const [missing, setMissing] = useState<Set<string>>(new Set());
+  const [errors, setErrors] = useState<Record<string, FieldErrorKey>>({});
   const [completeError, setCompleteError] = useState<string | null>(null);
   const [reveal, setReveal] = useState(false);
 
@@ -86,6 +179,22 @@ export default function IntakeForm({ token }: { token: string }) {
   const { status: saveStatus } = useIulIntakeAutosave({ token, data });
 
   const isOwner = session?.role === "owner";
+  const sections = useMemo(() => visibleSections(!!isOwner), [isOwner]);
+
+  // Clients pay by bank draft only — lock the value so it always syncs.
+  useEffect(() => {
+    if (loadState !== "ready" || isOwner) return;
+    const current = typeof data.paymentMethod === "string" ? data.paymentMethod : "";
+    if (current !== "Electronic (bank draft)") {
+      setData((prev) => ({ ...prev, paymentMethod: "Electronic (bank draft)" }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loadState, isOwner]);
+
+  // Keep step in range when the section list changes (role resolves after load).
+  useEffect(() => {
+    setStep((s) => Math.min(s, sections.length - 1));
+  }, [sections.length]);
 
   function setField(key: string, value: unknown) {
     setData((prev) => ({ ...prev, [key]: value }));
@@ -97,10 +206,44 @@ export default function IntakeForm({ token }: { token: string }) {
         return next;
       });
     }
+    setErrors((prev) => {
+      if (!prev[key]) return prev;
+      const next = { ...prev };
+      delete next[key];
+      return next;
+    });
   }
 
-  const sections = INTAKE_SECTIONS;
+  function validateOnBlur(field: IntakeField, value: string) {
+    const err = fieldFormatError(field, value);
+    setErrors((prev) => {
+      if (err) return { ...prev, [field.key]: err };
+      if (!prev[field.key]) return prev;
+      const next = { ...prev };
+      delete next[field.key];
+      return next;
+    });
+  }
+
   const current = sections[step];
+
+  function goNext() {
+    // Surface format errors on the current step before advancing (empties stay allowed).
+    const stepErrors: Record<string, FieldErrorKey> = {};
+    for (const field of current.fields) {
+      if (!isFieldVisible(field, data)) continue;
+      const v = typeof data[field.key] === "string" ? (data[field.key] as string) : "";
+      const err = fieldFormatError(field, v);
+      if (err) stepErrors[field.key] = err;
+    }
+    if (Object.keys(stepErrors).length > 0) {
+      setErrors((prev) => ({ ...prev, ...stepErrors }));
+      setCompleteError(tr(UI.fixErrors, locale));
+      return;
+    }
+    setCompleteError(null);
+    setStep((s) => Math.min(sections.length - 1, s + 1));
+  }
 
   async function handleFinish() {
     setCompleting(true);
@@ -113,8 +256,14 @@ export default function IntakeForm({ token }: { token: string }) {
       } else {
         const miss = new Set(result.missing ?? []);
         setMissing(miss);
-        setCompleteError(result.message || tr(UI.missingFields, locale));
-        // Jump to the first section containing a missing field.
+        // Friendly, label-based summary instead of raw field keys.
+        const labels = (result.missing ?? [])
+          .map((k) => (k === "beneficiaries" ? tr(UI.beneficiary, locale) : fieldByKey(k) ? fieldLabel(fieldByKey(k)!, locale) : k))
+          .filter(Boolean);
+        const summary = labels.length
+          ? `${tr(UI.pleaseComplete, locale)} ${labels.join(", ")}`
+          : result.message || tr(UI.missingFields, locale);
+        setCompleteError(summary);
         if (miss.size) {
           const idx = sections.findIndex((s) => s.fields.some((f) => miss.has(f.key)));
           if (idx >= 0) setStep(idx);
@@ -184,6 +333,8 @@ export default function IntakeForm({ token }: { token: string }) {
         <div className="mt-3 space-y-4">
           {current.fields.map((field) => {
             if (!isFieldVisible(field, data)) return null;
+            if (field.ownerOnly && !isOwner) return null;
+
             if (field.type === "beneficiaries") {
               return (
                 <BeneficiariesEditor
@@ -216,9 +367,18 @@ export default function IntakeForm({ token }: { token: string }) {
                 locale={locale}
                 value={typeof data[field.key] === "string" ? (data[field.key] as string) : ""}
                 onChange={(v) => setField(field.key, v)}
+                onBlur={(v) => validateOnBlur(field, v)}
+                onResolveAddress={(addr) => {
+                  setField(field.key, addr.line1);
+                  const t = field.addressTargets;
+                  if (t?.city && addr.city) setField(t.city, addr.city);
+                  if (t?.state && addr.state) setField(t.state, addr.state);
+                  if (t?.zip && addr.zip) setField(t.zip, addr.zip);
+                }}
                 invalid={missing.has(field.key)}
+                errorKey={errors[field.key]}
                 reveal={reveal}
-                isOwner={isOwner}
+                isOwner={!!isOwner}
                 onToggleReveal={() => setReveal((r) => !r)}
               />
             );
@@ -227,8 +387,8 @@ export default function IntakeForm({ token }: { token: string }) {
       </div>
 
       {completeError && (
-        <p className="mt-3 flex items-center gap-1.5 text-sm text-red-600">
-          <AlertCircle className="h-4 w-4" /> {completeError}
+        <p className="mt-3 flex items-start gap-1.5 text-sm text-red-600">
+          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" /> {completeError}
         </p>
       )}
 
@@ -237,9 +397,7 @@ export default function IntakeForm({ token }: { token: string }) {
           {tr(UI.back, locale)}
         </Button>
         {step < sections.length - 1 ? (
-          <Button onClick={() => setStep((s) => Math.min(sections.length - 1, s + 1))}>
-            {tr(UI.next, locale)}
-          </Button>
+          <Button onClick={goNext}>{tr(UI.next, locale)}</Button>
         ) : (
           <Button onClick={handleFinish} disabled={completing}>
             {completing ? (
@@ -281,12 +439,20 @@ function SaveIndicator({ status, locale }: { status: string; locale: IntakeLocal
   return null;
 }
 
+/* Shared select styling (native selects are best on mobile). */
+const selectCls =
+  "flex h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:text-sm";
+const inputBase = "text-base sm:text-sm";
+
 function FieldInput({
   field,
   locale,
   value,
   onChange,
+  onBlur,
+  onResolveAddress,
   invalid,
+  errorKey,
   reveal,
   isOwner,
   onToggleReveal,
@@ -295,7 +461,10 @@ function FieldInput({
   locale: IntakeLocale;
   value: string;
   onChange: (v: string) => void;
+  onBlur: (v: string) => void;
+  onResolveAddress: (addr: ResolvedAddress) => void;
   invalid?: boolean;
+  errorKey?: FieldErrorKey;
   reveal: boolean;
   isOwner: boolean;
   onToggleReveal: () => void;
@@ -304,12 +473,19 @@ function FieldInput({
   const label = fieldLabel(field, locale);
   const help = fieldHelp(field, locale);
   const placeholder = fieldPlaceholder(field, locale);
-  const invalidCls = invalid ? "border-red-500 focus-visible:ring-red-500" : "";
+  const showInvalid = invalid || !!errorKey;
+  const invalidCls = showInvalid ? "border-red-500 focus-visible:ring-red-500" : "";
+
+  function handleDigits(raw: string) {
+    let v = raw.replace(/\D/g, "");
+    if (field.maxLength) v = v.slice(0, field.maxLength);
+    onChange(v);
+  }
 
   return (
     <div>
       <div className="mb-1 flex items-center justify-between">
-        <Label htmlFor={id} className={invalid ? "text-red-600" : ""}>
+        <Label htmlFor={id} className={showInvalid ? "text-red-600" : ""}>
           {label}
           {field.required && <span className="ml-0.5 text-red-500">*</span>}
         </Label>
@@ -330,30 +506,243 @@ function FieldInput({
           id={id}
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className={`flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${invalidCls}`}
+          className={`${selectCls} ${invalidCls}`}
         >
           <option value="">{tr(UI.choose, locale)}</option>
-          {field.options?.map((opt) => (
-            <option key={opt.value} value={opt.value}>
-              {optionLabel(opt, locale)}
-            </option>
-          ))}
+          {field.options
+            ?.filter((opt) => isOwner || !opt.ownerOnly)
+            .map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {optionLabel(opt, locale)}
+              </option>
+            ))}
         </select>
-      ) : field.type === "textarea" ? (
-        <Textarea id={id} value={value} placeholder={placeholder} onChange={(e) => onChange(e.target.value)} className={invalidCls} />
-      ) : (
-        <Input
+      ) : field.type === "dob" ? (
+        <DobParts value={value} onChange={onChange} invalid={showInvalid} locale={locale} />
+      ) : field.type === "height" ? (
+        <HeightSelect id={id} value={value} onChange={onChange} invalid={showInvalid} locale={locale} />
+      ) : field.type === "address" ? (
+        <IntakeAddressInput
           id={id}
-          type={field.sensitive && !reveal ? "password" : field.type === "date" ? "date" : field.type === "email" ? "email" : field.type === "tel" ? "tel" : "text"}
-          inputMode={field.type === "number" || field.type === "money" ? "decimal" : undefined}
-          autoComplete={field.sensitive ? "off" : undefined}
+          value={value}
+          onChange={onChange}
+          onResolve={onResolveAddress}
+          placeholder={placeholder}
+          invalid={showInvalid}
+          locale={locale}
+        />
+      ) : field.type === "money" ? (
+        <MoneyInput
+          id={id}
+          display={formatWholeDollarDisplay(value)}
+          onChange={(raw) => onChange(parseWholeDollarInput(raw))}
+          inputMode="numeric"
+          invalid={showInvalid}
+        />
+      ) : field.type === "premium" ? (
+        <MoneyInput
+          id={id}
+          display={formatPremiumDisplay(value)}
+          onChange={(raw) => onChange(sanitizePremiumInput(raw))}
+          onBlur={() => onChange(normalizePremiumOnBlur(value))}
+          inputMode="decimal"
+          invalid={showInvalid}
+        />
+      ) : field.type === "textarea" ? (
+        <Textarea
+          id={id}
           value={value}
           placeholder={placeholder}
           onChange={(e) => onChange(e.target.value)}
-          className={invalidCls}
+          className={`${inputBase} ${invalidCls}`}
+        />
+      ) : field.type === "tel" ? (
+        <Input
+          id={id}
+          type="tel"
+          inputMode="tel"
+          value={formatUsPhone(value)}
+          placeholder={placeholder}
+          onChange={(e) => onChange(formatUsPhone(e.target.value))}
+          onBlur={(e) => onBlur(e.target.value)}
+          className={`${inputBase} ${invalidCls}`}
+        />
+      ) : field.type === "ssn" || field.type === "number" || field.digitsOnly ? (
+        <Input
+          id={id}
+          type={field.sensitive && !reveal ? "password" : "text"}
+          inputMode="numeric"
+          autoComplete={field.sensitive ? "off" : undefined}
+          value={value}
+          placeholder={placeholder}
+          maxLength={field.type === "ssn" ? 9 : field.maxLength}
+          onChange={(e) => handleDigits(e.target.value)}
+          onBlur={(e) => onBlur(e.target.value)}
+          className={`${inputBase} ${invalidCls}`}
+        />
+      ) : (
+        <Input
+          id={id}
+          type={field.sensitive && !reveal ? "password" : field.type === "email" ? "email" : "text"}
+          inputMode={field.type === "email" ? "email" : undefined}
+          autoComplete={field.sensitive ? "off" : undefined}
+          value={value}
+          placeholder={placeholder}
+          maxLength={field.maxLength}
+          onChange={(e) => onChange(e.target.value)}
+          onBlur={(e) => onBlur(e.target.value)}
+          className={`${inputBase} ${invalidCls}`}
         />
       )}
-      {help && <p className="mt-1 text-xs text-muted-foreground">{help}</p>}
+
+      {errorKey ? (
+        <p className="mt-1 flex items-center gap-1 text-xs text-red-600">
+          <AlertCircle className="h-3.5 w-3.5" /> {errorMessageFor(errorKey, locale)}
+        </p>
+      ) : (
+        help && <p className="mt-1 text-xs text-muted-foreground">{help}</p>
+      )}
+    </div>
+  );
+}
+
+/* Dollar input with a leading $ adornment. */
+function MoneyInput({
+  id,
+  display,
+  onChange,
+  onBlur,
+  inputMode,
+  invalid,
+}: {
+  id: string;
+  display: string;
+  onChange: (raw: string) => void;
+  onBlur?: () => void;
+  inputMode: "numeric" | "decimal";
+  invalid?: boolean;
+}) {
+  return (
+    <div
+      className={`flex h-11 w-full items-center rounded-md border bg-background px-3 sm:h-10 ${
+        invalid ? "border-red-500 focus-within:ring-2 focus-within:ring-red-500" : "border-input focus-within:ring-2 focus-within:ring-ring"
+      } focus-within:ring-offset-2`}
+    >
+      <span className="mr-1 text-muted-foreground">$</span>
+      <input
+        id={id}
+        type="text"
+        inputMode={inputMode}
+        value={display}
+        onChange={(e) => onChange(e.target.value)}
+        onBlur={onBlur}
+        className="h-full w-full border-0 bg-transparent text-base outline-none sm:text-sm"
+      />
+    </div>
+  );
+}
+
+/**
+ * Month / Day / Year selects → ISO YYYY-MM-DD. Holds local part state so a partial
+ * selection (e.g. month chosen, year not yet) doesn't wipe the other dropdowns; emits the
+ * ISO string to the parent when complete & valid, or "" while incomplete.
+ */
+function DobParts({
+  value,
+  onChange,
+  invalid,
+  locale,
+}: {
+  value: string;
+  onChange: (iso: string) => void;
+  invalid?: boolean;
+  locale: IntakeLocale;
+}) {
+  const [parts, setParts] = useState(() => splitDobIso(value));
+
+  // Re-sync when the parent value changes to a different complete date (e.g. loaded data).
+  useEffect(() => {
+    setParts((prev) => {
+      const prevIso = buildDobIso(prev.month, prev.day, prev.year);
+      if (value && value !== prevIso) return splitDobIso(value);
+      return prev;
+    });
+  }, [value]);
+
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({ length: 100 }, (_, i) => String(currentYear - i));
+  const cls = `${selectCls} ${invalid ? "border-red-500" : ""}`;
+
+  function set(next: { month?: string; day?: string; year?: string }) {
+    const merged = { ...parts, ...next };
+    setParts(merged);
+    onChange(buildDobIso(merged.month, merged.day, merged.year));
+  }
+
+  return (
+    <div className="grid grid-cols-3 gap-2">
+      <select aria-label={tr(UI.dobMonth, locale)} value={parts.month} onChange={(e) => set({ month: e.target.value })} className={cls}>
+        <option value="">{tr(UI.dobMonth, locale)}</option>
+        {MONTHS[locale].map((name, i) => (
+          <option key={i} value={String(i + 1)}>
+            {name}
+          </option>
+        ))}
+      </select>
+      <select aria-label={tr(UI.dobDay, locale)} value={parts.day} onChange={(e) => set({ day: e.target.value })} className={cls}>
+        <option value="">{tr(UI.dobDay, locale)}</option>
+        {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => (
+          <option key={d} value={String(d)}>
+            {d}
+          </option>
+        ))}
+      </select>
+      <select aria-label={tr(UI.dobYear, locale)} value={parts.year} onChange={(e) => set({ year: e.target.value })} className={cls}>
+        <option value="">{tr(UI.dobYear, locale)}</option>
+        {years.map((y) => (
+          <option key={y} value={y}>
+            {y}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
+/* Feet + inches selects → e.g. 5'9". */
+function HeightSelect({
+  id,
+  value,
+  onChange,
+  invalid,
+  locale,
+}: {
+  id: string;
+  value: string;
+  onChange: (v: string) => void;
+  invalid?: boolean;
+  locale: IntakeLocale;
+}) {
+  const { feet, inches } = parseHeight(value);
+  const cls = `${selectCls} ${invalid ? "border-red-500" : ""}`;
+  return (
+    <div className="grid grid-cols-2 gap-2" id={id}>
+      <select value={feet} onChange={(e) => onChange(buildHeight(e.target.value, inches))} className={cls}>
+        <option value="">{tr(UI.heightFeet, locale)}</option>
+        {[4, 5, 6, 7].map((f) => (
+          <option key={f} value={String(f)}>
+            {f} {tr(UI.heightFeet, locale)}
+          </option>
+        ))}
+      </select>
+      <select value={inches} onChange={(e) => onChange(buildHeight(feet, e.target.value))} className={cls} disabled={!feet}>
+        <option value="">{tr(UI.heightInches, locale)}</option>
+        {Array.from({ length: 12 }, (_, i) => i).map((inch) => (
+          <option key={inch} value={String(inch)}>
+            {inch} {tr(UI.heightInches, locale)}
+          </option>
+        ))}
+      </select>
     </div>
   );
 }
@@ -372,6 +761,8 @@ function BeneficiariesEditor({
   invalid?: boolean;
 }) {
   const list = useMemo(() => (value.length ? value : [emptyBeneficiary()]), [value]);
+  const total = beneficiaryPercentTotal(list);
+  const showTotalWarning = list.some((b) => b.percent.trim()) && total !== 100;
 
   function update(idx: number, patch: Partial<Beneficiary>) {
     const next = list.map((b, i) => (i === idx ? { ...b, ...patch } : b));
@@ -388,28 +779,74 @@ function BeneficiariesEditor({
 
   return (
     <div className={`space-y-4 ${invalid ? "rounded-md border border-red-500 p-3" : ""}`}>
-      {list.map((b, idx) => (
-        <div key={idx} className="rounded-md border p-3">
-          <div className="mb-2 flex items-center justify-between">
-            <span className="text-sm font-medium">
-              {tr(UI.beneficiary, locale)} {idx + 1}
-            </span>
-            {list.length > 1 && (
-              <button type="button" onClick={() => remove(idx)} className="text-xs text-red-600 hover:underline">
-                {tr(UI.remove, locale)}
-              </button>
-            )}
+      {list.map((b, idx) => {
+        return (
+          <div key={idx} className="rounded-md border p-3">
+            <div className="mb-2 flex items-center justify-between">
+              <span className="text-sm font-medium">
+                {tr(UI.beneficiary, locale)} {idx + 1}
+              </span>
+              {list.length > 1 && (
+                <button type="button" onClick={() => remove(idx)} className="text-xs text-red-600 hover:underline">
+                  {tr(UI.remove, locale)}
+                </button>
+              )}
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <LabeledInput label={tr(UI.benFirstName, locale)} value={b.firstName} onChange={(v) => update(idx, { firstName: v })} />
+              <LabeledInput label={tr(UI.benLastName, locale)} value={b.lastName} onChange={(v) => update(idx, { lastName: v })} />
+              <div>
+                <Label className="text-xs">{tr(UI.benRelationship, locale)}</Label>
+                <select
+                  value={b.relationship}
+                  onChange={(e) => update(idx, { relationship: e.target.value })}
+                  className={selectCls}
+                >
+                  <option value="">{tr(UI.choose, locale)}</option>
+                  {BENEFICIARY_RELATIONSHIPS.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {optionLabel(opt, locale)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <Label className="text-xs">{tr(UI.benPercent, locale)}</Label>
+                <div className="flex h-11 items-center rounded-md border border-input bg-background px-3 focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 sm:h-10">
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    value={b.percent}
+                    onChange={(e) => {
+                      let v = e.target.value.replace(/\D/g, "").slice(0, 3);
+                      if (v && Number(v) > 100) v = "100";
+                      update(idx, { percent: v });
+                    }}
+                    className="h-full w-full border-0 bg-transparent text-base outline-none sm:text-sm"
+                  />
+                  <span className="ml-1 text-muted-foreground">%</span>
+                </div>
+              </div>
+              <div>
+                <Label className="text-xs">{tr(UI.benDob, locale)}</Label>
+                <DobParts value={b.dateOfBirth} onChange={(iso) => update(idx, { dateOfBirth: iso })} locale={locale} />
+              </div>
+              <LabeledInput
+                label={tr(UI.benSsn, locale)}
+                value={b.ssn}
+                onChange={(v) => update(idx, { ssn: v.replace(/\D/g, "").slice(0, 9) })}
+                type={reveal ? "text" : "password"}
+                inputMode="numeric"
+              />
+            </div>
           </div>
-          <div className="grid gap-3 sm:grid-cols-2">
-            <LabeledInput label={tr(UI.benFirstName, locale)} value={b.firstName} onChange={(v) => update(idx, { firstName: v })} />
-            <LabeledInput label={tr(UI.benLastName, locale)} value={b.lastName} onChange={(v) => update(idx, { lastName: v })} />
-            <LabeledInput label={tr(UI.benRelationship, locale)} value={b.relationship} onChange={(v) => update(idx, { relationship: v })} />
-            <LabeledInput label={tr(UI.benPercent, locale)} value={b.percent} onChange={(v) => update(idx, { percent: v })} inputMode="decimal" />
-            <LabeledInput label={tr(UI.benDob, locale)} value={b.dateOfBirth} onChange={(v) => update(idx, { dateOfBirth: v })} type="date" />
-            <LabeledInput label={tr(UI.benSsn, locale)} value={b.ssn} onChange={(v) => update(idx, { ssn: v })} type={reveal ? "text" : "password"} />
-          </div>
-        </div>
-      ))}
+        );
+      })}
+      {showTotalWarning && (
+        <p className="flex items-center gap-1 text-xs text-amber-600">
+          <AlertCircle className="h-3.5 w-3.5" /> {tr(UI.benTotalWarning, locale)} ({total}%)
+        </p>
+      )}
       {list.length < MAX_BENEFICIARIES && (
         <Button type="button" variant="outline" size="sm" onClick={add}>
           {tr(UI.addBeneficiary, locale)}
@@ -430,12 +867,12 @@ function LabeledInput({
   value: string;
   onChange: (v: string) => void;
   type?: string;
-  inputMode?: "decimal";
+  inputMode?: "decimal" | "numeric";
 }) {
   return (
     <div>
       <Label className="text-xs">{label}</Label>
-      <Input type={type} inputMode={inputMode} value={value} onChange={(e) => onChange(e.target.value)} />
+      <Input type={type} inputMode={inputMode} value={value} onChange={(e) => onChange(e.target.value)} className={inputBase} />
     </div>
   );
 }
