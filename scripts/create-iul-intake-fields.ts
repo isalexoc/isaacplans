@@ -116,6 +116,14 @@ function buildSpecs(): FieldSpec[] {
     });
   });
 
+  // Meta field (not part of the form): the always-current client share link.
+  specs.push({
+    slug: "iul_intake_link",
+    name: `${FIELD_PREFIX}Share Link`,
+    dataType: "TEXT",
+    reused: false,
+  });
+
   return specs;
 }
 

@@ -443,6 +443,46 @@ export async function agentCrmUpdateContact(
   return true;
 }
 
+/** Add tags to a contact (POST fires GHL "tag added" automations). */
+export async function agentCrmAddContactTags(
+  contactId: string,
+  tags: string[],
+  token: string,
+  logPrefix = "[AGENT_CRM]"
+): Promise<boolean> {
+  if (tags.length === 0) return true;
+  const res = await fetch(`${AGENT_CRM_API_BASE}/contacts/${contactId}/tags`, {
+    method: "POST",
+    headers: agentCrmJsonHeaders(token),
+    body: JSON.stringify({ tags }),
+  });
+  if (!res.ok) {
+    console.warn(`${logPrefix} Add tags failed:`, res.status, await res.text());
+    return false;
+  }
+  return true;
+}
+
+/** Remove tags from a contact. Best-effort (used to allow re-triggering on re-add). */
+export async function agentCrmRemoveContactTags(
+  contactId: string,
+  tags: string[],
+  token: string,
+  logPrefix = "[AGENT_CRM]"
+): Promise<boolean> {
+  if (tags.length === 0) return true;
+  const res = await fetch(`${AGENT_CRM_API_BASE}/contacts/${contactId}/tags`, {
+    method: "DELETE",
+    headers: agentCrmJsonHeaders(token),
+    body: JSON.stringify({ tags }),
+  });
+  if (!res.ok) {
+    // Not fatal — the tag may simply not be present yet.
+    return false;
+  }
+  return true;
+}
+
 /**
  * Upload a file to the GHL media library (so it lives inside the CRM) and return its
  * CRM-hosted URL. Used to populate FILE_UPLOAD custom fields.

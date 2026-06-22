@@ -7,16 +7,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Search, UserPlus, Copy, Check, Pencil, Eye, ChevronDown, RotateCcw, Unlock, Lock } from "lucide-react";
+import { Loader2, Search, UserPlus, Copy, Check, Pencil, Eye, ChevronDown, RotateCcw, Unlock, Lock, Send } from "lucide-react";
 import {
   listIntakes,
   createIntake,
   searchCrmContacts,
   resetIntakeLink,
   reopenIntake,
+  sendIntakeLink,
   type CrmContactMatch,
 } from "@/lib/iul-intake-api";
 import type { IntakeSummary, IntakeStatus } from "@/lib/iul-intake/types";
+import { buildIntakeShareUrl } from "@/lib/iul-intake/share-url";
 import { titleCaseName, isValidEmail, isValidPhone } from "@/lib/iul-intake/validation";
 import { UI, pickLocale, tr } from "@/lib/iul-intake/ui-strings";
 import IntakeBreadcrumb from "@/components/iul-intake/intake-breadcrumb";
@@ -51,6 +53,8 @@ export default function IntakeDashboard() {
   const [copiedToken, setCopiedToken] = useState<string | null>(null);
   const [resettingId, setResettingId] = useState<string | null>(null);
   const [reopeningId, setReopeningId] = useState<string | null>(null);
+  const [sendingId, setSendingId] = useState<string | null>(null);
+  const [sentId, setSentId] = useState<string | null>(null);
 
   const statusLabel = useCallback(
     (s: IntakeStatus) =>
@@ -149,9 +153,22 @@ export default function IntakeDashboard() {
   }
 
   function shareUrl(token: string): string {
-    const slug = locale === "es" ? "iul/admision" : "iul/intake";
-    const origin = typeof window !== "undefined" ? window.location.origin : "";
-    return `${origin}/${locale}/${slug}/${token}`;
+    const origin = typeof window !== "undefined" ? window.location.origin : undefined;
+    return buildIntakeShareUrl(token, locale, origin);
+  }
+
+  async function handleSendLink(s: IntakeSummary) {
+    setSendingId(s.id);
+    setError(null);
+    try {
+      await sendIntakeLink(s.token);
+      setSentId(s.id);
+      setTimeout(() => setSentId((id) => (id === s.id ? null : id)), 2500);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Error");
+    } finally {
+      setSendingId(null);
+    }
   }
 
   async function copyLink(token: string) {
@@ -378,6 +395,24 @@ export default function IntakeDashboard() {
                         </>
                       )}
                     </Button>
+                    {s.crmContactId && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="text-brand hover:text-brand"
+                        disabled={sendingId === s.id}
+                        onClick={() => handleSendLink(s)}
+                      >
+                        {sendingId === s.id ? (
+                          <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+                        ) : sentId === s.id ? (
+                          <Check className="mr-1 h-4 w-4 text-green-600" />
+                        ) : (
+                          <Send className="mr-1 h-4 w-4" />
+                        )}
+                        {sentId === s.id ? tr(UI.linkSent, locale) : tr(UI.sendLink, locale)}
+                      </Button>
+                    )}
                     <Button
                       size="sm"
                       variant="ghost"

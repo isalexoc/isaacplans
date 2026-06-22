@@ -4,6 +4,7 @@ import { getIsAdmin } from "@/lib/auth/admin";
 import {
   getIntakeByToken,
   resetIntakeLink,
+  syncIntakeLinkToCrm,
   toIntakeSummary,
 } from "@/lib/iul-intake/server";
 
@@ -30,6 +31,9 @@ export async function POST(_request: NextRequest, context: RouteContext) {
     if (!updated) {
       return NextResponse.json({ success: false, error: "Not found" }, { status: 404 });
     }
+
+    // The token changed — keep the CRM link field current.
+    await syncIntakeLinkToCrm(updated);
 
     return NextResponse.json({ success: true, session: toIntakeSummary(updated) });
   } catch (error) {

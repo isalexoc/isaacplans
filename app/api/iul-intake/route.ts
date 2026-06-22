@@ -3,6 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import {
   createIntakeSession,
   listIntakeSessionsForOwner,
+  syncIntakeLinkToCrm,
   toIntakeSummary,
   type IntakeStatus,
 } from "@/lib/iul-intake/server";
@@ -154,6 +155,9 @@ export async function POST(request: NextRequest) {
       locale,
       data: prefill,
     });
+
+    // Seed the CRM link field so it's ready for the "Send link" workflow.
+    await syncIntakeLinkToCrm(row);
 
     return NextResponse.json({ success: true, session: toIntakeSummary(row) });
   } catch (error) {
