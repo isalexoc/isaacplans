@@ -291,10 +291,10 @@ export const INTAKE_SECTIONS: IntakeSection[] = [
     key: "attachments",
     titleEn: "Documents",
     titleEs: "Documentos",
-    descriptionEn: "Upload photos or PDFs. Files are stored securely in the CRM.",
-    descriptionEs: "Suba fotos o PDF. Los archivos se almacenan de forma segura en el CRM.",
+    descriptionEn: "Uploading documents is optional, but it helps us move faster.",
+    descriptionEs: "Subir documentos es opcional, pero nos ayuda a avanzar más rápido.",
     fields: [
-      { key: "attachmentDriversLicense", labelEn: "Driver's license", labelEs: "Licencia de conducir", type: "file", crm: custom("attachment_drivers_license") },
+      { key: "attachmentDriversLicense", labelEn: "Driver's license", labelEs: "Licencia de conducir", type: "file", crm: custom("attachment_drivers_license"), helpEn: "Recommended to upload.", helpEs: "Recomendado subirla." },
       { key: "attachmentBankDoc", labelEn: "Voided check / account & routing", labelEs: "Cheque anulado / cuenta y ruta", type: "file", crm: custom("attachment_bank_doc") },
       { key: "attachmentOther", labelEn: "Other documents", labelEs: "Otros documentos", type: "file", crm: custom("attachment_other") },
     ],
