@@ -14,7 +14,7 @@ import type { IntakeData } from "@/lib/iul-intake/schema";
 import { encryptIntakeData, decryptIntakeData } from "@/lib/crypto/field-encryption";
 import {
   agentCrmGetBaseCredentials,
-  agentCrmUploadMedia,
+  agentCrmUploadCustomFieldFile,
   agentCrmSetFileField,
 } from "@/lib/agent-crm-contacts";
 
@@ -37,8 +37,8 @@ function currentFiles(data: IntakeData, fieldKey: string): FileRef[] {
   return Array.isArray(v) ? (v as FileRef[]) : [];
 }
 
-/** Persist the new file list (plaintext URLs) and mirror it to the CRM file field. */
-async function syncFiles(
+/** Persist the file list to our DB (encrypting sensitive fields). */
+async function persistFiles(
   row: IntakeSessionRow,
   fieldKey: string,
   files: FileRef[]
@@ -48,7 +48,16 @@ async function syncFiles(
   const encrypted = encryptIntakeData(decrypted);
   const nextStatus = row.status === "completed" ? "completed" : "in_progress";
   await updateIntakeData(row.token, encrypted, nextStatus);
+  return decrypted;
+}
 
+/** Persist the list and best-effort clear/overwrite the CRM file field (used on delete). */
+async function persistAndClearCrm(
+  row: IntakeSessionRow,
+  fieldKey: string,
+  files: FileRef[]
+): Promise<IntakeData> {
+  const decrypted = await persistFiles(row, fieldKey, files);
   const creds = agentCrmGetBaseCredentials();
   const fieldId = fileFieldId(fieldKey);
   if (creds && row.crmContactId && fieldId) {
@@ -95,21 +104,36 @@ export async function POST(request: NextRequest, context: RouteContext) {
     }
 
     const creds = agentCrmGetBaseCredentials();
-    if (!creds || !row.crmContactId) {
+    const fieldId = fileFieldId(fieldKey);
+    if (!creds || !row.crmContactId || !fieldId) {
       return NextResponse.json(
         { success: false, error: "CRM is not configured for this session." },
         { status: 400 }
       );
     }
 
-    const uploaded = await agentCrmUploadMedia(file, file.name || "upload", creds.locationId, creds.token, "[IUL_INTAKE]");
-    if (!uploaded) {
+    // Attach the file to the contact's FILE_UPLOAD custom field via the dedicated endpoint.
+    // (Setting field_value URLs on the contact update is silently ignored by GHL.)
+    const fieldFiles = await agentCrmUploadCustomFieldFile(
+      file,
+      file.name || "upload",
+      row.crmContactId,
+      creds.locationId,
+      fieldId,
+      creds.token,
+      "[IUL_INTAKE]"
+    );
+    if (!fieldFiles) {
       return NextResponse.json({ success: false, error: "Upload failed" }, { status: 502 });
     }
 
+    // Prefer the authoritative list GHL echoes back; fall back to appending if it returns none.
     const decryptedNow = decryptIntakeData((row.data ?? {}) as IntakeData);
-    const next = [...currentFiles(decryptedNow, fieldKey), { url: uploaded.url, name: file.name || "file", fileId: uploaded.fileId }];
-    const decrypted = await syncFiles(row, fieldKey, next);
+    const next: FileRef[] =
+      fieldFiles.length > 0
+        ? fieldFiles.map((f) => ({ url: f.url, name: f.name }))
+        : [...currentFiles(decryptedNow, fieldKey), { url: "", name: file.name || "file" }];
+    const decrypted = await persistFiles(row, fieldKey, next);
 
     return NextResponse.json({
       success: true,
@@ -146,7 +170,7 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
 
     const decryptedNow = decryptIntakeData((row.data ?? {}) as IntakeData);
     const next = currentFiles(decryptedNow, fieldKey).filter((f) => f.url !== url);
-    const decrypted = await syncFiles(row, fieldKey, next);
+    const decrypted = await persistAndClearCrm(row, fieldKey, next);
 
     return NextResponse.json({
       success: true,
