@@ -4,7 +4,7 @@
  */
 
 import "server-only";
-import { and, desc, eq, or, ilike } from "drizzle-orm";
+import { and, count, desc, eq, or, ilike, type SQL } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { db } from "@/lib/db";
 import { iulIntakeSessions } from "@/lib/db/schema";
@@ -109,11 +109,12 @@ export async function getIntakeByToken(token: string): Promise<IntakeSessionRow 
   return row ?? null;
 }
 
-export async function listIntakeSessionsForOwner(
+/** Filters shared by the paginated list and the matching count query. */
+function ownerListConditions(
   ownerUserId: string,
-  opts: { search?: string; status?: IntakeStatus } = {}
-): Promise<IntakeSessionRow[]> {
-  const conditions = [eq(iulIntakeSessions.ownerUserId, ownerUserId)];
+  opts: { search?: string; status?: IntakeStatus }
+): SQL[] {
+  const conditions: SQL[] = [eq(iulIntakeSessions.ownerUserId, ownerUserId)];
   if (opts.status) conditions.push(eq(iulIntakeSessions.status, opts.status));
   if (opts.search?.trim()) {
     const q = `%${opts.search.trim()}%`;
@@ -124,12 +125,47 @@ export async function listIntakeSessionsForOwner(
     );
     if (searchClause) conditions.push(searchClause);
   }
+  return conditions;
+}
+
+export const INTAKE_PAGE_SIZE = 20;
+
+export async function listIntakeSessionsForOwner(
+  ownerUserId: string,
+  opts: { search?: string; status?: IntakeStatus; page?: number; limit?: number } = {}
+): Promise<IntakeSessionRow[]> {
+  const limit = Math.max(1, Math.min(opts.limit ?? INTAKE_PAGE_SIZE, 100));
+  const page = Math.max(1, opts.page ?? 1);
+  const conditions = ownerListConditions(ownerUserId, opts);
   return db
     .select()
     .from(iulIntakeSessions)
     .where(and(...conditions))
     .orderBy(desc(iulIntakeSessions.updatedAt))
-    .limit(200);
+    .limit(limit)
+    .offset((page - 1) * limit);
+}
+
+/** Total rows matching the same filters — used to compute total pages. */
+export async function countIntakeSessionsForOwner(
+  ownerUserId: string,
+  opts: { search?: string; status?: IntakeStatus } = {}
+): Promise<number> {
+  const conditions = ownerListConditions(ownerUserId, opts);
+  const [row] = await db
+    .select({ value: count() })
+    .from(iulIntakeSessions)
+    .where(and(...conditions));
+  return row?.value ?? 0;
+}
+
+/** Permanently delete an intake session. Owner-scoped: only the creating agent can delete. */
+export async function deleteIntakeSession(token: string, ownerUserId: string): Promise<boolean> {
+  const deleted = await db
+    .delete(iulIntakeSessions)
+    .where(and(eq(iulIntakeSessions.token, token), eq(iulIntakeSessions.ownerUserId, ownerUserId)))
+    .returning({ id: iulIntakeSessions.id });
+  return deleted.length > 0;
 }
 
 export async function updateIntakeData(

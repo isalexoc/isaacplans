@@ -145,7 +145,7 @@ export const INTAKE_SECTIONS: IntakeSection[] = [
       },
       { key: "usCitizen", labelEn: "US citizen?", labelEs: "¿Ciudadano americano?", type: "select", required: true, crm: custom("us_citizen"), options: YES_NO },
       {
-        key: "idType", labelEn: "I have", labelEs: "Tengo", type: "select", required: true, crm: custom("id_type"),
+        key: "idType", labelEn: "Do you have an SSN or ITIN?", labelEs: "¿Tiene un SSN o ITIN?", type: "select", required: true, crm: custom("id_type"),
         options: [
           { value: "SSN", labelEn: "Social Security Number (SSN)", labelEs: "Número de seguro social (SSN)" },
           { value: "ITIN", labelEn: "Individual Taxpayer ID (ITIN)", labelEs: "ITIN" },
@@ -157,7 +157,7 @@ export const INTAKE_SECTIONS: IntakeSection[] = [
       { key: "birthCityState", labelEn: "Birth city and state", labelEs: "Ciudad y estado de nacimiento", type: "text", required: true, crm: custom("birth_city_state") },
       { key: "countryOfCitizenship", labelEn: "Country of citizenship", labelEs: "País de ciudadanía", type: "country", required: true, crm: custom("country_of_citizenship") },
       {
-        key: "visaType", labelEn: "Type of visa", labelEs: "Tipo de visa", type: "text", crm: custom("visa_type"),
+        key: "visaType", labelEn: "Type of visa (optional)", labelEs: "Tipo de visa (opcional)", type: "text", crm: custom("visa_type"),
         showIf: { field: "usCitizen", equals: "no" },
       },
       { key: "height", labelEn: "Height", labelEs: "Altura", type: "height", required: true, metric: "cm", crm: custom("height") },
@@ -197,19 +197,32 @@ export const INTAKE_SECTIONS: IntakeSection[] = [
     titleEn: "Employment",
     titleEs: "Empleo",
     fields: [
-      { key: "employed", labelEn: "Currently employed?", labelEs: "¿Está trabajando actualmente?", type: "select", required: true, crm: custom("employed"), options: YES_NO },
-      { key: "employer", labelEn: "Employer", labelEs: "Empleador", type: "text", crm: native("companyName"), showIf: { field: "employed", equals: "yes" } },
-      { key: "occupation", labelEn: "Occupation", labelEs: "Ocupación", type: "text", crm: custom("occupation"), showIf: { field: "employed", equals: "yes" } },
-      { key: "yearsWithEmployer", labelEn: "Years with current employer", labelEs: "Años con el empleador actual", type: "number", maxLength: 2, crm: custom("years_with_employer"), showIf: { field: "employed", equals: "yes" } },
       {
-        key: "employerStreet", labelEn: "Employer street address", labelEs: "Dirección del empleador", type: "address", crm: custom("employer_street"), showIf: { field: "employed", equals: "yes" },
+        key: "employed", labelEn: "Employment status", labelEs: "Estado laboral", type: "select", required: true, crm: custom("employed"),
+        options: [
+          { value: "Employed", labelEn: "Employed", labelEs: "Empleado" },
+          { value: "Self-employed", labelEn: "Self-employed", labelEs: "Trabajador independiente" },
+          { value: "Not employed", labelEn: "Not employed", labelEs: "No trabaja" },
+        ],
+      },
+      // Shared by employed + self-employed.
+      { key: "occupation", labelEn: "Occupation / type of work", labelEs: "Ocupación / tipo de trabajo", type: "text", crm: custom("occupation"), showIf: { field: "employed", equals: ["Employed", "Self-employed"] } },
+      // Employed only.
+      { key: "employer", labelEn: "Employer", labelEs: "Empleador", type: "text", crm: native("companyName"), showIf: { field: "employed", equals: "Employed" } },
+      { key: "yearsWithEmployer", labelEn: "Years with current employer", labelEs: "Años con el empleador actual", type: "number", maxLength: 2, crm: custom("years_with_employer"), showIf: { field: "employed", equals: "Employed" } },
+      {
+        key: "employerStreet", labelEn: "Employer street address", labelEs: "Dirección del empleador", type: "address", crm: custom("employer_street"), showIf: { field: "employed", equals: "Employed" },
         addressTargets: { city: "employerCity", state: "employerState", zip: "employerZip" },
         placeholderEn: "Start typing the address…", placeholderEs: "Empiece a escribir la dirección…",
       },
-      { key: "employerCity", labelEn: "Employer city", labelEs: "Ciudad del empleador", type: "text", crm: custom("employer_city"), showIf: { field: "employed", equals: "yes" } },
-      { key: "employerState", labelEn: "Employer state", labelEs: "Estado del empleador", type: "text", crm: custom("employer_state"), showIf: { field: "employed", equals: "yes" } },
-      { key: "employerZip", labelEn: "Employer zip code", labelEs: "Código postal del empleador", type: "text", digitsOnly: true, maxLength: 5, crm: custom("employer_zip"), showIf: { field: "employed", equals: "yes" } },
-      { key: "workPhone", labelEn: "Work phone number", labelEs: "Teléfono del empleador", type: "tel", crm: custom("work_phone"), showIf: { field: "employed", equals: "yes" } },
+      { key: "employerCity", labelEn: "Employer city", labelEs: "Ciudad del empleador", type: "text", crm: custom("employer_city"), showIf: { field: "employed", equals: "Employed" } },
+      { key: "employerState", labelEn: "Employer state", labelEs: "Estado del empleador", type: "text", crm: custom("employer_state"), showIf: { field: "employed", equals: "Employed" } },
+      { key: "employerZip", labelEn: "Employer zip code", labelEs: "Código postal del empleador", type: "text", digitsOnly: true, maxLength: 5, crm: custom("employer_zip"), showIf: { field: "employed", equals: "Employed" } },
+      { key: "workPhone", labelEn: "Work phone number", labelEs: "Teléfono del empleador", type: "tel", crm: custom("work_phone"), showIf: { field: "employed", equals: "Employed" } },
+      // Self-employed only.
+      { key: "businessName", labelEn: "Business name", labelEs: "Nombre del negocio", type: "text", crm: native("companyName"), showIf: { field: "employed", equals: "Self-employed" } },
+      { key: "businessType", labelEn: "Industry / business type", labelEs: "Industria / tipo de negocio", type: "text", crm: custom("business_type"), showIf: { field: "employed", equals: "Self-employed" } },
+      { key: "yearsSelfEmployed", labelEn: "Years self-employed", labelEs: "Años como trabajador independiente", type: "number", maxLength: 2, crm: custom("years_self_employed"), showIf: { field: "employed", equals: "Self-employed" } },
     ],
   },
   {
@@ -235,8 +248,8 @@ export const INTAKE_SECTIONS: IntakeSection[] = [
     key: "beneficiaries",
     titleEn: "Beneficiaries",
     titleEs: "Beneficiarios",
-    descriptionEn: "Add up to four beneficiaries. Percentages should total 100%.",
-    descriptionEs: "Agregue hasta cuatro beneficiarios. Los porcentajes deben sumar 100%.",
+    descriptionEn: "Add at least two beneficiaries (up to four). Percentages should total 100%.",
+    descriptionEs: "Agregue al menos dos beneficiarios (hasta cuatro). Los porcentajes deben sumar 100%.",
     fields: [
       { key: "beneficiaries", labelEn: "Beneficiaries", labelEs: "Beneficiarios", type: "beneficiaries", required: true, sensitive: true },
     ],
@@ -295,7 +308,6 @@ export const INTAKE_SECTIONS: IntakeSection[] = [
     descriptionEs: "Subir documentos es opcional, pero nos ayuda a avanzar más rápido.",
     fields: [
       { key: "attachmentDriversLicense", labelEn: "Driver's license", labelEs: "Licencia de conducir", type: "file", crm: custom("attachment_drivers_license"), helpEn: "Recommended to upload.", helpEs: "Recomendado subirla." },
-      { key: "attachmentBankDoc", labelEn: "Voided check / account & routing", labelEs: "Cheque anulado / cuenta y ruta", type: "file", crm: custom("attachment_bank_doc") },
       { key: "attachmentOther", labelEn: "Other documents", labelEs: "Otros documentos", type: "file", crm: custom("attachment_other") },
     ],
   },

@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Search, UserPlus, Copy, Check, Pencil, Eye, ChevronDown, RotateCcw, Unlock, Lock, Send } from "lucide-react";
+import { Loader2, Search, UserPlus, Copy, Check, Pencil, Eye, ChevronDown, RotateCcw, Unlock, Lock, Send, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
 import {
   listIntakes,
   createIntake,
@@ -15,7 +15,9 @@ import {
   resetIntakeLink,
   reopenIntake,
   sendIntakeLink,
+  deleteIntake,
   type CrmContactMatch,
+  type IntakePagination,
 } from "@/lib/iul-intake-api";
 import type { IntakeSummary, IntakeStatus } from "@/lib/iul-intake/types";
 import { buildIntakeShareUrl } from "@/lib/iul-intake/share-url";
@@ -37,6 +39,9 @@ export default function IntakeDashboard() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<IntakeStatus | "">("");
+  const [page, setPage] = useState(1);
+  const [pagination, setPagination] = useState<IntakePagination | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   // Find-or-add
   const [crmQuery, setCrmQuery] = useState("");
@@ -70,21 +75,36 @@ export default function IntakeDashboard() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const rows = await listIntakes({
+      const { sessions: rows, pagination: pg } = await listIntakes({
         search: search || undefined,
         status: statusFilter || undefined,
+        page,
       });
       setSessions(rows);
+      setPagination(pg);
     } catch {
       setSessions([]);
+      setPagination(null);
     } finally {
       setLoading(false);
     }
-  }, [search, statusFilter]);
+  }, [search, statusFilter, page]);
 
   useEffect(() => {
     void load();
   }, [load]);
+
+  // Reset to the first page whenever the filters change.
+  useEffect(() => {
+    setPage(1);
+  }, [search, statusFilter]);
+
+  // If a delete empties the current page, fall back to the last valid page.
+  useEffect(() => {
+    if (pagination && page > pagination.totalPages) {
+      setPage(pagination.totalPages);
+    }
+  }, [pagination, page]);
 
   async function handleSearch() {
     if (!crmQuery.trim()) return;
@@ -192,6 +212,22 @@ export default function IntakeDashboard() {
       setError(e instanceof Error ? e.message : "Error");
     } finally {
       setReopeningId(null);
+    }
+  }
+
+  async function handleDelete(s: IntakeSummary) {
+    if (!window.confirm(tr(UI.deleteConfirm, locale))) return;
+    setDeletingId(s.id);
+    setError(null);
+    try {
+      await deleteIntake(s.token);
+      // Drop it locally; reload to refresh the page/count (and backfill from the next page).
+      setSessions((prev) => prev.filter((row) => row.id !== s.id));
+      await load();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Error");
+    } finally {
+      setDeletingId(null);
     }
   }
 
@@ -458,12 +494,55 @@ export default function IntakeDashboard() {
                         {s.reopenedForClient ? tr(UI.lockClientEdit, locale) : tr(UI.allowClientEdit, locale)}
                       </Button>
                     )}
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="text-red-600 hover:bg-red-50 hover:text-red-700"
+                      disabled={deletingId === s.id}
+                      onClick={() => handleDelete(s)}
+                    >
+                      {deletingId === s.id ? (
+                        <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+                      ) : (
+                        <Trash2 className="mr-1 h-4 w-4" />
+                      )}
+                      {tr(UI.deleteForm, locale)}
+                    </Button>
                   </div>
                 </li>
               ))}
             </ul>
           )}
         </div>
+
+        {/* Pagination */}
+        {pagination && pagination.totalPages > 1 && (
+          <div className="mt-4 flex items-center justify-between gap-3">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page <= 1 || loading}
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+            >
+              <ChevronLeft className="mr-1 h-4 w-4" />
+              {tr(UI.prevPage, locale)}
+            </Button>
+            <span className="text-sm text-muted-foreground">
+              {tr(UI.pageOf, locale)
+                .replace("{page}", String(pagination.page))
+                .replace("{total}", String(pagination.totalPages))}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={!pagination.hasMore || loading}
+              onClick={() => setPage((p) => p + 1)}
+            >
+              {tr(UI.nextPage, locale)}
+              <ChevronRight className="ml-1 h-4 w-4" />
+            </Button>
+          </div>
+        )}
       </div>
     </main>
   );

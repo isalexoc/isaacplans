@@ -35,6 +35,8 @@ export type GhlFieldSlug =
   | "years_at_address"
   | "employed"
   | "occupation"
+  | "business_type"
+  | "years_self_employed"
   | "years_with_employer"
   | "employer_street"
   | "employer_city"
@@ -104,6 +106,8 @@ export const ghlFieldIds: Record<GhlFieldSlug, string> = {
   years_at_address: "hBQtcaBCbVNXDv1ttjMR",
   employed: "6Ujx3shtbr3o30RYWqXm",
   occupation: "7I2Yr5BUhXohyHmcYz5n",
+  business_type: "wmPfntf2CFKtgqmTSpD9",
+  years_self_employed: "8DbttOQviuGUGV8HaXBr",
   years_with_employer: "g3zpN3D6wHmofQbp9K6i",
   employer_street: "aelL3A6uRunRFQ88g80U",
   employer_city: "hJKHXELYlr5DZW3i24xI",
