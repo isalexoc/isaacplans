@@ -23,15 +23,36 @@ async function parseJson<T>(res: Response): Promise<T> {
   return data as T;
 }
 
-export async function listIntakes(opts: { search?: string; status?: IntakeStatus } = {}): Promise<IntakeSummary[]> {
+export type IntakePagination = {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+  hasMore: boolean;
+};
+
+export async function listIntakes(
+  opts: { search?: string; status?: IntakeStatus; page?: number; limit?: number } = {}
+): Promise<{ sessions: IntakeSummary[]; pagination: IntakePagination }> {
   const params = new URLSearchParams();
   if (opts.search) params.set("search", opts.search);
   if (opts.status) params.set("status", opts.status);
+  if (opts.page) params.set("page", String(opts.page));
+  if (opts.limit) params.set("limit", String(opts.limit));
   const qs = params.toString();
-  const data = await parseJson<{ success: boolean; sessions: IntakeSummary[] }>(
+  const data = await parseJson<{ success: boolean; sessions: IntakeSummary[]; pagination: IntakePagination }>(
     await fetch(`/api/iul-intake${qs ? `?${qs}` : ""}`, { credentials: "same-origin" })
   );
-  return data.sessions;
+  return { sessions: data.sessions, pagination: data.pagination };
+}
+
+export async function deleteIntake(token: string): Promise<void> {
+  await parseJson<{ success: boolean }>(
+    await fetch(`/api/iul-intake/${token}`, {
+      method: "DELETE",
+      credentials: "same-origin",
+    })
+  );
 }
 
 export type CrmContactMatch = {

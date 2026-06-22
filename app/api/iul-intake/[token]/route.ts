@@ -3,6 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import {
   getIntakeByToken,
   updateIntakeData,
+  deleteIntakeSession,
   bindClientUser,
   canAccessIntake,
   clientCanEdit,
@@ -104,5 +105,32 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
   } catch (error) {
     console.error("[iul-intake/:token] PATCH", error);
     return NextResponse.json({ success: false, error: "Failed to save" }, { status: 500 });
+  }
+}
+
+// DELETE /api/iul-intake/[token] — owner-only; removes the intake record (CRM contact untouched)
+export async function DELETE(_request: NextRequest, context: RouteContext) {
+  try {
+    const { userId } = await auth();
+    if (!userId) {
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
+    const { token } = await context.params;
+    const row = await getIntakeByToken(token);
+    if (!row) {
+      return NextResponse.json({ success: false, error: "Not found" }, { status: 404 });
+    }
+    // Only the agent who created the intake may delete it.
+    if (row.ownerUserId !== userId) {
+      return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 });
+    }
+    const deleted = await deleteIntakeSession(token, userId);
+    if (!deleted) {
+      return NextResponse.json({ success: false, error: "Not found" }, { status: 404 });
+    }
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("[iul-intake/:token] DELETE", error);
+    return NextResponse.json({ success: false, error: "Failed to delete" }, { status: 500 });
   }
 }

@@ -233,6 +233,14 @@ export default function IntakeForm({ token }: { token: string }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loadState, isOwner]);
 
+  // US citizens always have an SSN — auto-select it (the idType question is hidden for them).
+  useEffect(() => {
+    if (loadState !== "ready") return;
+    if (data.usCitizen === "yes" && data.idType !== "SSN") {
+      setData((prev) => ({ ...prev, idType: "SSN" }));
+    }
+  }, [loadState, data.usCitizen, data.idType]);
+
   // Keep step in range when the section list changes (role resolves after load).
   useEffect(() => {
     setStep((s) => Math.min(s, sections.length - 1));
@@ -273,6 +281,39 @@ export default function IntakeForm({ token }: { token: string }) {
   }
 
   const current = sections[step];
+
+  // Section indices that still contain an unresolved missing field (ordered).
+  const sectionsWithMissing = useMemo(() => {
+    if (!missing.size) return [];
+    return sections.reduce<number[]>((acc, section, idx) => {
+      const hit = section.fields.some(
+        (f) => (f.type === "beneficiaries" ? missing.has("beneficiaries") : missing.has(f.key))
+      );
+      if (hit) acc.push(idx);
+      return acc;
+    }, []);
+  }, [sections, missing]);
+
+  /** Next section (after `from`) that still has a missing field, wrapping to the first. */
+  function nextIssueIndex(from: number): number {
+    if (!sectionsWithMissing.length) return from;
+    const after = sectionsWithMissing.find((i) => i > from);
+    return after ?? sectionsWithMissing[0];
+  }
+
+  // After a failed Finish, auto-advance once the current step is fully fixed.
+  useEffect(() => {
+    if (!sectionsWithMissing.length) return;
+    if (!sectionsWithMissing.includes(step)) {
+      setStep(nextIssueIndex(step));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sectionsWithMissing, step]);
+
+  // Clear the error banner once every flagged field has been fixed.
+  useEffect(() => {
+    if (completeError && missing.size === 0) setCompleteError(null);
+  }, [missing, completeError]);
 
   function goNext() {
     // Free navigation — required/format are only enforced at Finish on the last step.
@@ -365,10 +406,9 @@ export default function IntakeForm({ token }: { token: string }) {
   return (
     <div className="mx-auto max-w-2xl px-4 py-8">
       {isOwner && <IntakeBreadcrumb current={tr(UI.navForm, locale)} />}
-      <div className="mb-1 flex items-start justify-between gap-3">
-        <h1 className="text-2xl font-extrabold tracking-tight sm:text-3xl">{tr(UI.intakeTitle, locale)}</h1>
-        <SaveIndicator status={saveStatus} locale={locale} />
-      </div>
+      {/* Out-of-flow save status — fixed so it never shifts the page layout. */}
+      <SaveIndicator status={saveStatus} locale={locale} />
+      <h1 className="mb-1 text-2xl font-extrabold tracking-tight sm:text-3xl">{tr(UI.intakeTitle, locale)}</h1>
       <p className="mb-1 text-sm text-muted-foreground">{tr(UI.formSubtitle, locale)}</p>
       <p className="mb-5 flex items-center gap-1.5 text-xs text-muted-foreground">
         <ShieldCheck className="h-4 w-4 text-green-600" /> {tr(UI.secureNote, locale)}
@@ -426,6 +466,8 @@ export default function IntakeForm({ token }: { token: string }) {
           {current.fields.map((field) => {
             if (!isFieldVisible(field, data)) return null;
             if (field.ownerOnly && !isOwner) return null;
+            // US citizens always have an SSN — hide the redundant SSN/ITIN choice (auto-set to SSN).
+            if (field.key === "idType" && data.usCitizen === "yes") return null;
 
             if (field.type === "beneficiaries") {
               return (
@@ -486,9 +528,27 @@ export default function IntakeForm({ token }: { token: string }) {
       </div>
 
       {completeError && (
-        <p className="mt-3 flex items-start gap-1.5 text-sm text-red-600">
-          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" /> {completeError}
-        </p>
+        <div className="mt-3 rounded-xl border border-red-200 bg-red-50 p-3 dark:border-red-900 dark:bg-red-950/40">
+          <p className="flex items-start gap-1.5 text-sm text-red-600">
+            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" /> {completeError}
+          </p>
+          {sectionsWithMissing.length > 0 && (
+            <div className="mt-2 flex items-center justify-between gap-3">
+              <span className="text-xs font-medium text-red-600">
+                {sectionsWithMissing.length} {tr(UI.stepsNeedAttention, locale)}
+              </span>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={() => setStep(nextIssueIndex(step))}
+                className="gap-1 border-red-300 text-red-700 hover:bg-red-100 dark:hover:bg-red-900"
+              >
+                {tr(UI.nextIssue, locale)} <ArrowRight className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+          )}
+        </div>
       )}
 
       <div className="mt-6 flex items-center justify-between gap-3">
@@ -518,43 +578,80 @@ export default function IntakeForm({ token }: { token: string }) {
           >
             {completing ? (
               <>
-                <Loader2 className="h-4 w-4 animate-spin" /> {tr(UI.finishing, locale)}
+                <Loader2 className="h-4 w-4 animate-spin" /> {tr(isOwner ? UI.finishing : UI.submitting, locale)}
               </>
             ) : (
               <>
-                <Send className="h-4 w-4" /> {tr(UI.finish, locale)}
+                <Send className="h-4 w-4" /> {tr(isOwner ? UI.finish : UI.submitApplication, locale)}
               </>
             )}
           </Button>
         )}
       </div>
+
+      {/* Bottom step navigation — jump directly to any step. */}
+      <nav className="mt-6 flex flex-wrap items-center justify-center gap-2" aria-label={sectionTitle(current, locale)}>
+        {sections.map((s, i) => {
+          const Icon = SECTION_ICONS[s.key] ?? FileText;
+          const isCurrent = i === step;
+          const hasIssue = sectionsWithMissing.includes(i);
+          return (
+            <button
+              key={s.key}
+              type="button"
+              onClick={() => setStep(i)}
+              title={sectionTitle(s, locale)}
+              aria-current={isCurrent ? "step" : undefined}
+              className={`relative flex h-9 w-9 items-center justify-center rounded-full border text-xs transition ${
+                isCurrent
+                  ? "border-brand bg-brand text-white shadow-sm"
+                  : "border-input bg-background text-muted-foreground hover:border-brand hover:text-brand"
+              }`}
+            >
+              <Icon className="h-4 w-4" />
+              {hasIssue && !isCurrent && (
+                <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-white dark:ring-gray-950" />
+              )}
+            </button>
+          );
+        })}
+      </nav>
     </div>
   );
 }
 
+/**
+ * Save status as a fixed-position pill (bottom-right). Out of the normal document flow and
+ * always mounted (fades via opacity), so appearing/disappearing never shifts the page layout.
+ */
 function SaveIndicator({ status, locale }: { status: string; locale: IntakeLocale }) {
-  if (status === "pending") {
-    return (
-      <span className="flex items-center gap-1 text-xs text-muted-foreground">
-        <CloudUpload className="h-4 w-4 animate-pulse" /> {tr(UI.saving, locale)}
-      </span>
-    );
-  }
-  if (status === "saved") {
-    return (
-      <span className="flex items-center gap-1 text-xs text-green-600">
-        <Check className="h-4 w-4" /> {tr(UI.saved, locale)}
-      </span>
-    );
-  }
-  if (status === "error") {
-    return (
-      <span className="flex items-center gap-1 text-xs text-red-600">
-        <AlertCircle className="h-4 w-4" /> {tr(UI.saveError, locale)}
-      </span>
-    );
-  }
-  return null;
+  const visible = status === "pending" || status === "saved" || status === "error";
+  const tone =
+    status === "error" ? "text-red-600" : status === "saved" ? "text-green-700" : "text-muted-foreground";
+  return (
+    <div
+      aria-live="polite"
+      className={`pointer-events-none fixed bottom-4 right-4 z-50 flex items-center gap-1.5 rounded-full border bg-white/95 px-3 py-1.5 text-xs shadow-md backdrop-blur transition-opacity duration-300 dark:bg-gray-900/95 ${tone} ${
+        visible ? "opacity-100" : "opacity-0"
+      }`}
+    >
+      {status === "pending" && (
+        <>
+          <CloudUpload className="h-4 w-4 animate-pulse" /> {tr(UI.saving, locale)}
+        </>
+      )}
+      {status === "saved" && (
+        <>
+          <Check className="h-4 w-4" /> {tr(UI.saved, locale)}
+        </>
+      )}
+      {status === "error" && (
+        <>
+          <AlertCircle className="h-4 w-4" /> {tr(UI.saveError, locale)}
+        </>
+      )}
+    </div>
+  );
 }
 
 /* Shared select styling (native selects are best on mobile). */
@@ -972,7 +1069,11 @@ function BeneficiariesEditor({
   reveal: boolean;
   invalid?: boolean;
 }) {
-  const list = useMemo(() => (value.length ? value : [emptyBeneficiary()]), [value]);
+  // At least two beneficiaries are required — start with two empty rows.
+  const list = useMemo(
+    () => (value.length ? value : [emptyBeneficiary(), emptyBeneficiary()]),
+    [value]
+  );
   const total = beneficiaryPercentTotal(list);
   const showTotalWarning = list.some((b) => b.percent.trim()) && total !== 100;
 

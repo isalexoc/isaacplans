@@ -71,6 +71,14 @@ export const UI = {
   copyLink: { en: "Copy link", es: "Copiar enlace" } as Dict,
   linkCopied: { en: "Link copied!", es: "¡Enlace copiado!" } as Dict,
   resetLink: { en: "Reset link", es: "Restablecer enlace" } as Dict,
+  deleteForm: { en: "Delete", es: "Eliminar" } as Dict,
+  deleteConfirm: {
+    en: "Delete this intake form? This permanently removes the saved form data. The CRM contact is not affected. This cannot be undone.",
+    es: "¿Eliminar este formulario? Esto elimina permanentemente los datos guardados del formulario. El contacto del CRM no se ve afectado. Esta acción no se puede deshacer.",
+  } as Dict,
+  prevPage: { en: "Previous", es: "Anterior" } as Dict,
+  nextPage: { en: "Next", es: "Siguiente" } as Dict,
+  pageOf: { en: "Page {page} of {total}", es: "Página {page} de {total}" } as Dict,
   sendLink: { en: "Send link", es: "Enviar enlace" } as Dict,
   linkSent: { en: "Link sent!", es: "¡Enlace enviado!" } as Dict,
   resetConfirm: {
@@ -110,7 +118,14 @@ export const UI = {
   step: { en: "Step", es: "Paso" } as Dict,
   of: { en: "of", es: "de" } as Dict,
   finish: { en: "Finish & sync to CRM", es: "Finalizar y enviar al CRM" } as Dict,
+  submitApplication: { en: "Submit application", es: "Enviar solicitud" } as Dict,
   finishing: { en: "Finishing…", es: "Finalizando…" } as Dict,
+  submitting: { en: "Submitting…", es: "Enviando…" } as Dict,
+  nextIssue: { en: "Next issue", es: "Siguiente problema" } as Dict,
+  stepsNeedAttention: {
+    en: "step(s) still need attention.",
+    es: "paso(s) aún necesitan atención.",
+  } as Dict,
   completed: {
     en: "Completed and synced to the CRM contact.",
     es: "Completado y sincronizado con el contacto del CRM.",

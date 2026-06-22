@@ -3,8 +3,10 @@ import { auth } from "@clerk/nextjs/server";
 import {
   createIntakeSession,
   listIntakeSessionsForOwner,
+  countIntakeSessionsForOwner,
   syncIntakeLinkToCrm,
   toIntakeSummary,
+  INTAKE_PAGE_SIZE,
   IUL_SPANISH_TAG,
   type IntakeStatus,
 } from "@/lib/iul-intake/server";
@@ -45,11 +47,23 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: true, contacts });
     }
 
-    const rows = await listIntakeSessionsForOwner(userId, {
+    const filters = {
       search: searchParams.get("search") ?? undefined,
       status: parseStatus(searchParams.get("status")),
+    };
+    const page = Math.max(1, parseInt(searchParams.get("page") ?? "1", 10) || 1);
+    const limit = Math.max(1, Math.min(parseInt(searchParams.get("limit") ?? String(INTAKE_PAGE_SIZE), 10) || INTAKE_PAGE_SIZE, 100));
+
+    const [rows, total] = await Promise.all([
+      listIntakeSessionsForOwner(userId, { ...filters, page, limit }),
+      countIntakeSessionsForOwner(userId, filters),
+    ]);
+    const totalPages = Math.max(1, Math.ceil(total / limit));
+    return NextResponse.json({
+      success: true,
+      sessions: rows.map(toIntakeSummary),
+      pagination: { page, limit, total, totalPages, hasMore: page < totalPages },
     });
-    return NextResponse.json({ success: true, sessions: rows.map(toIntakeSummary) });
   } catch (error) {
     console.error("[iul-intake] GET", error);
     return NextResponse.json({ success: false, error: "Failed to load" }, { status: 500 });

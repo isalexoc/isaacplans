@@ -50,7 +50,7 @@ function beneficiariesValid(data: IntakeData): { ok: boolean; reason?: string } 
   const filled = list.filter(
     (b) => str(b.firstName) || str(b.lastName) || str(b.percent) || str(b.ssn) || str(b.relationship)
   );
-  if (filled.length === 0) return { ok: false, reason: "At least one beneficiary is required" };
+  if (filled.length < 2) return { ok: false, reason: "At least two beneficiaries are required" };
   for (const b of filled) {
     if (!str(b.firstName) || !str(b.lastName) || !str(b.relationship) || !str(b.percent)) {
       return { ok: false, reason: "Each beneficiary needs name, relationship, and percentage" };
