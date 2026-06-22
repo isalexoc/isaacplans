@@ -5,8 +5,8 @@ import { useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, AlertCircle, Pencil, Eye, EyeOff, FileText, Copy, Check } from "lucide-react";
-import { fetchIntake } from "@/lib/iul-intake-api";
+import { Loader2, AlertCircle, Pencil, Eye, EyeOff, FileText, Copy, Check, Unlock, Lock } from "lucide-react";
+import { fetchIntake, reopenIntake } from "@/lib/iul-intake-api";
 import { formatMoneyDisplay } from "@/lib/iul-intake/money";
 import IntakeBreadcrumb from "@/components/iul-intake/intake-breadcrumb";
 import {
@@ -87,6 +87,7 @@ export default function ClientView({ token }: { token: string }) {
   const [session, setSession] = useState<IntakeSession | null>(null);
   const [state, setState] = useState<"loading" | "ready" | "error">("loading");
   const [reveal, setReveal] = useState(false);
+  const [reopening, setReopening] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -105,6 +106,19 @@ export default function ClientView({ token }: { token: string }) {
       active = false;
     };
   }, [token]);
+
+  async function handleReopen(allow: boolean) {
+    if (!session) return;
+    setReopening(true);
+    try {
+      const updated = await reopenIntake(session.token, allow);
+      setSession((prev) => (prev ? { ...prev, reopenedForClient: updated.reopenedForClient, status: updated.status } : prev));
+    } catch {
+      /* surfaced by disabled state reset */
+    } finally {
+      setReopening(false);
+    }
+  }
 
   if (state === "loading") {
     return (
@@ -135,6 +149,24 @@ export default function ClientView({ token }: { token: string }) {
               <Button variant="outline" size="sm" onClick={() => setReveal((r) => !r)}>
                 {reveal ? <EyeOff className="mr-1 h-4 w-4" /> : <Eye className="mr-1 h-4 w-4" />}
                 {reveal ? tr(UI.hide, locale) : tr(UI.reveal, locale)}
+              </Button>
+            )}
+            {isOwner && session.status === "completed" && (
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={reopening}
+                className={session.reopenedForClient ? "text-green-600 hover:text-green-700" : "text-blue-600 hover:text-blue-700"}
+                onClick={() => handleReopen(!session.reopenedForClient)}
+              >
+                {reopening ? (
+                  <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+                ) : session.reopenedForClient ? (
+                  <Lock className="mr-1 h-4 w-4" />
+                ) : (
+                  <Unlock className="mr-1 h-4 w-4" />
+                )}
+                {session.reopenedForClient ? tr(UI.lockClientEdit, locale) : tr(UI.allowClientEdit, locale)}
               </Button>
             )}
             <Button asChild size="sm">

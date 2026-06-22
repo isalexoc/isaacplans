@@ -7,12 +7,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Search, UserPlus, Copy, Check, Pencil, Eye, ChevronDown, RotateCcw } from "lucide-react";
+import { Loader2, Search, UserPlus, Copy, Check, Pencil, Eye, ChevronDown, RotateCcw, Unlock, Lock } from "lucide-react";
 import {
   listIntakes,
   createIntake,
   searchCrmContacts,
   resetIntakeLink,
+  reopenIntake,
   type CrmContactMatch,
 } from "@/lib/iul-intake-api";
 import type { IntakeSummary, IntakeStatus } from "@/lib/iul-intake/types";
@@ -47,6 +48,7 @@ export default function IntakeDashboard() {
   const [error, setError] = useState<string | null>(null);
   const [copiedToken, setCopiedToken] = useState<string | null>(null);
   const [resettingId, setResettingId] = useState<string | null>(null);
+  const [reopeningId, setReopeningId] = useState<string | null>(null);
 
   const statusLabel = useCallback(
     (s: IntakeStatus) =>
@@ -138,6 +140,19 @@ export default function IntakeDashboard() {
       setTimeout(() => setCopiedToken((t) => (t === token ? null : t)), 2000);
     } catch {
       /* clipboard blocked */
+    }
+  }
+
+  async function handleReopen(s: IntakeSummary, allow: boolean) {
+    setReopeningId(s.id);
+    setError(null);
+    try {
+      const updated = await reopenIntake(s.token, allow);
+      setSessions((prev) => prev.map((row) => (row.id === s.id ? updated : row)));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Error");
+    } finally {
+      setReopeningId(null);
     }
   }
 
@@ -330,6 +345,24 @@ export default function IntakeDashboard() {
                       )}
                       {tr(UI.resetLink, locale)}
                     </Button>
+                    {s.status === "completed" && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className={s.reopenedForClient ? "text-green-600 hover:text-green-700" : "text-blue-600 hover:text-blue-700"}
+                        disabled={reopeningId === s.id}
+                        onClick={() => handleReopen(s, !s.reopenedForClient)}
+                      >
+                        {reopeningId === s.id ? (
+                          <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+                        ) : s.reopenedForClient ? (
+                          <Lock className="mr-1 h-4 w-4" />
+                        ) : (
+                          <Unlock className="mr-1 h-4 w-4" />
+                        )}
+                        {s.reopenedForClient ? tr(UI.lockClientEdit, locale) : tr(UI.allowClientEdit, locale)}
+                      </Button>
+                    )}
                   </div>
                 </li>
               ))}

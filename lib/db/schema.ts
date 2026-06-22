@@ -271,6 +271,7 @@ export const iulIntakeSessions = pgTable("iul_intake_sessions", {
   contactEmail:  text("contact_email"),
   contactPhone:  text("contact_phone"),
   status:        text("status").notNull().default("draft"), // draft|in_progress|completed
+  reopenedForClient: boolean("reopened_for_client").notNull().default(false), // admin let the client edit after submit
   data:          jsonb("data").notNull().$type<IntakeData>().default({}),
   locale:        text("locale").default("en"), // en|es
   completedAt:   timestamp("completed_at"),

@@ -1,0 +1,1 @@
+ALTER TABLE "iul_intake_sessions" ADD COLUMN "reopened_for_client" boolean DEFAULT false NOT NULL;

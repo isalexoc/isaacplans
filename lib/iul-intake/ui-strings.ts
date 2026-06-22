@@ -110,6 +110,16 @@ export const UI = {
     en: "Completed and synced to the CRM contact.",
     es: "Completado y sincronizado con el contacto del CRM.",
   } as Dict,
+  // Client thank-you (shown after a client submits and is locked out of editing)
+  thankYouTitle: { en: "Thank you!", es: "¡Gracias!" } as Dict,
+  thankYouBody: {
+    en: "Your information has been submitted. We're reviewing it and will reach out to you shortly. There's nothing else you need to do.",
+    es: "Su información ha sido enviada. La estamos revisando y nos pondremos en contacto con usted en breve. No necesita hacer nada más.",
+  } as Dict,
+  // Admin re-open controls
+  allowClientEdit: { en: "Allow client to edit", es: "Permitir que el cliente edite" } as Dict,
+  lockClientEdit: { en: "Lock client edits", es: "Bloquear edición del cliente" } as Dict,
+  clientEditEnabled: { en: "Client editing enabled", es: "Edición del cliente habilitada" } as Dict,
   missingFields: {
     en: "Please complete the required fields before finishing.",
     es: "Complete los campos requeridos antes de finalizar.",

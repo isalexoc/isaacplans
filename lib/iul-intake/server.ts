@@ -37,6 +37,7 @@ export function toIntakeSummary(row: IntakeSessionRow): IntakeSummary {
     contactEmail: row.contactEmail,
     contactPhone: row.contactPhone,
     crmContactId: row.crmContactId,
+    reopenedForClient: row.reopenedForClient ?? false,
     createdAt: row.createdAt?.toISOString() ?? null,
     updatedAt: row.updatedAt?.toISOString() ?? null,
     completedAt: row.completedAt?.toISOString() ?? null,
@@ -166,10 +167,29 @@ export async function markIntakeCompleted(
   const now = new Date();
   const [row] = await db
     .update(iulIntakeSessions)
-    .set({ data, status: "completed", completedAt: now, updatedAt: now })
+    // Re-lock the client on every submission; admin re-opens explicitly if needed.
+    .set({ data, status: "completed", reopenedForClient: false, completedAt: now, updatedAt: now })
     .where(eq(iulIntakeSessions.token, token))
     .returning();
   return row ?? null;
+}
+
+/** Admin grants (or revokes) the client's ability to edit an already-submitted form. */
+export async function setClientReopened(
+  token: string,
+  allow: boolean
+): Promise<IntakeSessionRow | null> {
+  const [row] = await db
+    .update(iulIntakeSessions)
+    .set({ reopenedForClient: allow, updatedAt: new Date() })
+    .where(eq(iulIntakeSessions.token, token))
+    .returning();
+  return row ?? null;
+}
+
+/** A client may edit while not yet completed, or after an admin re-opens the form. */
+export function clientCanEdit(row: IntakeSessionRow): boolean {
+  return row.status !== "completed" || row.reopenedForClient === true;
 }
 
 /** Access rule: owner agent always; the bound client; or an unclaimed session (to claim). */

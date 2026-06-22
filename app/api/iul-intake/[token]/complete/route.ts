@@ -3,6 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import {
   getIntakeByToken,
   canAccessIntake,
+  clientCanEdit,
   buildCrmPayloadFromData,
   markIntakeCompleted,
   toIntakeSummary,
@@ -36,6 +37,10 @@ export async function POST(_request: NextRequest, context: RouteContext) {
     }
     if (!canAccessIntake(row, userId).allowed) {
       return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 });
+    }
+    // A client cannot re-submit a locked (already-completed) form; the admin re-opens it first.
+    if (row.ownerUserId !== userId && !clientCanEdit(row)) {
+      return NextResponse.json({ success: false, error: "This form has already been submitted." }, { status: 403 });
     }
 
     const decrypted = decryptIntakeData((row.data ?? {}) as IntakeData);

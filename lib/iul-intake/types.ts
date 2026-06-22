@@ -13,6 +13,8 @@ export type IntakeSummary = {
   contactEmail: string | null;
   contactPhone: string | null;
   crmContactId: string | null;
+  /** Admin granted the client edit access after submission (re-locks on re-submit). */
+  reopenedForClient: boolean;
   createdAt: string | null;
   updatedAt: string | null;
   completedAt: string | null;

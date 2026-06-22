@@ -79,6 +79,18 @@ export async function resetIntakeLink(token: string): Promise<IntakeSummary> {
   return data.session;
 }
 
+export async function reopenIntake(token: string, allow: boolean): Promise<IntakeSummary> {
+  const data = await parseJson<{ success: boolean; session: IntakeSummary }>(
+    await fetch(`/api/iul-intake/${token}/reopen`, {
+      method: "POST",
+      credentials: "same-origin",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ allow }),
+    })
+  );
+  return data.session;
+}
+
 export async function fetchIntake(token: string): Promise<IntakeSession> {
   const data = await parseJson<{ success: boolean; session: IntakeSession }>(
     await fetch(`/api/iul-intake/${token}`, { credentials: "same-origin" })
