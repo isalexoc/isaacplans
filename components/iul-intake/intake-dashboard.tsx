@@ -17,6 +17,7 @@ import {
   type CrmContactMatch,
 } from "@/lib/iul-intake-api";
 import type { IntakeSummary, IntakeStatus } from "@/lib/iul-intake/types";
+import { titleCaseName, isValidEmail, isValidPhone } from "@/lib/iul-intake/validation";
 import { UI, pickLocale, tr } from "@/lib/iul-intake/ui-strings";
 import IntakeBreadcrumb from "@/components/iul-intake/intake-breadcrumb";
 
@@ -41,7 +42,8 @@ export default function IntakeDashboard() {
   const [searching, setSearching] = useState(false);
   const [searched, setSearched] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
-  const [newName, setNewName] = useState("");
+  const [newFirstName, setNewFirstName] = useState("");
+  const [newLastName, setNewLastName] = useState("");
   const [newEmail, setNewEmail] = useState("");
   const [newPhone, setNewPhone] = useState("");
   const [busy, setBusy] = useState(false);
@@ -112,14 +114,33 @@ export default function IntakeDashboard() {
   }
 
   async function createAndStart() {
-    if (!newName.trim() && !newEmail.trim() && !newPhone.trim()) {
+    const firstName = titleCaseName(newFirstName);
+    const lastName = titleCaseName(newLastName);
+    const email = newEmail.trim().toLowerCase();
+    const phone = newPhone.replace(/\D/g, "");
+
+    if (!firstName && !lastName && !email && !phone) {
       setError(tr(UI.startError, locale));
       return;
     }
+    if (email && !isValidEmail(email)) {
+      setError(tr(UI.errEmail, locale));
+      return;
+    }
+    if (phone && !isValidPhone(phone)) {
+      setError(tr(UI.errPhone, locale));
+      return;
+    }
+    // Reflect the normalized values back to the user.
+    setNewFirstName(firstName);
+    setNewLastName(lastName);
+    setNewEmail(email);
+    setNewPhone(phone);
+
     setBusy(true);
     setError(null);
     try {
-      const session = await createIntake({ name: newName, email: newEmail, phone: newPhone, locale });
+      const session = await createIntake({ firstName, lastName, email, phone, locale });
       goToForm(session.token);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Error");
@@ -238,18 +259,44 @@ export default function IntakeDashboard() {
             </button>
             {showCreate && (
               <div className="mt-3">
-                <div className="grid gap-3 sm:grid-cols-3">
+                <div className="grid gap-3 sm:grid-cols-2">
                   <div>
-                    <Label htmlFor="ni-name">{tr(UI.clientName, locale)}</Label>
-                    <Input id="ni-name" value={newName} onChange={(e) => setNewName(e.target.value)} />
+                    <Label htmlFor="ni-first">{tr(UI.firstName, locale)}</Label>
+                    <Input
+                      id="ni-first"
+                      value={newFirstName}
+                      onChange={(e) => setNewFirstName(e.target.value)}
+                      onBlur={(e) => setNewFirstName(titleCaseName(e.target.value))}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="ni-last">{tr(UI.lastName, locale)}</Label>
+                    <Input
+                      id="ni-last"
+                      value={newLastName}
+                      onChange={(e) => setNewLastName(e.target.value)}
+                      onBlur={(e) => setNewLastName(titleCaseName(e.target.value))}
+                    />
                   </div>
                   <div>
                     <Label htmlFor="ni-email">{tr(UI.email, locale)}</Label>
-                    <Input id="ni-email" type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} />
+                    <Input
+                      id="ni-email"
+                      type="email"
+                      inputMode="email"
+                      value={newEmail}
+                      onChange={(e) => setNewEmail(e.target.value.toLowerCase())}
+                    />
                   </div>
                   <div>
                     <Label htmlFor="ni-phone">{tr(UI.phone, locale)}</Label>
-                    <Input id="ni-phone" type="tel" value={newPhone} onChange={(e) => setNewPhone(e.target.value)} />
+                    <Input
+                      id="ni-phone"
+                      type="tel"
+                      inputMode="tel"
+                      value={newPhone}
+                      onChange={(e) => setNewPhone(e.target.value.replace(/\D/g, "").slice(0, 11))}
+                    />
                   </div>
                 </div>
                 <Button className="mt-3" disabled={busy} onClick={createAndStart}>

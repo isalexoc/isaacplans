@@ -38,6 +38,15 @@ export function isValidAge(v: string): boolean {
   return Number.isFinite(n) && n >= 0 && n <= 120;
 }
 
+/** Title-case a person's name: "MARthA saNCHEZ" → "Martha Sanchez" (handles spaces, - and ʼ). */
+export function titleCaseName(v: string): string {
+  return (v ?? "")
+    .trim()
+    .replace(/\s+/g, " ")
+    .toLowerCase()
+    .replace(/(^|[\s'’-])([a-zà-öø-ÿ])/g, (_m, sep: string, ch: string) => sep + ch.toUpperCase());
+}
+
 const DOB_ISO_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 
 /** A real calendar date in ISO form, not in the future, within a sane age range. */
