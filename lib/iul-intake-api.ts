@@ -56,6 +56,8 @@ export async function createIntake(input: {
   email?: string;
   phone?: string;
   name?: string;
+  firstName?: string;
+  lastName?: string;
   locale?: string;
 }): Promise<IntakeSummary> {
   const data = await parseJson<{ success: boolean; session: IntakeSummary }>(

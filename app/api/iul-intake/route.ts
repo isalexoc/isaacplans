@@ -13,6 +13,7 @@ import {
   agentCrmSearchContacts,
 } from "@/lib/agent-crm-contacts";
 import { getIsAdmin } from "@/lib/auth/admin";
+import { titleCaseName, isValidEmail, isValidPhone } from "@/lib/iul-intake/validation";
 import type { IntakeData } from "@/lib/iul-intake/schema";
 
 const STATUSES: IntakeStatus[] = ["draft", "in_progress", "completed"];
@@ -65,10 +66,25 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json().catch(() => ({}));
     const crmContactIdInput = typeof body?.crmContactId === "string" ? body.crmContactId.trim() : "";
-    const email = typeof body?.email === "string" ? body.email.trim() : "";
-    const phone = typeof body?.phone === "string" ? body.phone.trim() : "";
-    const name = typeof body?.name === "string" ? body.name.trim() : "";
+    // Normalize: email lowercased, phone digits-only, names title-cased.
+    const email = typeof body?.email === "string" ? body.email.trim().toLowerCase() : "";
+    const phone = typeof body?.phone === "string" ? body.phone.replace(/\D/g, "") : "";
+    const firstNameInput = typeof body?.firstName === "string" ? titleCaseName(body.firstName) : "";
+    const lastNameInput = typeof body?.lastName === "string" ? titleCaseName(body.lastName) : "";
+    // Back-compat: a single "name" still works (split on whitespace, title-cased).
+    const nameInput = typeof body?.name === "string" ? titleCaseName(body.name) : "";
+    const name = [firstNameInput, lastNameInput].filter(Boolean).join(" ") || nameInput;
     const locale = body?.locale === "es" ? "es" : "en";
+
+    // Validate contact details before creating a new contact.
+    if (!crmContactIdInput) {
+      if (email && !isValidEmail(email)) {
+        return NextResponse.json({ success: false, error: "Enter a valid email address." }, { status: 400 });
+      }
+      if (phone && !isValidPhone(phone)) {
+        return NextResponse.json({ success: false, error: "Enter a valid 10-digit phone number." }, { status: 400 });
+      }
+    }
 
     const creds = agentCrmGetBaseCredentials();
     let crmContactId: string | null = null;
@@ -104,8 +120,14 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         );
       }
-      const [firstName, ...rest] = name.split(/\s+/).filter(Boolean);
-      const lastName = rest.join(" ");
+      // Prefer explicit first/last; fall back to splitting a combined name.
+      let firstName = firstNameInput;
+      let lastName = lastNameInput;
+      if (!firstName && !lastName && name) {
+        const [first, ...rest] = name.split(/\s+/).filter(Boolean);
+        firstName = first ?? "";
+        lastName = rest.join(" ");
+      }
       if (firstName) prefill.firstName = firstName;
       if (lastName) prefill.lastName = lastName;
       if (email) prefill.email = email;
