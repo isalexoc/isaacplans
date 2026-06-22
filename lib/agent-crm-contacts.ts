@@ -485,6 +485,16 @@ export async function agentCrmUploadMedia(
 /** A file attached to a FILE_UPLOAD custom field, as read back from the CRM contact. */
 export type AgentCrmFieldFile = { url: string; name: string };
 
+/** Derive a readable filename from a URL, dropping any query string. */
+function fileNameFromUrl(url: string): string {
+  const last = (url.split("/").pop() || "file").split("?")[0] || "file";
+  try {
+    return decodeURIComponent(last);
+  } catch {
+    return last;
+  }
+}
+
 /** Pull the file list off a contact's FILE_UPLOAD custom field value (shape varies). */
 function parseFieldFiles(value: unknown): AgentCrmFieldFile[] {
   const entries: unknown[] = Array.isArray(value)
@@ -495,7 +505,7 @@ function parseFieldFiles(value: unknown): AgentCrmFieldFile[] {
   const out: AgentCrmFieldFile[] = [];
   for (const e of entries) {
     if (typeof e === "string") {
-      out.push({ url: e, name: decodeURIComponent(e.split("/").pop() || "file") });
+      out.push({ url: e, name: fileNameFromUrl(e) });
     } else if (e && typeof e === "object") {
       const o = e as Record<string, unknown>;
       const meta = (o.meta && typeof o.meta === "object" ? (o.meta as Record<string, unknown>) : {}) as Record<string, unknown>;
@@ -505,7 +515,7 @@ function parseFieldFiles(value: unknown): AgentCrmFieldFile[] {
         (typeof meta.name === "string" && meta.name) ||
         (typeof o.name === "string" && o.name) ||
         (typeof o.fileName === "string" && o.fileName) ||
-        decodeURIComponent(url.split("/").pop() || "file");
+        fileNameFromUrl(url);
       out.push({ url, name });
     }
   }

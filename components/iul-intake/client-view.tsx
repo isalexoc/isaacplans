@@ -5,8 +5,9 @@ import { useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, AlertCircle, Pencil, Eye, EyeOff, FileText } from "lucide-react";
+import { Loader2, AlertCircle, Pencil, Eye, EyeOff, FileText, Copy, Check } from "lucide-react";
 import { fetchIntake } from "@/lib/iul-intake-api";
+import { formatMoneyDisplay } from "@/lib/iul-intake/money";
 import IntakeBreadcrumb from "@/components/iul-intake/intake-breadcrumb";
 import {
   INTAKE_SECTIONS,
@@ -42,6 +43,43 @@ function maskValue(value: string): string {
   if (!value) return "";
   const last = value.slice(-4);
   return `••••${last}`;
+}
+
+/** A value with a one-tap copy button (copies the real value for pasting into carrier apps). */
+function CopyableValue({
+  value,
+  display,
+  locale,
+}: {
+  value: string;
+  display: string;
+  locale: IntakeLocale;
+}) {
+  const [copied, setCopied] = useState(false);
+  if (!value) return <span>{display}</span>;
+  async function copy() {
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1200);
+    } catch {
+      /* clipboard unavailable */
+    }
+  }
+  return (
+    <span className="group inline-flex max-w-full items-start gap-1.5">
+      <span className="min-w-0 break-words">{display}</span>
+      <button
+        type="button"
+        onClick={copy}
+        title={tr(UI.copy, locale)}
+        aria-label={tr(UI.copy, locale)}
+        className="mt-0.5 shrink-0 text-muted-foreground transition hover:text-foreground"
+      >
+        {copied ? <Check className="h-3.5 w-3.5 text-green-600" /> : <Copy className="h-3.5 w-3.5" />}
+      </button>
+    </span>
+  );
 }
 
 export default function ClientView({ token }: { token: string }) {
@@ -129,23 +167,25 @@ export default function ClientView({ token }: { token: string }) {
                     <p className="text-sm text-muted-foreground">{tr(UI.notProvided, locale)}</p>
                   ) : (
                     <ul className="space-y-2">
-                      {beneficiaries.map((b, i) => (
-                        <li key={i} className="rounded-md border p-3 text-sm">
-                          <div className="font-medium">
-                            {tr(UI.beneficiary, locale)} {i + 1}: {[b.firstName, b.lastName].filter(Boolean).join(" ")}
-                          </div>
-                          <div className="text-muted-foreground">
-                            {[
-                              b.relationship,
-                              b.percent ? `${b.percent}%` : "",
-                              b.dateOfBirth,
-                              b.ssn ? (reveal ? b.ssn : maskValue(b.ssn)) : "",
-                            ]
-                              .filter(Boolean)
-                              .join(" · ")}
-                          </div>
-                        </li>
-                      ))}
+                      {beneficiaries.map((b, i) => {
+                        const name = [b.firstName, b.lastName].filter(Boolean).join(" ");
+                        const detailParts = (ssn: string) =>
+                          [b.relationship, b.percent ? `${b.percent}%` : "", b.dateOfBirth, ssn ? `SSN ${ssn}` : ""]
+                            .filter(Boolean)
+                            .join(" · ");
+                        const displayDetail = detailParts(b.ssn ? (reveal ? b.ssn : maskValue(b.ssn)) : "");
+                        const copyDetail = [name, detailParts(b.ssn)].filter(Boolean).join(" · ");
+                        return (
+                          <li key={i} className="rounded-md border p-3 text-sm">
+                            <div className="font-medium">
+                              {tr(UI.beneficiary, locale)} {i + 1}: {name}
+                            </div>
+                            <div className="text-muted-foreground">
+                              <CopyableValue value={copyDetail} display={displayDetail} locale={locale} />
+                            </div>
+                          </li>
+                        );
+                      })}
                     </ul>
                   )}
                 </section>
@@ -169,9 +209,9 @@ export default function ClientView({ token }: { token: string }) {
                             ) : (
                               <ul className="mt-1 space-y-1">
                                 {fileList.map((f) => (
-                                  <li key={f.url}>
-                                    <a href={f.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-blue-600 hover:underline">
-                                      <FileText className="h-4 w-4" />
+                                  <li key={f.url} className="flex min-w-0 items-start gap-1.5">
+                                    <FileText className="mt-0.5 h-4 w-4 shrink-0 text-blue-600" />
+                                    <a href={f.url} target="_blank" rel="noopener noreferrer" className="min-w-0 break-all text-blue-600 hover:underline">
                                       {f.name}
                                     </a>
                                   </li>
@@ -182,12 +222,28 @@ export default function ClientView({ token }: { token: string }) {
                         </div>
                       );
                     }
+                    const raw = String(data[field.key] ?? "");
                     const value = displayValue(field, data, locale);
-                    const shown = field.sensitive && !reveal ? maskValue(value) : value;
+                    let display = value;
+                    let copyText = value;
+                    if (field.type === "money" && raw) {
+                      display = `$${formatMoneyDisplay(raw)}`;
+                      copyText = raw;
+                    }
+                    if (field.sensitive) {
+                      copyText = raw;
+                      if (!reveal) display = maskValue(value);
+                    }
                     return (
-                      <div key={field.key}>
+                      <div key={field.key} className="min-w-0">
                         <dt className="text-xs text-muted-foreground">{fieldLabel(field, locale)}</dt>
-                        <dd className="text-sm">{shown || tr(UI.empty, locale)}</dd>
+                        <dd className="text-sm">
+                          {value ? (
+                            <CopyableValue value={copyText} display={display} locale={locale} />
+                          ) : (
+                            tr(UI.empty, locale)
+                          )}
+                        </dd>
                       </div>
                     );
                   })}

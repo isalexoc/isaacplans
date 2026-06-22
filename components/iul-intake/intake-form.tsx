@@ -44,13 +44,8 @@ import {
   beneficiaryPercentTotal,
   type FieldErrorKey,
 } from "@/lib/iul-intake/validation";
-import {
-  parseWholeDollarInput,
-  formatWholeDollarDisplay,
-  sanitizePremiumInput,
-  formatPremiumDisplay,
-  normalizePremiumOnBlur,
-} from "@/lib/leave-behind-money-input";
+import { digitsToStored, formatMoneyDisplay } from "@/lib/iul-intake/money";
+import { countriesFor } from "@/lib/iul-intake/countries";
 import type { IntakeData } from "@/lib/iul-intake/schema";
 import type { IntakeSession } from "@/lib/iul-intake/types";
 import {
@@ -109,6 +104,24 @@ function buildHeight(feet: string, inches: string): string {
   return `${feet}'${inches || "0"}"`;
 }
 
+/** Centimeters → imperial height string (e.g. 180 → 5'11"). */
+function cmToHeight(cm: string): string {
+  const n = Number((cm ?? "").replace(/[^\d.]/g, ""));
+  if (!Number.isFinite(n) || n <= 0) return "";
+  const totalInches = Math.round(n / 2.54);
+  const feet = Math.floor(totalInches / 12);
+  const inches = totalInches % 12;
+  if (feet < 1) return "";
+  return `${feet}'${inches}"`;
+}
+
+/** Kilograms → pounds (rounded). */
+function kgToLbs(kg: string): string {
+  const n = Number((kg ?? "").replace(/[^\d.]/g, ""));
+  if (!Number.isFinite(n) || n <= 0) return "";
+  return String(Math.round(n * 2.2046226218));
+}
+
 /** Progressive US phone format: digits → (305) 555-1234. */
 function formatUsPhone(value: string): string {
   let d = (value ?? "").replace(/\D/g, "");
@@ -130,8 +143,6 @@ function errorMessageFor(key: FieldErrorKey, locale: IntakeLocale): string {
       return tr(UI.errZip, locale);
     case "ssn":
       return tr(UI.errSsn, locale);
-    case "routing":
-      return tr(UI.errRouting, locale);
     case "age":
       return tr(UI.errAge, locale);
     case "dob":
@@ -196,6 +207,11 @@ export default function IntakeForm({ token }: { token: string }) {
     setStep((s) => Math.min(s, sections.length - 1));
   }, [sections.length]);
 
+  // Jump to the top of the page whenever the step changes (mobile users stay mid-page).
+  useEffect(() => {
+    if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [step]);
+
   function setField(key: string, value: unknown) {
     setData((prev) => ({ ...prev, [key]: value }));
     if (missing.size) {
@@ -228,19 +244,7 @@ export default function IntakeForm({ token }: { token: string }) {
   const current = sections[step];
 
   function goNext() {
-    // Surface format errors on the current step before advancing (empties stay allowed).
-    const stepErrors: Record<string, FieldErrorKey> = {};
-    for (const field of current.fields) {
-      if (!isFieldVisible(field, data)) continue;
-      const v = typeof data[field.key] === "string" ? (data[field.key] as string) : "";
-      const err = fieldFormatError(field, v);
-      if (err) stepErrors[field.key] = err;
-    }
-    if (Object.keys(stepErrors).length > 0) {
-      setErrors((prev) => ({ ...prev, ...stepErrors }));
-      setCompleteError(tr(UI.fixErrors, locale));
-      return;
-    }
+    // Free navigation — required/format are only enforced at Finish on the last step.
     setCompleteError(null);
     setStep((s) => Math.min(sections.length - 1, s + 1));
   }
@@ -369,6 +373,10 @@ export default function IntakeForm({ token }: { token: string }) {
                 onChange={(v) => setField(field.key, v)}
                 onBlur={(v) => validateOnBlur(field, v)}
                 onResolveAddress={(addr) => {
+                  if (field.fullAddress) {
+                    setField(field.key, addr.formatted || addr.line1);
+                    return;
+                  }
                   setField(field.key, addr.line1);
                   const t = field.addressTargets;
                   if (t?.city && addr.city) setField(t.city, addr.city);
@@ -517,10 +525,26 @@ function FieldInput({
               </option>
             ))}
         </select>
+      ) : field.type === "country" ? (
+        <select
+          id={id}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className={`${selectCls} ${invalidCls}`}
+        >
+          <option value="">{tr(UI.choose, locale)}</option>
+          {countriesFor(locale).map((c) => (
+            <option key={c.value} value={c.value}>
+              {locale === "es" ? c.labelEs : c.labelEn}
+            </option>
+          ))}
+        </select>
       ) : field.type === "dob" ? (
         <DobParts value={value} onChange={onChange} invalid={showInvalid} locale={locale} />
       ) : field.type === "height" ? (
         <HeightSelect id={id} value={value} onChange={onChange} invalid={showInvalid} locale={locale} />
+      ) : field.metric === "kg" ? (
+        <WeightInput id={id} value={value} onChange={onChange} onBlur={onBlur} invalid={showInvalid} maxLength={field.maxLength} locale={locale} />
       ) : field.type === "address" ? (
         <IntakeAddressInput
           id={id}
@@ -532,22 +556,7 @@ function FieldInput({
           locale={locale}
         />
       ) : field.type === "money" ? (
-        <MoneyInput
-          id={id}
-          display={formatWholeDollarDisplay(value)}
-          onChange={(raw) => onChange(parseWholeDollarInput(raw))}
-          inputMode="numeric"
-          invalid={showInvalid}
-        />
-      ) : field.type === "premium" ? (
-        <MoneyInput
-          id={id}
-          display={formatPremiumDisplay(value)}
-          onChange={(raw) => onChange(sanitizePremiumInput(raw))}
-          onBlur={() => onChange(normalizePremiumOnBlur(value))}
-          inputMode="decimal"
-          invalid={showInvalid}
-        />
+        <CurrencyInput id={id} value={value} onChange={onChange} invalid={showInvalid} />
       ) : field.type === "textarea" ? (
         <Textarea
           id={id}
@@ -606,20 +615,19 @@ function FieldInput({
   );
 }
 
-/* Dollar input with a leading $ adornment. */
-function MoneyInput({
+/**
+ * Calculator-style dollar input: digits fill from the right (1 → $0.01, 10 → $0.10,
+ * 100 → $1.00…). Stores canonical "dollars.cents"; older whole-dollar values still display.
+ */
+function CurrencyInput({
   id,
-  display,
+  value,
   onChange,
-  onBlur,
-  inputMode,
   invalid,
 }: {
   id: string;
-  display: string;
-  onChange: (raw: string) => void;
-  onBlur?: () => void;
-  inputMode: "numeric" | "decimal";
+  value: string;
+  onChange: (stored: string) => void;
   invalid?: boolean;
 }) {
   return (
@@ -632,12 +640,78 @@ function MoneyInput({
       <input
         id={id}
         type="text"
-        inputMode={inputMode}
-        value={display}
-        onChange={(e) => onChange(e.target.value)}
-        onBlur={onBlur}
+        inputMode="numeric"
+        value={formatMoneyDisplay(value)}
+        onChange={(e) => onChange(digitsToStored(e.target.value))}
+        placeholder="0.00"
         className="h-full w-full border-0 bg-transparent text-base outline-none sm:text-sm"
       />
+    </div>
+  );
+}
+
+/**
+ * Weight in lbs with an optional "Prefer kilograms?" helper that converts to lbs.
+ */
+function WeightInput({
+  id,
+  value,
+  onChange,
+  onBlur,
+  invalid,
+  maxLength,
+  locale,
+}: {
+  id: string;
+  value: string;
+  onChange: (v: string) => void;
+  onBlur: (v: string) => void;
+  invalid?: boolean;
+  maxLength?: number;
+  locale: IntakeLocale;
+}) {
+  const [metric, setMetric] = useState(false);
+  const [kg, setKg] = useState("");
+  const invalidCls = invalid ? "border-red-500 focus-visible:ring-red-500" : "";
+  return (
+    <div>
+      <Input
+        id={id}
+        type="text"
+        inputMode="numeric"
+        value={value}
+        maxLength={maxLength}
+        onChange={(e) => onChange(e.target.value.replace(/\D/g, "").slice(0, maxLength))}
+        onBlur={(e) => onBlur(e.target.value)}
+        className={`${inputBase} ${invalidCls}`}
+      />
+      <button type="button" onClick={() => setMetric((m) => !m)} className="mt-1 text-xs text-blue-600 hover:underline">
+        {tr(UI.preferKg, locale)}
+      </button>
+      {metric && (
+        <div className="mt-1 flex items-center gap-2">
+          <div className="flex h-10 w-32 items-center rounded-md border border-input bg-background px-3 focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
+            <input
+              type="text"
+              inputMode="decimal"
+              value={kg}
+              placeholder="0"
+              onChange={(e) => {
+                const v = e.target.value.replace(/[^\d.]/g, "");
+                setKg(v);
+                onChange(kgToLbs(v));
+              }}
+              className="h-full w-full border-0 bg-transparent text-base outline-none sm:text-sm"
+            />
+            <span className="ml-1 text-muted-foreground">{tr(UI.kgUnit, locale)}</span>
+          </div>
+          {value && (
+            <span className="text-xs text-muted-foreground">
+              = {value} {tr(UI.lbsUnit, locale)}
+            </span>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -725,24 +799,51 @@ function HeightSelect({
 }) {
   const { feet, inches } = parseHeight(value);
   const cls = `${selectCls} ${invalid ? "border-red-500" : ""}`;
+  const [metric, setMetric] = useState(false);
+  const [cm, setCm] = useState("");
   return (
-    <div className="grid grid-cols-2 gap-2" id={id}>
-      <select value={feet} onChange={(e) => onChange(buildHeight(e.target.value, inches))} className={cls}>
-        <option value="">{tr(UI.heightFeet, locale)}</option>
-        {[4, 5, 6, 7].map((f) => (
-          <option key={f} value={String(f)}>
-            {f} {tr(UI.heightFeet, locale)}
-          </option>
-        ))}
-      </select>
-      <select value={inches} onChange={(e) => onChange(buildHeight(feet, e.target.value))} className={cls} disabled={!feet}>
-        <option value="">{tr(UI.heightInches, locale)}</option>
-        {Array.from({ length: 12 }, (_, i) => i).map((inch) => (
-          <option key={inch} value={String(inch)}>
-            {inch} {tr(UI.heightInches, locale)}
-          </option>
-        ))}
-      </select>
+    <div id={id}>
+      <div className="grid grid-cols-2 gap-2">
+        <select value={feet} onChange={(e) => onChange(buildHeight(e.target.value, inches))} className={cls}>
+          <option value="">{tr(UI.heightFeet, locale)}</option>
+          {[4, 5, 6, 7].map((f) => (
+            <option key={f} value={String(f)}>
+              {f} {tr(UI.heightFeet, locale)}
+            </option>
+          ))}
+        </select>
+        <select value={inches} onChange={(e) => onChange(buildHeight(feet, e.target.value))} className={cls} disabled={!feet}>
+          <option value="">{tr(UI.heightInches, locale)}</option>
+          {Array.from({ length: 12 }, (_, i) => i).map((inch) => (
+            <option key={inch} value={String(inch)}>
+              {inch} {tr(UI.heightInches, locale)}
+            </option>
+          ))}
+        </select>
+      </div>
+      <button type="button" onClick={() => setMetric((m) => !m)} className="mt-1 text-xs text-blue-600 hover:underline">
+        {tr(UI.preferCm, locale)}
+      </button>
+      {metric && (
+        <div className="mt-1 flex items-center gap-2">
+          <div className="flex h-10 w-32 items-center rounded-md border border-input bg-background px-3 focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
+            <input
+              type="text"
+              inputMode="decimal"
+              value={cm}
+              placeholder="0"
+              onChange={(e) => {
+                const v = e.target.value.replace(/[^\d.]/g, "");
+                setCm(v);
+                onChange(cmToHeight(v));
+              }}
+              className="h-full w-full border-0 bg-transparent text-base outline-none sm:text-sm"
+            />
+            <span className="ml-1 text-muted-foreground">{tr(UI.cmUnit, locale)}</span>
+          </div>
+          {value && <span className="text-xs text-muted-foreground">= {value}</span>}
+        </div>
+      )}
     </div>
   );
 }
