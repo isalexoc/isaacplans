@@ -150,13 +150,23 @@ export const UI = {
   heightFeet: { en: "ft", es: "pies" } as Dict,
   heightInches: { en: "in", es: "pulg" } as Dict,
 
+  // Metric helpers (height / weight)
+  preferCm: { en: "Prefer centimeters?", es: "¿Prefiere centímetros?" } as Dict,
+  preferKg: { en: "Prefer kilograms?", es: "¿Prefiere kilogramos?" } as Dict,
+  cmUnit: { en: "cm", es: "cm" } as Dict,
+  kgUnit: { en: "kg", es: "kg" } as Dict,
+  lbsUnit: { en: "lbs", es: "lbs" } as Dict,
+
+  // Copy (view page)
+  copy: { en: "Copy", es: "Copiar" } as Dict,
+  copied: { en: "Copied", es: "Copiado" } as Dict,
+
   // Inline validation messages
   errRequired: { en: "This field is required.", es: "Este campo es obligatorio." } as Dict,
   errEmail: { en: "Enter a valid email address.", es: "Ingrese un correo electrónico válido." } as Dict,
   errPhone: { en: "Enter a valid 10-digit phone number.", es: "Ingrese un número de teléfono válido de 10 dígitos." } as Dict,
   errZip: { en: "Enter a valid 5-digit zip code.", es: "Ingrese un código postal válido de 5 dígitos." } as Dict,
   errSsn: { en: "Enter a valid 9-digit number.", es: "Ingrese un número válido de 9 dígitos." } as Dict,
-  errRouting: { en: "Routing numbers are 9 digits.", es: "Los números de ruta tienen 9 dígitos." } as Dict,
   errPercent: { en: "Enter a percentage between 0 and 100.", es: "Ingrese un porcentaje entre 0 y 100." } as Dict,
   errDob: { en: "Enter a valid date of birth.", es: "Ingrese una fecha de nacimiento válida." } as Dict,
   errAge: { en: "Enter a valid age.", es: "Ingrese una edad válida." } as Dict,

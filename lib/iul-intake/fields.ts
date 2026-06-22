@@ -35,10 +35,10 @@ export type IntakeFieldType =
   | "dob"
   | "height"
   | "select"
+  | "country"
   | "ssn"
   | "number"
   | "money"
-  | "premium"
   | "address"
   | "textarea"
   | "beneficiaries"
@@ -79,8 +79,12 @@ export type IntakeField = {
   digitsOnly?: boolean;
   /** Maximum number of characters accepted. */
   maxLength?: number;
+  /** Offer a metric entry helper that converts to the stored imperial value. */
+  metric?: "cm" | "kg";
   /** For `address` fields: sibling field keys to populate from autocomplete. */
   addressTargets?: AddressTargets;
+  /** For `address` fields: store the whole formatted address in this one field. */
+  fullAddress?: boolean;
   /** Where this value is written in the CRM. Omit for DB-only fields. */
   crm?: CrmTarget;
   options?: IntakeOption[];
@@ -149,15 +153,15 @@ export const INTAKE_SECTIONS: IntakeSection[] = [
       },
       { key: "ssn", labelEn: "SSN / ITIN", labelEs: "Número de seguro social o ITIN", type: "ssn", required: true, sensitive: true, digitsOnly: true, maxLength: 9, crm: custom("ssn") },
       { key: "yearsInUsa", labelEn: "Years residing in the USA", labelEs: "Años residiendo en EE. UU.", type: "number", required: true, maxLength: 3, crm: custom("years_in_usa") },
-      { key: "birthCountry", labelEn: "Birth country", labelEs: "País de nacimiento", type: "text", required: true, crm: custom("birth_country") },
+      { key: "birthCountry", labelEn: "Birth country", labelEs: "País de nacimiento", type: "country", required: true, crm: custom("birth_country") },
       { key: "birthCityState", labelEn: "Birth city and state", labelEs: "Ciudad y estado de nacimiento", type: "text", required: true, crm: custom("birth_city_state") },
-      { key: "countryOfCitizenship", labelEn: "Country of citizenship", labelEs: "País de ciudadanía", type: "text", required: true, crm: custom("country_of_citizenship") },
+      { key: "countryOfCitizenship", labelEn: "Country of citizenship", labelEs: "País de ciudadanía", type: "country", required: true, crm: custom("country_of_citizenship") },
       {
         key: "visaType", labelEn: "Type of visa", labelEs: "Tipo de visa", type: "text", crm: custom("visa_type"),
         showIf: { field: "usCitizen", equals: "no" },
       },
-      { key: "height", labelEn: "Height", labelEs: "Altura", type: "height", required: true, crm: custom("height") },
-      { key: "weight", labelEn: "Weight (lbs)", labelEs: "Peso (lbs)", type: "number", required: true, maxLength: 3, crm: custom("weight") },
+      { key: "height", labelEn: "Height", labelEs: "Altura", type: "height", required: true, metric: "cm", crm: custom("height") },
+      { key: "weight", labelEn: "Weight (lbs)", labelEs: "Peso (lbs)", type: "number", required: true, maxLength: 3, metric: "kg", crm: custom("weight") },
       { key: "driversLicense", labelEn: "Has a driver's license?", labelEs: "¿Tiene licencia de conducir?", type: "select", required: true, crm: custom("drivers_license"), options: YES_NO },
       {
         key: "dlNumber", labelEn: "Driver's license number", labelEs: "Número de licencia de conducir", type: "text", sensitive: true, crm: custom("dl_number"),
@@ -238,50 +242,6 @@ export const INTAKE_SECTIONS: IntakeSection[] = [
     ],
   },
   {
-    key: "payment",
-    titleEn: "Banking & payment",
-    titleEs: "Banco y pago",
-    descriptionEn: "Sensitive banking details — stored encrypted.",
-    descriptionEs: "Datos bancarios sensibles — almacenados cifrados.",
-    fields: [
-      {
-        key: "payorSameAs", labelEn: "Who is the policy payor?", labelEs: "¿Quién es el pagador de la póliza?", type: "select", required: true, crm: custom("payor_same_as"),
-        options: [
-          { value: "Primary insured", labelEn: "Primary insured", labelEs: "Asegurado principal" },
-          { value: "Other", labelEn: "Other", labelEs: "Otro" },
-        ],
-      },
-      { key: "bankName", labelEn: "Bank name", labelEs: "Nombre del banco", type: "text", required: true, crm: custom("bank_name") },
-      {
-        key: "paymentMethod", labelEn: "Payment method", labelEs: "Método de pago", type: "select", required: true, crm: custom("payment_method"),
-        options: [
-          { value: "Electronic (bank draft)", labelEn: "Electronic (bank draft)", labelEs: "Electrónico (débito bancario)" },
-          { value: "Credit card", labelEn: "Credit card", labelEs: "Tarjeta de crédito", ownerOnly: true },
-          { value: "Other", labelEn: "Other", labelEs: "Otro", ownerOnly: true },
-        ],
-      },
-      { key: "routingNumber", labelEn: "Routing number", labelEs: "Número de ruta", type: "text", required: true, sensitive: true, digitsOnly: true, maxLength: 9, crm: custom("routing_number") },
-      { key: "accountNumber", labelEn: "Account number", labelEs: "Número de cuenta", type: "text", required: true, sensitive: true, digitsOnly: true, maxLength: 17, crm: custom("account_number") },
-      {
-        key: "accountType", labelEn: "Account type", labelEs: "Tipo de cuenta", type: "select", required: true, crm: custom("account_type"),
-        options: [
-          { value: "Checking", labelEn: "Checking", labelEs: "Corriente" },
-          { value: "Savings", labelEn: "Savings", labelEs: "Ahorros" },
-        ],
-      },
-      { key: "initialPlannedPremium", labelEn: "Initial planned premium (monthly payment)", labelEs: "Prima inicial planeada (pago mensual)", type: "premium", required: true, crm: custom("initial_planned_premium") },
-      {
-        key: "premiumPaymentMode", labelEn: "Premium payment mode (how often you pay)", labelEs: "Modo de pago de la prima (con qué frecuencia paga)", type: "select", required: true, crm: custom("premium_payment_mode"),
-        options: [
-          { value: "Monthly", labelEn: "Monthly", labelEs: "Mensual" },
-          { value: "Quarterly", labelEn: "Quarterly", labelEs: "Trimestral" },
-          { value: "Semi-annual", labelEn: "Semi-annual", labelEs: "Semestral" },
-          { value: "Annual", labelEn: "Annual", labelEs: "Anual" },
-        ],
-      },
-    ],
-  },
-  {
     key: "health",
     titleEn: "Health & doctor",
     titleEs: "Salud y médico",
@@ -296,7 +256,7 @@ export const INTAKE_SECTIONS: IntakeSection[] = [
       },
       { key: "doctorName", labelEn: "Primary doctor name", labelEs: "Nombre del médico primario", type: "text", required: true, crm: custom("doctor_name") },
       {
-        key: "doctorAddress", labelEn: "Doctor address", labelEs: "Dirección del médico", type: "address", required: true, crm: custom("doctor_address"),
+        key: "doctorAddress", labelEn: "Doctor address", labelEs: "Dirección del médico", type: "address", required: true, fullAddress: true, crm: custom("doctor_address"),
         placeholderEn: "Start typing the address…", placeholderEs: "Empiece a escribir la dirección…",
       },
       { key: "doctorPhone", labelEn: "Doctor phone", labelEs: "Teléfono del médico", type: "tel", required: true, crm: custom("doctor_phone") },
@@ -348,6 +308,50 @@ export const INTAKE_SECTIONS: IntakeSection[] = [
     ownerOnly: true,
     fields: [
       { key: "additionalComments", labelEn: "Additional comments", labelEs: "Comentarios adicionales", type: "textarea", crm: custom("additional_comments") },
+    ],
+  },
+  {
+    key: "payment",
+    titleEn: "Banking & payment",
+    titleEs: "Banco y pago",
+    descriptionEn: "Sensitive banking details — stored encrypted.",
+    descriptionEs: "Datos bancarios sensibles — almacenados cifrados.",
+    fields: [
+      {
+        key: "payorSameAs", labelEn: "Who is the policy payor?", labelEs: "¿Quién es el pagador de la póliza?", type: "select", required: true, crm: custom("payor_same_as"),
+        options: [
+          { value: "Primary insured", labelEn: "Primary insured", labelEs: "Asegurado principal" },
+          { value: "Other", labelEn: "Other", labelEs: "Otro" },
+        ],
+      },
+      { key: "bankName", labelEn: "Bank name", labelEs: "Nombre del banco", type: "text", required: true, crm: custom("bank_name") },
+      {
+        key: "paymentMethod", labelEn: "Payment method", labelEs: "Método de pago", type: "select", required: true, crm: custom("payment_method"),
+        options: [
+          { value: "Electronic (bank draft)", labelEn: "Electronic (bank draft)", labelEs: "Electrónico (débito bancario)" },
+          { value: "Credit card", labelEn: "Credit card", labelEs: "Tarjeta de crédito", ownerOnly: true },
+          { value: "Other", labelEn: "Other", labelEs: "Otro", ownerOnly: true },
+        ],
+      },
+      { key: "routingNumber", labelEn: "Routing number", labelEs: "Número de ruta", type: "text", required: true, sensitive: true, digitsOnly: true, crm: custom("routing_number") },
+      { key: "accountNumber", labelEn: "Account number", labelEs: "Número de cuenta", type: "text", required: true, sensitive: true, digitsOnly: true, maxLength: 17, crm: custom("account_number") },
+      {
+        key: "accountType", labelEn: "Account type", labelEs: "Tipo de cuenta", type: "select", required: true, crm: custom("account_type"),
+        options: [
+          { value: "Checking", labelEn: "Checking", labelEs: "Corriente" },
+          { value: "Savings", labelEn: "Savings", labelEs: "Ahorros" },
+        ],
+      },
+      { key: "initialPlannedPremium", labelEn: "Initial planned premium (monthly payment)", labelEs: "Prima inicial planeada (pago mensual)", type: "money", required: true, crm: custom("initial_planned_premium") },
+      {
+        key: "premiumPaymentMode", labelEn: "Premium payment mode (how often you pay)", labelEs: "Modo de pago de la prima (con qué frecuencia paga)", type: "select", required: true, crm: custom("premium_payment_mode"),
+        options: [
+          { value: "Monthly", labelEn: "Monthly", labelEs: "Mensual" },
+          { value: "Quarterly", labelEn: "Quarterly", labelEs: "Trimestral" },
+          { value: "Semi-annual", labelEn: "Semi-annual", labelEs: "Semestral" },
+          { value: "Annual", labelEn: "Annual", labelEs: "Anual" },
+        ],
+      },
     ],
   },
 ];

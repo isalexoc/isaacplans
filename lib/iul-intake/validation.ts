@@ -28,10 +28,6 @@ export function isValidSsn(v: string): boolean {
   return digits(v).length === 9;
 }
 
-export function isValidRouting(v: string): boolean {
-  return digits(v).length === 9;
-}
-
 export function isValidPercent(v: string): boolean {
   const n = Number((v ?? "").trim());
   return Number.isFinite(n) && n >= 0 && n <= 100;
@@ -63,7 +59,7 @@ export function isValidDob(v: string): boolean {
   return y >= now.getFullYear() - 120;
 }
 
-export type FieldErrorKey = "email" | "phone" | "zip" | "ssn" | "routing" | "age" | "dob";
+export type FieldErrorKey = "email" | "phone" | "zip" | "ssn" | "age" | "dob";
 
 const AGE_KEYS = new Set(["fatherAge", "motherAge", "fatherAgeAtDeath", "motherAgeAtDeath"]);
 
@@ -89,7 +85,6 @@ export function fieldFormatError(field: IntakeField, value: string): FieldErrorK
   }
 
   if (field.digitsOnly && field.maxLength === 5) return isValidZip(v) ? null : "zip";
-  if (field.key === "routingNumber") return isValidRouting(v) ? null : "routing";
   if (AGE_KEYS.has(field.key)) return isValidAge(v) ? null : "age";
 
   return null;

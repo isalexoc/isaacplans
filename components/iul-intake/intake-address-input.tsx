@@ -14,6 +14,8 @@ export type ResolvedAddress = {
   city: string;
   state: string;
   zip: string;
+  /** Full single-line address (street, city, state zip) for fields that store the whole thing. */
+  formatted: string;
 };
 
 type GoogleAddressComponent = {
@@ -39,7 +41,11 @@ function parsePlaceComponents(components: GoogleAddressComponent[] | undefined):
   const zip = getPart("postal_code");
   const line1 = [streetNumber, route].filter(Boolean).join(" ").trim();
   if (!line1) return null;
-  return { line1, city: locality, state: stateShort ? stateShort.toUpperCase() : "", zip };
+  const state = stateShort ? stateShort.toUpperCase() : "";
+  const formatted = [line1, locality, [state, zip].filter(Boolean).join(" ")]
+    .filter(Boolean)
+    .join(", ");
+  return { line1, city: locality, state, zip, formatted };
 }
 
 /**
@@ -154,12 +160,16 @@ export default function IntakeAddressInput({
             const place = pred.toPlace() as {
               fetchFields: (opts: { fields: string[] }) => Promise<void>;
               addressComponents?: GoogleAddressComponent[];
+              formattedAddress?: string;
             };
-            await place.fetchFields({ fields: ["addressComponents"] });
+            await place.fetchFields({ fields: ["addressComponents", "formattedAddress"] });
             const parsed = parsePlaceComponents(place.addressComponents);
             if (parsed?.line1) {
+              // Prefer Google's formatted address (drops country) when available.
+              const gFormatted = (place.formattedAddress ?? "").replace(/,\s*USA$/i, "").trim();
+              const resolved = { ...parsed, formatted: gFormatted || parsed.formatted };
               (el as unknown as { value: string }).value = parsed.line1;
-              onResolveRef.current(parsed);
+              onResolveRef.current(resolved);
             }
           } catch (e) {
             logFePlaces("error", { message: String(e instanceof Error ? e.message : e), step: "fetchFields" });
