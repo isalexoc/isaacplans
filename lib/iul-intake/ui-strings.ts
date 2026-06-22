@@ -55,6 +55,7 @@ export const UI = {
   clientName: { en: "Client name", es: "Nombre del cliente" } as Dict,
   firstName: { en: "First name", es: "Nombre" } as Dict,
   lastName: { en: "Last name", es: "Apellido" } as Dict,
+  preferredLanguage: { en: "Preferred language", es: "Idioma preferido" } as Dict,
   email: { en: "Email", es: "Correo electrónico" } as Dict,
   phone: { en: "Phone", es: "Teléfono" } as Dict,
   startIntake: { en: "Start intake", es: "Iniciar registro" } as Dict,

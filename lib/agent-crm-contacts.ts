@@ -443,6 +443,21 @@ export async function agentCrmUpdateContact(
   return true;
 }
 
+/** Read a contact's tags. Returns null on fetch failure, [] when the contact has none. */
+export async function agentCrmGetContactTags(
+  contactId: string,
+  token: string
+): Promise<string[] | null> {
+  const res = await fetch(`${AGENT_CRM_API_BASE}/contacts/${contactId}`, {
+    headers: agentCrmAuthHeaders(token),
+  });
+  if (!res.ok) return null;
+  const data = await res.json().catch(() => null);
+  const c = data?.contact ?? data;
+  if (!c?.id) return null;
+  return agentCrmNormalizeContactTags(c.tags);
+}
+
 /** Add tags to a contact (POST fires GHL "tag added" automations). */
 export async function agentCrmAddContactTags(
   contactId: string,

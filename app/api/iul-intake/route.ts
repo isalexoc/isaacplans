@@ -5,12 +5,14 @@ import {
   listIntakeSessionsForOwner,
   syncIntakeLinkToCrm,
   toIntakeSummary,
+  IUL_SPANISH_TAG,
   type IntakeStatus,
 } from "@/lib/iul-intake/server";
 import {
   agentCrmEnsureContact,
   agentCrmGetBaseCredentials,
   agentCrmGetContactNative,
+  agentCrmAddContactTags,
   agentCrmSearchContacts,
 } from "@/lib/agent-crm-contacts";
 import { getIsAdmin } from "@/lib/auth/admin";
@@ -92,6 +94,9 @@ export async function POST(request: NextRequest) {
     let contactName = name || null;
     let contactEmail = email || null;
     let contactPhone = phone || null;
+    // For a brand-new contact we know the chosen language → use it for the saved link. For an
+    // existing contact, let the link locale follow the contact's Spanish tag (no override).
+    let linkLocaleOverride: "en" | "es" | undefined;
     const prefill: IntakeData = {};
 
     if (crmContactIdInput) {
@@ -134,6 +139,7 @@ export async function POST(request: NextRequest) {
       if (email) prefill.email = email;
       if (phone) prefill.phone = phone;
 
+      linkLocaleOverride = locale;
       if (creds) {
         crmContactId = await agentCrmEnsureContact(
           { email, phone, firstName, lastName },
@@ -141,6 +147,10 @@ export async function POST(request: NextRequest) {
           creds.token,
           "[IUL_INTAKE]"
         );
+        // Spanish preference → tag the contact so the link (and your workflows) use /es.
+        if (crmContactId && locale === "es") {
+          await agentCrmAddContactTags(crmContactId, [IUL_SPANISH_TAG], creds.token, "[IUL_INTAKE]");
+        }
       } else {
         console.warn("[iul-intake] Agent CRM credentials missing; creating unlinked session.");
       }
@@ -157,7 +167,7 @@ export async function POST(request: NextRequest) {
     });
 
     // Seed the CRM link field so it's ready for the "Send link" workflow.
-    await syncIntakeLinkToCrm(row);
+    await syncIntakeLinkToCrm(row, linkLocaleOverride);
 
     return NextResponse.json({ success: true, session: toIntakeSummary(row) });
   } catch (error) {
