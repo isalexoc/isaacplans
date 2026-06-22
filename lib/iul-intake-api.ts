@@ -93,6 +93,16 @@ export async function reopenIntake(token: string, allow: boolean): Promise<Intak
   return data.session;
 }
 
+export async function sendIntakeLink(token: string): Promise<IntakeSummary> {
+  const data = await parseJson<{ success: boolean; session: IntakeSummary }>(
+    await fetch(`/api/iul-intake/${token}/send-link`, {
+      method: "POST",
+      credentials: "same-origin",
+    })
+  );
+  return data.session;
+}
+
 export async function fetchIntake(token: string): Promise<IntakeSession> {
   const data = await parseJson<{ success: boolean; session: IntakeSession }>(
     await fetch(`/api/iul-intake/${token}`, { credentials: "same-origin" })

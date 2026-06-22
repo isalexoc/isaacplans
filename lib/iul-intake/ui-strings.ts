@@ -70,6 +70,8 @@ export const UI = {
   copyLink: { en: "Copy link", es: "Copiar enlace" } as Dict,
   linkCopied: { en: "Link copied!", es: "¡Enlace copiado!" } as Dict,
   resetLink: { en: "Reset link", es: "Restablecer enlace" } as Dict,
+  sendLink: { en: "Send link", es: "Enviar enlace" } as Dict,
+  linkSent: { en: "Link sent!", es: "¡Enlace enviado!" } as Dict,
   resetConfirm: {
     en: "Reset this link? The old link will stop working and anyone who already opened it will lose access. A new link will be copied for you to send.",
     es: "¿Restablecer este enlace? El enlace anterior dejará de funcionar y quien ya lo haya abierto perderá el acceso. Se copiará un nuevo enlace para que lo envíe.",
@@ -127,6 +129,10 @@ export const UI = {
     es: "Complete los campos requeridos antes de finalizar.",
   } as Dict,
   intakeTitle: { en: "IUL Application Intake", es: "Registro de solicitud IUL" } as Dict,
+  formSubtitle: {
+    en: "Just a few quick steps — your progress saves automatically as you go.",
+    es: "Solo unos pasos rápidos — su progreso se guarda automáticamente.",
+  } as Dict,
   secureNote: {
     en: "Your information is encrypted.",
     es: "Su información está cifrada.",

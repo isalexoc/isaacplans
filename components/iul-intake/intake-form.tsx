@@ -18,7 +18,20 @@ import {
   Upload,
   FileText,
   X,
+  ArrowRight,
+  Send,
+  User,
+  MapPin,
+  Briefcase,
+  DollarSign,
+  Users,
+  Users2,
+  CreditCard,
+  HeartPulse,
+  StickyNote,
+  type LucideIcon,
 } from "lucide-react";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import {
   fetchIntake,
   completeIntake,
@@ -152,6 +165,20 @@ function errorMessageFor(key: FieldErrorKey, locale: IntakeLocale): string {
   }
 }
 
+/** Icon per section, shown in a colored chip next to the step title. */
+const SECTION_ICONS: Record<string, LucideIcon> = {
+  personal: User,
+  residence: MapPin,
+  employment: Briefcase,
+  financial: DollarSign,
+  beneficiaries: Users,
+  payment: CreditCard,
+  health: HeartPulse,
+  family: Users2,
+  attachments: FileText,
+  agent: StickyNote,
+};
+
 /* ------------------------------- component ------------------------------- */
 
 export default function IntakeForm({ token }: { token: string }) {
@@ -168,6 +195,7 @@ export default function IntakeForm({ token }: { token: string }) {
   const [completeError, setCompleteError] = useState<string | null>(null);
   const [reveal, setReveal] = useState(false);
   const cardRef = useRef<HTMLDivElement | null>(null);
+  const reduceMotion = useReducedMotion();
 
   useEffect(() => {
     let active = true;
@@ -299,59 +327,102 @@ export default function IntakeForm({ token }: { token: string }) {
   }
   if (lockedForClient) {
     return (
-      <div className="mx-auto flex min-h-[70vh] max-w-md flex-col items-center justify-center px-4 text-center">
-        <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-950">
-          <PartyPopper className="h-8 w-8 text-green-600" />
-        </div>
-        <h1 className="text-2xl font-bold">{tr(UI.thankYouTitle, locale)}</h1>
-        <p className="mt-3 text-muted-foreground">{tr(UI.thankYouBody, locale)}</p>
-        <p className="mt-6 flex items-center gap-1.5 text-xs text-muted-foreground">
+      <div className="mx-auto flex min-h-[70vh] max-w-md flex-col items-center justify-center px-5 text-center">
+        <motion.div
+          initial={reduceMotion ? false : { scale: 0, rotate: -20 }}
+          animate={{ scale: 1, rotate: 0 }}
+          transition={{ type: "spring", stiffness: 260, damping: 18 }}
+          className="mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-brand to-accent text-white shadow-lg shadow-brand/30"
+        >
+          <PartyPopper className="h-10 w-10" />
+        </motion.div>
+        <motion.h1
+          initial={reduceMotion ? false : { opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="text-3xl font-extrabold tracking-tight"
+        >
+          {tr(UI.thankYouTitle, locale)}
+        </motion.h1>
+        <motion.p
+          initial={reduceMotion ? false : { opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.18 }}
+          className="mt-3 text-base text-muted-foreground"
+        >
+          {tr(UI.thankYouBody, locale)}
+        </motion.p>
+        <p className="mt-8 flex items-center gap-1.5 text-xs text-muted-foreground">
           <ShieldCheck className="h-4 w-4 text-green-600" /> {tr(UI.secureNote, locale)}
         </p>
       </div>
     );
   }
 
+  const pct = Math.round(((step + 1) / sections.length) * 100);
+  const StepIcon = SECTION_ICONS[current.key] ?? FileText;
+
   return (
     <div className="mx-auto max-w-2xl px-4 py-8">
       {isOwner && <IntakeBreadcrumb current={tr(UI.navForm, locale)} />}
-      <div className="mb-2 flex items-center justify-between gap-3">
-        <h1 className="text-xl font-bold sm:text-2xl">{tr(UI.intakeTitle, locale)}</h1>
+      <div className="mb-1 flex items-start justify-between gap-3">
+        <h1 className="text-2xl font-extrabold tracking-tight sm:text-3xl">{tr(UI.intakeTitle, locale)}</h1>
         <SaveIndicator status={saveStatus} locale={locale} />
       </div>
-      <p className="mb-4 flex items-center gap-1.5 text-xs text-muted-foreground">
+      <p className="mb-1 text-sm text-muted-foreground">{tr(UI.formSubtitle, locale)}</p>
+      <p className="mb-5 flex items-center gap-1.5 text-xs text-muted-foreground">
         <ShieldCheck className="h-4 w-4 text-green-600" /> {tr(UI.secureNote, locale)}
       </p>
 
       {/* Step progress */}
-      <div className="mb-4">
-        <div className="mb-1 flex justify-between text-xs text-muted-foreground">
-          <span>{sectionTitle(current, locale)}</span>
+      <div className="mb-5">
+        <div className="mb-1.5 flex items-center justify-between text-xs font-medium text-muted-foreground">
+          <span className="text-foreground">{sectionTitle(current, locale)}</span>
           <span>
-            {tr(UI.step, locale)} {step + 1} {tr(UI.of, locale)} {sections.length}
+            {tr(UI.step, locale)} {step + 1} {tr(UI.of, locale)} {sections.length} · {pct}%
           </span>
         </div>
-        <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
-          <div
-            className="h-full rounded-full bg-primary transition-all"
-            style={{ width: `${((step + 1) / sections.length) * 100}%` }}
+        <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+          <motion.div
+            className="h-full rounded-full bg-gradient-to-r from-brand to-accent"
+            initial={false}
+            animate={{ width: `${pct}%` }}
+            transition={reduceMotion ? { duration: 0 } : { type: "spring", stiffness: 120, damping: 20 }}
           />
         </div>
       </div>
 
       {completed && isOwner && (
-        <div className="mb-4 flex items-center gap-2 rounded-md border border-green-200 bg-green-50 p-3 text-sm text-green-800 dark:border-green-900 dark:bg-green-950 dark:text-green-300">
+        <div className="mb-4 flex items-center gap-2 rounded-xl border border-green-200 bg-green-50 p-3 text-sm text-green-800 dark:border-green-900 dark:bg-green-950 dark:text-green-300">
           <PartyPopper className="h-4 w-4" /> {tr(UI.completed, locale)}
         </div>
       )}
 
-      <div ref={cardRef} className="scroll-mt-4 rounded-lg border bg-white p-5 shadow-sm dark:bg-gray-950">
-        <h2 className="text-lg font-semibold">{sectionTitle(current, locale)}</h2>
-        {sectionDescription(current, locale) && (
-          <p className="mb-3 text-sm text-muted-foreground">{sectionDescription(current, locale)}</p>
-        )}
+      <div
+        ref={cardRef}
+        className="scroll-mt-4 overflow-hidden rounded-2xl border bg-white shadow-md shadow-black/5 dark:bg-gray-950"
+      >
+        <div className="h-1.5 w-full bg-gradient-to-r from-brand to-accent" />
+        <div className="p-5 sm:p-6">
+          <div className="flex items-center gap-3">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand/10 text-brand">
+              <StepIcon className="h-5 w-5" />
+            </span>
+            <h2 className="text-xl font-bold">{sectionTitle(current, locale)}</h2>
+          </div>
+          {sectionDescription(current, locale) && (
+            <p className="mt-2 text-sm text-muted-foreground">{sectionDescription(current, locale)}</p>
+          )}
 
-        <div className="mt-3 space-y-4">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={step}
+              initial={reduceMotion ? false : { opacity: 0, x: 24 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={reduceMotion ? { opacity: 0 } : { opacity: 0, x: -24 }}
+              transition={{ duration: 0.22, ease: "easeOut" }}
+              className="mt-4 space-y-5"
+            >
           {current.fields.map((field) => {
             if (!isFieldVisible(field, data)) return null;
             if (field.ownerOnly && !isOwner) return null;
@@ -409,6 +480,8 @@ export default function IntakeForm({ token }: { token: string }) {
               />
             );
           })}
+            </motion.div>
+          </AnimatePresence>
         </div>
       </div>
 
@@ -418,20 +491,39 @@ export default function IntakeForm({ token }: { token: string }) {
         </p>
       )}
 
-      <div className="mt-5 flex items-center justify-between gap-3">
-        <Button variant="outline" disabled={step === 0} onClick={() => setStep((s) => Math.max(0, s - 1))}>
+      <div className="mt-6 flex items-center justify-between gap-3">
+        <Button
+          variant="ghost"
+          size="lg"
+          disabled={step === 0}
+          onClick={() => setStep((s) => Math.max(0, s - 1))}
+          className="text-muted-foreground"
+        >
           {tr(UI.back, locale)}
         </Button>
         {step < sections.length - 1 ? (
-          <Button onClick={goNext}>{tr(UI.next, locale)}</Button>
+          <Button
+            size="lg"
+            onClick={goNext}
+            className="flex-1 gap-2 bg-gradient-to-r from-brand to-accent text-white shadow-md shadow-brand/30 transition active:scale-[0.98] hover:opacity-95 sm:flex-none sm:min-w-44"
+          >
+            {tr(UI.next, locale)} <ArrowRight className="h-4 w-4" />
+          </Button>
         ) : (
-          <Button onClick={handleFinish} disabled={completing}>
+          <Button
+            size="lg"
+            onClick={handleFinish}
+            disabled={completing}
+            className="flex-1 gap-2 bg-gradient-to-r from-brand to-accent text-white shadow-md shadow-brand/30 transition active:scale-[0.98] hover:opacity-95 sm:flex-none"
+          >
             {completing ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> {tr(UI.finishing, locale)}
+                <Loader2 className="h-4 w-4 animate-spin" /> {tr(UI.finishing, locale)}
               </>
             ) : (
-              tr(UI.finish, locale)
+              <>
+                <Send className="h-4 w-4" /> {tr(UI.finish, locale)}
+              </>
             )}
           </Button>
         )}
@@ -467,8 +559,8 @@ function SaveIndicator({ status, locale }: { status: string; locale: IntakeLocal
 
 /* Shared select styling (native selects are best on mobile). */
 const selectCls =
-  "flex h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:text-sm";
-const inputBase = "text-base sm:text-sm";
+  "flex h-12 w-full rounded-md border border-input bg-background px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 sm:h-11 sm:text-sm";
+const inputBase = "h-12 text-base focus-visible:ring-brand sm:h-11 sm:text-sm";
 
 function FieldInput({
   field,

@@ -23,6 +23,10 @@ import {
   type AgentCrmCustomFieldValue,
   type AgentCrmNativeFields,
 } from "@/lib/agent-crm-contacts";
+import { buildIntakeShareUrl } from "./share-url";
+
+/** Tag added to the contact when the agent sends the link — triggers the GHL workflow. */
+export const IUL_INTAKE_LINK_SENT_TAG = "iul_intake_link_sent";
 
 export type IntakeSessionRow = typeof iulIntakeSessions.$inferSelect;
 
@@ -190,6 +194,31 @@ export async function setClientReopened(
 /** A client may edit while not yet completed, or after an admin re-opens the form. */
 export function clientCanEdit(row: IntakeSessionRow): boolean {
   return row.status !== "completed" || row.reopenedForClient === true;
+}
+
+/**
+ * Write the session's current share link to the CRM `iul_intake_link` custom field so a GHL
+ * workflow can text/email it. Best-effort — token only changes on create/reset, so call it
+ * there (and at send time as a safety net). Never throws.
+ */
+export async function syncIntakeLinkToCrm(row: IntakeSessionRow): Promise<boolean> {
+  if (!row.crmContactId) return false;
+  const fieldId = ghlFieldIds.iul_intake_link;
+  if (!fieldId) return false;
+  const creds = agentCrmGetBaseCredentials();
+  if (!creds) return false;
+  try {
+    const url = buildIntakeShareUrl(row.token, row.locale ?? "en");
+    return await agentCrmUpdateContact(
+      row.crmContactId,
+      { customFields: [{ id: fieldId, field_value: url }] },
+      creds.token,
+      "[IUL_INTAKE]"
+    );
+  } catch (e) {
+    console.warn("[iul-intake] Link sync failed:", e);
+    return false;
+  }
 }
 
 /** Access rule: owner agent always; the bound client; or an unclaimed session (to claim). */
