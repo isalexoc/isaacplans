@@ -61,6 +61,7 @@ export default function IntakeAddressInput({
   placeholder,
   invalid,
   locale,
+  fullAddress,
 }: {
   id: string;
   value: string;
@@ -69,6 +70,8 @@ export default function IntakeAddressInput({
   placeholder?: string;
   invalid?: boolean;
   locale: "en" | "es";
+  /** Display the whole formatted address in the input after selection (not just the street). */
+  fullAddress?: boolean;
 }) {
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -79,9 +82,11 @@ export default function IntakeAddressInput({
   const onChangeRef = useRef(onChange);
   const onResolveRef = useRef(onResolve);
   const valueRef = useRef(value);
+  const fullAddressRef = useRef(fullAddress);
   onChangeRef.current = onChange;
   onResolveRef.current = onResolve;
   valueRef.current = value;
+  fullAddressRef.current = fullAddress;
 
   // `importLibrary` is the real readiness signal (the <Script> onLoad can fire too early).
   useEffect(() => {
@@ -168,7 +173,7 @@ export default function IntakeAddressInput({
               // Prefer Google's formatted address (drops country) when available.
               const gFormatted = (place.formattedAddress ?? "").replace(/,\s*USA$/i, "").trim();
               const resolved = { ...parsed, formatted: gFormatted || parsed.formatted };
-              (el as unknown as { value: string }).value = parsed.line1;
+              (el as unknown as { value: string }).value = fullAddressRef.current ? resolved.formatted : parsed.line1;
               onResolveRef.current(resolved);
             }
           } catch (e) {

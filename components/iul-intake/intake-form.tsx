@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocale } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -167,6 +167,7 @@ export default function IntakeForm({ token }: { token: string }) {
   const [errors, setErrors] = useState<Record<string, FieldErrorKey>>({});
   const [completeError, setCompleteError] = useState<string | null>(null);
   const [reveal, setReveal] = useState(false);
+  const cardRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -191,6 +192,8 @@ export default function IntakeForm({ token }: { token: string }) {
 
   const isOwner = session?.role === "owner";
   const sections = useMemo(() => visibleSections(!!isOwner), [isOwner]);
+  // A client who has submitted can't edit until an admin re-opens the form.
+  const lockedForClient = !isOwner && completed && !session?.reopenedForClient;
 
   // Clients pay by bank draft only — lock the value so it always syncs.
   useEffect(() => {
@@ -207,9 +210,9 @@ export default function IntakeForm({ token }: { token: string }) {
     setStep((s) => Math.min(s, sections.length - 1));
   }, [sections.length]);
 
-  // Jump to the top of the page whenever the step changes (mobile users stay mid-page).
+  // On step change, bring the step's content (title + first field) into view.
   useEffect(() => {
-    if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
+    cardRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, [step]);
 
   function setField(key: string, value: unknown) {
@@ -294,6 +297,20 @@ export default function IntakeForm({ token }: { token: string }) {
       </div>
     );
   }
+  if (lockedForClient) {
+    return (
+      <div className="mx-auto flex min-h-[70vh] max-w-md flex-col items-center justify-center px-4 text-center">
+        <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-950">
+          <PartyPopper className="h-8 w-8 text-green-600" />
+        </div>
+        <h1 className="text-2xl font-bold">{tr(UI.thankYouTitle, locale)}</h1>
+        <p className="mt-3 text-muted-foreground">{tr(UI.thankYouBody, locale)}</p>
+        <p className="mt-6 flex items-center gap-1.5 text-xs text-muted-foreground">
+          <ShieldCheck className="h-4 w-4 text-green-600" /> {tr(UI.secureNote, locale)}
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-8">
@@ -322,13 +339,13 @@ export default function IntakeForm({ token }: { token: string }) {
         </div>
       </div>
 
-      {completed && (
+      {completed && isOwner && (
         <div className="mb-4 flex items-center gap-2 rounded-md border border-green-200 bg-green-50 p-3 text-sm text-green-800 dark:border-green-900 dark:bg-green-950 dark:text-green-300">
           <PartyPopper className="h-4 w-4" /> {tr(UI.completed, locale)}
         </div>
       )}
 
-      <div className="rounded-lg border bg-white p-5 shadow-sm dark:bg-gray-950">
+      <div ref={cardRef} className="scroll-mt-4 rounded-lg border bg-white p-5 shadow-sm dark:bg-gray-950">
         <h2 className="text-lg font-semibold">{sectionTitle(current, locale)}</h2>
         {sectionDescription(current, locale) && (
           <p className="mb-3 text-sm text-muted-foreground">{sectionDescription(current, locale)}</p>
@@ -554,6 +571,7 @@ function FieldInput({
           placeholder={placeholder}
           invalid={showInvalid}
           locale={locale}
+          fullAddress={field.fullAddress}
         />
       ) : field.type === "money" ? (
         <CurrencyInput id={id} value={value} onChange={onChange} invalid={showInvalid} />

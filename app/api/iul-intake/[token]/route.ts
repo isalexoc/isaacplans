@@ -5,6 +5,7 @@ import {
   updateIntakeData,
   bindClientUser,
   canAccessIntake,
+  clientCanEdit,
   toIntakeSession,
   syncIntakeToCrm,
   type IntakeSessionRow,
@@ -74,6 +75,11 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     if (access.shouldClaim) {
       await bindClientUser(token, userId);
       row.clientUserId = userId;
+    }
+
+    // A client cannot edit a submitted form unless the admin re-opened it (admin always can).
+    if (roleOf(row, userId) === "client" && !clientCanEdit(row)) {
+      return NextResponse.json({ success: false, error: "This form has already been submitted." }, { status: 403 });
     }
 
     const body = await request.json().catch(() => ({}));
