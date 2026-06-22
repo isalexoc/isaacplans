@@ -59,6 +59,7 @@ export type GhlFieldSlug =
   | "med_heart_stroke_cancer"
   | "med_diabetes_blood"
   | "med_meds_diet"
+  | "meds_list"
   | "doctor_name"
   | "doctor_address"
   | "doctor_phone"
@@ -125,6 +126,7 @@ export const ghlFieldIds: Record<GhlFieldSlug, string> = {
   med_heart_stroke_cancer: "iDfKJNty3Q7QtjdAi82V",
   med_diabetes_blood: "Kx6l0RajMVF9ovM0EnKJ",
   med_meds_diet: "DoX9yaWWsgivQBN4lgPa",
+  meds_list: "AbLNN3DoKXIQkizSwxNP",
   doctor_name: "CrlPWKHmPdeBO0pJh9ek",
   doctor_address: "5GwwE9eIXtOscVctfbsU",
   doctor_phone: "wtL0CCYiO7atg0n1n8bZ",

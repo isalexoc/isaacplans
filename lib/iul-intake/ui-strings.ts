@@ -9,7 +9,17 @@ export function pickLocale(locale: string): IntakeLocale {
 }
 
 export function fieldLabel(field: IntakeField, locale: IntakeLocale): string {
-  return locale === "es" ? field.labelEs : field.labelEn;
+  const raw = locale === "es" ? field.labelEs : field.labelEn;
+  return applyYearTokens(raw);
+}
+
+/** Replace {currentYear}/{lastYear} so income labels never hard-code the year. */
+export function applyYearTokens(text: string): string {
+  if (!text.includes("{")) return text;
+  const current = new Date().getFullYear();
+  return text
+    .replace(/\{currentYear\}/g, String(current))
+    .replace(/\{lastYear\}/g, String(current - 1));
 }
 
 export function fieldPlaceholder(field: IntakeField, locale: IntakeLocale): string | undefined {
@@ -131,6 +141,34 @@ export const UI = {
   noFiles: { en: "No files uploaded yet.", es: "Aún no hay archivos." } as Dict,
   uploadError: { en: "Upload failed. Try again.", es: "Error al subir. Intente de nuevo." } as Dict,
   fileHint: { en: "Images or PDF, up to 15 MB.", es: "Imágenes o PDF, hasta 15 MB." } as Dict,
+
+  // Split DOB selects
+  dobMonth: { en: "Month", es: "Mes" } as Dict,
+  dobDay: { en: "Day", es: "Día" } as Dict,
+  dobYear: { en: "Year", es: "Año" } as Dict,
+  // Height selects
+  heightFeet: { en: "ft", es: "pies" } as Dict,
+  heightInches: { en: "in", es: "pulg" } as Dict,
+
+  // Inline validation messages
+  errRequired: { en: "This field is required.", es: "Este campo es obligatorio." } as Dict,
+  errEmail: { en: "Enter a valid email address.", es: "Ingrese un correo electrónico válido." } as Dict,
+  errPhone: { en: "Enter a valid 10-digit phone number.", es: "Ingrese un número de teléfono válido de 10 dígitos." } as Dict,
+  errZip: { en: "Enter a valid 5-digit zip code.", es: "Ingrese un código postal válido de 5 dígitos." } as Dict,
+  errSsn: { en: "Enter a valid 9-digit number.", es: "Ingrese un número válido de 9 dígitos." } as Dict,
+  errRouting: { en: "Routing numbers are 9 digits.", es: "Los números de ruta tienen 9 dígitos." } as Dict,
+  errPercent: { en: "Enter a percentage between 0 and 100.", es: "Ingrese un porcentaje entre 0 y 100." } as Dict,
+  errDob: { en: "Enter a valid date of birth.", es: "Ingrese una fecha de nacimiento válida." } as Dict,
+  errAge: { en: "Enter a valid age.", es: "Ingrese una edad válida." } as Dict,
+  benTotalWarning: {
+    en: "Beneficiary percentages should add up to 100%.",
+    es: "Los porcentajes de los beneficiarios deben sumar 100%.",
+  } as Dict,
+  fixErrors: {
+    en: "Please fix the highlighted fields before continuing.",
+    es: "Corrija los campos resaltados antes de continuar.",
+  } as Dict,
+  pleaseComplete: { en: "Please complete:", es: "Por favor complete:" } as Dict,
 
   // View
   viewTitle: { en: "Client summary", es: "Resumen del cliente" } as Dict,

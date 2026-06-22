@@ -13,6 +13,7 @@ import {
   isFieldVisible,
   type Beneficiary,
 } from "./fields";
+import { fieldFormatError } from "./validation";
 
 /** The shape stored in `iulIntakeSessions.data` (jsonb). */
 export type IntakeData = Record<string, unknown> & {
@@ -71,16 +72,26 @@ export function validateForCompletion(data: IntakeData): CompletionCheck {
 
   for (const section of INTAKE_SECTIONS) {
     for (const field of section.fields) {
-      if (!field.required) continue;
       if (!isFieldVisible(field, data)) continue;
 
       if (field.type === "beneficiaries") {
-        const result = beneficiariesValid(data);
-        if (!result.ok) missing.push("beneficiaries");
+        if (field.required) {
+          const result = beneficiariesValid(data);
+          if (!result.ok) missing.push("beneficiaries");
+        }
         continue;
       }
 
-      if (!str(data[field.key])) missing.push(field.key);
+      const value = str(data[field.key]);
+
+      // Required-but-empty.
+      if (field.required && !value) {
+        missing.push(field.key);
+        continue;
+      }
+
+      // Present but clearly malformed (email/phone/zip/ssn/routing/age/dob).
+      if (value && fieldFormatError(field, value)) missing.push(field.key);
     }
   }
 
