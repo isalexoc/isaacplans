@@ -1,0 +1,56 @@
+{
+  "iulApply": {
+    "meta": {
+      "title": "Apply for IUL | Isaac Plans",
+      "description": "Start your Indexed Universal Life application online — secure, guided, and only a few minutes.",
+      "image": "https://www.isaacplans.com/images/iul_en.png",
+      "imageAlt": "Apply for IUL with Isaac Plans"
+    },
+    "hero": {
+      "badge": "Indexed Universal Life",
+      "title": "Build tax-advantaged wealth and protect your family",
+      "subtitle": "Watch the short video below, then start your secure application online. It only takes a few minutes and your progress saves automatically."
+    },
+    "video": {
+      "comingSoon": "Video coming soon"
+    },
+    "benefitsHeading": "Why an IUL?",
+    "benefits": [
+      {
+        "title": "Tax-advantaged growth",
+        "desc": "Your cash value can grow tax-deferred and be accessed tax-free when structured correctly."
+      },
+      {
+        "title": "Lifelong protection",
+        "desc": "A death benefit that protects the people who depend on you."
+      },
+      {
+        "title": "Market-linked, downside-protected",
+        "desc": "Grow based on index performance with a floor that protects you in down years."
+      },
+      {
+        "title": "Living benefits",
+        "desc": "Access funds for emergencies, college, or retirement — on your terms."
+      }
+    ],
+    "howItWorksHeading": "How to apply",
+    "steps": [
+      {
+        "title": "Create your account",
+        "desc": "Sign up securely with your email or Google. It keeps your information private and lets you finish later on any device."
+      },
+      {
+        "title": "Fill out the secure form",
+        "desc": "Answer a few guided questions. Everything is encrypted and saves automatically as you go."
+      },
+      {
+        "title": "We review and reach out",
+        "desc": "Once you submit, we review your application and contact you to finalize everything."
+      }
+    ],
+    "secureNote": "Your information is encrypted and never shared. This process is 100% secure.",
+    "cta": "Apply now",
+    "ctaNote": "You'll sign in first to keep your application private.",
+    "starting": "Starting your application…"
+  }
+}
