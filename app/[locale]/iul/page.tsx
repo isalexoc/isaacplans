@@ -1,5 +1,6 @@
 import HeroWithTestimonials from "@/components/hero-template";
 import IULButton from "@/components/IULButton";
+import IulApplyHeroButton from "@/components/iul-apply-hero-button";
 import IULPresentationButton from "@/components/IULPresentationButton";
 import CTABanner from "@/components/CTABanner-template";
 import FaqSection from "@/components/FaqSection";
@@ -96,6 +97,7 @@ export default async function IndexedUniversalLifePage() {
         imagePublicId="pexels-victor-l-19338-2790434_1_pr9bng"
         imagePosition="left"
         cta={<IULButton />}
+        ctaSecondary={<IulApplyHeroButton />}
         testimonials={[
           {
             name: t("hero.testimonials.0.name"),
