@@ -49,6 +49,7 @@ import {
   isFieldVisible,
   fieldByKey,
   type IntakeField,
+  type IntakeOption,
   type Beneficiary,
   type FileRef,
 } from "@/lib/iul-intake/fields";
@@ -721,6 +722,51 @@ const selectCls =
   "flex h-12 w-full rounded-md border border-input bg-background px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 sm:h-11 sm:text-sm";
 const inputBase = "h-12 text-base focus-visible:ring-brand sm:h-11 sm:text-sm";
 
+/** Two-option questions (Yes/No, Sex, etc.) as tappable radio cards — left unselected by default. */
+function RadioOptions({
+  id,
+  options,
+  value,
+  locale,
+  invalid,
+  onChange,
+}: {
+  id: string;
+  options: IntakeOption[];
+  value: string;
+  locale: IntakeLocale;
+  invalid?: boolean;
+  onChange: (v: string) => void;
+}) {
+  return (
+    <div role="radiogroup" className="grid grid-cols-2 gap-2">
+      {options.map((opt) => {
+        const selected = value === opt.value;
+        return (
+          <label
+            key={opt.value}
+            className={`flex min-h-[3rem] cursor-pointer items-center justify-center gap-2 rounded-md border px-3 py-2.5 text-center text-base leading-tight transition sm:min-h-[2.75rem] sm:text-sm ${
+              selected
+                ? "border-brand bg-brand/5 font-medium text-brand ring-1 ring-brand"
+                : `${invalid ? "border-red-500" : "border-input"} text-foreground hover:border-brand`
+            }`}
+          >
+            <input
+              type="radio"
+              name={id}
+              value={opt.value}
+              checked={selected}
+              onChange={() => onChange(opt.value)}
+              className="h-4 w-4 shrink-0 accent-brand"
+            />
+            {optionLabel(opt, locale)}
+          </label>
+        );
+      })}
+    </div>
+  );
+}
+
 function FieldInput({
   field,
   locale,
@@ -779,21 +825,33 @@ function FieldInput({
       </div>
 
       {field.type === "select" ? (
-        <select
-          id={id}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className={`${selectCls} ${invalidCls}`}
-        >
-          <option value="">{tr(UI.choose, locale)}</option>
-          {field.options
-            ?.filter((opt) => isOwner || !opt.ownerOnly)
-            .map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {optionLabel(opt, locale)}
-              </option>
-            ))}
-        </select>
+        field.options && field.options.length === 2 ? (
+          // Two-option questions (Yes/No, Sex, etc.) render as tappable radio buttons.
+          <RadioOptions
+            id={id}
+            options={field.options.filter((opt) => isOwner || !opt.ownerOnly)}
+            value={value}
+            locale={locale}
+            invalid={showInvalid}
+            onChange={onChange}
+          />
+        ) : (
+          <select
+            id={id}
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            className={`${selectCls} ${invalidCls}`}
+          >
+            <option value="">{tr(UI.choose, locale)}</option>
+            {field.options
+              ?.filter((opt) => isOwner || !opt.ownerOnly)
+              .map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {optionLabel(opt, locale)}
+                </option>
+              ))}
+          </select>
+        )
       ) : field.type === "country" ? (
         <select
           id={id}
