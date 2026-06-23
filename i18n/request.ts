@@ -64,6 +64,14 @@ async function loadSplitMessages(locale: string): Promise<Record<string, any>> {
     } catch {
       // File doesn't exist, skip
     }
+
+    // Load IUL apply (public self-service) messages if they exist
+    try {
+      const iulApply = (await import(`@/messages/${locale}/iul/apply.json`)).default;
+      Object.assign(splitMessages, iulApply);
+    } catch {
+      // File doesn't exist, skip
+    }
     
     // Load IUL quote messages if they exist
     try {

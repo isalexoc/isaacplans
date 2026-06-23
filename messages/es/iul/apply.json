@@ -1,0 +1,56 @@
+{
+  "iulApply": {
+    "meta": {
+      "title": "Solicita un IUL | Isaac Plans",
+      "description": "Comienza tu solicitud de Seguro de Vida Universal Indexado en línea — segura, guiada y en solo unos minutos.",
+      "image": "https://www.isaacplans.com/images/iul_es.png",
+      "imageAlt": "Solicita un IUL con Isaac Plans"
+    },
+    "hero": {
+      "badge": "Vida Universal Indexada",
+      "title": "Crea patrimonio con ventajas fiscales y protege a tu familia",
+      "subtitle": "Mira el video corto a continuación y luego comienza tu solicitud segura en línea. Solo toma unos minutos y tu progreso se guarda automáticamente."
+    },
+    "video": {
+      "comingSoon": "Video próximamente"
+    },
+    "benefitsHeading": "¿Por qué un IUL?",
+    "benefits": [
+      {
+        "title": "Crecimiento con ventajas fiscales",
+        "desc": "Tu valor en efectivo puede crecer con impuestos diferidos y se puede acceder libre de impuestos cuando se estructura correctamente."
+      },
+      {
+        "title": "Protección de por vida",
+        "desc": "Un beneficio por fallecimiento que protege a quienes dependen de ti."
+      },
+      {
+        "title": "Ligado al mercado, protegido a la baja",
+        "desc": "Crece según el rendimiento del índice con un piso que te protege en los años de baja."
+      },
+      {
+        "title": "Beneficios en vida",
+        "desc": "Accede a fondos para emergencias, la universidad o el retiro — bajo tus condiciones."
+      }
+    ],
+    "howItWorksHeading": "Cómo solicitar",
+    "steps": [
+      {
+        "title": "Crea tu cuenta",
+        "desc": "Regístrate de forma segura con tu correo o Google. Mantiene tu información privada y te permite continuar más tarde desde cualquier dispositivo."
+      },
+      {
+        "title": "Completa el formulario seguro",
+        "desc": "Responde unas preguntas guiadas. Todo está cifrado y se guarda automáticamente a medida que avanzas."
+      },
+      {
+        "title": "Revisamos y te contactamos",
+        "desc": "Una vez que envíes, revisamos tu solicitud y te contactamos para finalizar todo."
+      }
+    ],
+    "secureNote": "Tu información está cifrada y nunca se comparte. Este proceso es 100% seguro.",
+    "cta": "Solicitar ahora",
+    "ctaNote": "Primero iniciarás sesión para mantener tu solicitud privada.",
+    "starting": "Iniciando tu solicitud…"
+  }
+}
