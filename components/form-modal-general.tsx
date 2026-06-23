@@ -20,6 +20,8 @@ interface QuoteModalProps {
   setOpen?: (v: boolean) => void;
   /** ACA lead form (e.g. Get Covered Fast when quiz → ACA); default is contact form. */
   formVariant?: "contact" | "aca";
+  /** IUL context (e.g. an IUL blog post) — show an "Apply now" CTA on form success. */
+  iulApply?: boolean;
 }
 
 /** Modal for site-wide “Get in touch” — same lead capture as /contact (create-contact). */
@@ -27,6 +29,7 @@ export const QuoteModalGeneral = ({
   open,
   setOpen,
   formVariant = "contact",
+  iulApply = false,
 }: QuoteModalProps = {}) => {
   const [internalOpen, setInternalOpen] = useState(false);
   const actualOpen = open ?? internalOpen;
@@ -137,6 +140,7 @@ export const QuoteModalGeneral = ({
                   ) : (
                     <ContactLeadForm
                       onCloseModal={() => actualSetOpen(false)}
+                      iulApply={iulApply}
                     />
                   )}
                 </div>
