@@ -6,6 +6,7 @@ import { Link } from "@/i18n/navigation";
 import { Loader2 } from "lucide-react";
 import PhoneInput, { parsePhoneNumber } from "react-phone-number-input";
 import "react-phone-number-input/style.css";
+import IulApplySuccessCta from "@/components/iul-apply-success-cta";
 
 function toE164OrUndefined(phone: string | undefined): string | undefined {
   if (!phone?.trim()) return undefined;
@@ -22,7 +23,7 @@ interface LeadMagnetFormProps {
   };
 }
 
-export function LeadMagnetForm({ slug, leadFormSettings }: LeadMagnetFormProps) {
+export function LeadMagnetForm({ slug, category, leadFormSettings }: LeadMagnetFormProps) {
   const locale = useLocale();
   const isES = locale.startsWith("es");
 
@@ -142,6 +143,7 @@ export function LeadMagnetForm({ slug, leadFormSettings }: LeadMagnetFormProps) 
             </a>
           </p>
         )}
+        {category === "iul" && <IulApplySuccessCta />}
       </div>
     );
   }

@@ -34,6 +34,9 @@ export const IUL_INTAKE_LINK_SENT_TAG = "iul_intake_link_sent";
 /** Contact tag that marks a Spanish-speaking client → the saved link uses the /es locale. */
 export const IUL_SPANISH_TAG = "spanish";
 
+/** Contact tag that marks an English-speaking client (locale segmentation counterpart). */
+export const IUL_ENGLISH_TAG = "english";
+
 /** Contact tag applied when a prospect self-starts an application from the public apply page. */
 export const IUL_SELF_APPLY_TAG = "iul_self_apply";
 
@@ -181,7 +184,7 @@ export async function selfStartIntakeForClient(input: {
         "[IUL_SELF_APPLY]"
       );
       if (crmContactId) {
-        const tags = [IUL_SELF_APPLY_TAG, ...(locale === "es" ? [IUL_SPANISH_TAG] : [])];
+        const tags = [IUL_SELF_APPLY_TAG, locale === "es" ? IUL_SPANISH_TAG : IUL_ENGLISH_TAG];
         await agentCrmAddContactTags(crmContactId, tags, creds.token, "[IUL_SELF_APPLY]");
       }
     } catch (e) {
