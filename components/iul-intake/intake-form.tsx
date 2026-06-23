@@ -233,13 +233,15 @@ export default function IntakeForm({ token }: { token: string }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loadState, isOwner]);
 
-  // US citizens always have an SSN — auto-select it (the idType question is hidden for them).
+  // US citizens always have an SSN and US citizenship — auto-fill both (the redundant
+  // SSN/ITIN and country-of-citizenship questions are hidden for them).
   useEffect(() => {
-    if (loadState !== "ready") return;
-    if (data.usCitizen === "yes" && data.idType !== "SSN") {
-      setData((prev) => ({ ...prev, idType: "SSN" }));
-    }
-  }, [loadState, data.usCitizen, data.idType]);
+    if (loadState !== "ready" || data.usCitizen !== "yes") return;
+    const patch: Record<string, unknown> = {};
+    if (data.idType !== "SSN") patch.idType = "SSN";
+    if (data.countryOfCitizenship !== "United States") patch.countryOfCitizenship = "United States";
+    if (Object.keys(patch).length) setData((prev) => ({ ...prev, ...patch }));
+  }, [loadState, data.usCitizen, data.idType, data.countryOfCitizenship]);
 
   // Keep step in range when the section list changes (role resolves after load).
   useEffect(() => {
@@ -509,8 +511,10 @@ export default function IntakeForm({ token }: { token: string }) {
           {current.fields.map((field) => {
             if (!isFieldVisible(field, data)) return null;
             if (field.ownerOnly && !isOwner) return null;
-            // US citizens always have an SSN — hide the redundant SSN/ITIN choice (auto-set to SSN).
-            if (field.key === "idType" && data.usCitizen === "yes") return null;
+            // US citizens: hide the redundant SSN/ITIN choice and country-of-citizenship
+            // questions (both auto-filled to SSN / United States above).
+            if (data.usCitizen === "yes" && (field.key === "idType" || field.key === "countryOfCitizenship"))
+              return null;
 
             if (field.type === "beneficiaries") {
               return (
