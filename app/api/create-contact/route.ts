@@ -675,6 +675,22 @@ export async function POST(request: NextRequest) {
       getCoveredFastTags.push(getCoveredFastData.language === 'es' ? 'Spanish' : 'English');
     }
 
+    // Lowercase locale tag for every line of business (coexists with the capitalized tags above) —
+    // one consistent language convention site-wide, matching the IUL apply/intake flow.
+    const localeTags: string[] = [];
+    const leadLanguage =
+      iulLeadGenData?.language ||
+      shortTermMedicalData?.language ||
+      contactPageData?.language ||
+      acaData?.language ||
+      dentalVisionData?.language ||
+      hospitalIndemnityData?.language ||
+      finalExpenseData?.language ||
+      getCoveredFastData?.language;
+    if (typeof leadLanguage === 'string' && leadLanguage.trim()) {
+      localeTags.push(leadLanguage.toLowerCase().startsWith('es') ? 'spanish' : 'english');
+    }
+
     // Determine lead source for CRM routing (prevents IUL workflow from auto-triggering on specialty page leads)
     const leadSource = shortTermMedicalData
       ? "short_term_medical"
@@ -740,6 +756,10 @@ export async function POST(request: NextRequest) {
     // Add tags for Get Covered Fast funnel
     if (getCoveredFastTags.length > 0) {
       contactPayload.tags = [...(contactPayload.tags || []), ...getCoveredFastTags];
+    }
+    // Add lowercase locale tag (all lines of business)
+    if (localeTags.length > 0) {
+      contactPayload.tags = [...(contactPayload.tags || []), ...localeTags];
     }
 
     const consumerGuideTagSources = [
@@ -875,6 +895,8 @@ export async function POST(request: NextRequest) {
             ...hospitalIndemnityTags,
             ...iulLeadGenTags,
             ...finalExpenseTags,
+            ...getCoveredFastTags,
+            ...localeTags,
           ];
 
           const buildMergePayload = async (

@@ -8,6 +8,7 @@ import {
   toIntakeSummary,
   INTAKE_PAGE_SIZE,
   IUL_SPANISH_TAG,
+  IUL_ENGLISH_TAG,
   type IntakeStatus,
 } from "@/lib/iul-intake/server";
 import {
@@ -161,9 +162,14 @@ export async function POST(request: NextRequest) {
           creds.token,
           "[IUL_INTAKE]"
         );
-        // Spanish preference → tag the contact so the link (and your workflows) use /es.
-        if (crmContactId && locale === "es") {
-          await agentCrmAddContactTags(crmContactId, [IUL_SPANISH_TAG], creds.token, "[IUL_INTAKE]");
+        // Tag the contact's language — the saved link locale + your workflows branch on it.
+        if (crmContactId) {
+          await agentCrmAddContactTags(
+            crmContactId,
+            [locale === "es" ? IUL_SPANISH_TAG : IUL_ENGLISH_TAG],
+            creds.token,
+            "[IUL_INTAKE]"
+          );
         }
       } else {
         console.warn("[iul-intake] Agent CRM credentials missing; creating unlinked session.");
