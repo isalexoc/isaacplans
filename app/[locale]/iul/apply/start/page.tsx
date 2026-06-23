@@ -18,10 +18,10 @@ export default async function IulApplyStartPage() {
   const locale = await getLocale();
   const { userId } = await auth();
 
-  // Localized path back to this page after sign-in.
-  const startPath = locale === "es" ? "/iul/aplicar/start" : "/iul/apply/start";
+  // Auth happens via the Clerk modal on the landing page (this app has no /sign-in route).
+  // If someone lands here logged out (e.g. direct navigation), send them back to apply.
   if (!userId) {
-    redirect(`/${locale}/sign-in?redirect_url=/${locale}${startPath}`);
+    redirect(locale === "es" ? "/es/iul/aplicar" : "/en/iul/apply");
   }
 
   const user = await currentUser();

@@ -1,16 +1,14 @@
 /* app/[locale]/iul/apply/page.tsx — public IUL "Apply now" landing (noindex until launched). */
 
 import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
-import { Link } from "@/i18n/navigation";
-import { Button } from "@/components/ui/button";
+import { getLocale, getTranslations } from "next-intl/server";
 import IulApplyVideo from "@/components/iul-apply-video";
+import IulApplyCta from "@/components/iul-apply-cta";
 import {
   ShieldCheck,
   TrendingUp,
   HeartHandshake,
   PiggyBank,
-  ArrowRight,
   Lock,
   type LucideIcon,
 } from "lucide-react";
@@ -38,8 +36,16 @@ const BENEFIT_ICONS: LucideIcon[] = [TrendingUp, ShieldCheck, HeartHandshake, Pi
 
 export default async function IulApplyPage() {
   const t = await getTranslations("iulApply");
+  const locale = await getLocale();
   const benefits = t.raw("benefits") as Card[];
   const steps = t.raw("steps") as Card[];
+  // Localized path Clerk returns to after the sign-in/sign-up modal.
+  const startHref = locale === "es" ? "/es/iul/aplicar/start" : "/en/iul/apply/start";
+  // Placeholder image until the agent's recording is set via NEXT_PUBLIC_IUL_APPLY_VIDEO_URL.
+  const heroImage =
+    locale === "es"
+      ? "https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_1280,c_limit/v1767070515/quote_iul_es_bcqglt.png"
+      : "https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_1280,c_limit/v1767070514/quote_iul_en_cxwq4x.png";
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-950 dark:to-gray-950">
@@ -57,22 +63,18 @@ export default async function IulApplyPage() {
           </p>
         </div>
 
-        {/* Video */}
+        {/* Media (placeholder image until the video is set) */}
         <div className="mt-8">
-          <IulApplyVideo comingSoonLabel={t("video.comingSoon")} />
+          <IulApplyVideo
+            comingSoonLabel={t("video.comingSoon")}
+            imageUrl={heroImage}
+            imageAlt={t("meta.imageAlt")}
+          />
         </div>
 
         {/* Primary CTA */}
         <div className="mt-8 flex flex-col items-center gap-2">
-          <Button
-            asChild
-            size="lg"
-            className="gap-2 bg-gradient-to-r from-brand to-accent px-8 text-base text-white shadow-md shadow-brand/30 transition hover:opacity-95"
-          >
-            <Link href="/iul/apply/start">
-              {t("cta")} <ArrowRight className="h-5 w-5" />
-            </Link>
-          </Button>
+          <IulApplyCta label={t("cta")} startHref={startHref} />
           <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <Lock className="h-3.5 w-3.5" /> {t("ctaNote")}
           </p>
@@ -132,15 +134,7 @@ export default async function IulApplyPage() {
         </div>
 
         <div className="mt-8 flex justify-center">
-          <Button
-            asChild
-            size="lg"
-            className="gap-2 bg-gradient-to-r from-brand to-accent px-8 text-base text-white shadow-md shadow-brand/30 transition hover:opacity-95"
-          >
-            <Link href="/iul/apply/start">
-              {t("cta")} <ArrowRight className="h-5 w-5" />
-            </Link>
-          </Button>
+          <IulApplyCta label={t("cta")} startHref={startHref} />
         </div>
       </div>
     </main>
