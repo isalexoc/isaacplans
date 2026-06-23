@@ -193,7 +193,9 @@ export default function IntakeForm({ token }: { token: string }) {
   const [missing, setMissing] = useState<Set<string>>(new Set());
   const [errors, setErrors] = useState<Record<string, FieldErrorKey>>({});
   const [completeError, setCompleteError] = useState<string | null>(null);
-  const [reveal, setReveal] = useState(false);
+  // Sensitive fields (SSN/ITIN, driver's license #, routing/account #, beneficiary SSN) show
+  // their value by default so users can see what they type; owners can still toggle Hide.
+  const [reveal, setReveal] = useState(true);
   const cardRef = useRef<HTMLDivElement | null>(null);
   const reduceMotion = useReducedMotion();
 
