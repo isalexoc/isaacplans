@@ -213,6 +213,10 @@ export const UI = {
     es: "Corrija los campos resaltados antes de continuar.",
   } as Dict,
   pleaseComplete: { en: "Please complete:", es: "Por favor complete:" } as Dict,
+  benNeedTwo: {
+    en: "at least 2 beneficiaries — each with name, relationship, and %",
+    es: "al menos 2 beneficiarios — cada uno con nombre, parentesco y %",
+  } as Dict,
 
   // View
   viewTitle: { en: "Client summary", es: "Resumen del cliente" } as Dict,

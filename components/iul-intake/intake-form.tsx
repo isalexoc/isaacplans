@@ -59,7 +59,7 @@ import {
 } from "@/lib/iul-intake/validation";
 import { digitsToStored, formatMoneyDisplay } from "@/lib/iul-intake/money";
 import { countriesFor } from "@/lib/iul-intake/countries";
-import type { IntakeData } from "@/lib/iul-intake/schema";
+import { sectionMissingFields, type IntakeData } from "@/lib/iul-intake/schema";
 import type { IntakeSession } from "@/lib/iul-intake/types";
 import {
   UI,
@@ -301,14 +301,24 @@ export default function IntakeForm({ token }: { token: string }) {
     return after ?? sectionsWithMissing[0];
   }
 
-  // After a failed Finish, auto-advance once the current step is fully fixed.
-  useEffect(() => {
-    if (!sectionsWithMissing.length) return;
-    if (!sectionsWithMissing.includes(step)) {
-      setStep(nextIssueIndex(step));
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sectionsWithMissing, step]);
+  // A section is "complete" when it has no missing/invalid fields AND has actually been filled
+  // in (so untouched, all-optional sections don't show as done from the start).
+  const sectionComplete = useMemo(
+    () =>
+      sections.map((section) => {
+        if (sectionMissingFields(section, data).length) return false;
+        return section.fields.some((f) => {
+          if (!isFieldVisible(f, data)) return false;
+          if (f.type === "beneficiaries") {
+            const list = Array.isArray(data.beneficiaries) ? data.beneficiaries : [];
+            return list.some((b) => Object.values(b).some((v) => String(v ?? "").trim()));
+          }
+          const v = data[f.key];
+          return Array.isArray(v) ? v.length > 0 : String(v ?? "").trim() !== "";
+        });
+      }),
+    [sections, data]
+  );
 
   // Clear the error banner once every flagged field has been fixed.
   useEffect(() => {
@@ -316,9 +326,49 @@ export default function IntakeForm({ token }: { token: string }) {
   }, [missing, completeError]);
 
   function goNext() {
-    // Free navigation — required/format are only enforced at Finish on the last step.
     setCompleteError(null);
     setStep((s) => Math.min(sections.length - 1, s + 1));
+  }
+
+  // Clients must complete the current step before advancing; admins move freely.
+  function handleNext() {
+    if (!isOwner) {
+      const miss = sectionMissingFields(current, data);
+      if (miss.length) {
+        setMissing((prev) => {
+          const next = new Set(prev);
+          miss.forEach((k) => next.add(k));
+          return next;
+        });
+        // Surface inline format errors for malformed (non-empty) fields too.
+        const fmt: Record<string, FieldErrorKey> = {};
+        for (const field of current.fields) {
+          if (!isFieldVisible(field, data)) continue;
+          const v = typeof data[field.key] === "string" ? (data[field.key] as string) : "";
+          const err = fieldFormatError(field, v);
+          if (err) fmt[field.key] = err;
+        }
+        if (Object.keys(fmt).length) setErrors((prev) => ({ ...prev, ...fmt }));
+        setCompleteError(summarizeMissing(miss));
+        cardRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+        return;
+      }
+    }
+    goNext();
+  }
+
+  // Friendly, label-based summary instead of raw field keys (beneficiaries gets its own copy).
+  function summarizeMissing(keys: string[]): string {
+    const labels = keys
+      .map((k) =>
+        k === "beneficiaries"
+          ? tr(UI.benNeedTwo, locale)
+          : fieldByKey(k)
+            ? fieldLabel(fieldByKey(k)!, locale)
+            : k
+      )
+      .filter(Boolean);
+    return labels.length ? `${tr(UI.pleaseComplete, locale)} ${labels.join(", ")}` : tr(UI.missingFields, locale);
   }
 
   async function handleFinish() {
@@ -332,14 +382,7 @@ export default function IntakeForm({ token }: { token: string }) {
       } else {
         const miss = new Set(result.missing ?? []);
         setMissing(miss);
-        // Friendly, label-based summary instead of raw field keys.
-        const labels = (result.missing ?? [])
-          .map((k) => (k === "beneficiaries" ? tr(UI.beneficiary, locale) : fieldByKey(k) ? fieldLabel(fieldByKey(k)!, locale) : k))
-          .filter(Boolean);
-        const summary = labels.length
-          ? `${tr(UI.pleaseComplete, locale)} ${labels.join(", ")}`
-          : result.message || tr(UI.missingFields, locale);
-        setCompleteError(summary);
+        setCompleteError(summarizeMissing(result.missing ?? []));
         if (miss.size) {
           const idx = sections.findIndex((s) => s.fields.some((f) => miss.has(f.key)));
           if (idx >= 0) setStep(idx);
@@ -532,7 +575,7 @@ export default function IntakeForm({ token }: { token: string }) {
           <p className="flex items-start gap-1.5 text-sm text-red-600">
             <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" /> {completeError}
           </p>
-          {sectionsWithMissing.length > 0 && (
+          {isOwner && sectionsWithMissing.length > 0 && (
             <div className="mt-2 flex items-center justify-between gap-3">
               <span className="text-xs font-medium text-red-600">
                 {sectionsWithMissing.length} {tr(UI.stepsNeedAttention, locale)}
@@ -564,7 +607,7 @@ export default function IntakeForm({ token }: { token: string }) {
         {step < sections.length - 1 ? (
           <Button
             size="lg"
-            onClick={goNext}
+            onClick={handleNext}
             className="flex-1 gap-2 bg-gradient-to-r from-brand to-accent text-white shadow-md shadow-brand/30 transition active:scale-[0.98] hover:opacity-95 sm:flex-none sm:min-w-44"
           >
             {tr(UI.next, locale)} <ArrowRight className="h-4 w-4" />
@@ -589,33 +632,43 @@ export default function IntakeForm({ token }: { token: string }) {
         )}
       </div>
 
-      {/* Bottom step navigation — jump directly to any step. */}
-      <nav className="mt-6 flex flex-wrap items-center justify-center gap-2" aria-label={sectionTitle(current, locale)}>
-        {sections.map((s, i) => {
-          const Icon = SECTION_ICONS[s.key] ?? FileText;
-          const isCurrent = i === step;
-          const hasIssue = sectionsWithMissing.includes(i);
-          return (
-            <button
-              key={s.key}
-              type="button"
-              onClick={() => setStep(i)}
-              title={sectionTitle(s, locale)}
-              aria-current={isCurrent ? "step" : undefined}
-              className={`relative flex h-9 w-9 items-center justify-center rounded-full border text-xs transition ${
-                isCurrent
-                  ? "border-brand bg-brand text-white shadow-sm"
-                  : "border-input bg-background text-muted-foreground hover:border-brand hover:text-brand"
-              }`}
-            >
-              <Icon className="h-4 w-4" />
-              {hasIssue && !isCurrent && (
-                <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-white dark:ring-gray-950" />
-              )}
-            </button>
-          );
-        })}
-      </nav>
+      {/* Bottom step navigation — admins jump to any step; clients move linearly (Back/Next). */}
+      {isOwner && (
+        <nav className="mt-6 flex flex-wrap items-center justify-center gap-2" aria-label={tr(UI.step, locale)}>
+          {sections.map((s, i) => {
+            const Icon = SECTION_ICONS[s.key] ?? FileText;
+            const isCurrent = i === step;
+            const hasIssue = sectionsWithMissing.includes(i);
+            const done = sectionComplete[i] && !hasIssue;
+            return (
+              <button
+                key={s.key}
+                type="button"
+                onClick={() => setStep(i)}
+                title={sectionTitle(s, locale)}
+                aria-current={isCurrent ? "step" : undefined}
+                className={`relative flex h-9 w-9 items-center justify-center rounded-full border text-xs transition ${
+                  isCurrent
+                    ? "border-brand bg-brand text-white shadow-sm"
+                    : done
+                      ? "border-green-500 bg-green-50 text-green-600 dark:bg-green-950"
+                      : "border-input bg-background text-muted-foreground hover:border-brand hover:text-brand"
+                }`}
+              >
+                <Icon className="h-4 w-4" />
+                {hasIssue && !isCurrent && (
+                  <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-white dark:ring-gray-950" />
+                )}
+                {done && !isCurrent && (
+                  <span className="absolute -right-0.5 -top-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-green-500 text-white ring-2 ring-white dark:ring-gray-950">
+                    <Check className="h-2.5 w-2.5" />
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </nav>
+      )}
     </div>
   );
 }

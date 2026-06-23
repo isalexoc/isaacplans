@@ -12,6 +12,7 @@ import {
   MAX_BENEFICIARIES,
   isFieldVisible,
   type Beneficiary,
+  type IntakeSection,
 } from "./fields";
 import { fieldFormatError } from "./validation";
 
@@ -66,33 +67,39 @@ export type CompletionCheck = {
   message?: string;
 };
 
+/**
+ * Required/format-invalid field keys for a single section (respects conditional visibility).
+ * Used both for whole-form completion and to gate a client's step-by-step progression.
+ */
+export function sectionMissingFields(section: IntakeSection, data: IntakeData): string[] {
+  const missing: string[] = [];
+  for (const field of section.fields) {
+    if (!isFieldVisible(field, data)) continue;
+
+    if (field.type === "beneficiaries") {
+      if (field.required && !beneficiariesValid(data).ok) missing.push("beneficiaries");
+      continue;
+    }
+
+    const value = str(data[field.key]);
+
+    // Required-but-empty.
+    if (field.required && !value) {
+      missing.push(field.key);
+      continue;
+    }
+
+    // Present but clearly malformed (email/phone/zip/ssn/routing/age/dob).
+    if (value && fieldFormatError(field, value)) missing.push(field.key);
+  }
+  return missing;
+}
+
 /** Required-field check used at completion time. Respects conditional visibility. */
 export function validateForCompletion(data: IntakeData): CompletionCheck {
   const missing: string[] = [];
-
   for (const section of INTAKE_SECTIONS) {
-    for (const field of section.fields) {
-      if (!isFieldVisible(field, data)) continue;
-
-      if (field.type === "beneficiaries") {
-        if (field.required) {
-          const result = beneficiariesValid(data);
-          if (!result.ok) missing.push("beneficiaries");
-        }
-        continue;
-      }
-
-      const value = str(data[field.key]);
-
-      // Required-but-empty.
-      if (field.required && !value) {
-        missing.push(field.key);
-        continue;
-      }
-
-      // Present but clearly malformed (email/phone/zip/ssn/routing/age/dob).
-      if (value && fieldFormatError(field, value)) missing.push(field.key);
-    }
+    missing.push(...sectionMissingFields(section, data));
   }
 
   return {
