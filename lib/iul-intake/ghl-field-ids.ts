@@ -43,10 +43,12 @@ export type GhlFieldSlug =
   | "employer_state"
   | "employer_zip"
   | "work_phone"
+  | "employment_notes"
   | "gross_income_current"
   | "gross_income_previous"
   | "net_worth"
   | "source_of_funds"
+  | "source_of_funds_other"
   | "beneficiary_1"
   | "beneficiary_2"
   | "beneficiary_3"
@@ -114,10 +116,12 @@ export const ghlFieldIds: Record<GhlFieldSlug, string> = {
   employer_state: "THIo5FxPgWioynhtl0W5",
   employer_zip: "S1XkHEYUuiXrxUuvIZjL",
   work_phone: "PisVRPrCVlSbLn7ZpBUP",
+  employment_notes: "n0rLwv1S92ra4fMFhB9i",
   gross_income_current: "nt6WsGlNk2quRuG5sOTy",
   gross_income_previous: "kHtbZjUfHrl2hsdITKiJ",
   net_worth: "dn84UoiVtN2ULT7YtoTn",
   source_of_funds: "yC3QkNiECaU0fF4D9DjL",
+  source_of_funds_other: "IlGeA00FqkOYI2OyJsDE",
   beneficiary_1: "qnEICxN00qC0pzCGAtgc",
   beneficiary_2: "2GE3Y0MxR5UMioeylOOA",
   beneficiary_3: "iZ4T8gZtzjP5QtKg2As4",

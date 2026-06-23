@@ -202,7 +202,11 @@ export const INTAKE_SECTIONS: IntakeSection[] = [
         options: [
           { value: "Employed", labelEn: "Employed", labelEs: "Empleado" },
           { value: "Self-employed", labelEn: "Self-employed", labelEs: "Trabajador independiente" },
-          { value: "Not employed", labelEn: "Not employed", labelEs: "No trabaja" },
+          { value: "Student/Child", labelEn: "Student/Child", labelEs: "Estudiante o menor" },
+          { value: "Disabled", labelEn: "Disabled", labelEs: "Discapacitado" },
+          { value: "Disabled due to back and knees", labelEn: "Disabled due to back and knees", labelEs: "Discapacitado por espalda y rodillas" },
+          { value: "Retired", labelEn: "Retired", labelEs: "Jubilado" },
+          { value: "Other", labelEn: "Other", labelEs: "Otro" },
         ],
       },
       // Shared by employed + self-employed.
@@ -223,6 +227,12 @@ export const INTAKE_SECTIONS: IntakeSection[] = [
       { key: "businessName", labelEn: "Business name", labelEs: "Nombre del negocio", type: "text", crm: native("companyName"), showIf: { field: "employed", equals: "Self-employed" } },
       { key: "businessType", labelEn: "Industry / business type", labelEs: "Industria / tipo de negocio", type: "text", crm: custom("business_type"), showIf: { field: "employed", equals: "Self-employed" } },
       { key: "yearsSelfEmployed", labelEn: "Years self-employed", labelEs: "Años como trabajador independiente", type: "number", maxLength: 2, crm: custom("years_self_employed"), showIf: { field: "employed", equals: "Self-employed" } },
+      // Student/Child, Disabled, Retired, Other — optional context.
+      {
+        key: "employmentNotes", labelEn: "Additional notes", labelEs: "Notas adicionales", type: "textarea", crm: custom("employment_notes"),
+        showIf: { field: "employed", equals: ["Student/Child", "Disabled", "Disabled due to back and knees", "Retired", "Other"] },
+        placeholderEn: "Anything relevant about your situation…", placeholderEs: "Cualquier información relevante sobre su situación…",
+      },
     ],
   },
   {
@@ -237,10 +247,15 @@ export const INTAKE_SECTIONS: IntakeSection[] = [
         key: "sourceOfFunds", labelEn: "Source of funds", labelEs: "Fuente de fondos", type: "select", required: true, crm: custom("source_of_funds"),
         options: [
           { value: "Employment", labelEn: "Employment", labelEs: "Empleo" },
-          { value: "Savings", labelEn: "Savings", labelEs: "Ahorros" },
-          { value: "Investments", labelEn: "Investments", labelEs: "Inversiones" },
+          { value: "Retirement", labelEn: "Retirement", labelEs: "Jubilación" },
+          { value: "Inheritance", labelEn: "Inheritance", labelEs: "Herencia" },
+          { value: "1035 Exchange", labelEn: "1035 Exchange", labelEs: "Intercambio 1035" },
           { value: "Other", labelEn: "Other", labelEs: "Otro" },
         ],
+      },
+      {
+        key: "sourceOfFundsOther", labelEn: "Please explain the source of funds", labelEs: "Explique la fuente de fondos", type: "text", required: true, crm: custom("source_of_funds_other"),
+        showIf: { field: "sourceOfFunds", equals: "Other" },
       },
     ],
   },
