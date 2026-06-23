@@ -17,6 +17,7 @@ function toE164OrUndefined(phone: string | undefined): string | undefined {
   return parsed?.number;
 }
 import { Link } from "@/i18n/navigation";
+import IulApplySuccessCta from "@/components/iul-apply-success-cta";
 
 const initialFormValues: FormValues = {
   firstName: "",
@@ -32,11 +33,14 @@ type ContactLeadFormProps = {
   onCloseModal?: () => void;
   /** Passed to create-contact as contactPageData.source */
   source?: string;
+  /** IUL context (e.g. an IUL blog post) — show an "Apply now" CTA on success. */
+  iulApply?: boolean;
 };
 
 export default function ContactLeadForm({
   onCloseModal,
   source = "contact_page",
+  iulApply = false,
 }: ContactLeadFormProps = {}) {
   const locale = useLocale();
   const isES = locale.startsWith("es");
@@ -118,6 +122,7 @@ export default function ContactLeadForm({
               {t("successScheduleAppointment")}
             </Link>
           </div>
+          {iulApply && <IulApplySuccessCta />}
         </div>
       </div>
     );

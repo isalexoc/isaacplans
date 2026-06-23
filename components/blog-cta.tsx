@@ -146,7 +146,11 @@ export default function BlogCTA({
         </Button>
       </div>
       {ctaType === "quote" && (
-        <QuoteModalGeneral open={openModal} setOpen={setOpenModal} />
+        <QuoteModalGeneral
+          open={openModal}
+          setOpen={setOpenModal}
+          iulApply={postCategory === "iul"}
+        />
       )}
       {ctaType === "guide" && leadMagnet && leadMagnet.type !== "guide" && leadMagnet.file && (
         <BlogLeadMagnetModal
