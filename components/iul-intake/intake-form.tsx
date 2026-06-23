@@ -204,7 +204,10 @@ export default function IntakeForm({ token }: { token: string }) {
         const s = await fetchIntake(token);
         if (!active) return;
         setSession(s);
-        setData(s.data ?? {});
+        const initial = { ...(s.data ?? {}) };
+        // Default the premium payment mode to Monthly when not yet chosen.
+        if (!initial.premiumPaymentMode) initial.premiumPaymentMode = "Monthly";
+        setData(initial);
         setCompleted(s.status === "completed");
         setLoadState("ready");
       } catch {
