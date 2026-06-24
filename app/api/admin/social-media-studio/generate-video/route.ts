@@ -7,7 +7,8 @@ import type {
   SocialLocale,
 } from "@/lib/social-media-studio/types";
 
-export const maxDuration = 60;
+// TTS + caption transcription + per-scene uploads run before the render is submitted.
+export const maxDuration = 300;
 
 export async function POST(req: Request) {
   const { userId } = await auth();

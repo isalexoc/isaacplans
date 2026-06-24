@@ -3,6 +3,9 @@ import cloudinary from "@/config/cloudinary";
 import { getDemographicHint, pickVariationMood } from "./image-generator";
 import { musicUrlForCategory } from "./video-music";
 import { HEYGEN_CHROMA_COLOR } from "./heygen-presenter";
+import { synthesizeSceneVoiceover, captionsFromUrl, type SceneVoiceover } from "./voiceover";
+import { shotstackProvider } from "./render/shotstack";
+import type { RenderPlan, RenderPlanScene, RenderPlanClip, RenderPlanCaption, RenderPlanPresenter } from "./render/types";
 import type {
   SocialPostSource,
   VideoScript,
@@ -12,6 +15,14 @@ import type {
   VideoRenderStatus,
   SocialLocale,
 } from "./types";
+
+// Render engine selection. Default "shotstack" (pay-as-you-go, decoupled TTS+captions);
+// set VIDEO_RENDER_PROVIDER=json2video to fall back to the legacy bundled renderer.
+function renderProvider(): "shotstack" | "json2video" {
+  return (process.env.VIDEO_RENDER_PROVIDER || "shotstack").toLowerCase() === "json2video"
+    ? "json2video"
+    : "shotstack";
+}
 
 // ─── Config ─────────────────────────────────────────────────────────────────────
 // JSON2Video assembles the Short (images + Ken Burns motion + ElevenLabs voiceover +
@@ -49,15 +60,18 @@ Rules:
 - CRITICAL IMAGE SAFETY: imageConcept must always be WHOLESOME, POSITIVE and HOPEFUL — happy, healthy, dignified people in warm everyday settings (family at home, outdoors, a friendly advisor meeting, a person smiling). NEVER describe death, dying, funerals, coffins, caskets, graves, cemeteries, grief, crying, illness, disease, hospital beds, medical procedures, blood, injury, frailty, or anything somber, morbid or distressing — even if the narration mentions them. For sensitive topics, show the POSITIVE outcome (a protected, joyful family; peace of mind; a loving moment) instead.
 - The FIRST scene must be a scroll-stopping hook.
 - Keep total narration tight so the whole video fits the target duration when spoken at a natural pace (~2.5 words/second).
-- Write narration AND onScreenText in the SAME language as the source script (English or Spanish). imageConcept is always in English (it prompts an image model).
+- Write narration AND onScreenText in the TARGET LANGUAGE stated in the user message — if the source script is in a different language, TRANSLATE it into the target language. imageConcept is ALWAYS in English (it prompts an image model), regardless of the target language.
 - Do not mention you are an AI. Do not add a disclaimer.`;
 
 function buildStoryboardUserPrompt(
   source: SocialPostSource,
   videoScript: VideoScript,
-  sceneCount: number
+  sceneCount: number,
+  voiceLanguage: SocialLocale
 ): string {
+  const langName = voiceLanguage === "es" ? "Spanish (Español)" : "English";
   return [
+    `TARGET LANGUAGE: ${langName}. Write EVERY "narration" and "onScreenText" value in ${langName} — translate the script below if it is in another language. ("imageConcept" stays in English.)`,
     `Target duration: ${videoScript.duration} seconds → produce exactly ${sceneCount} scenes.`,
     `Topic: ${source.title}`,
     source.subtitle ? `Subtitle: ${source.subtitle}` : "",
@@ -87,7 +101,7 @@ export async function buildVideoStoryboard(
     response_format: { type: "json_object" },
     messages: [
       { role: "system", content: STORYBOARD_SYSTEM_PROMPT },
-      { role: "user",   content: buildStoryboardUserPrompt(source, videoScript, sceneCount) },
+      { role: "user",   content: buildStoryboardUserPrompt(source, videoScript, sceneCount, voiceLanguage) },
     ],
     max_tokens:  2500,
     temperature: 0.7,
@@ -413,7 +427,7 @@ function buildMovieJson(
   return movie;
 }
 
-export async function submitVideoRender(
+async function submitJson2VideoRender(
   storyboard: VideoStoryboard,
   presenter?: { url: string; durationSec: number }
 ): Promise<{ projectId: string }> {
@@ -440,7 +454,7 @@ export async function submitVideoRender(
 
 // ─── Step 3: Poll status + host final mp4 on Cloudinary ──────────────────────────
 
-export async function getVideoRenderStatus(
+async function getJson2VideoStatus(
   projectId: string,
   category?: string
 ): Promise<{ status: VideoRenderStatus; videoUrl?: string; progress?: number; message?: string }> {
@@ -479,4 +493,130 @@ export async function getVideoRenderStatus(
   });
 
   return { status: "done", videoUrl: upload.secure_url };
+}
+
+// ─── Shotstack path (default) — decoupled TTS + captions, pay-as-you-go render ─────
+
+const VIDEO_WIDTH     = 1080;
+const VIDEO_HEIGHT    = 1920;
+const VIDEO_FPS       = 30;
+const PRESENTER_SCALE = 0.5;   // presenter clip width as a fraction of the frame
+
+async function submitShotstackRender(
+  storyboard: VideoStoryboard,
+  presenter?: { url: string; durationSec: number }
+): Promise<{ projectId: string }> {
+  const category     = storyboard.category ?? "general";
+  const locale       = storyboard.voiceLanguage;
+  const cinematic    = Boolean(storyboard.cinematic);
+  const usePresenter = Boolean(storyboard.presenter && presenter);
+
+  // Cinematic scenes use their Veo clip as the background; otherwise the still image.
+  const sceneBg = (s: VideoScene): { backgroundUrl: string; isVideo: boolean } =>
+    cinematic && s.videoClipUrl
+      ? { backgroundUrl: s.videoClipUrl, isVideo: true }
+      : { backgroundUrl: s.imageUrl, isVideo: false };
+
+  const scenes:    RenderPlanScene[]   = [];
+  const voiceover: RenderPlanClip[]    = [];
+  const captions:  RenderPlanCaption[] = [];
+
+  if (usePresenter) {
+    // The HeyGen presenter clip is the master audio; distribute scene durations by narration weight.
+    const durations = presenterSceneDurations(storyboard.scenes, presenter!.durationSec);
+    let t = 0;
+    storyboard.scenes.forEach((s, i) => {
+      scenes.push({ ...sceneBg(s), start: t, length: durations[i] });
+      t += durations[i];
+    });
+    // Captions from transcribing the presenter audio (best-effort).
+    const cues = await captionsFromUrl(presenter!.url, locale);
+    cues.forEach((c) => captions.push({ text: c.text, start: c.start, length: Math.max(0.3, c.end - c.start) }));
+  } else {
+    // Faceless: synthesize each scene's narration (bounded concurrency) → exact durations + captions.
+    // Default 2 to stay under ElevenLabs' per-plan concurrent-request cap (commonly 2–3);
+    // override with ELEVENLABS_TTS_CONCURRENCY once on a higher tier.
+    const CONCURRENCY = Math.max(1, Number(process.env.ELEVENLABS_TTS_CONCURRENCY) || 2);
+    const vo: SceneVoiceover[] = new Array(storyboard.scenes.length);
+    for (let start = 0; start < storyboard.scenes.length; start += CONCURRENCY) {
+      const batch = storyboard.scenes.slice(start, start + CONCURRENCY);
+      await Promise.all(
+        batch.map(async (s, j) => {
+          vo[start + j] = await synthesizeSceneVoiceover(s.narration, locale, category);
+        })
+      );
+    }
+    let t = 0;
+    storyboard.scenes.forEach((s, i) => {
+      const len = vo[i].durationSec;
+      scenes.push({ ...sceneBg(s), start: t, length: len });
+      voiceover.push({ src: vo[i].audioUrl, start: t, length: len });
+      vo[i].captions.forEach((c) =>
+        captions.push({ text: c.text, start: t + c.start, length: Math.max(0.3, c.end - c.start) })
+      );
+      t += len;
+    });
+  }
+
+  const presenterPlan: RenderPlanPresenter | undefined = usePresenter
+    ? {
+        src:         presenter!.url,
+        start:       0,
+        length:      presenter!.durationSec,
+        chromaColor: HEYGEN_CHROMA_COLOR,
+        placement:   storyboard.presenterPlacement === "bottom-right" ? "bottom-right" : "bottom-left",
+        scale:       PRESENTER_SCALE,
+      }
+    : undefined;
+
+  const plan: RenderPlan = {
+    width:     VIDEO_WIDTH,
+    height:    VIDEO_HEIGHT,
+    fps:       VIDEO_FPS,
+    scenes,
+    voiceover,
+    captions,
+    musicUrl:  storyboard.musicUrl || musicUrlForCategory(category),
+    presenter: presenterPlan,
+  };
+
+  const { jobId } = await shotstackProvider.submit(plan);
+  return { projectId: jobId };
+}
+
+async function getShotstackStatus(
+  projectId: string,
+  category?: string
+): Promise<{ status: VideoRenderStatus; videoUrl?: string; progress?: number; message?: string }> {
+  const r = await shotstackProvider.status(projectId);
+  if (r.status === "failed") throw new Error(`Video render failed: ${r.message ?? "no detail"}`);
+  if (r.status !== "done") return { status: "running", progress: r.progress, message: r.message };
+
+  // Done — re-host the rendered mp4 on Cloudinary for a stable, canonical URL.
+  if (!r.videoUrl) throw new Error("Render reported done but returned no video URL");
+  const upload = await cloudinary.uploader.upload(r.videoUrl, {
+    folder:        `social-media/${category ?? "general"}/videos`,
+    resource_type: "video",
+  });
+  return { status: "done", videoUrl: upload.secure_url };
+}
+
+// ─── Public render API (provider-switched; default Shotstack) ──────────────────────
+
+export async function submitVideoRender(
+  storyboard: VideoStoryboard,
+  presenter?: { url: string; durationSec: number }
+): Promise<{ projectId: string }> {
+  return renderProvider() === "json2video"
+    ? submitJson2VideoRender(storyboard, presenter)
+    : submitShotstackRender(storyboard, presenter);
+}
+
+export async function getVideoRenderStatus(
+  projectId: string,
+  category?: string
+): Promise<{ status: VideoRenderStatus; videoUrl?: string; progress?: number; message?: string }> {
+  return renderProvider() === "json2video"
+    ? getJson2VideoStatus(projectId, category)
+    : getShotstackStatus(projectId, category);
 }
