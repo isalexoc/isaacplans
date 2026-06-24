@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { Loader2, RotateCcw } from "lucide-react";
+import { Loader2, RotateCcw, Wand2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
+import { ImagePromptModal } from "./ImagePromptModal";
 
 interface Props {
   postId: string;
@@ -19,6 +20,11 @@ interface Props {
   sourceLocale?: string;
   /** The original (non-branded) source image URL for "use source image" mode */
   sourceImageUrl?: string;
+  /** A previously tuned image prompt — pre-fills the control panel modal */
+  initialCustomPrompt?: string;
+  /** Post content (from the saved generated copy) that feeds the AI image concept */
+  postSubtitle?: string;
+  postBodyText?: string;
 }
 
 async function postJson(url: string, body: unknown) {
@@ -43,6 +49,9 @@ export function HistoryImageRegenerator({
   sourceCategory,
   sourceLocale,
   sourceImageUrl,
+  initialCustomPrompt,
+  postSubtitle,
+  postBodyText,
 }: Props) {
   const [headline, setHeadline]         = useState(initialHeadline);
   const [generateNew, setGenerateNew]   = useState(false);
@@ -51,8 +60,10 @@ export function HistoryImageRegenerator({
   const [isLoading, setIsLoading]       = useState(false);
   const [error, setError]               = useState<string | undefined>();
   const [savedAt, setSavedAt]           = useState<string | undefined>();
+  const [showPromptModal, setShowPromptModal] = useState(false);
+  const [customPrompt, setCustomPrompt] = useState<string | undefined>(initialCustomPrompt);
 
-  const triggerRegeneration = useCallback(async (h: string, newBg: boolean) => {
+  const triggerRegeneration = useCallback(async (h: string, newBg: boolean, prompt?: string) => {
     setIsLoading(true);
     setError(undefined);
     setSavedAt(undefined);
@@ -66,6 +77,9 @@ export function HistoryImageRegenerator({
           category:       sourceCategory,
           sourceTitle:    sourceTitle,
           locale:         sourceLocale,
+          subtitle:       postSubtitle,
+          bodyText:       postBodyText,
+          ...(prompt ? { customPrompt: prompt } : {}),
         }
       );
       if (!result.success) throw new Error(result.error ?? "Generation failed");
@@ -77,7 +91,23 @@ export function HistoryImageRegenerator({
     } finally {
       setIsLoading(false);
     }
-  }, [postId, sourceImageUrl, sourceCategory, sourceTitle, sourceLocale]);
+  }, [postId, sourceImageUrl, sourceCategory, sourceTitle, sourceLocale, postSubtitle, postBodyText]);
+
+  // "Generate new AI image" opens the prompt control panel first; "Use source image"
+  // generates directly (no AI prompt involved).
+  const handleGenerateClick = () => {
+    if (generateNew) {
+      setShowPromptModal(true);
+    } else {
+      triggerRegeneration(headline, false);
+    }
+  };
+
+  const handleModalGenerate = (finalPrompt: string) => {
+    setCustomPrompt(finalPrompt);
+    setShowPromptModal(false);
+    triggerRegeneration(headline, true, finalPrompt);
+  };
 
   return (
     <div className="space-y-5">
@@ -116,7 +146,7 @@ export function HistoryImageRegenerator({
 
       {/* Generate button */}
       <Button
-        onClick={() => triggerRegeneration(headline, generateNew)}
+        onClick={handleGenerateClick}
         disabled={isLoading || !headline.trim()}
         className="w-fit"
       >
@@ -124,6 +154,11 @@ export function HistoryImageRegenerator({
           <>
             <Loader2 className="h-4 w-4 mr-2 animate-spin" />
             Generating… (20–60 s)
+          </>
+        ) : generateNew ? (
+          <>
+            <Wand2 className="h-4 w-4 mr-2" />
+            Generate with AI
           </>
         ) : (
           <>
@@ -138,13 +173,30 @@ export function HistoryImageRegenerator({
         <div className="flex items-center gap-3 rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
           <span className="flex-1">{error}</span>
           <button
-            onClick={() => { setError(undefined); triggerRegeneration(headline, generateNew); }}
+            onClick={() => { setError(undefined); handleGenerateClick(); }}
             className="shrink-0 underline hover:no-underline"
           >
             Retry
           </button>
         </div>
       )}
+
+      {/* Prompt control panel */}
+      <ImagePromptModal
+        open={showPromptModal}
+        onOpenChange={setShowPromptModal}
+        previewParams={{
+          headline,
+          category:    sourceCategory,
+          sourceTitle: sourceTitle,
+          locale:      sourceLocale,
+          subtitle:    postSubtitle,
+          bodyText:    postBodyText,
+        }}
+        initialPrompt={customPrompt}
+        isGenerating={isLoading}
+        onGenerate={handleModalGenerate}
+      />
 
       {/* Saved confirmation */}
       {savedAt && !isLoading && (

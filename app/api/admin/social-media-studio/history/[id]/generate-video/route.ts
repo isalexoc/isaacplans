@@ -11,7 +11,9 @@ import type {
   SocialLocale,
 } from "@/lib/social-media-studio/types";
 
-export const maxDuration = 60;
+// Decoupled render prep (ElevenLabs TTS + Whisper captions + Cloudinary uploads for every
+// scene) runs synchronously before the render is submitted, so allow the longer window.
+export const maxDuration = 300;
 
 function getWriteClient() {
   if (!process.env.SANITY_API_WRITE_TOKEN) throw new Error("SANITY_API_WRITE_TOKEN is not configured");

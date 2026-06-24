@@ -43,7 +43,9 @@ export async function PATCH(
       return NextResponse.json({ success: false, error: msg }, { status: 500 });
     }
 
-    // Persist new image URLs back to the Sanity document
+    // Persist new image URLs back to the Sanity document. When a tuned prompt was used,
+    // remember it on the document so the control panel pre-fills it next time. Don't
+    // clobber a saved prompt on "use source image" generations (no customPrompt sent).
     const sanity = getWriteClient();
     await sanity
       .patch(id)
@@ -52,6 +54,7 @@ export async function PATCH(
         verticalImageUrl: images.vertical,
         imageHeadline:    images.headline,
         updatedAt:        new Date().toISOString(),
+        ...(body.customPrompt?.trim() ? { customImagePrompt: body.customPrompt.trim() } : {}),
       })
       .commit();
 
