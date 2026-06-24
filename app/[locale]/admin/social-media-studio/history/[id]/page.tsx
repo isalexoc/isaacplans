@@ -25,6 +25,7 @@ const DETAIL_QUERY = `*[_type == "socialPost" && _id == $id][0] {
   squareImageUrl,
   verticalImageUrl,
   imageHeadline,
+  customImagePrompt,
   videoScript,
   videoUrl,
   videoImages,
@@ -60,6 +61,7 @@ interface SocialPostDetail {
   squareImageUrl?: string;
   verticalImageUrl?: string;
   imageHeadline?: string;
+  customImagePrompt?: string;
   videoScript?: VideoScript;
   videoUrl?: string;
   videoImages?: { url?: string; concept?: string; createdAt?: string }[];
@@ -124,6 +126,18 @@ export default async function SocialPostDetailPage({
   // Only show / use copies that match the source locale
   const localeCopies = allCopies.filter((c) => c.locale === postLocale);
   const publishedSet = new Set(post.publishedPlatforms ?? []);
+
+  // Build a content brief for the AI image concept from the copy already saved on the
+  // post. Pick the richest locale-matched copy (longest body) so the generated scene
+  // reflects what the post is actually about — in the correct language. The hook seeds
+  // the concept's "subtitle" and body + CTA seed its "bodyText".
+  const richestCopy = localeCopies
+    .slice()
+    .sort((a, b) => (b.body?.length ?? 0) - (a.body?.length ?? 0))[0];
+  const imageConceptSubtitle = richestCopy?.hook?.trim() || undefined;
+  const imageConceptBody = richestCopy
+    ? ([richestCopy.body, richestCopy.cta].filter(Boolean).join("\n\n").trim() || undefined)
+    : undefined;
 
   // Restore the active video storyboard (the image set used to render the Short).
   const initialStoryboard: VideoStoryboard | undefined = post.videoStoryboard?.scenes?.length
@@ -211,6 +225,9 @@ export default async function SocialPostDetailPage({
           sourceCategory={post.sourceCategory}
           sourceLocale={post.sourceLocale}
           sourceImageUrl={post.sourceImageUrl}
+          initialCustomPrompt={post.customImagePrompt}
+          postSubtitle={imageConceptSubtitle}
+          postBodyText={imageConceptBody}
         />
       </section>
 

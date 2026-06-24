@@ -1,11 +1,16 @@
 import OpenAI from "openai";
 import cloudinary from "@/config/cloudinary";
 import { renderSocialImages } from "./image-renderer";
-import type { ImageGenerationRequest, SocialCreativeImages } from "./types";
+import type {
+  ImageGenerationRequest,
+  SocialCreativeImages,
+  ImagePromptPart,
+  ImagePromptPreview,
+} from "./types";
 
 // ─── Fallback scenes (used when GPT concept generation fails or no content available) ──
 
-const CATEGORY_SCENES: Record<string, string> = {
+export const CATEGORY_SCENES: Record<string, string> = {
   "final-expense":              "tender moment between an elderly man and woman holding hands on a park bench, warm afternoon sunlight filtering through trees, genuine loving expressions on their faces",
   "aca":                        "vibrant healthy family of four — parents and two children — laughing together in a sunny outdoor park, genuine authentic joy on their faces",
   "temporary-health-insurance": "confident smiling young man or woman in casual professional attire, bright airy modern living space or café, relaxed and optimistic expression",
@@ -53,7 +58,7 @@ export function getDemographicHint(locale?: string): string {
   return "Subjects should be diverse American — reflecting the broad multicultural United States population.";
 }
 
-async function generateVisualConcept(
+export async function generateVisualConcept(
   openai: OpenAI,
   title: string,
   category: string,
@@ -64,7 +69,7 @@ async function generateVisualConcept(
   const contentSnippet = [
     title,
     subtitle ?? "",
-    (bodyText ?? "").slice(0, 500),
+    (bodyText ?? "").slice(0, 1200),
   ]
     .filter(Boolean)
     .join("\n\n")
@@ -99,21 +104,68 @@ async function generateVisualConcept(
 }
 
 // ─── DALL-E prompt builder ──────────────────────────────────────────────────────
+// The prompt is assembled from labeled, ordered segments. `buildImagePrompt` simply
+// joins their text with a space — keep that identity intact so the default output is
+// byte-for-byte unchanged. The segmented form is surfaced to the UI so each piece can
+// be inspected/tuned before generating (see `previewImagePrompt`).
 
-function buildImagePrompt(scene: string, locale?: string): string {
-  const mood = pickVariationMood();
+export function buildImagePromptParts(
+  scene: string,
+  locale?: string,
+  mood: string = pickVariationMood()
+): ImagePromptPart[] {
   const demographic = getDemographicHint(locale);
   return [
-    `Cinematic professional portrait photograph: ${scene}.`,
-    `Lighting: ${mood}.`,
-    `Camera: Canon EOS R5, 85mm f/1.4 portrait lens, shallow depth of field with soft bokeh background.`,
-    `Mood: emotionally authentic, warm color grading.`,
-    demographic,
-    `CRITICAL COMPOSITION — place ALL faces and upper bodies strictly in the TOP 28% of the square frame only (upper quarter-plus; approximately the top 287 pixels of a 1024 px image).`,
-    `The BOTTOM 55% of the image must be completely open — soft bokeh, blurred background, empty environment only. Absolutely no faces, hands, or subjects anywhere below the midpoint.`,
-    `PROHIBITED: No text, words, numbers, signs, logos, watermarks, or graphic overlays of any kind anywhere in the image.`,
-    `STYLE: Hyper-realistic professional photograph. Absolutely NOT an illustration, NOT vector art, NOT a painting, NOT CGI render, NOT digital art. Real photography only.`,
-  ].join(" ");
+    { key: "scene",       label: "Scene & framing", text: `Cinematic professional portrait photograph: ${scene}.` },
+    { key: "lighting",    label: "Lighting / mood", text: `Lighting: ${mood}.` },
+    { key: "camera",      label: "Camera",          text: `Camera: Canon EOS R5, 85mm f/1.4 portrait lens, shallow depth of field with soft bokeh background.` },
+    { key: "colorMood",   label: "Color & mood",    text: `Mood: emotionally authentic, warm color grading.` },
+    { key: "demographic", label: "Demographic",     text: demographic },
+    { key: "composition", label: "Composition",     text: `CRITICAL COMPOSITION — place ALL faces and upper bodies strictly in the TOP 28% of the square frame only (upper quarter-plus; approximately the top 287 pixels of a 1024 px image).` },
+    { key: "openBottom",  label: "Open bottom area", text: `The BOTTOM 55% of the image must be completely open — soft bokeh, blurred background, empty environment only. Absolutely no faces, hands, or subjects anywhere below the midpoint.` },
+    { key: "prohibited",  label: "Prohibited",      text: `PROHIBITED: No text, words, numbers, signs, logos, watermarks, or graphic overlays of any kind anywhere in the image.` },
+    { key: "style",       label: "Style / realism", text: `STYLE: Hyper-realistic professional photograph. Absolutely NOT an illustration, NOT vector art, NOT a painting, NOT CGI render, NOT digital art. Real photography only.` },
+  ];
+}
+
+function buildImagePrompt(scene: string, locale?: string, mood?: string): string {
+  return buildImagePromptParts(scene, locale, mood).map((p) => p.text).join(" ");
+}
+
+// ─── Prompt preview ───────────────────────────────────────────────────────────
+// Runs only the prompt-building steps (no image generation, no Cloudinary upload):
+// resolves the visual concept exactly as `generateSocialImages` would, then returns
+// the assembled prompt broken into its component parts for inspection/tuning.
+
+export async function previewImagePrompt(
+  req: ImageGenerationRequest
+): Promise<ImagePromptPreview> {
+  const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+  const generatedConcept = await generateVisualConcept(
+    openai,
+    req.sourceTitle ?? req.headline,
+    req.category ?? "general",
+    req.locale,
+    req.subtitle,
+    req.bodyText
+  );
+  const scene =
+    generatedConcept ??
+    CATEGORY_SCENES[req.category ?? ""] ??
+    CATEGORY_SCENES["general"];
+
+  const mood = pickVariationMood();
+  const parts = buildImagePromptParts(scene, req.locale, mood);
+
+  return {
+    prompt:        parts.map((p) => p.text).join(" "),
+    scene,
+    mood,
+    conceptFromAI: Boolean(generatedConcept),
+    parts,
+    availableMoods: VARIATION_MOODS,
+  };
 }
 
 export async function generateSocialImages(
@@ -145,23 +197,28 @@ export async function generateSocialImages(
     try {
       const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-      // Generate content-aware visual concept from post data; fall back to category scene.
-      const generatedConcept = await generateVisualConcept(
-        openai,
-        req.sourceTitle ?? req.headline,
-        req.category ?? "general",
-        req.locale,
-        req.subtitle,
-        req.bodyText
-      );
-      const scene =
-        generatedConcept ??
-        CATEGORY_SCENES[req.category ?? ""] ??
-        CATEGORY_SCENES["general"];
+      // A tuned prompt from the control panel takes precedence and is used verbatim.
+      // Otherwise: generate a content-aware visual concept, fall back to a category scene.
+      let prompt = req.customPrompt?.trim();
+      if (!prompt) {
+        const generatedConcept = await generateVisualConcept(
+          openai,
+          req.sourceTitle ?? req.headline,
+          req.category ?? "general",
+          req.locale,
+          req.subtitle,
+          req.bodyText
+        );
+        const scene =
+          generatedConcept ??
+          CATEGORY_SCENES[req.category ?? ""] ??
+          CATEGORY_SCENES["general"];
+        prompt = buildImagePrompt(scene, req.locale);
+      }
 
       const response = await openai.images.generate({
         model:   (process.env.OPENAI_IMAGE_MODEL ?? "gpt-image-1") as "gpt-image-1",
-        prompt:  buildImagePrompt(scene, req.locale),
+        prompt,
         quality: "high",
         size:    "1024x1024",
         n:       1,

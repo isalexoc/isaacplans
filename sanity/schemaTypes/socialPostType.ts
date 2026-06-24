@@ -154,6 +154,14 @@ export const socialPostType = defineType({
       group: "images",
       description: "Text overlaid on both images",
     }),
+    {
+      name: "customImagePrompt",
+      title: "Custom Image Prompt",
+      type: "text",
+      rows: 8,
+      group: "images",
+      description: "Last tuned AI image prompt used to generate the creative — pre-fills the prompt control panel on the history page",
+    },
 
     // ─── VIDEO SCRIPT ─────────────────────────────────────────────────────────
     {

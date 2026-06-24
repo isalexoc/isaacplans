@@ -205,6 +205,27 @@ export interface ImageGenerationRequest {
   subtitle?: string;             // post excerpt or lead magnet subtitle
   bodyText?: string;             // plain text body excerpt (first ~500 chars) for concept
   locale?: string;               // "en" = diverse American subjects; "es" = Hispanic/Latino subjects
+  customPrompt?: string;         // tuned prompt from the control panel; used verbatim (skips concept build)
+}
+
+// ─── Image prompt preview (control panel) ──────────────────────────────────────
+// The assembled image prompt broken into its labeled, ordered segments so the UI
+// can show/tune each piece before generating. `parts.map(p => p.text).join(" ")`
+// reproduces `prompt` exactly.
+
+export interface ImagePromptPart {
+  key:   string;   // stable id: "scene" | "lighting" | "camera" | …
+  label: string;   // display label for the control panel
+  text:  string;   // the segment's text
+}
+
+export interface ImagePromptPreview {
+  prompt:         string;            // full assembled prompt
+  scene:          string;            // resolved visual concept (AI or fallback)
+  mood:           string;            // chosen lighting/mood seed
+  conceptFromAI:  boolean;           // true if GPT produced the scene, false if category fallback
+  parts:          ImagePromptPart[]; // ordered, editable segments
+  availableMoods: string[];          // lighting-mood options for the picker
 }
 
 export interface VideoScriptRequest {
