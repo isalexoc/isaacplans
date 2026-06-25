@@ -11,6 +11,16 @@ import PresentationsDashboard from "@/components/presentations-dashboard";
 import { sanityFetch } from "@/sanity/lib/live";
 import { PRESENTATION_SCRIPT_QUERY } from "@/lib/sanity/queries/presentationScripts";
 
+// In production, next-sanity's sanityFetch caches query results indefinitely
+// (revalidate: false) and only invalidates via the sync-tags of the documents a
+// query TOUCHED. A query that returned no script for a line of business caches an
+// empty result whose tags don't include any future document, so publishing the
+// FIRST script for that line never invalidates it (SanityLive can't cover the
+// empty -> first-document transition). This is a low-traffic admin page, so we
+// force fresh fetches every load to guarantee newly published scripts appear.
+// SanityLive still provides live in-page updates while the page is open.
+export const fetchCache = "force-no-store";
+
 /* ───────── SEO ───────── */
 export async function generateMetadata(): Promise<Metadata> {
   const locale = (await getLocale()) as SupportedLocale;
