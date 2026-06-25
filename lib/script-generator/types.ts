@@ -92,6 +92,27 @@ export const SECTION_LABELS: Record<SectionKey, string> = {
   psychologySalesTips: "Psychology & Sales Tips",
 };
 
+// ── Language handling ───────────────────────────────────────────────────────────
+// The script is written FIRST in the language of the source videos, then
+// translated to the other language — so Spanish sources produce a native Spanish
+// script (not an English-first translation) and vice-versa.
+export type ScriptLanguage = "en" | "es";
+
+export function normalizeLanguage(value: unknown): ScriptLanguage {
+  return typeof value === "string" && value.trim().toLowerCase().startsWith("es") ? "es" : "en";
+}
+
+export function languageName(lang: ScriptLanguage): string {
+  return lang === "es" ? "Spanish" : "English";
+}
+
+/** The majority language across the source videos (ties default to English). */
+export function primaryLanguage(distillations: { language: ScriptLanguage }[]): ScriptLanguage {
+  const es = distillations.filter((d) => d.language === "es").length;
+  const en = distillations.length - es;
+  return es > en ? "es" : "en";
+}
+
 // ── Per-video distillation (map step) ──────────────────────────────────────────
 export type SourceType = "call" | "training" | "other";
 
@@ -102,7 +123,8 @@ export interface VideoDistillation {
   url: string;
   durationSeconds: number;
   sourceType: SourceType;
-  insights: string; // distilled, sales-relevant content (markdown/plain text)
+  language: ScriptLanguage; // detected language of the spoken content
+  insights: string; // distilled, sales-relevant content (markdown/plain text), in the source language
 }
 
 // ── Synthesized script (reduce step) ───────────────────────────────────────────

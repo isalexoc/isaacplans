@@ -3,10 +3,12 @@ import {
   SECTION_KEYS,
   SECTION_LABELS,
   coerceText,
+  languageName,
   lineOfBusinessLabel,
   parseJsonLoose,
   type GeneratedScript,
   type LineOfBusiness,
+  type ScriptLanguage,
   type ScriptSection,
   type SectionKey,
   type VideoDistillation,
@@ -19,13 +21,14 @@ const SYNTH_MODEL = process.env.SCRIPT_GENERATOR_MODEL ?? "gpt-4o";
 // earlier scripts come out short. gpt-4o supports up to 16384 output tokens.
 const MAX_TOKENS = Number(process.env.SCRIPT_GENERATOR_MAX_TOKENS) || 16000;
 
-function buildSystemPrompt(lob: LineOfBusiness): string {
+function buildSystemPrompt(lob: LineOfBusiness, language: ScriptLanguage): string {
   const label = lineOfBusinessLabel(lob);
+  const lang = languageName(language);
   return `You are an elite insurance sales coach and scriptwriter for Isaac Plans Insurance. You write phone/in-person sales scripts that agents read and follow, often word-for-word, with real clients.
 
 You are building ONE definitive, COMPREHENSIVE ${label} sales script by synthesizing insights distilled from many source videos (real sales calls and sales-training sessions). Mine EVERY source for usable material and merge the best openings, rapport-building, discovery/qualifying questions, product framing, analogies, numbers, closing language, and objection responses into a single coherent, ready-to-use master script. An agent should be able to run an entire call from this script alone.
 
-LANGUAGE: Write the ENTIRE script in clear, professional ENGLISH — even when the source insights are in Spanish. (A Spanish version is generated separately by translation, so do not mix languages here.)
+LANGUAGE: Write the ENTIRE script in natural, professional ${lang}. The source videos are primarily in ${lang}, so write the script directly in ${lang} to preserve the real phrasing and idioms (the other language is produced separately by translation). Do not mix languages — every field must be in ${lang}.
 
 Depth & quality:
 - This is a long-form MASTER script, not a summary. Be thorough, specific, and detailed in every section.
@@ -53,7 +56,12 @@ Markdown format (converted to Sanity Portable Text):
 - Blank line between blocks`;
 }
 
-function buildUserPrompt(distillations: VideoDistillation[], lob: LineOfBusiness): string {
+function buildUserPrompt(
+  distillations: VideoDistillation[],
+  lob: LineOfBusiness,
+  language: ScriptLanguage
+): string {
+  const lang = languageName(language);
   const sources = distillations
     .map(
       (d, i) =>
@@ -83,7 +91,7 @@ ${sectionLines}
 }
 
 Field rules:
-- Write EVERYTHING in English, even though many sources are in Spanish.
+- Write EVERYTHING in ${lang} (title, description, all sections, tips, and completeScript).
 - title: a clear internal title, e.g. "${lineOfBusinessLabel(lob)} — Complete Sales Script".
 - description: 1–2 sentence summary of what this script covers and who it's for.
 - Each of the six section objects is REQUIRED and must be detailed per the per-section depth guidance — do NOT return thin one-paragraph sections. "content" is the actual script markdown; "tips" is a 3–6 bullet coaching list.
@@ -120,7 +128,8 @@ function normalizeSection(raw: RawSection | undefined, label: string): ScriptSec
 
 export async function synthesizeScript(
   distillations: VideoDistillation[],
-  lineOfBusiness: LineOfBusiness
+  lineOfBusiness: LineOfBusiness,
+  language: ScriptLanguage
 ): Promise<GeneratedScript> {
   if (!process.env.OPENAI_API_KEY) {
     throw new Error("OPENAI_API_KEY is not configured");
@@ -138,8 +147,8 @@ export async function synthesizeScript(
       response_format: { type: "json_object" },
       max_completion_tokens: MAX_TOKENS,
       messages: [
-        { role: "system", content: buildSystemPrompt(lineOfBusiness) },
-        { role: "user", content: buildUserPrompt(distillations, lineOfBusiness) },
+        { role: "system", content: buildSystemPrompt(lineOfBusiness, language) },
+        { role: "user", content: buildUserPrompt(distillations, lineOfBusiness, language) },
       ],
     });
     rawContent = response.choices[0]?.message?.content ?? "";

@@ -3,6 +3,7 @@ import { extractYouTubeData } from "@/lib/blog-generator/youtube-extractor";
 import {
   coerceText,
   lineOfBusinessLabel,
+  normalizeLanguage,
   parseJsonLoose,
   type LineOfBusiness,
   type SourceType,
@@ -53,17 +54,20 @@ ${transcript}
 ---
 Return a JSON object with this exact shape:
 {
+  "language": "en" | "es",
   "sourceType": "call" | "training" | "other",
   "insights": "..."
 }
 
+- language: the primary language SPOKEN in the video — "es" for Spanish, "en" for English.
 - sourceType: a single string, one of "call" | "training" | "other". "call" if this is a recorded sales call with a real/role-play client, "training" if it teaches how to sell, otherwise "other".
-- insights: a SINGLE markdown STRING (not an object, not key/value pairs, not nested JSON). Use markdown headings (## Opening, ## Discovery, ## Presentation, ## Closing, ## Objections, ## Psychology) with bullet points underneath. Keep useful verbatim phrasing. ~300–800 words. No preamble.
+- insights: a SINGLE markdown STRING (not an object, not key/value pairs, not nested JSON). Write the insights in the SAME language as the video (keep Spanish in Spanish, English in English) so verbatim phrasing is preserved. Use markdown headings (## Opening, ## Discovery, ## Presentation, ## Closing, ## Objections, ## Psychology) with bullet points underneath. Keep useful verbatim phrasing. ~300–800 words. No preamble.
 
-Return only the JSON object with exactly those two keys.`;
+Return only the JSON object with exactly those three keys.`;
 }
 
 interface RawDistillation {
+  language?: string;
   sourceType?: string;
   insights?: string;
 }
@@ -82,7 +86,7 @@ export async function distillVideo(
   }
 
   const extraction = await extractYouTubeData(url.trim());
-  const { metadata, transcript } = extraction;
+  const { metadata, transcript, transcriptLanguage } = extraction;
 
   if (transcript.trim().length < MIN_TRANSCRIPT_CHARS) {
     throw new Error(
@@ -118,6 +122,12 @@ export async function distillVideo(
     throw new Error("Distillation returned no usable sales content for this video.");
   }
 
+  // Trust the model's language detection (it reads the actual content); fall back
+  // to the transcript language reported by the extractor.
+  const language = parsed.language
+    ? normalizeLanguage(parsed.language)
+    : normalizeLanguage(transcriptLanguage);
+
   return {
     videoId: metadata.videoId,
     title: metadata.title,
@@ -125,6 +135,7 @@ export async function distillVideo(
     url: metadata.url,
     durationSeconds: metadata.durationSeconds,
     sourceType: normalizeSourceType(parsed.sourceType),
+    language,
     insights,
   };
 }

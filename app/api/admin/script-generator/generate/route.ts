@@ -2,7 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { synthesizeScript } from "@/lib/script-generator/script-synthesizer";
 import { translateScript } from "@/lib/script-generator/translator";
-import { isLineOfBusiness, type VideoDistillation } from "@/lib/script-generator/types";
+import {
+  isLineOfBusiness,
+  primaryLanguage,
+  type VideoDistillation,
+} from "@/lib/script-generator/types";
 
 export const runtime = "nodejs";
 export const maxDuration = 300;
@@ -34,9 +38,19 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const en = await synthesizeScript(distillations as VideoDistillation[], lineOfBusiness);
-    const es = await translateScript(en);
-    return NextResponse.json({ success: true, data: { en, es } });
+    const videos = distillations as VideoDistillation[];
+    // Write the script FIRST in the language of the source videos (preserves real
+    // phrasing), then translate to the other language.
+    const sourceLang = primaryLanguage(videos);
+    const targetLang = sourceLang === "en" ? "es" : "en";
+
+    const source = await synthesizeScript(videos, lineOfBusiness, sourceLang);
+    const translated = await translateScript(source, sourceLang, targetLang);
+
+    const en = sourceLang === "en" ? source : translated;
+    const es = sourceLang === "es" ? source : translated;
+
+    return NextResponse.json({ success: true, data: { en, es, sourceLanguage: sourceLang } });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unexpected error during generation";
     console.error("[script-generator/generate]", err);
