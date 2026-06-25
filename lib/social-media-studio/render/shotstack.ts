@@ -9,15 +9,21 @@ import type { RenderPlan, RenderProviderStatus, VideoRenderProvider } from "./ty
 //   GET  https://api.shotstack.io/edit/{env}/render/{id}     → { response: { status, url } }
 // env = "v1" (production) | "stage" (sandbox). Status terminal values: "done" | "failed".
 
-// Built-in Shotstack font (no custom-font import needed). Override via SHOTSTACK_CAPTION_FONT.
-const CAPTION_FONT = process.env.SHOTSTACK_CAPTION_FONT || "Montserrat";
-const CAPTION_SIZE = Number(process.env.SHOTSTACK_CAPTION_SIZE) || 70; // px on the 1080-wide frame
-// Fraction of frame height to raise captions off the bottom edge into the lower-third
-// (positive offset.y moves up). Tunable via SHOTSTACK_CAPTION_LIFT.
-const CAPTION_LIFT = Number(process.env.SHOTSTACK_CAPTION_LIFT) || 0.12;
+// Captions use the "rich-caption" asset, which auto-transcribes the aliased audio source
+// (auto-detecting the spoken language) and renders karaoke word-by-word captions. This both
+// matches the brand style and guarantees captions are in the SAME language as the audio.
+const CAPTION_FONT         = process.env.SHOTSTACK_CAPTION_FONT || "Montserrat";
+const CAPTION_SIZE         = Number(process.env.SHOTSTACK_CAPTION_SIZE) || 64;          // px on the 1080-wide frame
+const CAPTION_ACTIVE_COLOR = process.env.SHOTSTACK_CAPTION_ACTIVE || "#00B4D8";          // spoken-word highlight (brand cyan)
+// offset.y: positive moves UP. Presenter videos put captions in the UPPER area (avatar is at
+// the bottom) nudged slightly down; faceless videos put them in the lower-third lifted up.
+const CAPTION_TOP_OFFSET    = Number(process.env.SHOTSTACK_CAPTION_TOP_OFFSET ?? "-0.08");
+const CAPTION_BOTTOM_OFFSET = Number(process.env.SHOTSTACK_CAPTION_BOTTOM_OFFSET ?? "0.12");
 
 // Ken Burns motion cycled per scene so a still image still feels alive.
 const KEN_BURNS = ["zoomIn", "slideLeft", "zoomOut", "slideRight"] as const;
+
+const SPEECH_ALIAS = "speech";
 
 function shotstackEnv(): "v1" | "stage" {
   return (process.env.SHOTSTACK_ENV || "v1").toLowerCase() === "stage" ? "stage" : "v1";
@@ -33,54 +39,59 @@ function apiKey(): string {
 const round = (n: number) => Math.round(n * 1000) / 1000;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function buildTimeline(plan: RenderPlan): Record<string, any> {
-  // Tracks render top-first: captions on top, then presenter, then voiceover audio, then backgrounds.
-  const captionClips = plan.captions.map((c) => ({
+function richCaptionClip(plan: RenderPlan): Record<string, any> {
+  const onTop = Boolean(plan.presenter); // presenter occupies the bottom → captions go up top
+  return {
     asset: {
-      type: "text",
-      text: c.text,
-      font:      { family: CAPTION_FONT, color: "#FFFFFF", size: CAPTION_SIZE, weight: 800, lineHeight: 1 },
-      alignment: { horizontal: "center", vertical: "center" },
-      stroke:    { color: "#000000", width: 5 },
+      type:      "rich-caption",
+      src:       `alias://${SPEECH_ALIAS}`,
+      font:      { family: CAPTION_FONT, color: "#FFFFFF", size: CAPTION_SIZE, weight: 800 },
+      style:     { textTransform: "uppercase" },
+      stroke:    { width: 6, color: "#000000" },
+      active:    { font: { color: CAPTION_ACTIVE_COLOR } },
+      animation: { style: "karaoke" },
+      align:     { horizontal: "center", vertical: onTop ? "top" : "bottom" },
     },
-    start:      round(c.start),
-    length:     round(Math.max(0.3, c.length)),
-    // Anchor to the bottom, then lift into the lower-third (positive offset.y moves UP) so
-    // captions sit clear of the platform's bottom UI. Box is sized for ~2 lines and the text
-    // is centred within it (vertical "bottom" would push it below the frame edge).
-    position:   "bottom",
-    offset:     { x: 0, y: CAPTION_LIFT },
-    width:      Math.round(plan.width * 0.86),
-    height:     Math.round(plan.height * 0.16),
+    start:  0,
+    length: "end",
+    width:  Math.round(plan.width * 0.9),
+    offset: { x: 0, y: onTop ? CAPTION_TOP_OFFSET : CAPTION_BOTTOM_OFFSET },
+  };
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function presenterClip(plan: RenderPlan): Record<string, any> {
+  const p = plan.presenter!;
+  // Anchor large in a bottom corner, hug the edge, and push down so the lower body runs off
+  // the frame bottom (reads like a person standing in the corner). Tunable via env.
+  const bleedX = Number.isFinite(Number(process.env.SHOTSTACK_PRESENTER_X))
+    ? Number(process.env.SHOTSTACK_PRESENTER_X)
+    : (p.placement === "bottom-right" ? 0.06 : -0.06);
+  const pushY = Number.isFinite(Number(process.env.SHOTSTACK_PRESENTER_Y))
+    ? Number(process.env.SHOTSTACK_PRESENTER_Y)
+    : -0.10;
+  return {
+    alias: SPEECH_ALIAS,
+    asset: {
+      type:      "video",
+      src:       p.src,
+      volume:    1,
+      chromaKey: { color: p.chromaColor, threshold: 130, halo: 80 },
+    },
+    start:      round(p.start),
+    length:     round(p.length),
+    position:   p.placement === "bottom-right" ? "bottomRight" : "bottomLeft",
+    offset:     { x: bleedX, y: pushY },
+    scale:      p.scale,
     transition: { in: "fade", out: "fade" },
-  }));
+  };
+}
 
-  const presenterClips = plan.presenter
-    ? [{
-        asset: {
-          type:      "video",
-          src:       plan.presenter.src,
-          volume:    1,
-          chromaKey: { color: plan.presenter.chromaColor, threshold: 130, halo: 80 },
-        },
-        start:      round(plan.presenter.start),
-        length:     round(plan.presenter.length),
-        position:   plan.presenter.placement === "bottom-right" ? "bottomRight" : "bottomLeft",
-        offset:     { x: plan.presenter.placement === "bottom-right" ? 0.04 : -0.04, y: 0 },
-        scale:      plan.presenter.scale,
-        transition: { in: "fade", out: "fade" },
-      }]
-    : [];
-
-  const voiceClips = plan.voiceover.map((v) => ({
-    asset:  { type: "audio", src: v.src, volume: 1 },
-    start:  round(v.start),
-    length: round(v.length),
-  }));
-
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function buildTimeline(plan: RenderPlan): Record<string, any> {
   const sceneClips = plan.scenes.map((s, i) => ({
     asset: s.isVideo
-      ? { type: "video", src: s.backgroundUrl, volume: 0 } // mute cinematic clips; voiceover is the audio
+      ? { type: "video", src: s.backgroundUrl, volume: 0 } // mute cinematic clips; the speech track is the audio
       : { type: "image", src: s.backgroundUrl },
     start:      round(s.start),
     length:     round(s.length),
@@ -89,10 +100,26 @@ function buildTimeline(plan: RenderPlan): Record<string, any> {
     transition: { in: "fade", out: "fade" },
   }));
 
+  // The single "speech" source = the presenter clip (its audio) or the narration audio clip.
+  // It carries the alias the rich-caption transcribes.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const speechTrack: Record<string, any>[] = plan.presenter
+    ? [presenterClip(plan)]
+    : plan.narrationAudio
+      ? [{
+          alias:  SPEECH_ALIAS,
+          asset:  { type: "audio", src: plan.narrationAudio.src, volume: 1 },
+          start:  round(plan.narrationAudio.start),
+          length: round(plan.narrationAudio.length),
+        }]
+      : [];
+
+  const captionTrack = plan.captions && speechTrack.length ? [richCaptionClip(plan)] : [];
+
+  // Tracks render top-first: captions on top, then the speech clip, then scene backgrounds.
   const tracks = [
-    { clips: captionClips },
-    ...(presenterClips.length ? [{ clips: presenterClips }] : []),
-    ...(voiceClips.length ? [{ clips: voiceClips }] : []),
+    ...(captionTrack.length ? [{ clips: captionTrack }] : []),
+    ...(speechTrack.length ? [{ clips: speechTrack }] : []),
     { clips: sceneClips },
   ].filter((t) => t.clips.length > 0);
 

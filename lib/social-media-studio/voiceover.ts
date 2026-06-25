@@ -1,12 +1,11 @@
 import cloudinary from "@/config/cloudinary";
 import type { SocialLocale } from "./types";
 
-// ─── Decoupled voiceover + captions ──────────────────────────────────────────────
-// Render-engine-independent media prep so the video pipeline isn't tied to any one
-// render vendor's bundled TTS/captions:
-//   • Voiceover  → ElevenLabs Text-to-Speech (direct, pay-per-character), re-hosted on Cloudinary.
-//   • Captions   → OpenAI Whisper word-level timestamps grouped into short karaoke-style lines.
-// Both run on OUR keys (ELEVENLABS_API_KEY, OPENAI_API_KEY) with no per-render quota.
+// ─── Decoupled voiceover (ElevenLabs direct) ──────────────────────────────────────
+// Render-engine-independent narration so the video pipeline isn't tied to any one render
+// vendor's bundled TTS. One ElevenLabs call synthesizes the whole narration, re-hosted on
+// Cloudinary. Captions are NOT produced here — the render engine (Shotstack rich-caption)
+// auto-transcribes this audio so subtitles always match the spoken language.
 
 const ELEVENLABS_TTS_BASE = "https://api.elevenlabs.io/v1/text-to-speech";
 
@@ -21,25 +20,10 @@ function ttsVoiceId(locale: SocialLocale): string {
   return process.env.ELEVENLABS_TTS_VOICE_ID_EN || DEFAULT_VOICE_ID;
 }
 
-/** A caption line, timed relative to the START of its scene's audio (seconds). */
-export interface CaptionCue {
-  text:  string;
-  start: number;
-  end:   number;
-}
-
-/** A scene's synthesized narration: hosted audio + its exact length + word-timed captions. */
-export interface SceneVoiceover {
-  audioUrl:    string;
-  durationSec: number;
-  captions:    CaptionCue[];
-}
-
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 // ── ElevenLabs TTS → mp3 bytes ──
-// Retries on 429 (incl. concurrent_limit_exceeded — most plans allow only 2–3 parallel
-// requests) and transient 5xx, with backoff + jitter, so the per-scene batch self-heals.
+// Retries on 429 (incl. concurrent_limit_exceeded) and transient 5xx with backoff + jitter.
 async function synthesizeBytes(text: string, locale: SocialLocale): Promise<Buffer> {
   const key = process.env.ELEVENLABS_API_KEY;
   if (!key) throw new Error("ELEVENLABS_API_KEY is not configured — direct voiceover needs an ElevenLabs key.");
@@ -65,7 +49,6 @@ async function synthesizeBytes(text: string, locale: SocialLocale): Promise<Buff
     const detail = await res.text().catch(() => "");
     const retryable = res.status === 429 || res.status >= 500;
     if (retryable && attempt < MAX_ATTEMPTS - 1) {
-      // 429 concurrency clears in well under a second; back off with a little jitter.
       await sleep(1200 * (attempt + 1) + Math.floor(Math.random() * 400));
       continue;
     }
@@ -89,86 +72,15 @@ async function uploadAudio(bytes: Buffer, category: string): Promise<{ url: stri
   });
 }
 
-// ── Whisper word-level timestamps (whisper-1 is required for word granularity) ──
-interface WhisperWord { word: string; start: number; end: number }
-
-async function transcribeWords(bytes: Buffer, locale: SocialLocale): Promise<WhisperWord[]> {
-  const key = process.env.OPENAI_API_KEY;
-  if (!key) throw new Error("OPENAI_API_KEY is not configured");
-
-  const form = new FormData();
-  form.append("file", new Blob([bytes], { type: "audio/mpeg" }), "scene.mp3");
-  form.append("model", "whisper-1"); // word timestamps require whisper-1, not gpt-4o-transcribe
-  form.append("response_format", "verbose_json");
-  form.append("timestamp_granularities[]", "word");
-  form.append("language", locale);
-
-  const res = await fetch("https://api.openai.com/v1/audio/transcriptions", {
-    method:  "POST",
-    headers: { Authorization: `Bearer ${key}` },
-    body:    form,
-  });
-
-  if (!res.ok) {
-    const detail = await res.text().catch(() => "");
-    throw new Error(`Whisper failed (HTTP ${res.status}): ${detail.slice(0, 300)}`);
-  }
-  const json = (await res.json()) as { words?: WhisperWord[] };
-  return Array.isArray(json.words) ? json.words : [];
-}
-
-// Group words into short caption lines (≈ maxWords each), timed to the spoken words.
-function wordsToCaptions(words: WhisperWord[], maxWords = 4): CaptionCue[] {
-  const cues: CaptionCue[] = [];
-  for (let i = 0; i < words.length; i += maxWords) {
-    const chunk = words.slice(i, i + maxWords);
-    const text  = chunk.map((w) => w.word).join(" ").replace(/\s+([,.!?])/g, "$1").trim();
-    if (!text) continue;
-    cues.push({ text, start: chunk[0].start, end: chunk[chunk.length - 1].end });
-  }
-  return cues;
-}
-
-/** Synthesize one scene's narration → hosted audio + word-timed captions. */
-export async function synthesizeSceneVoiceover(
-  narration: string,
+/** Synthesize a full narration in one call → hosted audio + measured duration. */
+export async function synthesizeNarration(
+  text: string,
   locale: SocialLocale,
   category: string
-): Promise<SceneVoiceover> {
-  const bytes = await synthesizeBytes(narration, locale);
-
-  // Caption transcription is best-effort — a failure here must not block the render.
-  const [{ url, durationSec }, words] = await Promise.all([
-    uploadAudio(bytes, category),
-    transcribeWords(bytes, locale).catch((e) => {
-      console.warn("[voiceover] caption transcription failed:", (e as Error).message);
-      return [] as WhisperWord[];
-    }),
-  ]);
-
-  // Prefer Cloudinary's measured duration; fall back to the last word end, then a word-rate estimate.
-  const dur =
-    durationSec ||
-    (words.length ? words[words.length - 1].end : Math.max(1, narration.trim().split(/\s+/).length / 2.5));
-
-  const captions = wordsToCaptions(words).map((c) => ({
-    text:  c.text,
-    start: Math.min(c.start, dur),
-    end:   Math.min(c.end, dur),
-  }));
-
-  return { audioUrl: url, durationSec: dur, captions };
-}
-
-/** Transcribe an already-hosted audio/video URL (e.g. a HeyGen presenter clip) → captions. Best-effort. */
-export async function captionsFromUrl(url: string, locale: SocialLocale): Promise<CaptionCue[]> {
-  try {
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`download failed (${res.status})`);
-    const bytes = Buffer.from(await res.arrayBuffer());
-    return wordsToCaptions(await transcribeWords(bytes, locale));
-  } catch (e) {
-    console.warn("[voiceover] URL caption transcription failed:", (e as Error).message);
-    return [];
-  }
+): Promise<{ audioUrl: string; durationSec: number }> {
+  const bytes = await synthesizeBytes(text, locale);
+  const { url, durationSec } = await uploadAudio(bytes, category);
+  // Fall back to a word-rate estimate (~2.5 words/sec) if Cloudinary returns no duration.
+  const dur = durationSec || Math.max(1, text.trim().split(/\s+/).filter(Boolean).length / 2.5);
+  return { audioUrl: url, durationSec: dur };
 }

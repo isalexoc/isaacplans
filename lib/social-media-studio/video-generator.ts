@@ -3,9 +3,9 @@ import cloudinary from "@/config/cloudinary";
 import { getDemographicHint, pickVariationMood } from "./image-generator";
 import { musicUrlForCategory } from "./video-music";
 import { HEYGEN_CHROMA_COLOR } from "./heygen-presenter";
-import { synthesizeSceneVoiceover, captionsFromUrl, type SceneVoiceover } from "./voiceover";
+import { synthesizeNarration } from "./voiceover";
 import { shotstackProvider } from "./render/shotstack";
-import type { RenderPlan, RenderPlanScene, RenderPlanClip, RenderPlanCaption, RenderPlanPresenter } from "./render/types";
+import type { RenderPlan, RenderPlanScene, RenderPlanPresenter } from "./render/types";
 import type {
   SocialPostSource,
   VideoScript,
@@ -497,10 +497,11 @@ async function getJson2VideoStatus(
 
 // ─── Shotstack path (default) — decoupled TTS + captions, pay-as-you-go render ─────
 
-const VIDEO_WIDTH     = 1080;
-const VIDEO_HEIGHT    = 1920;
-const VIDEO_FPS       = 30;
-const PRESENTER_SCALE = 0.5;   // presenter clip width as a fraction of the frame
+const VIDEO_WIDTH  = 1080;
+const VIDEO_HEIGHT = 1920;
+const VIDEO_FPS    = 30;
+// Presenter clip size as a fraction of the frame — large, like a person standing in the corner.
+const PRESENTER_SCALE = Number(process.env.SHOTSTACK_PRESENTER_SCALE) || 0.62;
 
 async function submitShotstackRender(
   storyboard: VideoStoryboard,
@@ -517,46 +518,22 @@ async function submitShotstackRender(
       ? { backgroundUrl: s.videoClipUrl, isVideo: true }
       : { backgroundUrl: s.imageUrl, isVideo: false };
 
-  const scenes:    RenderPlanScene[]   = [];
-  const voiceover: RenderPlanClip[]    = [];
-  const captions:  RenderPlanCaption[] = [];
+  const scenes: RenderPlanScene[] = [];
+  let narrationAudio: RenderPlan["narrationAudio"];
 
-  if (usePresenter) {
-    // The HeyGen presenter clip is the master audio; distribute scene durations by narration weight.
-    const durations = presenterSceneDurations(storyboard.scenes, presenter!.durationSec);
-    let t = 0;
-    storyboard.scenes.forEach((s, i) => {
-      scenes.push({ ...sceneBg(s), start: t, length: durations[i] });
-      t += durations[i];
-    });
-    // Captions from transcribing the presenter audio (best-effort).
-    const cues = await captionsFromUrl(presenter!.url, locale);
-    cues.forEach((c) => captions.push({ text: c.text, start: c.start, length: Math.max(0.3, c.end - c.start) }));
-  } else {
-    // Faceless: synthesize each scene's narration (bounded concurrency) → exact durations + captions.
-    // Default 2 to stay under ElevenLabs' per-plan concurrent-request cap (commonly 2–3);
-    // override with ELEVENLABS_TTS_CONCURRENCY once on a higher tier.
-    const CONCURRENCY = Math.max(1, Number(process.env.ELEVENLABS_TTS_CONCURRENCY) || 2);
-    const vo: SceneVoiceover[] = new Array(storyboard.scenes.length);
-    for (let start = 0; start < storyboard.scenes.length; start += CONCURRENCY) {
-      const batch = storyboard.scenes.slice(start, start + CONCURRENCY);
-      await Promise.all(
-        batch.map(async (s, j) => {
-          vo[start + j] = await synthesizeSceneVoiceover(s.narration, locale, category);
-        })
-      );
-    }
-    let t = 0;
-    storyboard.scenes.forEach((s, i) => {
-      const len = vo[i].durationSec;
-      scenes.push({ ...sceneBg(s), start: t, length: len });
-      voiceover.push({ src: vo[i].audioUrl, start: t, length: len });
-      vo[i].captions.forEach((c) =>
-        captions.push({ text: c.text, start: t + c.start, length: Math.max(0.3, c.end - c.start) })
-      );
-      t += len;
-    });
-  }
+  // Scene image durations are word-weighted to fill the audio length (precise enough for a
+  // Ken Burns slideshow), so a single audio source backs the whole video — required for the
+  // rich-caption auto-transcription and far simpler than per-scene clips.
+  const totalAudioSec = usePresenter
+    ? presenter!.durationSec
+    : (await synthesizeNarrationTrack(storyboard, locale, category, (a) => { narrationAudio = a; }));
+
+  const durations = presenterSceneDurations(storyboard.scenes, totalAudioSec);
+  let t = 0;
+  storyboard.scenes.forEach((s, i) => {
+    scenes.push({ ...sceneBg(s), start: t, length: durations[i] });
+    t += durations[i];
+  });
 
   const presenterPlan: RenderPlanPresenter | undefined = usePresenter
     ? {
@@ -570,18 +547,32 @@ async function submitShotstackRender(
     : undefined;
 
   const plan: RenderPlan = {
-    width:     VIDEO_WIDTH,
-    height:    VIDEO_HEIGHT,
-    fps:       VIDEO_FPS,
+    width:          VIDEO_WIDTH,
+    height:         VIDEO_HEIGHT,
+    fps:            VIDEO_FPS,
     scenes,
-    voiceover,
-    captions,
-    musicUrl:  storyboard.musicUrl || musicUrlForCategory(category),
-    presenter: presenterPlan,
+    narrationAudio,
+    presenter:      presenterPlan,
+    musicUrl:       storyboard.musicUrl || musicUrlForCategory(category),
+    captions:       true,
   };
 
   const { jobId } = await shotstackProvider.submit(plan);
   return { projectId: jobId };
+}
+
+// Synthesize the whole narration in one ElevenLabs call; reports the hosted track back via
+// `setAudio` and returns its duration (used to time the scene slideshow).
+async function synthesizeNarrationTrack(
+  storyboard: VideoStoryboard,
+  locale: SocialLocale,
+  category: string,
+  setAudio: (a: RenderPlan["narrationAudio"]) => void
+): Promise<number> {
+  const fullNarration = storyboard.scenes.map((s) => s.narration.trim()).filter(Boolean).join(" ");
+  const { audioUrl, durationSec } = await synthesizeNarration(fullNarration, locale, category);
+  setAudio({ src: audioUrl, start: 0, length: durationSec });
+  return durationSec;
 }
 
 async function getShotstackStatus(
