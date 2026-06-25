@@ -11,6 +11,8 @@ import {
 // Translates a synthesized English script into Latin American Spanish,
 // preserving structure and markdown. Mirrors the blog translator rules.
 const TRANSLATE_MODEL = process.env.SCRIPT_GENERATOR_MODEL ?? "gpt-4o";
+// The script can be long; give the translation room so the Spanish isn't truncated.
+const MAX_TOKENS = Number(process.env.SCRIPT_GENERATOR_MAX_TOKENS) || 16000;
 
 const SYSTEM_PROMPT = `You are a professional translator specializing in insurance sales content for a U.S.-based bilingual insurance agency targeting Spanish-speaking clients.
 
@@ -71,6 +73,7 @@ export async function translateScript(en: GeneratedScript): Promise<GeneratedScr
     const response = await client.chat.completions.create({
       model: TRANSLATE_MODEL,
       response_format: { type: "json_object" },
+      max_completion_tokens: MAX_TOKENS,
       messages: [
         { role: "system", content: SYSTEM_PROMPT },
         { role: "user", content: buildPrompt(en) },
