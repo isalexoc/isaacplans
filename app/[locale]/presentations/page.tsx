@@ -68,21 +68,18 @@ export default async function PresentationsPage() {
 
   const t = await getTranslations({ locale, namespace: "presentations" });
 
-  const scriptOptions = { 
-    next: { 
-      revalidate: 3600, // 1 hour cache
-      tags: ['presentation-scripts'] 
-    } 
-  };
-
   // Fetch scripts for all lines of business
   const linesOfBusiness = ['iul', 'aca', 'dentalVision', 'hospitalIndemnity', 'finalExpense', 'shortTermMedical'];
-  
+
   const scriptPromises = linesOfBusiness.map(async (lob) => {
     const result = await sanityFetch({
       query: PRESENTATION_SCRIPT_QUERY,
       params: { lineOfBusiness: lob },
-      ...scriptOptions,
+      // next-sanity's sanityFetch takes `tags` at the TOP level (not under `next`).
+      // Tagging the cache here lets the script-generator publish route call
+      // revalidateTag('presentation-scripts') so a newly published script shows up
+      // immediately instead of being stuck in next-sanity's 90-day cacheLife.
+      tags: ['presentation-scripts'],
     });
     return [lob, result.data || null] as const;
   });
