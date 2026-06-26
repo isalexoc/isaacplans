@@ -81,6 +81,14 @@ async function loadSplitMessages(locale: string): Promise<Record<string, any>> {
       // File doesn't exist, skip
     }
 
+    // Load IUL get-covered (Meta ads funnel) messages if they exist
+    try {
+      const iulGetCovered = (await import(`@/messages/${locale}/iul/get-covered.json`)).default;
+      Object.assign(splitMessages, iulGetCovered);
+    } catch {
+      // File doesn't exist, skip
+    }
+
     // Load Final Expense presentation messages if they exist
     try {
       const fePresentation = (await import(`@/messages/${locale}/final-expense/presentation.json`)).default;

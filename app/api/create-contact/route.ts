@@ -100,7 +100,13 @@ async function trySendMetaLeadCapiLead(
   const feSource =
     typeof finalExpenseData?.source === "string" ? finalExpenseData.source : undefined;
   const isFinalExpenseGetCoveredAds = feSource === "final_expense_get_covered_ads";
-  const allowDuplicateMergeCapi = !isNewContact && isFinalExpenseGetCoveredAds;
+  const iulSource =
+    typeof iulLeadGenData?.source === "string" ? iulLeadGenData.source : undefined;
+  const isIulGetCoveredAds = iulSource === "iul_get_covered_ads";
+  // Duplicate-merge CAPI: FE get-covered and IUL get-covered ad funnels fire Lead on Step 1
+  // (contact) even for returning/duplicate contacts, using the same eventId as the Pixel.
+  const allowDuplicateMergeCapi =
+    !isNewContact && (isFinalExpenseGetCoveredAds || isIulGetCoveredAds);
 
   const willSend = !!(
     pixelId &&
@@ -133,41 +139,45 @@ async function trySendMetaLeadCapiLead(
     const ip = getClientIpFromRequest(request);
 
     const value = 100;
-    const source = isFinalExpenseGetCoveredAds
-      ? "final_expense_get_covered_ads"
-      : shortTermMedicalData
-        ? "short_term_medical"
-        : acaData
-          ? "aca"
-          : contactPageData
-            ? "contact_page"
-            : dentalVisionData
-              ? "dental_vision"
-              : hospitalIndemnityData
-                ? "hospital_indemnity"
-                : finalExpenseData
-                  ? "final_expense"
-                  : getCoveredFastData
-                    ? "get_covered_fast"
-                    : "iul_lead_gen";
+    const source = isIulGetCoveredAds
+      ? "iul_get_covered_ads"
+      : isFinalExpenseGetCoveredAds
+        ? "final_expense_get_covered_ads"
+        : shortTermMedicalData
+          ? "short_term_medical"
+          : acaData
+            ? "aca"
+            : contactPageData
+              ? "contact_page"
+              : dentalVisionData
+                ? "dental_vision"
+                : hospitalIndemnityData
+                  ? "hospital_indemnity"
+                  : finalExpenseData
+                    ? "final_expense"
+                    : getCoveredFastData
+                      ? "get_covered_fast"
+                      : "iul_lead_gen";
 
-    const contentName = isFinalExpenseGetCoveredAds
-      ? "Final expense get covered (VA ads)"
-      : shortTermMedicalData
-        ? "Short Term Medical Lead"
-        : acaData
-          ? "ACA Lead"
-          : contactPageData
-            ? "Contact Page Lead"
-            : dentalVisionData
-              ? "Dental & Vision Lead"
-              : hospitalIndemnityData
-                ? "Hospital Indemnity Lead"
-                : finalExpenseData
-                  ? "Final Expense Lead"
-                  : getCoveredFastData
-                    ? "Get Covered Fast funnel"
-                    : "IUL Lead Generation Campaign";
+    const contentName = isIulGetCoveredAds
+      ? "IUL get covered (ads)"
+      : isFinalExpenseGetCoveredAds
+        ? "Final expense get covered (VA ads)"
+        : shortTermMedicalData
+          ? "Short Term Medical Lead"
+          : acaData
+            ? "ACA Lead"
+            : contactPageData
+              ? "Contact Page Lead"
+              : dentalVisionData
+                ? "Dental & Vision Lead"
+                : hospitalIndemnityData
+                  ? "Hospital Indemnity Lead"
+                  : finalExpenseData
+                    ? "Final Expense Lead"
+                    : getCoveredFastData
+                      ? "Get Covered Fast funnel"
+                      : "IUL Lead Generation Campaign";
 
     const customData: Record<string, unknown> = {
       content_name: contentName,
@@ -177,6 +187,9 @@ async function trySendMetaLeadCapiLead(
     };
     if (isFinalExpenseGetCoveredAds) {
       customData.lead_event_source = "fe_get_covered_funnel";
+    }
+    if (isIulGetCoveredAds) {
+      customData.lead_event_source = "iul_get_covered_funnel";
     }
 
     console.log("[Meta CAPI] Sending event:", {
@@ -655,6 +668,10 @@ export async function POST(request: NextRequest) {
     if (iulLeadGenData) {
       iulLeadGenTags.push('IUL Lead');
       iulLeadGenTags.push(iulLeadGenData.language === 'es' ? 'Spanish' : 'English');
+      // Distinguish the Meta-ads get-covered funnel from the /iul/quote + modal leads.
+      if (iulLeadGenData.source === 'iul_get_covered_ads') {
+        iulLeadGenTags.push('iul_get_covered_funnel');
+      }
     }
 
     // Build tags for Final Expense page CTA leads (CRM workflows branch on fe_get_covered_funnel)

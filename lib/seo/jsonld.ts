@@ -1031,6 +1031,57 @@ export const getFinalExpenseGetCoveredAdsBreadcrumbLd = (
   };
 };
 
+/** Paid ads — IUL get-covered lead funnel; locale slug from routing. */
+const getIulGetCoveredAdsPathFor = (locale: string) =>
+  locale?.toLowerCase().startsWith("es")
+    ? "iul/obtener-cobertura"
+    : "iul/get-covered";
+
+export const getIulGetCoveredAdsPageLd = (
+  locale: string,
+  title: string,
+  description: string
+): WithContext<WebPage> => {
+  const path = getIulGetCoveredAdsPathFor(locale);
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "@id": `${BASE_URL}/${locale}/${path}#webpage`,
+    url: `${BASE_URL}/${locale}/${path}`,
+    name: title,
+    description,
+    inLanguage: locale,
+    about: { "@id": `${BASE_URL}/#organization` },
+    isPartOf: { "@id": `${BASE_URL}/#website` },
+  };
+};
+
+export const getIulGetCoveredAdsBreadcrumbLd = (
+  locale: string,
+  homeLabel: string,
+  pageLabel: string
+): WithContext<BreadcrumbList> => {
+  const path = getIulGetCoveredAdsPathFor(locale);
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: homeLabel,
+        item: `${BASE_URL}/${locale}`,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: pageLabel,
+        item: `${BASE_URL}/${locale}/${path}`,
+      },
+    ],
+  };
+};
+
 /* ───────────── Blog Post Article JSON-LD ───────────── */
 export interface BlogPostData {
   title: string;

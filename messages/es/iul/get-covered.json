@@ -1,0 +1,65 @@
+{
+  "iulGetCoveredPage": {
+    "metadata": {
+      "title": "Seguro de Vida Universal Indexado (IUL) — obtener cobertura | Isaac Plans Insurance",
+      "description": "Descubra cómo una póliza de Vida Universal Indexada puede acumular valor en efectivo con ventajas fiscales y proteger a su familia—sin riesgo de pérdidas del mercado. Responda unas preguntas rápidas para una estrategia personalizada con un asesor con licencia y bilingüe.",
+      "keywords": "IUL, vida universal indexada, retiro libre de impuestos, seguro de vida con valor en efectivo, planificación de retiro, Isaac Plans",
+      "imageAlt": "Planificando una estrategia de retiro con ventajas fiscales junto a un asesor de confianza",
+      "breadcrumbPage": "IUL — obtener cobertura"
+    },
+    "funnel": {
+      "banner": "Asesoría con licencia · Vida Universal Indexada",
+      "hero": {
+        "badge": "Crecimiento con ventajas fiscales · Protección de por vida",
+        "title": "Construya ingresos de retiro libres de impuestos con un IUL",
+        "mobileSubtitle": "Vea cómo un IUL puede hacer crecer su dinero—protegido de las pérdidas del mercado.",
+        "subtitle": "La Vida Universal Indexada combina protección de por vida con valor en efectivo que puede crecer con el mercado—sin el riesgo de caídas. Indíquenos cómo contactarlo y responda unas preguntas rápidas para una estrategia personalizada."
+      },
+      "secureNote": "Seguro · Sin compromiso · Sus datos son privados",
+      "helpLine": "¿Necesita ayuda? Llámenos al",
+      "progress": {
+        "step": "Paso {current} de {total}",
+        "done": "Listo"
+      },
+      "contact": {
+        "cta": "Ver si califico"
+      },
+      "quiz": {
+        "age": {
+          "placeholder": "Su edad"
+        },
+        "retirementOther": {
+          "label": "Otro",
+          "placeholder": "Indíquenos su plazo"
+        },
+        "next": "Siguiente",
+        "back": "Atrás",
+        "cta": "Ver mis resultados",
+        "submitting": "Enviando...",
+        "selectError": "Seleccione una opción para continuar.",
+        "ageError": "Ingrese una edad válida (18–85).",
+        "stateError": "Seleccione su estado.",
+        "investmentsError": "Seleccione al menos una opción.",
+        "sessionError": "Su sesión expiró. Por favor, empiece de nuevo."
+      },
+      "done": {
+        "title": "Listo",
+        "body": "Recibimos su información. Isaac le llamará en las próximas 24 horas.",
+        "optionIntro": "¿Qué desea hacer ahora?",
+        "applyCta": "¿Listo para aplicar ahora?",
+        "bookCta": "Agendar su cita",
+        "callCta": "Llamar ahora",
+        "callAria": "Llamar a Isaac Plans Insurance al 540-426-1804",
+        "whatsappCta": "Contactar por WhatsApp",
+        "whatsappAria": "Abrir WhatsApp con Isaac Plans Insurance",
+        "callerIntro": "Su estratega personal de IUL",
+        "callerSubline": "Isaac le llamará en las próximas 24 horas desde el 540-426-1804. Guarde su número para no perder la llamada.",
+        "agentName": "Isaac Orraiz",
+        "agentTitle": "Especialista en finanzas",
+        "headshotAlt": "Isaac Orraiz, asesor de seguros con licencia",
+        "saveContactCta": "Guardar contacto",
+        "saveContactAria": "Guardar a Isaac Orraiz en los contactos del teléfono (descarga vCard)"
+      }
+    }
+  }
+}

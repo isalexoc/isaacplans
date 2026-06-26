@@ -41,6 +41,37 @@ export function getFinalExpenseGetCoveredOgImageUrl(locale: string): string {
   return `${CLOUDINARY_ISAAC}/f_auto,q_auto,w_1200,h_630,c_fill,g_auto/${publicId}`;
 }
 
+/**
+ * Hero / OG art for the IUL get-covered (Meta ads) funnel — desktop split column + social card.
+ * TODO: swap these Cloudinary public IDs once the IUL-specific hero is provided;
+ * for now they reuse the Final Expense get-covered art so the page can ship.
+ */
+const IUL_GET_COVERED_HERO_PUBLIC_ID_EN = FINAL_EXPENSE_GET_COVERED_HERO_PUBLIC_ID_EN;
+const IUL_GET_COVERED_HERO_PUBLIC_ID_ES = FINAL_EXPENSE_GET_COVERED_HERO_PUBLIC_ID_ES;
+
+export function getIulGetCoveredHeroImageUrl(locale: string): string {
+  const isEs = locale.toLowerCase().startsWith("es");
+  const publicId = isEs
+    ? IUL_GET_COVERED_HERO_PUBLIC_ID_ES
+    : IUL_GET_COVERED_HERO_PUBLIC_ID_EN;
+  return `${CLOUDINARY_ISAAC}/f_auto,q_auto,w_1600,h_1200,c_fill,g_auto/${publicId}`;
+}
+
+/**
+ * OG / Twitter card (1200×630) for the IUL get-covered funnel — same locale-specific art
+ * as the `/iul/apply` page (`iulApply.meta.image`), per request.
+ */
+const IUL_GET_COVERED_OG_PUBLIC_ID_EN = "v1767070514/quote_iul_en_cxwq4x";
+const IUL_GET_COVERED_OG_PUBLIC_ID_ES = "v1767070515/quote_iul_es_bcqglt";
+
+export function getIulGetCoveredOgImageUrl(locale: string): string {
+  const isEs = locale.toLowerCase().startsWith("es");
+  const publicId = isEs
+    ? IUL_GET_COVERED_OG_PUBLIC_ID_ES
+    : IUL_GET_COVERED_OG_PUBLIC_ID_EN;
+  return `${CLOUDINARY_ISAAC}/f_auto,q_auto,w_1200,h_630,c_pad,b_auto/${publicId}`;
+}
+
 /** Agent headshot on `/final-expense/get-covered` success (square, face-cropped; displayed as rounded-rect in UI). */
 export const FINAL_EXPENSE_GET_COVERED_AGENT_HEADSHOT =
   "https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_320,h_320,c_fill,g_face/v1764176212/isaacpic_c8kca5_3_hz35qm.png";

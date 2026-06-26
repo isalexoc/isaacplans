@@ -1,0 +1,65 @@
+{
+  "iulGetCoveredPage": {
+    "metadata": {
+      "title": "Indexed Universal Life (IUL) — get covered | Isaac Plans Insurance",
+      "description": "See how an Indexed Universal Life policy can grow tax-advantaged cash value and protect your family—without market downside. Answer a few quick questions for a personalized strategy from a licensed, bilingual advisor.",
+      "keywords": "IUL, indexed universal life, tax-free retirement, cash value life insurance, retirement planning, Isaac Plans",
+      "imageAlt": "Planning a tax-advantaged retirement strategy with a trusted advisor",
+      "breadcrumbPage": "IUL — get covered"
+    },
+    "funnel": {
+      "banner": "Licensed guidance · Indexed Universal Life",
+      "hero": {
+        "badge": "Tax-advantaged growth · Lifetime protection",
+        "title": "Build tax-free retirement income with an IUL",
+        "mobileSubtitle": "See how an IUL can grow your money—protected from market losses.",
+        "subtitle": "Indexed Universal Life combines lifetime protection with cash value that can grow with the market—without the downside risk. Tell us how to reach you, then answer a few quick questions for a personalized strategy."
+      },
+      "secureNote": "Secure · No obligation · Your data stays private",
+      "helpLine": "Need help? Call us at",
+      "progress": {
+        "step": "Step {current} of {total}",
+        "done": "Complete"
+      },
+      "contact": {
+        "cta": "See If I Qualify"
+      },
+      "quiz": {
+        "age": {
+          "placeholder": "Your age"
+        },
+        "retirementOther": {
+          "label": "Other",
+          "placeholder": "Tell us your timeline"
+        },
+        "next": "Next",
+        "back": "Back",
+        "cta": "See My Results",
+        "submitting": "Submitting...",
+        "selectError": "Please choose an option to continue.",
+        "ageError": "Please enter a valid age (18–85).",
+        "stateError": "Please select your state.",
+        "investmentsError": "Please select at least one option.",
+        "sessionError": "Your session expired. Please start again."
+      },
+      "done": {
+        "title": "You're all set",
+        "body": "We received your info. Expect Isaac's call within 24 hours.",
+        "optionIntro": "What would you like to do next?",
+        "applyCta": "Ready to apply now?",
+        "bookCta": "Schedule your appointment",
+        "callCta": "Call now",
+        "callAria": "Call Isaac Plans Insurance at 540-426-1804",
+        "whatsappCta": "Message us on WhatsApp",
+        "whatsappAria": "Open WhatsApp with Isaac Plans Insurance",
+        "callerIntro": "Your personal IUL strategist",
+        "callerSubline": "Isaac will call you within 24 hours from 540-426-1804. Save his number so you don't miss it.",
+        "agentName": "Isaac Orraiz",
+        "agentTitle": "Licensed insurance advisor",
+        "headshotAlt": "Isaac Orraiz, licensed insurance advisor",
+        "saveContactCta": "Save contact",
+        "saveContactAria": "Save Isaac Orraiz to your phone contacts (vCard download)"
+      }
+    }
+  }
+}

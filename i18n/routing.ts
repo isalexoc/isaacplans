@@ -183,6 +183,10 @@ export const routing = defineRouting({
       en: "/iul/quote",
       es: "/iul/cotizacion",
     },
+    "/iul/get-covered": {
+      en: "/iul/get-covered",
+      es: "/iul/obtener-cobertura",
+    },
     "/final-expense": {
       en: "/final-expense",
       es: "/gastos-finales",
