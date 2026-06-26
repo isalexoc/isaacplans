@@ -13,7 +13,7 @@ import type { AppHref } from "@/i18n/navigation";
 import { usePathname, useRouter } from "@/i18n/navigation";
 
 import { cn } from "@/lib/utils";
-import { isAdsLandingPath } from "@/lib/ads-landing";
+import { isAdsLandingPath, isIulBareLandingPath } from "@/lib/ads-landing";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import {
@@ -108,6 +108,29 @@ const Header = () => {
       router.push(href as any);
     }
   };
+
+  /** IUL get-covered ads page: bare chrome — logo + phone only, both NON-clickable
+   *  (no nav, CTA, theme, or locale switcher). The lead form is the only interactive area. */
+  if (isIulBareLandingPath(pathname)) {
+    return (
+      <Headroom style={{ zIndex: 50 }}>
+        <header className="border-b border-border bg-background/95 backdrop-blur-sm shadow-sm transition-shadow duration-300 supports-[backdrop-filter]:bg-background/80">
+          <div className="container mx-auto px-4 sm:px-6">
+            <div className="flex h-16 items-center justify-between md:h-20">
+              <Logo clickable={false} />
+              <div
+                className="flex items-center gap-2 text-sm font-medium text-foreground/90"
+                aria-label={`Call us at ${nav("phone")}`}
+              >
+                <Lucide.Phone className="h-4 w-4 shrink-0" aria-hidden="true" />
+                <span>{nav("phone")}</span>
+              </div>
+            </div>
+          </div>
+        </header>
+      </Headroom>
+    );
+  }
 
   /** Paid ads landing: logo + phone + locale only (no nav / quote CTA). */
   if (isAdsLandingPath(pathname)) {

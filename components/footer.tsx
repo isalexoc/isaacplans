@@ -42,6 +42,29 @@ const SITE_NAME = "Isaac Plans";
 const LOGO_URL =
   "https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_40,h_40,c_fill,g_auto/isaacplanslogo_tkraak.png";
 
+/** Barest footer for the IUL get-covered ads page: logo (non-clickable) + centered
+ *  copyright. No "Full website" link, no other links — the form is the only exit. */
+async function BareIulFooter() {
+  const t = await getTranslations("footer.adsMinimal");
+  const year = new Date().getFullYear();
+  return (
+    <footer
+      className="border-t border-gray-200 bg-gray-50 py-8 dark:border-gray-800 dark:bg-gray-950"
+      aria-label="Footer"
+    >
+      <div className="container mx-auto grid grid-cols-1 items-center gap-4 px-4 sm:grid-cols-3 sm:px-6 lg:px-8">
+        <div className="flex justify-center sm:justify-start">
+          <Logo clickable={false} />
+        </div>
+        <p className="text-center text-sm text-gray-600 dark:text-gray-400">
+          {t("copyright", { year })}
+        </p>
+        <div className="hidden sm:block" aria-hidden />
+      </div>
+    </footer>
+  );
+}
+
 /** Slim footer for paid-ads landing pages (minimal exits). */
 async function MinimalAdsFooter() {
   const t = await getTranslations("footer.adsMinimal");
@@ -73,6 +96,9 @@ async function MinimalAdsFooter() {
 export default async function Footer() {
   const headerList = await headers();
   if (headerList.get("x-is-ads-landing") === "1") {
+    if (headerList.get("x-ads-landing-variant") === "iul-bare") {
+      return await BareIulFooter();
+    }
     return await MinimalAdsFooter();
   }
 

@@ -22,3 +22,18 @@ export function isAdsLandingPathResolved(pathname: string | null | undefined): b
   const normalized = pathname.replace(/^\/(en|es)(?=\/)/i, "");
   return isAdsLandingPath(normalized || pathname);
 }
+
+/**
+ * IUL get-covered ads pages get an even barer chrome than the generic ads landings:
+ * logo + phone only, both NON-clickable (the lead form is the sole interactive element).
+ * Pathnames are locale-agnostic (next-intl usePathname omits the locale prefix).
+ */
+export const IUL_BARE_LANDING_PATHNAMES = [
+  "/iul/get-covered",
+  "/iul/obtener-cobertura",
+] as const;
+
+export function isIulBareLandingPath(pathname: string | null | undefined): boolean {
+  if (!pathname) return false;
+  return (IUL_BARE_LANDING_PATHNAMES as readonly string[]).includes(pathname);
+}

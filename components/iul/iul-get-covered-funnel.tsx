@@ -207,17 +207,22 @@ export default function IulGetCoveredFunnel() {
     };
   }, [phase, locale]);
 
-  /** Position the form card in view when entering quiz / done and on each quiz step
-   *  (phones vary in height; this keeps the current question visible). */
+  /** Position the TOP of the form card in view when entering quiz / done and on each
+   *  quiz step (mobile-first: phones vary in height). We defer to the next frame so the
+   *  new step's layout is committed first, and the card's `scroll-mt-*` offsets the
+   *  pinned (Headroom) header so the question heading is never hidden under it. */
   useLayoutEffect(() => {
     if (phase === "contact") return;
     if (typeof window === "undefined") return;
     const el = quizCardRef.current;
-    if (el) {
-      el.scrollIntoView({ behavior: "auto", block: "start" });
-    } else {
+    if (!el) {
       window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+      return;
     }
+    const raf = requestAnimationFrame(() => {
+      el.scrollIntoView({ behavior: "auto", block: "start" });
+    });
+    return () => cancelAnimationFrame(raf);
   }, [phase, quizIndex]);
 
   useEffect(() => {
@@ -570,12 +575,14 @@ export default function IulGetCoveredFunnel() {
             sizes="(max-width: 1023px) 0px, 46vw"
             className="object-cover object-center"
           />
-          <div className="absolute inset-0 bg-black/50" aria-hidden />
+          {/* Targeted scrim over the mid-image gap (between the couple and the agent) where
+              the headline sits — keeps the couple up top and the agent below both bright. */}
           <div
-            className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/45 to-slate-950/25"
+            className="absolute inset-0 bg-[radial-gradient(135%_62%_at_42%_42%,rgba(0,0,0,0.7),rgba(0,0,0,0.12)_72%)]"
             aria-hidden
           />
-          <div className="absolute inset-0 flex flex-col justify-center p-10 pb-10 xl:p-12">
+          {/* Headline centered in the gap between the couple (top) and the agent (bottom). */}
+          <div className="absolute inset-x-0 top-[42%] flex -translate-y-1/2 flex-col px-10 xl:px-12">
             <p className="mb-3 inline-flex w-fit items-center gap-2 rounded-full border border-white/25 bg-black/35 px-3 py-1 text-[11px] font-medium uppercase tracking-wider text-white backdrop-blur-md sm:text-xs [text-shadow:0_1px_12px_rgba(0,0,0,0.85)]">
               <Shield className="h-3.5 w-3.5 shrink-0 text-emerald-300" aria-hidden />
               {t("hero.badge")}
@@ -646,7 +653,7 @@ export default function IulGetCoveredFunnel() {
 
             <div
               ref={quizCardRef}
-              className="mt-7 scroll-mt-4 rounded-2xl border border-slate-200/80 bg-white/95 p-5 shadow-[0_4px_40px_-12px_rgba(15,23,42,0.12)] backdrop-blur-sm dark:border-slate-700/80 dark:bg-slate-900/85 sm:p-7 sm:px-8"
+              className="mt-7 scroll-mt-24 rounded-2xl border border-slate-200/80 bg-white/95 p-5 shadow-[0_4px_40px_-12px_rgba(15,23,42,0.12)] backdrop-blur-sm dark:border-slate-700/80 dark:bg-slate-900/85 sm:p-7 sm:px-8"
             >
               {phase === "contact" && (
                 <form onSubmit={handleContactSubmit} className="space-y-4">

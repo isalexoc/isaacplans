@@ -1,9 +1,11 @@
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
 
-const Logo = () => {
-  return (
-    <Link href="/" className="flex items-center space-x-2">
+/** Set `clickable={false}` to render the logo as plain (non-interactive) branding —
+ *  used on the distraction-free IUL ads landing where the form is the only link. */
+const Logo = ({ clickable = true }: { clickable?: boolean }) => {
+  const inner = (
+    <>
       <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg overflow-hidden flex items-center justify-center">
         <Image
           src="https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_40,h_40,c_fill,g_auto/isaacplanslogo_tkraak.png"
@@ -22,6 +24,20 @@ const Logo = () => {
           Insurance
         </span>
       </div>
+    </>
+  );
+
+  if (!clickable) {
+    return (
+      <span className="flex items-center space-x-2" aria-label="Isaac Plans Insurance">
+        {inner}
+      </span>
+    );
+  }
+
+  return (
+    <Link href="/" className="flex items-center space-x-2">
+      {inner}
     </Link>
   );
 };

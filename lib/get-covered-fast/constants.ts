@@ -42,19 +42,16 @@ export function getFinalExpenseGetCoveredOgImageUrl(locale: string): string {
 }
 
 /**
- * Hero / OG art for the IUL get-covered (Meta ads) funnel — desktop split column + social card.
- * TODO: swap these Cloudinary public IDs once the IUL-specific hero is provided;
- * for now they reuse the Final Expense get-covered art so the page can ship.
+ * Hero art for the IUL get-covered (Meta ads) funnel — desktop split column.
+ * Portrait source (1122×1402); the same image is used for EN + ES. We only width-cap
+ * and let `f_auto,q_auto` optimize — no forced crop, so the panel's `object-cover`
+ * controls final framing (logo top, retired couple mid, agent front-and-center bottom).
  */
-const IUL_GET_COVERED_HERO_PUBLIC_ID_EN = FINAL_EXPENSE_GET_COVERED_HERO_PUBLIC_ID_EN;
-const IUL_GET_COVERED_HERO_PUBLIC_ID_ES = FINAL_EXPENSE_GET_COVERED_HERO_PUBLIC_ID_ES;
+const IUL_GET_COVERED_HERO_PUBLIC_ID =
+  "v1782480981/bdf11eb4-0cff-4d8c-96dd-6f3bb076bff7_kqsyij";
 
-export function getIulGetCoveredHeroImageUrl(locale: string): string {
-  const isEs = locale.toLowerCase().startsWith("es");
-  const publicId = isEs
-    ? IUL_GET_COVERED_HERO_PUBLIC_ID_ES
-    : IUL_GET_COVERED_HERO_PUBLIC_ID_EN;
-  return `${CLOUDINARY_ISAAC}/f_auto,q_auto,w_1600,h_1200,c_fill,g_auto/${publicId}`;
+export function getIulGetCoveredHeroImageUrl(_locale: string): string {
+  return `${CLOUDINARY_ISAAC}/f_auto,q_auto,w_1200,c_limit/${IUL_GET_COVERED_HERO_PUBLIC_ID}`;
 }
 
 /**

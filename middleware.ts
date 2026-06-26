@@ -63,6 +63,13 @@ export default clerkMiddleware(async (auth, req) => {
   ) {
     response.headers.set("x-is-ads-landing", "1");
   }
+  // IUL get-covered gets an even barer footer (logo + copyright only, no links).
+  if (
+    pathname.includes("/iul/get-covered") ||
+    pathname.includes("/iul/obtener-cobertura")
+  ) {
+    response.headers.set("x-ads-landing-variant", "iul-bare");
+  }
   return response;
 });
 
