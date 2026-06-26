@@ -34,7 +34,7 @@ import {
 } from "@/components/ui/command";
 import {
   FINAL_EXPENSE_GET_COVERED_AGENT_HEADSHOT,
-  FINAL_EXPENSE_GET_COVERED_VCARD_URL,
+  IUL_GET_COVERED_VCARD_URL,
   getIulGetCoveredHeroImageUrl,
 } from "@/lib/get-covered-fast/constants";
 import { US_STATE_OPTIONS } from "@/lib/get-covered-fast/us-states";
@@ -1143,7 +1143,7 @@ export default function IulGetCoveredFunnel() {
                     </p>
 
                     <a
-                      href={FINAL_EXPENSE_GET_COVERED_VCARD_URL}
+                      href={IUL_GET_COVERED_VCARD_URL}
                       download="Isaac-Orraiz-Isaac-Plans.vcf"
                       rel="noopener noreferrer"
                       className="mt-3 flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border-2 border-[hsl(var(--custom))] bg-white px-4 text-sm font-semibold text-[hsl(var(--custom))] shadow-sm transition-colors active:bg-slate-50 dark:bg-slate-900/40 dark:text-[hsl(var(--custom))] dark:active:bg-slate-800 sm:mt-4"

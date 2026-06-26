@@ -76,3 +76,7 @@ export const FINAL_EXPENSE_GET_COVERED_AGENT_HEADSHOT =
 /** vCard for “Save contact” on the get-covered success screen. */
 export const FINAL_EXPENSE_GET_COVERED_VCARD_URL =
   "https://res.cloudinary.com/isaacdev/raw/upload/v1777217085/isaac-orraiz_uaubck.vcf";
+
+/** vCard for “Save contact” on the IUL get-covered success screen. */
+export const IUL_GET_COVERED_VCARD_URL =
+  "https://res.cloudinary.com/isaacdev/raw/upload/v1782486525/isaac-orraiz_ficunl.vcf";
