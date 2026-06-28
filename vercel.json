@@ -5,12 +5,8 @@
       "schedule": "0 6 * * *"
     },
     {
-      "path": "/api/cron/kixie-call-summary",
-      "schedule": "*/3 * * * *"
-    },
-    {
-      "path": "/api/cron/social-publish",
-      "schedule": "*/5 * * * *"
+      "path": "/api/cron/queue-reconcile",
+      "schedule": "0 7 * * *"
     },
     {
       "path": "/api/cron/social-token-refresh",

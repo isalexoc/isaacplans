@@ -15,6 +15,7 @@ function firstAttachmentUrl(attachments: GhlCallWebhookPayload["attachments"]): 
 import { enqueueKixieCallJob } from "@/lib/agent-crm-call-summary-store";
 import { createCallSummaryLogger, sanitizeCallPayload } from "@/lib/agent-crm-call-summary-log";
 import { triggerKixieProcessorKick } from "@/lib/kixie-call-processor";
+import { publishJob } from "@/lib/qstash/client";
 import {
   getKixieCallSummaryConfig,
   isKixieCallSummaryConfigured,
@@ -124,7 +125,18 @@ export async function POST(req: NextRequest) {
   if (queued.queued) {
     const origin = req.nextUrl.origin;
     after(async () => {
-      await triggerKixieProcessorKick(origin);
+      // Event-driven: hand the job to QStash so Neon stays idle until there's
+      // real work (no polling cron). Fall back to the direct processor kick when
+      // QStash is disabled or the publish fails, so processing still happens.
+      const published = await publishJob({
+        path: "/api/queue/kixie-call-summary",
+        body: { messageId: processingId },
+        requestOrigin: origin,
+        retries: 3,
+      });
+      if (!published) {
+        await triggerKixieProcessorKick(origin);
+      }
     });
   }
 

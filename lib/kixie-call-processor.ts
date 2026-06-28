@@ -1,6 +1,7 @@
 import type { GhlCallWebhookPayload } from "@/lib/agent-crm-call-summary";
 import { completeCallSummaryFromTranscript } from "@/lib/agent-crm-call-summary";
 import {
+  claimKixieJobByMessageId,
   claimNextKixieJob,
   kixieRetryBackoffMs,
   MAX_KIXIE_ATTEMPTS,
@@ -34,7 +35,10 @@ export type ProcessKixieQueueResult = {
   noteId?: string | null;
 };
 
-/** Process one claimed Kixie job (download → Whisper → summary → note). */
+/**
+ * Process the next queued Kixie job (FIFO claim). Used by the daily reconcile
+ * backstop to drain anything QStash never delivered.
+ */
 export async function processOneKixieCallJob(): Promise<ProcessKixieQueueResult> {
   const kixieConfig = getKixieCallSummaryConfig();
   const log = createCallSummaryLogger(kixieConfig.callSummary.debug);
@@ -49,6 +53,39 @@ export async function processOneKixieCallJob(): Promise<ProcessKixieQueueResult>
     log.debug("Kixie processor: no jobs in queue");
     return { processed: false };
   }
+
+  return processClaimedKixieJob(row, log);
+}
+
+/**
+ * Process a SPECIFIC Kixie job by id — the QStash delivery path. Returns
+ * `{ processed: false }` when the job is missing/already done/not claimable
+ * (duplicate delivery), which the endpoint maps to a 200 (no retry).
+ */
+export async function processKixieJobById(messageId: string): Promise<ProcessKixieQueueResult> {
+  const kixieConfig = getKixieCallSummaryConfig();
+  const log = createCallSummaryLogger(kixieConfig.callSummary.debug);
+
+  if (!kixieConfig.enabled || !isCallSummaryConfigured(kixieConfig.callSummary)) {
+    log.warn("Kixie processor skipped: not configured");
+    return { processed: false, reason: "not_configured" };
+  }
+
+  const row = await claimKixieJobByMessageId(messageId, log);
+  if (!row) {
+    log.info("Kixie processor: job not claimable", { messageId });
+    return { processed: false, messageId, reason: "not_claimable" };
+  }
+
+  return processClaimedKixieJob(row, log);
+}
+
+/** Run the download → Whisper → summary → note pipeline for an already-claimed job. */
+async function processClaimedKixieJob(
+  row: CallSummaryRow,
+  log: ReturnType<typeof createCallSummaryLogger>
+): Promise<ProcessKixieQueueResult> {
+  const kixieConfig = getKixieCallSummaryConfig();
 
   const recordingUrl = row.recordingUrl?.trim();
   if (!recordingUrl) {

@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import { createScheduledPost, listScheduledPosts } from "@/lib/social-publishing/scheduler";
+import { createScheduledPost, listScheduledPosts, setQstashMessageId } from "@/lib/social-publishing/scheduler";
 import type { SocialPlatform, PublishFormat } from "@/lib/social-publishing/types";
 import type { SocialPostCopy } from "@/lib/social-media-studio/types";
+import { publishJob } from "@/lib/qstash/client";
 
 export const maxDuration = 300;
 
@@ -53,6 +54,21 @@ export async function POST(req: NextRequest) {
     videoUrl:        body.videoUrl,
     copySnapshot:    body.copySnapshot,
   });
+
+  // Hand to QStash for exact-time, poll-free delivery. When QStash is disabled
+  // or the publish fails, publishJob returns null and the daily reconcile cron
+  // picks the post up instead — so scheduling never silently drops.
+  const messageId = await publishJob({
+    path: "/api/queue/social-publish",
+    body: { scheduledPostId: post.id },
+    notBefore: Math.floor(scheduledFor.getTime() / 1000),
+    requestOrigin: req.nextUrl.origin,
+    retries: 3,
+  });
+  if (messageId) {
+    await setQstashMessageId(post.id, messageId);
+    post.qstashMessageId = messageId;
+  }
 
   return NextResponse.json({ success: true, data: post });
 }

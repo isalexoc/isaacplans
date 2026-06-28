@@ -170,8 +170,9 @@ For integrations:
 - Meta: NEXT_PUBLIC_FACEBOOK_PIXEL_ID, META_CAPI_ACCESS_TOKEN
 - Cloudinary: NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_SECRET
 - Email: EMAIL_HOST, EMAIL_PORT, EMAIL_USER_INFO, EMAIL_PASS_INFO
+- QStash (background jobs): QSTASH_ENABLED, QSTASH_TOKEN, QSTASH_URL, QSTASH_CURRENT_SIGNING_KEY, QSTASH_NEXT_SIGNING_KEY, QSTASH_TARGET_BASE_URL
 
-See .env for full list and CALL_SUMMARY_SETUP.md, META_CAPI_SETUP.md, FACEBOOK_PIXEL_GUIDE.md for detailed integration docs.
+See .env for full list and CALL_SUMMARY_SETUP.md, META_CAPI_SETUP.md, FACEBOOK_PIXEL_GUIDE.md, QSTASH_SETUP.md for detailed integration docs.
 
 ## Testing & Debugging
 
@@ -182,13 +183,22 @@ See .env for full list and CALL_SUMMARY_SETUP.md, META_CAPI_SETUP.md, FACEBOOK_P
 - Call summary debug: Set AGENT_CRM_CALL_SUMMARY_DEBUG=true for verbose webhook logs
 - Meta CAPI testing: Set testEventCode=TEST22889 to test in Meta Events Manager
 
-## Cron Jobs
+## Background Jobs & Cron
 
-Configured in vercel.json:
-- /api/cron/call-summary-backfill: Daily 6 AM UTC; backfills missed call summaries
-- /api/cron/kixie-call-summary: Every 3 minutes; processes pending Kixie webhooks
+**Standard for all background / async / scheduled / retry work: Upstash QStash (event-driven), NOT polling crons.** A cron that queries Neon every few minutes keeps the serverless database awake 24/7 and bills compute around the clock regardless of real activity (this is exactly what caused a runaway Neon bill — see QSTASH_SETUP.md). Instead: publish a QStash message when there's real work; QStash calls back (with built-in retries + delayed/exact-time delivery), so Neon stays idle until needed.
 
-Both require CRON_SECRET header for auth.
+Rule: **do not add a Vercel cron more frequent than daily that touches Neon.** If you need timely background processing, retries, or scheduled delivery, use QStash (`lib/qstash/` — `publishJob`, `cancelJob`, `verifyQStashRequest`).
+
+QStash delivery endpoints (auth via `Upstash-Signature`, not CRON_SECRET):
+- /api/queue/kixie-call-summary: processes one Kixie call (published from the Kixie webhook)
+- /api/queue/social-publish: publishes one scheduled social post at its exact time
+
+Crons in vercel.json (all CRON_SECRET bearer auth; all daily-or-less):
+- /api/cron/call-summary-backfill: Daily 6 AM UTC; backfills missed GHL call summaries
+- /api/cron/queue-reconcile: Daily 7 AM UTC; safety-net that drains any Kixie job / social post QStash missed
+- /api/cron/social-token-refresh: Weekly (Mon 8 AM UTC); refreshes social OAuth tokens
+
+QStash is feature-flagged by `QSTASH_ENABLED`; when off, the Kixie webhook falls back to a direct processor kick and posts wait for the daily reconcile.
 
 ## Deployment
 
@@ -207,6 +217,7 @@ Both require CRON_SECRET header for auth.
 4. Drizzle with Neon serverless: Uses HTTP fetch (neon() adapter) instead of TCP
 5. Bilingual schema: Fields have _es suffix (titleEs, descriptionEs) for Spanish
 6. Leave-behind package draft: Client-side autosave via hook, canvas rendering, Cloudinary
+7. Event-driven background jobs: QStash publishes a message on real work and calls back (retries + exact-time delivery); never frequent Neon-polling crons (see "Background Jobs & Cron")
 
 ## Gotchas & Important Notes
 

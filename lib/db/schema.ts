@@ -245,6 +245,7 @@ export const socialScheduledPosts = pgTable("social_scheduled_posts", {
   errorMessage:    text("error_message"),
   attemptCount:    integer("attempt_count").notNull().default(0),
   nextRetryAt:     timestamp("next_retry_at"),
+  qstashMessageId: text("qstash_message_id"), // QStash scheduled-delivery id (for cancel/reschedule)
   copySnapshot:    jsonb("copy_snapshot"),   // SocialPostCopy snapshot
   imageUrl:        text("image_url"),
   videoUrl:        text("video_url"),

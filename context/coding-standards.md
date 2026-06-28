@@ -55,6 +55,11 @@
 - Return `{ success, data, error }` pattern from actions
 - Display user-friendly error messages via toast
 
+## Background & Scheduled Work
+
+- Use Upstash QStash (`lib/qstash/`) for any async, scheduled, retry, or deferred work — publish a message on real work and let QStash call back.
+- Do NOT add a Vercel cron that polls Neon more frequently than daily: frequent polling keeps the serverless DB awake 24/7 and bills compute around the clock. See CLAUDE.md → "Background Jobs & Cron" and QSTASH_SETUP.md.
+
 ## Code Quality
 
 - No commented-out code unless specified

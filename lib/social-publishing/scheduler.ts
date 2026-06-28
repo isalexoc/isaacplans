@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { socialScheduledPosts } from "@/lib/db/schema";
 import type { SocialPlatform, ScheduledPost, PublishStatus, PublishFormat } from "./types";
 import type { SocialPostCopy } from "@/lib/social-media-studio/types";
+import { runPublishJob } from "./publish-job";
 
 function rowToScheduled(row: typeof socialScheduledPosts.$inferSelect): ScheduledPost {
   return {
@@ -21,6 +22,7 @@ function rowToScheduled(row: typeof socialScheduledPosts.$inferSelect): Schedule
     errorMessage:    row.errorMessage ?? null,
     attemptCount:    row.attemptCount,
     nextRetryAt:     row.nextRetryAt ?? null,
+    qstashMessageId: row.qstashMessageId ?? null,
     imageUrl:        row.imageUrl ?? null,
     videoUrl:        row.videoUrl ?? null,
     copySnapshot:    (row.copySnapshot as SocialPostCopy | null) ?? null,
@@ -57,6 +59,7 @@ export async function createScheduledPost(params: {
     errorMessage:    null,
     attemptCount:    0,
     nextRetryAt:     null,
+    qstashMessageId: null,
     copySnapshot:    params.copySnapshot ?? null,
     imageUrl:        params.imageUrl ?? null,
     videoUrl:        params.videoUrl ?? null,
@@ -87,6 +90,24 @@ export async function getDuePosts(limit = 10): Promise<ScheduledPost[]> {
     .filter((r) => !r.nextRetryAt || r.nextRetryAt <= now)
     .filter((r) => r.attemptCount < 3)
     .map(rowToScheduled);
+}
+
+/** Fetch a single scheduled post by id (used by the QStash delivery endpoint). */
+export async function getScheduledPostById(id: string): Promise<ScheduledPost | null> {
+  const rows = await db
+    .select()
+    .from(socialScheduledPosts)
+    .where(eq(socialScheduledPosts.id, id))
+    .limit(1);
+  return rows[0] ? rowToScheduled(rows[0]) : null;
+}
+
+/** Persist the QStash message id for a scheduled post (for later cancel/reschedule). */
+export async function setQstashMessageId(id: string, qstashMessageId: string | null): Promise<void> {
+  await db
+    .update(socialScheduledPosts)
+    .set({ qstashMessageId, updatedAt: new Date() })
+    .where(eq(socialScheduledPosts.id, id));
 }
 
 export async function markPublishing(id: string): Promise<void> {
@@ -147,6 +168,59 @@ export async function listScheduledPosts(userId: string): Promise<ScheduledPost[
     .from(socialScheduledPosts)
     .where(eq(socialScheduledPosts.userId, userId));
   return rows.map(rowToScheduled);
+}
+
+export type ProcessScheduledPostResult = {
+  success: boolean;
+  /** Set when no publish was attempted (already handled or invalid data). */
+  skipped?: string;
+  error?: string;
+};
+
+/**
+ * Validate + publish a single scheduled post, updating its DB status.
+ * Shared by the QStash delivery endpoint and the daily reconcile backstop so
+ * both use identical bookkeeping (markPublishing → markPublished/markFailed).
+ * Idempotent: already-published/cancelled posts are skipped.
+ */
+export async function processScheduledPost(post: ScheduledPost): Promise<ProcessScheduledPostResult> {
+  if (post.status === "published" || post.status === "cancelled") {
+    return { success: true, skipped: post.status };
+  }
+
+  const caption  = post.copySnapshot?.fullPost ?? "";
+  const imageUrl = post.imageUrl ?? "";
+  const videoUrl = post.videoUrl ?? undefined;
+  const isReel    = post.format === "reel";
+  const isYouTube = post.platform === "youtube";
+
+  // Reels need a video; YouTube needs a video; everything else needs an image.
+  if (!caption || (isReel ? !videoUrl : !isYouTube && !imageUrl)) {
+    await markFailed(
+      post.id,
+      isReel ? "Missing caption or video URL for reel" : "Missing caption or image URL in snapshot",
+      post.attemptCount
+    );
+    return { success: false, skipped: "missing_data" };
+  }
+
+  await markPublishing(post.id);
+  const result = await runPublishJob({
+    userId:       post.userId,
+    sanityPostId: post.sanityPostId,
+    platform:     post.platform,
+    format:       post.format,
+    caption,
+    imageUrl,
+    videoUrl,
+  });
+
+  if (result.success) {
+    await markPublished(post.id, result.platformPostId ?? "");
+    return { success: true };
+  }
+  await markFailed(post.id, result.error ?? "Unknown error", post.attemptCount);
+  return { success: false, error: result.error };
 }
 
 export async function getScheduledPostsInRange(from: Date, to: Date): Promise<ScheduledPost[]> {

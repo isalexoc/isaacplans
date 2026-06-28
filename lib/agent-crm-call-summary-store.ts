@@ -196,6 +196,60 @@ export async function claimNextKixieJob(
   return updated;
 }
 
+/**
+ * Claim a SPECIFIC Kixie job by id — used when QStash delivers one job.
+ * Applies the same claimability guards as {@link claimNextKixieJob} (never
+ * re-claims a `completed` job, so duplicate QStash deliveries are safe).
+ * Returns null when the job is missing or not claimable.
+ */
+export async function claimKixieJobByMessageId(
+  messageId: string,
+  log: CallSummaryLogger = createCallSummaryLogger()
+): Promise<CallSummaryRow | null> {
+  const now = new Date();
+  const staleBefore = new Date(Date.now() - 2 * 60 * 60 * 1000);
+  const existing = await getProcessedCall(messageId, log);
+  if (!existing) {
+    log.warn("Kixie claim-by-id: job not found", { messageId });
+    return null;
+  }
+
+  const claimable =
+    existing.status === "pending" ||
+    (existing.status === "processing" &&
+      existing.processedAt != null &&
+      existing.processedAt <= staleBefore) ||
+    (existing.status === "failed" &&
+      (existing.attemptCount ?? 0) < MAX_KIXIE_ATTEMPTS &&
+      (existing.nextRetryAt == null || existing.nextRetryAt <= now));
+
+  if (!claimable) {
+    log.info("Kixie claim-by-id: not claimable", {
+      messageId,
+      status: existing.status,
+      attemptCount: existing.attemptCount,
+    });
+    return null;
+  }
+
+  await db
+    .update(callSummaryProcessed)
+    .set({
+      status: "processing",
+      processedAt: new Date(),
+      jobState: { ...(existing.jobState ?? {}), step: existing.jobState?.step ?? "download" },
+    })
+    .where(eq(callSummaryProcessed.messageId, messageId));
+
+  log.info("Claimed Kixie job by id", {
+    messageId,
+    priorStatus: existing.status,
+    attemptCount: existing.attemptCount,
+  });
+
+  return getProcessedCall(messageId, log);
+}
+
 export async function updateKixieJobProgress(
   messageId: string,
   patch: {

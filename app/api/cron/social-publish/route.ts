@@ -1,8 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getDuePosts, markPublishing, markPublished, markFailed } from "@/lib/social-publishing/scheduler";
-import { runPublishJob } from "@/lib/social-publishing/publish-job";
-import type { SocialPlatform, PublishFormat } from "@/lib/social-publishing/types";
+import { getDuePosts, processScheduledPost } from "@/lib/social-publishing/scheduler";
 
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+export const maxDuration = 300;
+
+/**
+ * Publish any due scheduled posts. No longer on a frequent schedule — QStash
+ * now delivers each post at its exact time (see /api/queue/social-publish), and
+ * the daily /api/cron/queue-reconcile is the backstop. Kept as a manual trigger.
+ */
 export async function GET(req: NextRequest) {
   const secret = req.headers.get("authorization")?.replace("Bearer ", "");
   if (secret !== process.env.CRON_SECRET) {
@@ -10,42 +17,10 @@ export async function GET(req: NextRequest) {
   }
 
   const duePosts = await getDuePosts(10);
-  const results: { id: string; platform: string; success: boolean; error?: string }[] = [];
-
+  const results = [];
   for (const post of duePosts) {
-    await markPublishing(post.id);
-
-    const caption  = post.copySnapshot?.fullPost ?? "";
-    const imageUrl = post.imageUrl ?? "";
-    const videoUrl = post.videoUrl ?? undefined;
-    const format   = (post.format ?? "post") as PublishFormat;
-
-    const isReel    = format === "reel";
-    const isYouTube = post.platform === "youtube";
-    // Reels need a video; YouTube needs a video; everything else needs an image.
-    if (!caption || (isReel ? !videoUrl : !isYouTube && !imageUrl)) {
-      await markFailed(post.id, isReel ? "Missing caption or video URL for reel" : "Missing caption or image URL in snapshot", post.attemptCount);
-      results.push({ id: post.id, platform: post.platform, success: false, error: "Missing data" });
-      continue;
-    }
-
-    const result = await runPublishJob({
-      userId:      post.userId,
-      sanityPostId: post.sanityPostId,
-      platform:    post.platform as SocialPlatform,
-      format,
-      caption,
-      imageUrl,
-      videoUrl,
-    });
-
-    if (result.success) {
-      await markPublished(post.id, result.platformPostId ?? "");
-      results.push({ id: post.id, platform: post.platform, success: true });
-    } else {
-      await markFailed(post.id, result.error ?? "Unknown error", post.attemptCount);
-      results.push({ id: post.id, platform: post.platform, success: false, error: result.error });
-    }
+    const r = await processScheduledPost(post);
+    results.push({ id: post.id, platform: post.platform, success: r.success, error: r.error ?? r.skipped });
   }
 
   return NextResponse.json({ processed: results.length, results });

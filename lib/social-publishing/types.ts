@@ -106,6 +106,7 @@ export interface ScheduledPost {
   errorMessage: string | null;
   attemptCount: number;
   nextRetryAt: Date | null;
+  qstashMessageId: string | null;
   imageUrl: string | null;
   videoUrl: string | null;
   copySnapshot: SocialPostCopy | null;
