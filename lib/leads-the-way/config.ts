@@ -50,11 +50,17 @@ function parseList(value: string | undefined, defaults: string[]): string[] {
   return out.length > 0 ? out : defaults;
 }
 
-/** "spanish=fe_senior_life_spanish, english=fe_senior_life_english" → [{match,tag}] */
+/**
+ * "spanish=fe_senior_life_spanish,spanish=spanish" → [{match,tag}]. Repeat a match key to add
+ * multiple tags for the same Lead Type keyword.
+ */
 function parseTagMap(value: string | undefined): Array<{ match: string; tag: string }> {
   if (!value?.trim()) {
     return [
       { match: "spanish", tag: "fe_senior_life_spanish" },
+      { match: "spanish", tag: "spanish" },
+      { match: "english", tag: "fe_senior_life_english" },
+      { match: "english", tag: "english" },
     ];
   }
   const out: Array<{ match: string; tag: string }> = [];
@@ -76,7 +82,14 @@ export function getLeadsTheWayConfig(): LeadsTheWayConfig {
       "srlife.net",
       "seniorlifeinsurancecompany.com",
     ]).map((s) => s.toLowerCase()),
-    baseTags: parseList(process.env.LEADS_THE_WAY_TAGS, ["Leads the Way", "Senior Life Lead"]),
+    baseTags: parseList(process.env.LEADS_THE_WAY_TAGS, [
+      "Leads the Way",
+      "Senior Life Lead",
+      "Senior Life",
+      "Senior Life - Lead",
+      "⚪senior life - lead", // legacy tag with a stray U+26AA prefix — kept so existing workflows still fire
+      "Final Expense Lead",
+    ]),
     tagMap: parseTagMap(process.env.LEADS_THE_WAY_TAG_MAP),
     aiFallback: parseBool(process.env.LEADS_THE_WAY_AI_FALLBACK, true),
     openaiApiKey: process.env.OPENAI_API_KEY?.trim() || null,
