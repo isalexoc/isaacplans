@@ -31,6 +31,7 @@ import {
   resolveLeadTags,
 } from "@/lib/leads-the-way/config";
 import { deriveLeadKey, parseLeadEmail, toE164, type ParsedLead } from "@/lib/leads-the-way/parse";
+import { resolveTimezone } from "@/lib/leads-the-way/timezone";
 import { extractLeadWithOpenAI } from "@/lib/leads-the-way/extract-openai";
 import {
   claimLeadByMessageId,
@@ -73,7 +74,7 @@ function presentNativeFields(parsed: ParsedLead, includePhone: string | null): A
 }
 
 /** Full, labeled dump of every lead field we have — used for both the custom field and the note. */
-function formatLeadDetails(parsed: ParsedLead, phoneE164: string): string {
+function formatLeadDetails(parsed: ParsedLead, phoneE164: string, timezone: string | null): string {
   const name = [parsed.firstName, parsed.lastName].filter(Boolean).join(" ");
   const cityLine = [parsed.city, parsed.state, parsed.postalCode].filter(Boolean).join(" ");
   const address = [parsed.address1, cityLine].filter(Boolean).join(", ");
@@ -83,6 +84,7 @@ function formatLeadDetails(parsed: ParsedLead, phoneE164: string): string {
     ["Email", parsed.email],
     ["Address", address || undefined],
     ["Date of Birth", parsed.dateOfBirth],
+    ["Time Zone", timezone ?? undefined],
     ["Lead Type", parsed.leadType],
     ["Lead ID", parsed.leadId],
     ["Purchase Date", parsed.purchaseDate],
@@ -292,12 +294,14 @@ export async function processLeadJobById(
       return { processed: true, ok: false, reason: "crm_resolve_failed" };
     }
     const { contactId, matchedBy } = resolved;
-    const details = formatLeadDetails(parsed, phoneE164);
+    const timezone = resolveTimezone(parsed.state, parsed.postalCode);
+    const details = formatLeadDetails(parsed, phoneE164, timezone);
 
     // 2. Update native fields (only those present → never clobber existing data). Include the phone
     //    only when we matched by email (enrich a contact that may lack it); the phone-matched
-    //    contact already has it.
+    //    contact already has it. Set timezone from the address/ZIP for scheduling.
     const native = presentNativeFields(parsed, matchedBy === "email" ? phoneE164 : null);
+    if (timezone) native.timezone = timezone;
 
     // 3. Merge the lead_source_details custom field with the full lead detail (preserve other fields).
     let customFields: CrmCustomFieldRow[] | undefined;

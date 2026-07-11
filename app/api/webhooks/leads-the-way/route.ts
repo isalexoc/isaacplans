@@ -159,5 +159,6 @@ export function GET() {
     writesNote: true, // build marker: this deploy writes a contact note + full lead-detail field
     tagsAlwaysOn: true, // build marker: core tags applied regardless of env overrides
     tagCount: config.baseTags.length,
+    setsTimezone: true, // build marker: this deploy sets contact timezone from address/ZIP
   });
 }

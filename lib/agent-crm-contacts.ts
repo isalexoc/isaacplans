@@ -250,6 +250,7 @@ export type AgentCrmNativeFields = Partial<{
   state: string;
   postalCode: string;
   companyName: string;
+  timezone: string; // IANA name, e.g. "America/New_York"
 }>;
 
 export type AgentCrmCustomFieldValue = { id: string; field_value: string };
