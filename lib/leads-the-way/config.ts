@@ -51,18 +51,11 @@ function parseList(value: string | undefined, defaults: string[]): string[] {
 }
 
 /**
- * "spanish=fe_senior_life_spanish,spanish=spanish" → [{match,tag}]. Repeat a match key to add
- * multiple tags for the same Lead Type keyword.
+ * Parse env-provided EXTRA mappings "spanish=fe_senior_life_spanish,spanish=spanish" → [{match,tag}].
+ * Returns [] when unset — the always-on maps live in REQUIRED_TAG_MAP below.
  */
 function parseTagMap(value: string | undefined): Array<{ match: string; tag: string }> {
-  if (!value?.trim()) {
-    return [
-      { match: "spanish", tag: "fe_senior_life_spanish" },
-      { match: "spanish", tag: "spanish" },
-      { match: "english", tag: "fe_senior_life_english" },
-      { match: "english", tag: "english" },
-    ];
-  }
+  if (!value?.trim()) return [];
   const out: Array<{ match: string; tag: string }> = [];
   for (const pair of value.split(",")) {
     const [rawMatch, rawTag] = pair.split("=");
@@ -73,6 +66,26 @@ function parseTagMap(value: string | undefined): Array<{ match: string; tag: str
   return out;
 }
 
+/**
+ * Tags below are ALWAYS applied; env vars (LEADS_THE_WAY_TAGS / LEADS_THE_WAY_TAG_MAP) only ADD to
+ * them. This makes the core Senior Life tags immune to a stale env override dropping them.
+ */
+const REQUIRED_BASE_TAGS = [
+  "Leads the Way",
+  "Senior Life Lead",
+  "Senior Life",
+  "Senior Life - Lead",
+  "⚪senior life - lead", // legacy tag with a stray U+26AA prefix — kept so existing workflows still fire
+  "Final Expense Lead",
+];
+
+const REQUIRED_TAG_MAP: Array<{ match: string; tag: string }> = [
+  { match: "spanish", tag: "fe_senior_life_spanish" },
+  { match: "spanish", tag: "spanish" },
+  { match: "english", tag: "fe_senior_life_english" },
+  { match: "english", tag: "english" },
+];
+
 export function getLeadsTheWayConfig(): LeadsTheWayConfig {
   return {
     enabled: parseBool(process.env.LEADS_THE_WAY_ENABLED, false),
@@ -82,15 +95,8 @@ export function getLeadsTheWayConfig(): LeadsTheWayConfig {
       "srlife.net",
       "seniorlifeinsurancecompany.com",
     ]).map((s) => s.toLowerCase()),
-    baseTags: parseList(process.env.LEADS_THE_WAY_TAGS, [
-      "Leads the Way",
-      "Senior Life Lead",
-      "Senior Life",
-      "Senior Life - Lead",
-      "⚪senior life - lead", // legacy tag with a stray U+26AA prefix — kept so existing workflows still fire
-      "Final Expense Lead",
-    ]),
-    tagMap: parseTagMap(process.env.LEADS_THE_WAY_TAG_MAP),
+    baseTags: [...REQUIRED_BASE_TAGS, ...parseList(process.env.LEADS_THE_WAY_TAGS, [])],
+    tagMap: [...REQUIRED_TAG_MAP, ...parseTagMap(process.env.LEADS_THE_WAY_TAG_MAP)],
     aiFallback: parseBool(process.env.LEADS_THE_WAY_AI_FALLBACK, true),
     openaiApiKey: process.env.OPENAI_API_KEY?.trim() || null,
     openaiModel: process.env.OPENAI_MODEL?.trim() || "gpt-4o-mini",
