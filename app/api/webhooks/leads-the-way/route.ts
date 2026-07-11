@@ -156,5 +156,6 @@ export function GET() {
     configured: isLeadsTheWayConfigured(config),
     aiFallback: config.aiFallback,
     debug: config.debug,
+    writesNote: true, // build marker: this deploy writes a contact note + full lead-detail field
   });
 }

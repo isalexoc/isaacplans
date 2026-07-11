@@ -72,14 +72,53 @@ function presentNativeFields(parsed: ParsedLead, includePhone: string | null): A
   return native;
 }
 
-function leadSourceDetailsText(parsed: ParsedLead): string {
-  const parts = [
-    parsed.leadType ? `Leads the Way — ${parsed.leadType}` : "Leads the Way",
-    parsed.leadId ? `Lead ID ${parsed.leadId}` : null,
-    parsed.purchaseDate ? `Purchased ${parsed.purchaseDate}` : null,
-    parsed.purchasePrice ? `$${parsed.purchasePrice}` : null,
-  ].filter(Boolean);
-  return parts.join(" | ");
+/** Full, labeled dump of every lead field we have — used for both the custom field and the note. */
+function formatLeadDetails(parsed: ParsedLead, phoneE164: string): string {
+  const name = [parsed.firstName, parsed.lastName].filter(Boolean).join(" ");
+  const cityLine = [parsed.city, parsed.state, parsed.postalCode].filter(Boolean).join(" ");
+  const address = [parsed.address1, cityLine].filter(Boolean).join(", ");
+  const rows: Array<[string, string | undefined]> = [
+    ["Name", name || undefined],
+    ["Phone", phoneE164],
+    ["Email", parsed.email],
+    ["Address", address || undefined],
+    ["Date of Birth", parsed.dateOfBirth],
+    ["Lead Type", parsed.leadType],
+    ["Lead ID", parsed.leadId],
+    ["Purchase Date", parsed.purchaseDate],
+    ["Purchase Price", parsed.purchasePrice ? `$${parsed.purchasePrice}` : undefined],
+  ];
+  const details = rows
+    .filter(([, v]) => v && v.trim())
+    .map(([k, v]) => `${k}: ${v}`)
+    .join("\n");
+  return `Leads the Way lead\n${details}`;
+}
+
+/** Create a contact note (non-throwing; returns the note id or null). POST /contacts/{id}/notes. */
+async function postContactNote(
+  contactId: string,
+  title: string,
+  body: string,
+  token: string,
+  log: LeadsTheWayLogger
+): Promise<string | null> {
+  try {
+    const res = await fetch(`${AGENT_CRM_API_BASE}/contacts/${contactId}/notes`, {
+      method: "POST",
+      headers: agentCrmJsonHeaders(token),
+      body: JSON.stringify({ title, body }),
+    });
+    if (!res.ok) {
+      log.warn("Create note failed", { status: res.status, body: (await res.text()).slice(0, 200) });
+      return null;
+    }
+    const data = (await res.json().catch(() => null)) as { note?: { id?: string }; id?: string } | null;
+    return data?.note?.id ?? data?.id ?? null;
+  } catch (err) {
+    log.warn("Create note error", { error: err instanceof Error ? err.message : String(err) });
+    return null;
+  }
 }
 
 function parsedSnapshot(parsed: ParsedLead): Record<string, string | undefined> {
@@ -253,19 +292,20 @@ export async function processLeadJobById(
       return { processed: true, ok: false, reason: "crm_resolve_failed" };
     }
     const { contactId, matchedBy } = resolved;
+    const details = formatLeadDetails(parsed, phoneE164);
 
     // 2. Update native fields (only those present → never clobber existing data). Include the phone
     //    only when we matched by email (enrich a contact that may lack it); the phone-matched
     //    contact already has it.
     const native = presentNativeFields(parsed, matchedBy === "email" ? phoneE164 : null);
 
-    // 3. Merge the lead_source_details custom field (preserve any existing custom fields).
+    // 3. Merge the lead_source_details custom field with the full lead detail (preserve other fields).
     let customFields: CrmCustomFieldRow[] | undefined;
     const field = await resolveLeadSourceDetailsCustomField(AGENT_CRM_API_BASE, locationId, token);
     if (field?.id) {
       const existing = await fetchExistingCustomFields(contactId, token);
       customFields = mergeCustomFieldsWithUpdates(existing, [
-        { id: field.id, key: field.key, field_value: leadSourceDetailsText(parsed) },
+        { id: field.id, key: field.key, field_value: details },
       ]);
     }
 
@@ -281,6 +321,16 @@ export async function processLeadJobById(
     const tags = resolveLeadTags(config, parsed.leadType);
     const tagged = await agentCrmAddContactTags(contactId, tags, token, "[LEADS_THE_WAY]");
     if (!tagged) log.warn("Add tags returned false (non-fatal)", { leadKey, contactId, tags });
+
+    // 5. Add a note with the same full lead detail (non-fatal).
+    const noteId = await postContactNote(
+      contactId,
+      `Leads the Way — ${parsed.leadType || "New Lead"}`,
+      details,
+      token,
+      log
+    );
+    if (!noteId) log.warn("Lead note not created (non-fatal)", { leadKey, contactId });
 
     await markLeadProcessed(
       {
