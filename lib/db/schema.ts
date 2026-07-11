@@ -285,3 +285,43 @@ export const iulIntakeSessions = pgTable("iul_intake_sessions", {
   contactIdx:     index("iul_intake_contact_idx").on(t.crmContactId),
 }));
 
+// ─── Leads the Way (Senior Life) email → GHL sync ─────────────────────────────
+
+/**
+ * Idempotency + async job queue for inbound "Leads the Way" order-confirmation emails.
+ * One row per lead (keyed by the app's Lead Id when present, else a stable content hash).
+ * Mirrors {@link callSummaryProcessed}: webhook inserts `pending`, QStash consumer claims
+ * by `leadKey`, and never re-claims `completed` so duplicate deliveries are safe.
+ */
+export const leadsTheWayProcessed = pgTable("leads_the_way_processed", {
+  leadKey: text("lead_key").primaryKey(), // "ltw_<leadId>" or "ltw_<sha256(from|subject|text)>"
+  contactId: text("contact_id"), // GHL contact id once upserted
+  locationId: text("location_id"),
+  phone: text("phone"), // normalized E.164, for observability/lookup
+  email: text("email"),
+  leadId: text("lead_id"), // raw Leads the Way "Lead Id" when present
+  /** pending | processing | completed | failed | skipped */
+  status: text("status").notNull().default("pending"),
+  errorMessage: text("error_message"),
+  jobState: jsonb("job_state").$type<LeadsTheWayJobState | null>(), // raw email + parsed fields
+  attemptCount: integer("attempt_count").notNull().default(0),
+  nextRetryAt: timestamp("next_retry_at"),
+  processedAt: timestamp("processed_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => ({
+  statusIdx: index("leads_the_way_processed_status_idx").on(table.status),
+  phoneIdx: index("leads_the_way_processed_phone_idx").on(table.phone),
+  leadIdIdx: index("leads_the_way_processed_lead_id_idx").on(table.leadId),
+}));
+
+export type LeadsTheWayJobState = {
+  step?: "parse" | "resolve" | "update" | "tag";
+  /** Raw inbound email captured by the webhook so the consumer can (re)parse it. */
+  rawText?: string;
+  from?: string;
+  subject?: string;
+  /** Structured fields parsed from the email (best-effort snapshot). */
+  parsed?: Record<string, string | undefined>;
+  lastError?: string;
+};
+

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { processOneKixieCallJob } from "@/lib/kixie-call-processor";
 import { getDuePosts, processScheduledPost } from "@/lib/social-publishing/scheduler";
+import { reconcileLeadJobs } from "@/lib/leads-the-way/process";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -43,11 +44,17 @@ export async function GET(req: NextRequest) {
     else if (!r.skipped) socialFailed++;
   }
 
+  // ── Leads the Way: drain any lead emails QStash never delivered ──
+  const leads = await reconcileLeadJobs(req.nextUrl.origin);
+
   return NextResponse.json({
     ok: true,
     kixieProcessed,
     socialDue: duePosts.length,
     socialPublished,
     socialFailed,
+    leadsFound: leads.found,
+    leadsProcessed: leads.processed,
+    leadsRepublished: leads.republished,
   });
 }
