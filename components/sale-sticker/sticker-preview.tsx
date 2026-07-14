@@ -138,15 +138,18 @@ export const StickerPreview = forwardRef<HTMLDivElement, StickerPreviewProps>(
 
     const s = { logo: 92, badge: 88, cap: 14, headline: 66, trophy: 58, sparkle: 30, avatar: 264, title: 22, name: 46, nameSm: 38, protect: 21, pill: 19, phrase: 22, moti: 22, agent: 21, date: 18 };
 
-    // Personal-image intro (GIF only): spins in big, shrinks, and lands at the footer.
+    // Personal-image intro (GIF only): spins in down the LEFT margin (clear of the
+    // centered text), shrinking, then drifts to its footer spot and lands.
     let extraOverlay: React.ReactNode = null;
     if (animateExtra && data.extraImageUrl) {
       const t = Math.min(p / 0.5, 1);
       const e = smoothstep(t);
-      const scale = 3.0 - e * 2.45; // 3.0 → 0.55
+      const scale = 2.6 - e * 2.0; // 2.6 → 0.6
       const rot = (1 - e) * 720; // two spins → 0
-      const topPct = 30 + e * 61; // 30% → 91% (down to the footer)
-      const opacity = p >= 0.5 ? 0 : t > 0.82 ? Math.max(0, 1 - (t - 0.82) / 0.18) : 1;
+      const topPct = 26 + e * 64; // 26% → 90% (down to the footer)
+      const drift = smoothstep(Math.max(0, (t - 0.65) / 0.35)); // move in only near the end
+      const leftPct = 13 + drift * 19; // stays far-left, then drifts to ~32% (footer)
+      const opacity = p >= 0.5 ? 0 : t > 0.85 ? Math.max(0, 1 - (t - 0.85) / 0.15) : 1;
       extraOverlay = (
         <div style={{ position: "absolute", inset: 0, pointerEvents: "none", zIndex: 6 }}>
           <img
@@ -155,7 +158,7 @@ export const StickerPreview = forwardRef<HTMLDivElement, StickerPreviewProps>(
             crossOrigin="anonymous"
             style={{
               position: "absolute",
-              left: "50%",
+              left: `${leftPct}%`,
               top: `${topPct}%`,
               width: 104,
               height: 104,
