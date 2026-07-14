@@ -199,18 +199,23 @@ export function PresenterPicker({ open, onOpenChange, locale, current, onConfirm
                         key={a.avatarId}
                         onClick={() => setSel((s) => ({ ...s, avatarId: a.avatarId, avatarName: a.name }))}
                         className={cn(
-                          "relative rounded-md border overflow-hidden text-left group",
+                          "relative block w-full rounded-md border overflow-hidden text-left group",
                           selected ? "ring-2 ring-blue-600 border-blue-600" : "hover:border-blue-400"
                         )}
-                        style={{ aspectRatio: "3 / 4" }}
                         title={a.name}
                       >
-                        {a.previewImageUrl ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={a.previewImageUrl} alt={a.name} className="w-full h-full object-cover" />
-                        ) : (
-                          <div className="w-full h-full bg-muted" />
-                        )}
+                        {/* Aspect ratio lives on this plain div — set on the <button> it sizes
+                            unreliably in iPadOS/WebKit and crops the portrait to just the forehead. */}
+                        <div className="relative aspect-[3/4] w-full bg-muted">
+                          {a.previewImageUrl && (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={a.previewImageUrl}
+                              alt={a.name}
+                              className="absolute inset-0 h-full w-full object-cover object-top"
+                            />
+                          )}
+                        </div>
                         {selected && (
                           <span className="absolute top-1 right-1 bg-blue-600 text-white rounded-full p-0.5">
                             <Check className="h-3 w-3" />

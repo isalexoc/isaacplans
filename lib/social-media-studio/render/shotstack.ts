@@ -18,7 +18,7 @@ const CAPTION_ACTIVE_COLOR = process.env.SHOTSTACK_CAPTION_ACTIVE || "#00B4D8"; 
 // offset.y: positive moves UP. Presenter videos put captions in the UPPER area (avatar is at
 // the bottom) nudged slightly down; faceless videos put them in the lower-third lifted up.
 const CAPTION_TOP_OFFSET    = Number(process.env.SHOTSTACK_CAPTION_TOP_OFFSET ?? "-0.08");
-const CAPTION_BOTTOM_OFFSET = Number(process.env.SHOTSTACK_CAPTION_BOTTOM_OFFSET ?? "0.12");
+const CAPTION_BOTTOM_OFFSET = Number(process.env.SHOTSTACK_CAPTION_BOTTOM_OFFSET ?? "0.06");
 
 // Ken Burns motion cycled per scene so a still image still feels alive.
 const KEN_BURNS = ["zoomIn", "slideLeft", "zoomOut", "slideRight"] as const;
