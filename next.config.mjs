@@ -6,6 +6,14 @@ const nextConfig = {
   // Keep native-binary packages out of the server bundle so their binary paths
   // (computed from __dirname in node_modules) resolve correctly in dev and prod.
   serverExternalPackages: ["ffmpeg-static"],
+  // Vercel's file tracing doesn't auto-include the ffmpeg binary (it's referenced
+  // as a runtime path string, not an import), so force it into each function that
+  // shells out to ffmpeg. The glob covers pnpm's nested node_modules layout.
+  outputFileTracingIncludes: {
+    "/api/sale-sticker/animate": ["./node_modules/**/ffmpeg-static/ffmpeg"],
+    "/api/cron/kixie-call-summary": ["./node_modules/**/ffmpeg-static/ffmpeg"],
+    "/api/queue/kixie-call-summary": ["./node_modules/**/ffmpeg-static/ffmpeg"],
+  },
   eslint: {
     ignoreDuringBuilds: false,
   },
