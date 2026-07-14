@@ -48,6 +48,7 @@ import {
   writeSaleStickerDraft,
 } from "@/lib/sale-sticker-draft";
 import {
+  captureImageFramePng,
   captureRichStickerPng,
   captureStickerFramePng,
   captureWhatsAppStickerWebp,
@@ -319,7 +320,7 @@ export default function SaleStickerForm({
       for (let i = 0; i < ANIM_FRAMES; i++) {
         setAnimPhase(i / ANIM_FRAMES);
         await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
-        const frame = await captureStickerFramePng(el);
+        const frame = await captureImageFramePng(el, STICKER_BG_FALLBACK);
         if (frame) frames.push(frame);
       }
       setAnimPhase(0);
