@@ -17,6 +17,7 @@ import { ClerkThemeProvider } from "@/components/clerk-theme-provider";
 import { esES, enUS } from '@clerk/localizations';
 import { SanityLive } from '@/sanity/lib/live';
 import MetaPixelWrapper from "@/components/meta-pixel-wrapper";
+import AdminFab from "@/components/admin-fab";
 import AgentCrmChat from "@/components/agent-crm-chat";
 import AgentCrmExternalTracking from "@/components/agent-crm-external-tracking";
 import { GoogleAnalytics } from '@next/third-parties/google'
@@ -142,6 +143,9 @@ export default async function LocaleLayout({
           <Header />
           <main className="flex-1 w-full">{children}</main>
           <Toaster />
+          {/* Floating admin shortcut — server-gated, only renders for admins */}
+          {/* @ts-ignore - AdminFab is an async server component, works correctly with React 19 */}
+          <AdminFab />
           {/* <CrispChat /> */}
           {/* @ts-ignore - Footer is an async server component, works correctly with React 19 */}
           <Footer />
