@@ -37,6 +37,7 @@ export default clerkMiddleware(async (auth, req) => {
   if (
     req.nextUrl.pathname.startsWith('/api/blog') ||
     req.nextUrl.pathname.startsWith('/api/leave-behind') ||
+    req.nextUrl.pathname.startsWith('/api/sale-sticker') ||
     req.nextUrl.pathname.startsWith('/api/iul-intake') ||
     req.nextUrl.pathname.startsWith('/api/admin') ||
     req.nextUrl.pathname.startsWith('/api/newsletter')
@@ -82,6 +83,7 @@ export const config = {
   matcher: [
     "/api/blog/:path*",
     "/api/leave-behind/:path*",
+    "/api/sale-sticker/:path*",
     "/api/iul-intake/:path*",
     "/api/admin/:path*",
     "/api/newsletter/:path*",

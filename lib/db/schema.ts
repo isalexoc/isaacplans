@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, boolean, integer, index, uniqueIndex, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, boolean, integer, index, uniqueIndex, jsonb, date } from "drizzle-orm/pg-core";
 import type { LeaveBehindQuoteData } from "@/lib/leave-behind-clients";
 import type { IntakeData } from "@/lib/iul-intake/schema";
 
@@ -163,6 +163,32 @@ export const leaveBehindAgentProfiles = pgTable("leave_behind_agent_profiles", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
+
+/**
+ * Sale-celebration WhatsApp stickers: one row per generated sticker (agent closes a sale).
+ * The rendered image is produced client-side; only the sticker's fields are stored here.
+ * dailySequence is the "sale #N of the day" counter, unique-ish per (userId, saleDate).
+ */
+export const saleStickers = pgTable("sale_stickers", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull(), // Clerk userId
+  clientName: text("client_name").notNull(),
+  clientTitle: text("client_title").notNull().default("mr"), // mr | mrs (El Señor / La Señora)
+  leadSource: text("lead_source").notNull(), // live_transfer | facebook | organic | cold | referral | returning | other
+  leadSourceCustom: text("lead_source_custom"), // free text when leadSource = other
+  saleType: text("sale_type").notNull(), // in_person | telesales
+  language: text("language").notNull().default("en"), // en | es (per-sticker on-image language)
+  saleDate: date("sale_date", { mode: "string" }).notNull(), // agent LOCAL date, YYYY-MM-DD
+  dailySequence: integer("daily_sequence").notNull(), // 1..n per (userId, saleDate)
+  customPhrase: text("custom_phrase"), // optional short phrase (<= 15 chars)
+  extraImageUrl: text("extra_image_url"), // optional personal image (Cloudinary delivery URL)
+  extraImagePublicId: text("extra_image_public_id"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => ({
+  userIdIdx: index("sale_stickers_user_id_idx").on(table.userId),
+  userDateIdx: index("sale_stickers_user_date_idx").on(table.userId, table.saleDate),
+}));
 
 /** Tracks Agent CRM / Kixie call summaries (idempotency + async Kixie job queue). */
 export const callSummaryProcessed = pgTable("call_summary_processed", {

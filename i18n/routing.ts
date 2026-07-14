@@ -211,6 +211,10 @@ export const routing = defineRouting({
       en: "/final-expense/leave-behind",
       es: "/gastos-finales/dejar-imagen",
     },
+    "/final-expense/sale-sticker": {
+      en: "/final-expense/sale-sticker",
+      es: "/gastos-finales/sticker-de-venta",
+    },
     "/final-expense/get-covered": {
       en: "/final-expense/get-covered",
       es: "/gastos-finales/obtener-cobertura",

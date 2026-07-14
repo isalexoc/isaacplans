@@ -1,0 +1,120 @@
+{
+  "saleSticker": {
+    "meta": {
+      "title": "Sale Celebration Sticker | Isaac Plans",
+      "description": "Create an amazing WhatsApp sticker to celebrate every sale you close.",
+      "keywords": "sale sticker, WhatsApp sticker, final expense, agent tools, celebrate sale"
+    },
+    "title": "Sale Celebration Sticker",
+    "subtitle": "Closed a sale? Make a stunning WhatsApp sticker to celebrate it.",
+    "backButton": "Back to Final Expense",
+    "landing": {
+      "title": "Sale Celebration Sticker",
+      "subtitle": "Sign in to design and download WhatsApp stickers that celebrate every sale you close.",
+      "signIn": "Sign in to start"
+    },
+    "tabs": {
+      "profile": "My profile",
+      "create": "Create sticker",
+      "stickers": "My stickers"
+    },
+    "profileRequired": {
+      "title": "Complete your agent profile first",
+      "hint": "Add your photo, company logo, and name so every sticker shows your branding. Your Leave-Behind profile is reused here.",
+      "cta": "Set up my profile"
+    },
+    "form": {
+      "title": "Design your sticker",
+      "description": "Fill in the sale details—your sticker updates live on the right.",
+      "numberPreview": "This will be sale #{n} of the day",
+      "numberCommitted": "Saved as sale #{n} of the day",
+      "optional": "optional",
+      "saleTypeLabel": "How was the sale made?",
+      "saleType": {
+        "in_person": "In Person",
+        "telesales": "Telesales"
+      },
+      "clientNameLabel": "Client name",
+      "clientNamePlaceholder": "e.g. Maria Garcia",
+      "clientNameRequired": "Client name is required",
+      "clientTitleLabel": "Title",
+      "clientTitle": {
+        "mr": "Mr.",
+        "mrs": "Mrs."
+      },
+      "leadSourceLabel": "Lead source",
+      "leadSource": {
+        "live_transfer": "Live Transfer",
+        "facebook": "Facebook Lead",
+        "organic": "Organic Lead",
+        "cold": "Cold Lead",
+        "referral": "Referral",
+        "returning": "Returning Client",
+        "other": "Other…"
+      },
+      "leadSourceCustomPlaceholder": "Enter lead source",
+      "languageLabel": "Sticker language",
+      "language": {
+        "en": "English",
+        "es": "Español"
+      },
+      "languageHint": "Sets the language of the text on the sticker (independent of the site language).",
+      "phraseLabel": "Short phrase",
+      "phrasePlaceholder": "e.g. Welcome!",
+      "phraseCounter": "{count}/{max} characters",
+      "extraImageLabel": "Personal image",
+      "extraImageHint": "Add a small personal image for an extra touch (logo, mascot, photo).",
+      "extraImagePlaceholder": "No image",
+      "uploadExtraImage": "Upload image",
+      "removeExtraImage": "Remove",
+      "extraRemoveBg": "Remove background",
+      "extraUploadFailed": "Could not upload image. Please try again."
+    },
+    "preview": {
+      "title": "Live preview",
+      "hint": "Download as a full image or as a WhatsApp sticker."
+    },
+    "toolbar": {
+      "newSticker": "New sticker",
+      "save": "Save",
+      "saving": "Saving…",
+      "downloadImage": "Download image",
+      "downloadingImage": "Preparing…",
+      "downloadSticker": "WhatsApp sticker",
+      "downloadingSticker": "Preparing…",
+      "downloadAnimated": "Animated sticker",
+      "downloadingAnimated": "Animating…",
+      "share": "Share",
+      "sharing": "Sharing…"
+    },
+    "messages": {
+      "saved": "Sticker saved",
+      "saveFailed": "Could not save sticker. Please try again.",
+      "captureFailed": "Could not generate the image. Please try again.",
+      "animateFailed": "Could not build the animated sticker. Please try again.",
+      "shareFailed": "Could not share the sticker. Please try again.",
+      "shareDownloadedInstead": "Sharing isn't available here—downloaded instead."
+    },
+    "share": {
+      "title": "Sale celebration!",
+      "textPreparedFor": "Sale closed with {name}! 🎉",
+      "textDefault": "Another sale closed! 🎉"
+    },
+    "list": {
+      "title": "My stickers",
+      "description": "Every sticker you've saved. Open one to re-download it.",
+      "newSticker": "New sticker",
+      "loading": "Loading stickers…",
+      "loadFailed": "Could not load your stickers.",
+      "empty": "No stickers yet. Create your first celebration sticker!",
+      "open": "Open",
+      "delete": "Delete",
+      "deleteConfirm": "Delete this sticker? This cannot be undone.",
+      "deleteFailed": "Could not delete sticker.",
+      "saleType": {
+        "in_person": "In Person",
+        "telesales": "Telesales"
+      }
+    }
+  }
+}

@@ -1,0 +1,120 @@
+{
+  "saleSticker": {
+    "meta": {
+      "title": "Sticker de Venta | Isaac Plans",
+      "description": "Crea un sticker increíble de WhatsApp para celebrar cada venta que cierres.",
+      "keywords": "sticker de venta, sticker de WhatsApp, gastos finales, herramientas para agentes, celebrar venta"
+    },
+    "title": "Sticker de Venta",
+    "subtitle": "¿Cerraste una venta? Crea un sticker espectacular de WhatsApp para celebrarla.",
+    "backButton": "Volver a Gastos Finales",
+    "landing": {
+      "title": "Sticker de Venta",
+      "subtitle": "Inicia sesión para diseñar y descargar stickers de WhatsApp que celebren cada venta que cierres.",
+      "signIn": "Inicia sesión para empezar"
+    },
+    "tabs": {
+      "profile": "Mi perfil",
+      "create": "Crear sticker",
+      "stickers": "Mis stickers"
+    },
+    "profileRequired": {
+      "title": "Completa tu perfil de agente primero",
+      "hint": "Agrega tu foto, el logo de tu compañía y tu nombre para que cada sticker muestre tu marca. Se reutiliza tu perfil de Dejar-Imagen.",
+      "cta": "Configurar mi perfil"
+    },
+    "form": {
+      "title": "Diseña tu sticker",
+      "description": "Completa los detalles de la venta—tu sticker se actualiza en vivo a la derecha.",
+      "numberPreview": "Esta será la venta #{n} del día",
+      "numberCommitted": "Guardada como venta #{n} del día",
+      "optional": "opcional",
+      "saleTypeLabel": "¿Cómo se hizo la venta?",
+      "saleType": {
+        "in_person": "En Persona",
+        "telesales": "Televenta"
+      },
+      "clientNameLabel": "Nombre del cliente",
+      "clientNamePlaceholder": "ej. María García",
+      "clientNameRequired": "El nombre del cliente es obligatorio",
+      "clientTitleLabel": "Título",
+      "clientTitle": {
+        "mr": "Sr.",
+        "mrs": "Sra."
+      },
+      "leadSourceLabel": "Origen del lead",
+      "leadSource": {
+        "live_transfer": "Transferencia en Vivo",
+        "facebook": "Lead de Facebook",
+        "organic": "Lead Orgánico",
+        "cold": "Lead Frío",
+        "referral": "Referido",
+        "returning": "Cliente Recurrente",
+        "other": "Otro…"
+      },
+      "leadSourceCustomPlaceholder": "Escribe el origen del lead",
+      "languageLabel": "Idioma del sticker",
+      "language": {
+        "en": "English",
+        "es": "Español"
+      },
+      "languageHint": "Define el idioma del texto en el sticker (independiente del idioma del sitio).",
+      "phraseLabel": "Frase corta",
+      "phrasePlaceholder": "ej. ¡Bienvenida!",
+      "phraseCounter": "{count}/{max} caracteres",
+      "extraImageLabel": "Imagen personal",
+      "extraImageHint": "Agrega una imagen personal pequeña para un toque extra (logo, mascota, foto).",
+      "extraImagePlaceholder": "Sin imagen",
+      "uploadExtraImage": "Subir imagen",
+      "removeExtraImage": "Quitar",
+      "extraRemoveBg": "Quitar fondo",
+      "extraUploadFailed": "No se pudo subir la imagen. Inténtalo de nuevo."
+    },
+    "preview": {
+      "title": "Vista previa en vivo",
+      "hint": "Descarga como imagen completa o como sticker de WhatsApp."
+    },
+    "toolbar": {
+      "newSticker": "Nuevo sticker",
+      "save": "Guardar",
+      "saving": "Guardando…",
+      "downloadImage": "Descargar imagen",
+      "downloadingImage": "Preparando…",
+      "downloadSticker": "Sticker de WhatsApp",
+      "downloadingSticker": "Preparando…",
+      "downloadAnimated": "Sticker animado",
+      "downloadingAnimated": "Animando…",
+      "share": "Compartir",
+      "sharing": "Compartiendo…"
+    },
+    "messages": {
+      "saved": "Sticker guardado",
+      "saveFailed": "No se pudo guardar el sticker. Inténtalo de nuevo.",
+      "captureFailed": "No se pudo generar la imagen. Inténtalo de nuevo.",
+      "animateFailed": "No se pudo crear el sticker animado. Inténtalo de nuevo.",
+      "shareFailed": "No se pudo compartir el sticker. Inténtalo de nuevo.",
+      "shareDownloadedInstead": "Compartir no está disponible aquí—se descargó en su lugar."
+    },
+    "share": {
+      "title": "¡Celebración de venta!",
+      "textPreparedFor": "¡Venta cerrada con {name}! 🎉",
+      "textDefault": "¡Otra venta cerrada! 🎉"
+    },
+    "list": {
+      "title": "Mis stickers",
+      "description": "Todos los stickers que has guardado. Abre uno para volver a descargarlo.",
+      "newSticker": "Nuevo sticker",
+      "loading": "Cargando stickers…",
+      "loadFailed": "No se pudieron cargar tus stickers.",
+      "empty": "Aún no hay stickers. ¡Crea tu primer sticker de celebración!",
+      "open": "Abrir",
+      "delete": "Eliminar",
+      "deleteConfirm": "¿Eliminar este sticker? Esta acción no se puede deshacer.",
+      "deleteFailed": "No se pudo eliminar el sticker.",
+      "saleType": {
+        "in_person": "En Persona",
+        "telesales": "Televenta"
+      }
+    }
+  }
+}

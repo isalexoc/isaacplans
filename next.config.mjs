@@ -3,6 +3,9 @@ import createNextIntlPlugin from "next-intl/plugin";
 
 const withNextIntl = createNextIntlPlugin();
 const nextConfig = {
+  // Keep native-binary packages out of the server bundle so their binary paths
+  // (computed from __dirname in node_modules) resolve correctly in dev and prod.
+  serverExternalPackages: ["ffmpeg-static"],
   eslint: {
     ignoreDuringBuilds: false,
   },

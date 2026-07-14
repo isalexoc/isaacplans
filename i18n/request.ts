@@ -255,6 +255,15 @@ async function loadSplitMessages(locale: string): Promise<Record<string, any>> {
       // File doesn't exist, skip
     }
 
+    // Sale-celebration sticker tool (saleSticker namespace)
+    try {
+      const feSaleSticker = (await import(`@/messages/${locale}/final-expense/sale-sticker.json`))
+        .default;
+      Object.assign(splitMessages, feSaleSticker);
+    } catch {
+      // File doesn't exist, skip
+    }
+
     // Leave-behind last so nothing overwrites finalExpenseLeaveBehind via Object.assign
     try {
       const feLeaveBehind = (await import(`@/messages/${locale}/final-expense/leave-behind.json`))

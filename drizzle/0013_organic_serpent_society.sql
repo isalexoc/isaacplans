@@ -1,0 +1,1 @@
+ALTER TABLE "sale_stickers" ADD COLUMN "client_title" text DEFAULT 'mr' NOT NULL;
