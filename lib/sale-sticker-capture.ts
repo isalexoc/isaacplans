@@ -112,12 +112,26 @@ export async function captureStickerFramePng(el: HTMLElement): Promise<Blob | nu
 }
 
 /**
- * One GIF frame: natural-aspect OPAQUE PNG. Layout is constant across phases,
- * so all frames share the same dimensions. Call prepareStickerNode(el) once first.
+ * One GIF frame: natural-aspect OPAQUE JPEG, downscaled to keep the upload small
+ * (Vercel caps request bodies ~4.5 MB) and ffmpeg fast. Layout is constant across
+ * phases, so all frames share the same dimensions. Call prepareStickerNode(el) once first.
  */
-export async function captureImageFramePng(el: HTMLElement, background: string): Promise<Blob | null> {
+export async function captureGifFrame(
+  el: HTMLElement,
+  background: string,
+  maxWidth = 480
+): Promise<Blob | null> {
   const canvas = await renderNatural(el, { backgroundColor: background, scale: 1 });
-  return new Promise<Blob | null>((resolve) => canvas.toBlob((b) => resolve(b), "image/png"));
+  const scale = Math.min(1, maxWidth / canvas.width);
+  const target = document.createElement("canvas");
+  target.width = Math.round(canvas.width * scale);
+  target.height = Math.round(canvas.height * scale);
+  const ctx = target.getContext("2d");
+  if (!ctx) return null;
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = "high";
+  ctx.drawImage(canvas, 0, 0, target.width, target.height);
+  return new Promise<Blob | null>((resolve) => target.toBlob((b) => resolve(b), "image/jpeg", 0.82));
 }
 
 /** Trigger a browser download for a captured blob. */

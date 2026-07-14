@@ -46,22 +46,21 @@ function svgDataUri(svg: string): string {
   return `data:image/svg+xml,${encodeURIComponent(svg.replace(/\s+/g, " ").trim())}`;
 }
 
+// Solid fills only + explicit width/height so html2canvas renders it fully
+// (gradients / <defs> get clipped or dropped in html2canvas's SVG handling).
 export const TROPHY_SVG = svgDataUri(`
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
-    <stop offset="0" stop-color="#FFE79A"/><stop offset="1" stop-color="#FFB020"/>
-  </linearGradient></defs>
-  <path d="M17 7h30v11a15 15 0 0 1-30 0V7z" fill="url(#g)"/>
-  <path d="M17 12h-7a9 9 0 0 0 9 13" fill="none" stroke="#FFB020" stroke-width="3.5" stroke-linecap="round"/>
-  <path d="M47 12h7a9 9 0 0 1-9 13" fill="none" stroke="#FFB020" stroke-width="3.5" stroke-linecap="round"/>
-  <rect x="28.5" y="31" width="7" height="12" fill="#E7952A"/>
-  <rect x="19" y="43" width="26" height="6.5" rx="2.5" fill="url(#g)"/>
-  <rect x="23" y="49.5" width="18" height="6.5" rx="2.5" fill="#E7952A"/>
-  <path d="M32 12l1.7 3.5 3.8.5-2.8 2.7.7 3.8L32 20.9l-3.4 1.8.7-3.8-2.8-2.7 3.8-.5z" fill="#FFF7DE"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <path d="M18 8h28v10a14 14 0 0 1-28 0V8z" fill="#FFD65A"/>
+  <path d="M18 12h-7a8 8 0 0 0 9 12.5V12z" fill="#FFB020"/>
+  <path d="M46 12h7a8 8 0 0 1-9 12.5V12z" fill="#FFB020"/>
+  <rect x="28.5" y="30" width="7" height="12" fill="#E7952A"/>
+  <rect x="19" y="42" width="26" height="6.5" rx="2.5" fill="#FFD65A"/>
+  <rect x="23" y="48.5" width="18" height="6.5" rx="2.5" fill="#E7952A"/>
+  <path d="M32 11l1.7 3.5 3.8.5-2.8 2.7.7 3.8L32 19.9l-3.4 1.8.7-3.8-2.8-2.7 3.8-.5z" fill="#FFF7DE"/>
 </svg>`);
 
 export const SPARKLE_SVG = svgDataUri(`
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
   <path d="M12 0c.6 6.2 2.5 8.2 12 12-9.5 3.8-11.4 5.8-12 12-.6-6.2-2.5-8.2-12-12C9.5 8.2 11.4 6.2 12 0z" fill="#FFE9A8"/>
 </svg>`);
 

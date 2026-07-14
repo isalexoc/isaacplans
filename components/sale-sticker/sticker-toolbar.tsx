@@ -1,6 +1,6 @@
 "use client";
 
-import { Clapperboard, Download, Loader2, Plus, Save, Share2, Sparkles, Sticker } from "lucide-react";
+import { Clapperboard, Download, Loader2, Plus, Save, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export type StickerToolbarLabels = {
@@ -9,10 +9,6 @@ export type StickerToolbarLabels = {
   saving: string;
   downloadImage: string;
   downloadingImage: string;
-  downloadSticker: string;
-  downloadingSticker: string;
-  downloadAnimated: string;
-  downloadingAnimated: string;
   downloadGif: string;
   downloadingGif: string;
   share: string;
@@ -24,16 +20,12 @@ export type StickerToolbarProps = {
   disabled: boolean;
   isSaving: boolean;
   isDownloadingImage: boolean;
-  isDownloadingSticker: boolean;
-  isDownloadingAnimated: boolean;
   isDownloadingGif: boolean;
   isSharing: boolean;
   saveMessage: string | null;
   onNew: () => void;
   onSave: () => void;
   onDownloadImage: () => void;
-  onDownloadSticker: () => void;
-  onDownloadAnimated: () => void;
   onDownloadGif: () => void;
   onShare: () => void;
 };
@@ -43,26 +35,16 @@ export function StickerToolbar({
   disabled,
   isSaving,
   isDownloadingImage,
-  isDownloadingSticker,
-  isDownloadingAnimated,
   isDownloadingGif,
   isSharing,
   saveMessage,
   onNew,
   onSave,
   onDownloadImage,
-  onDownloadSticker,
-  onDownloadAnimated,
   onDownloadGif,
   onShare,
 }: StickerToolbarProps) {
-  const busy =
-    isSaving ||
-    isDownloadingImage ||
-    isDownloadingSticker ||
-    isDownloadingAnimated ||
-    isDownloadingGif ||
-    isSharing;
+  const busy = isSaving || isDownloadingImage || isDownloadingGif || isSharing;
 
   return (
     <div className="rounded-xl border border-gray-200/80 bg-white p-3 shadow-sm dark:border-gray-700/80 dark:bg-gray-950">
@@ -86,36 +68,6 @@ export function StickerToolbar({
             <Download className="h-4 w-4" />
           )}
           {isDownloadingImage ? labels.downloadingImage : labels.downloadImage}
-        </Button>
-
-        <Button
-          type="button"
-          variant="secondary"
-          className="gap-1.5"
-          disabled={disabled || busy}
-          onClick={onDownloadSticker}
-        >
-          {isDownloadingSticker ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <Sticker className="h-4 w-4" />
-          )}
-          {isDownloadingSticker ? labels.downloadingSticker : labels.downloadSticker}
-        </Button>
-
-        <Button
-          type="button"
-          variant="secondary"
-          className="gap-1.5"
-          disabled={disabled || busy}
-          onClick={onDownloadAnimated}
-        >
-          {isDownloadingAnimated ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <Sparkles className="h-4 w-4" />
-          )}
-          {isDownloadingAnimated ? labels.downloadingAnimated : labels.downloadAnimated}
         </Button>
 
         <Button

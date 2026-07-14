@@ -48,18 +48,16 @@ import {
   writeSaleStickerDraft,
 } from "@/lib/sale-sticker-draft";
 import {
-  captureImageFramePng,
+  captureGifFrame,
   captureRichStickerPng,
-  captureStickerFramePng,
-  captureWhatsAppStickerWebp,
   downloadStickerBlob,
   prepareStickerNode,
 } from "@/lib/sale-sticker-capture";
 import { STICKER_BG_FALLBACK } from "@/lib/sale-sticker-assets";
 import { shareLeaveBehindPng } from "@/lib/leave-behind-share-image";
 
-const ANIM_FRAMES = 14;
-const ANIM_FPS = 14;
+const ANIM_FRAMES = 12;
+const ANIM_FPS = 12;
 
 export type SaleStickerFormProps = {
   stickerId?: string | null;
@@ -107,15 +105,12 @@ export default function SaleStickerForm({
   const [extraRemoveBg, setExtraRemoveBg] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isDownloadingImage, setIsDownloadingImage] = useState(false);
-  const [isDownloadingSticker, setIsDownloadingSticker] = useState(false);
-  const [isDownloadingAnimated, setIsDownloadingAnimated] = useState(false);
   const [isDownloadingGif, setIsDownloadingGif] = useState(false);
   const [isSharing, setIsSharing] = useState(false);
   const [animPhase, setAnimPhase] = useState(0);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
 
   const richRef = useRef<HTMLDivElement>(null);
-  const diecutRef = useRef<HTMLDivElement>(null);
   const extraInputRef = useRef<HTMLInputElement>(null);
 
   // Restore a session draft for brand-new stickers only.
@@ -245,74 +240,11 @@ export default function SaleStickerForm({
     }
   };
 
-  const handleDownloadSticker = async () => {
-    if (!validate()) return;
-    setIsDownloadingSticker(true);
-    try {
-      await commitSticker();
-      const el = diecutRef.current;
-      if (!el) return;
-      const blob = await captureWhatsAppStickerWebp(el);
-      if (!blob) {
-        toast({ title: t("messages.captureFailed"), variant: "destructive" });
-        return;
-      }
-      downloadStickerBlob(
-        blob,
-        saleStickerFilenameSlug(data.clientName, displaySequence, saleDate, "webp")
-      );
-    } catch (error) {
-      console.error("Error exporting WhatsApp sticker:", error);
-      toast({ title: t("messages.captureFailed"), variant: "destructive" });
-    } finally {
-      setIsDownloadingSticker(false);
-    }
-  };
-
-  const handleDownloadAnimated = async () => {
-    if (!validate()) return;
-    setIsDownloadingAnimated(true);
-    try {
-      await commitSticker();
-      const el = diecutRef.current;
-      if (!el) return;
-      // Load images once, then capture one transparent PNG per animation phase.
-      await prepareStickerNode(el);
-      const frames: Blob[] = [];
-      for (let i = 0; i < ANIM_FRAMES; i++) {
-        setAnimPhase(i / ANIM_FRAMES);
-        await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
-        const frame = await captureStickerFramePng(el);
-        if (frame) frames.push(frame);
-      }
-      setAnimPhase(0);
-      if (frames.length < 2) {
-        toast({ title: t("messages.captureFailed"), variant: "destructive" });
-        return;
-      }
-      const webp = await requestAnimatedSticker(frames, ANIM_FPS);
-      const name = saleStickerFilenameSlug(
-        data.clientName,
-        displaySequence,
-        saleDate,
-        "webp"
-      ).replace(/\.webp$/, "-animated.webp");
-      downloadStickerBlob(webp, name);
-    } catch (error) {
-      console.error("Error building animated sticker:", error);
-      toast({ title: t("messages.animateFailed"), variant: "destructive" });
-    } finally {
-      setAnimPhase(0);
-      setIsDownloadingAnimated(false);
-    }
-  };
-
   const handleDownloadGif = async () => {
     if (!validate()) return;
     setIsDownloadingGif(true);
     try {
       await commitSticker();
-      // GIF uses the full opaque layout (readable when it plays large in chat).
       const el = richRef.current;
       if (!el) return;
       await prepareStickerNode(el);
@@ -320,7 +252,7 @@ export default function SaleStickerForm({
       for (let i = 0; i < ANIM_FRAMES; i++) {
         setAnimPhase(i / ANIM_FRAMES);
         await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
-        const frame = await captureImageFramePng(el, STICKER_BG_FALLBACK);
+        const frame = await captureGifFrame(el, STICKER_BG_FALLBACK);
         if (frame) frames.push(frame);
       }
       setAnimPhase(0);
@@ -384,10 +316,6 @@ export default function SaleStickerForm({
     saving: t("toolbar.saving"),
     downloadImage: t("toolbar.downloadImage"),
     downloadingImage: t("toolbar.downloadingImage"),
-    downloadSticker: t("toolbar.downloadSticker"),
-    downloadingSticker: t("toolbar.downloadingSticker"),
-    downloadAnimated: t("toolbar.downloadAnimated"),
-    downloadingAnimated: t("toolbar.downloadingAnimated"),
     downloadGif: t("toolbar.downloadGif"),
     downloadingGif: t("toolbar.downloadingGif"),
     share: t("toolbar.share"),
@@ -422,16 +350,12 @@ export default function SaleStickerForm({
         disabled={!complete || !agentProfileComplete}
         isSaving={isSaving}
         isDownloadingImage={isDownloadingImage}
-        isDownloadingSticker={isDownloadingSticker}
-        isDownloadingAnimated={isDownloadingAnimated}
         isDownloadingGif={isDownloadingGif}
         isSharing={isSharing}
         saveMessage={saveMessage}
         onNew={() => onNewSticker?.()}
         onSave={handleSave}
         onDownloadImage={handleDownloadImage}
-        onDownloadSticker={handleDownloadSticker}
-        onDownloadAnimated={handleDownloadAnimated}
         onDownloadGif={handleDownloadGif}
         onShare={handleShare}
       />
@@ -701,9 +625,9 @@ export default function SaleStickerForm({
       </div>
 
       {/*
-        Offscreen, native-size (unscaled) capture nodes. The on-screen preview is
+        Offscreen, native-size (unscaled) capture node. The on-screen preview is
         CSS-scaled to fit, which html2canvas mis-renders — so downloads are always
-        captured from these full-size nodes instead.
+        captured from this full-size node instead.
       */}
       <div
         aria-hidden
@@ -719,18 +643,6 @@ export default function SaleStickerForm({
           companyLogoUrl={companyLogoUrl}
           agentName={agentName}
           variant="image"
-          animationPhase={animPhase}
-        />
-        <StickerPreview
-          ref={diecutRef}
-          data={data}
-          dailySequence={displaySequence}
-          saleDate={saleDate}
-          agentPhotoUrl={agentPhotoUrl}
-          agentAvatarUrl={agentAvatarUrl}
-          companyLogoUrl={companyLogoUrl}
-          agentName={agentName}
-          variant="diecut"
           animationPhase={animPhase}
         />
       </div>
