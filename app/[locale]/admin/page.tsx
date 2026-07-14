@@ -9,6 +9,10 @@ import {
   CalendarDays,
   Link2,
   LayoutDashboard,
+  ScanLine,
+  ScrollText,
+  Sticker,
+  Package,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import {
@@ -44,6 +48,39 @@ const CONTENT_TOOLS: ToolCard[] = [
     description: "Create a branded consumer guide PDF from any topic.",
     href: "/en/admin/lead-magnet-generator",
     icon: FileDown,
+  },
+  {
+    title: "Script Generator",
+    description: "Generate bilingual sales presentation scripts and publish them to the library.",
+    href: "/en/admin/script-generator",
+    icon: ScrollText,
+  },
+];
+
+const OPERATIONS_TOOLS: ToolCard[] = [
+  {
+    title: "Lead Backup",
+    description:
+      "Manually process a Senior Life lead from a screenshot when the confirmation email didn't arrive.",
+    href: "/en/admin/lead-backup",
+    icon: ScanLine,
+  },
+];
+
+const FINAL_EXPENSE_TOOLS: ToolCard[] = [
+  {
+    title: "Sale Sticker",
+    description:
+      "Create a WhatsApp celebration sticker to announce a closed final expense sale.",
+    href: "/en/final-expense/sale-sticker",
+    icon: Sticker,
+  },
+  {
+    title: "Leave-Behind Package",
+    description:
+      "Build a branded final expense quote package to share or leave behind with clients.",
+    href: "/en/final-expense/leave-behind",
+    icon: Package,
   },
 ];
 
@@ -121,6 +158,28 @@ export default async function AdminDashboardPage() {
           </h2>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {CONTENT_TOOLS.map((tool) => (
+              <ToolCardItem key={tool.href} tool={tool} />
+            ))}
+          </div>
+        </section>
+
+        <section>
+          <h2 className="mb-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            Operations
+          </h2>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {OPERATIONS_TOOLS.map((tool) => (
+              <ToolCardItem key={tool.href} tool={tool} />
+            ))}
+          </div>
+        </section>
+
+        <section>
+          <h2 className="mb-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            Final Expense
+          </h2>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {FINAL_EXPENSE_TOOLS.map((tool) => (
               <ToolCardItem key={tool.href} tool={tool} />
             ))}
           </div>
