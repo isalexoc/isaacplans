@@ -22,20 +22,22 @@ export type StickerPreviewProps = {
   data: SaleStickerData;
   dailySequence: number;
   saleDate: string;
-  agentPhotoUrl: string; // background-removed cutout (rich image)
-  agentAvatarUrl: string; // filled headshot (round avatar on die-cut)
+  agentPhotoUrl: string; // (unused) background-removed cutout
+  agentAvatarUrl: string; // filled headshot for the round avatar
   companyLogoUrl: string;
   agentName: string;
   variant?: StickerPreviewVariant;
   /** 0..1 phase for animated frames; 0 = static. */
   animationPhase?: number;
+  /** When true (GIF frames), the personal image does an intro spin-in. */
+  animateExtra?: boolean;
   className?: string;
 };
 
-// Fixed WIDTH; height flows with content (html2canvas renders block flow
-// reliably — unlike flex-grow / aspect-ratio, which it mis-measures).
+// Fixed WIDTH; height flows with content (html2canvas renders block flow reliably).
 const W = SALE_STICKER_RENDER_SIZE;
 const FONT = "'Poppins','Segoe UI',system-ui,-apple-system,sans-serif";
+const smoothstep = (t: number) => t * t * (3 - 2 * t);
 
 function ConfettiLayer({ phase }: { phase: number }) {
   return (
@@ -105,7 +107,7 @@ function Pill({ label, color, bg, border, fontSize }: { label: string; color: st
         backgroundColor: bg,
         border: `1.5px solid ${border}`,
         borderRadius: 999,
-        padding: "7px 17px",
+        padding: "8px 18px",
         letterSpacing: "0.01em",
         whiteSpace: "nowrap",
         lineHeight: 1.15,
@@ -116,42 +118,9 @@ function Pill({ label, color, bg, border, fontSize }: { label: string; color: st
   );
 }
 
-/** Fixed-size photo box (no aspect-ratio / flex-grow) with a halo behind. */
-function PhotoBox({ boxW, boxH, children }: { boxW: number | string; boxH: number; children: React.ReactNode }) {
-  return (
-    <div
-      style={{
-        position: "relative",
-        width: boxW,
-        height: boxH,
-        margin: "0 auto",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-      <div
-        style={{
-          position: "absolute",
-          left: "50%",
-          top: "50%",
-          width: boxH + 40,
-          height: boxH + 40,
-          marginLeft: -(boxH + 40) / 2,
-          marginTop: -(boxH + 40) / 2,
-          borderRadius: "50%",
-          background:
-            "radial-gradient(circle at 50% 50%, rgba(255,214,90,0.5) 0%, rgba(255,214,90,0.14) 46%, rgba(255,214,90,0) 68%)",
-        }}
-      />
-      {children}
-    </div>
-  );
-}
-
 export const StickerPreview = forwardRef<HTMLDivElement, StickerPreviewProps>(
   function StickerPreview(
-    { data, dailySequence, saleDate, agentPhotoUrl, agentAvatarUrl, companyLogoUrl, agentName, variant = "image", animationPhase = 0, className },
+    { data, dailySequence, saleDate, agentAvatarUrl, companyLogoUrl, agentName, animationPhase = 0, animateExtra = false, className },
     ref
   ) {
     const theme = STICKER_THEME;
@@ -159,50 +128,54 @@ export const StickerPreview = forwardRef<HTMLDivElement, StickerPreviewProps>(
     const saleTypeAccent = SALE_TYPE_THEME[data.saleType];
     const leadLabel = resolveLeadSourceLabel(data.language, data.leadSource, data.leadSourceCustom);
     const dateLabel = formatStickerDate(saleDate, data.language);
-    const isDiecut = variant === "diecut";
     const clientName = data.clientName.trim() || strings.clientPrefix;
     const titlePrefix = strings.clientTitle[data.clientTitle];
     const protectionLine = strings.protectedWith(data.clientTitle);
     const motivational = strings.motivationalPhrase;
-    const sparkleRot = animationPhase * 360;
 
-    const headline = (size: number, trophy: number, sparkle: number, mb: number) => (
-      <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", gap: 12, marginTop: 6, marginBottom: mb }}>
-        <img src={TROPHY_SVG} alt="" width={trophy} height={trophy} />
-        <span style={{ fontFamily: FONT, fontWeight: 800, fontSize: size, color: theme.gold, letterSpacing: "0.01em", textShadow: "0 3px 10px rgba(0,0,0,0.55), 0 1px 2px rgba(0,0,0,0.6)", lineHeight: 1 }}>
-          {strings.saleHeadline}
-        </span>
-        <img src={SPARKLE_SVG} alt="" width={sparkle} height={sparkle} style={{ transform: `rotate(${sparkleRot}deg)` }} />
-      </div>
-    );
+    const p = animationPhase;
+    const sparkleRot = p * 360;
 
-    const header = (logo: number, badge: number, cap: number) => (
-      <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
-        <div style={{ display: "flex", alignItems: "center", height: badge }}>
-          {companyLogoUrl ? (
-            <img src={companyLogoUrl} alt="" crossOrigin="anonymous" style={{ maxHeight: logo, maxWidth: 230, width: "auto", objectFit: "contain" }} />
-          ) : null}
+    const s = { logo: 92, badge: 88, cap: 14, headline: 66, trophy: 58, sparkle: 30, avatar: 264, title: 22, name: 46, nameSm: 38, protect: 21, pill: 19, phrase: 22, moti: 22, agent: 21, date: 18 };
+
+    // Personal-image intro (GIF only): spins in big, shrinks, and lands at the footer.
+    let extraOverlay: React.ReactNode = null;
+    if (animateExtra && data.extraImageUrl) {
+      const t = Math.min(p / 0.5, 1);
+      const e = smoothstep(t);
+      const scale = 3.0 - e * 2.45; // 3.0 → 0.55
+      const rot = (1 - e) * 720; // two spins → 0
+      const topPct = 30 + e * 61; // 30% → 91% (down to the footer)
+      const opacity = p >= 0.5 ? 0 : t > 0.82 ? Math.max(0, 1 - (t - 0.82) / 0.18) : 1;
+      extraOverlay = (
+        <div style={{ position: "absolute", inset: 0, pointerEvents: "none", zIndex: 6 }}>
+          <img
+            src={data.extraImageUrl}
+            alt=""
+            crossOrigin="anonymous"
+            style={{
+              position: "absolute",
+              left: "50%",
+              top: `${topPct}%`,
+              width: 104,
+              height: 104,
+              objectFit: "cover",
+              borderRadius: "50%",
+              border: "4px solid #FFFFFF",
+              boxShadow: "0 0 26px 8px rgba(255,214,90,0.8), 0 8px 16px rgba(0,0,0,0.45)",
+              transform: `translate(-50%, -50%) scale(${scale}) rotate(${rot}deg)`,
+              opacity,
+            }}
+          />
         </div>
-        <NumberBadge n={dailySequence} caption={strings.numberBadgeLabel} size={badge} captionSize={cap} />
-      </div>
-    );
+      );
+    }
 
-    const clientBlock = (titleSize: number, nameSize: number, nameSmSize: number) => (
-      <div style={{ position: "relative", textAlign: "center", marginTop: 12 }}>
-        <div style={{ fontFamily: FONT, fontWeight: 600, fontSize: titleSize, color: theme.gold, textTransform: "uppercase", letterSpacing: "0.18em", marginBottom: 4 }}>
-          {titlePrefix}
-        </div>
-        <div style={{ fontFamily: FONT, fontWeight: 700, fontSize: clientName.length > 16 ? nameSmSize : nameSize, color: "#FFFFFF", textTransform: "uppercase", letterSpacing: "0.03em", lineHeight: 1.05, wordBreak: "break-word" }}>
-          {clientName}
-        </div>
-      </div>
-    );
-
-    const wrap = (children: React.ReactNode, pad: string) => (
+    return (
       <div
         ref={ref}
         className={className}
-        style={{ width: W, boxSizing: "border-box", background: "transparent", padding: isDiecut ? 16 : 0, position: "relative" }}
+        style={{ width: W, boxSizing: "border-box", position: "relative" }}
       >
         <div
           style={{
@@ -210,82 +183,97 @@ export const StickerPreview = forwardRef<HTMLDivElement, StickerPreviewProps>(
             width: "100%",
             boxSizing: "border-box",
             background: theme.background,
-            borderRadius: isDiecut ? 48 : 0,
-            border: isDiecut ? "9px solid #FFFFFF" : "none",
             overflow: "hidden",
-            padding: pad,
+            padding: "24px 30px 26px",
             fontFamily: FONT,
             color: theme.text,
           }}
         >
-          <div style={{ position: "absolute", inset: 0, background: "radial-gradient(120% 70% at 50% 62%, rgba(255,214,90,0.16) 0%, rgba(255,214,90,0) 55%)" }} />
+          <div style={{ position: "absolute", inset: 0, background: "radial-gradient(120% 70% at 50% 60%, rgba(255,214,90,0.16) 0%, rgba(255,214,90,0) 55%)" }} />
           <ConfettiLayer phase={animationPhase} />
-          <div style={{ position: "relative" }}>{children}</div>
+
+          <div style={{ position: "relative" }}>
+            {/* Header: logo + number badge */}
+            <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+              <div style={{ display: "flex", alignItems: "center", height: s.badge }}>
+                {companyLogoUrl ? (
+                  <img src={companyLogoUrl} alt="" crossOrigin="anonymous" style={{ maxHeight: s.logo, maxWidth: 240, width: "auto", objectFit: "contain" }} />
+                ) : null}
+              </div>
+              <NumberBadge n={dailySequence} caption={strings.numberBadgeLabel} size={s.badge} captionSize={s.cap} />
+            </div>
+
+            {/* Headline */}
+            <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", gap: 14, marginTop: 8, marginBottom: 8 }}>
+              <img src={TROPHY_SVG} alt="" width={s.trophy} height={s.trophy} />
+              <span style={{ fontFamily: FONT, fontWeight: 800, fontSize: s.headline, color: theme.gold, letterSpacing: "0.01em", textShadow: "0 3px 10px rgba(0,0,0,0.55), 0 1px 2px rgba(0,0,0,0.6)", lineHeight: 1 }}>
+                {strings.saleHeadline}
+              </span>
+              <img src={SPARKLE_SVG} alt="" width={s.sparkle} height={s.sparkle} style={{ transform: `rotate(${sparkleRot}deg)` }} />
+            </div>
+
+            {/* Round agent avatar (profile-style frame) */}
+            <div style={{ position: "relative", width: "100%", height: s.avatar + 24, display: "flex", alignItems: "center", justifyContent: "center", margin: "4px 0" }}>
+              <div style={{ position: "absolute", left: "50%", top: "50%", width: s.avatar + 60, height: s.avatar + 60, marginLeft: -(s.avatar + 60) / 2, marginTop: -(s.avatar + 60) / 2, borderRadius: "50%", background: "radial-gradient(circle at 50% 50%, rgba(255,214,90,0.45) 0%, rgba(255,214,90,0.12) 46%, rgba(255,214,90,0) 68%)" }} />
+              <div style={{ position: "relative", width: s.avatar, height: s.avatar, borderRadius: "50%", overflow: "hidden", border: "5px solid #FFFFFF", boxShadow: "0 0 0 5px rgba(255,214,90,0.35), 0 10px 22px rgba(0,0,0,0.42)", background: "#0E3A6E" }}>
+                {agentAvatarUrl ? (
+                  <img src={agentAvatarUrl} alt="" crossOrigin="anonymous" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                ) : null}
+              </div>
+            </div>
+
+            {/* Client title + name */}
+            <div style={{ position: "relative", textAlign: "center", marginTop: 14 }}>
+              <div style={{ fontFamily: FONT, fontWeight: 600, fontSize: s.title, color: theme.gold, textTransform: "uppercase", letterSpacing: "0.18em", marginBottom: 4 }}>
+                {titlePrefix}
+              </div>
+              <div style={{ fontFamily: FONT, fontWeight: 700, fontSize: clientName.length > 16 ? s.nameSm : s.name, color: "#FFFFFF", textTransform: "uppercase", letterSpacing: "0.03em", lineHeight: 1.05, wordBreak: "break-word" }}>
+                {clientName}
+              </div>
+            </div>
+
+            {/* Protection tagline */}
+            <div style={{ position: "relative", textAlign: "center", marginTop: 6, marginLeft: "auto", marginRight: "auto", maxWidth: "96%", fontFamily: FONT, fontWeight: 500, fontSize: s.protect, lineHeight: 1.3, color: theme.textMuted }}>
+              {protectionLine}
+            </div>
+
+            {/* Pills */}
+            <div style={{ position: "relative", display: "flex", flexWrap: "wrap", gap: 10, alignItems: "center", justifyContent: "center", marginTop: 14 }}>
+              <Pill label={strings.saleType[data.saleType]} color="#062B12" bg={saleTypeAccent.accent} border={saleTypeAccent.accent} fontSize={s.pill} />
+              {leadLabel ? <Pill label={leadLabel} color="#FFFFFF" bg="rgba(255,255,255,0.16)" border="rgba(255,255,255,0.42)" fontSize={s.pill} /> : null}
+            </div>
+
+            {/* Optional custom phrase */}
+            {data.customPhrase.trim() ? (
+              <div style={{ position: "relative", marginTop: 14, textAlign: "center" }}>
+                <span style={{ display: "inline-block", padding: "8px 22px", borderRadius: 999, background: "rgba(255,255,255,0.10)", border: "1px solid rgba(255,255,255,0.28)", color: "#FFFFFF", fontFamily: FONT, fontWeight: 600, fontStyle: "italic", fontSize: s.phrase, maxWidth: "90%", lineHeight: 1.2 }}>
+                  “{data.customPhrase.trim()}”
+                </span>
+              </div>
+            ) : null}
+
+            {/* Always-present motivational ribbon */}
+            <div style={{ position: "relative", marginTop: 16, textAlign: "center" }}>
+              <span style={{ display: "inline-block", padding: "10px 28px", borderRadius: 999, background: "linear-gradient(90deg, #FFD65A 0%, #FFB020 100%)", boxShadow: "0 3px 10px rgba(0,0,0,0.28)", color: "#3A2400", fontFamily: FONT, fontWeight: 700, fontSize: s.moti, lineHeight: 1.15 }}>
+                {motivational}
+              </span>
+            </div>
+
+            {/* Footer: personal image (round) + agent name + date */}
+            <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", gap: 14, marginTop: 18 }}>
+              {data.extraImageUrl ? (
+                <img src={data.extraImageUrl} alt="" crossOrigin="anonymous" style={{ height: 60, width: 60, objectFit: "cover", borderRadius: "50%", border: "3px solid rgba(255,255,255,0.7)", boxShadow: "0 3px 8px rgba(0,0,0,0.35)" }} />
+              ) : null}
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", lineHeight: 1.15 }}>
+                <span style={{ fontFamily: FONT, fontWeight: 600, fontSize: s.agent, color: "#FFFFFF", letterSpacing: "0.02em" }}>{agentName}</span>
+                <span style={{ fontFamily: FONT, fontWeight: 500, fontSize: s.date, color: theme.textMuted, marginTop: 2 }}>{dateLabel}</span>
+              </div>
+            </div>
+          </div>
+
+          {extraOverlay}
         </div>
       </div>
-    );
-
-    // ── HERO layout: simplified + big photo (die-cut sticker / animated webp) ──
-    if (isDiecut) {
-      return wrap(
-        <>
-          {header(84, 84, 13)}
-          {headline(60, 54, 28, 6)}
-          <PhotoBox boxW={244} boxH={244}>
-            <div style={{ width: 224, height: 224, borderRadius: "50%", overflow: "hidden", border: "5px solid #FFFFFF", boxShadow: "0 6px 16px rgba(0,0,0,0.35)", background: "#0E3A6E" }}>
-              {agentAvatarUrl ? <img src={agentAvatarUrl} alt="" crossOrigin="anonymous" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : null}
-            </div>
-          </PhotoBox>
-          {clientBlock(20, 46, 38)}
-          <div style={{ position: "relative", textAlign: "center", marginTop: 10, fontFamily: FONT, fontWeight: 600, fontSize: 18, color: theme.textMuted, letterSpacing: "0.03em" }}>
-            {agentName}
-          </div>
-        </>,
-        "26px 26px 26px"
-      );
-    }
-
-    // ── FULL layout: everything (large opaque image + GIF) ──
-    return wrap(
-      <>
-        {header(92, 88, 14)}
-        {headline(66, 58, 30, 4)}
-        <PhotoBox boxW="100%" boxH={300}>
-          {agentPhotoUrl ? (
-            <img src={agentPhotoUrl} alt="" crossOrigin="anonymous" style={{ position: "relative", maxHeight: 300, maxWidth: "80%", objectFit: "contain", filter: "drop-shadow(0 8px 12px rgba(0,0,0,0.4))" }} />
-          ) : null}
-        </PhotoBox>
-        {clientBlock(19, 42, 34)}
-        <div style={{ position: "relative", textAlign: "center", marginTop: 6, marginLeft: "auto", marginRight: "auto", maxWidth: "94%", fontFamily: FONT, fontWeight: 500, fontSize: 18, lineHeight: 1.3, color: theme.textMuted }}>
-          {protectionLine}
-        </div>
-        <div style={{ position: "relative", display: "flex", flexWrap: "wrap", gap: 10, alignItems: "center", justifyContent: "center", marginTop: 14 }}>
-          <Pill label={strings.saleType[data.saleType]} color="#062B12" bg={saleTypeAccent.accent} border={saleTypeAccent.accent} fontSize={17} />
-          {leadLabel ? <Pill label={leadLabel} color="#FFFFFF" bg="rgba(255,255,255,0.16)" border="rgba(255,255,255,0.42)" fontSize={17} /> : null}
-        </div>
-        {data.customPhrase.trim() ? (
-          <div style={{ position: "relative", marginTop: 14, textAlign: "center" }}>
-            <span style={{ display: "inline-block", padding: "7px 20px", borderRadius: 999, background: "rgba(255,255,255,0.10)", border: "1px solid rgba(255,255,255,0.28)", color: "#FFFFFF", fontFamily: FONT, fontWeight: 600, fontStyle: "italic", fontSize: 20, maxWidth: "90%", lineHeight: 1.2 }}>
-              “{data.customPhrase.trim()}”
-            </span>
-          </div>
-        ) : null}
-        <div style={{ position: "relative", marginTop: 16, textAlign: "center" }}>
-          <span style={{ display: "inline-block", padding: "9px 26px", borderRadius: 999, background: "linear-gradient(90deg, #FFD65A 0%, #FFB020 100%)", boxShadow: "0 3px 10px rgba(0,0,0,0.28)", color: "#3A2400", fontFamily: FONT, fontWeight: 700, fontSize: 20, lineHeight: 1.15 }}>
-            {motivational}
-          </span>
-        </div>
-        <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center", gap: 14, marginTop: 18 }}>
-          {data.extraImageUrl ? (
-            <img src={data.extraImageUrl} alt="" crossOrigin="anonymous" style={{ height: 58, width: 58, objectFit: "cover", borderRadius: 12, border: "2px solid rgba(255,255,255,0.55)" }} />
-          ) : null}
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", lineHeight: 1.15 }}>
-            <span style={{ fontFamily: FONT, fontWeight: 600, fontSize: 19, color: "#FFFFFF", letterSpacing: "0.02em" }}>{agentName}</span>
-            <span style={{ fontFamily: FONT, fontWeight: 500, fontSize: 16, color: theme.textMuted, marginTop: 2 }}>{dateLabel}</span>
-          </div>
-        </div>
-      </>,
-      "24px 30px 26px"
     );
   }
 );

@@ -108,6 +108,7 @@ export default function SaleStickerForm({
   const [isDownloadingGif, setIsDownloadingGif] = useState(false);
   const [isSharing, setIsSharing] = useState(false);
   const [animPhase, setAnimPhase] = useState(0);
+  const [capturingGif, setCapturingGif] = useState(false);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
 
   const richRef = useRef<HTMLDivElement>(null);
@@ -243,8 +244,11 @@ export default function SaleStickerForm({
   const handleDownloadGif = async () => {
     if (!validate()) return;
     setIsDownloadingGif(true);
+    setCapturingGif(true); // enables the personal-image spin-in on the capture node
     try {
       await commitSticker();
+      // Let the node re-render with the animated overlay before we preload/capture.
+      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
       const el = richRef.current;
       if (!el) return;
       await prepareStickerNode(el);
@@ -271,6 +275,7 @@ export default function SaleStickerForm({
       toast({ title: t("messages.animateFailed"), variant: "destructive" });
     } finally {
       setAnimPhase(0);
+      setCapturingGif(false);
       setIsDownloadingGif(false);
     }
   };
@@ -644,6 +649,7 @@ export default function SaleStickerForm({
           agentName={agentName}
           variant="image"
           animationPhase={animPhase}
+          animateExtra={capturingGif}
         />
       </div>
     </div>
