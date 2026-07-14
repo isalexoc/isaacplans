@@ -13,6 +13,9 @@ import {
   ScrollText,
   Sticker,
   Package,
+  ClipboardList,
+  Presentation,
+  Database,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import {
@@ -64,6 +67,27 @@ const OPERATIONS_TOOLS: ToolCard[] = [
       "Manually process a Senior Life lead from a screenshot when the confirmation email didn't arrive.",
     href: "/en/admin/lead-backup",
     icon: ScanLine,
+  },
+  {
+    title: "IUL Intake",
+    description: "Manage IUL application intakes and review submitted client applications.",
+    href: "/en/iul/intake",
+    icon: ClipboardList,
+  },
+];
+
+const CONTENT_CMS_TOOLS: ToolCard[] = [
+  {
+    title: "Presentations",
+    description: "Open the sales presentation scripts library by line of business.",
+    href: "/en/presentations",
+    icon: Presentation,
+  },
+  {
+    title: "Sanity Studio (CMS)",
+    description: "Edit blog posts, presentation scripts, and licensed states.",
+    href: "/studio",
+    icon: Database,
   },
 ];
 
@@ -191,6 +215,17 @@ export default async function AdminDashboardPage() {
           </h2>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {SOCIAL_TOOLS.map((tool) => (
+              <ToolCardItem key={tool.href} tool={tool} />
+            ))}
+          </div>
+        </section>
+
+        <section>
+          <h2 className="mb-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            Content &amp; CMS
+          </h2>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {CONTENT_CMS_TOOLS.map((tool) => (
               <ToolCardItem key={tool.href} tool={tool} />
             ))}
           </div>
