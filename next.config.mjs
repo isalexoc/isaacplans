@@ -10,9 +10,15 @@ const nextConfig = {
   // as a runtime path string, not an import), so force it into each function that
   // shells out to ffmpeg. The glob covers pnpm's nested node_modules layout.
   outputFileTracingIncludes: {
-    "/api/sale-sticker/animate": ["./node_modules/**/ffmpeg-static/ffmpeg"],
-    "/api/cron/kixie-call-summary": ["./node_modules/**/ffmpeg-static/ffmpeg"],
-    "/api/queue/kixie-call-summary": ["./node_modules/**/ffmpeg-static/ffmpeg"],
+    "/api/sale-sticker/animate": [
+      "./node_modules/.pnpm/ffmpeg-static@*/node_modules/ffmpeg-static/ffmpeg",
+    ],
+    "/api/cron/kixie-call-summary": [
+      "./node_modules/.pnpm/ffmpeg-static@*/node_modules/ffmpeg-static/ffmpeg",
+    ],
+    "/api/queue/kixie-call-summary": [
+      "./node_modules/.pnpm/ffmpeg-static@*/node_modules/ffmpeg-static/ffmpeg",
+    ],
   },
   eslint: {
     ignoreDuringBuilds: false,
