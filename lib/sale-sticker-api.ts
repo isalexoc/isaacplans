@@ -56,14 +56,16 @@ export async function deleteSaleSticker(id: string): Promise<void> {
   );
 }
 
-/** Send transparent PNG frames to the server and get back an animated WebP sticker. */
+/** Send PNG frames to the server and get back an animated WebP sticker or GIF. */
 export async function requestAnimatedSticker(
   frames: Blob[],
-  fps: number
+  fps: number,
+  format: "webp" | "gif" = "webp"
 ): Promise<Blob> {
   const formData = new FormData();
   frames.forEach((frame, i) => formData.append("frames", frame, `frame_${i}.png`));
   formData.append("fps", String(fps));
+  formData.append("format", format);
   const res = await fetch("/api/sale-sticker/animate", {
     method: "POST",
     credentials: "same-origin",

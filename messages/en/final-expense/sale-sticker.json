@@ -84,6 +84,8 @@
       "downloadingSticker": "Preparing…",
       "downloadAnimated": "Animated sticker",
       "downloadingAnimated": "Animating…",
+      "downloadGif": "Animated GIF",
+      "downloadingGif": "Building GIF…",
       "share": "Share",
       "sharing": "Sharing…"
     },

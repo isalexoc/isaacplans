@@ -1,6 +1,6 @@
 "use client";
 
-import { Download, Loader2, Plus, Save, Share2, Sparkles, Sticker } from "lucide-react";
+import { Clapperboard, Download, Loader2, Plus, Save, Share2, Sparkles, Sticker } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export type StickerToolbarLabels = {
@@ -13,6 +13,8 @@ export type StickerToolbarLabels = {
   downloadingSticker: string;
   downloadAnimated: string;
   downloadingAnimated: string;
+  downloadGif: string;
+  downloadingGif: string;
   share: string;
   sharing: string;
 };
@@ -24,6 +26,7 @@ export type StickerToolbarProps = {
   isDownloadingImage: boolean;
   isDownloadingSticker: boolean;
   isDownloadingAnimated: boolean;
+  isDownloadingGif: boolean;
   isSharing: boolean;
   saveMessage: string | null;
   onNew: () => void;
@@ -31,6 +34,7 @@ export type StickerToolbarProps = {
   onDownloadImage: () => void;
   onDownloadSticker: () => void;
   onDownloadAnimated: () => void;
+  onDownloadGif: () => void;
   onShare: () => void;
 };
 
@@ -41,6 +45,7 @@ export function StickerToolbar({
   isDownloadingImage,
   isDownloadingSticker,
   isDownloadingAnimated,
+  isDownloadingGif,
   isSharing,
   saveMessage,
   onNew,
@@ -48,6 +53,7 @@ export function StickerToolbar({
   onDownloadImage,
   onDownloadSticker,
   onDownloadAnimated,
+  onDownloadGif,
   onShare,
 }: StickerToolbarProps) {
   const busy =
@@ -55,6 +61,7 @@ export function StickerToolbar({
     isDownloadingImage ||
     isDownloadingSticker ||
     isDownloadingAnimated ||
+    isDownloadingGif ||
     isSharing;
 
   return (
@@ -109,6 +116,21 @@ export function StickerToolbar({
             <Sparkles className="h-4 w-4" />
           )}
           {isDownloadingAnimated ? labels.downloadingAnimated : labels.downloadAnimated}
+        </Button>
+
+        <Button
+          type="button"
+          variant="secondary"
+          className="gap-1.5"
+          disabled={disabled || busy}
+          onClick={onDownloadGif}
+        >
+          {isDownloadingGif ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Clapperboard className="h-4 w-4" />
+          )}
+          {isDownloadingGif ? labels.downloadingGif : labels.downloadGif}
         </Button>
 
         <Button

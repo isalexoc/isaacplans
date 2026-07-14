@@ -61,6 +61,31 @@ async function encodeAnimatedWebp(
   return fs.readFile(out);
 }
 
+async function encodeAnimatedGif(ffmpeg: string, dir: string, fps: number): Promise<Buffer> {
+  const out = join(dir, "out.gif");
+  // Two-pass palette in one graph for clean colors; -loop 0 = infinite loop.
+  await execFileAsync(
+    ffmpeg,
+    [
+      "-hide_banner",
+      "-loglevel",
+      "error",
+      "-y",
+      "-framerate",
+      String(fps),
+      "-i",
+      join(dir, "frame_%03d.png"),
+      "-vf",
+      "split[a][b];[a]palettegen=stats_mode=diff[p];[b][p]paletteuse=dither=sierra2_4a",
+      "-loop",
+      "0",
+      out,
+    ],
+    { maxBuffer: 40 * 1024 * 1024 }
+  );
+  return fs.readFile(out);
+}
+
 export async function POST(request: Request) {
   const { userId } = await auth();
   if (!userId) {
@@ -71,6 +96,7 @@ export async function POST(request: Request) {
   const frames = formData.getAll("frames").filter((f): f is File => f instanceof File);
   const fpsRaw = Number(formData.get("fps"));
   const fps = Number.isFinite(fpsRaw) && fpsRaw >= 4 && fpsRaw <= 30 ? Math.round(fpsRaw) : 14;
+  const format = formData.get("format") === "gif" ? "gif" : "webp";
 
   if (frames.length < MIN_FRAMES || frames.length > MAX_FRAMES) {
     return NextResponse.json(
@@ -101,7 +127,19 @@ export async function POST(request: Request) {
 
     const ffmpeg = await getFfmpegPath();
 
-    // Encode; if the WhatsApp 500 KB animated limit is exceeded, retry lossier.
+    if (format === "gif") {
+      const gif = await encodeAnimatedGif(ffmpeg, dir, fps);
+      return new NextResponse(new Uint8Array(gif), {
+        status: 200,
+        headers: {
+          "Content-Type": "image/gif",
+          "Content-Length": String(gif.byteLength),
+          "Cache-Control": "no-store",
+        },
+      });
+    }
+
+    // WebP sticker; if the WhatsApp 500 KB animated limit is exceeded, retry lossier.
     let webp = await encodeAnimatedWebp(ffmpeg, dir, fps, 60);
     if (webp.byteLength > WHATSAPP_ANIM_MAX_BYTES) {
       webp = await encodeAnimatedWebp(ffmpeg, dir, fps, 40);

@@ -108,6 +108,7 @@ export default function SaleStickerForm({
   const [isDownloadingImage, setIsDownloadingImage] = useState(false);
   const [isDownloadingSticker, setIsDownloadingSticker] = useState(false);
   const [isDownloadingAnimated, setIsDownloadingAnimated] = useState(false);
+  const [isDownloadingGif, setIsDownloadingGif] = useState(false);
   const [isSharing, setIsSharing] = useState(false);
   const [animPhase, setAnimPhase] = useState(0);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
@@ -305,6 +306,42 @@ export default function SaleStickerForm({
     }
   };
 
+  const handleDownloadGif = async () => {
+    if (!validate()) return;
+    setIsDownloadingGif(true);
+    try {
+      await commitSticker();
+      // GIF uses the full opaque layout (readable when it plays large in chat).
+      const el = richRef.current;
+      if (!el) return;
+      await prepareStickerNode(el);
+      const frames: Blob[] = [];
+      for (let i = 0; i < ANIM_FRAMES; i++) {
+        setAnimPhase(i / ANIM_FRAMES);
+        await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+        const frame = await captureStickerFramePng(el);
+        if (frame) frames.push(frame);
+      }
+      setAnimPhase(0);
+      if (frames.length < 2) {
+        toast({ title: t("messages.captureFailed"), variant: "destructive" });
+        return;
+      }
+      const gif = await requestAnimatedSticker(frames, ANIM_FPS, "gif");
+      const name = saleStickerFilenameSlug(data.clientName, displaySequence, saleDate, "webp").replace(
+        /\.webp$/,
+        ".gif"
+      );
+      downloadStickerBlob(gif, name);
+    } catch (error) {
+      console.error("Error building animated GIF:", error);
+      toast({ title: t("messages.animateFailed"), variant: "destructive" });
+    } finally {
+      setAnimPhase(0);
+      setIsDownloadingGif(false);
+    }
+  };
+
   const handleShare = async () => {
     if (!validate()) return;
     setIsSharing(true);
@@ -350,6 +387,8 @@ export default function SaleStickerForm({
     downloadingSticker: t("toolbar.downloadingSticker"),
     downloadAnimated: t("toolbar.downloadAnimated"),
     downloadingAnimated: t("toolbar.downloadingAnimated"),
+    downloadGif: t("toolbar.downloadGif"),
+    downloadingGif: t("toolbar.downloadingGif"),
     share: t("toolbar.share"),
     sharing: t("toolbar.sharing"),
   };
@@ -384,6 +423,7 @@ export default function SaleStickerForm({
         isDownloadingImage={isDownloadingImage}
         isDownloadingSticker={isDownloadingSticker}
         isDownloadingAnimated={isDownloadingAnimated}
+        isDownloadingGif={isDownloadingGif}
         isSharing={isSharing}
         saveMessage={saveMessage}
         onNew={() => onNewSticker?.()}
@@ -391,6 +431,7 @@ export default function SaleStickerForm({
         onDownloadImage={handleDownloadImage}
         onDownloadSticker={handleDownloadSticker}
         onDownloadAnimated={handleDownloadAnimated}
+        onDownloadGif={handleDownloadGif}
         onShare={handleShare}
       />
 
@@ -677,6 +718,7 @@ export default function SaleStickerForm({
           companyLogoUrl={companyLogoUrl}
           agentName={agentName}
           variant="image"
+          animationPhase={animPhase}
         />
         <StickerPreview
           ref={diecutRef}
