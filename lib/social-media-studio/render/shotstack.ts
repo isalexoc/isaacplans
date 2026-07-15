@@ -15,10 +15,14 @@ import type { RenderPlan, RenderProviderStatus, VideoRenderProvider } from "./ty
 const CAPTION_FONT         = process.env.SHOTSTACK_CAPTION_FONT || "Montserrat";
 const CAPTION_SIZE         = Number(process.env.SHOTSTACK_CAPTION_SIZE) || 64;          // px on the 1080-wide frame
 const CAPTION_ACTIVE_COLOR = process.env.SHOTSTACK_CAPTION_ACTIVE || "#00B4D8";          // spoken-word highlight (brand cyan)
-// offset.y: positive moves UP. Presenter videos put captions in the UPPER area (avatar is at
-// the bottom) nudged slightly down; faceless videos put them in the lower-third lifted up.
-const CAPTION_TOP_OFFSET    = Number(process.env.SHOTSTACK_CAPTION_TOP_OFFSET ?? "-0.08");
+// offset.y: positive moves UP, negative DOWN. Presenter videos center captions slightly below
+// mid-frame (~58% from the top) — clear of the scene faces in the upper half and mostly clear
+// of the presenter inset in the bottom corner. Faceless videos keep them near the bottom edge.
+const CAPTION_MID_OFFSET    = Number(process.env.SHOTSTACK_CAPTION_MID_OFFSET ?? "-0.08");
 const CAPTION_BOTTOM_OFFSET = Number(process.env.SHOTSTACK_CAPTION_BOTTOM_OFFSET ?? "0.06");
+// The caption clip's box height bounds how much text a caption page can show. ~1.5em per line
+// at CAPTION_SIZE caps pages at ~2 short lines instead of a 5-6 line wall covering the frame.
+const CAPTION_MAX_LINES     = Number(process.env.SHOTSTACK_CAPTION_MAX_LINES) || 2;
 
 // Ken Burns motion cycled per scene so a still image still feels alive.
 const KEN_BURNS = ["zoomIn", "slideLeft", "zoomOut", "slideRight"] as const;
@@ -40,7 +44,7 @@ const round = (n: number) => Math.round(n * 1000) / 1000;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function richCaptionClip(plan: RenderPlan): Record<string, any> {
-  const onTop = Boolean(plan.presenter); // presenter occupies the bottom → captions go up top
+  const midFrame = Boolean(plan.presenter); // presenter occupies the bottom → captions sit just below mid-frame
   return {
     asset: {
       type:      "rich-caption",
@@ -50,12 +54,13 @@ function richCaptionClip(plan: RenderPlan): Record<string, any> {
       stroke:    { width: 6, color: "#000000" },
       active:    { font: { color: CAPTION_ACTIVE_COLOR } },
       animation: { style: "karaoke" },
-      align:     { horizontal: "center", vertical: onTop ? "top" : "bottom" },
+      align:     { horizontal: "center", vertical: midFrame ? "middle" : "bottom" },
     },
     start:  0,
     length: "end",
     width:  Math.round(plan.width * 0.9),
-    offset: { x: 0, y: onTop ? CAPTION_TOP_OFFSET : CAPTION_BOTTOM_OFFSET },
+    height: Math.round(CAPTION_SIZE * 1.5 * CAPTION_MAX_LINES),
+    offset: { x: 0, y: midFrame ? CAPTION_MID_OFFSET : CAPTION_BOTTOM_OFFSET },
   };
 }
 
