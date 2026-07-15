@@ -8,7 +8,7 @@ import type { Metadata } from "next";
 import { Button } from "@/components/ui/button";
 import { BlogUserAuth } from "@/components/blog-user-auth";
 import SaleStickerHub from "@/components/sale-sticker-hub";
-import { SaleStickerSignedOut } from "@/components/sale-sticker/sale-sticker-signed-out";
+import SaleStickerLanding from "@/components/sale-sticker/sale-sticker-landing";
 import enLeaveBehindMessages from "@/messages/en/final-expense/leave-behind.json";
 import esLeaveBehindMessages from "@/messages/es/final-expense/leave-behind.json";
 import enSaleStickerMessages from "@/messages/en/final-expense/sale-sticker.json";
@@ -27,7 +27,14 @@ const ROUTE_KEY = "/final-expense/sale-sticker" as const;
 /* ───────── SEO ───────── */
 export async function generateMetadata(): Promise<Metadata> {
   const locale = (await getLocale()) as SupportedLocale;
+  const { userId } = await auth();
   const t = await getTranslations({ locale, namespace: "saleSticker" });
+
+  // Signed-out visitors see the public marketing landing (indexable, like the
+  // leave-behind landing); the tool itself stays out of the index.
+  const title = userId ? t("meta.title") : t("landing.meta.title");
+  const description = userId ? t("meta.description") : t("landing.meta.description");
+  const keywords = userId ? t("meta.keywords") : t("landing.meta.keywords");
 
   const slug = localizedSlug(ROUTE_KEY, locale);
   const canonical = withLocalePrefix(locale, slug);
@@ -36,24 +43,25 @@ export async function generateMetadata(): Promise<Metadata> {
   const xDefault = withLocalePrefix("en", localizedSlug(ROUTE_KEY, "en"));
 
   return {
-    title: t("meta.title"),
-    description: t("meta.description"),
-    keywords: t("meta.keywords"),
+    title,
+    description,
+    keywords,
     alternates: {
       canonical,
       languages: { ...languages, "x-default": xDefault },
     },
     openGraph: {
-      title: t("meta.title"),
-      description: t("meta.description"),
+      title,
+      description,
       url: canonical,
       siteName: "Isaac Plans Insurance",
       locale: ogLocale,
       alternateLocale: ogLocale === "en_US" ? ["es_ES"] : ["en_US"],
       type: "website",
     },
-    // Internal agent tool — keep it out of the index.
-    robots: { index: false, follow: false },
+    robots: userId
+      ? { index: false, follow: false }
+      : { index: true, follow: true },
   };
 }
 
@@ -70,11 +78,9 @@ export default async function SaleStickerPage() {
   if (!userId) {
     return (
       <main className="min-h-screen bg-background">
-        <div className="container mx-auto max-w-6xl px-4 py-16">
-          <NextIntlClientProvider locale={locale} messages={messages}>
-            <SaleStickerSignedOut />
-          </NextIntlClientProvider>
-        </div>
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          <SaleStickerLanding />
+        </NextIntlClientProvider>
       </main>
     );
   }
