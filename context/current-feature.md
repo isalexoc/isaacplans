@@ -2,9 +2,17 @@
 
 ## Status
 
-Not Started
+In Progress — IUL Presentation → Sanity CMS + Clerk-secured license reveal (branch `feature/iul-presentation-sanity`)
 
 ## Goals
+
+1. Move all `/iul/presentation` slide content (26 slides) out of next-intl JSON (`messages/{en,es}/iul/presentation.json`) and hardcoded TSX into a single Sanity `iulPresentation` document with EN+ES field pairs per slide, editable in Studio. Locale toggle picks the matching language fields.
+2. New `agentLicense` Sanity document type (12 state licenses + driver's license): metadata only (state reference, Cloudinary public ID, active, order). License images stay in Cloudinary authenticated delivery — never on Sanity's public CDN. Buying a new state license = upload image to Cloudinary + add one Sanity doc.
+3. Replace the insecure password reveal (forgeable unsigned cookie + `"isaac2024"` fallback) with Clerk admin gating: licenses auto-reveal for signed-in admin; image proxy moves to `/api/admin/license-image` (middleware-enforced 401/403).
+4. Non-sensitive slide images (product/scenario/hero/logo/headshot) become Sanity image assets uploaded by seed scripts (`pnpm add:iul-presentation`, `pnpm add:agent-licenses`).
+5. Cleanup: delete the two message JSONs, the `i18n/request.ts` merge block, 14 dead slide components, `/api/unlock-licenses`, old `/api/license-image`. Add `/api/revalidate/iul` webhook route.
+
+Full plan: `C:\Users\isale\.claude\plans\okay-i-need-you-deep-lamport.md`
 
 ## Notes
 
