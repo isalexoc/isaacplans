@@ -42,6 +42,13 @@ export async function generateMetadata(): Promise<Metadata> {
   const ogLocale = ogLocaleOf(locale);
   const xDefault = withLocalePrefix("en", localizedSlug(ROUTE_KEY, "en"));
 
+  // Locale-specific OG image (optimized for social sharing: 1200x630)
+  const ogImageId =
+    locale === "es"
+      ? "og_sticker_page_spanish_z18zhn"
+      : "og_sticker_page_english_kq8vcf";
+  const ogImageUrl = `https://res.cloudinary.com/isaacdev/image/upload/w_1200,h_630,c_fill/f_auto/q_auto/v1784228072/${ogImageId}.png`;
+
   return {
     title,
     description,
@@ -58,6 +65,20 @@ export async function generateMetadata(): Promise<Metadata> {
       locale: ogLocale,
       alternateLocale: ogLocale === "en_US" ? ["es_ES"] : ["en_US"],
       type: "website",
+      images: [
+        {
+          url: ogImageUrl,
+          width: 1200,
+          height: 630,
+          alt: title,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [{ url: ogImageUrl, alt: title }],
     },
     robots: userId
       ? { index: false, follow: false }
