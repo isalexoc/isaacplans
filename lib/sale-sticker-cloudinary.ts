@@ -56,14 +56,9 @@ export function resolveAgentCutoutUrl(publicId: string, profileImageUrl: string)
   return profileImageUrl || "";
 }
 
-/** Optional personal image. Background removal is opt-in (some are decorative graphics). */
-export function saleStickerExtraImageUrl(
-  publicId: string,
-  options?: { removeBackground?: boolean }
-): string {
+/** Optional personal image, delivered as uploaded (background-removal option retired). */
+export function saleStickerExtraImageUrl(publicId: string): string {
   if (!publicId) return "";
-  const transforms = options?.removeBackground
-    ? "e_background_removal/c_limit,w_700,h_700/e_sharpen:40/f_png/q_auto:best"
-    : "c_limit,w_700,h_700/q_auto:good/f_auto";
+  const transforms = "c_limit,w_700,h_700/q_auto:good/f_auto";
   return `https://res.cloudinary.com/${cloudName()}/image/upload/${transforms}/${publicId}`;
 }

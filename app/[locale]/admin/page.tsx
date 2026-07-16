@@ -25,6 +25,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { BlogUserAuth } from "@/components/blog-user-auth";
 
 export const metadata: Metadata = {
   title: "Admin Dashboard | Isaac Plans",
@@ -163,16 +164,19 @@ export default async function AdminDashboardPage() {
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
-      <div className="mb-8 flex items-center gap-3">
-        <div className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-          <LayoutDashboard className="h-5 w-5 text-primary" />
+      <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+            <LayoutDashboard className="h-5 w-5 text-primary" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">Admin Dashboard</h1>
+            <p className="text-sm text-muted-foreground">
+              Internal tools for content creation and publishing
+            </p>
+          </div>
         </div>
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Admin Dashboard</h1>
-          <p className="text-sm text-muted-foreground">
-            Internal tools for content creation and publishing
-          </p>
-        </div>
+        <BlogUserAuth />
       </div>
 
       <div className="space-y-8">

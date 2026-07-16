@@ -85,14 +85,10 @@ export async function requestAnimatedSticker(
 }
 
 export async function uploadSaleStickerExtraImage(
-  file: File,
-  options?: { removeBackground?: boolean }
+  file: File
 ): Promise<{ url: string; publicId: string }> {
   const formData = new FormData();
   formData.append("file", file);
-  if (options?.removeBackground) {
-    formData.append("removeBackground", "true");
-  }
   const res = await fetch("/api/sale-sticker/upload", {
     method: "POST",
     body: formData,

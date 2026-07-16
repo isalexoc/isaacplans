@@ -6,7 +6,6 @@ import { Loader2, Upload, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -102,7 +101,6 @@ export default function SaleStickerForm({
 
   const [clientNameError, setClientNameError] = useState(false);
   const [uploadingExtra, setUploadingExtra] = useState(false);
-  const [extraRemoveBg, setExtraRemoveBg] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isDownloadingImage, setIsDownloadingImage] = useState(false);
   const [isDownloadingGif, setIsDownloadingGif] = useState(false);
@@ -206,9 +204,7 @@ export default function SaleStickerForm({
   const handleExtraUpload = async (file: File) => {
     setUploadingExtra(true);
     try {
-      const { url, publicId } = await uploadSaleStickerExtraImage(file, {
-        removeBackground: extraRemoveBg,
-      });
+      const { url, publicId } = await uploadSaleStickerExtraImage(file);
       update({ extraImageUrl: url, extraImagePublicId: publicId });
     } catch {
       toast({ title: t("form.extraUploadFailed"), variant: "destructive" });
@@ -587,19 +583,6 @@ export default function SaleStickerForm({
                       {t("form.removeExtraImage")}
                     </Button>
                   )}
-                </div>
-                <div className="flex items-center gap-2">
-                  <Checkbox
-                    id="extra-remove-bg"
-                    checked={extraRemoveBg}
-                    onCheckedChange={(v) => setExtraRemoveBg(v === true)}
-                  />
-                  <Label
-                    htmlFor="extra-remove-bg"
-                    className="cursor-pointer text-sm font-normal leading-snug"
-                  >
-                    {t("form.extraRemoveBg")}
-                  </Label>
                 </div>
               </div>
             </div>

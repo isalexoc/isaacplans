@@ -63,6 +63,18 @@
       "create": "Create sticker",
       "stickers": "My stickers"
     },
+    "onboarding": {
+      "title": "Welcome! 🎉",
+      "subtitle": "Three quick steps and your first celebration sticker is ready.",
+      "step1Title": "Set up your profile",
+      "step1Body": "Add your photo, logo, and contact info — just once.",
+      "step2Title": "Log your sale",
+      "step2Body": "Client name and a few details — the sticker builds itself live.",
+      "step3Title": "Share it on WhatsApp",
+      "step3Body": "Download the image or sticker and drop it in the group chat.",
+      "cta": "Set up my profile",
+      "skip": "Skip for now"
+    },
     "profileRequired": {
       "title": "Complete your agent profile first",
       "hint": "Add your photo, company logo, and name so every sticker shows your branding. Your Leave-Behind profile is reused here.",
@@ -112,7 +124,6 @@
       "extraImagePlaceholder": "No image",
       "uploadExtraImage": "Upload image",
       "removeExtraImage": "Remove",
-      "extraRemoveBg": "Remove background",
       "extraUploadFailed": "Could not upload image. Please try again."
     },
     "preview": {

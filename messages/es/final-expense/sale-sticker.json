@@ -63,6 +63,18 @@
       "create": "Crear sticker",
       "stickers": "Mis stickers"
     },
+    "onboarding": {
+      "title": "¡Bienvenido! 🎉",
+      "subtitle": "Tres pasos rápidos y tu primer sticker de celebración está listo.",
+      "step1Title": "Configura tu perfil",
+      "step1Body": "Agrega tu foto, logo y datos de contacto — solo una vez.",
+      "step2Title": "Registra tu venta",
+      "step2Body": "El nombre del cliente y unos detalles — el sticker se arma en vivo.",
+      "step3Title": "Compártelo en WhatsApp",
+      "step3Body": "Descarga la imagen o el sticker y compártelo en el chat del grupo.",
+      "cta": "Configurar mi perfil",
+      "skip": "Omitir por ahora"
+    },
     "profileRequired": {
       "title": "Completa tu perfil de agente primero",
       "hint": "Agrega tu foto, el logo de tu compañía y tu nombre para que cada sticker muestre tu marca. Se reutiliza tu perfil de Dejar-Imagen.",
@@ -112,7 +124,6 @@
       "extraImagePlaceholder": "Sin imagen",
       "uploadExtraImage": "Subir imagen",
       "removeExtraImage": "Quitar",
-      "extraRemoveBg": "Quitar fondo",
       "extraUploadFailed": "No se pudo subir la imagen. Inténtalo de nuevo."
     },
     "preview": {

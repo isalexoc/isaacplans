@@ -17,7 +17,6 @@ export async function POST(request: Request) {
 
   const formData = await request.formData();
   const file = formData.get("file");
-  const removeBackground = formData.get("removeBackground") === "true";
 
   if (!(file instanceof File)) {
     return NextResponse.json({ success: false, error: "No file provided" }, { status: 400 });
@@ -61,7 +60,7 @@ export async function POST(request: Request) {
       }
     );
 
-    const url = saleStickerExtraImageUrl(uploadResult.public_id, { removeBackground });
+    const url = saleStickerExtraImageUrl(uploadResult.public_id);
 
     return NextResponse.json({
       success: true,
