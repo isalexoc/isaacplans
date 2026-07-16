@@ -11,7 +11,6 @@ export type LeaveBehindAgentProfile = {
   profileImagePublicId: string;
   companyLogoUrl: string;
   companyLogoPublicId: string;
-  logoRemoveBackground: boolean;
   onboardingCompletedAt: string | null;
   createdAt: string;
   updatedAt: string;
@@ -27,7 +26,6 @@ export type LeaveBehindAgentProfileInput = {
   profileImagePublicId?: string;
   companyLogoUrl?: string;
   companyLogoPublicId?: string;
-  logoRemoveBackground?: boolean;
   markOnboardingComplete?: boolean;
 };
 

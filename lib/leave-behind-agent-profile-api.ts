@@ -28,15 +28,11 @@ export async function saveLeaveBehindAgentProfile(
 
 export async function uploadLeaveBehindAgentImage(
   file: File,
-  kind: LeaveBehindImageKind,
-  options?: { removeBackground?: boolean }
+  kind: LeaveBehindImageKind
 ): Promise<{ url: string; publicId: string }> {
   const formData = new FormData();
   formData.append("file", file);
   formData.append("kind", kind);
-  if (kind === "company_logo" && options?.removeBackground === false) {
-    formData.append("removeBackground", "false");
-  }
   const res = await fetch("/api/leave-behind/agent-profile/upload", {
     method: "POST",
     body: formData,

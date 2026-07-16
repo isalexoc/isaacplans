@@ -19,25 +19,19 @@ function cloudName(): string {
   return name;
 }
 
-/** Transformation path segments (Cloudinary URL API). */
-export function leaveBehindTransformationPath(
-  kind: LeaveBehindImageKind,
-  options?: { removeLogoBackground?: boolean }
-): string {
+/** Transformation path segments (Cloudinary URL API). Logos are delivered as
+ * uploaded — the background-removal option was retired; agents upload final logos. */
+export function leaveBehindTransformationPath(kind: LeaveBehindImageKind): string {
   if (kind === "profile_photo") {
     return "e_improve/c_fill,g_face,w_400,h_400/q_auto:good/f_auto";
-  }
-  if (options?.removeLogoBackground !== false) {
-    return "e_background_removal/f_png/c_limit,w_560,h_160/e_sharpen:80/q_auto:best/f_auto";
   }
   return "c_limit,w_560,h_160/e_sharpen:80/q_auto:good/f_auto";
 }
 
 export function leaveBehindDeliveryUrl(
   publicId: string,
-  kind: LeaveBehindImageKind,
-  options?: { removeLogoBackground?: boolean }
+  kind: LeaveBehindImageKind
 ): string {
-  const transforms = leaveBehindTransformationPath(kind, options);
+  const transforms = leaveBehindTransformationPath(kind);
   return `https://res.cloudinary.com/${cloudName()}/image/upload/${transforms}/${publicId}`;
 }

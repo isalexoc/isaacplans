@@ -6,14 +6,12 @@ import { Loader2, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { useLeaveBehindAgentProfile } from "@/components/leave-behind/leave-behind-agent-profile-context";
 import {
   saveLeaveBehindAgentProfile,
   uploadLeaveBehindAgentImage,
 } from "@/lib/leave-behind-agent-profile-api";
-import { leaveBehindDeliveryUrl } from "@/lib/leave-behind-cloudinary";
 import {
   isLeaveBehindAgentProfileComplete,
   type LeaveBehindAgentProfile,
@@ -31,7 +29,6 @@ type FormState = {
   profileImagePublicId: string;
   companyLogoUrl: string;
   companyLogoPublicId: string;
-  logoRemoveBackground: boolean;
 };
 
 function emptyForm(): FormState {
@@ -45,7 +42,6 @@ function emptyForm(): FormState {
     profileImagePublicId: "",
     companyLogoUrl: "",
     companyLogoPublicId: "",
-    logoRemoveBackground: true,
   };
 }
 
@@ -61,7 +57,6 @@ function profileToForm(profile: LeaveBehindAgentProfile | null): FormState {
     profileImagePublicId: profile.profileImagePublicId,
     companyLogoUrl: profile.companyLogoUrl,
     companyLogoPublicId: profile.companyLogoPublicId,
-    logoRemoveBackground: profile.logoRemoveBackground,
   };
 }
 
@@ -124,9 +119,7 @@ export default function FinalExpenseLeaveBehindAgentProfilePanel({
     setUploadingLogo(true);
     setMessage(null);
     try {
-      const { url, publicId } = await uploadLeaveBehindAgentImage(file, "company_logo", {
-        removeBackground: form.logoRemoveBackground,
-      });
+      const { url, publicId } = await uploadLeaveBehindAgentImage(file, "company_logo");
       setForm((f) => ({
         ...f,
         companyLogoUrl: url,
@@ -138,18 +131,6 @@ export default function FinalExpenseLeaveBehindAgentProfilePanel({
     } finally {
       setUploadingLogo(false);
     }
-  };
-
-  const setLogoRemoveBackground = (checked: boolean) => {
-    setForm((f) => {
-      const next = { ...f, logoRemoveBackground: checked };
-      if (f.companyLogoPublicId) {
-        next.companyLogoUrl = leaveBehindDeliveryUrl(f.companyLogoPublicId, "company_logo", {
-          removeLogoBackground: checked,
-        });
-      }
-      return next;
-    });
   };
 
   const handleSave = async () => {
@@ -167,7 +148,6 @@ export default function FinalExpenseLeaveBehindAgentProfilePanel({
         profileImagePublicId: form.profileImagePublicId,
         companyLogoUrl: form.companyLogoUrl,
         companyLogoPublicId: form.companyLogoPublicId,
-        logoRemoveBackground: form.logoRemoveBackground,
         markOnboardingComplete: true,
       });
       setProfile(saved);
@@ -255,16 +235,6 @@ export default function FinalExpenseLeaveBehindAgentProfilePanel({
           )}
           {t("agentProfile.uploadLogo")}
         </Button>
-        <div className="flex items-start gap-2">
-          <Checkbox
-            id="logo-remove-bg"
-            checked={form.logoRemoveBackground}
-            onCheckedChange={(v) => setLogoRemoveBackground(v === true)}
-          />
-          <Label htmlFor="logo-remove-bg" className="cursor-pointer text-sm font-normal leading-snug">
-            {t("agentProfile.logoRemoveBackground")}
-          </Label>
-        </div>
         {errors.companyLogoUrl && (
           <p className="text-sm text-red-600 dark:text-red-400">{t("agentProfile.logoRequired")}</p>
         )}

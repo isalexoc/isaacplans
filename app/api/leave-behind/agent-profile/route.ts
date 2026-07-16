@@ -40,8 +40,6 @@ export async function PATCH(request: Request) {
     typeof body?.companyLogoUrl === "string" ? body.companyLogoUrl.trim() : undefined;
   const companyLogoPublicId =
     typeof body?.companyLogoPublicId === "string" ? body.companyLogoPublicId.trim() : undefined;
-  const logoRemoveBackground =
-    typeof body?.logoRemoveBackground === "boolean" ? body.logoRemoveBackground : undefined;
 
   const existing = await getLeaveBehindAgentProfile(userId);
   const hasPhoto =
@@ -80,7 +78,6 @@ export async function PATCH(request: Request) {
       profileImagePublicId,
       companyLogoUrl,
       companyLogoPublicId,
-      logoRemoveBackground,
       markOnboardingComplete: Boolean(body?.markOnboardingComplete),
     });
     return NextResponse.json({ success: true, profile });

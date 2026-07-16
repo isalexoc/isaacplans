@@ -158,6 +158,7 @@ export const leaveBehindAgentProfiles = pgTable("leave_behind_agent_profiles", {
   profileImagePublicId: text("profile_image_public_id").default("").notNull(),
   companyLogoUrl: text("company_logo_url").default("").notNull(),
   companyLogoPublicId: text("company_logo_public_id").default("").notNull(),
+  // Legacy: background-removal option retired (logos now uploaded final); column kept to avoid a migration.
   logoRemoveBackground: boolean("logo_remove_background").default(true).notNull(),
   onboardingCompletedAt: timestamp("onboarding_completed_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),

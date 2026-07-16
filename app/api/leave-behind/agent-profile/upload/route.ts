@@ -24,7 +24,6 @@ export async function POST(request: Request) {
   const formData = await request.formData();
   const file = formData.get("file");
   const kind = parseKind(formData.get("kind"));
-  const removeBackground = formData.get("removeBackground") !== "false";
 
   if (!(file instanceof File)) {
     return NextResponse.json({ success: false, error: "No file provided" }, { status: 400 });
@@ -76,9 +75,7 @@ export async function POST(request: Request) {
       stream.end(buffer);
     });
 
-    const url = leaveBehindDeliveryUrl(uploadResult.public_id, kind, {
-      removeLogoBackground: removeBackground,
-    });
+    const url = leaveBehindDeliveryUrl(uploadResult.public_id, kind);
 
     return NextResponse.json({
       success: true,

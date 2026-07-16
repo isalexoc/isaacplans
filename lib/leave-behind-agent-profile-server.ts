@@ -11,20 +11,13 @@ function hydrateImageUrls(
   row: typeof leaveBehindAgentProfiles.$inferSelect
 ): Pick<
   LeaveBehindAgentProfile,
-  | "profileImageUrl"
-  | "profileImagePublicId"
-  | "companyLogoUrl"
-  | "companyLogoPublicId"
-  | "logoRemoveBackground"
+  "profileImageUrl" | "profileImagePublicId" | "companyLogoUrl" | "companyLogoPublicId"
 > {
-  const logoRemoveBackground = row.logoRemoveBackground ?? true;
   const profileImageUrl = row.profileImagePublicId
     ? leaveBehindDeliveryUrl(row.profileImagePublicId, "profile_photo")
     : row.profileImageUrl;
   const companyLogoUrl = row.companyLogoPublicId
-    ? leaveBehindDeliveryUrl(row.companyLogoPublicId, "company_logo", {
-        removeLogoBackground: logoRemoveBackground,
-      })
+    ? leaveBehindDeliveryUrl(row.companyLogoPublicId, "company_logo")
     : row.companyLogoUrl;
 
   return {
@@ -32,7 +25,6 @@ function hydrateImageUrls(
     profileImagePublicId: row.profileImagePublicId ?? "",
     companyLogoUrl,
     companyLogoPublicId: row.companyLogoPublicId ?? "",
-    logoRemoveBackground,
   };
 }
 
@@ -69,9 +61,6 @@ export async function upsertLeaveBehindAgentProfile(
   const now = new Date();
   const existing = await getLeaveBehindAgentProfile(userId);
 
-  const logoRemoveBackground =
-    input.logoRemoveBackground ?? existing?.logoRemoveBackground ?? true;
-
   const profileImagePublicId =
     input.profileImagePublicId ?? existing?.profileImagePublicId ?? "";
   const companyLogoPublicId =
@@ -82,9 +71,7 @@ export async function upsertLeaveBehindAgentProfile(
     : (input.profileImageUrl ?? existing?.profileImageUrl ?? "").trim();
 
   const companyLogoUrl = companyLogoPublicId
-    ? leaveBehindDeliveryUrl(companyLogoPublicId, "company_logo", {
-        removeLogoBackground: logoRemoveBackground,
-      })
+    ? leaveBehindDeliveryUrl(companyLogoPublicId, "company_logo")
     : (input.companyLogoUrl ?? existing?.companyLogoUrl ?? "").trim();
 
   const onboardingCompletedAt = input.markOnboardingComplete
@@ -103,7 +90,6 @@ export async function upsertLeaveBehindAgentProfile(
     profileImagePublicId,
     companyLogoUrl,
     companyLogoPublicId,
-    logoRemoveBackground,
     onboardingCompletedAt,
     updatedAt: now,
   };

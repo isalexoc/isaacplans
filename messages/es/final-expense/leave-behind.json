@@ -30,7 +30,6 @@
       "logoPlaceholder": "Sin logo",
       "logoRequired": "El logo de la compañía es obligatorio",
       "logoUploadFailed": "No se pudo subir el logo. Intenta de nuevo.",
-      "logoRemoveBackground": "Quitar fondo del logo (recomendado en tarjetas oscuras)",
       "profilePhoto": "Foto de perfil",
       "uploadPhoto": "Subir foto",
       "photoHint": "Una foto cuadrada tipo retrato funciona mejor. Mejoramos la luz con Cloudinary. JPEG, PNG o WebP, hasta 4 MB.",

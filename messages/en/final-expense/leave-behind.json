@@ -30,7 +30,6 @@
       "logoPlaceholder": "No logo uploaded",
       "logoRequired": "Company logo is required",
       "logoUploadFailed": "Could not upload logo. Please try again.",
-      "logoRemoveBackground": "Remove logo background (recommended for logos on dark cards)",
       "profilePhoto": "Profile photo",
       "uploadPhoto": "Upload photo",
       "photoHint": "Square headshot works best. We auto-enhance lighting via Cloudinary. JPEG, PNG, or WebP, up to 4 MB.",
