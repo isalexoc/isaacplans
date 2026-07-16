@@ -1,6 +1,7 @@
 /**
  * Seeds `agentLicense` documents in Sanity from the license list that used to
- * live hardcoded in messages/en/iul/presentation.json.
+ * live hardcoded in the IUL presentation message JSON (snapshot now at
+ * scripts/data/iul-presentation-en.json).
  *
  * License images stay in Cloudinary (authenticated delivery) — Sanity only
  * stores the metadata (state reference + Cloudinary public ID).

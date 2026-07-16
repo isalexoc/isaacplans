@@ -1,6 +1,6 @@
 /**
  * Seeds the singleton `iulPresentation` document (_id: "iulPresentation") from
- * the legacy next-intl message files (messages/{en,es}/iul/presentation.json)
+ * the legacy next-intl message snapshots (scripts/data/iul-presentation-*.json)
  * plus the values that were hardcoded in components/iul-slide-content.tsx
  * (slide images, company statistics, chart label placements).
  *
@@ -14,8 +14,8 @@
  */
 import "dotenv/config";
 import { createClient } from "next-sanity";
-import enMessages from "../messages/en/iul/presentation.json";
-import esMessages from "../messages/es/iul/presentation.json";
+import enMessages from "./data/iul-presentation-en.json";
+import esMessages from "./data/iul-presentation-es.json";
 
 const client = createClient({
   projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID || "anetxoet",

@@ -1,6 +1,8 @@
 /* app/[locale]/iul/presentation/page.tsx – server component */
 
-import { getTranslations, getLocale } from "next-intl/server";
+import { getLocale } from "next-intl/server";
+import { notFound } from "next/navigation";
+import { auth, currentUser } from "@clerk/nextjs/server";
 import { Link } from "@/i18n/navigation";
 import type { Metadata } from "next";
 import { ClipboardList } from "lucide-react";
@@ -10,6 +12,12 @@ import FullscreenButton from "@/components/fullscreen-button";
 import IULPresentationSlides from "@/components/iul-presentation-slides";
 import IULSlideContent from "@/components/iul-slide-content";
 
+import {
+  getIulPresentation,
+  mapIulPresentation,
+  type IulLocale,
+} from "@/lib/iul-presentation";
+import { getAgentLicenseStates } from "@/lib/agent-licenses";
 import { cloudinaryOgImageUrl } from "@/lib/blog-featured-image";
 import {
   ogLocaleOf,
@@ -22,16 +30,16 @@ import {
 /* ───────── SEO ───────── */
 export async function generateMetadata(): Promise<Metadata> {
   const locale = (await getLocale()) as SupportedLocale;
-  const t = await getTranslations({
-    locale,
-    namespace: "iulPresentation.meta",
-  });
+  const doc = await getIulPresentation();
+  if (!doc) return {};
 
-  const title = t("title");
-  const description = t("description");
-  const keywords = t("keywords");
-  const image = t("image");
-  const alt = t("imageAlt");
+  const { meta } = mapIulPresentation(doc, locale as IulLocale);
+
+  const title = meta.title;
+  const description = meta.description;
+  const keywords = meta.keywords;
+  const image = meta.image;
+  const alt = meta.imageAlt;
 
   const routeKey = "/iul/presentation";
   const slug = localizedSlug(routeKey, locale);
@@ -70,21 +78,25 @@ export async function generateMetadata(): Promise<Metadata> {
 /* ───────── Page ───────── */
 export default async function IULPresentationPage() {
   const locale = (await getLocale()) as SupportedLocale;
-  const t = await getTranslations({ locale, namespace: "iulPresentation" });
+
+  const doc = await getIulPresentation();
+  if (!doc) notFound();
+
+  const licenseStates = await getAgentLicenseStates();
+  const pres = mapIulPresentation(doc, locale as IulLocale, { licenseStates });
+  const { ui } = pres;
+
+  // License reveal is admin-only: the flag drives the slide-1 UI, while the
+  // real gate is the /api/admin/license-image middleware check.
+  const { userId } = await auth();
+  const isAdmin = userId
+    ? (await currentUser())?.publicMetadata?.role === "admin"
+    : false;
 
   const steps = [
-    {
-      id: "presentation",
-      label: t("stepper.presentation"),
-    },
-    {
-      id: "application",
-      label: t("stepper.application"),
-    },
-    {
-      id: "referrals",
-      label: t("stepper.referrals"),
-    },
+    { id: "presentation", label: ui.stepperPresentation },
+    { id: "application", label: ui.stepperApplication },
+    { id: "referrals", label: ui.stepperReferrals },
   ];
 
   return (
@@ -93,16 +105,16 @@ export default async function IULPresentationPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <Button asChild variant="secondary">
-            <Link href="/iul">{t("backButton")}</Link>
+            <Link href="/iul">{ui.backButton}</Link>
           </Button>
           <h1 className="text-2xl sm:text-3xl font-bold text-center flex-1 text-gray-900 dark:text-gray-100">
-            {t("title")}
+            {ui.title}
           </h1>
           <div className="w-[110px] sm:w-[120px] flex justify-end">
             <FullscreenButton
               targetId="presentation-content"
-              label={t("fullscreen.enter")}
-              exitLabel={t("fullscreen.exit")}
+              label={ui.fullscreenEnter}
+              exitLabel={ui.fullscreenExit}
             />
           </div>
         </div>
@@ -116,18 +128,16 @@ export default async function IULPresentationPage() {
         <div className="mb-8 flex flex-col items-center justify-between gap-3 rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-900 dark:bg-blue-950/40 sm:flex-row">
           <div className="text-center sm:text-left">
             <p className="font-semibold text-gray-900 dark:text-gray-100">
-              {locale === "es" ? "Captura de datos del cliente" : "Client data collection"}
+              {ui.intakeTitle}
             </p>
             <p className="text-sm text-muted-foreground">
-              {locale === "es"
-                ? "Inicie el formulario seguro o envíe un enlace al cliente para la solicitud IUL."
-                : "Start the secure form or send the client a link for the IUL application."}
+              {ui.intakeDescription}
             </p>
           </div>
           <Button asChild size="lg" className="shrink-0">
             <Link href="/iul/intake">
               <ClipboardList className="mr-2 h-5 w-5" />
-              {locale === "es" ? "Capturar datos del cliente" : "Collect client data"}
+              {ui.intakeButton}
             </Link>
           </Button>
         </div>
@@ -138,34 +148,16 @@ export default async function IULPresentationPage() {
           className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-950 dark:to-slate-900 dark:shadow-black/40 rounded-lg shadow-lg min-h-[600px] h-[70vh] overflow-hidden relative [&:fullscreen]:h-screen [&:fullscreen]:w-screen [&:fullscreen]:rounded-none [&:fullscreen]:min-h-screen"
         >
           <IULPresentationSlides
-            slides={[
-              { id: 1, content: <IULSlideContent slideKey="slide1" /> },
-              { id: 2, content: <IULSlideContent slideKey="slide2" /> },
-              { id: 3, content: <IULSlideContent slideKey="slide3" /> },
-              { id: 4, content: <IULSlideContent slideKey="slide4" /> },
-              { id: 5, content: <IULSlideContent slideKey="slide5" /> },
-              { id: 6, content: <IULSlideContent slideKey="slide6" /> },
-              { id: 7, content: <IULSlideContent slideKey="slide7" /> },
-              { id: 8, content: <IULSlideContent slideKey="slide8" /> },
-              { id: 9, content: <IULSlideContent slideKey="slide9" /> },
-              { id: 10, content: <IULSlideContent slideKey="slide10" /> },
-              { id: 11, content: <IULSlideContent slideKey="slide11" /> },
-              { id: 12, content: <IULSlideContent slideKey="slide12" /> },
-              { id: 13, content: <IULSlideContent slideKey="slide13" /> },
-              { id: 14, content: <IULSlideContent slideKey="slide14" /> },
-              { id: 15, content: <IULSlideContent slideKey="slide15" /> },
-              { id: 16, content: <IULSlideContent slideKey="slide16" /> },
-              { id: 17, content: <IULSlideContent slideKey="slide17" /> },
-              { id: 18, content: <IULSlideContent slideKey="slide18" /> },
-              { id: 19, content: <IULSlideContent slideKey="slide19" /> },
-              { id: 20, content: <IULSlideContent slideKey="slide20" /> },
-              { id: 21, content: <IULSlideContent slideKey="slide21" /> },
-              { id: 22, content: <IULSlideContent slideKey="slide22" /> },
-              { id: 23, content: <IULSlideContent slideKey="slide23" /> },
-              { id: 24, content: <IULSlideContent slideKey="slide24" /> },
-              { id: 25, content: <IULSlideContent slideKey="slide25" /> },
-              { id: 26, content: <IULSlideContent slideKey="slide26" /> },
-            ]}
+            slides={pres.slides.map((slide, index) => ({
+              id: index + 1,
+              content: (
+                <IULSlideContent
+                  slide={slide}
+                  labels={pres.labels}
+                  isAdmin={isAdmin}
+                />
+              ),
+            }))}
             className="h-full w-full"
           />
         </div>
@@ -173,4 +165,3 @@ export default async function IULPresentationPage() {
     </main>
   );
 }
-
