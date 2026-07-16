@@ -41,14 +41,6 @@ async function loadSplitMessages(locale: string): Promise<Record<string, any>> {
     // This uses dynamic imports to handle the folder structure
     const splitPath = `@/messages/${locale}`;
     
-    // Load IUL presentation messages if they exist
-    try {
-      const iulPresentation = (await import(`@/messages/${locale}/iul/presentation.json`)).default;
-      Object.assign(splitMessages, iulPresentation);
-    } catch {
-      // File doesn't exist, skip
-    }
-    
     // Load IUL application messages if they exist
     try {
       const iulApplication = (await import(`@/messages/${locale}/iul/application.json`)).default;
