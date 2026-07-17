@@ -16,6 +16,7 @@
     "add:agent-licenses": "tsx scripts/add-agent-licenses-to-sanity.ts",
     "privatize:licenses": "tsx scripts/privatize-license-images.ts",
     "iul:fields": "tsx scripts/create-iul-intake-fields.ts",
+    "test:call-summary": "tsx scripts/test-call-summary.ts",
     "postinstall": "node node_modules/ffmpeg-static/install.js"
   },
   "dependencies": {

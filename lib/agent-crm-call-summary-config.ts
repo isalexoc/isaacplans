@@ -8,6 +8,7 @@ export type CallSummaryConfig = {
   includeVoicemail: boolean;
   openaiApiKey: string | null;
   openaiModel: string;
+  openaiMaxOutputTokens: number;
   whisperModel: string;
   maxTranscriptChars: number;
   backfillDays: number;
@@ -47,7 +48,8 @@ export function getCallSummaryConfig(): CallSummaryConfig {
     notePrefix: stripQuotes(notePrefixRaw || "AI Call Summary"),
     includeVoicemail: parseBool(process.env.AGENT_CRM_CALL_SUMMARY_INCLUDE_VOICEMAIL, false),
     openaiApiKey: process.env.OPENAI_API_KEY?.trim() || null,
-    openaiModel: process.env.OPENAI_MODEL?.trim() || "gpt-4o-mini",
+    openaiModel: process.env.OPENAI_MODEL?.trim() || "gpt-4o",
+    openaiMaxOutputTokens: parseIntEnv(process.env.OPENAI_MAX_OUTPUT_TOKENS, 3000),
     whisperModel: process.env.OPENAI_WHISPER_MODEL?.trim() || "whisper-1",
     maxTranscriptChars: parseIntEnv(process.env.AGENT_CRM_CALL_SUMMARY_MAX_TRANSCRIPT_CHARS, 120_000),
     backfillDays: parseIntEnv(process.env.AGENT_CRM_CALL_SUMMARY_BACKFILL_DAYS, 30),

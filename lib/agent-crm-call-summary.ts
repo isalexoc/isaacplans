@@ -13,6 +13,8 @@ import {
   summarizeCallTranscript,
   transcribeRecordingWithWhisper,
 } from "@/lib/openai-call-summary";
+import { formatLocalizedDate, NOTE_SEPARATOR } from "@/lib/call-summary-note-format";
+import type { CallLanguage } from "@/lib/call-summary-structured";
 import { createHash } from "crypto";
 import {
   createCallSummaryLogger,
@@ -319,15 +321,14 @@ function formatNoteBody(
     dateAdded?: string;
     processingId: string;
     transcriptSource: "workflow" | "api" | "whisper";
+    language?: CallLanguage;
   }
 ): string {
   const durationLabel =
     meta.callDurationSeconds > 0
       ? `${Math.floor(meta.callDurationSeconds / 60)}m ${(meta.callDurationSeconds % 60).toString().padStart(2, "0")}s`
       : null;
-  const dateLine = meta.dateAdded
-    ? new Date(meta.dateAdded).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" })
-    : new Date().toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" });
+  const dateLine = formatLocalizedDate(meta.dateAdded, meta.language ?? "en");
 
   const headerMeta = [dateLine, meta.direction !== "unknown" ? meta.direction : null, durationLabel]
     .filter(Boolean)
@@ -338,7 +339,7 @@ function formatNoteBody(
     "",
     summaryBody,
     "",
-    "---",
+    NOTE_SEPARATOR,
     meta.processingId.startsWith("kx_")
       ? `Generated from Kixie call recording (${meta.processingId})`
       : meta.transcriptSource === "workflow"
@@ -422,12 +423,11 @@ export async function completeCallSummaryFromTranscript(
   const callStatus = payload.callStatus ?? payload.status ?? "completed";
 
   try {
-    const trimmed = truncateTranscriptForConfig(transcript, config);
-    log.step("Transcript ready", { source: transcriptSource, ...previewText(trimmed, 250) });
+    log.step("Transcript ready", { source: transcriptSource, ...previewText(transcript, 250) });
 
-    const { title, body: summaryBody } = await summarizeCallTranscript(
+    const { title, body: summaryBody, structured } = await summarizeCallTranscript(
       {
-        transcript: trimmed,
+        transcript,
         direction,
         callDurationSeconds: callDuration,
         callStatus,
@@ -444,6 +444,7 @@ export async function completeCallSummaryFromTranscript(
       dateAdded: payload.dateAdded,
       processingId,
       transcriptSource,
+      language: structured?.language,
     });
 
     const noteTitle = title.startsWith(config.notePrefix) ? title : `${config.notePrefix}: ${title}`;
@@ -487,12 +488,6 @@ export async function completeCallSummaryFromTranscript(
     log.error("Pipeline failed", { processingId, contactId, error: message });
     return { ok: false, reason: message };
   }
-}
-
-function truncateTranscriptForConfig(transcript: string, config: CallSummaryConfig): string {
-  const max = config.maxTranscriptChars;
-  if (transcript.length <= max) return transcript;
-  return `${transcript.slice(0, max)}\n\n[Transcript truncated for length]`;
 }
 
 export async function processCallSummary(
@@ -596,7 +591,7 @@ export async function processCallSummary(
 
     log.step("Transcript ready", { source: transcriptSource, ...previewText(transcript, 250) });
 
-    const { title, body: summaryBody } = await summarizeCallTranscript(
+    const { title, body: summaryBody, structured } = await summarizeCallTranscript(
       {
         transcript,
         direction,
@@ -615,6 +610,7 @@ export async function processCallSummary(
       dateAdded: payload.dateAdded,
       processingId,
       transcriptSource,
+      language: structured?.language,
     });
 
     const noteTitle = title.startsWith(config.notePrefix) ? title : `${config.notePrefix}: ${title}`;

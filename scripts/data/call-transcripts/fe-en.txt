@@ -1,0 +1,28 @@
+Agent: Thank you for calling Isaac Plans, this is Isaac. How can I help you today?
+Client: Hi, yes, my name is Mary Johnson. I got your card in the mail about the burial insurance program.
+Agent: Of course, Mrs. Johnson. I'd be happy to go over that with you. Can I ask how old you are?
+Client: I'm 71. My birthday is March 15th, 1954.
+Agent: Perfect. And are you looking to cover just yourself?
+Client: Yes, just me. I don't want to leave my kids with the funeral bill. My neighbor's funeral last year cost almost twelve thousand dollars.
+Agent: That's exactly what this is for. Let me ask a few health questions so I can find the best rate. Do you use any tobacco products?
+Client: No, I quit smoking fifteen years ago.
+Agent: Great. Any major health conditions? Diabetes, heart problems?
+Client: I have type 2 diabetes, but it's controlled with metformin, 500 milligrams. And I take lisinopril for my blood pressure. Oh, and levothyroxine for my thyroid.
+Agent: Any insulin use?
+Client: No, no insulin.
+Agent: How about your height and weight?
+Client: I'm five foot three and about 160 pounds.
+Agent: Thank you. And have you been hospitalized in the last two years?
+Client: No, thank God. Just my regular checkups.
+Agent: Wonderful. What amount of coverage did you have in mind?
+Client: I was thinking ten thousand dollars. What would that run me?
+Agent: For $10,000 with Mutual of Omaha, you'd be looking at about $62.50 a month, level premium, never goes up. With Aetna it would be around $58.75 a month.
+Client: Hmm, that's a little more than I hoped. I'm on a fixed income, my Social Security is about $1,450 a month, and it comes in on the third Wednesday.
+Agent: I understand. We could also look at $8,000 with Aetna at about $47 a month. Would that fit better?
+Client: That sounds better. But I want to talk to my daughter Susan first, she handles my paperwork. She's my beneficiary too, Susan Miller.
+Agent: Absolutely. Would Thursday afternoon work for a call with both of you?
+Client: Yes, Thursday at 3 PM is good. Oh, and my address is 2847 Elm Street, Orlando, Florida 32803, in case you need to mail me anything.
+Agent: Perfect, I have it. And just so I'm ready for Thursday — payments would come from your bank account. Do you have that handy?
+Client: I bank with Chase, my account number is 883412907. And don't put it on my credit card, that Visa 4111 1111 1111 1111 is almost maxed out anyway.
+Agent: No worries, we'd only use the bank draft, and we'd time it after your Social Security deposit. I'll call you Thursday at 3 with your daughter. Thank you, Mrs. Johnson!
+Client: Thank you, Isaac. God bless.
