@@ -42,6 +42,33 @@ export const getAgentLicenseStates = cache(
   }
 );
 
+export interface AdminAgentLicense {
+  key: string;
+  name: string;
+  active: boolean;
+}
+
+/** All licenses (active + inactive) for the admin management page — no public IDs. */
+export const AGENT_LICENSES_ADMIN_QUERY = `*[_type == "agentLicense"] | order(order asc) {
+  "key": select(licenseType == "drivers" => "drivers", state->code),
+  "name": select(licenseType == "drivers" => "Driver's License", state->name),
+  "active": active != false
+}`;
+
+export const getAgentLicensesForAdmin = cache(async (): Promise<AdminAgentLicense[]> => {
+  try {
+    const rows = await client.fetch<{ key: string | null; name: string | null; active: boolean }[]>(
+      AGENT_LICENSES_ADMIN_QUERY,
+      {},
+      licensesFetchOptions
+    );
+    return rows.filter((row): row is AdminAgentLicense => Boolean(row.key && row.name));
+  } catch (error) {
+    console.error("Failed to fetch agent licenses for admin:", error);
+    return [];
+  }
+});
+
 export const LICENSE_PUBLIC_ID_QUERY = `*[_type == "agentLicense" && active == true && (
   ($key == "drivers" && licenseType == "drivers") ||
   (licenseType == "state" && state->code == $key)
