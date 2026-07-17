@@ -1,0 +1,19 @@
+Agente: Isaac Plans, habla Isaac, buenas tardes.
+Cliente: Hola, buenas. Me pasaron su número. Necesito seguro médico para mi familia, perdí el trabajo el mes pasado y con él el seguro.
+Agente: Lamento escuchar eso, pero sí le puedo ayudar. Perder la cobertura del trabajo le abre un período especial de inscripción. ¿Me dice su nombre?
+Cliente: Carlos Ramírez.
+Agente: Mucho gusto, Carlos. ¿Cuántas personas viven en su hogar y declaran impuestos juntos?
+Cliente: Somos cuatro: mi esposa Laura, mis dos hijos de 8 y 12 años, y yo. Yo tengo 39 años, nací el 10 de enero de 1987.
+Agente: ¿Y cuál sería el ingreso anual del hogar este año, más o menos?
+Cliente: Ahorita solo trabaja mi esposa. Ella gana como $42,000 al año en la clínica dental. Yo espero conseguir trabajo pronto.
+Agente: Con $42,000 para cuatro personas les corresponde un buen subsidio, probablemente unos $1,400 mensuales de crédito. ¿Tienen algún doctor que quieran mantener?
+Cliente: Sí, el pediatra de los niños, el doctor Fuentes en la clínica de Westchase. Y mi esposa toma Ozempic para la diabetes, eso es importante, está carísimo.
+Agente: Muy importante, lo verifico en el formulario. ¿Los cuatro son ciudadanos o tienen residencia?
+Cliente: Mi esposa y los niños son ciudadanos. Yo tengo la residencia desde 2019.
+Agente: Perfecto. Con eso les busco un plan Ambetter o Blue Cross que cubra al doctor Fuentes y el Ozempic. Con el subsidio, probablemente paguen entre $80 y $150 al mes por toda la familia con deducible bajo.
+Cliente: Eso suena muy bien. ¿Qué necesita de mí?
+Agente: Necesito la carta de terminación de su empleo para el período especial, los seguros sociales de los cuatro y su tarjeta de residencia. ¿Me los puede mandar por texto hoy?
+Cliente: Sí, se los mando esta noche. Mi correo es carlos.ramirez87@gmail.com por si acaso.
+Agente: Perfecto. Mañana a las 11 le llamo con las opciones ya cotizadas y hacemos la solicitud, ¿le parece? La cobertura puede empezar el 1ro de agosto.
+Cliente: Mañana a las 11 está perfecto. Muchas gracias.
+Agente: A usted, Carlos. Hasta mañana.

@@ -68,11 +68,12 @@ Studio mounted at /studio/[[...tool]]/. Live sync via <SanityLive /> in root lay
 ### CRM & Call Processing
 Agent CRM (LeadConnector) integrations:
 
-1. Call summaries: Webhook receives InboundMessage/OutboundMessage, fetches GHL transcript or transcribes with OpenAI Whisper, generates summary with GPT, posts to contact notes
+1. Call summaries: Webhook receives InboundMessage/OutboundMessage, fetches GHL transcript or transcribes with OpenAI Whisper, extracts structured JSON with GPT (lib/call-summary-structured.ts), formats a plain-text emoji note (lib/call-summary-note-format.ts — GHL does not render Markdown), posts to contact notes
    - Config: lib/agent-crm-call-summary-config.ts, lib/agent-crm-call-summary.ts
    - Store: lib/agent-crm-call-summary-store.ts tracks processed calls (prevents duplicates)
    - Backfill cron: /api/cron/call-summary-backfill (daily 6 AM UTC per vercel.json)
-   - Kixie dialer support: /api/cron/kixie-call-summary (every 3 minutes)
+   - Kixie dialer support: QStash queue /api/queue/kixie-call-summary (+ daily /api/cron/queue-reconcile backstop)
+   - Test locally: pnpm test:call-summary --formatter-only (no API calls) or pnpm test:call-summary fe-en (live OpenAI, never posts notes)
 
 2. Contact sync: Clerk webhooks upsert contacts in Agent CRM via lib/clerk-agent-crm-sync.ts
 

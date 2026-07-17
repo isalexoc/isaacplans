@@ -6,13 +6,61 @@ Automatically summarizes phone calls from GoHighLevel (Agent CRM) and creates no
 
 1. **Real-time:** GHL sends `InboundMessage` / `OutboundMessage` (call) to the webhook.
 2. Fetch transcript from GHL (`GET .../messages/:messageId/transcription`), or Whisper on recording URL if empty.
-3. OpenAI generates a structured summary (Spanish or English to match the call), with a **Coaching** section focused on final expense when applicable, and **bold** markdown for key facts (names, DOB, amounts, etc.).
-4. `POST /contacts/:contactId/notes` in Agent CRM.
-5. `call_summary_processed` table prevents duplicate notes.
+3. OpenAI extracts the call into structured JSON (`StructuredCallSummary` in `lib/call-summary-structured.ts`): line of business (ACA, STM, Dental/Vision, Hospital Indemnity, IUL, Final Expense), disposition, client profile, health, financial, quote/policy details, objections, next steps, follow-up date, and coaching — in Spanish or English to match the call.
+4. A deterministic TypeScript formatter (`lib/call-summary-note-format.ts`) renders the note as plain text with emoji section headers (GHL notes do **not** render Markdown — see [Note format](#note-format) below).
+5. `POST /contacts/:contactId/notes` in Agent CRM.
+6. `call_summary_processed` table prevents duplicate notes.
 
 **Backfill:** Daily cron processes recent calls that were missed.
 
-**Kixie:** End Call webhook → Whisper on `recordingurl` → same OpenAI summary → GHL contact note (see [Kixie setup](#kixie-dialer-setup) below).
+**Kixie:** End Call webhook → QStash job → Whisper on `recordingurl` → same OpenAI summary → GHL contact note (see [Kixie setup](#kixie-dialer-setup) below).
+
+## Note format
+
+GHL displays contact notes as plain text, so the note is built deterministically in code (never by the model): an at-a-glance status line (line-of-business + disposition + follow-up date), then `Key: Value` sections — only sections with data appear. Labels are localized (EN/ES) based on the detected call language. Example:
+
+```
+[AI Call Summary] — Jul 17, 2026, 2:14 PM · inbound · 18m 32s
+
+🕊️ Final Expense | 💲 Quoted | 📅 Follow-up: Tue 7/22 2:00 PM
+━━━━━━━━━━━━━━━
+📝 SUMMARY
+Maria called about burial coverage. Quoted $10,000 with Aetna at $54.30/mo.
+Callback set for Tuesday 2 PM with her son Carlos.
+
+👤 CLIENT INFO
+Name: María López
+DOB: 03/15/1948 (age 78)
+Phone: (813) 555-0147
+
+🏥 HEALTH
+Tobacco: No
+Conditions: diabetes (oral meds), high blood pressure
+Medications: metformin 500mg, lisinopril
+
+💰 FINANCIAL
+Income: Social Security $1,200/mo
+Budget: $50–60/mo
+
+📋 QUOTE / POLICY
+Carrier: Aetna (Protection Series)
+Face amount: $10,000
+Premium: $54.30/mo
+Beneficiary: son Carlos López
+
+⚠️ OBJECTIONS
+• Wants son Carlos to hear details before signing
+
+✅ NEXT STEPS
+• [Tue 7/22 2:00 PM] Call back with Carlos on the line — agent
+
+💡 COACHING
+• Strong discovery, but no trial close after the quote
+━━━━━━━━━━━━━━━
+Generated from Kixie call recording (kx_12345)
+```
+
+**Sensitive data:** SSNs, bank/routing, and card numbers are masked to their last 4 digits (`•••-••-6789`, `•••• 1111`) — the prompt instructs last-4 only and `maskSensitiveNumbers` re-masks the final note as a backstop. Phone numbers are never masked.
 
 ## Environment variables
 
@@ -55,7 +103,8 @@ Requires the same `AGENT_CRM_*`, `OPENAI_*`, `DATABASE_URL`, and `CRON_SECRET` a
 
 | Variable | Default | Purpose |
 |----------|---------|---------|
-| `OPENAI_MODEL` | `gpt-4o-mini` | Chat model for summaries |
+| `OPENAI_MODEL` | `gpt-4o` | Chat model for summaries (use `gpt-4o-mini` to cut cost) |
+| `OPENAI_MAX_OUTPUT_TOKENS` | `3000` | Cap on summary output tokens |
 | `AGENT_CRM_CALL_SUMMARY_MAX_TRANSCRIPT_CHARS` | `120000` | Truncate long transcripts |
 | `AGENT_CRM_CALL_SUMMARY_BACKFILL_DAYS` | `30` | How far back cron looks |
 | `AGENT_CRM_CALL_SUMMARY_BACKFILL_MAX_PER_RUN` | `15` | Max calls per cron run |
@@ -145,7 +194,7 @@ Returns `{ ok: true, enabled: true, configured: true }` when env is complete.
 | Header | `x-call-summary-secret`: `<KIXIE_CALL_SUMMARY_WEBHOOK_SECRET>` (no `Bearer` — Kixie rejects spaces) |
 | Filters | **Answered** calls; duration **≥ 60 seconds** (recommended) |
 
-**Async queue:** The webhook only enqueues a job (`status: pending`). A cron worker (`/api/cron/kixie-call-summary`, every 3 minutes, **800s** timeout on Vercel Pro) downloads the MP3, runs Whisper (with ffmpeg chunking for long calls), and creates the GHL note.
+**Async queue:** The webhook only enqueues a job (`status: pending`) and publishes a QStash message. QStash delivers to `/api/queue/kixie-call-summary` (**800s** timeout on Vercel Pro), which downloads the MP3, runs Whisper (with ffmpeg chunking for long calls), and creates the GHL note. The daily `/api/cron/queue-reconcile` cron drains any job QStash missed; `/api/cron/kixie-call-summary` remains as a manual kick target.
 
 Kixie sends JSON automatically (no custom body). Important fields:
 
@@ -166,7 +215,7 @@ curl -X POST -H "Authorization: Bearer YOUR_CRON_SECRET" \
   https://www.isaacplans.com/api/cron/kixie-call-summary
 ```
 
-Runs one queued Kixie job. Scheduled every **3 minutes** in `vercel.json`.
+Runs one queued Kixie job. Not scheduled in `vercel.json` — live processing is event-driven via QStash (`/api/queue/kixie-call-summary`), with the daily `/api/cron/queue-reconcile` as the safety net.
 
 ### 5. Avoid duplicate notes
 
@@ -193,6 +242,20 @@ curl -H "Authorization: Bearer YOUR_CRON_SECRET" \
 ```
 
 ## Local testing
+
+**Without any API calls or webhooks** — deterministic formatter + masking checks:
+
+```bash
+pnpm test:call-summary --formatter-only
+```
+
+**Live OpenAI run on a sample transcript** (needs `OPENAI_API_KEY`; never posts a CRM note):
+
+```bash
+pnpm test:call-summary fe-en   # also: fe-es, aca-es, iul-en
+```
+
+**Full webhook flow:**
 
 1. `npm run db:migrate`
 2. `npm run dev`

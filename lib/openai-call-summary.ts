@@ -6,6 +6,12 @@ import {
   previewText,
   type CallSummaryLogger,
 } from "@/lib/agent-crm-call-summary-log";
+import {
+  maskSensitiveNumbers,
+  normalizeStructuredSummary,
+  type StructuredCallSummary,
+} from "@/lib/call-summary-structured";
+import { formatStructuredNote } from "@/lib/call-summary-note-format";
 
 export type CallSummaryInput = {
   transcript: string;
@@ -19,50 +25,59 @@ export type CallSummaryInput = {
 export type CallSummaryResult = {
   title: string;
   body: string;
+  structured?: StructuredCallSummary;
 };
 
-const SYSTEM_PROMPT = `You are an elite sales coach and CRM assistant for Isaac, an independent insurance agent whose PRIMARY focus is final expense (burial/funeral) life insurance. This is his dedicated work phone: every call is business-related (final expense, ACA/Marketplace, IUL, dental, hospital indemnity, STM, renewals, carriers, referrals, or operational calls).
+const SYSTEM_PROMPT = `You are an elite insurance CRM assistant and sales coach for Isaac, an independent insurance agent. This is his dedicated work phone: every call is business-related. He sells six lines of business: Final Expense (burial/funeral life — his PRIMARY focus), ACA/Marketplace health, Short-Term Medical (STM), Dental/Vision, Hospital Indemnity, and IUL (Indexed Universal Life). Calls may also be renewals, carrier/admin, referrals, or operational.
+
+YOUR JOB
+Extract every concrete fact from the call transcript into the JSON schema below, so Isaac can glance at the CRM note before the next call and instantly know the client and where things stand.
+
+OUTPUT (critical)
+- Output ONLY valid JSON matching this schema. No markdown, no extra keys.
+- Omit any key you have no information for. Never output empty strings, empty arrays, null, or placeholders like "N/A" or "unknown".
+- Every leaf value is a string (or array as shown). Write amounts/dates/times exactly as spoken (e.g. "$54.30/mo", "Tue 7/22 2:00 PM").
+
+SCHEMA
+{
+  "language": "en" | "es",
+  "lineOfBusiness": "aca" | "stm" | "dental_vision" | "hospital_indemnity" | "iul" | "final_expense" | "other",
+  "disposition": "sale" | "quoted" | "follow_up" | "appointment_set" | "needs_info" | "not_interested" | "no_decision" | "service" | "voicemail" | "other",
+  "title": "short, under 80 chars, specific (e.g. \\"FE — quoted $10k Aetna, callback Tue 2pm\\")",
+  "summary": "2–4 sentences: what happened and the outcome",
+  "clientProfile": { "name", "dob", "age", "gender", "address", "phone", "email", "maritalStatus", "occupation", "spouse", "householdSize", "state" },
+  "health": { "heightWeight", "tobacco", "conditions": ["..."], "medications": ["..."], "recentEvents" },
+  "financial": { "income", "incomeSource", "budget", "paymentMethod", "subsidy" },
+  "policy": { "currentCoverage", "carrier", "plan", "faceAmount", "premium", "deductible", "effectiveDate", "beneficiary", "policyNumber", "contribution" },
+  "quotes": [ { "carrier", "plan", "faceAmount", "premium", "notes" } ],
+  "objections": ["..."],
+  "nextSteps": [ { "action", "date", "owner": "agent" | "client" } ],
+  "followUpDate": "the single most important upcoming date/time, as spoken",
+  "coaching": ["2–5 short bullets"],
+  "otherNotes": ["vital facts that fit nowhere else"]
+}
 
 RULES
 - Be factual. Never invent products, prices, underwriting decisions, or commitments not stated in the transcript.
-- Output valid JSON only: { "title": string, "body": string }.
-- LANGUAGE (critical): Detect the dominant language of the transcript.
-  - If the call is mainly in Spanish → write the ENTIRE title and body in Spanish (section headings, bullets, coaching — everything).
-  - If mainly in English → write everything in English.
-  - If clearly mixed, use the language the CLIENT spoke most; do not default to English.
-- FORMATTING: Use Markdown in body. Put **double asterisks** around every important fact, e.g. **María López**, **DOB 03/15/1948**, **$8,000 face**, **diabetes**, **Social Security $1,200/mo**, **callback Tuesday 2pm**, **beneficiary: son Carlos**, phone numbers, emails, addresses, policy numbers, premium amounts, health conditions, medications, smoker status, and appointment times.
-- Identify the call type from context (final expense, ACA, IUL, renewal, carrier, personal/work admin, etc.).
+- EXTRACTION: Capture EVERY concrete fact stated, even in passing: names (incl. spelling corrections), DOB/age, address, phone/email, height/weight, tobacco use, health conditions, medications with dosages, income and its source, budget, payment method and deposit dates, beneficiary and relationship, carrier/plan/face amount/premium quoted, callback dates/times, effective dates. If the client corrects earlier info, keep only the corrected version.
+- LANGUAGE (critical): Detect the dominant language the CLIENT spoke. Set "language" and write ALL free-text values (title, summary, conditions, objections, next steps, coaching — everything) in that language. If clearly mixed, use the client's language; do not default to English. Machine values ("language", "lineOfBusiness", "disposition", "owner") always use the exact English codes above.
+- SENSITIVE DATA: If an SSN, bank account, routing, or card number is spoken, record ONLY the last 4 digits (e.g. "SSN ending 1234", "cuenta terminación 5678"). Never write the full number anywhere.
+- "policy" holds the main/chosen coverage discussed; use "quotes" for additional options quoted.
+- "disposition": sale = application submitted/closed; quoted = quote(s) given, no decision; follow_up = callback agreed; appointment_set = specific appointment scheduled; needs_info = waiting on documents/info; not_interested = declined; no_decision = talked, no clear outcome; service = existing-client service/admin; voicemail = voicemail or no real conversation.
 
-BODY STRUCTURE (use these section headings in the call's language):
+LINE-OF-BUSINESS PRIORITIES (what "vital info" means per line):
+- final_expense: health conditions, medications, tobacco, height/weight (underwriting); face amount vs budget; beneficiary + relationship; payment method + Social Security deposit date; existing burial/life policies.
+- aca: tax household size; annual household income; subsidy/APTC amount; SEP qualifying event vs OEP; current plan/carrier; doctors and medications that must stay in network; document needs; effective date.
+- stm: coverage-gap reason and length needed; preexisting conditions (exclusions apply); deductible comfort; how soon coverage is needed.
+- dental_vision: dental/vision needs (implants, dentures, crowns, glasses/exams); waiting-period concerns; preferred dentist; standalone vs bundled.
+- hospital_indemnity: the major-medical/ACA plan it supplements; daily benefit amount; hospitalization history; budget.
+- iul: retirement goals and time horizon; monthly contribution capacity; existing 401k/IRA/retirement accounts; family protection need; income; underwriting basics.
+- other (carrier/admin/personal-work calls): keep it brief — summary and nextSteps only.
 
-English example headings:
-## Summary
-## Key facts
-## Client needs
-## Objections or concerns
-## Next steps
-## Coaching
-
-Spanish example headings:
-## Resumen
-## Datos importantes
-## Necesidades del cliente
-## Objeciones o preocupaciones
-## Próximos pasos
-## Coaching
-
-Section guidance:
-- **Summary**: 2–4 sentences on what happened and outcome.
-- **Key facts**: Bullet list of concrete details from the call; bold all PII and numbers.
-- **Client needs / Necesidades**: What they want, budget, coverage goals, timeline.
-- **Objections**: Stated hesitations (price, trust, health, "need to think", spouse, etc.).
-- **Next steps**: Checkbox-style bullets (- [ ]) for agent follow-ups with dates when mentioned.
-- **Coaching**: Actionable coaching for Isaac (2–5 bullets or short paragraphs):
-  - For **final expense** calls: coach like a top FE producer — discovery depth, health/underwriting questions missed or done well, face amount vs budget, carrier fit, beneficiary clarity, trial close, appointment setting, referral ask, compliance (no guaranteeing approval), and what to do on the next touch.
-  - For **other insurance** calls (ACA, IUL, etc.): professional insurance sales coaching — rapport, qualification, compliance, urgency, and next-touch plan.
-  - For **non-sales** work calls: brief coaching on efficiency, documentation, or follow-up only if useful; keep it short.
-
-Title: short (under 80 chars), in the call's language, specific to topic (e.g. "FE — cotización $10k" or "ACA renewal — missing documents").`;
+COACHING (in the call's language, 2–5 short actionable bullets for Isaac's next touch):
+- final_expense: coach like a top FE producer — discovery depth, underwriting questions missed or done well, face amount vs budget, carrier fit, beneficiary clarity, trial close, appointment setting, referral ask, compliance (never guarantee approval).
+- Other insurance lines: professional insurance sales coaching — rapport, qualification, compliance, urgency, next-touch plan.
+- Non-sales/admin calls: brief efficiency or follow-up coaching only if useful.`;
 
 function truncateTranscript(text: string, maxChars: number): string {
   if (text.length <= maxChars) return text;
@@ -100,10 +115,10 @@ export async function summarizeCallTranscript(
     `Contact ID: ${input.contactId}`,
     "",
     "Instructions:",
-    "- Summarize this work call for CRM.",
-    "- Match the transcript language exactly (Spanish call → all Spanish output; English → all English).",
-    "- Bold (**...**) all names, dates, amounts, health info, and follow-up times in Key facts / Datos importantes.",
-    "- Include the Coaching section; prioritize final expense coaching when this is an FE call.",
+    "- Extract this work call into the JSON schema for CRM.",
+    "- Match the transcript language exactly (Spanish call → all Spanish free-text values; English → all English).",
+    "- Fill every schema field you have information for; omit unknown fields entirely.",
+    "- Include coaching; prioritize final expense coaching when this is an FE call.",
     "",
     "Transcript:",
     transcript,
@@ -120,6 +135,7 @@ export async function summarizeCallTranscript(
     body: JSON.stringify({
       model: config.openaiModel,
       temperature: 0.3,
+      max_tokens: config.openaiMaxOutputTokens,
       response_format: { type: "json_object" },
       messages: [
         { role: "system", content: SYSTEM_PROMPT },
@@ -135,34 +151,44 @@ export async function summarizeCallTranscript(
     throw new Error(`OpenAI chat failed (${res.status}): ${raw.slice(0, 500)}`);
   }
 
-  let parsed: { choices?: { message?: { content?: string } }[] };
+  let parsed: { choices?: { message?: { content?: string }; finish_reason?: string }[] };
   try {
     parsed = JSON.parse(raw) as typeof parsed;
   } catch {
     throw new Error("OpenAI returned invalid JSON");
   }
 
-  const content = parsed.choices?.[0]?.message?.content;
+  const choice = parsed.choices?.[0];
+  const content = choice?.message?.content;
   if (!content) throw new Error("OpenAI returned empty content");
+  if (choice?.finish_reason === "length") {
+    log.warn("OpenAI output hit max_tokens; summary may be truncated", {
+      maxTokens: config.openaiMaxOutputTokens,
+    });
+  }
 
-  let data: { title?: string; body?: string };
+  let data: unknown;
   try {
-    data = JSON.parse(content) as { title?: string; body?: string };
+    data = JSON.parse(content);
   } catch {
     throw new Error("OpenAI summary was not valid JSON");
   }
 
-  const title = (data.title || "Call summary").trim().slice(0, 120);
-  const body = (data.body || content).trim();
+  const structured = normalizeStructuredSummary(data);
+  const title = maskSensitiveNumbers(structured.title).slice(0, 120);
+  const body = formatStructuredNote(structured);
   if (!body) throw new Error("OpenAI returned empty summary body");
 
   log.debug("OpenAI summary parsed", {
     title,
+    lineOfBusiness: structured.lineOfBusiness,
+    disposition: structured.disposition,
+    language: structured.language,
     bodyLength: body.length,
     bodyPreview: previewText(body, 150),
   });
 
-  return { title, body };
+  return { title, body, structured };
 }
 
 export async function transcribeRecordingWithWhisper(

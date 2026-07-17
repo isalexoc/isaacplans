@@ -1,0 +1,20 @@
+Agent: Isaac Plans, this is Isaac.
+Client: Hey Isaac, this is David Chen. We met at the chamber networking event last week. You mentioned something about tax-free retirement with life insurance?
+Agent: David, good to hear from you! Yes, indexed universal life. Do you have a few minutes now?
+Client: Sure. So I'm 42, married, two kids. I max out my 401k at work but I'm worried it won't be enough, and everything's taxable when I pull it out.
+Agent: That's the exact situation IUL fits. Quick picture: how much are you putting in the 401k?
+Client: About $23,000 a year. My income is around $145,000 as an engineering manager at Lockheed. My wife works part-time.
+Agent: Got it. And beyond the 401k, how much could you comfortably set aside monthly for a tax-free bucket?
+Client: Probably $800 to $1,000 a month without feeling it.
+Agent: Perfect range. At $1,000 a month into an IUL, by 65 you could be looking at roughly $700,000 to $900,000 of cash value depending on index performance, and you can take income from it tax-free through policy loans. Plus it carries a death benefit protecting your family the whole time, probably around $600,000 to start.
+Client: And if the market crashes?
+Agent: That's the floor feature — worst case the credited rate is 0%, your cash value doesn't drop from market losses. You give up some upside via the cap in exchange.
+Client: Interesting. What do you need from me to run real numbers?
+Agent: Basic health profile. Height, weight, any conditions?
+Client: Six foot, 185. Healthy, no medications. I did have LASIK, that's it. Never smoked.
+Agent: You'd likely get preferred rates. When do you want to retire, 65?
+Client: Ideally 60, honestly.
+Agent: Good to know — I'll run illustrations at both 60 and 65, at $800 and $1,000 monthly. Can we go over them Tuesday evening, say 7 PM? I can share my screen.
+Client: Tuesday 7 PM works. Send the invite to dchen42@gmail.com.
+Agent: Will do. One thing — think about whether your wife should have a smaller policy too; it often makes sense for household protection. We'll cover it Tuesday.
+Client: Good idea. Talk Tuesday, thanks Isaac.
