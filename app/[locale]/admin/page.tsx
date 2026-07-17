@@ -16,6 +16,7 @@ import {
   ClipboardList,
   Presentation,
   Database,
+  IdCard,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import {
@@ -74,6 +75,12 @@ const OPERATIONS_TOOLS: ToolCard[] = [
     description: "Manage IUL application intakes and review submitted client applications.",
     href: "/en/iul/intake",
     icon: ClipboardList,
+  },
+  {
+    title: "Agent Licenses",
+    description: "Upload and manage license images, stored privately in Cloudinary.",
+    href: "/en/admin/agent-licenses",
+    icon: IdCard,
   },
 ];
 

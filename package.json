@@ -14,6 +14,7 @@
     "add:states": "tsx scripts/add-states-to-sanity.ts",
     "add:iul-presentation": "tsx scripts/add-iul-presentation-to-sanity.ts",
     "add:agent-licenses": "tsx scripts/add-agent-licenses-to-sanity.ts",
+    "privatize:licenses": "tsx scripts/privatize-license-images.ts",
     "iul:fields": "tsx scripts/create-iul-intake-fields.ts",
     "postinstall": "node node_modules/ffmpeg-static/install.js"
   },
