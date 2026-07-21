@@ -15,14 +15,30 @@ import type { RenderPlan, RenderProviderStatus, VideoRenderProvider } from "./ty
 const CAPTION_FONT         = process.env.SHOTSTACK_CAPTION_FONT || "Montserrat";
 const CAPTION_SIZE         = Number(process.env.SHOTSTACK_CAPTION_SIZE) || 64;          // px on the 1080-wide frame
 const CAPTION_ACTIVE_COLOR = process.env.SHOTSTACK_CAPTION_ACTIVE || "#00B4D8";          // spoken-word highlight (brand cyan)
-// offset.y: positive moves UP, negative DOWN. Presenter videos center captions slightly below
-// mid-frame (~58% from the top) — clear of the scene faces in the upper half and mostly clear
-// of the presenter inset in the bottom corner. Faceless videos keep them near the bottom edge.
-const CAPTION_MID_OFFSET    = Number(process.env.SHOTSTACK_CAPTION_MID_OFFSET ?? "-0.08");
-const CAPTION_BOTTOM_OFFSET = Number(process.env.SHOTSTACK_CAPTION_BOTTOM_OFFSET ?? "0.06");
+// Caption placement is derived from the layout so text never lands on the subject (offset.y is
+// a fraction of frame height; +up / −down from frame center):
+//  • Presenter videos: the avatar is a LARGE figure anchored to a bottom corner, so its head/face
+//    sits in the vertical middle of the frame. Captions go in the guaranteed-clear band ABOVE the
+//    avatar's head, computed from the avatar's scale/offset so it adapts to any avatar or scale.
+//  • Faceless videos: captions sit near the bottom edge, clear of the upper-centered subject.
+// Each mode takes an optional env override for fine-tuning; otherwise the value is computed.
+const CAPTION_BOTTOM_OFFSET    = envNum("SHOTSTACK_CAPTION_BOTTOM_OFFSET") ?? 0.06;      // faceless: up from bottom
+const CAPTION_PRESENTER_OFFSET = envNum("SHOTSTACK_CAPTION_PRESENTER_OFFSET");           // presenter override (else computed)
 // The caption clip's box height bounds how much text a caption page can show. ~1.5em per line
 // at CAPTION_SIZE caps pages at ~2 short lines instead of a 5-6 line wall covering the frame.
 const CAPTION_MAX_LINES     = Number(process.env.SHOTSTACK_CAPTION_MAX_LINES) || 2;
+
+// Parse an env var as a finite number, treating unset/blank/non-numeric as "not provided".
+function envNum(name: string): number | undefined {
+  const v = process.env[name];
+  if (v === undefined || v.trim() === "") return undefined;
+  const n = Number(v);
+  return Number.isFinite(n) ? n : undefined;
+}
+
+// Fallback presenter scale (fraction of frame) if a plan omits it — mirrors SHOTSTACK_PRESENTER_SCALE
+// in video-generator.ts. Only used to size the caption-clearance band when scale is somehow unset.
+const PRESENTER_SCALE_FALLBACK = Number(process.env.SHOTSTACK_PRESENTER_SCALE) || 0.62;
 
 // Ken Burns motion cycled per scene so a still image still feels alive.
 const KEN_BURNS = ["zoomIn", "slideLeft", "zoomOut", "slideRight"] as const;
@@ -42,9 +58,38 @@ function apiKey(): string {
 }
 const round = (n: number) => Math.round(n * 1000) / 1000;
 
+// How far the presenter clip is pushed down (offset.y; negative = down) so its lower body runs
+// off the frame bottom. Shared with the caption math so captions can clear the avatar's head.
+function presenterPushY(): number {
+  return envNum("SHOTSTACK_PRESENTER_Y") ?? -0.10;
+}
+
+// Caption vertical offset (fraction of frame height, +up) that keeps the caption band in the
+// clear zone ABOVE a bottom-anchored presenter's head. The presenter clip is 9:16 like the
+// canvas, so its displayed height ≈ scale × frame height; anchored to the bottom and pushed
+// down by |pushY|, the TOP of the figure sits at (1 − scale + |pushY|) from the top of the
+// frame. We drop the caption box into the space above that, clear of the very top too.
+function presenterCaptionOffsetY(plan: RenderPlan, boxHeightPx: number): number {
+  const scale         = plan.presenter?.scale ?? PRESENTER_SCALE_FALLBACK;
+  const avatarTopFrac = Math.min(1, (1 - scale) + -presenterPushY()); // −pushY → positive (down)
+
+  const boxHalf   = boxHeightPx / plan.height / 2;
+  const TOP_SAFE  = 0.12;                                   // clear of the status bar / very top
+  const GAP       = 0.04;                                   // breathing room above the avatar's head
+  const bandTop    = TOP_SAFE + boxHalf;                    // highest the box center may sit
+  const bandBottom = Math.max(bandTop, avatarTopFrac - GAP - boxHalf); // lowest, just above the head
+  const centerFrac = (bandTop + bandBottom) / 2;            // box center, fraction from the top
+  return round(0.5 - centerFrac);                           // center-anchored clip: +y moves up
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function richCaptionClip(plan: RenderPlan): Record<string, any> {
-  const midFrame = Boolean(plan.presenter); // presenter occupies the bottom → captions sit just below mid-frame
+  const boxHeightPx = CAPTION_SIZE * 1.5 * CAPTION_MAX_LINES;
+  const withPresenter = Boolean(plan.presenter);
+  // Presenter → clear band above the avatar's head (env override wins). Faceless → bottom edge.
+  const offsetY = withPresenter
+    ? (CAPTION_PRESENTER_OFFSET ?? presenterCaptionOffsetY(plan, boxHeightPx))
+    : CAPTION_BOTTOM_OFFSET;
   return {
     asset: {
       type:      "rich-caption",
@@ -54,13 +99,13 @@ function richCaptionClip(plan: RenderPlan): Record<string, any> {
       stroke:    { width: 6, color: "#000000" },
       active:    { font: { color: CAPTION_ACTIVE_COLOR } },
       animation: { style: "karaoke" },
-      align:     { horizontal: "center", vertical: midFrame ? "middle" : "bottom" },
+      align:     { horizontal: "center", vertical: withPresenter ? "middle" : "bottom" },
     },
     start:  0,
     length: "end",
     width:  Math.round(plan.width * 0.9),
-    height: Math.round(CAPTION_SIZE * 1.5 * CAPTION_MAX_LINES),
-    offset: { x: 0, y: midFrame ? CAPTION_MID_OFFSET : CAPTION_BOTTOM_OFFSET },
+    height: Math.round(boxHeightPx),
+    offset: { x: 0, y: round(offsetY) },
   };
 }
 
@@ -69,12 +114,9 @@ function presenterClip(plan: RenderPlan): Record<string, any> {
   const p = plan.presenter!;
   // Anchor large in a bottom corner, hug the edge, and push down so the lower body runs off
   // the frame bottom (reads like a person standing in the corner). Tunable via env.
-  const bleedX = Number.isFinite(Number(process.env.SHOTSTACK_PRESENTER_X))
-    ? Number(process.env.SHOTSTACK_PRESENTER_X)
-    : (p.placement === "bottom-right" ? 0.06 : -0.06);
-  const pushY = Number.isFinite(Number(process.env.SHOTSTACK_PRESENTER_Y))
-    ? Number(process.env.SHOTSTACK_PRESENTER_Y)
-    : -0.10;
+  const bleedX = envNum("SHOTSTACK_PRESENTER_X")
+    ?? (p.placement === "bottom-right" ? 0.06 : -0.06);
+  const pushY = presenterPushY();
   return {
     alias: SPEECH_ALIAS,
     asset: {

@@ -405,9 +405,10 @@ function buildMovieJson(
           style:                "classic-progressive",
           "font-family":        "Oswald",
           "font-size":          90,
-          // mid-bottom-center keeps captions horizontally CENTERED while sitting in the
-          // lower-third — raised clear of the platform's bottom UI, not pinned to the edge.
-          position:             "mid-bottom-center",
+          // Faceless: mid-bottom-center keeps captions CENTERED in the lower-third, clear of the
+          // platform's bottom UI. Presenter on: the large avatar's face sits in the vertical
+          // middle, so move captions to the top — the clear zone above the avatar's head.
+          position:             usePresenter ? "top-center" : "mid-bottom-center",
           "word-color":         "#00B4D8",
           "line-color":         "#FFFFFF",
           "outline-color":      "#000000",
