@@ -17,6 +17,8 @@ import {
   Presentation,
   Database,
   IdCard,
+  PhoneCall,
+  BarChart3,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import {
@@ -81,6 +83,21 @@ const OPERATIONS_TOOLS: ToolCard[] = [
     description: "Upload and manage license images, stored privately in Cloudinary.",
     href: "/en/admin/agent-licenses",
     icon: IdCard,
+  },
+];
+
+const CALL_CENTER_TOOLS: ToolCard[] = [
+  {
+    title: "Callback Priority",
+    description: "Contacts with an open follow-up loop, sorted by soonest promised callback.",
+    href: "/en/admin/call-dashboard",
+    icon: PhoneCall,
+  },
+  {
+    title: "Call Metrics",
+    description: "Contact rate, disposition mix, and line-of-business breakdown for a date range.",
+    href: "/en/admin/call-metrics",
+    icon: BarChart3,
   },
 ];
 
@@ -204,6 +221,17 @@ export default async function AdminDashboardPage() {
           </h2>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {OPERATIONS_TOOLS.map((tool) => (
+              <ToolCardItem key={tool.href} tool={tool} />
+            ))}
+          </div>
+        </section>
+
+        <section>
+          <h2 className="mb-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            Call Center
+          </h2>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {CALL_CENTER_TOOLS.map((tool) => (
               <ToolCardItem key={tool.href} tool={tool} />
             ))}
           </div>

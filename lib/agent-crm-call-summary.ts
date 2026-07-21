@@ -471,6 +471,10 @@ export async function completeCallSummaryFromTranscript(
         status: "completed",
         source: "kixie",
         errorMessage: null,
+        disposition: structured?.disposition ?? null,
+        lineOfBusiness: structured?.lineOfBusiness ?? null,
+        followUpDateIso: structured?.followUpDateIso ? new Date(structured.followUpDateIso) : null,
+        structuredSummary: structured ?? null,
       },
       log
     );
@@ -545,6 +549,17 @@ export async function processCallSummary(
           status: "skipped",
           errorMessage: gate.reason,
         },
+        log
+      );
+    }
+    if (gate.reason?.startsWith("call_status_")) {
+      // A genuine missed dial (no-answer/busy/failed), not a non-call event or
+      // excluded voicemail — draft a follow-up text/WhatsApp note. Dynamic
+      // import avoids a static circular dependency (missed-call-drafts imports
+      // createContactNote from this file).
+      const { maybeGenerateMissedCallDraft } = await import("@/lib/missed-call-drafts/generate");
+      await maybeGenerateMissedCallDraft(
+        { contactId, locationId, reason: gate.reason, dateAdded: payload.dateAdded, source: "ghl" },
         log
       );
     }
@@ -635,6 +650,10 @@ export async function processCallSummary(
         direction,
         callDurationSeconds: callDuration,
         status: "completed",
+        disposition: structured?.disposition ?? null,
+        lineOfBusiness: structured?.lineOfBusiness ?? null,
+        followUpDateIso: structured?.followUpDateIso ? new Date(structured.followUpDateIso) : null,
+        structuredSummary: structured ?? null,
       },
       log
     );

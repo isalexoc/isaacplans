@@ -1,6 +1,7 @@
 import { pgTable, text, timestamp, boolean, integer, index, uniqueIndex, jsonb, date } from "drizzle-orm/pg-core";
 import type { LeaveBehindQuoteData } from "@/lib/leave-behind-clients";
 import type { IntakeData } from "@/lib/iul-intake/schema";
+import type { StructuredCallSummary } from "@/lib/call-summary-structured";
 
 // Guides table - stores all available guides
 export const guides = pgTable("guides", {
@@ -207,6 +208,11 @@ export const callSummaryProcessed = pgTable("call_summary_processed", {
   jobState: jsonb("job_state").$type<CallSummaryJobState | null>(),
   attemptCount: integer("attempt_count").notNull().default(0),
   nextRetryAt: timestamp("next_retry_at"),
+  /** disposition/lineOfBusiness/followUpDateIso/structuredSummary: the AI extraction (lib/call-summary-structured.ts), persisted so the call-dashboard/metrics views can query it instead of re-parsing GHL note text. */
+  disposition: text("disposition"), // sale | quoted | follow_up | appointment_set | needs_info | not_interested | no_decision | service | voicemail | other
+  lineOfBusiness: text("line_of_business"), // aca | stm | dental_vision | hospital_indemnity | iul | final_expense | other
+  followUpDateIso: timestamp("follow_up_date_iso"),
+  structuredSummary: jsonb("structured_summary").$type<StructuredCallSummary | null>(),
   processedAt: timestamp("processed_at").defaultNow().notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 }, (table) => ({
@@ -214,6 +220,9 @@ export const callSummaryProcessed = pgTable("call_summary_processed", {
   statusIdx: index("call_summary_processed_status_idx").on(table.status),
   processedAtIdx: index("call_summary_processed_processed_at_idx").on(table.processedAt),
   sourceStatusIdx: index("call_summary_processed_source_status_idx").on(table.source, table.status),
+  dispositionIdx: index("call_summary_processed_disposition_idx").on(table.disposition),
+  lineOfBusinessIdx: index("call_summary_processed_line_of_business_idx").on(table.lineOfBusiness),
+  statusProcessedAtIdx: index("call_summary_processed_status_processed_at_idx").on(table.status, table.processedAt),
 }));
 
 export type CallSummaryJobState = {
@@ -351,4 +360,34 @@ export type LeadsTheWayJobState = {
   parsed?: Record<string, string | undefined>;
   lastError?: string;
 };
+
+// ─── Missed-call SMS/WhatsApp draft notes ─────────────────────────────────────
+
+/**
+ * One row per contact per local calendar day a missed/no-answer call was drafted for.
+ * `draftKey` IS the dedup mechanism: a triple-dial within the same day claims the
+ * same row (attemptCount bumped, no new note); the next calendar day drafts fresh.
+ */
+export const missedCallDrafts = pgTable("missed_call_drafts", {
+  draftKey: text("draft_key").primaryKey(), // "mcd_<contactId>_<YYYY-MM-DD local>"
+  contactId: text("contact_id").notNull(),
+  locationId: text("location_id").notNull(),
+  noteId: text("note_id"),
+  reason: text("reason"), // gate reason that triggered this, e.g. "call_status_no-answer"
+  source: text("source"), // 'ghl' | 'kixie'
+  lineOfBusiness: text("line_of_business"),
+  language: text("language"), // en | es
+  smsDraft: text("sms_draft"),
+  whatsappDraft: text("whatsapp_draft"),
+  /** pending | completed | failed */
+  status: text("status").notNull().default("pending"),
+  errorMessage: text("error_message"),
+  attemptCount: integer("attempt_count").notNull().default(1),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => ({
+  contactIdIdx: index("missed_call_drafts_contact_id_idx").on(table.contactId),
+  statusIdx: index("missed_call_drafts_status_idx").on(table.status),
+  createdAtIdx: index("missed_call_drafts_created_at_idx").on(table.createdAt),
+}));
 

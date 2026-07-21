@@ -24,7 +24,9 @@ import {
   isKixieEndCallEvent,
   kixieToCallSummaryPayload,
   parseKixieEndCallBody,
+  resolveKixieContactContext,
 } from "@/lib/kixie-call-webhook";
+import { maybeGenerateMissedCallDraft } from "@/lib/missed-call-drafts/generate";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -85,6 +87,26 @@ export async function POST(req: NextRequest) {
   const mapped = await kixieToCallSummaryPayload(kixie, config);
   if (!mapped.ok) {
     log.info("Kixie webhook skipped", { reason: mapped.reason });
+    if (mapped.reason.startsWith("call_status_")) {
+      const details = kixie.data?.callDetails;
+      if (details) {
+        after(async () => {
+          const ctx = await resolveKixieContactContext(details, kixie, config);
+          if (ctx.contactId && ctx.locationId) {
+            await maybeGenerateMissedCallDraft(
+              {
+                contactId: ctx.contactId,
+                locationId: ctx.locationId,
+                reason: mapped.reason,
+                dateAdded: details.callEndDate || details.calldate,
+                source: "kixie",
+              },
+              log
+            );
+          }
+        });
+      }
+    }
     return NextResponse.json({ received: true, skipped: mapped.reason });
   }
 

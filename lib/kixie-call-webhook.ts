@@ -134,18 +134,23 @@ export type KixieToCallSummaryResult =
   | { ok: true; payload: GhlCallWebhookPayload }
   | { ok: false; reason: string };
 
-/** Map Kixie End Call payload → shared GHL call summary payload. */
-export async function kixieToCallSummaryPayload(
+export type KixieContactContext = {
+  contactId: string | null;
+  locationId: string | null;
+  customerPhone: string | null;
+};
+
+/**
+ * Resolve contact identity from Kixie call details, independent of the
+ * answered/missed gate (shouldProcessKixieCall) — a missed/no-answer call
+ * still has a real contact to draft a follow-up message for, even though it
+ * never becomes a call-summary payload.
+ */
+export async function resolveKixieContactContext(
+  details: KixieCallDetails,
   webhook: KixieEndCallWebhook,
   config: KixieCallSummaryConfig
-): Promise<KixieToCallSummaryResult> {
-  const details = webhook.data?.callDetails;
-  if (!details) return { ok: false, reason: "missing_call_details" };
-
-  const gate = shouldProcessKixieCall(details, config);
-  if (!gate.ok) return { ok: false, reason: gate.reason ?? "skipped" };
-
-  const callid = kixieCallId(details)!;
+): Promise<KixieContactContext> {
   let contactId = resolveKixieContactId(details);
   const locationId = resolveKixieLocationId(details, config.callSummary.locationId);
   const customerPhone =
@@ -162,6 +167,23 @@ export async function kixieToCallSummaryPayload(
     );
     contactId = found?.id ?? null;
   }
+
+  return { contactId, locationId, customerPhone };
+}
+
+/** Map Kixie End Call payload → shared GHL call summary payload. */
+export async function kixieToCallSummaryPayload(
+  webhook: KixieEndCallWebhook,
+  config: KixieCallSummaryConfig
+): Promise<KixieToCallSummaryResult> {
+  const details = webhook.data?.callDetails;
+  if (!details) return { ok: false, reason: "missing_call_details" };
+
+  const gate = shouldProcessKixieCall(details, config);
+  if (!gate.ok) return { ok: false, reason: gate.reason ?? "skipped" };
+
+  const callid = kixieCallId(details)!;
+  const { contactId, locationId } = await resolveKixieContactContext(details, webhook, config);
 
   if (!contactId) return { ok: false, reason: "missing_contact_id" };
   if (!locationId) return { ok: false, reason: "missing_location_id" };

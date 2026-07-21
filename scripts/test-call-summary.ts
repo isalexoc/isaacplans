@@ -121,8 +121,30 @@ const MALFORMED_RAW: unknown = {
   coaching: [],
 };
 
+function runFollowUpDateIsoAssertions(): void {
+  const valid = normalizeStructuredSummary({
+    title: "t",
+    summary: "s",
+    followUpDateIso: "2026-07-22T14:00:00-04:00",
+  });
+  assert(valid.followUpDateIso === new Date("2026-07-22T14:00:00-04:00").toISOString(), "valid ISO should pass through");
+
+  const garbage = normalizeStructuredSummary({ title: "t", summary: "s", followUpDateIso: "not a date" });
+  assert(garbage.followUpDateIso === undefined, "unparseable date should drop to undefined");
+
+  const hallucinated = normalizeStructuredSummary({
+    title: "t",
+    summary: "s",
+    followUpDateIso: "2040-01-01T00:00:00Z",
+  });
+  assert(hallucinated.followUpDateIso === undefined, ">2yr-out date should drop to undefined (hallucination guard)");
+
+  console.log("✓ followUpDateIso normalizer assertions passed");
+}
+
 function runFormatterOnly(): void {
   runMaskingAssertions();
+  runFollowUpDateIsoAssertions();
 
   printNote("FULL — English final expense", formatStructuredNote(FULL_EN));
   printNote("SPARSE — Spanish ACA", formatStructuredNote(SPARSE_ES));
@@ -184,6 +206,9 @@ async function runLiveFixture(name: string): Promise<void> {
   console.log(`\nTitle: ${result.title}`);
   console.log(
     `Detected: lob=${result.structured?.lineOfBusiness} disposition=${result.structured?.disposition} language=${result.structured?.language}`
+  );
+  console.log(
+    `Follow-up: "${result.structured?.followUpDate ?? "(none)"}" -> followUpDateIso=${result.structured?.followUpDateIso ?? "(none)"}`
   );
   printNote(`NOTE BODY — ${name}`, result.body);
 }
