@@ -5,6 +5,11 @@ import {
   type CallSummaryJobState,
   type CallSummarySource,
 } from "@/lib/db/schema";
+import type {
+  CallDisposition,
+  LineOfBusiness,
+  StructuredCallSummary,
+} from "@/lib/call-summary-structured";
 import {
   createCallSummaryLogger,
   type CallSummaryLogger,
@@ -56,6 +61,10 @@ export async function markCallProcessed(
     jobState?: CallSummaryJobState | null;
     attemptCount?: number;
     nextRetryAt?: Date | null;
+    disposition?: CallDisposition | null;
+    lineOfBusiness?: LineOfBusiness | null;
+    followUpDateIso?: Date | null;
+    structuredSummary?: StructuredCallSummary | null;
   },
   log: CallSummaryLogger = createCallSummaryLogger()
 ) {
@@ -67,6 +76,8 @@ export async function markCallProcessed(
     errorMessage: params.errorMessage,
     source: params.source,
     attemptCount: params.attemptCount,
+    disposition: params.disposition,
+    lineOfBusiness: params.lineOfBusiness,
   });
   await db
     .insert(callSummaryProcessed)
@@ -84,6 +95,10 @@ export async function markCallProcessed(
       jobState: params.jobState ?? null,
       attemptCount: params.attemptCount ?? 0,
       nextRetryAt: params.nextRetryAt ?? null,
+      disposition: params.disposition ?? null,
+      lineOfBusiness: params.lineOfBusiness ?? null,
+      followUpDateIso: params.followUpDateIso ?? null,
+      structuredSummary: params.structuredSummary ?? null,
     })
     .onConflictDoUpdate({
       target: callSummaryProcessed.messageId,
@@ -96,6 +111,10 @@ export async function markCallProcessed(
         ...(params.jobState !== undefined ? { jobState: params.jobState } : {}),
         ...(params.attemptCount !== undefined ? { attemptCount: params.attemptCount } : {}),
         ...(params.nextRetryAt !== undefined ? { nextRetryAt: params.nextRetryAt } : {}),
+        ...(params.disposition !== undefined ? { disposition: params.disposition } : {}),
+        ...(params.lineOfBusiness !== undefined ? { lineOfBusiness: params.lineOfBusiness } : {}),
+        ...(params.followUpDateIso !== undefined ? { followUpDateIso: params.followUpDateIso } : {}),
+        ...(params.structuredSummary !== undefined ? { structuredSummary: params.structuredSummary } : {}),
         processedAt: new Date(),
       },
     });

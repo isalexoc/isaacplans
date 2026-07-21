@@ -12,6 +12,7 @@ import {
   type StructuredCallSummary,
 } from "@/lib/call-summary-structured";
 import { formatStructuredNote } from "@/lib/call-summary-note-format";
+import { getAgentLocalTimezone, localReferenceDateLine } from "@/lib/timezone";
 
 export type CallSummaryInput = {
   transcript: string;
@@ -53,6 +54,7 @@ SCHEMA
   "objections": ["..."],
   "nextSteps": [ { "action", "date", "owner": "agent" | "client" } ],
   "followUpDate": "the single most important upcoming date/time, as spoken",
+  "followUpDateIso": "followUpDate resolved to an absolute ISO 8601 datetime using the Reference date/time given below (e.g. \\"Tuesday 2pm\\" -> \\"2026-07-22T14:00:00-04:00\\"); omit if unsure or no followUpDate",
   "coaching": ["2–5 short bullets"],
   "otherNotes": ["vital facts that fit nowhere else"]
 }
@@ -107,11 +109,15 @@ export async function summarizeCallTranscript(
       ? `Duration: ~${Math.round(input.callDurationSeconds / 60)} min`
       : null;
   const statusLine = input.callStatus ? `Call status: ${input.callStatus}` : null;
+  const timezone = getAgentLocalTimezone();
+  const referenceDate = input.dateAdded ? new Date(input.dateAdded) : new Date();
+  const referenceDateLine = `Reference date/time (use to resolve relative dates like "Tuesday 2pm" into followUpDateIso): ${localReferenceDateLine(referenceDate, timezone)}`;
   const userContent = [
     `Direction: ${input.direction}`,
     durationLine,
     statusLine,
     input.dateAdded ? `Date: ${input.dateAdded}` : null,
+    referenceDateLine,
     `Contact ID: ${input.contactId}`,
     "",
     "Instructions:",

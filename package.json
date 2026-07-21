@@ -17,6 +17,8 @@
     "privatize:licenses": "tsx scripts/privatize-license-images.ts",
     "iul:fields": "tsx scripts/create-iul-intake-fields.ts",
     "test:call-summary": "tsx scripts/test-call-summary.ts",
+    "test:missed-call-drafts": "tsx scripts/test-missed-call-drafts.ts",
+    "seed:call-dashboard": "tsx scripts/seed-call-dashboard-fixtures.ts",
     "postinstall": "node node_modules/ffmpeg-static/install.js"
   },
   "dependencies": {

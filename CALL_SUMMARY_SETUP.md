@@ -62,6 +62,28 @@ Generated from Kixie call recording (kx_12345)
 
 **Sensitive data:** SSNs, bank/routing, and card numbers are masked to their last 4 digits (`•••-••-6789`, `•••• 1111`) — the prompt instructs last-4 only and `maskSensitiveNumbers` re-masks the final note as a backstop. Phone numbers are never masked.
 
+## Callback Priority + Call Metrics dashboards
+
+Every processed call now also writes `disposition`, `lineOfBusiness`, `followUpDateIso`, and the full structured summary JSON into `call_summary_processed` (previously this data only existed as text inside the GHL note). Two admin pages read it:
+
+- `/admin/call-dashboard` — contacts whose most recent completed call has an open disposition (follow_up, appointment_set, needs_info, no_decision), sorted by soonest promised follow-up.
+- `/admin/call-metrics` — contact rate, disposition mix, and line-of-business mix for the last 7/30/90 days.
+
+Both are linked from the "Call Center" section on `/admin`. No new env vars required — they read data the pipeline already writes.
+
+## Missed-call SMS/WhatsApp drafts
+
+When a call goes unanswered (no-answer/busy/failed — from GHL or Kixie, same behavior either way), the pipeline drafts a short SMS and a slightly warmer WhatsApp follow-up message and posts them as a CRM note titled "📱 Follow-Up Drafts" for the agent to review and copy/send manually — **never auto-sent**. Repeated dial attempts to the same contact within the same local day (triple-dialing) collapse into one draft.
+
+| Variable | Default | Purpose |
+|----------|---------|---------|
+| `MISSED_CALL_DRAFTS_ENABLED` | `false` | Master switch |
+| `MISSED_CALL_DRAFTS_NOTE_PREFIX` | `📱 Follow-Up Drafts` | Note title prefix |
+| `AGENT_LOCAL_TIMEZONE` | `America/New_York` | Used for the "one draft per contact per day" dedup boundary and for resolving relative follow-up dates ("Tuesday 2pm") into absolute datetimes |
+| `AGENT_CRM_APP_URL` | `https://app.gohighlevel.com` | Override if the GHL contact deep-link shape ever changes |
+
+Requires the same `AGENT_CRM_PI`, `OPENAI_API_KEY`, and `DATABASE_URL` as the rest of this pipeline. Test locally with `pnpm test:missed-call-drafts --formatter-only` (no network) or `pnpm test:missed-call-drafts en` / `es` (live OpenAI, prints both drafts, never posts a note).
+
 ## Environment variables
 
 ### Required (you likely already have)

@@ -91,6 +91,8 @@ export type StructuredCallSummary = {
   objections?: string[];
   nextSteps?: CallNextStep[];
   followUpDate?: string;
+  /** Best-effort ISO 8601 resolution of `followUpDate`'s relative language (e.g. "Tuesday 2pm" -> an absolute datetime), using the call's own date as reference. Omitted when the model isn't confident. */
+  followUpDateIso?: string;
   coaching?: string[];
   otherNotes?: string[];
 };
@@ -103,6 +105,18 @@ function asString(value: unknown): string | undefined {
   const trimmed = value.trim();
   if (!trimmed || EMPTY_PLACEHOLDERS.has(trimmed.toLowerCase())) return undefined;
   return trimmed;
+}
+
+const TWO_YEARS_MS = 2 * 365 * 24 * 60 * 60 * 1000;
+
+/** Rejects unparseable dates and hallucinated ones (>2 years from now) — never throws. */
+function asIsoDateTime(value: unknown): string | undefined {
+  const s = asString(value);
+  if (!s) return undefined;
+  const d = new Date(s);
+  if (Number.isNaN(d.getTime())) return undefined;
+  if (Math.abs(d.getTime() - Date.now()) > TWO_YEARS_MS) return undefined;
+  return d.toISOString();
 }
 
 function asStringArray(value: unknown): string[] | undefined {
@@ -307,6 +321,7 @@ export function normalizeStructuredSummary(raw: unknown): StructuredCallSummary 
     objections: asStringArray(record.objections),
     nextSteps: normalizeNextSteps(record.nextSteps ?? record.next_steps),
     followUpDate: asString(record.followUpDate ?? record.follow_up_date),
+    followUpDateIso: asIsoDateTime(record.followUpDateIso ?? record.follow_up_date_iso),
     coaching: asStringArray(record.coaching),
     otherNotes: asStringArray(record.otherNotes ?? record.other_notes),
   };

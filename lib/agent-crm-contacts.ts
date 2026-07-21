@@ -21,6 +21,12 @@ export function agentCrmJsonHeaders(token: string): HeadersInit {
   };
 }
 
+/** Deep link to a contact's detail page in the GHL app UI. Override via AGENT_CRM_APP_URL if the shape differs. */
+export function agentCrmContactUrl(locationId: string, contactId: string): string {
+  const base = process.env.AGENT_CRM_APP_URL?.trim() || "https://app.gohighlevel.com";
+  return `${base.replace(/\/$/, "")}/v2/location/${locationId}/contacts/detail/${contactId}`;
+}
+
 /** PI + location only (callers add feature flags like AGENT_CRM_SYNC_NEWSLETTER). */
 export function agentCrmGetBaseCredentials(): { token: string; locationId: string } | null {
   const token = process.env.AGENT_CRM_PI;
