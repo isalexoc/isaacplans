@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import cloudinary from "@/config/cloudinary";
+import { fetchAgentLicenseImage } from "@/lib/agent-license-image";
 import { getLicensePublicId } from "@/lib/agent-licenses";
 
 /**
@@ -31,58 +31,25 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Missing license key" }, { status: 400 });
     }
 
+    // Whitelist check up front so unknown keys 404 (vs. a generic 502).
     const publicId = await getLicensePublicId(key);
     if (!publicId) {
       return NextResponse.json({ error: "Unknown license" }, { status: 404 });
     }
 
-    const transformation = [
-      { width, height, crop: "fit" as const, quality: "auto", fetch_format: "auto" },
-    ];
-
-    // Candidate chain: on-the-fly transformations may be blocked for
-    // authenticated assets (account-dependent), so fall back to the signed
-    // original. The last legacy `upload` candidate serves assets that haven't
-    // been flipped by scripts/privatize-license-images.ts yet.
-    const candidates = [
-      cloudinary.url(publicId, {
-        resource_type: "image",
-        type: "authenticated",
-        sign_url: true,
-        secure: true,
-        transformation,
-      }),
-      cloudinary.url(publicId, {
-        resource_type: "image",
-        type: "authenticated",
-        sign_url: true,
-        secure: true,
-      }),
-      cloudinary.url(publicId, {
-        resource_type: "image",
-        type: "upload",
-        sign_url: true,
-        secure: true,
-        transformation,
-      }),
-    ];
-
-    for (const url of candidates) {
-      const response = await fetch(url);
-      if (!response.ok) continue;
-
-      const imageBuffer = await response.arrayBuffer();
-      return new NextResponse(imageBuffer, {
-        status: 200,
-        headers: {
-          "Content-Type": response.headers.get("content-type") ?? "image/png",
-          "Cache-Control": "private, max-age=3600",
-          "X-Content-Type-Options": "nosniff",
-        },
-      });
+    const image = await fetchAgentLicenseImage(key, { width, height });
+    if (!image) {
+      return NextResponse.json({ error: "Failed to fetch image" }, { status: 502 });
     }
 
-    return NextResponse.json({ error: "Failed to fetch image" }, { status: 502 });
+    return new NextResponse(new Uint8Array(image.buffer), {
+      status: 200,
+      headers: {
+        "Content-Type": image.contentType,
+        "Cache-Control": "private, max-age=3600",
+        "X-Content-Type-Options": "nosniff",
+      },
+    });
   } catch (error) {
     console.error("Error fetching license image:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

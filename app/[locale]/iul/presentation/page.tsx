@@ -155,6 +155,7 @@ export default async function IULPresentationPage() {
                   slide={slide}
                   labels={pres.labels}
                   isAdmin={isAdmin}
+                  locale={locale}
                 />
               ),
             }))}
