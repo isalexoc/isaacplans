@@ -60,6 +60,7 @@ interface SlideContentProps {
   slide: IulSlideData;
   labels: Record<string, string>;
   isAdmin?: boolean;
+  locale?: string;
 }
 
 // Animation variants
@@ -177,22 +178,22 @@ function IULSlideThemeWrapper({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default function IULSlideContent({ slide, labels, isAdmin }: SlideContentProps) {
+export default function IULSlideContent({ slide, labels, isAdmin, locale }: SlideContentProps) {
   return (
     <IULSlideThemeWrapper>
-      <IULSlideContentInner slide={slide} labels={labels} isAdmin={isAdmin} />
+      <IULSlideContentInner slide={slide} labels={labels} isAdmin={isAdmin} locale={locale} />
     </IULSlideThemeWrapper>
   );
 }
 
-function IULSlideContentInner({ slide, labels, isAdmin }: SlideContentProps) {
+function IULSlideContentInner({ slide, labels, isAdmin, locale }: SlideContentProps) {
   const t = createAccessor(slide.data);
   const labelsT = createAccessor(labels);
 
   const slideType = slide.type;
 
   if (slideType === "agent") {
-    return <AgentSlide t={t} isAdmin={isAdmin ?? false} />;
+    return <AgentSlide t={t} isAdmin={isAdmin ?? false} locale={locale ?? "en"} />;
   } else if (slideType === "discovery") {
     return <DiscoverySlide t={t} />;
   } else if (slideType === "retirementProduct") {
@@ -232,8 +233,18 @@ function IULSlideContentInner({ slide, labels, isAdmin }: SlideContentProps) {
   return null;
 }
 
+// Slugify a string for use in a download filename (lowercase, hyphenated, ASCII).
+function slugifyForFilename(value: string): string {
+  return value
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "") // strip accents
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
 // Agent Introduction Slide
-function AgentSlide({ t, isAdmin }: { t: any; isAdmin: boolean }) {
+function AgentSlide({ t, isAdmin, locale }: { t: any; isAdmin: boolean; locale: string }) {
   const [selectedState, setSelectedState] = useState<string>("");
   const [isDownloading, setIsDownloading] = useState(false);
   const slideRef = useRef<HTMLDivElement>(null);
@@ -242,6 +253,9 @@ function AgentSlide({ t, isAdmin }: { t: any; isAdmin: boolean }) {
   const states = t.raw("states") || [];
   const contactInfo = t.raw("contact") || {};
   const headshot = t.raw("headshot") || {};
+
+  const selectedStateName =
+    states.find((s: { code: string; name: string }) => s.code === selectedState)?.name || "";
 
   // License images stream through the admin-gated proxy (middleware returns
   // 401/403 for anyone else), keyed by state code — Cloudinary public IDs
@@ -254,21 +268,47 @@ function AgentSlide({ t, isAdmin }: { t: any; isAdmin: boolean }) {
     ? "/api/admin/license-image?key=drivers&w=1200&h=800"
     : null;
 
+  // Build the client-facing filename: agent + state + language, e.g.
+  // "isaac-orraiz-california-credentials-english.png".
+  const buildFileBaseName = () => {
+    const agentSlug = slugifyForFilename(contactInfo.name || "isaac-orraiz");
+    const stateSlug = selectedStateName ? `-${slugifyForFilename(selectedStateName)}` : "";
+    const langSlug = locale === "es" ? "spanish" : "english";
+    return `${agentSlug}${stateSlug}-credentials-${langSlug}`;
+  };
+
+  // Capture the slide as a clean, client-ready image. `onclone` strips the
+  // agent-only controls (download buttons, state selector, "unlocked" badges)
+  // from the cloned DOM so the live UI is untouched but the exported image
+  // shows only the polished credentials — nothing to confuse a client.
+  const captureCanvas = () =>
+    html2canvas(slideRef.current as HTMLElement, {
+      backgroundColor: "#ffffff",
+      scale: 2,
+      logging: false,
+      useCORS: true,
+      onclone: (clonedDoc) => {
+        clonedDoc.querySelectorAll("[data-capture-hide]").forEach((el) => {
+          (el as HTMLElement).style.display = "none";
+        });
+        clonedDoc.querySelectorAll("[data-capture-show]").forEach((el) => {
+          const node = el as HTMLElement;
+          node.classList.remove("hidden");
+          node.style.display = "";
+        });
+      },
+    });
+
   // Download as image
   const downloadAsImage = async () => {
     if (!slideRef.current) return;
-    
+
     setIsDownloading(true);
     try {
-      const canvas = await html2canvas(slideRef.current, {
-        backgroundColor: "#ffffff",
-        scale: 2,
-        logging: false,
-        useCORS: true,
-      });
-      
+      const canvas = await captureCanvas();
+
       const link = document.createElement("a");
-      link.download = `isaac-orraiz-agent-introduction-${Date.now()}.png`;
+      link.download = `${buildFileBaseName()}.png`;
       link.href = canvas.toDataURL("image/png");
       link.click();
     } catch (error) {
@@ -281,23 +321,18 @@ function AgentSlide({ t, isAdmin }: { t: any; isAdmin: boolean }) {
   // Download as PDF
   const downloadAsPDF = async () => {
     if (!slideRef.current) return;
-    
+
     setIsDownloading(true);
     try {
-      const canvas = await html2canvas(slideRef.current, {
-        backgroundColor: "#ffffff",
-        scale: 2,
-        logging: false,
-        useCORS: true,
-      });
-      
+      const canvas = await captureCanvas();
+
       const imgData = canvas.toDataURL("image/png");
       const pdf = new jsPDF({
         orientation: "landscape",
         unit: "mm",
         format: "a4",
       });
-      
+
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
       // Convert pixels to mm (1 inch = 25.4mm, and at scale 2, 1px = 0.264583mm)
@@ -306,9 +341,9 @@ function AgentSlide({ t, isAdmin }: { t: any; isAdmin: boolean }) {
       const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
       const imgX = (pdfWidth - imgWidth * ratio) / 2;
       const imgY = (pdfHeight - imgHeight * ratio) / 2;
-      
+
       pdf.addImage(imgData, "PNG", imgX, imgY, imgWidth * ratio, imgHeight * ratio);
-      pdf.save(`isaac-orraiz-agent-introduction-${Date.now()}.pdf`);
+      pdf.save(`${buildFileBaseName()}.pdf`);
     } catch (error) {
       console.error("Error downloading PDF:", error);
     } finally {
@@ -339,8 +374,9 @@ function AgentSlide({ t, isAdmin }: { t: any; isAdmin: boolean }) {
           {t("subtitle")}
         </motion.p>
         
-        {/* Download Buttons */}
+        {/* Download Buttons — agent-only tooling, stripped from the exported image */}
         <motion.div
+          data-capture-hide
           variants={itemVariants}
           className="flex justify-center gap-3 mt-6"
         >
@@ -480,14 +516,24 @@ function AgentSlide({ t, isAdmin }: { t: any; isAdmin: boolean }) {
                 <h4 className="text-xl font-bold text-gray-900">{t("stateLicense.title")}</h4>
               </div>
               {isAdmin && (
-                <div className="flex items-center text-green-600 text-sm">
+                <div data-capture-hide className="flex items-center text-green-600 text-sm">
                   <CheckCircle2 className="h-4 w-4 mr-1" />
                   {t("unlock.unlocked")}
                 </div>
               )}
             </div>
-            
-            <div className="mb-4">
+
+            {/* Clean state caption — hidden on screen, revealed only in the exported image */}
+            {selectedStateName && (
+              <p
+                data-capture-show
+                className="hidden text-lg font-semibold text-blue-700 mb-4"
+              >
+                {selectedStateName}
+              </p>
+            )}
+
+            <div data-capture-hide className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 {t("stateLicense.selectLabel")}
               </label>
@@ -547,7 +593,7 @@ function AgentSlide({ t, isAdmin }: { t: any; isAdmin: boolean }) {
                 <h4 className="text-xl font-bold text-gray-900">{t("driversLicense.title")}</h4>
               </div>
               {isAdmin && (
-                <div className="flex items-center text-green-600 text-sm">
+                <div data-capture-hide className="flex items-center text-green-600 text-sm">
                   <CheckCircle2 className="h-4 w-4 mr-1" />
                   {t("unlock.unlocked")}
                 </div>
