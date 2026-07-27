@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { processOneKixieCallJob } from "@/lib/kixie-call-processor";
 import { getDuePosts, processScheduledPost } from "@/lib/social-publishing/scheduler";
 import { reconcileLeadJobs } from "@/lib/leads-the-way/process";
+import { getStaleJobs } from "@/lib/social-media-studio/video-job-store";
+import { enqueueVideoJobTick } from "@/lib/social-media-studio/video-job-queue";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -47,6 +49,14 @@ export async function GET(req: NextRequest) {
   // ── Leads the Way: drain any lead emails QStash never delivered ──
   const leads = await reconcileLeadJobs(req.nextUrl.origin);
 
+  // ── Video generation: nudge any stale video jobs back onto QStash (dropped tick) ──
+  const staleVideoJobs = await getStaleJobs(25);
+  let videoJobsRequeued = 0;
+  for (const job of staleVideoJobs) {
+    const messageId = await enqueueVideoJobTick(job.id, { delaySeconds: 1, requestOrigin: req.nextUrl.origin });
+    if (messageId) videoJobsRequeued++;
+  }
+
   return NextResponse.json({
     ok: true,
     kixieProcessed,
@@ -56,5 +66,7 @@ export async function GET(req: NextRequest) {
     leadsFound: leads.found,
     leadsProcessed: leads.processed,
     leadsRepublished: leads.republished,
+    videoJobsStale: staleVideoJobs.length,
+    videoJobsRequeued,
   });
 }

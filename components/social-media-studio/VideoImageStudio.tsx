@@ -6,7 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { PresenterPicker, type PresenterSelection } from "./PresenterPicker";
+import { VideoJobProgress } from "./VideoJobProgress";
 import type { VideoStoryboard, SocialLocale } from "@/lib/social-media-studio/types";
+import type { SocialVideoJobView } from "@/lib/social-media-studio/video-job-types";
+
+type VeoTier = "lite" | "fast" | "standard";
 
 export interface VideoImageStudioProps {
   defaultLocale: SocialLocale;
@@ -14,37 +18,43 @@ export interface VideoImageStudioProps {
   initialVideoUrl?: string;
   canGenerate: boolean;            // false → show a hint (e.g. no script yet)
   disabledHint?: string;
-  /** Phase A — build storyboard + portrait images from the latest script. */
-  generateImages: (locale: SocialLocale) => Promise<VideoStoryboard>;
-  /** Regenerate one scene's image from a concept; returns the new image URL. */
+  /** Phase A — start a durable image-build job; returns its jobId. */
+  startImages: (locale: SocialLocale) => Promise<{ jobId: string }>;
+  /** Regenerate one scene's image from a concept (fast, synchronous); returns the new URL. */
   regenerateImage: (concept: string, sceneIndex: number, locale: SocialLocale) => Promise<string>;
-  /** Phase B — render the video; returns the JSON2Video project id + duration. `notice` carries a
-   *  non-fatal warning (e.g. the presenter failed and we fell back to a faceless render). */
-  renderVideo: (storyboard: VideoStoryboard) => Promise<{ projectId: string; durationSeconds: number; notice?: string }>;
-  /** Poll render status; returns the finished Cloudinary URL when done. */
-  pollStatus: (projectId: string) => Promise<{ status: string; videoUrl?: string }>;
-  onVideoReady: (videoUrl: string, projectId: string, durationSeconds: number, voiceLanguage: SocialLocale) => void;
-  /** Fired whenever the active storyboard changes (so the wizard can persist it on Save). */
+  /** Phase B — start a durable render job (presenter → compose → render → finalize). */
+  startRender: (storyboard: VideoStoryboard) => Promise<{ jobId: string }>;
+  onVideoReady: (videoUrl: string, jobId: string, durationSeconds: number, voiceLanguage: SocialLocale) => void;
+  /** Fired whenever the active storyboard changes (so the caller can persist it on Save). */
   onStoryboardChange?: (storyboard: VideoStoryboard) => void;
-  /** Cinematic (Veo) — submit a scene-clip render; returns the long-running operation name. */
-  submitClip?: (imageUrl: string, imageConcept: string, sceneIndex: number, tier: VeoTier, durationSec: 4 | 6 | 8) => Promise<{ operationName: string }>;
-  /** Cinematic (Veo) — poll a clip operation; returns the Cloudinary URL when done. */
-  pollClip?: (operationName: string, sceneIndex: number) => Promise<{ status: string; videoUrl?: string }>;
-  /** AI background music (ElevenLabs) — generate a category-matched track; returns its URL. */
-  generateMusic?: (durationSeconds: number) => Promise<string>;
+  /** Cinematic (Veo) — start a durable scene-clip job; returns its jobId. */
+  startClip?: (imageUrl: string, imageConcept: string, sceneIndex: number, tier: VeoTier, durationSec: 4 | 6 | 8) => Promise<{ jobId: string }>;
+  /** AI background music — start a durable music job; returns its jobId. */
+  startMusic?: (durationSeconds: number) => Promise<{ jobId: string }>;
+  /** Poll one durable job's DB-backed status. */
+  pollJob: (jobId: string) => Promise<SocialVideoJobView>;
+  /** Cancel an in-progress job. */
+  cancelJob: (jobId: string) => Promise<void>;
+  /** Active jobs for this post — used to reattach progress after a refresh. */
+  findActiveJobs?: () => Promise<SocialVideoJobView[]>;
 }
 
 type Phase = "idle" | "images" | "rendering" | "done";
-type VeoTier = "lite" | "fast" | "standard";
 
-const POLL_INTERVAL_MS = 4000;
-const MAX_POLLS = 90;
+// DB-job polling cadence + ceiling (covers long presenter renders + Veo clips).
+const JOB_POLL_MS = 3000;
+const MAX_JOB_POLLS = 600; // ~30 min
+const MAX_POLL_ERRORS = 6; // tolerate brief network blips before giving up
 
 // $/sec by Veo tier (client-side copy for the cost estimate; the server is the source of truth).
 const VEO_RATE: Record<VeoTier, number> = { lite: 0.05, fast: 0.15, standard: 0.40 };
 const VEO_TIER_LABEL: Record<VeoTier, string> = { lite: "Lite", fast: "Fast", standard: "Standard" };
-const CLIP_POLL_MS  = 8000;
-const MAX_CLIP_POLLS = 60; // ~8 min per clip
+
+// Sentinels for silent (non-error) poll-loop exits.
+const CANCELLED = "__job_cancelled__";
+const UNMOUNTED = "__unmounted__";
+const isSilent = (err: unknown) => err instanceof Error && (err.message === CANCELLED || err.message === UNMOUNTED);
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 export function VideoImageStudio({
   defaultLocale,
@@ -52,15 +62,16 @@ export function VideoImageStudio({
   initialVideoUrl,
   canGenerate,
   disabledHint,
-  generateImages,
+  startImages,
   regenerateImage,
-  renderVideo,
-  pollStatus,
+  startRender,
   onVideoReady,
   onStoryboardChange,
-  submitClip,
-  pollClip,
-  generateMusic,
+  startClip,
+  startMusic,
+  pollJob,
+  cancelJob,
+  findActiveJobs,
 }: VideoImageStudioProps) {
   const [voiceLang, setVoiceLang]   = useState<SocialLocale>(defaultLocale);
   const [presenter, setPresenter]   = useState<boolean>(Boolean(initialStoryboard?.presenter));
@@ -81,15 +92,21 @@ export function VideoImageStudio({
   const [error, setError]           = useState<string | undefined>();
   const [notice, setNotice]         = useState<string | undefined>(); // non-fatal warning (e.g. faceless fallback)
 
+  // Durable-job progress views
+  const [renderView, setRenderView] = useState<SocialVideoJobView | null>(null);
+  const [renderJobId, setRenderJobId] = useState<string | null>(null);
+  const [renderStartedAt, setRenderStartedAt] = useState<number | undefined>();
+  const [imagesView, setImagesView] = useState<SocialVideoJobView | null>(null);
+
   // Cinematic motion (Veo 3.1)
-  const cinematicSupported = Boolean(submitClip && pollClip);
+  const cinematicSupported = Boolean(startClip);
   const [cinematic, setCinematic]     = useState<boolean>(Boolean(initialStoryboard?.cinematic));
   const [veoTier, setVeoTier]         = useState<VeoTier>((initialStoryboard?.veoTier as VeoTier) ?? "lite");
   const [veoDuration, setVeoDuration] = useState<4 | 6 | 8>((initialStoryboard?.veoDurationSec as 4 | 6 | 8) ?? 6);
   const [clipIdx, setClipIdx]         = useState<Set<number>>(new Set());
 
   // AI background music (ElevenLabs) — always generated once images exist, regenerable.
-  const musicSupported = Boolean(generateMusic);
+  const musicSupported = Boolean(startMusic);
   const [musicBusy, setMusicBusy]     = useState(false);
   const [musicError, setMusicError]   = useState<string | undefined>();
   const musicTriedRef = useRef(false);
@@ -98,8 +115,6 @@ export function VideoImageStudio({
   useEffect(() => () => { aliveRef.current = false; }, []);
   // Synchronous source of truth for the storyboard so concurrent clip jobs don't clobber each other.
   const sbRef = useRef<VideoStoryboard | undefined>(initialStoryboard);
-
-  const category = storyboard?.category;
 
   function commitStoryboard(next: VideoStoryboard) {
     sbRef.current = next;
@@ -186,34 +201,148 @@ export function VideoImageStudio({
     });
   }
 
+  // ── Generic durable-job poll loop ─────────────────────────────────────────
+  // Polls the DB job until it's done (returns the final view), fails, is cancelled,
+  // or the component unmounts (the server job keeps running and is reattached later).
+  async function runJob(jobId: string, onView?: (v: SocialVideoJobView) => void): Promise<SocialVideoJobView> {
+    let errors = 0;
+    for (let i = 0; i < MAX_JOB_POLLS; i++) {
+      if (!aliveRef.current) throw new Error(UNMOUNTED);
+      let view: SocialVideoJobView;
+      try {
+        view = await pollJob(jobId);
+        errors = 0;
+      } catch {
+        if (++errors >= MAX_POLL_ERRORS) throw new Error("Lost connection to the generation job.");
+        await sleep(JOB_POLL_MS);
+        continue;
+      }
+      if (!aliveRef.current) throw new Error(UNMOUNTED);
+      onView?.(view);
+      if (view.status === "done") return view;
+      if (view.status === "failed") throw new Error(view.errorMessage ?? "Generation failed");
+      if (view.status === "cancelled") throw new Error(CANCELLED);
+      await sleep(JOB_POLL_MS);
+    }
+    throw new Error("Generation timed out. Please try again.");
+  }
+
+  // ── Attach helpers (used by both new starts and resume-on-mount) ──────────
+  async function attachImagesJob(jobId: string, initial?: SocialVideoJobView) {
+    setError(undefined);
+    setBusyImages(true);
+    if (initial) setImagesView(initial);
+    const prevMusic = sbRef.current?.musicUrl;
+    try {
+      const view = await runJob(jobId, setImagesView);
+      if (!aliveRef.current) return;
+      const sb = view.resultData?.storyboard;
+      if (!sb) throw new Error("Image build returned no storyboard.");
+      commitStoryboard({ ...decorate(sb), musicUrl: prevMusic ?? sb.musicUrl ?? undefined });
+    } catch (err) {
+      if (aliveRef.current && !isSilent(err)) setError(err instanceof Error ? err.message : "Image generation failed");
+    } finally {
+      if (aliveRef.current) { setBusyImages(false); setImagesView(null); }
+    }
+  }
+
+  async function attachRenderJob(jobId: string, initial?: SocialVideoJobView) {
+    setError(undefined);
+    setNotice(initial?.jobState?.notice ?? undefined);
+    setPhase("rendering");
+    setRenderJobId(jobId);
+    setRenderStartedAt(Date.now());
+    if (initial) setRenderView(initial);
+    try {
+      const view = await runJob(jobId, (v) => {
+        setRenderView(v);
+        if (v.jobState?.notice) setNotice(v.jobState.notice);
+      });
+      if (!aliveRef.current) return;
+      const url = view.resultUrl;
+      if (!url) throw new Error("Render finished without a video.");
+      setVideoUrl(url);
+      setPhase("done");
+      onVideoReady(url, jobId, sbRef.current?.durationSeconds ?? 30, voiceLang);
+    } catch (err) {
+      if (!aliveRef.current) return;
+      setPhase(sbRef.current ? "images" : "idle");
+      if (!isSilent(err)) setError(err instanceof Error ? err.message : "Video render failed");
+    } finally {
+      if (aliveRef.current) { setRenderJobId(null); setRenderView(null); }
+    }
+  }
+
+  async function attachClipJob(jobId: string, idx: number) {
+    setError(undefined);
+    setClipBusy(idx, true);
+    try {
+      const view = await runJob(jobId);
+      if (!aliveRef.current) return;
+      if (view.resultUrl) {
+        const latest = sbRef.current!;
+        commitStoryboard({
+          ...latest,
+          scenes: latest.scenes.map((s, i) => (i === idx ? { ...s, videoClipUrl: view.resultUrl! } : s)),
+        });
+      }
+    } catch (err) {
+      if (aliveRef.current && !isSilent(err)) setError(err instanceof Error ? err.message : "Cinematic motion failed");
+    } finally {
+      if (aliveRef.current) setClipBusy(idx, false);
+    }
+  }
+
+  async function attachMusicJob(jobId: string) {
+    setMusicError(undefined);
+    setMusicBusy(true);
+    try {
+      const view = await runJob(jobId);
+      if (!aliveRef.current) return;
+      if (view.resultUrl) commitStoryboard({ ...sbRef.current!, musicUrl: view.resultUrl });
+    } catch (err) {
+      if (aliveRef.current && !isSilent(err)) setMusicError(err instanceof Error ? err.message : "Music generation failed");
+    } finally {
+      if (aliveRef.current) setMusicBusy(false);
+    }
+  }
+
+  // ── Resume any jobs still running from a previous window/tab ───────────────
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      if (!findActiveJobs) return;
+      try {
+        const jobs = await findActiveJobs();
+        if (!active || !aliveRef.current) return;
+        for (const job of jobs) {
+          if (job.status !== "pending" && job.status !== "processing") continue;
+          if (job.kind === "render") void attachRenderJob(job.id, job);
+          else if (job.kind === "images") void attachImagesJob(job.id, job);
+          else if (job.kind === "clip" && job.sceneIndex != null) void attachClipJob(job.id, job.sceneIndex);
+          else if (job.kind === "music") void attachMusicJob(job.id);
+        }
+      } catch { /* no active jobs / endpoint unavailable */ }
+    })();
+    return () => { active = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // ── Cinematic: animate one scene image into a Veo clip ─────────────────────
   async function animateScene(idx: number) {
     const cur = sbRef.current;
     const scene = cur?.scenes[idx];
-    if (!cur || !scene?.imageUrl || !submitClip || !pollClip) return;
+    if (!cur || !scene?.imageUrl || !startClip) return;
     setError(undefined);
     setClipBusy(idx, true);
+    let jobId: string;
     try {
-      const { operationName } = await submitClip(scene.imageUrl, scene.imageConcept, idx, veoTier, veoDuration);
-      for (let p = 0; p < MAX_CLIP_POLLS; p++) {
-        await new Promise((r) => setTimeout(r, CLIP_POLL_MS));
-        if (!aliveRef.current) return;
-        const st = await pollClip(operationName, idx);
-        if (st.status === "done" && st.videoUrl) {
-          const latest = sbRef.current!;
-          commitStoryboard({
-            ...latest,
-            scenes: latest.scenes.map((s, i) => (i === idx ? { ...s, videoClipUrl: st.videoUrl } : s)),
-          });
-          return;
-        }
-      }
-      throw new Error("Veo clip timed out. Please try again.");
+      ({ jobId } = await startClip(scene.imageUrl, scene.imageConcept, idx, veoTier, veoDuration));
     } catch (err) {
-      if (aliveRef.current) setError(err instanceof Error ? err.message : "Cinematic motion failed");
-    } finally {
-      if (aliveRef.current) setClipBusy(idx, false);
+      if (aliveRef.current) { setError(err instanceof Error ? err.message : "Could not start the animation."); setClipBusy(idx, false); }
+      return;
     }
+    await attachClipJob(jobId, idx);
   }
 
   async function animateAll() {
@@ -240,24 +369,23 @@ export function VideoImageStudio({
   // ── AI background music: generate a category-matched track ─────────────────
   async function generateMusicTrack() {
     const cur = sbRef.current;
-    if (!cur || !generateMusic) return;
+    if (!cur || !startMusic) return;
     setMusicError(undefined);
     setMusicBusy(true);
+    let jobId: string;
     try {
-      const url = await generateMusic(cur.durationSeconds);
-      if (!aliveRef.current) return;
-      commitStoryboard({ ...sbRef.current!, musicUrl: url });
+      ({ jobId } = await startMusic(cur.durationSeconds));
     } catch (err) {
-      if (aliveRef.current) setMusicError(err instanceof Error ? err.message : "Music generation failed");
-    } finally {
-      if (aliveRef.current) setMusicBusy(false);
+      if (aliveRef.current) { setMusicError(err instanceof Error ? err.message : "Could not start music."); setMusicBusy(false); }
+      return;
     }
+    await attachMusicJob(jobId);
   }
 
   // Auto-generate the track once images exist and none is set yet (no toggle).
   const hasImagesForMusic = Boolean(storyboard?.scenes.length);
   useEffect(() => {
-    if (!generateMusic || !hasImagesForMusic || musicTriedRef.current) return;
+    if (!startMusic || !hasImagesForMusic || musicTriedRef.current) return;
     if (storyboard?.musicUrl) return;        // restored from Sanity → keep it
     musicTriedRef.current = true;
     void generateMusicTrack();
@@ -268,17 +396,14 @@ export function VideoImageStudio({
   async function buildImages() {
     setError(undefined);
     setBusyImages(true);
+    let jobId: string;
     try {
-      const prevMusic = sbRef.current?.musicUrl;
-      const sb = await generateImages(voiceLang);
-      if (!aliveRef.current) return;
-      // carry presenter + cinematic settings AND the existing music track onto the new storyboard
-      commitStoryboard({ ...decorate(sb), musicUrl: prevMusic });
+      ({ jobId } = await startImages(voiceLang));
     } catch (err) {
-      if (aliveRef.current) setError(err instanceof Error ? err.message : "Image generation failed");
-    } finally {
-      if (aliveRef.current) setBusyImages(false);
+      if (aliveRef.current) { setError(err instanceof Error ? err.message : "Could not start image generation."); setBusyImages(false); }
+      return;
     }
+    await attachImagesJob(jobId);
   }
 
   // ── Regenerate one scene image (quick re-roll or edited concept) ───────────
@@ -334,33 +459,26 @@ export function VideoImageStudio({
 
   // ── Phase B: render the video ─────────────────────────────────────────────
   async function createVideo() {
-    if (!storyboard) return;
+    const cur = sbRef.current;
+    if (!cur) return;
+    setVideoUrl("");
     setError(undefined);
     setNotice(undefined);
-    setVideoUrl("");
     setPhase("rendering");
+    setRenderStartedAt(Date.now());
+    let jobId: string;
     try {
-      const renderStoryboard = decorate(storyboard);
-      const { projectId, durationSeconds, notice: renderNotice } = await renderVideo(renderStoryboard);
-      if (renderNotice && aliveRef.current) setNotice(renderNotice);
-      for (let i = 0; i < MAX_POLLS; i++) {
-        await new Promise((r) => setTimeout(r, POLL_INTERVAL_MS));
-        if (!aliveRef.current) return;
-        const st = await pollStatus(projectId);
-        if (st.status === "done" && st.videoUrl) {
-          setVideoUrl(st.videoUrl);
-          setPhase("done");
-          onVideoReady(st.videoUrl, projectId, durationSeconds, voiceLang);
-          return;
-        }
-      }
-      throw new Error("Render timed out. Please try again.");
+      ({ jobId } = await startRender(decorate(cur)));
     } catch (err) {
-      if (aliveRef.current) {
-        setPhase(storyboard ? "images" : "idle");
-        setError(err instanceof Error ? err.message : "Video render failed");
-      }
+      if (aliveRef.current) { setPhase("images"); setError(err instanceof Error ? err.message : "Could not start the render."); }
+      return;
     }
+    await attachRenderJob(jobId);
+  }
+
+  async function cancelRender() {
+    if (!renderJobId) return;
+    try { await cancelJob(renderJobId); } catch { /* the poll loop will also stop on status change */ }
   }
 
   const anyBusy = busyImages || regenIdx.size > 0 || clipIdx.size > 0 || musicBusy || phase === "rendering";
@@ -494,11 +612,13 @@ export function VideoImageStudio({
 
       {/* Phase A trigger / image controls */}
       {!hasImages ? (
-        <Button onClick={buildImages} disabled={!canGenerate || busyImages} className="w-fit">
-          {busyImages
-            ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Generating images… (~60–90s)</>
-            : <><Film className="h-4 w-4 mr-2" /> Generate Video Images</>}
-        </Button>
+        busyImages ? (
+          <VideoJobProgress view={imagesView} title="Generating video images" />
+        ) : (
+          <Button onClick={buildImages} disabled={!canGenerate} className="w-fit">
+            <Film className="h-4 w-4 mr-2" /> Generate Video Images
+          </Button>
+        )
       ) : (
         <>
           <div className="flex items-center gap-2 flex-wrap">
@@ -517,6 +637,8 @@ export function VideoImageStudio({
               Rebuild from script
             </Button>
           </div>
+
+          {busyImages && imagesView && <VideoJobProgress view={imagesView} title="Rebuilding video images" />}
 
           <div className="grid grid-cols-5 gap-2">
             {storyboard!.scenes.map((scene, i) => {
@@ -646,14 +768,21 @@ export function VideoImageStudio({
             <p className="text-xs text-amber-600">{musicError}</p>
           )}
 
-          {/* Phase B trigger */}
-          <Button onClick={createVideo} disabled={anyBusy} className="w-fit">
-            {phase === "rendering"
-              ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> {presenter ? "Rendering presenter + video… (1–5 min)" : "Rendering video… (30–120s)"}</>
-              : phase === "done"
+          {/* Phase B trigger / live render progress */}
+          {phase === "rendering" ? (
+            <VideoJobProgress
+              view={renderView}
+              title={presenter ? "Rendering presenter + video" : "Rendering video"}
+              onCancel={cancelRender}
+              startedAt={renderStartedAt}
+            />
+          ) : (
+            <Button onClick={createVideo} disabled={anyBusy} className="w-fit">
+              {phase === "done"
                 ? <><RotateCcw className="h-4 w-4 mr-2" /> Regenerate video</>
                 : <><Film className="h-4 w-4 mr-2" /> Create Video</>}
-          </Button>
+            </Button>
+          )}
         </>
       )}
 

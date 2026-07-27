@@ -1,7 +1,7 @@
 "use client";
 
+import { useRef } from "react";
 import { VideoImageStudio } from "./VideoImageStudio";
-import { runPresenterPhase } from "./runPresenterPhase";
 import type {
   SocialPostSource,
   VideoScript,
@@ -9,6 +9,7 @@ import type {
   GeneratedVideo,
   SocialLocale,
 } from "@/lib/social-media-studio/types";
+import type { SocialVideoJobView } from "@/lib/social-media-studio/video-job-types";
 
 interface Props {
   source: SocialPostSource;
@@ -19,6 +20,13 @@ interface Props {
   onVideoReady: (video: GeneratedVideo) => void;
   /** Lifts the active storyboard so it persists on Save to Sanity. */
   onStoryboardChange: (storyboard: VideoStoryboard) => void;
+  /**
+   * Materialize (once) a draft socialPost and return its id — durable video jobs need a
+   * stable document id to key on. Idempotent: returns the same id on repeat calls.
+   */
+  ensurePostId: () => Promise<string>;
+  /** The draft id if one already exists (enables resume-on-mount + progress polling). */
+  currentPostId?: string;
 }
 
 async function postJson(url: string, body: unknown) {
@@ -32,6 +40,11 @@ async function postJson(url: string, body: unknown) {
   return data.data;
 }
 
+/**
+ * Creation-wizard wiring for the video studio. Because the wizard has no saved post yet,
+ * it materializes a draft on first generation, then uses the same durable history-style
+ * job routes (progress + resume + cancel) as the history page.
+ */
 export function VideoGenerator({
   source,
   videoScript,
@@ -40,8 +53,16 @@ export function VideoGenerator({
   initialStoryboard,
   onVideoReady,
   onStoryboardChange,
+  ensurePostId,
+  currentPostId,
 }: Props) {
   const category = source.category;
+  const postIdRef = useRef<string | null>(currentPostId ?? null);
+
+  async function base(): Promise<string> {
+    if (!postIdRef.current) postIdRef.current = await ensurePostId();
+    return `/api/admin/social-media-studio/history/${postIdRef.current}`;
+  }
 
   return (
     <VideoImageStudio
@@ -51,59 +72,49 @@ export function VideoGenerator({
       canGenerate={Boolean(videoScript?.fullScript)}
       disabledHint="Generate a video script first to enable AI video."
       onStoryboardChange={onStoryboardChange}
-      generateImages={async (locale) => {
-        const data = await postJson("/api/admin/social-media-studio/generate-video-images", {
-          source, videoScript, locale,
-        });
-        return data.storyboard as VideoStoryboard;
+      startImages={async (locale) => {
+        const data = await postJson(`${await base()}/generate-video-images`, { locale });
+        return { jobId: data.jobId as string };
       }}
-      regenerateImage={async (concept, _sceneIndex, locale) => {
-        const data = await postJson("/api/admin/social-media-studio/generate-video-image", {
-          concept, category, locale,
+      regenerateImage={async (concept, sceneIndex, locale) => {
+        const data = await postJson(`${await base()}/generate-video-image`, {
+          concept, category, locale, sceneIndex,
         });
         return data.url as string;
       }}
-      renderVideo={async (storyboard) => {
-        // Presenter on → render the HeyGen clip first, then composite it in JSON2Video.
-        // If the presenter render fails (e.g. HeyGen plan time quota), fall back to a faceless
-        // render so the whole video isn't lost — and report why via `notice`.
-        let presenter: { presenterVideoUrl?: string; presenterDurationSec?: number } = {};
-        let notice: string | undefined;
-        if (storyboard.presenter) {
-          try {
-            presenter = await runPresenterPhase(storyboard, storyboard.voiceLanguage);
-          } catch (err) {
-            notice = `${err instanceof Error ? err.message : "Presenter render failed"} — rendered the video without the avatar.`;
-            presenter = {};
-          }
-        }
-        const data = await postJson("/api/admin/social-media-studio/generate-video", {
-          storyboard, ...presenter,
-        });
-        return { projectId: data.projectId as string, durationSeconds: data.durationSeconds as number, notice };
+      startRender={async (storyboard) => {
+        const data = await postJson(`${await base()}/generate-video`, { storyboard });
+        return { jobId: data.jobId as string };
       }}
-      pollStatus={async (projectId) => {
-        const url = `/api/admin/social-media-studio/generate-video/status?projectId=${encodeURIComponent(projectId)}${category ? `&category=${encodeURIComponent(category)}` : ""}`;
-        const res = await fetch(url);
-        const data = await res.json();
-        if (!data.success) throw new Error(data.error ?? "Render failed");
-        return { status: data.data.status as string, videoUrl: data.data.videoUrl as string | undefined };
-      }}
-      onVideoReady={(videoUrl, projectId, durationSeconds, voiceLanguage) =>
-        onVideoReady({ url: videoUrl, projectId, durationSeconds, voiceLanguage })
+      onVideoReady={(videoUrl, jobId, durationSeconds, voiceLanguage) =>
+        onVideoReady({ url: videoUrl, projectId: jobId, durationSeconds, voiceLanguage })
       }
-      submitClip={async (imageUrl, imageConcept, _sceneIndex, tier, durationSec) => {
-        const data = await postJson("/api/admin/social-media-studio/generate-scene-clip", {
-          imageUrl, imageConcept, tier, durationSec,
+      startClip={async (imageUrl, imageConcept, sceneIndex, tier, durationSec) => {
+        const data = await postJson(`${await base()}/generate-scene-clip`, {
+          imageUrl, imageConcept, sceneIndex, tier, durationSec, category,
         });
-        return { operationName: data.operationName as string };
+        return { jobId: data.jobId as string };
       }}
-      pollClip={async (operationName) => {
-        const url = `/api/admin/social-media-studio/generate-scene-clip/status?op=${encodeURIComponent(operationName)}${category ? `&category=${encodeURIComponent(category)}` : ""}`;
-        const res = await fetch(url);
+      startMusic={async (durationSeconds) => {
+        const data = await postJson(`${await base()}/generate-music`, { durationSeconds });
+        return { jobId: data.jobId as string };
+      }}
+      pollJob={async (jobId) => {
+        const res = await fetch(`${await base()}/video-job/${jobId}`);
         const data = await res.json();
-        if (!data.success) throw new Error(data.error ?? "Clip failed");
-        return { status: data.data.status as string, videoUrl: data.data.videoUrl as string | undefined };
+        if (!data.success) throw new Error(data.error ?? "Job status failed");
+        return data.data as SocialVideoJobView;
+      }}
+      cancelJob={async (jobId) => {
+        await fetch(`${await base()}/video-job/${jobId}/cancel`, { method: "POST" });
+      }}
+      findActiveJobs={async () => {
+        // Don't materialize a draft just to look for jobs — only poll if one already exists.
+        if (!postIdRef.current) return [];
+        const res = await fetch(`/api/admin/social-media-studio/history/${postIdRef.current}/video-jobs`);
+        const data = await res.json();
+        if (!data.success) return [];
+        return (data.data.jobs ?? []) as SocialVideoJobView[];
       }}
     />
   );
