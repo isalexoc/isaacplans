@@ -1,4 +1,5 @@
 import type { RenderPlan, RenderProviderStatus, VideoRenderProvider } from "./types";
+import { RenderPermanentError } from "./errors";
 
 // ─── Shotstack render provider ────────────────────────────────────────────────────
 // Pay-as-you-go video render API (no monthly minute quota). Translates a provider-neutral
@@ -57,6 +58,40 @@ function apiKey(): string {
   return key;
 }
 const round = (n: number) => Math.round(n * 1000) / 1000;
+
+// Build a detailed, actionable error from a failed Shotstack response. Reads the RAW body
+// (Shotstack/its gateway sometimes returns non-JSON or a bare "Forbidden") and, for auth/
+// client errors, spells out the most common cause: a key that doesn't match the environment.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function shotstackError(action: "submit" | "status", statusCode: number, raw: string, parsed: any): Error {
+  const env = shotstackEnv();
+  const detail =
+    parsed?.message ??
+    parsed?.response?.error ??
+    parsed?.error?.message ??
+    parsed?.error ??
+    (raw?.trim() ? raw.trim().slice(0, 300) : "no response body");
+
+  let message =
+    `Shotstack render ${action} failed (HTTP ${statusCode}) on the "${env}" environment ` +
+    `(${renderBase()}). Shotstack said: ${JSON.stringify(String(detail))}.`;
+
+  // 401/403 → the key is missing/invalid or for the OTHER environment. Retrying can't fix it.
+  if (statusCode === 401 || statusCode === 403) {
+    const needed = env === "stage" ? "Sandbox" : "Production";
+    message +=
+      ` This is an auth/config problem — retrying won't help. Shotstack's Sandbox and Production ` +
+      `environments each require their OWN key. With SHOTSTACK_ENV="${env}" you must use the ${needed} ` +
+      `API key from the Shotstack dashboard` +
+      (env === "v1" ? " and have a payment method / production activated on the account" : "") +
+      `. Fix SHOTSTACK_API_KEY (and SHOTSTACK_ENV) in .env AND in Vercel env vars, then redeploy.`;
+  }
+
+  // 4xx = client/config error (permanent); 5xx / network = transient (worth a retry).
+  return statusCode >= 400 && statusCode < 500
+    ? new RenderPermanentError(message, statusCode)
+    : new Error(message);
+}
 
 // How far the presenter clip is pushed down (offset.y; negative = down) so its lower body runs
 // off the frame bottom. Shared with the caption math so captions can clear the avatar's head.
@@ -189,9 +224,12 @@ async function submit(plan: RenderPlan): Promise<{ jobId: string }> {
     headers: { "x-api-key": apiKey(), "Content-Type": "application/json" },
     body:    JSON.stringify(body),
   });
-  const data = await res.json().catch(() => ({}));
+  const raw = await res.text().catch(() => "");
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let data: any = {};
+  try { data = raw ? JSON.parse(raw) : {}; } catch { /* non-JSON body (e.g. a gateway "Forbidden") */ }
   if (!res.ok || !data?.success || !data?.response?.id) {
-    throw new Error(`Shotstack render submit failed (HTTP ${res.status}): ${data?.message ?? "unknown error"}`);
+    throw shotstackError("submit", res.status, raw, data);
   }
   return { jobId: String(data.response.id) };
 }
@@ -202,9 +240,12 @@ async function status(jobId: string): Promise<RenderProviderStatus> {
   const res = await fetch(`${renderBase()}/${encodeURIComponent(jobId)}`, {
     headers: { "x-api-key": apiKey() },
   });
-  const data = await res.json().catch(() => ({}));
+  const raw = await res.text().catch(() => "");
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let data: any = {};
+  try { data = raw ? JSON.parse(raw) : {}; } catch { /* non-JSON body */ }
   if (!res.ok || !data?.success) {
-    throw new Error(`Shotstack status check failed (HTTP ${res.status}): ${data?.message ?? "unknown error"}`);
+    throw shotstackError("status", res.status, raw, data);
   }
 
   const s = String(data.response?.status ?? "queued");
