@@ -391,3 +391,13 @@ export const missedCallDrafts = pgTable("missed_call_drafts", {
   createdAtIdx: index("missed_call_drafts_created_at_idx").on(table.createdAt),
 }));
 
+// Generic admin-editable key/value settings (small config the admin can change without a
+// deploy — e.g. the final-expense get-covered hero image override for A/B testing).
+// Reads on public pages must be cached (unstable_cache + revalidateTag) so this does NOT
+// wake Neon on every ad click; writes revalidate the tag. See lib/get-covered-fast/hero-setting.ts.
+export const appSettings = pgTable("app_settings", {
+  key: text("key").primaryKey(),
+  value: text("value").notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+

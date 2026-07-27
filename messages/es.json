@@ -2302,7 +2302,9 @@
         "invalidZip": "Ingrese un código postal válido en EE. UU. (ej. 12345 o 12345-6789).",
         "line1Note": "Necesaria para verificar los planes aprobados disponibles en su área.",
         "searchPlaceholder": "Empiece a escribir su dirección...",
-        "searchUnavailable": "La autocompletación de direcciones no está disponible temporalmente. Ingrese su dirección manualmente."
+        "searchUnavailable": "La autocompletación de direcciones no está disponible temporalmente. Ingrese su dirección manualmente.",
+        "emailLabel": "Correo electrónico (opcional)",
+        "emailNote": "Agréguelo para enviarle su cotización e información."
       },
       "done": {
         "title": "Listo",

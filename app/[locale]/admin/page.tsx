@@ -19,6 +19,7 @@ import {
   IdCard,
   PhoneCall,
   BarChart3,
+  Image as ImageIcon,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import {
@@ -117,6 +118,13 @@ const CONTENT_CMS_TOOLS: ToolCard[] = [
 ];
 
 const FINAL_EXPENSE_TOOLS: ToolCard[] = [
+  {
+    title: "Get Covered Hero Image",
+    description:
+      "Swap the hero image on the final-expense get-covered ads page to A/B test what converts.",
+    href: "/en/admin/get-covered-hero",
+    icon: ImageIcon,
+  },
   {
     title: "Sale Sticker",
     description:

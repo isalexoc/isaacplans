@@ -334,14 +334,17 @@ export async function POST(request: NextRequest) {
       country,
     } = body as Record<string, string | undefined>;
 
+    // Email is optional here (the get-covered funnel now collects it in Step 2, and the
+    // contact was created in Step 1 with phone only). We still need one identifier —
+    // email or phone — to authenticate the update against the existing contact.
     if (
       !contactId ||
-      !email?.trim() ||
       !dateOfBirth?.trim() ||
       !addressLine1?.trim() ||
       !city?.trim() ||
       !state?.trim() ||
-      !postalCode?.trim()
+      !postalCode?.trim() ||
+      (!email?.trim() && !phone?.trim())
     ) {
       return NextResponse.json(
         {
@@ -349,14 +352,22 @@ export async function POST(request: NextRequest) {
           error: "Missing required fields",
           required: [
             "contactId",
-            "email",
             "dateOfBirth",
             "addressLine1",
             "city",
             "state",
             "postalCode",
+            "email or phone",
           ],
         },
+        { status: 400 }
+      );
+    }
+
+    const emailTrimmed = email?.trim() ?? "";
+    if (emailTrimmed && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailTrimmed)) {
+      return NextResponse.json(
+        { success: false, error: "Invalid email" },
         { status: 400 }
       );
     }
@@ -424,7 +435,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const requestedEmail = email.toLowerCase().trim();
+    const requestedEmail = emailTrimmed.toLowerCase();
     const crmEmail = extractCrmEmail(contact);
     const crmPhone = typeof contact.phone === "string" ? contact.phone : "";
     const emailOk = Boolean(crmEmail) && crmEmail === requestedEmail;
@@ -485,6 +496,11 @@ export async function POST(request: NextRequest) {
     };
     if (ctry) {
       addressPayload.country = ctry;
+    }
+    // Set the email captured in Step 2, but only when the contact has none yet
+    // (Step 1 created it phone-only). Never overwrite an existing email here.
+    if (requestedEmail && !crmEmail) {
+      addressPayload.email = requestedEmail;
     }
     const customFieldUpdates: CrmCustomFieldRow[] = [];
     if (aptTrimmed && aptFieldId) {
@@ -567,9 +583,11 @@ export async function POST(request: NextRequest) {
         errText
       );
 
-      // Some workspaces reject `country`; retry without it.
-      if (addressPayload.country != null) {
-        const { country: _c, ...withoutCountry } = addressPayload;
+      // Retry without `country` (some workspaces reject it) and without `email`
+      // (a duplicate-email conflict must never block saving the address/DOB — the
+      // critical data; the Step 2 email is a best-effort add).
+      if (addressPayload.country != null || addressPayload.email != null) {
+        const { country: _c, email: _e, ...withoutOptional } = addressPayload;
         putRes = await fetch(putUrl, {
           method: "PUT",
           headers: {
@@ -578,7 +596,7 @@ export async function POST(request: NextRequest) {
             Authorization: `Bearer ${piToken}`,
             Version: "2021-07-28",
           },
-          body: JSON.stringify(withoutCountry),
+          body: JSON.stringify(withoutOptional),
         });
       }
 

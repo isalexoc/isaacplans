@@ -40,6 +40,10 @@ const CRM_PHONE_TEL = "tel:+15404261804";
 const CRM_PHONE_DISPLAY = "540-426-1804";
 const WHATSAPP_CHAT_HREF = "https://wa.me/15406813507";
 const DOB_ISO_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+/** Step 1 collects first name, last name, and phone only — email moved to Step 2 (optional). */
+const feStep1ContactSchema = shortTermMedicalFormSchema.omit({ email: true });
 
 function getTodayIsoLocal(): string {
   const now = new Date();
@@ -154,9 +158,20 @@ function scrollDobBlockIntoViewMobileIfNeeded(container: HTMLElement | null) {
 }
 
 type Phase = "contact" | "address" | "done";
-type AddressFieldErrorKey = "dob" | "addressLine1" | "city" | "state" | "postalCode";
+type AddressFieldErrorKey =
+  | "dob"
+  | "addressLine1"
+  | "city"
+  | "state"
+  | "postalCode"
+  | "email";
 
-export default function FinalExpenseGetCoveredFunnel() {
+export default function FinalExpenseGetCoveredFunnel({
+  heroImageUrl,
+}: {
+  /** Admin-overridable hero art (desktop split panel). Falls back to the locale default. */
+  heroImageUrl?: string;
+}) {
   const locale = useLocale();
   const isES = locale.startsWith("es");
   const t = useTranslations("finalExpenseGetCoveredPage.funnel");
@@ -611,10 +626,9 @@ export default function FinalExpenseGetCoveredFunnel() {
     setFieldErrors({});
     trackFeGetCoveredSubmitAttempt({ phase: "contact", locale });
 
-    const parsed = shortTermMedicalFormSchema.safeParse({
+    const parsed = feStep1ContactSchema.safeParse({
       firstName,
       lastName,
-      email,
       phone,
     });
 
@@ -644,7 +658,6 @@ export default function FinalExpenseGetCoveredFunnel() {
 
       const capFirst = capitalizeName(parsed.data.firstName.trim());
       const capLast = capitalizeName(parsed.data.lastName.trim());
-      const emailNorm = parsed.data.email.trim().toLowerCase();
       const phoneDigits = phoneE164.replace(/\D/g, "");
       const phonePayload =
         phoneDigits.length === 11 && phoneDigits.startsWith("1")
@@ -657,7 +670,6 @@ export default function FinalExpenseGetCoveredFunnel() {
         body: JSON.stringify({
           firstName: capFirst,
           lastName: capLast,
-          email: emailNorm,
           phone: phonePayload,
           finalExpenseData: {
             language: isES ? "es" : "en",
@@ -707,7 +719,6 @@ export default function FinalExpenseGetCoveredFunnel() {
       setContactId(id);
 
       const userData = {
-        em: emailNorm,
         fn: capFirst.toLowerCase(),
         ln: capLast.toLowerCase(),
         ph: phoneDigits.replace(/^1/, ""),
@@ -745,7 +756,7 @@ export default function FinalExpenseGetCoveredFunnel() {
     setAddressFieldErrors({});
     trackFeGetCoveredSubmitAttempt({ phase: "address", locale });
 
-    if (!contactId || !email.trim()) {
+    if (!contactId) {
       setSubmitError(
         isES ? "Sesión inválida. Vuelva a enviar el formulario." : "Invalid session. Please submit the form again."
       );
@@ -753,6 +764,10 @@ export default function FinalExpenseGetCoveredFunnel() {
     }
 
     const nextAddressErrors: Partial<Record<AddressFieldErrorKey, string>> = {};
+    const emailTrimmed = email.trim();
+    if (emailTrimmed && !EMAIL_REGEX.test(emailTrimmed)) {
+      nextAddressErrors.email = tForm("invalidEmail");
+    }
     const dobPartsComplete = Boolean(dobMonth && dobDay && dobYear);
     if (!dobPartsComplete) {
       nextAddressErrors.dob = t("address.requiredDob");
@@ -792,21 +807,26 @@ export default function FinalExpenseGetCoveredFunnel() {
 
     setLoadingAddress(true);
     try {
+      const appendPayload: Record<string, unknown> = {
+        contactId,
+        phone: phoneE164,
+        dateOfBirth,
+        addressLine1: addressLine1.trim(),
+        addressLine2: addressLine2.trim() || undefined,
+        city: city.trim(),
+        state: stateVal.trim(),
+        postalCode: postalCode.trim(),
+        country: "US",
+      };
+      // Email is optional now (collected in Step 2). Only send it when provided so the
+      // CRM contact — created in Step 1 with phone only — gets the email set.
+      const emailForAppend = email.trim().toLowerCase();
+      if (emailForAppend) appendPayload.email = emailForAppend;
+
       const res = await fetch("/api/contact-append-address", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contactId,
-          email: email.trim().toLowerCase(),
-          phone: phoneE164,
-          dateOfBirth,
-          addressLine1: addressLine1.trim(),
-          addressLine2: addressLine2.trim() || undefined,
-          city: city.trim(),
-          state: stateVal.trim(),
-          postalCode: postalCode.trim(),
-          country: "US",
-        }),
+        body: JSON.stringify(appendPayload),
       });
 
       const data = await res.json().catch(() => ({}));
@@ -876,7 +896,7 @@ export default function FinalExpenseGetCoveredFunnel() {
       <div className="relative z-10 mx-auto flex min-h-0 max-w-6xl flex-col lg:min-h-[min(100vh,920px)] lg:flex-row lg:items-stretch">
         <div className="relative hidden overflow-hidden bg-slate-900 lg:sticky lg:block lg:top-0 lg:min-h-[min(100vh,920px)] lg:w-[46%] lg:shrink-0">
           <Image
-            src={getFinalExpenseGetCoveredHeroImageUrl(locale)}
+            src={heroImageUrl ?? getFinalExpenseGetCoveredHeroImageUrl(locale)}
             alt=""
             fill
             priority
@@ -1011,30 +1031,6 @@ export default function FinalExpenseGetCoveredFunnel() {
                     />
                     {fieldErrors.lastName && (
                       <p className={fieldErrorBase}>{fieldErrors.lastName}</p>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className={labelBase}>
-                      {tForm("email")} <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="email"
-                      name="email"
-                      autoComplete="email"
-                      value={email}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        setEmail(value);
-                        trackFieldStartedOnce("email", "contact");
-                        trackFieldCompletedOnce("email", "contact", value.trim().length > 0);
-                        if (value.trim()) clearFieldError("email");
-                      }}
-                      className={cn(inputBase, fieldErrors.email && "border-red-500")}
-                      disabled={loadingContact}
-                    />
-                    {fieldErrors.email && (
-                      <p className={fieldErrorBase}>{fieldErrors.email}</p>
                     )}
                   </div>
 
@@ -1376,6 +1372,40 @@ export default function FinalExpenseGetCoveredFunnel() {
                       </div>
                     </div>
                     {addressFieldErrors.dob && <p className={fieldErrorBase}>{addressFieldErrors.dob}</p>}
+                  </div>
+
+                  <div>
+                    <label htmlFor="fe-get-covered-email" className={labelBase}>
+                      {t("address.emailLabel")}
+                    </label>
+                    <input
+                      id="fe-get-covered-email"
+                      type="email"
+                      name="email"
+                      autoComplete="email"
+                      inputMode="email"
+                      value={email}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setEmail(value);
+                        trackFieldStartedOnce("email", "address");
+                        trackFieldCompletedOnce("email", "address", EMAIL_REGEX.test(value.trim()));
+                        setAddressFieldErrors((prev) => {
+                          if (!prev.email) return prev;
+                          const next = { ...prev };
+                          delete next.email;
+                          return next;
+                        });
+                      }}
+                      className={cn(inputBase, addressFieldErrors.email && "border-red-500")}
+                      disabled={loadingAddress}
+                    />
+                    {addressFieldErrors.email && (
+                      <p className={fieldErrorBase}>{addressFieldErrors.email}</p>
+                    )}
+                    <p className="mt-1.5 text-xs leading-snug text-slate-500 dark:text-slate-400">
+                      {t("address.emailNote")}
+                    </p>
                   </div>
 
                   <Button

@@ -2311,7 +2311,9 @@
         "invalidZip": "Enter a valid U.S. ZIP code (e.g. 12345 or 12345-6789).",
         "line1Note": "Required to check state-approved plans available at your address.",
         "searchPlaceholder": "Start typing your street address...",
-        "searchUnavailable": "Address autocomplete is temporarily unavailable. Please enter your address manually."
+        "searchUnavailable": "Address autocomplete is temporarily unavailable. Please enter your address manually.",
+        "emailLabel": "Email (optional)",
+        "emailNote": "Add it so we can send your quote and details."
       },
       "done": {
         "title": "You’re all set",
