@@ -24,6 +24,7 @@ import {
 import { submitPresenterVideo, getPresenterStatus } from "./heygen-presenter";
 import { submitSceneClip, getSceneClipStatus } from "./veo";
 import { generateCategoryMusic } from "./music-generator";
+import { RenderPermanentError } from "./render/errors";
 import type { VideoStoryboard, VideoImage } from "./types";
 import type { SocialVideoJobState } from "./video-job-types";
 
@@ -113,7 +114,13 @@ export async function processVideoJob(jobId: string): Promise<ProcessVideoJobRes
     }
     return failTransient(current, outcome.error);
   } catch (err) {
-    return failTransient(current, err instanceof Error ? err.message : "Video job failed");
+    const msg = err instanceof Error ? err.message : "Video job failed";
+    // Config/auth errors (bad or mismatched provider key) never succeed on retry — fail now.
+    if (err instanceof RenderPermanentError) {
+      await markJobFailed(jobId, msg, 1_000_000, { ...(current.jobState ?? {}), lastError: msg });
+      return { kind: "done" };
+    }
+    return failTransient(current, msg);
   }
 }
 
