@@ -2,6 +2,11 @@ import { pgTable, text, timestamp, boolean, integer, index, uniqueIndex, jsonb, 
 import type { LeaveBehindQuoteData } from "@/lib/leave-behind-clients";
 import type { IntakeData } from "@/lib/iul-intake/schema";
 import type { StructuredCallSummary } from "@/lib/call-summary-structured";
+import type {
+  SocialVideoJobState,
+  SocialVideoJobInput,
+  SocialVideoImagesResult,
+} from "@/lib/social-media-studio/video-job-types";
 
 // Guides table - stores all available guides
 export const guides = pgTable("guides", {
@@ -291,6 +296,38 @@ export const socialScheduledPosts = pgTable("social_scheduled_posts", {
   pendingIdx: index("ssp_pending_idx").on(t.status, t.scheduledFor),
   sanityIdx:  index("ssp_sanity_idx").on(t.sanityPostId),
   userIdx:    index("ssp_user_idx").on(t.userId, t.status),
+}));
+
+/**
+ * Durable video-generation jobs — one row per long-running generation action
+ * (image build, per-scene Veo clip, final render, music). Driven by a QStash worker
+ * that advances a state machine and persists `jobState` so the browser can close/refresh
+ * and reattach to a running job. Mirrors `callSummaryProcessed` (status + jobState + backoff).
+ * @see lib/social-media-studio/video-job-store.ts / video-job-processor.ts
+ */
+export const socialVideoJobs = pgTable("social_video_jobs", {
+  id:              text("id").primaryKey(), // nanoid
+  userId:          text("user_id").notNull(),
+  sanityPostId:    text("sanity_post_id").notNull(), // socialPost._id the job is keyed on
+  kind:            text("kind").notNull(),           // images | clip | render | music
+  status:          text("status").notNull().default("pending"), // pending|processing|done|failed|cancelled
+  category:        text("category"),
+  voiceLanguage:   text("voice_language"),
+  sceneIndex:      integer("scene_index"),           // clip only
+  input:           jsonb("input").$type<SocialVideoJobInput | null>(),
+  jobState:        jsonb("job_state").$type<SocialVideoJobState | null>(),
+  resultUrl:       text("result_url"),               // final video / clip / music URL
+  resultData:      jsonb("result_data").$type<SocialVideoImagesResult | null>(), // images: storyboard + stack
+  errorMessage:    text("error_message"),
+  attemptCount:    integer("attempt_count").notNull().default(0),
+  nextRetryAt:     timestamp("next_retry_at"),
+  qstashMessageId: text("qstash_message_id"),         // last scheduled continuation tick (cancel/reschedule)
+  createdAt:       timestamp("created_at").defaultNow().notNull(),
+  updatedAt:       timestamp("updated_at").defaultNow().notNull(),
+}, (t) => ({
+  postIdx:   index("svj_post_idx").on(t.sanityPostId, t.kind, t.status),
+  statusIdx: index("svj_status_idx").on(t.status, t.nextRetryAt),
+  userIdx:   index("svj_user_idx").on(t.userId, t.status),
 }));
 
 /**

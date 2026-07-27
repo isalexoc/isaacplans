@@ -243,6 +243,7 @@ export interface SocialPostPublishRequest {
   videoStoryboard?: VideoStoryboard; // active scene set used to render the video
   status: SocialPostStatus;
   tags?: string[];               // optional manual tags for Sanity filtering
+  existingId?: string;           // when set, update this doc (e.g. a draft materialized for video gen) instead of creating a new one
 }
 
 // ─── Video generation request bodies ──────────────────────────────────────────

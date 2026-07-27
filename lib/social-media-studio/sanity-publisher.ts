@@ -35,6 +35,49 @@ async function generateUniqueSlug(client: WriteClient, title: string): Promise<s
   return `${base}-${counter}`;
 }
 
+/**
+ * Create a minimal draft socialPost so a wizard-initiated video generation has a stable
+ * document id to key its durable jobs on (and to persist videoImages/storyboard/url onto).
+ * The wizard later finishes it via {@link publishSocialPost} with `existingId`, so no
+ * duplicate document is created.
+ */
+export async function materializeSocialPostDraft(params: {
+  source: SocialPostPublishRequest["source"];
+  videoScript?: SocialPostPublishRequest["videoScript"];
+}): Promise<{ id: string }> {
+  const client = getWriteClient();
+  const now = new Date().toISOString();
+  const videoScript = params.videoScript
+    ? {
+        duration:         params.videoScript.duration,
+        hookScript:       params.videoScript.hookScript,
+        fullScript:       params.videoScript.fullScript,
+        onScreenText:     params.videoScript.onScreenTextSuggestions,
+        brollSuggestions: params.videoScript.brollSuggestions,
+        voiceoverTips:    params.videoScript.voiceoverTips,
+        suggestedCaption: params.videoScript.suggestedCaption,
+      }
+    : undefined;
+
+  const created = await client.create({
+    _type:          "socialPost",
+    sourceType:     params.source.type,
+    sourceId:       params.source.id ?? null,
+    sourceTitle:    params.source.title,
+    sourceSlug:     params.source.slug ?? null,
+    sourceLocale:   params.source.locale ?? "en",
+    sourceUrl:      params.source.publicUrl ?? null,
+    sourceImageUrl: params.source.imageUrl ?? null,
+    sourceCategory: params.source.category ?? null,
+    ...(videoScript ? { videoScript } : {}),
+    status:    "draft",
+    tags:      [],
+    createdAt: now,
+    updatedAt: now,
+  });
+  return { id: created._id };
+}
+
 export async function publishSocialPost(
   req: SocialPostPublishRequest
 ): Promise<PublishedSocialPost> {
@@ -117,6 +160,14 @@ export async function publishSocialPost(
     createdAt:        now,
     updatedAt:        now,
   };
+
+  // Update the previously-materialized draft in place (no duplicate document).
+  if (req.existingId) {
+    const { _type: _t, createdAt: _c, ...updateFields } = doc;
+    void _t; void _c;
+    await client.patch(req.existingId).set(updateFields).commit();
+    return { sanityDocumentId: req.existingId, slug };
+  }
 
   const created = await client.create(doc);
 

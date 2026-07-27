@@ -66,6 +66,8 @@ interface StudioState {
   scriptError?: string;
   generatedVideo?: GeneratedVideo;
   generatedVideoStoryboard?: VideoStoryboard;
+  /** Draft socialPost id materialized for durable video generation (also the doc Save updates). */
+  draftPostId?: string;
   savedResult?: PublishedSocialPost;
 }
 
@@ -1185,6 +1187,21 @@ function ExportStep({
   const images = state.images;
   const script = state.videoScript;
 
+  // Materialize (once) a draft socialPost so wizard video generation has a stable id to key
+  // its durable jobs on. The final Save updates this same draft (existingId) — no duplicate.
+  const draftPostIdRef = useRef<string | null>(state.draftPostId ?? null);
+  async function ensureDraftPostId(): Promise<string> {
+    if (draftPostIdRef.current) return draftPostIdRef.current;
+    const data = await postJson("/api/admin/social-media-studio/materialize-draft", {
+      source: state.source,
+      videoScript: state.videoScript,
+    });
+    const id = (data as { id: string }).id;
+    draftPostIdRef.current = id;
+    setState((prev) => ({ ...prev, draftPostId: id }));
+    return id;
+  }
+
   async function saveToSanity() {
     if (!state.source || !copies.length) return;
     setIsSaving(true);
@@ -1202,6 +1219,7 @@ function ExportStep({
           .map((s) => ({ url: s.imageUrl, concept: s.imageConcept, createdAt: new Date().toISOString() })),
         status: saveStatus,
         tags,
+        existingId: state.draftPostId, // update the draft materialized for video gen (no duplicate doc)
       });
       setState((prev) => ({ ...prev, savedResult: result.data as PublishedSocialPost }));
     } catch (err) {
@@ -1321,6 +1339,8 @@ function ExportStep({
           initialStoryboard={state.generatedVideoStoryboard}
           onVideoReady={(video) => setState((prev) => ({ ...prev, generatedVideo: video }))}
           onStoryboardChange={(sb) => setState((prev) => ({ ...prev, generatedVideoStoryboard: sb }))}
+          ensurePostId={ensureDraftPostId}
+          currentPostId={state.draftPostId}
         />
       )}
 
