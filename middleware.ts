@@ -119,10 +119,13 @@ export default clerkMiddleware(async (auth, req) => {
   ) {
     response.headers.set("x-is-ads-landing", "1");
   }
-  // IUL get-covered gets an even barer footer (logo + copyright only, no links).
+  // "Bare" get-covered funnels (IUL + final expense) get an even barer footer
+  // (logo + copyright only, no links) and a logo-only + phone header.
   if (
     pathname.includes("/iul/get-covered") ||
-    pathname.includes("/iul/obtener-cobertura")
+    pathname.includes("/iul/obtener-cobertura") ||
+    pathname.includes("/final-expense/get-covered") ||
+    pathname.includes("/gastos-finales/obtener-cobertura")
   ) {
     response.headers.set("x-ads-landing-variant", "iul-bare");
   }

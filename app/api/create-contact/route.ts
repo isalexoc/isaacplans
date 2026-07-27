@@ -61,7 +61,7 @@ async function trySendMetaLeadCapiLead(
   request: NextRequest,
   opts: {
     meta: CreateContactMetaBody | undefined;
-    email: string;
+    email?: string;
     phone: string;
     firstName: string;
     lastName: string;
@@ -195,7 +195,7 @@ async function trySendMetaLeadCapiLead(
     console.log("[Meta CAPI] Sending event:", {
       eventId: meta!.eventId,
       eventName: "Lead",
-      email: `${email.slice(0, 3)}***`,
+      email: email ? `${email.slice(0, 3)}***` : "(none — phone-only lead)",
       hasFbp: !!meta?.fbp,
       hasFbc: !!meta?.fbc,
       contentName,
@@ -295,13 +295,15 @@ export async function POST(request: NextRequest) {
                       : "other",
     });
 
-    // Validate required fields
-    if (!firstName || !lastName || !email || !phone) {
+    // Validate required fields. Email is optional (e.g. the final-expense get-covered
+    // funnel captures name + phone in Step 1 and collects email later in Step 2);
+    // phone is the required contact key. Callers that send an email are unaffected.
+    if (!firstName || !lastName || !phone) {
       return NextResponse.json(
-        { 
+        {
           success: false,
           error: "Missing required fields",
-          required: ["firstName", "lastName", "email", "phone"]
+          required: ["firstName", "lastName", "phone"]
         },
         { status: 400 }
       );
@@ -548,7 +550,7 @@ export async function POST(request: NextRequest) {
         '',
         'Contact:',
         `  Name: ${firstName} ${lastName}`,
-        `  Email: ${email}`,
+        `  Email: ${email || 'Not provided (collected in Step 2)'}`,
         `  Phone: ${phone}`,
         '',
         'Lead Details:',
@@ -731,12 +733,15 @@ export async function POST(request: NextRequest) {
     const contactPayload: any = {
       firstName,
       lastName,
-      email,
       phone,
       locationId,
       source: leadSource,
     };
-    
+    // Email is optional — only include it when provided (phone-only leads are valid).
+    if (email) {
+      contactPayload.email = email;
+    }
+
     // Add customFields if we have any
     if (customFieldsArray.length > 0) {
       contactPayload.customFields = customFieldsArray;
@@ -869,8 +874,8 @@ export async function POST(request: NextRequest) {
           });
         }
 
-        // 2) Fallback: robust POST /contacts/search by email.
-        if (!existingContactId) {
+        // 2) Fallback: robust POST /contacts/search by email (only if an email was provided).
+        if (!existingContactId && email) {
           const found = await agentCrmFindContactByEmail(
             email,
             locationId,

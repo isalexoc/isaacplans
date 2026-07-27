@@ -24,13 +24,17 @@ export function isAdsLandingPathResolved(pathname: string | null | undefined): b
 }
 
 /**
- * IUL get-covered ads pages get an even barer chrome than the generic ads landings:
- * logo + phone only, both NON-clickable (the lead form is the sole interactive element).
+ * "Bare" ads landings get an even barer chrome than the generic ads landings:
+ * logo + phone only (logo NON-clickable), plus a bare footer (logo + copyright, no links).
+ * The lead form is the sole interactive element / exit. Applies to the IUL and
+ * final-expense get-covered funnels.
  * Pathnames are locale-agnostic (next-intl usePathname omits the locale prefix).
  */
 export const IUL_BARE_LANDING_PATHNAMES = [
   "/iul/get-covered",
   "/iul/obtener-cobertura",
+  "/final-expense/get-covered",
+  "/gastos-finales/obtener-cobertura",
 ] as const;
 
 export function isIulBareLandingPath(pathname: string | null | undefined): boolean {

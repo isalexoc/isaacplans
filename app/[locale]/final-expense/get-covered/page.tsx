@@ -3,6 +3,7 @@ import { getLocale, getTranslations } from "next-intl/server";
 import FinalExpenseGetCoveredFunnel from "@/components/final-expense/final-expense-get-covered-funnel";
 import ServicePageTracker from "@/components/service-page-tracker";
 import { getFinalExpenseGetCoveredOgImageUrl } from "@/lib/get-covered-fast/constants";
+import { getEffectiveFeGetCoveredHeroUrl } from "@/lib/get-covered-fast/hero-setting";
 import {
   getFinalExpenseGetCoveredAdsBreadcrumbLd,
   getFinalExpenseGetCoveredAdsPageLd,
@@ -92,13 +93,15 @@ export default async function FinalExpenseGetCoveredAdsPage() {
     tMeta("breadcrumbPage")
   );
 
+  const heroImageUrl = await getEffectiveFeGetCoveredHeroUrl(locale);
+
   return (
     <div className="relative min-h-screen">
       <ServicePageTracker
         serviceName="Final expense get covered"
         serviceCategory="final-expense-get-covered-ads"
       />
-      <FinalExpenseGetCoveredFunnel />
+      <FinalExpenseGetCoveredFunnel heroImageUrl={heroImageUrl} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{

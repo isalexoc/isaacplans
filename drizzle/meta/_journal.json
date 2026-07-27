@@ -106,6 +106,13 @@
       "when": 1784670654817,
       "tag": "0014_perpetual_squadron_sinister",
       "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "5",
+      "when": 1785181074026,
+      "tag": "0015_thankful_smiling_tiger",
+      "breakpoints": true
     }
   ]
 }
