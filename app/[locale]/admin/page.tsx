@@ -19,6 +19,7 @@ import {
   IdCard,
   PhoneCall,
   BarChart3,
+  HeartPulse,
   Image as ImageIcon,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -78,6 +79,13 @@ const OPERATIONS_TOOLS: ToolCard[] = [
     description: "Manage IUL application intakes and review submitted client applications.",
     href: "/en/iul/intake",
     icon: ClipboardList,
+  },
+  {
+    title: "ACA Intake",
+    description:
+      "Send a secure health coverage form, then review household details and uploaded documents.",
+    href: "/en/aca/intake",
+    icon: HeartPulse,
   },
   {
     title: "Agent Licenses",
