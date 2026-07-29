@@ -20,6 +20,11 @@ const isProtectedRoute = createRouteMatcher([
   '/iul/admision(.*)',
   '/en/iul/intake(.*)',
   '/es/iul/admision(.*)',
+  // ACA intake (form + dashboard) — same token-scoped model as IUL.
+  '/aca/intake(.*)',
+  '/aca/admision(.*)',
+  '/en/aca/intake(.*)',
+  '/es/aca/admision(.*)',
 ]);
 
 // Admin-only surfaces: the /admin dashboard + tools, Sanity Studio, and every
@@ -76,6 +81,7 @@ export default clerkMiddleware(async (auth, req) => {
     req.nextUrl.pathname.startsWith('/api/leave-behind') ||
     req.nextUrl.pathname.startsWith('/api/sale-sticker') ||
     req.nextUrl.pathname.startsWith('/api/iul-intake') ||
+    req.nextUrl.pathname.startsWith('/api/aca-intake') ||
     req.nextUrl.pathname.startsWith('/api/newsletter')
   ) {
     return;
@@ -143,6 +149,7 @@ export const config = {
     "/api/leave-behind/:path*",
     "/api/sale-sticker/:path*",
     "/api/iul-intake/:path*",
+    "/api/aca-intake/:path*",
     "/api/admin/:path*",
     "/api/newsletter/:path*",
     "/studio/:path*",

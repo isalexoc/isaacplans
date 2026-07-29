@@ -59,6 +59,18 @@ export const routing = defineRouting({
       en: "/aca/calendar",
       es: "/aca/calendario",
     },
+    "/aca/intake": {
+      en: "/aca/intake",
+      es: "/aca/admision",
+    },
+    "/aca/intake/[token]": {
+      en: "/aca/intake/[token]",
+      es: "/aca/admision/[token]",
+    },
+    "/aca/intake/[token]/view": {
+      en: "/aca/intake/[token]/view",
+      es: "/aca/admision/[token]/view",
+    },
     "/about": {
       en: "/about",
       es: "/sobre-mi",
