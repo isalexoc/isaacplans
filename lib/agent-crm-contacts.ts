@@ -359,7 +359,19 @@ export async function agentCrmGetContactNative(
  * duplicates, then creates a minimal contact. Returns the contact id (or null on failure).
  */
 export async function agentCrmEnsureContact(
-  input: { email?: string; phone?: string; firstName?: string; lastName?: string },
+  input: {
+    email?: string;
+    phone?: string;
+    firstName?: string;
+    lastName?: string;
+    /**
+     * Contact `source` stamped on newly created contacts. Defaults to "iul_intake" for
+     * backwards compatibility — pass an explicit value from any other product line so
+     * source-filtered CRM workflows don't misfire (an ACA client is not an IUL lead).
+     * Ignored when an existing contact is matched by email/phone.
+     */
+    source?: string;
+  },
   locationId: string,
   token: string,
   logPrefix = "[AGENT_CRM]"
@@ -376,7 +388,7 @@ export async function agentCrmEnsureContact(
     if (found?.id) return found.id;
   }
 
-  const body: Record<string, unknown> = { locationId, source: "iul_intake" };
+  const body: Record<string, unknown> = { locationId, source: input.source ?? "iul_intake" };
   if (email) body.email = email;
   if (phone) body.phone = phone;
   if (input.firstName?.trim()) body.firstName = input.firstName.trim();

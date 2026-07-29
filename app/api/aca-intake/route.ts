@@ -157,7 +157,9 @@ export async function POST(request: NextRequest) {
       linkLocaleOverride = locale;
       if (creds) {
         crmContactId = await agentCrmEnsureContact(
-          { email, phone, firstName, lastName },
+          // Explicit source: without it the shared helper stamps every new contact
+          // "iul_intake", which makes an ACA client match source-filtered IUL workflows.
+          { email, phone, firstName, lastName, source: "aca_intake" },
           creds.locationId,
           creds.token,
           "[ACA_INTAKE]"
