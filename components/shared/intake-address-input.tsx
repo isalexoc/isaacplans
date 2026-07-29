@@ -14,6 +14,12 @@ export type ResolvedAddress = {
   city: string;
   state: string;
   zip: string;
+  /**
+   * County name as Google reports it (e.g. "Miami-Dade County"). Empty when Places does not
+   * return `administrative_area_level_2`. ACA needs this because rating areas are county-level
+   * and a single ZIP can straddle two counties; IUL ignores it.
+   */
+  county: string;
   /** Full single-line address (street, city, state zip) for fields that store the whole thing. */
   formatted: string;
 };
@@ -38,6 +44,7 @@ function parsePlaceComponents(components: GoogleAddressComponent[] | undefined):
   const locality =
     getPart("locality") || getPart("postal_town") || getPart("administrative_area_level_3");
   const stateShort = getPart("administrative_area_level_1", "shortText");
+  const county = getPart("administrative_area_level_2");
   const zip = getPart("postal_code");
   const line1 = [streetNumber, route].filter(Boolean).join(" ").trim();
   if (!line1) return null;
@@ -45,13 +52,15 @@ function parsePlaceComponents(components: GoogleAddressComponent[] | undefined):
   const formatted = [line1, locality, [state, zip].filter(Boolean).join(" ")]
     .filter(Boolean)
     .join(", ");
-  return { line1, city: locality, state, zip, formatted };
+  return { line1, city: locality, state, zip, county, formatted };
 }
 
 /**
  * Google Places street-address autocomplete, reusing the proven /final-expense/get-covered
  * approach. Loads the Maps script once (deduped by id), mounts a `PlaceAutocompleteElement`,
  * and degrades to a plain text input if Maps is unavailable so the field is always usable.
+ *
+ * Shared by the IUL and ACA intake forms.
  */
 export default function IntakeAddressInput({
   id,

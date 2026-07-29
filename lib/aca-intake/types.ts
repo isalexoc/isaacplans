@@ -1,0 +1,29 @@
+/** Client-safe DTOs for ACA intake (no server-only imports). */
+
+import type { AcaIntakeData } from "./schema";
+
+export type AcaIntakeStatus = "draft" | "in_progress" | "completed";
+
+/** Summary row for the agent dashboard list. */
+export type AcaIntakeSummary = {
+  id: string;
+  token: string;
+  status: AcaIntakeStatus;
+  contactName: string | null;
+  contactEmail: string | null;
+  contactPhone: string | null;
+  crmContactId: string | null;
+  /** Admin granted the client edit access after submission (re-locks on re-submit). */
+  reopenedForClient: boolean;
+  createdAt: string | null;
+  updatedAt: string | null;
+  completedAt: string | null;
+};
+
+/** Full session payload returned to an authorized user (sensitive fields decrypted). */
+export type AcaIntakeSession = AcaIntakeSummary & {
+  data: AcaIntakeData;
+  locale: string;
+  /** "owner" (agent) or "client" — controls UI affordances like sensitive reveal. */
+  role: "owner" | "client";
+};

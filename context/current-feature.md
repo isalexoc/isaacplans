@@ -2,11 +2,44 @@
 
 ## Status
 
-Not Started
+In Progress — ACA Client Intake (branch `feature/aca-intake`)
 
 ## Goals
 
+Mirror the IUL secure-link intake for ACA ahead of open enrollment: agent creates a session from
+`/aca/intake`, a token link syncs to the contact's `aca_intake_link` field, a GHL workflow sends it,
+and the client fills an 8-step autosaving form on their phone.
+
+Field spec (approved, rev 2): [context/features/aca-intake/fields-spec.md](features/aca-intake/fields-spec.md)
+
 ## Notes
+
+Built as a parallel copy of the IUL intake rather than a shared-engine refactor — IUL is live and
+this is OEP-critical, so the two stay independent. Only `intake-address-input` was actually shared
+(moved to `components/shared/`, gained county support).
+
+Three things are genuinely new vs. IUL:
+
+1. **Config-driven repeater** (`type: "repeater"` + `rowFields` in `lib/aca-intake/fields.ts`) —
+   replaces the hard-coded beneficiaries editor. Drives household members, doctors and
+   prescriptions. `isFieldVisible(sub, rowData)` resolves `showIf` against the ROW, which is what
+   makes the citizenship branch (citizen → naturalized → which document) work per member.
+2. **Per-row file uploads** — the files route accepts `repeaterKey` + `rowIndex` + `rowField`. The
+   three per-member document slugs are SHARED CRM buckets, so the route diffs GHL's echoed file
+   list against URLs already known for that slug and appends only the new ones to that row;
+   replacing wholesale (as the IUL route does) would clobber other members' files.
+3. **Client-side image compression** (`lib/image-compress.ts`) — Vercel caps request bodies at
+   4.5 MB and phone photos of a green card run 4–12 MB, so uploads are downscaled to 1600px/JPEG
+   before the request. Without this the primary flow simply fails.
+
+Also fixed while mirroring: the IUL files route skips `clientCanEdit` on POST and DELETE (a claimed
+client can mutate attachments on a submitted, locked form). The ACA route guards both.
+
+Remaining before this can be used:
+- `pnpm db:migrate` (migration `0017_dusty_dragon_lord.sql`, additive `CREATE TABLE IF NOT EXISTS`)
+- `pnpm aca:fields` to provision the ACA custom fields in Agent CRM
+- GHL workflow on the `aca_intake_link_sent` tag to text/email the link
+- Browser walkthrough of all 8 steps
 
 ## History
 

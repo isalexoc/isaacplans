@@ -15,53 +15,55 @@ import {
   EyeOff,
   ShieldCheck,
   PartyPopper,
+  Camera,
   Upload,
   FileText,
   X,
+  Plus,
   ArrowRight,
   Send,
   User,
   MapPin,
-  Briefcase,
   DollarSign,
   Users,
-  Users2,
   CreditCard,
-  HeartPulse,
+  Stethoscope,
   StickyNote,
   type LucideIcon,
 } from "lucide-react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import {
-  fetchIntake,
-  completeIntake,
-  uploadIntakeFile,
-  removeIntakeFile,
-} from "@/lib/iul-intake-api";
-import { useIulIntakeAutosave } from "@/hooks/use-iul-intake-autosave";
-import IntakeBreadcrumb from "@/components/iul-intake/intake-breadcrumb";
+  fetchAcaIntake,
+  completeAcaIntake,
+  uploadAcaIntakeFile,
+  removeAcaIntakeFile,
+  type FileTargetRef,
+} from "@/lib/aca-intake-api";
+import { useAcaIntakeAutosave } from "@/hooks/use-aca-intake-autosave";
+import AcaIntakeBreadcrumb from "@/components/aca-intake/intake-breadcrumb";
 import IntakeAddressInput, { type ResolvedAddress } from "@/components/shared/intake-address-input";
 import {
   visibleSections,
-  MAX_BENEFICIARIES,
-  BENEFICIARY_RELATIONSHIPS,
-  emptyBeneficiary,
   isFieldVisible,
   fieldByKey,
-  type IntakeField,
-  type IntakeOption,
-  type Beneficiary,
+  emptyRow,
+  type AcaField,
+  type AcaOption,
   type FileRef,
-} from "@/lib/iul-intake/fields";
-import {
-  fieldFormatError,
-  beneficiaryPercentTotal,
-  type FieldErrorKey,
-} from "@/lib/iul-intake/validation";
+  type RepeaterRow,
+} from "@/lib/aca-intake/fields";
+import { fieldFormatError, type FieldErrorKey } from "@/lib/aca-intake/validation";
 import { digitsToStored, formatMoneyDisplay } from "@/lib/iul-intake/money";
-import { countriesFor } from "@/lib/iul-intake/countries";
-import { sectionMissingFields, type IntakeData } from "@/lib/iul-intake/schema";
-import type { IntakeSession } from "@/lib/iul-intake/types";
+import { sectionMissingFields, type AcaIntakeData } from "@/lib/aca-intake/schema";
+import type { AcaIntakeSession } from "@/lib/aca-intake/types";
+import {
+  MONTHS,
+  buildDobIso,
+  splitDobIso,
+  formatUsPhone,
+  formatCardExpiration,
+} from "@/lib/intake-shared/format";
+import { compressImageFile, MAX_UPLOAD_BYTES, formatBytes } from "@/lib/image-compress";
 import {
   UI,
   pickLocale,
@@ -70,84 +72,22 @@ import {
   fieldPlaceholder,
   fieldHelp,
   optionLabel,
+  rowLabel,
   sectionTitle,
   sectionDescription,
-  type IntakeLocale,
-} from "@/lib/iul-intake/ui-strings";
+  type AcaLocale,
+} from "@/lib/aca-intake/ui-strings";
 
 /* ------------------------------- helpers ------------------------------- */
 
-const MONTHS: Record<IntakeLocale, string[]> = {
-  en: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-  es: ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"],
-};
+const str = (v: unknown): string => (typeof v === "string" ? v : "");
 
-function buildDobIso(month: string, day: string, year: string): string {
-  if (!month || !day || !year) return "";
-  const m = month.padStart(2, "0");
-  const d = day.padStart(2, "0");
-  const yNum = Number(year);
-  const mNum = Number(month);
-  const dNum = Number(day);
-  const check = new Date(yNum, mNum - 1, dNum);
-  if (
-    Number.isNaN(check.getTime()) ||
-    check.getFullYear() !== yNum ||
-    check.getMonth() !== mNum - 1 ||
-    check.getDate() !== dNum
-  ) {
-    return "";
-  }
-  return `${year}-${m}-${d}`;
+/** Path used for per-row validation keys: `householdMembers[2].ssn`. */
+function rowPath(repeaterKey: string, index: number, subKey: string): string {
+  return `${repeaterKey}[${index}].${subKey}`;
 }
 
-function splitDobIso(value: string): { month: string; day: string; year: string } {
-  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec((value ?? "").trim());
-  if (!m) return { month: "", day: "", year: "" };
-  return { year: m[1], month: String(Number(m[2])), day: String(Number(m[3])) };
-}
-
-function parseHeight(value: string): { feet: string; inches: string } {
-  const m = /(\d+)\s*'\s*(\d+)/.exec(value ?? "");
-  if (!m) return { feet: "", inches: "" };
-  return { feet: m[1], inches: m[2] };
-}
-
-function buildHeight(feet: string, inches: string): string {
-  if (!feet) return "";
-  return `${feet}'${inches || "0"}"`;
-}
-
-/** Centimeters → imperial height string (e.g. 180 → 5'11"). */
-function cmToHeight(cm: string): string {
-  const n = Number((cm ?? "").replace(/[^\d.]/g, ""));
-  if (!Number.isFinite(n) || n <= 0) return "";
-  const totalInches = Math.round(n / 2.54);
-  const feet = Math.floor(totalInches / 12);
-  const inches = totalInches % 12;
-  if (feet < 1) return "";
-  return `${feet}'${inches}"`;
-}
-
-/** Kilograms → pounds (rounded). */
-function kgToLbs(kg: string): string {
-  const n = Number((kg ?? "").replace(/[^\d.]/g, ""));
-  if (!Number.isFinite(n) || n <= 0) return "";
-  return String(Math.round(n * 2.2046226218));
-}
-
-/** Progressive US phone format: digits → (305) 555-1234. */
-function formatUsPhone(value: string): string {
-  let d = (value ?? "").replace(/\D/g, "");
-  if (d.length === 11 && d.startsWith("1")) d = d.slice(1);
-  d = d.slice(0, 10);
-  if (d.length === 0) return "";
-  if (d.length < 4) return `(${d}`;
-  if (d.length < 7) return `(${d.slice(0, 3)}) ${d.slice(3)}`;
-  return `(${d.slice(0, 3)}) ${d.slice(3, 6)}-${d.slice(6)}`;
-}
-
-function errorMessageFor(key: FieldErrorKey, locale: IntakeLocale): string {
+function errorMessageFor(key: FieldErrorKey, locale: AcaLocale): string {
   switch (key) {
     case "email":
       return tr(UI.errEmail, locale);
@@ -157,10 +97,16 @@ function errorMessageFor(key: FieldErrorKey, locale: IntakeLocale): string {
       return tr(UI.errZip, locale);
     case "ssn":
       return tr(UI.errSsn, locale);
-    case "age":
-      return tr(UI.errAge, locale);
     case "dob":
       return tr(UI.errDob, locale);
+    case "routing":
+      return tr(UI.errRouting, locale);
+    case "card":
+      return tr(UI.errCard, locale);
+    case "cardExpiration":
+      return tr(UI.errCardExpiration, locale);
+    case "cvv":
+      return tr(UI.errCvv, locale);
     default:
       return tr(UI.fixErrors, locale);
   }
@@ -170,23 +116,32 @@ function errorMessageFor(key: FieldErrorKey, locale: IntakeLocale): string {
 const SECTION_ICONS: Record<string, LucideIcon> = {
   personal: User,
   residence: MapPin,
-  employment: Briefcase,
-  financial: DollarSign,
-  beneficiaries: Users,
+  household: Users,
+  income: DollarSign,
+  medical: Stethoscope,
+  documents: FileText,
   payment: CreditCard,
-  health: HeartPulse,
-  family: Users2,
-  attachments: FileText,
   agent: StickyNote,
 };
 
+/** Identity sub-fields on household member row 0, mirrored from step 1 and shown read-only. */
+const PRIMARY_MIRROR_KEYS = ["firstName", "lastName", "dateOfBirth", "sex", "ssn"] as const;
+
+/** Add-button copy per repeater. */
+function addLabelFor(fieldKey: string, locale: AcaLocale): string {
+  if (fieldKey === "householdMembers") return tr(UI.addMember, locale);
+  if (fieldKey === "doctorsToKeep") return tr(UI.addDoctor, locale);
+  if (fieldKey === "prescriptions") return tr(UI.addPrescription, locale);
+  return tr(UI.addRow, locale);
+}
+
 /* ------------------------------- component ------------------------------- */
 
-export default function IntakeForm({ token }: { token: string }) {
+export default function AcaIntakeForm({ token }: { token: string }) {
   const locale = pickLocale(useLocale());
 
-  const [session, setSession] = useState<IntakeSession | null>(null);
-  const [data, setData] = useState<IntakeData>({});
+  const [session, setSession] = useState<AcaIntakeSession | null>(null);
+  const [data, setData] = useState<AcaIntakeData>({});
   const [loadState, setLoadState] = useState<"loading" | "ready" | "error">("loading");
   const [step, setStep] = useState(0);
   const [completing, setCompleting] = useState(false);
@@ -194,8 +149,8 @@ export default function IntakeForm({ token }: { token: string }) {
   const [missing, setMissing] = useState<Set<string>>(new Set());
   const [errors, setErrors] = useState<Record<string, FieldErrorKey>>({});
   const [completeError, setCompleteError] = useState<string | null>(null);
-  // Sensitive fields (SSN/ITIN, driver's license #, routing/account #, beneficiary SSN) show
-  // their value by default so users can see what they type; owners can still toggle Hide.
+  // Sensitive fields (SSN, routing/account, card) show their value by default so users can
+  // see what they type; owners can still toggle Hide.
   const [reveal, setReveal] = useState(true);
   const cardRef = useRef<HTMLDivElement | null>(null);
   const reduceMotion = useReducedMotion();
@@ -204,13 +159,10 @@ export default function IntakeForm({ token }: { token: string }) {
     let active = true;
     (async () => {
       try {
-        const s = await fetchIntake(token);
+        const s = await fetchAcaIntake(token);
         if (!active) return;
         setSession(s);
-        const initial = { ...(s.data ?? {}) };
-        // Default the premium payment mode to Monthly when not yet chosen.
-        if (!initial.premiumPaymentMode) initial.premiumPaymentMode = "Monthly";
-        setData(initial);
+        setData({ ...(s.data ?? {}) });
         setCompleted(s.status === "completed");
         setLoadState("ready");
       } catch {
@@ -222,32 +174,40 @@ export default function IntakeForm({ token }: { token: string }) {
     };
   }, [token]);
 
-  const { status: saveStatus } = useIulIntakeAutosave({ token, data });
+  const { status: saveStatus } = useAcaIntakeAutosave({ token, data });
 
   const isOwner = session?.role === "owner";
   const sections = useMemo(() => visibleSections(!!isOwner), [isOwner]);
   // A client who has submitted can't edit until an admin re-opens the form.
   const lockedForClient = !isOwner && completed && !session?.reopenedForClient;
 
-  // Clients pay by bank draft only — lock the value so it always syncs.
+  /**
+   * Household member row 0 IS the primary applicant, so mirror their step-1 identity into it.
+   * Only writes when something actually differs, otherwise this effect would loop on itself.
+   */
   useEffect(() => {
-    if (loadState !== "ready" || isOwner) return;
-    const current = typeof data.paymentMethod === "string" ? data.paymentMethod : "";
-    if (current !== "Electronic (bank draft)") {
-      setData((prev) => ({ ...prev, paymentMethod: "Electronic (bank draft)" }));
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loadState, isOwner]);
+    if (loadState !== "ready") return;
+    const memberField = fieldByKey("householdMembers");
+    if (!memberField) return;
 
-  // US citizens always have an SSN and US citizenship — auto-fill both (the redundant
-  // SSN/ITIN and country-of-citizenship questions are hidden for them).
-  useEffect(() => {
-    if (loadState !== "ready" || data.usCitizen !== "yes") return;
-    const patch: Record<string, unknown> = {};
-    if (data.idType !== "SSN") patch.idType = "SSN";
-    if (data.countryOfCitizenship !== "United States") patch.countryOfCitizenship = "United States";
-    if (Object.keys(patch).length) setData((prev) => ({ ...prev, ...patch }));
-  }, [loadState, data.usCitizen, data.idType, data.countryOfCitizenship]);
+    setData((prev) => {
+      const rows: RepeaterRow[] = Array.isArray(prev.householdMembers)
+        ? [...(prev.householdMembers as RepeaterRow[])]
+        : [];
+      const row0: RepeaterRow = { ...(rows[0] ?? emptyRow(memberField)) };
+
+      const patch: RepeaterRow = { relationship: "Self" };
+      for (const key of PRIMARY_MIRROR_KEYS) patch[key] = str(prev[key]);
+      // The primary answered the SSN question in step 1, so don't ask again here.
+      patch.hasSsn = str(prev.ssn) ? "yes" : str(row0.hasSsn);
+
+      const changed = Object.entries(patch).some(([k, v]) => str(row0[k]) !== str(v));
+      if (!changed) return prev;
+
+      rows[0] = { ...row0, ...patch };
+      return { ...prev, householdMembers: rows };
+    });
+  }, [loadState, data.firstName, data.lastName, data.dateOfBirth, data.sex, data.ssn]);
 
   // Keep step in range when the section list changes (role resolves after load).
   useEffect(() => {
@@ -259,8 +219,7 @@ export default function IntakeForm({ token }: { token: string }) {
     cardRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, [step]);
 
-  function setField(key: string, value: unknown) {
-    setData((prev) => ({ ...prev, [key]: value }));
+  function clearFlags(key: string) {
     if (missing.size) {
       setMissing((prev) => {
         if (!prev.has(key)) return prev;
@@ -277,13 +236,33 @@ export default function IntakeForm({ token }: { token: string }) {
     });
   }
 
-  function validateOnBlur(field: IntakeField, value: string) {
+  function setField(key: string, value: unknown) {
+    setData((prev) => ({ ...prev, [key]: value }));
+    clearFlags(key);
+  }
+
+  /** Update one sub-field of one repeater row, keyed by path for validation flags. */
+  function setRowField(repeaterKey: string, index: number, subKey: string, value: unknown) {
+    setData((prev) => {
+      const field = fieldByKey(repeaterKey);
+      const rows: RepeaterRow[] = Array.isArray(prev[repeaterKey])
+        ? [...(prev[repeaterKey] as RepeaterRow[])]
+        : [];
+      while (rows.length <= index) rows.push(field ? emptyRow(field) : {});
+      rows[index] = { ...rows[index], [subKey]: value as string | FileRef[] };
+      return { ...prev, [repeaterKey]: rows };
+    });
+    clearFlags(rowPath(repeaterKey, index, subKey));
+    clearFlags(repeaterKey);
+  }
+
+  function validateOnBlur(field: AcaField, value: string, key: string) {
     const err = fieldFormatError(field, value);
     setErrors((prev) => {
-      if (err) return { ...prev, [field.key]: err };
-      if (!prev[field.key]) return prev;
+      if (err) return { ...prev, [key]: err };
+      if (!prev[key]) return prev;
       const next = { ...prev };
-      delete next[field.key];
+      delete next[key];
       return next;
     });
   }
@@ -293,9 +272,10 @@ export default function IntakeForm({ token }: { token: string }) {
   // Section indices that still contain an unresolved missing field (ordered).
   const sectionsWithMissing = useMemo(() => {
     if (!missing.size) return [];
+    const keys = Array.from(missing);
     return sections.reduce<number[]>((acc, section, idx) => {
       const hit = section.fields.some(
-        (f) => (f.type === "beneficiaries" ? missing.has("beneficiaries") : missing.has(f.key))
+        (f) => missing.has(f.key) || keys.some((k) => k.startsWith(`${f.key}[`))
       );
       if (hit) acc.push(idx);
       return acc;
@@ -317,11 +297,11 @@ export default function IntakeForm({ token }: { token: string }) {
         if (sectionMissingFields(section, data).length) return false;
         return section.fields.some((f) => {
           if (!isFieldVisible(f, data)) return false;
-          if (f.type === "beneficiaries") {
-            const list = Array.isArray(data.beneficiaries) ? data.beneficiaries : [];
-            return list.some((b) => Object.values(b).some((v) => String(v ?? "").trim()));
-          }
           const v = data[f.key];
+          if (f.type === "repeater") {
+            const rows = Array.isArray(v) ? (v as RepeaterRow[]) : [];
+            return rows.some((r) => Object.values(r ?? {}).some((x) => String(x ?? "").trim()));
+          }
           return Array.isArray(v) ? v.length > 0 : String(v ?? "").trim() !== "";
         });
       }),
@@ -348,15 +328,6 @@ export default function IntakeForm({ token }: { token: string }) {
           miss.forEach((k) => next.add(k));
           return next;
         });
-        // Surface inline format errors for malformed (non-empty) fields too.
-        const fmt: Record<string, FieldErrorKey> = {};
-        for (const field of current.fields) {
-          if (!isFieldVisible(field, data)) continue;
-          const v = typeof data[field.key] === "string" ? (data[field.key] as string) : "";
-          const err = fieldFormatError(field, v);
-          if (err) fmt[field.key] = err;
-        }
-        if (Object.keys(fmt).length) setErrors((prev) => ({ ...prev, ...fmt }));
         setCompleteError(summarizeMissing(miss));
         cardRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
         return;
@@ -365,25 +336,35 @@ export default function IntakeForm({ token }: { token: string }) {
     goNext();
   }
 
-  // Friendly, label-based summary instead of raw field keys (beneficiaries gets its own copy).
+  /** Friendly, label-based summary instead of raw field keys / row paths. */
   function summarizeMissing(keys: string[]): string {
     const labels = keys
-      .map((k) =>
-        k === "beneficiaries"
-          ? tr(UI.benNeedTwo, locale)
-          : fieldByKey(k)
-            ? fieldLabel(fieldByKey(k)!, locale)
-            : k
-      )
+      .map((k) => {
+        const rowMatch = /^([^[]+)\[(\d+)\]\.(.+)$/.exec(k);
+        if (rowMatch) {
+          const [, repeaterKey, indexRaw, subKey] = rowMatch;
+          const repeater = fieldByKey(repeaterKey);
+          const sub = repeater?.rowFields?.find((f) => f.key === subKey);
+          const who = `${rowLabel(repeater ?? ({} as AcaField), locale)} ${Number(indexRaw) + 1}`.trim();
+          return sub ? `${who}: ${fieldLabel(sub, locale)}` : who;
+        }
+        if (k === "householdMembers") return tr(UI.needOneMember, locale);
+        const f = fieldByKey(k);
+        return f ? fieldLabel(f, locale) : k;
+      })
       .filter(Boolean);
-    return labels.length ? `${tr(UI.pleaseComplete, locale)} ${labels.join(", ")}` : tr(UI.missingFields, locale);
+    // De-duplicate — one missing member can produce several sub-field paths.
+    const unique = Array.from(new Set(labels));
+    return unique.length
+      ? `${tr(UI.pleaseComplete, locale)} ${unique.join(", ")}`
+      : tr(UI.missingFields, locale);
   }
 
   async function handleFinish() {
     setCompleting(true);
     setCompleteError(null);
     try {
-      const result = await completeIntake(token);
+      const result = await completeAcaIntake(token);
       if (result.success) {
         setCompleted(true);
         setMissing(new Set());
@@ -392,7 +373,10 @@ export default function IntakeForm({ token }: { token: string }) {
         setMissing(miss);
         setCompleteError(summarizeMissing(result.missing ?? []));
         if (miss.size) {
-          const idx = sections.findIndex((s) => s.fields.some((f) => miss.has(f.key)));
+          const keys = Array.from(miss);
+          const idx = sections.findIndex((s) =>
+            s.fields.some((f) => miss.has(f.key) || keys.some((k) => k.startsWith(`${f.key}[`)))
+          );
           if (idx >= 0) setStep(idx);
         }
       }
@@ -456,7 +440,7 @@ export default function IntakeForm({ token }: { token: string }) {
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-8">
-      {isOwner && <IntakeBreadcrumb current={tr(UI.navForm, locale)} />}
+      {isOwner && <AcaIntakeBreadcrumb current={tr(UI.navForm, locale)} />}
       {/* Out-of-flow save status — fixed so it never shifts the page layout. */}
       <SaveIndicator status={saveStatus} locale={locale} />
       <h1 className="mb-1 text-2xl font-extrabold tracking-tight sm:text-3xl">{tr(UI.intakeTitle, locale)}</h1>
@@ -514,67 +498,76 @@ export default function IntakeForm({ token }: { token: string }) {
               transition={{ duration: 0.22, ease: "easeOut" }}
               className="mt-4 space-y-5"
             >
-          {current.fields.map((field) => {
-            if (!isFieldVisible(field, data)) return null;
-            if (field.ownerOnly && !isOwner) return null;
-            // US citizens: hide the redundant SSN/ITIN choice and country-of-citizenship
-            // questions (both auto-filled to SSN / United States above).
-            if (data.usCitizen === "yes" && (field.key === "idType" || field.key === "countryOfCitizenship"))
-              return null;
+              {current.fields.map((field) => {
+                if (!isFieldVisible(field, data)) return null;
+                if (field.ownerOnly && !isOwner) return null;
 
-            if (field.type === "beneficiaries") {
-              return (
-                <BeneficiariesEditor
-                  key={field.key}
-                  locale={locale}
-                  value={Array.isArray(data.beneficiaries) ? data.beneficiaries : []}
-                  reveal={reveal || !isOwner}
-                  onChange={(list) => setField("beneficiaries", list)}
-                  invalid={missing.has("beneficiaries")}
-                />
-              );
-            }
-            if (field.type === "file") {
-              return (
-                <FileUploader
-                  key={field.key}
-                  token={token}
-                  fieldKey={field.key}
-                  label={fieldLabel(field, locale)}
-                  help={fieldHelp(field, locale)}
-                  locale={locale}
-                  files={Array.isArray(data[field.key]) ? (data[field.key] as FileRef[]) : []}
-                  onChange={(files) => setField(field.key, files)}
-                />
-              );
-            }
-            return (
-              <FieldInput
-                key={field.key}
-                field={field}
-                locale={locale}
-                value={typeof data[field.key] === "string" ? (data[field.key] as string) : ""}
-                onChange={(v) => setField(field.key, v)}
-                onBlur={(v) => validateOnBlur(field, v)}
-                onResolveAddress={(addr) => {
-                  if (field.fullAddress) {
-                    setField(field.key, addr.formatted || addr.line1);
-                    return;
-                  }
-                  setField(field.key, addr.line1);
-                  const t = field.addressTargets;
-                  if (t?.city && addr.city) setField(t.city, addr.city);
-                  if (t?.state && addr.state) setField(t.state, addr.state);
-                  if (t?.zip && addr.zip) setField(t.zip, addr.zip);
-                }}
-                invalid={missing.has(field.key)}
-                errorKey={errors[field.key]}
-                reveal={reveal}
-                isOwner={!!isOwner}
-                onToggleReveal={() => setReveal((r) => !r)}
-              />
-            );
-          })}
+                if (field.type === "repeater") {
+                  return (
+                    <RepeaterEditor
+                      key={field.key}
+                      field={field}
+                      token={token}
+                      locale={locale}
+                      rows={Array.isArray(data[field.key]) ? (data[field.key] as RepeaterRow[]) : []}
+                      onSetRowField={(i, subKey, value) => setRowField(field.key, i, subKey, value)}
+                      onReplaceRows={(rows) => setField(field.key, rows)}
+                      missing={missing}
+                      errors={errors}
+                      onBlurSub={validateOnBlur}
+                      isOwner={!!isOwner}
+                      reveal={reveal || !isOwner}
+                      lockedFirstRow={field.key === "householdMembers"}
+                      addLabel={addLabelFor(field.key, locale)}
+                    />
+                  );
+                }
+
+                if (field.type === "file") {
+                  return (
+                    <FileUploader
+                      key={field.key}
+                      token={token}
+                      target={{ fieldKey: field.key }}
+                      label={fieldLabel(field, locale)}
+                      help={fieldHelp(field, locale)}
+                      required={field.required}
+                      locale={locale}
+                      invalid={missing.has(field.key)}
+                      files={Array.isArray(data[field.key]) ? (data[field.key] as FileRef[]) : []}
+                      onChange={(files) => setField(field.key, files)}
+                    />
+                  );
+                }
+
+                return (
+                  <FieldInput
+                    key={field.key}
+                    field={field}
+                    locale={locale}
+                    value={str(data[field.key])}
+                    onChange={(v) => setField(field.key, v)}
+                    onBlur={(v) => validateOnBlur(field, v, field.key)}
+                    onResolveAddress={(addr) => {
+                      if (field.fullAddress) {
+                        setField(field.key, addr.formatted || addr.line1);
+                        return;
+                      }
+                      setField(field.key, addr.line1);
+                      const t = field.addressTargets;
+                      if (t?.city && addr.city) setField(t.city, addr.city);
+                      if (t?.state && addr.state) setField(t.state, addr.state);
+                      if (t?.zip && addr.zip) setField(t.zip, addr.zip);
+                      if (t?.county && addr.county) setField(t.county, addr.county);
+                    }}
+                    invalid={missing.has(field.key)}
+                    errorKey={errors[field.key]}
+                    reveal={reveal}
+                    isOwner={!!isOwner}
+                    onToggleReveal={() => setReveal((r) => !r)}
+                  />
+                );
+              })}
             </motion.div>
           </AnimatePresence>
         </div>
@@ -687,7 +680,7 @@ export default function IntakeForm({ token }: { token: string }) {
  * Save status as a fixed-position pill (bottom-right). Out of the normal document flow and
  * always mounted (fades via opacity), so appearing/disappearing never shifts the page layout.
  */
-function SaveIndicator({ status, locale }: { status: string; locale: IntakeLocale }) {
+function SaveIndicator({ status, locale }: { status: string; locale: AcaLocale }) {
   const visible = status === "pending" || status === "saved" || status === "error";
   const tone =
     status === "error" ? "text-red-600" : status === "saved" ? "text-green-700" : "text-muted-foreground";
@@ -729,13 +722,15 @@ function RadioOptions({
   value,
   locale,
   invalid,
+  disabled,
   onChange,
 }: {
   id: string;
-  options: IntakeOption[];
+  options: AcaOption[];
   value: string;
-  locale: IntakeLocale;
+  locale: AcaLocale;
   invalid?: boolean;
+  disabled?: boolean;
   onChange: (v: string) => void;
 }) {
   return (
@@ -745,7 +740,9 @@ function RadioOptions({
         return (
           <label
             key={opt.value}
-            className={`flex min-h-[3rem] cursor-pointer items-center justify-center gap-2 rounded-md border px-3 py-2.5 text-center text-base leading-tight transition sm:min-h-[2.75rem] sm:text-sm ${
+            className={`flex min-h-[3rem] items-center justify-center gap-2 rounded-md border px-3 py-2.5 text-center text-base leading-tight transition sm:min-h-[2.75rem] sm:text-sm ${
+              disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer"
+            } ${
               selected
                 ? "border-brand bg-brand/5 font-medium text-brand ring-1 ring-brand"
                 : `${invalid ? "border-red-500" : "border-input"} text-foreground hover:border-brand`
@@ -756,6 +753,7 @@ function RadioOptions({
               name={id}
               value={opt.value}
               checked={selected}
+              disabled={disabled}
               onChange={() => onChange(opt.value)}
               className="h-4 w-4 shrink-0 accent-brand"
             />
@@ -779,25 +777,34 @@ function FieldInput({
   reveal,
   isOwner,
   onToggleReveal,
+  idPrefix = "f",
+  disabled,
+  compact,
 }: {
-  field: IntakeField;
-  locale: IntakeLocale;
+  field: AcaField;
+  locale: AcaLocale;
   value: string;
   onChange: (v: string) => void;
   onBlur: (v: string) => void;
-  onResolveAddress: (addr: ResolvedAddress) => void;
+  onResolveAddress?: (addr: ResolvedAddress) => void;
   invalid?: boolean;
   errorKey?: FieldErrorKey;
   reveal: boolean;
   isOwner: boolean;
-  onToggleReveal: () => void;
+  onToggleReveal?: () => void;
+  /** Keeps DOM ids unique when the same field renders inside several repeater rows. */
+  idPrefix?: string;
+  disabled?: boolean;
+  /** Smaller label styling for use inside repeater rows. */
+  compact?: boolean;
 }) {
-  const id = `f-${field.key}`;
+  const id = `${idPrefix}-${field.key}`;
   const label = fieldLabel(field, locale);
   const help = fieldHelp(field, locale);
   const placeholder = fieldPlaceholder(field, locale);
   const showInvalid = invalid || !!errorKey;
   const invalidCls = showInvalid ? "border-red-500 focus-visible:ring-red-500" : "";
+  const disabledCls = disabled ? "opacity-60" : "";
 
   function handleDigits(raw: string) {
     let v = raw.replace(/\D/g, "");
@@ -808,11 +815,11 @@ function FieldInput({
   return (
     <div>
       <div className="mb-1 flex items-center justify-between">
-        <Label htmlFor={id} className={showInvalid ? "text-red-600" : ""}>
+        <Label htmlFor={id} className={`${showInvalid ? "text-red-600" : ""} ${compact ? "text-xs" : ""}`}>
           {label}
           {field.required && <span className="ml-0.5 text-red-500">*</span>}
         </Label>
-        {field.sensitive && isOwner && (
+        {field.sensitive && isOwner && onToggleReveal && (
           <button
             type="button"
             onClick={onToggleReveal}
@@ -833,14 +840,16 @@ function FieldInput({
             value={value}
             locale={locale}
             invalid={showInvalid}
+            disabled={disabled}
             onChange={onChange}
           />
         ) : (
           <select
             id={id}
             value={value}
+            disabled={disabled}
             onChange={(e) => onChange(e.target.value)}
-            className={`${selectCls} ${invalidCls}`}
+            className={`${selectCls} ${invalidCls} ${disabledCls}`}
           >
             <option value="">{tr(UI.choose, locale)}</option>
             {field.options
@@ -852,27 +861,9 @@ function FieldInput({
               ))}
           </select>
         )
-      ) : field.type === "country" ? (
-        <select
-          id={id}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className={`${selectCls} ${invalidCls}`}
-        >
-          <option value="">{tr(UI.choose, locale)}</option>
-          {countriesFor(locale).map((c) => (
-            <option key={c.value} value={c.value}>
-              {locale === "es" ? c.labelEs : c.labelEn}
-            </option>
-          ))}
-        </select>
       ) : field.type === "dob" ? (
-        <DobParts value={value} onChange={onChange} invalid={showInvalid} locale={locale} />
-      ) : field.type === "height" ? (
-        <HeightSelect id={id} value={value} onChange={onChange} invalid={showInvalid} locale={locale} />
-      ) : field.metric === "kg" ? (
-        <WeightInput id={id} value={value} onChange={onChange} onBlur={onBlur} invalid={showInvalid} maxLength={field.maxLength} locale={locale} />
-      ) : field.type === "address" ? (
+        <DobParts value={value} onChange={onChange} invalid={showInvalid} locale={locale} disabled={disabled} />
+      ) : field.type === "address" && onResolveAddress ? (
         <IntakeAddressInput
           id={id}
           value={value}
@@ -890,8 +881,9 @@ function FieldInput({
           id={id}
           value={value}
           placeholder={placeholder}
+          disabled={disabled}
           onChange={(e) => onChange(e.target.value)}
-          className={`${inputBase} ${invalidCls}`}
+          className={`${inputBase} ${invalidCls} ${disabledCls}`}
         />
       ) : field.type === "tel" ? (
         <Input
@@ -900,11 +892,25 @@ function FieldInput({
           inputMode="tel"
           value={formatUsPhone(value)}
           placeholder={placeholder}
+          disabled={disabled}
           onChange={(e) => onChange(formatUsPhone(e.target.value))}
           onBlur={(e) => onBlur(e.target.value)}
-          className={`${inputBase} ${invalidCls}`}
+          className={`${inputBase} ${invalidCls} ${disabledCls}`}
         />
-      ) : field.type === "ssn" || field.type === "number" || field.digitsOnly ? (
+      ) : field.key === "cardExpiration" ? (
+        <Input
+          id={id}
+          type="text"
+          inputMode="numeric"
+          autoComplete="off"
+          value={formatCardExpiration(value)}
+          placeholder="MM/YY"
+          disabled={disabled}
+          onChange={(e) => onChange(formatCardExpiration(e.target.value))}
+          onBlur={(e) => onBlur(e.target.value)}
+          className={`${inputBase} ${invalidCls} ${disabledCls}`}
+        />
+      ) : field.type === "ssn" || field.type === "zip" || field.type === "number" || field.digitsOnly ? (
         <Input
           id={id}
           type={field.sensitive && !reveal ? "password" : "text"}
@@ -912,10 +918,11 @@ function FieldInput({
           autoComplete={field.sensitive ? "off" : undefined}
           value={value}
           placeholder={placeholder}
+          disabled={disabled}
           maxLength={field.type === "ssn" ? 9 : field.maxLength}
           onChange={(e) => handleDigits(e.target.value)}
           onBlur={(e) => onBlur(e.target.value)}
-          className={`${inputBase} ${invalidCls}`}
+          className={`${inputBase} ${invalidCls} ${disabledCls}`}
         />
       ) : (
         <Input
@@ -925,10 +932,11 @@ function FieldInput({
           autoComplete={field.sensitive ? "off" : undefined}
           value={value}
           placeholder={placeholder}
+          disabled={disabled}
           maxLength={field.maxLength}
           onChange={(e) => onChange(e.target.value)}
           onBlur={(e) => onBlur(e.target.value)}
-          className={`${inputBase} ${invalidCls}`}
+          className={`${inputBase} ${invalidCls} ${disabledCls}`}
         />
       )}
 
@@ -961,7 +969,9 @@ function CurrencyInput({
   return (
     <div
       className={`flex h-11 w-full items-center rounded-md border bg-background px-3 sm:h-10 ${
-        invalid ? "border-red-500 focus-within:ring-2 focus-within:ring-red-500" : "border-input focus-within:ring-2 focus-within:ring-ring"
+        invalid
+          ? "border-red-500 focus-within:ring-2 focus-within:ring-red-500"
+          : "border-input focus-within:ring-2 focus-within:ring-ring"
       } focus-within:ring-offset-2`}
     >
       <span className="mr-1 text-muted-foreground">$</span>
@@ -978,87 +988,19 @@ function CurrencyInput({
   );
 }
 
-/**
- * Weight in lbs with an optional "Prefer kilograms?" helper that converts to lbs.
- */
-function WeightInput({
-  id,
-  value,
-  onChange,
-  onBlur,
-  invalid,
-  maxLength,
-  locale,
-}: {
-  id: string;
-  value: string;
-  onChange: (v: string) => void;
-  onBlur: (v: string) => void;
-  invalid?: boolean;
-  maxLength?: number;
-  locale: IntakeLocale;
-}) {
-  const [metric, setMetric] = useState(false);
-  const [kg, setKg] = useState("");
-  const invalidCls = invalid ? "border-red-500 focus-visible:ring-red-500" : "";
-  return (
-    <div>
-      <Input
-        id={id}
-        type="text"
-        inputMode="numeric"
-        value={value}
-        maxLength={maxLength}
-        onChange={(e) => onChange(e.target.value.replace(/\D/g, "").slice(0, maxLength))}
-        onBlur={(e) => onBlur(e.target.value)}
-        className={`${inputBase} ${invalidCls}`}
-      />
-      <button type="button" onClick={() => setMetric((m) => !m)} className="mt-1 text-xs text-blue-600 hover:underline">
-        {tr(UI.preferKg, locale)}
-      </button>
-      {metric && (
-        <div className="mt-1 flex items-center gap-2">
-          <div className="flex h-10 w-32 items-center rounded-md border border-input bg-background px-3 focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
-            <input
-              type="text"
-              inputMode="decimal"
-              value={kg}
-              placeholder="0"
-              onChange={(e) => {
-                const v = e.target.value.replace(/[^\d.]/g, "");
-                setKg(v);
-                onChange(kgToLbs(v));
-              }}
-              className="h-full w-full border-0 bg-transparent text-base outline-none sm:text-sm"
-            />
-            <span className="ml-1 text-muted-foreground">{tr(UI.kgUnit, locale)}</span>
-          </div>
-          {value && (
-            <span className="text-xs text-muted-foreground">
-              = {value} {tr(UI.lbsUnit, locale)}
-            </span>
-          )}
-        </div>
-      )}
-    </div>
-  );
-}
-
-/**
- * Month / Day / Year selects → ISO YYYY-MM-DD. Holds local part state so a partial
- * selection (e.g. month chosen, year not yet) doesn't wipe the other dropdowns; emits the
- * ISO string to the parent when complete & valid, or "" while incomplete.
- */
+/** Month / day / year selects → ISO date. Avoids the native date picker on mobile. */
 function DobParts({
   value,
   onChange,
   invalid,
   locale,
+  disabled,
 }: {
   value: string;
   onChange: (iso: string) => void;
   invalid?: boolean;
-  locale: IntakeLocale;
+  locale: AcaLocale;
+  disabled?: boolean;
 }) {
   const [parts, setParts] = useState(() => splitDobIso(value));
 
@@ -1073,7 +1015,7 @@ function DobParts({
 
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 100 }, (_, i) => String(currentYear - i));
-  const cls = `${selectCls} ${invalid ? "border-red-500" : ""}`;
+  const cls = `${selectCls} ${invalid ? "border-red-500" : ""} ${disabled ? "opacity-60" : ""}`;
 
   function set(next: { month?: string; day?: string; year?: string }) {
     const merged = { ...parts, ...next };
@@ -1083,7 +1025,7 @@ function DobParts({
 
   return (
     <div className="grid grid-cols-3 gap-2">
-      <select aria-label={tr(UI.dobMonth, locale)} value={parts.month} onChange={(e) => set({ month: e.target.value })} className={cls}>
+      <select aria-label={tr(UI.dobMonth, locale)} value={parts.month} disabled={disabled} onChange={(e) => set({ month: e.target.value })} className={cls}>
         <option value="">{tr(UI.dobMonth, locale)}</option>
         {MONTHS[locale].map((name, i) => (
           <option key={i} value={String(i + 1)}>
@@ -1091,7 +1033,7 @@ function DobParts({
           </option>
         ))}
       </select>
-      <select aria-label={tr(UI.dobDay, locale)} value={parts.day} onChange={(e) => set({ day: e.target.value })} className={cls}>
+      <select aria-label={tr(UI.dobDay, locale)} value={parts.day} disabled={disabled} onChange={(e) => set({ day: e.target.value })} className={cls}>
         <option value="">{tr(UI.dobDay, locale)}</option>
         {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => (
           <option key={d} value={String(d)}>
@@ -1099,7 +1041,7 @@ function DobParts({
           </option>
         ))}
       </select>
-      <select aria-label={tr(UI.dobYear, locale)} value={parts.year} onChange={(e) => set({ year: e.target.value })} className={cls}>
+      <select aria-label={tr(UI.dobYear, locale)} value={parts.year} disabled={disabled} onChange={(e) => set({ year: e.target.value })} className={cls}>
         <option value="">{tr(UI.dobYear, locale)}</option>
         {years.map((y) => (
           <option key={y} value={y}>
@@ -1111,274 +1053,283 @@ function DobParts({
   );
 }
 
-/* Feet + inches selects → e.g. 5'9". */
-function HeightSelect({
-  id,
-  value,
-  onChange,
-  invalid,
+/**
+ * Config-driven repeater. Renders each row's `rowFields` through the same `FieldInput`
+ * dispatch as top-level fields, with two things the IUL beneficiaries editor could not do:
+ *
+ *  1. `showIf` resolves against the ROW, so a member's citizenship branch (citizen →
+ *     naturalized → which document) works inside the row.
+ *  2. `file` sub-fields upload against `repeaterKey` + `rowIndex`, so each member carries
+ *     their own documents.
+ */
+function RepeaterEditor({
+  field,
+  token,
   locale,
-}: {
-  id: string;
-  value: string;
-  onChange: (v: string) => void;
-  invalid?: boolean;
-  locale: IntakeLocale;
-}) {
-  const { feet, inches } = parseHeight(value);
-  const cls = `${selectCls} ${invalid ? "border-red-500" : ""}`;
-  const [metric, setMetric] = useState(false);
-  const [cm, setCm] = useState("");
-  return (
-    <div id={id}>
-      <div className="grid grid-cols-2 gap-2">
-        <select value={feet} onChange={(e) => onChange(buildHeight(e.target.value, inches))} className={cls}>
-          <option value="">{tr(UI.heightFeet, locale)}</option>
-          {[4, 5, 6, 7].map((f) => (
-            <option key={f} value={String(f)}>
-              {f} {tr(UI.heightFeet, locale)}
-            </option>
-          ))}
-        </select>
-        <select value={inches} onChange={(e) => onChange(buildHeight(feet, e.target.value))} className={cls} disabled={!feet}>
-          <option value="">{tr(UI.heightInches, locale)}</option>
-          {Array.from({ length: 12 }, (_, i) => i).map((inch) => (
-            <option key={inch} value={String(inch)}>
-              {inch} {tr(UI.heightInches, locale)}
-            </option>
-          ))}
-        </select>
-      </div>
-      <button type="button" onClick={() => setMetric((m) => !m)} className="mt-1 text-xs text-blue-600 hover:underline">
-        {tr(UI.preferCm, locale)}
-      </button>
-      {metric && (
-        <div className="mt-1 flex items-center gap-2">
-          <div className="flex h-10 w-32 items-center rounded-md border border-input bg-background px-3 focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
-            <input
-              type="text"
-              inputMode="decimal"
-              value={cm}
-              placeholder="0"
-              onChange={(e) => {
-                const v = e.target.value.replace(/[^\d.]/g, "");
-                setCm(v);
-                onChange(cmToHeight(v));
-              }}
-              className="h-full w-full border-0 bg-transparent text-base outline-none sm:text-sm"
-            />
-            <span className="ml-1 text-muted-foreground">{tr(UI.cmUnit, locale)}</span>
-          </div>
-          {value && <span className="text-xs text-muted-foreground">= {value}</span>}
-        </div>
-      )}
-    </div>
-  );
-}
-
-function BeneficiariesEditor({
-  locale,
-  value,
-  onChange,
+  rows,
+  onSetRowField,
+  onReplaceRows,
+  missing,
+  errors,
+  onBlurSub,
+  isOwner,
   reveal,
-  invalid,
+  lockedFirstRow,
+  addLabel,
 }: {
-  locale: IntakeLocale;
-  value: Beneficiary[];
-  onChange: (list: Beneficiary[]) => void;
+  field: AcaField;
+  token: string;
+  locale: AcaLocale;
+  rows: RepeaterRow[];
+  onSetRowField: (index: number, subKey: string, value: unknown) => void;
+  onReplaceRows: (rows: RepeaterRow[]) => void;
+  missing: Set<string>;
+  errors: Record<string, FieldErrorKey>;
+  onBlurSub: (field: AcaField, value: string, key: string) => void;
+  isOwner: boolean;
   reveal: boolean;
-  invalid?: boolean;
+  /** Row 0 is the primary applicant: identity is mirrored from step 1 and not editable here. */
+  lockedFirstRow?: boolean;
+  addLabel: string;
 }) {
-  // At least two beneficiaries are required — start with two empty rows.
-  const list = useMemo(
-    () => (value.length ? value : [emptyBeneficiary(), emptyBeneficiary()]),
-    [value]
-  );
-  const total = beneficiaryPercentTotal(list);
-  const showTotalWarning = list.some((b) => b.percent.trim()) && total !== 100;
+  const minRows = field.minRows ?? 1;
+  const maxRows = field.maxRows ?? 8;
 
-  function update(idx: number, patch: Partial<Beneficiary>) {
-    const next = list.map((b, i) => (i === idx ? { ...b, ...patch } : b));
-    onChange(next);
+  // Always show at least `minRows`, even before anything is typed.
+  const list = useMemo(() => {
+    if (rows.length >= minRows) return rows;
+    const padded = [...rows];
+    while (padded.length < minRows) padded.push(emptyRow(field));
+    return padded;
+  }, [rows, minRows, field]);
+
+  function addRow() {
+    if (list.length >= maxRows) return;
+    onReplaceRows([...list, emptyRow(field)]);
   }
-  function add() {
-    if (list.length >= MAX_BENEFICIARIES) return;
-    onChange([...list, emptyBeneficiary()]);
+
+  function removeRow(index: number) {
+    const next = list.filter((_, i) => i !== index);
+    onReplaceRows(next.length ? next : [emptyRow(field)]);
   }
-  function remove(idx: number) {
-    const next = list.filter((_, i) => i !== idx);
-    onChange(next.length ? next : [emptyBeneficiary()]);
-  }
+
+  const invalidBlock = missing.has(field.key);
 
   return (
-    <div className={`space-y-4 ${invalid ? "rounded-md border border-red-500 p-3" : ""}`}>
-      {list.map((b, idx) => {
+    <div className={`space-y-4 ${invalidBlock ? "rounded-md border border-red-500 p-3" : ""}`}>
+      {list.map((row, index) => {
+        const rowData = (row ?? {}) as RepeaterRow;
+        const isPrimary = !!lockedFirstRow && index === 0;
+        const heading = isPrimary
+          ? `${rowLabel(field, locale)} 1 · ${tr(UI.youLabel, locale)}`
+          : `${rowLabel(field, locale)} ${index + 1}`;
+
         return (
-          <div key={idx} className="rounded-md border p-3">
+          <div key={index} className="rounded-md border p-3">
             <div className="mb-2 flex items-center justify-between">
-              <span className="text-sm font-medium">
-                {tr(UI.beneficiary, locale)} {idx + 1}
-              </span>
-              {list.length > 1 && (
-                <button type="button" onClick={() => remove(idx)} className="text-xs text-red-600 hover:underline">
+              <span className="text-sm font-medium">{heading}</span>
+              {list.length > minRows && !isPrimary && (
+                <button
+                  type="button"
+                  onClick={() => removeRow(index)}
+                  className="text-xs text-red-600 hover:underline"
+                >
                   {tr(UI.remove, locale)}
                 </button>
               )}
             </div>
+
+            {isPrimary && (
+              <p className="mb-3 text-xs text-muted-foreground">{tr(UI.primaryFromStepOne, locale)}</p>
+            )}
+
             <div className="grid gap-3 sm:grid-cols-2">
-              <LabeledInput label={tr(UI.benFirstName, locale)} value={b.firstName} onChange={(v) => update(idx, { firstName: v })} />
-              <LabeledInput label={tr(UI.benLastName, locale)} value={b.lastName} onChange={(v) => update(idx, { lastName: v })} />
-              <div>
-                <Label className="text-xs">{tr(UI.benRelationship, locale)}</Label>
-                <select
-                  value={b.relationship}
-                  onChange={(e) => update(idx, { relationship: e.target.value })}
-                  className={selectCls}
-                >
-                  <option value="">{tr(UI.choose, locale)}</option>
-                  {BENEFICIARY_RELATIONSHIPS.map((opt) => (
-                    <option key={opt.value} value={opt.value}>
-                      {optionLabel(opt, locale)}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <Label className="text-xs">{tr(UI.benPercent, locale)}</Label>
-                <div className="flex h-11 items-center rounded-md border border-input bg-background px-3 focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 sm:h-10">
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    value={b.percent}
-                    onChange={(e) => {
-                      let v = e.target.value.replace(/\D/g, "").slice(0, 3);
-                      if (v && Number(v) > 100) v = "100";
-                      update(idx, { percent: v });
-                    }}
-                    className="h-full w-full border-0 bg-transparent text-base outline-none sm:text-sm"
-                  />
-                  <span className="ml-1 text-muted-foreground">%</span>
-                </div>
-              </div>
-              <div>
-                <Label className="text-xs">{tr(UI.benDob, locale)}</Label>
-                <DobParts value={b.dateOfBirth} onChange={(iso) => update(idx, { dateOfBirth: iso })} locale={locale} />
-              </div>
-              <LabeledInput
-                label={tr(UI.benSsn, locale)}
-                value={b.ssn}
-                onChange={(v) => update(idx, { ssn: v.replace(/\D/g, "").slice(0, 9) })}
-                type={reveal ? "text" : "password"}
-                inputMode="numeric"
-              />
+              {(field.rowFields ?? []).map((sub) => {
+                // Row-scoped conditional visibility — the citizenship branch lives here.
+                if (!isFieldVisible(sub, rowData as Record<string, unknown>)) return null;
+
+                const path = rowPath(field.key, index, sub.key);
+                const locked =
+                  isPrimary &&
+                  (PRIMARY_MIRROR_KEYS as readonly string[]).concat("relationship", "hasSsn").includes(sub.key);
+
+                if (sub.type === "file") {
+                  return (
+                    <div key={sub.key} className="sm:col-span-2">
+                      <FileUploader
+                        token={token}
+                        target={{ fieldKey: sub.key, repeaterKey: field.key, rowIndex: index }}
+                        label={fieldLabel(sub, locale)}
+                        help={fieldHelp(sub, locale)}
+                        required={sub.required}
+                        locale={locale}
+                        invalid={missing.has(path)}
+                        files={Array.isArray(rowData[sub.key]) ? (rowData[sub.key] as FileRef[]) : []}
+                        onChange={(files) => onSetRowField(index, sub.key, files)}
+                      />
+                    </div>
+                  );
+                }
+
+                const wide = sub.type === "textarea" || sub.type === "select";
+                return (
+                  <div key={sub.key} className={wide ? "sm:col-span-2" : undefined}>
+                    <FieldInput
+                      field={sub}
+                      locale={locale}
+                      compact
+                      idPrefix={`r-${field.key}-${index}`}
+                      value={str(rowData[sub.key])}
+                      onChange={(v) => onSetRowField(index, sub.key, v)}
+                      onBlur={(v) => onBlurSub(sub, v, path)}
+                      invalid={missing.has(path)}
+                      errorKey={errors[path]}
+                      reveal={reveal}
+                      isOwner={isOwner}
+                      disabled={locked}
+                    />
+                  </div>
+                );
+              })}
             </div>
           </div>
         );
       })}
-      {showTotalWarning && (
-        <p className="flex items-center gap-1 text-xs text-amber-600">
-          <AlertCircle className="h-3.5 w-3.5" /> {tr(UI.benTotalWarning, locale)} ({total}%)
-        </p>
-      )}
-      {list.length < MAX_BENEFICIARIES && (
-        <Button type="button" variant="outline" size="sm" onClick={add}>
-          {tr(UI.addBeneficiary, locale)}
+
+      {list.length < maxRows && (
+        <Button type="button" variant="outline" size="sm" onClick={addRow} className="gap-1.5">
+          <Plus className="h-4 w-4" /> {addLabel}
         </Button>
       )}
     </div>
   );
 }
 
-function LabeledInput({
-  label,
-  value,
-  onChange,
-  type = "text",
-  inputMode,
-}: {
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-  type?: string;
-  inputMode?: "decimal" | "numeric";
-}) {
-  return (
-    <div>
-      <Label className="text-xs">{label}</Label>
-      <Input type={type} inputMode={inputMode} value={value} onChange={(e) => onChange(e.target.value)} className={inputBase} />
-    </div>
-  );
-}
-
+/**
+ * File upload with mobile camera capture. Images are downscaled in the browser before the
+ * request (see lib/image-compress.ts) because Vercel rejects request bodies over 4.5 MB and
+ * an unedited phone photo of a green card is routinely larger than that.
+ */
 function FileUploader({
   token,
-  fieldKey,
+  target,
   label,
   help,
+  required,
   locale,
+  invalid,
   files,
   onChange,
 }: {
   token: string;
-  fieldKey: string;
+  target: FileTargetRef;
   label: string;
   help?: string;
-  locale: IntakeLocale;
+  required?: boolean;
+  locale: AcaLocale;
+  invalid?: boolean;
   files: FileRef[];
   onChange: (files: FileRef[]) => void;
 }) {
-  const [uploading, setUploading] = useState(false);
+  const [busy, setBusy] = useState<"idle" | "preparing" | "uploading">("idle");
   const [error, setError] = useState<string | null>(null);
-  const inputId = `file-${fieldKey}`;
+  const uid = `${target.repeaterKey ?? "top"}-${target.rowIndex ?? 0}-${target.fieldKey}`;
+  const cameraId = `cam-${uid}`;
+  const fileId = `file-${uid}`;
 
   async function handleFiles(fileList: FileList | null) {
     if (!fileList || fileList.length === 0) return;
     setError(null);
-    setUploading(true);
     try {
       let latest = files;
-      for (const file of Array.from(fileList)) {
-        const res = await uploadIntakeFile(token, fieldKey, file);
+      for (const original of Array.from(fileList)) {
+        setBusy("preparing");
+        const prepared = await compressImageFile(original);
+        if (prepared.size > MAX_UPLOAD_BYTES) {
+          setError(`${tr(UI.fileTooLarge, locale)} (${formatBytes(prepared.size)})`);
+          continue;
+        }
+        setBusy("uploading");
+        const res = await uploadAcaIntakeFile(token, target, prepared);
         latest = res.files;
       }
       onChange(latest);
     } catch (e) {
       setError(e instanceof Error ? e.message : tr(UI.uploadError, locale));
     } finally {
-      setUploading(false);
+      setBusy("idle");
     }
   }
 
   async function handleRemove(url: string) {
     try {
-      const res = await removeIntakeFile(token, fieldKey, url);
+      const res = await removeAcaIntakeFile(token, target, url);
       onChange(res.files);
     } catch {
       setError(tr(UI.uploadError, locale));
     }
   }
 
+  const working = busy !== "idle";
+
   return (
-    <div>
-      <Label className="mb-0.5 block">{label}</Label>
-      {help && <p className="mb-1 text-xs font-medium text-blue-600">{help}</p>}
+    <div className={invalid ? "rounded-md border border-red-500 p-2" : undefined}>
+      <Label className={`mb-0.5 block ${invalid ? "text-red-600" : ""}`}>
+        {label}
+        {required && <span className="ml-0.5 text-red-500">*</span>}
+      </Label>
+      {help && <p className="mb-1 text-xs text-muted-foreground">{help}</p>}
+
       {files.length > 0 && (
         <ul className="mb-2 space-y-1">
-          {files.map((f) => (
-            <li key={f.url} className="flex items-center justify-between gap-2 rounded-md border px-3 py-2 text-sm">
-              <a href={f.url} target="_blank" rel="noopener noreferrer" className="flex min-w-0 items-center gap-2 text-blue-600 hover:underline">
-                <FileText className="h-4 w-4 shrink-0" />
-                <span className="truncate">{f.name}</span>
-              </a>
-              <button type="button" onClick={() => handleRemove(f.url)} className="text-muted-foreground hover:text-red-600">
+          {files.map((f, i) => (
+            <li
+              key={f.url || `${f.name}-${i}`}
+              className="flex items-center justify-between gap-2 rounded-md border px-3 py-2 text-sm"
+            >
+              {f.url ? (
+                <a
+                  href={f.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex min-w-0 items-center gap-2 text-blue-600 hover:underline"
+                >
+                  <FileText className="h-4 w-4 shrink-0" />
+                  <span className="truncate">{f.name}</span>
+                </a>
+              ) : (
+                <span className="flex min-w-0 items-center gap-2 text-muted-foreground">
+                  <FileText className="h-4 w-4 shrink-0" />
+                  <span className="truncate">{f.name}</span>
+                </span>
+              )}
+              <button
+                type="button"
+                onClick={() => handleRemove(f.url)}
+                className="text-muted-foreground hover:text-red-600"
+                aria-label={tr(UI.remove, locale)}
+              >
                 <X className="h-4 w-4" />
               </button>
             </li>
           ))}
         </ul>
       )}
+
+      {/* Camera-first on mobile; "choose a file" covers desktop and PDFs. */}
       <input
-        id={inputId}
+        id={cameraId}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        className="hidden"
+        onChange={(e) => {
+          void handleFiles(e.target.files);
+          e.target.value = "";
+        }}
+      />
+      <input
+        id={fileId}
         type="file"
         accept="image/*,application/pdf"
         multiple
@@ -1388,17 +1339,39 @@ function FileUploader({
           e.target.value = "";
         }}
       />
-      <Button type="button" variant="outline" size="sm" disabled={uploading} onClick={() => document.getElementById(inputId)?.click()}>
-        {uploading ? (
-          <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" /> {tr(UI.uploading, locale)}
-          </>
-        ) : (
-          <>
-            <Upload className="mr-2 h-4 w-4" /> {tr(UI.uploadFile, locale)}
-          </>
-        )}
-      </Button>
+
+      <div className="flex flex-wrap gap-2">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          disabled={working}
+          onClick={() => document.getElementById(cameraId)?.click()}
+          className="gap-1.5"
+        >
+          {working ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              {tr(busy === "preparing" ? UI.preparing : UI.uploading, locale)}
+            </>
+          ) : (
+            <>
+              <Camera className="h-4 w-4" /> {tr(UI.takePhoto, locale)}
+            </>
+          )}
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          disabled={working}
+          onClick={() => document.getElementById(fileId)?.click()}
+          className="gap-1.5 text-muted-foreground"
+        >
+          <Upload className="h-4 w-4" /> {tr(UI.chooseFile, locale)}
+        </Button>
+      </div>
+
       <p className="mt-1 text-xs text-muted-foreground">{tr(UI.fileHint, locale)}</p>
       {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
     </div>
