@@ -185,7 +185,6 @@ export const UI = {
   preparing: { en: "Preparing photo…", es: "Preparando foto…" } as Dict,
   noFiles: { en: "No files uploaded yet.", es: "Aún no hay archivos." } as Dict,
   uploadError: { en: "Upload failed. Try again.", es: "Error al subir. Intente de nuevo." } as Dict,
-  fileHint: { en: "Photos or PDF. Large photos are resized automatically.", es: "Fotos o PDF. Las fotos grandes se redimensionan automáticamente." } as Dict,
   fileTooLarge: {
     en: "That file is too large. Try taking a photo instead of attaching the original.",
     es: "Ese archivo es demasiado grande. Intente tomar una foto en lugar de adjuntar el original.",

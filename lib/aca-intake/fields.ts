@@ -148,9 +148,10 @@ const SEX_OPTIONS: AcaOption[] = [
 /** Sub-fields for one household member. Row 1 is the primary applicant (prefilled from step 1). */
 const HOUSEHOLD_MEMBER_FIELDS: AcaField[] = [
   {
+    // No "Self" option: row 1 IS the primary applicant and gets `relationship: "Self"`
+    // written by the form, so offering it on an added member would only invite duplicates.
     key: "relationship", labelEn: "Relationship to you", labelEs: "Parentesco con usted", type: "select", required: true,
     options: [
-      { value: "Self", labelEn: "Self (primary applicant)", labelEs: "Usted mismo (solicitante principal)" },
       { value: "Spouse", labelEn: "Spouse", labelEs: "Cónyuge" },
       { value: "Domestic partner", labelEn: "Domestic partner", labelEs: "Pareja de hecho" },
       { value: "Son", labelEn: "Son", labelEs: "Hijo" },
@@ -172,11 +173,11 @@ const HOUSEHOLD_MEMBER_FIELDS: AcaField[] = [
     options: YES_NO,
   },
   {
-    key: "ssn", labelEn: "Social Security number", labelEs: "Número de seguro social", type: "ssn", required: true, sensitive: true,
+    key: "ssn", labelEn: "Social Security number", labelEs: "Número de seguro social", type: "ssn", sensitive: true,
     digitsOnly: true, maxLength: 9, showIf: { field: "hasSsn", equals: "yes" },
   },
   {
-    key: "noSsnReason", labelEn: "Why no SSN?", labelEs: "¿Por qué no tiene SSN?", type: "select", required: true,
+    key: "noSsnReason", labelEn: "Why no SSN?", labelEs: "¿Por qué no tiene SSN?", type: "select",
     showIf: { field: "hasSsn", equals: "no" },
     options: [
       { value: "Not eligible for an SSN", labelEn: "Not eligible for an SSN", labelEs: "No elegible para un SSN" },
@@ -187,27 +188,26 @@ const HOUSEHOLD_MEMBER_FIELDS: AcaField[] = [
   { key: "isUsCitizen", labelEn: "Is this person a US citizen?", labelEs: "¿Es ciudadano(a) de EE. UU.?", type: "select", required: true, options: YES_NO },
   {
     key: "isNaturalizedCitizen", labelEn: "Are they a naturalized citizen?", labelEs: "¿Es ciudadano(a) naturalizado(a)?", type: "select", required: true,
+    options: YES_NO,
     showIf: { field: "isUsCitizen", equals: "yes" },
     helpEn: "Answer No if they were born in the US — nothing else is needed.",
     helpEs: "Responda No si nació en EE. UU. — no se necesita nada más.",
   },
   {
     key: "docCitizenshipCertificate", labelEn: "Naturalization or citizenship certificate", labelEs: "Certificado de naturalización o ciudadanía",
-    type: "file", required: true, crm: custom("aca_doc_citizenship"), crmLabel: "Citizenship certificate",
+    type: "file", crm: custom("aca_doc_citizenship"), crmLabel: "Citizenship certificate",
     showIf: { field: "isNaturalizedCitizen", equals: "yes" },
-    helpEn: "Take a photo of the certificate or upload a file.",
-    helpEs: "Tome una foto del certificado o suba un archivo.",
   },
   {
     key: "docLegalPresenceFront", labelEn: "Legal presence document — FRONT", labelEs: "Documento de presencia legal — FRENTE",
-    type: "file", required: true, crm: custom("aca_doc_legal_front"), crmLabel: "Legal presence doc (front)",
+    type: "file", crm: custom("aca_doc_legal_front"), crmLabel: "Legal presence doc (front)",
     showIf: { field: "isUsCitizen", equals: "no" },
-    helpEn: "Green card, work permit (EAD) or similar. Take a photo or upload a file.",
-    helpEs: "Tarjeta verde, permiso de trabajo (EAD) o similar. Tome una foto o suba un archivo.",
+    helpEn: "Green card, work permit (EAD) or similar.",
+    helpEs: "Tarjeta verde, permiso de trabajo (EAD) o similar.",
   },
   {
     key: "docLegalPresenceBack", labelEn: "Legal presence document — BACK", labelEs: "Documento de presencia legal — REVERSO",
-    type: "file", required: true, crm: custom("aca_doc_legal_back"), crmLabel: "Legal presence doc (back)",
+    type: "file", crm: custom("aca_doc_legal_back"), crmLabel: "Legal presence doc (back)",
     showIf: { field: "isUsCitizen", equals: "no" },
     helpEn: "The back of the same card.",
     helpEs: "El reverso de la misma tarjeta.",
@@ -236,10 +236,10 @@ export const ACA_SECTIONS: AcaSection[] = [
     descriptionEs: "Datos del solicitante principal.",
     fields: [
       { key: "firstName", labelEn: "First name", labelEs: "Primer nombre", type: "text", required: true, crm: native("firstName") },
-      { key: "middleName", labelEn: "Middle name (optional)", labelEs: "Segundo nombre (opcional)", type: "text", crm: custom("middle_name"), crmLabel: "Middle name" },
+      { key: "middleName", labelEn: "Middle name", labelEs: "Segundo nombre", type: "text", crm: custom("middle_name"), crmLabel: "Middle name" },
       { key: "lastName", labelEn: "Last name", labelEs: "Primer apellido", type: "text", required: true, crm: native("lastName") },
       {
-        key: "secondLastName", labelEn: "Second last name (optional)", labelEs: "Segundo apellido (opcional)", type: "text",
+        key: "secondLastName", labelEn: "Second last name", labelEs: "Segundo apellido", type: "text",
         helpEn: "If your ID shows two last names, include both.",
         helpEs: "Si su identificación muestra dos apellidos, incluya ambos.",
       },
@@ -262,7 +262,7 @@ export const ACA_SECTIONS: AcaSection[] = [
         ],
       },
       { key: "phone", labelEn: "Phone number", labelEs: "Número de teléfono", type: "tel", required: true, crm: native("phone") },
-      { key: "altPhone", labelEn: "Alternate phone (optional)", labelEs: "Teléfono alterno (opcional)", type: "tel", crm: custom("alt_phone"), crmLabel: "Alternate phone" },
+      { key: "altPhone", labelEn: "Alternate phone", labelEs: "Teléfono alterno", type: "tel", crm: custom("alt_phone"), crmLabel: "Alternate phone" },
       { key: "email", labelEn: "Email", labelEs: "Correo electrónico", type: "email", required: true, crm: native("email") },
     ],
   },
@@ -278,7 +278,7 @@ export const ACA_SECTIONS: AcaSection[] = [
         addressTargets: { city: "city", state: "state", zip: "postalCode", county: "county" },
         placeholderEn: "Start typing your address…", placeholderEs: "Empiece a escribir su dirección…",
       },
-      { key: "address2", labelEn: "Apartment, unit or suite (optional)", labelEs: "Apartamento, unidad o suite (opcional)", type: "text" },
+      { key: "address2", labelEn: "Apartment, unit or suite", labelEs: "Apartamento, unidad o suite", type: "text" },
       { key: "city", labelEn: "City", labelEs: "Ciudad", type: "text", required: true, crm: native("city") },
       { key: "state", labelEn: "State", labelEs: "Estado", type: "text", required: true, crm: native("state") },
       { key: "postalCode", labelEn: "Zip code", labelEs: "Código postal", type: "zip", required: true, digitsOnly: true, maxLength: 5, crm: native("postalCode") },

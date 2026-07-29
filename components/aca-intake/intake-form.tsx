@@ -124,8 +124,25 @@ const SECTION_ICONS: Record<string, LucideIcon> = {
   agent: StickyNote,
 };
 
-/** Identity sub-fields on household member row 0, mirrored from step 1 and shown read-only. */
+/** Identity sub-fields on household member row 0, mirrored from step 1. */
 const PRIMARY_MIRROR_KEYS = ["firstName", "lastName", "dateOfBirth", "sex", "ssn"] as const;
+
+/**
+ * Sub-fields hidden on household row 1. The primary applicant already answered all of these
+ * in step 1 and they are mirrored into the row, so re-displaying them (even disabled) just
+ * makes the step look like a wall of dead inputs. Row 1 shows a name and the citizenship
+ * questions, nothing else.
+ */
+const PRIMARY_HIDDEN_ROW_KEYS = new Set<string>([
+  "relationship",
+  "firstName",
+  "lastName",
+  "dateOfBirth",
+  "sex",
+  "hasSsn",
+  "ssn",
+  "noSsnReason",
+]);
 
 /** Add-button copy per repeater. */
 function addLabelFor(fieldKey: string, locale: AcaLocale): string {
@@ -473,11 +490,17 @@ export default function AcaIntakeForm({ token }: { token: string }) {
         </div>
       )}
 
+      {/*
+        No `overflow-hidden` here: the Google Places autocomplete renders its suggestion list
+        inside the input, so clipping the card cut the address options off at the card's edge
+        whenever the address field sat near the bottom of a step. The gradient bar rounds its
+        own top corners instead.
+      */}
       <div
         ref={cardRef}
-        className="scroll-mt-4 overflow-hidden rounded-2xl border bg-white shadow-md shadow-black/5 dark:bg-gray-950"
+        className="scroll-mt-4 rounded-2xl border bg-white shadow-md shadow-black/5 dark:bg-gray-950"
       >
-        <div className="h-1.5 w-full bg-gradient-to-r from-brand to-accent" />
+        <div className="h-1.5 w-full rounded-t-2xl bg-gradient-to-r from-brand to-accent" />
         <div className="p-5 sm:p-6">
           <div className="flex items-center gap-3">
             <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand/10 text-brand">
@@ -1140,18 +1163,23 @@ function RepeaterEditor({
             </div>
 
             {isPrimary && (
-              <p className="mb-3 text-xs text-muted-foreground">{tr(UI.primaryFromStepOne, locale)}</p>
+              <div className="mb-3">
+                <p className="text-sm font-medium">
+                  {[str(rowData.firstName), str(rowData.lastName)].filter(Boolean).join(" ") ||
+                    tr(UI.youLabel, locale)}
+                </p>
+                <p className="text-xs text-muted-foreground">{tr(UI.primaryFromStepOne, locale)}</p>
+              </div>
             )}
 
             <div className="grid gap-3 sm:grid-cols-2">
               {(field.rowFields ?? []).map((sub) => {
+                // Row 1 already has these from step 1 — show the name above instead.
+                if (isPrimary && PRIMARY_HIDDEN_ROW_KEYS.has(sub.key)) return null;
                 // Row-scoped conditional visibility — the citizenship branch lives here.
                 if (!isFieldVisible(sub, rowData as Record<string, unknown>)) return null;
 
                 const path = rowPath(field.key, index, sub.key);
-                const locked =
-                  isPrimary &&
-                  (PRIMARY_MIRROR_KEYS as readonly string[]).concat("relationship", "hasSsn").includes(sub.key);
 
                 if (sub.type === "file") {
                   return (
@@ -1186,7 +1214,6 @@ function RepeaterEditor({
                       errorKey={errors[path]}
                       reveal={reveal}
                       isOwner={isOwner}
-                      disabled={locked}
                     />
                   </div>
                 );
@@ -1316,7 +1343,13 @@ function FileUploader({
         </ul>
       )}
 
-      {/* Camera-first on mobile; "choose a file" covers desktop and PDFs. */}
+      {/*
+        Camera button keeps `accept="image/*"` because that is what makes the OS open the
+        camera. The file button deliberately has NO accept filter — clients photograph
+        documents on every kind of device and an allow-list kept rejecting perfectly valid
+        files (HEIC from iPhones, scans, screenshots). Anything is accepted; the size check
+        is the only gate.
+      */}
       <input
         id={cameraId}
         type="file"
@@ -1331,7 +1364,6 @@ function FileUploader({
       <input
         id={fileId}
         type="file"
-        accept="image/*,application/pdf"
         multiple
         className="hidden"
         onChange={(e) => {
@@ -1372,7 +1404,6 @@ function FileUploader({
         </Button>
       </div>
 
-      <p className="mt-1 text-xs text-muted-foreground">{tr(UI.fileHint, locale)}</p>
       {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
     </div>
   );
