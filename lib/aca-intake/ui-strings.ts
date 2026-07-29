@@ -167,6 +167,7 @@ export const UI = {
   addDoctor: { en: "Add another doctor", es: "Agregar otro médico" } as Dict,
   addPrescription: { en: "Add another medication", es: "Agregar otro medicamento" } as Dict,
   addRow: { en: "Add another", es: "Agregar otro" } as Dict,
+  canAddMore: { en: "You can add up to {n} more", es: "Puede agregar hasta {n} más" } as Dict,
   youLabel: { en: "You", es: "Usted" } as Dict,
   primaryFromStepOne: {
     en: "Taken from the first step — edit it there if something is wrong.",

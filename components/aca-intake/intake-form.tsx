@@ -1223,10 +1223,28 @@ function RepeaterEditor({
         );
       })}
 
+      {/*
+        Deliberately not a small outline Button: adding a household member is the whole point
+        of this step and a quiet secondary button reads as an afterthought. A full-width
+        dashed "slot" is the standard affordance for "there is room for another one here",
+        and the remaining count tells people the list has a limit before they hit it.
+      */}
       {list.length < maxRows && (
-        <Button type="button" variant="outline" size="sm" onClick={addRow} className="gap-1.5">
-          <Plus className="h-4 w-4" /> {addLabel}
-        </Button>
+        <button
+          type="button"
+          onClick={addRow}
+          className="group flex w-full items-center gap-3 rounded-xl border-2 border-dashed border-brand/40 bg-brand/5 px-4 py-3.5 text-left transition hover:border-brand hover:bg-brand/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 active:scale-[0.99]"
+        >
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-brand to-accent text-white shadow-sm shadow-brand/30 transition group-hover:scale-105">
+            <Plus className="h-5 w-5" />
+          </span>
+          <span className="min-w-0">
+            <span className="block text-sm font-semibold text-brand">{addLabel}</span>
+            <span className="block text-xs text-muted-foreground">
+              {tr(UI.canAddMore, locale).replace("{n}", String(maxRows - list.length))}
+            </span>
+          </span>
+        </button>
       )}
     </div>
   );
