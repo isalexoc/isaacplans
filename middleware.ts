@@ -115,23 +115,28 @@ export default clerkMiddleware(async (auth, req) => {
   // Just pass through to next-intl middleware for locale handling
   const response = intlMiddleware(req);
   const pathname = req.nextUrl.pathname;
+  // The ACA intake CLIENT form only — the token segment rules out the agent dashboard
+  // (/aca/intake) and the summary view (/aca/intake/<token>/view), which keep full chrome.
+  const isAcaIntakeForm = /^(?:\/(?:en|es))?\/aca\/(?:intake|admision)\/[^/]+$/i.test(pathname);
   if (
     pathname.includes("/get-health-coverage-fast") ||
     pathname.includes("/cobertura-salud-rapida") ||
     pathname.includes("/final-expense/get-covered") ||
     pathname.includes("/gastos-finales/obtener-cobertura") ||
     pathname.includes("/iul/get-covered") ||
-    pathname.includes("/iul/obtener-cobertura")
+    pathname.includes("/iul/obtener-cobertura") ||
+    isAcaIntakeForm
   ) {
     response.headers.set("x-is-ads-landing", "1");
   }
-  // "Bare" get-covered funnels (IUL + final expense) get an even barer footer
-  // (logo + copyright only, no links) and a logo-only + phone header.
+  // "Bare" funnels (IUL + final expense get-covered, ACA intake form) get an even barer
+  // footer (logo + copyright only, no links) and a logo-only + phone header.
   if (
     pathname.includes("/iul/get-covered") ||
     pathname.includes("/iul/obtener-cobertura") ||
     pathname.includes("/final-expense/get-covered") ||
-    pathname.includes("/gastos-finales/obtener-cobertura")
+    pathname.includes("/gastos-finales/obtener-cobertura") ||
+    isAcaIntakeForm
   ) {
     response.headers.set("x-ads-landing-variant", "iul-bare");
   }
