@@ -41,6 +41,7 @@ import {
 } from "@/lib/aca-intake-api";
 import { useAcaIntakeAutosave } from "@/hooks/use-aca-intake-autosave";
 import AcaIntakeBreadcrumb from "@/components/aca-intake/intake-breadcrumb";
+import FilePreview from "@/components/aca-intake/file-preview";
 import IntakeAddressInput, { type ResolvedAddress } from "@/components/shared/intake-address-input";
 import {
   visibleSections,
@@ -1326,32 +1327,33 @@ function FileUploader({
       {help && <p className="mb-1 text-xs text-muted-foreground">{help}</p>}
 
       {files.length > 0 && (
-        <ul className="mb-2 space-y-1">
+        <ul className="mb-2 space-y-1.5">
           {files.map((f, i) => (
             <li
               key={f.url || `${f.name}-${i}`}
-              className="flex items-center justify-between gap-2 rounded-md border px-3 py-2 text-sm"
+              className="flex items-center justify-between gap-2 rounded-md border p-2 text-sm"
             >
+              {/* Thumbnail + name are one target, so tapping the picture opens the file. */}
               {f.url ? (
                 <a
                   href={f.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex min-w-0 items-center gap-2 text-blue-600 hover:underline"
+                  className="flex min-w-0 items-center gap-2.5 text-blue-600 hover:underline"
                 >
-                  <FileText className="h-4 w-4 shrink-0" />
+                  <FilePreview file={f} />
                   <span className="truncate">{f.name}</span>
                 </a>
               ) : (
-                <span className="flex min-w-0 items-center gap-2 text-muted-foreground">
-                  <FileText className="h-4 w-4 shrink-0" />
+                <span className="flex min-w-0 items-center gap-2.5 text-muted-foreground">
+                  <FilePreview file={f} />
                   <span className="truncate">{f.name}</span>
                 </span>
               )}
               <button
                 type="button"
                 onClick={() => handleRemove(f.url)}
-                className="text-muted-foreground hover:text-red-600"
+                className="shrink-0 text-muted-foreground hover:text-red-600"
                 aria-label={tr(UI.remove, locale)}
               >
                 <X className="h-4 w-4" />

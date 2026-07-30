@@ -5,10 +5,11 @@ import { useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, AlertCircle, Pencil, Eye, EyeOff, FileText, Copy, Check, Unlock, Lock } from "lucide-react";
+import { Loader2, AlertCircle, Pencil, Eye, EyeOff, Copy, Check, Unlock, Lock } from "lucide-react";
 import { fetchAcaIntake, reopenAcaIntake } from "@/lib/aca-intake-api";
 import { formatMoneyDisplay } from "@/lib/iul-intake/money";
 import AcaIntakeBreadcrumb from "@/components/aca-intake/intake-breadcrumb";
+import FilePreview from "@/components/aca-intake/file-preview";
 import {
   ACA_SECTIONS,
   isFieldVisible,
@@ -83,14 +84,18 @@ function CopyableValue({
   );
 }
 
-/** Files attached to a top-level field or a repeater sub-field. */
+/**
+ * Files attached to a top-level field or a repeater sub-field.
+ * Thumbnails matter most here — scanning a household's ID documents is far quicker from
+ * pictures than from a list of filenames.
+ */
 function FileList({ files, locale }: { files: FileRef[]; locale: AcaLocale }) {
   if (files.length === 0) return <>{tr(UI.empty, locale)}</>;
   return (
-    <ul className="mt-1 space-y-1">
+    <ul className="mt-1 space-y-1.5">
       {files.map((f, i) => (
-        <li key={f.url || `${f.name}-${i}`} className="flex min-w-0 items-start gap-1.5">
-          <FileText className="mt-0.5 h-4 w-4 shrink-0 text-blue-600" />
+        <li key={f.url || `${f.name}-${i}`} className="flex min-w-0 items-center gap-2.5">
+          <FilePreview file={f} size={56} />
           {f.url ? (
             <a
               href={f.url}
