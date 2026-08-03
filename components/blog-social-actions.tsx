@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useLocale } from "next-intl";
-import { useUser, SignInButton } from "@clerk/nextjs";
+import { useUser, SignUpButton } from "@clerk/nextjs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BlogLikesAvatars } from "@/components/blog-likes-avatars";
 
@@ -150,7 +150,7 @@ export function BlogSocialActions({
 
   const handleLike = async () => {
     if (!isSignedIn) {
-      // This should not be called when wrapped in SignInButton, but keeping as safety check
+      // This should not be called when wrapped in SignUpButton, but keeping as safety check
       return;
     }
 
@@ -223,7 +223,7 @@ export function BlogSocialActions({
 
   const handleSave = async () => {
     if (!isSignedIn) {
-      // This should not be called when wrapped in SignInButton, but keeping as safety check
+      // This should not be called when wrapped in SignUpButton, but keeping as safety check
       setShowMenu(false);
       return;
     }
@@ -274,12 +274,12 @@ export function BlogSocialActions({
         {/* Action buttons */}
         <div className="flex items-center gap-2 flex-wrap">
           {!isSignedIn ? (
-            <SignInButton 
+            <SignUpButton 
               mode="modal" 
               forceRedirectUrl={currentUrl}
-              signUpForceRedirectUrl={currentUrl}
+              signInForceRedirectUrl={currentUrl}
               fallbackRedirectUrl={currentUrl}
-              signUpFallbackRedirectUrl={currentUrl}
+              signInFallbackRedirectUrl={currentUrl}
             >
               <button
                 onClick={() => {
@@ -314,7 +314,7 @@ export function BlogSocialActions({
                   <span className="text-sm font-medium">{likes}</span>
                 )}
               </button>
-            </SignInButton>
+            </SignUpButton>
           ) : (
             <button
               onClick={handleLike}
@@ -347,12 +347,12 @@ export function BlogSocialActions({
           )}
 
           {!isSignedIn ? (
-            <SignInButton 
+            <SignUpButton 
               mode="modal" 
               forceRedirectUrl={currentUrl}
-              signUpForceRedirectUrl={currentUrl}
+              signInForceRedirectUrl={currentUrl}
               fallbackRedirectUrl={currentUrl}
-              signUpFallbackRedirectUrl={currentUrl}
+              signInFallbackRedirectUrl={currentUrl}
             >
               <button
                 className="flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
@@ -373,7 +373,7 @@ export function BlogSocialActions({
                 </svg>
                 <span className="text-sm font-medium">{comments}</span>
               </button>
-            </SignInButton>
+            </SignUpButton>
           ) : (
             <button
               onClick={() => {
@@ -433,12 +433,12 @@ export function BlogSocialActions({
             {showMenu && (
               <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50">
                 {!isSignedIn ? (
-                  <SignInButton 
+                  <SignUpButton 
               mode="modal" 
               forceRedirectUrl={currentUrl}
-              signUpForceRedirectUrl={currentUrl}
+              signInForceRedirectUrl={currentUrl}
               fallbackRedirectUrl={currentUrl}
-              signUpFallbackRedirectUrl={currentUrl}
+              signInFallbackRedirectUrl={currentUrl}
             >
                     <button
                       className="w-full flex items-center gap-3 px-4 py-3 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors first:rounded-t-lg last:rounded-b-lg"
@@ -458,7 +458,7 @@ export function BlogSocialActions({
                       </svg>
                       <span>{locale === "en" ? "Save" : "Guardar"}</span>
                     </button>
-                  </SignInButton>
+                  </SignUpButton>
                 ) : (
                   <button
                     onClick={handleSave}

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useLocale } from "next-intl";
-import { SignedIn, SignedOut, SignInButton, useUser } from "@clerk/nextjs";
+import { SignedIn, SignedOut, SignUpButton, useUser } from "@clerk/nextjs";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -615,7 +615,7 @@ export function BlogComments({ postId, postSlug }: BlogCommentsProps) {
                         </SignedIn>
                         {/* @ts-ignore - Clerk React 19 compatibility */}
                         <SignedOut>
-                          <SignInButton mode="modal">
+                          <SignUpButton mode="modal">
                             <button
                               type="button"
                               className="flex items-center gap-1 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
@@ -635,7 +635,7 @@ export function BlogComments({ postId, postSlug }: BlogCommentsProps) {
                               </svg>
                               {comment.likeCount || 0}
                             </button>
-                          </SignInButton>
+                          </SignUpButton>
                         </SignedOut>
                       </>
                     )}
@@ -824,14 +824,14 @@ export function BlogComments({ postId, postSlug }: BlogCommentsProps) {
 
         {/* @ts-ignore - Clerk React 19 compatibility */}
         <SignedOut>
-          <SignInButton mode="modal">
+          <SignUpButton mode="modal">
             <button
               type="button"
               className="inline-flex items-center justify-center rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
             >
-              {t("Sign in to comment", "Inicia sesión para comentar")}
+              {t("Sign up to comment", "Regístrate para comentar")}
             </button>
-          </SignInButton>
+          </SignUpButton>
         </SignedOut>
       </div>
 
