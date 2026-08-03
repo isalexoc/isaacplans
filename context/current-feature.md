@@ -2,10 +2,40 @@
 
 ## Status
 
-None — last completed: ACA Get Covered (ads landing page + self-serve application + unified
-ads-image admin), merged to main from `feature/aca-get-covered`.
+None — last completed: ads-image upload + sign-up-first Clerk default, merged to main from
+`feature/ads-image-upload-and-signup-default`.
 
 ## History
+
+- 2026-08-03: **Ads-image upload + sign-up-first Clerk default** completed. Follow-up to the
+  ACA Get Covered work below, same day. Two independent pieces:
+  1. **Upload instead of paste-a-URL** for the `/admin/hero` image overrides: replaced the
+     Cloudinary-URL text field with a drag-and-drop/click-to-upload tile
+     (`components/admin/ads-images-client.tsx`) backed by a new admin-gated
+     `app/api/admin/ads-images/upload/route.ts` — uploads straight to Cloudinary
+     (`ads-images/{lob}/{kind}/{locale}` folder, `unique_filename: true` so a swap never serves
+     stale CDN bytes under a reused public_id), builds an optimized delivery URL (`f_auto,q_auto`,
+     width-capped for hero / smart-cropped 1200×630 for OG), and persists it as the override in
+     one round trip via the existing `setAdsImageOverride`. Client-side, large photos are
+     compressed with the existing `lib/image-compress.ts` (built for the ACA intake's green-card
+     photos) before upload — Vercel's serverless request body cap is 4.5 MB, so this isn't
+     optional. Also set the `/aca/apply` page's placeholder hero to a real photo
+     (`ACA_APPLY_HERO_IMAGE` in `lib/get-covered-fast/constants.ts`).
+  2. **Every Clerk entry point sitewide now defaults to the sign-up screen, not sign-in**
+     (`SignInButton` → `SignUpButton`, `signUpForceRedirectUrl`/`signUpFallbackRedirectUrl` →
+     `signInForceRedirectUrl`/`signInFallbackRedirectUrl` — the symmetric prop for the "already
+     have an account" path within the sign-up modal, confirmed against Clerk's actual
+     `SignUpButtonProps` type). Rationale: most clicks on an ad-driven "Apply now" CTA are
+     brand-new visitors, so defaulting to "Sign In" cost them an extra tap to find "Sign up."
+     Applied uniformly per explicit request rather than only on the apply pages: `aca-apply-cta.tsx`,
+     `iul-apply-cta.tsx`, `blog-user-auth.tsx` (header button, label updated "Sign In" → "Sign Up"),
+     `blog-comments.tsx` (label "Sign in to comment" → "Sign up to comment"),
+     `blog-social-actions.tsx` (icon-only, no label to update), `final-expense-leave-behind-landing.tsx`
+     and `sale-sticker/sale-sticker-landing.tsx` (internal `LandingSignInButton` helper renamed to
+     `LandingSignUpButton` to match what it now renders). `pnpm build` + `tsc --noEmit` clean.
+     Not independently verified live (Clerk modal rendering isn't something to screenshot-test
+     meaningfully) — verified via Clerk's type definitions and a clean build instead.
+  Merged to main on branch `feature/ads-image-upload-and-signup-default`.
 
 - 2026-08-03: **ACA Get Covered ads landing page + self-serve application + unified ads-image
   admin** completed. `/aca/get-covered` (+ `/aca/obtener-cobertura`) mirrors

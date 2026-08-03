@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { SignInButton } from "@clerk/nextjs";
+import { SignUpButton } from "@clerk/nextjs";
 import { useTranslations } from "next-intl";
 import {
   ArrowRight,
@@ -21,7 +21,7 @@ import { CONFETTI_PIECES, SALE_TYPE_THEME, STICKER_THEME } from "@/lib/sale-stic
 
 const FEATURE_ICONS = [Hash, UserCircle, MessageCircle, Languages] as const;
 
-function LandingSignInButton({
+function LandingSignUpButton({
   redirectUrl,
   className,
   children,
@@ -31,17 +31,17 @@ function LandingSignInButton({
   children: React.ReactNode;
 }) {
   return (
-    <SignInButton
+    <SignUpButton
       mode="modal"
       forceRedirectUrl={redirectUrl}
-      signUpForceRedirectUrl={redirectUrl}
+      signInForceRedirectUrl={redirectUrl}
       fallbackRedirectUrl={redirectUrl}
-      signUpFallbackRedirectUrl={redirectUrl}
+      signInFallbackRedirectUrl={redirectUrl}
     >
       <button type="button" className={className}>
         {children}
       </button>
-    </SignInButton>
+    </SignUpButton>
   );
 }
 
@@ -193,10 +193,10 @@ export default function SaleStickerLanding() {
               {t("heroSubtitle")}
             </p>
             <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row lg:justify-start">
-              <LandingSignInButton redirectUrl={redirectUrl} className={primaryCtaClass}>
+              <LandingSignUpButton redirectUrl={redirectUrl} className={primaryCtaClass}>
                 {t("ctaPrimary")}
                 <ArrowRight className="h-5 w-5" aria-hidden />
-              </LandingSignInButton>
+              </LandingSignUpButton>
               <p className="text-sm text-slate-400">{t("ctaHint")}</p>
             </div>
             <div className="mt-6 flex flex-col items-center gap-3 sm:flex-row lg:justify-start">
@@ -292,13 +292,13 @@ export default function SaleStickerLanding() {
           <h2 className="text-2xl font-bold sm:text-3xl">{t("finalTitle")}</h2>
           <p className="mx-auto mt-4 max-w-lg text-sky-100/90">{t("finalSubtitle")}</p>
           <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
-            <LandingSignInButton
+            <LandingSignUpButton
               redirectUrl={redirectUrl}
               className="inline-flex items-center gap-2 rounded-xl bg-white px-8 py-3.5 text-base font-semibold text-[#003366] shadow-lg transition hover:bg-amber-50"
             >
               {t("finalCta")}
               <ArrowRight className="h-5 w-5" aria-hidden />
-            </LandingSignInButton>
+            </LandingSignUpButton>
           </div>
         </div>
       </section>

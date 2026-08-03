@@ -5,7 +5,7 @@
  * Clerk's sign-in/sign-up modal (this app has no /sign-in route), then are redirected to the
  * localized start path. Mirrors components/iul-apply-cta.tsx.
  */
-import { SignInButton, useUser } from "@clerk/nextjs";
+import { SignUpButton, useUser } from "@clerk/nextjs";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
@@ -28,10 +28,10 @@ export default function AcaApplyCta({ label, startHref }: { label: string; start
 
   // Signed out (or still loading): open Clerk's modal, then return to the start handoff.
   return (
-    <SignInButton mode="modal" forceRedirectUrl={startHref} signUpForceRedirectUrl={startHref}>
+    <SignUpButton mode="modal" forceRedirectUrl={startHref} signInForceRedirectUrl={startHref}>
       <Button size="lg" className={CTA_CLS}>
         {label} <ArrowRight className="h-5 w-5" />
       </Button>
-    </SignInButton>
+    </SignUpButton>
   );
 }

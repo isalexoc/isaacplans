@@ -1,6 +1,6 @@
 "use client";
 
-import { SignInButton, UserButton, SignedIn, SignedOut, useUser } from "@clerk/nextjs";
+import { SignUpButton, UserButton, SignedIn, SignedOut, useUser } from "@clerk/nextjs";
 import { useLocale } from "next-intl";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useEffect, useState } from "react";
@@ -82,12 +82,12 @@ export function BlogUserAuth() {
     <div className="flex items-center min-w-[120px] h-10">
       {/* @ts-ignore - SignedOut works correctly with React 19, TypeScript types need update */}
       <SignedOut>
-        <SignInButton 
+        <SignUpButton
           mode="modal"
           forceRedirectUrl={currentUrl}
-          signUpForceRedirectUrl={currentUrl}
+          signInForceRedirectUrl={currentUrl}
           fallbackRedirectUrl={currentUrl}
-          signUpFallbackRedirectUrl={currentUrl}
+          signInFallbackRedirectUrl={currentUrl}
         >
           <button className="flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors h-10">
             <svg
@@ -104,10 +104,10 @@ export function BlogUserAuth() {
               />
             </svg>
             <span className="text-sm font-medium">
-              {locale === "en" ? "Sign In" : "Iniciar Sesión"}
+              {locale === "en" ? "Sign Up" : "Registrarse"}
             </span>
           </button>
-        </SignInButton>
+        </SignUpButton>
       </SignedOut>
       {/* @ts-ignore - SignedIn works correctly with React 19, TypeScript types need update */}
       <SignedIn>
