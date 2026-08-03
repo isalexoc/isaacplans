@@ -93,6 +93,13 @@ const OPERATIONS_TOOLS: ToolCard[] = [
     href: "/en/admin/agent-licenses",
     icon: IdCard,
   },
+  {
+    title: "Ads Page Images",
+    description:
+      "Swap the hero and OG images on the Final Expense, IUL, and ACA get-covered ads pages to A/B test what converts.",
+    href: "/en/admin/hero",
+    icon: ImageIcon,
+  },
 ];
 
 const CALL_CENTER_TOOLS: ToolCard[] = [
@@ -126,13 +133,6 @@ const CONTENT_CMS_TOOLS: ToolCard[] = [
 ];
 
 const FINAL_EXPENSE_TOOLS: ToolCard[] = [
-  {
-    title: "Get Covered Hero Image",
-    description:
-      "Swap the hero image on the final-expense get-covered ads page to A/B test what converts.",
-    href: "/en/admin/get-covered-hero",
-    icon: ImageIcon,
-  },
   {
     title: "Sale Sticker",
     description:

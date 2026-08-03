@@ -69,6 +69,26 @@ export function getIulGetCoveredOgImageUrl(locale: string): string {
   return `${CLOUDINARY_ISAAC}/f_auto,q_auto,w_1200,h_630,c_pad,b_auto/${publicId}`;
 }
 
+/**
+ * Hero art for the ACA get-covered (Meta ads) funnel — desktop split column. Portrait family
+ * photo, same locale for both languages (no forced crop; the browser's `object-cover` frames
+ * it within the tall panel, same convention as the IUL hero). Admin-overridable — see
+ * lib/ads-images/settings.ts.
+ */
+const ACA_GET_COVERED_HERO_PUBLIC_ID = "v1785773108/pexels-helenalopes-27176986_quwu4i";
+
+export function getAcaGetCoveredHeroImageUrl(_locale: string): string {
+  return `${CLOUDINARY_ISAAC}/f_auto,q_auto,w_1200,c_limit/${ACA_GET_COVERED_HERO_PUBLIC_ID}`;
+}
+
+/**
+ * OG / Twitter card (1200×630) for the ACA get-covered funnel — same source photo, smart-cropped
+ * to the social card aspect ratio. Admin-overridable — see lib/ads-images/settings.ts.
+ */
+export function getAcaGetCoveredOgImageUrl(_locale: string): string {
+  return `${CLOUDINARY_ISAAC}/f_auto,q_auto,w_1200,h_630,c_fill,g_auto/${ACA_GET_COVERED_HERO_PUBLIC_ID}`;
+}
+
 /** Agent headshot on `/final-expense/get-covered` success (square, face-cropped; displayed as rounded-rect in UI). */
 export const FINAL_EXPENSE_GET_COVERED_AGENT_HEADSHOT =
   "https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_320,h_320,c_fill,g_face/v1764176212/isaacpic_c8kca5_3_hz35qm.png";

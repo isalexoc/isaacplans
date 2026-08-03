@@ -1,0 +1,53 @@
+{
+  "acaApply": {
+    "meta": {
+      "title": "Solicite cobertura de salud ACA | Isaac Plans",
+      "description": "Comience su solicitud de seguro de salud de la Ley de Cuidado de Salud a Bajo Precio en línea — segura, guiada y en solo unos minutos.",
+      "image": "https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_1200,h_630,c_fill,g_center/pexels-wanda-yanery-villarraga-tole-584965425-17052722_ewanjk.jpg",
+      "imageAlt": "Solicite cobertura de salud ACA con Isaac Plans"
+    },
+    "hero": {
+      "badge": "Ley de Cuidado de Salud a Bajo Precio (ACA)",
+      "title": "Obtenga la cobertura de salud que su familia necesita",
+      "subtitle": "Comience su solicitud segura en línea. Solo toma unos minutos y su progreso se guarda automáticamente."
+    },
+    "benefitsHeading": "¿Por qué solicitar con Isaac Plans?",
+    "benefits": [
+      {
+        "title": "Sin costo para usted",
+        "desc": "Nuestra orientación es gratuita — nos paga la aseguradora, no usted."
+      },
+      {
+        "title": "Subsidios que podría calificar",
+        "desc": "Muchas familias califican para créditos fiscales que reducen su prima mensual."
+      },
+      {
+        "title": "Médicos y medicamentos cubiertos",
+        "desc": "Le ayudamos a encontrar un plan que mantenga a sus médicos y medicamentos actuales en la red."
+      },
+      {
+        "title": "Apoyo bilingüe y licenciado",
+        "desc": "Obtenga ayuda en inglés o español de un asesor licenciado en cada paso."
+      }
+    ],
+    "howItWorksHeading": "Cómo solicitar",
+    "steps": [
+      {
+        "title": "Cree su cuenta",
+        "desc": "Regístrese de forma segura con su correo electrónico o Google. Esto mantiene su información privada y le permite terminar más tarde desde cualquier dispositivo."
+      },
+      {
+        "title": "Complete el formulario seguro",
+        "desc": "Responda algunas preguntas guiadas sobre su hogar. Todo está encriptado y se guarda automáticamente mientras avanza."
+      },
+      {
+        "title": "Revisamos y nos comunicamos",
+        "desc": "Una vez que envíe su solicitud, la revisamos y nos comunicamos con usted para finalizar su plan."
+      }
+    ],
+    "secureNote": "Su información está encriptada y nunca se comparte. Este proceso es 100% seguro.",
+    "cta": "Solicitar ahora",
+    "ctaNote": "Primero iniciará sesión para mantener su solicitud privada.",
+    "starting": "Iniciando su solicitud…"
+  }
+}

@@ -81,6 +81,22 @@ async function loadSplitMessages(locale: string): Promise<Record<string, any>> {
       // File doesn't exist, skip
     }
 
+    // Load ACA apply (public self-service) messages if they exist
+    try {
+      const acaApply = (await import(`@/messages/${locale}/aca/apply.json`)).default;
+      Object.assign(splitMessages, acaApply);
+    } catch {
+      // File doesn't exist, skip
+    }
+
+    // Load ACA get-covered (Meta ads funnel) messages if they exist
+    try {
+      const acaGetCovered = (await import(`@/messages/${locale}/aca/get-covered.json`)).default;
+      Object.assign(splitMessages, acaGetCovered);
+    } catch {
+      // File doesn't exist, skip
+    }
+
     // Load Final Expense presentation messages if they exist
     try {
       const fePresentation = (await import(`@/messages/${locale}/final-expense/presentation.json`)).default;

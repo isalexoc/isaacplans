@@ -2,44 +2,74 @@
 
 ## Status
 
-In Progress — ACA Client Intake (branch `feature/aca-intake`)
+None — last completed: ACA Get Covered (ads landing page + self-serve application + unified
+ads-image admin), merged to main from `feature/aca-get-covered`.
 
-## Goals
+## History
 
-Mirror the IUL secure-link intake for ACA ahead of open enrollment: agent creates a session from
+- 2026-08-03: **ACA Get Covered ads landing page + self-serve application + unified ads-image
+  admin** completed. `/aca/get-covered` (+ `/aca/obtener-cobertura`) mirrors
+  `/final-expense/get-covered`/`/iul/get-covered` but single-step only (first/last name, email,
+  phone — no second step, per explicit request): `components/aca/aca-get-covered-funnel.tsx` is a
+  trimmed clone of the IUL funnel (`Phase = "contact" | "done"` only, no quiz), validated by the
+  existing shared `shortTermMedicalFormSchema`, submitting to `/api/create-contact` with the
+  existing `acaData` shape (`source: "aca_get_covered_ads"`) rather than inventing a fourth
+  per-LOB payload like FE/IUL did — keeps ACA a single unified CRM lead type, distinguished by a
+  new `aca_get_covered_funnel` tag and a Meta CAPI duplicate-merge carve-out
+  (`trySendMetaLeadCapiLead` in `app/api/create-contact/route.ts`) mirroring the existing FE/IUL
+  special-casing. Done screen adds a "Start your ACA application" CTA alongside
+  book-appointment/call/WhatsApp, the ACA analogue of IUL's "Ready to apply now?".
+  Since ACA intake was previously 100% agent-initiated (no public entry point, unlike IUL's
+  `/iul/apply`), built the missing self-serve pair: `/aca/apply` (public marketing page,
+  `components/aca-apply-cta.tsx` — Clerk `SignInButton` modal, noindex until launched) →
+  `/aca/apply/start` (server page, pulls the Clerk profile, calls new
+  `selfStartAcaIntakeForClient()` in `lib/aca-intake/server.ts` — resume/claim/create, reusing the
+  already-existing `findUnclaimedAcaSessionByEmail()`/`createAcaIntakeSession()` primitives) →
+  redirects into the existing `/aca/intake/[token]` form. New `ACA_SELF_APPLY_TAG` +
+  `ACA_DEFAULT_OWNER_USER_ID` env var (mirrors `IUL_DEFAULT_OWNER_USER_ID`) — the fixed agent
+  owner self-started sessions land under. The same "Start your ACA application" CTA was also added
+  to the shared `components/aca-lead-form.tsx` success screen, cascading to every other ACA
+  lead-capture surface site-wide (`ACAButton`/`AcaQuoteModal` on `/aca` + `/aca/[state]`, the
+  header quote CTA, blog CTAs, Get Covered Fast funnel's ACA result step) with a single edit.
+  Scope decision: the ACA consumer-guide PDF download flow (`guide-unlock-modal.tsx`) does NOT get
+  this CTA — different success moment (unlocking a document, not a lead thank-you).
+  New i18n: `messages/{en,es}/aca/{get-covered,apply}.json` (split-file convention, registered in
+  `i18n/request.ts`), `i18n/routing.ts` pathnames for `/aca/get-covered`, `/aca/apply`,
+  `/aca/apply/start`; `lib/ads-landing.ts` + `middleware.ts` bare-chrome pathname lists (the
+  latter has its own independent hardcoded list, easy to miss — both needed updating).
+  **Second pass**: set the ACA hero/OG default to a real Cloudinary family photo (was a
+  placeholder), then generalized the FE-only, hero-only admin override tool into
+  `lib/ads-images/` (`settings.ts` server logic + `shared.ts` types/constants split out
+  specifically so the "use client" admin component doesn't pull `"server-only"`/`db` into the
+  browser bundle — first attempt broke the build this way) covering hero **and** OG images across
+  Final Expense, IUL, and ACA. Storage keeps the exact original `fe_get_covered_hero_url_en/_es`
+  `app_settings` keys so Isaac's existing FE override keeps working with no migration; IUL and ACA
+  hero images, and all three lines' OG images, are newly admin-overridable for the first time.
+  Old single-purpose `/admin/get-covered-hero` (page, client component, action, hero-setting.ts)
+  deleted and replaced by a tabbed `/admin/hero` (`components/admin/ads-images-client.tsx`) with
+  live thumbnail previews per line of business × image kind × locale; `/admin` dashboard card
+  updated to match. Verified: `pnpm build` + `tsc --noEmit` clean, live curl round-trip against
+  Agent CRM confirmed the new tag/CAPI branch (real "Test User" contact created, `capiDispatched:
+  true`, Isaac confirmed leaving the test lead in place), screenshots confirmed bare chrome, the
+  single-step form, and the new hero photo rendering correctly. Not verified live (no browser
+  automation tooling available): the Clerk sign-up modal on `/aca/apply` and the `/admin/hero`
+  page itself (Clerk-protected, same as every other admin route — code-reviewed instead, mirrors
+  the already-proven `get-covered-hero` pattern). **Needs `ACA_DEFAULT_OWNER_USER_ID` set in
+  Vercel** (already added to local `.env` by Isaac, same value as `IUL_DEFAULT_OWNER_USER_ID`).
+  Merged to main on branch `feature/aca-get-covered`.
+
+---
+
+## Prior feature: ACA Client Intake
+
+Mirrored the IUL secure-link intake for ACA ahead of open enrollment: agent creates a session from
 `/aca/intake`, a token link syncs to the contact's `aca_intake_link` field, a GHL workflow sends it,
-and the client fills an 8-step autosaving form on their phone.
+and the client fills an 8-step autosaving form on their phone. Iterated post-merge via
+`feature/aca-add-member-button`, `feature/aca-intake-bare-chrome`, and `feature/aca-file-previews`
+(see git history) — effectively complete; not re-summarized in `History` below since it predates
+this file's per-feature entries.
 
 Field spec (approved, rev 2): [context/features/aca-intake/fields-spec.md](features/aca-intake/fields-spec.md)
-
-## Notes
-
-Built as a parallel copy of the IUL intake rather than a shared-engine refactor — IUL is live and
-this is OEP-critical, so the two stay independent. Only `intake-address-input` was actually shared
-(moved to `components/shared/`, gained county support).
-
-Three things are genuinely new vs. IUL:
-
-1. **Config-driven repeater** (`type: "repeater"` + `rowFields` in `lib/aca-intake/fields.ts`) —
-   replaces the hard-coded beneficiaries editor. Drives household members, doctors and
-   prescriptions. `isFieldVisible(sub, rowData)` resolves `showIf` against the ROW, which is what
-   makes the citizenship branch (citizen → naturalized → which document) work per member.
-2. **Per-row file uploads** — the files route accepts `repeaterKey` + `rowIndex` + `rowField`. The
-   three per-member document slugs are SHARED CRM buckets, so the route diffs GHL's echoed file
-   list against URLs already known for that slug and appends only the new ones to that row;
-   replacing wholesale (as the IUL route does) would clobber other members' files.
-3. **Client-side image compression** (`lib/image-compress.ts`) — Vercel caps request bodies at
-   4.5 MB and phone photos of a green card run 4–12 MB, so uploads are downscaled to 1600px/JPEG
-   before the request. Without this the primary flow simply fails.
-
-Also fixed while mirroring: the IUL files route skips `clientCanEdit` on POST and DELETE (a claimed
-client can mutate attachments on a submitted, locked form). The ACA route guards both.
-
-Remaining before this can be used:
-- `pnpm db:migrate` (migration `0017_dusty_dragon_lord.sql`, additive `CREATE TABLE IF NOT EXISTS`)
-- `pnpm aca:fields` to provision the ACA custom fields in Agent CRM
-- GHL workflow on the `aca_intake_link_sent` tag to text/email the link
-- Browser walkthrough of all 8 steps
 
 ## History
 

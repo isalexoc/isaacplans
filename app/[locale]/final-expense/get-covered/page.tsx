@@ -2,8 +2,7 @@ import type { Metadata } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
 import FinalExpenseGetCoveredFunnel from "@/components/final-expense/final-expense-get-covered-funnel";
 import ServicePageTracker from "@/components/service-page-tracker";
-import { getFinalExpenseGetCoveredOgImageUrl } from "@/lib/get-covered-fast/constants";
-import { getEffectiveFeGetCoveredHeroUrl } from "@/lib/get-covered-fast/hero-setting";
+import { getEffectiveAdsImageUrl } from "@/lib/ads-images/settings";
 import {
   getFinalExpenseGetCoveredAdsBreadcrumbLd,
   getFinalExpenseGetCoveredAdsPageLd,
@@ -34,7 +33,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const languages = languageAlternatesPrefixed(routeKey);
   const xDefault = withLocalePrefix("en", localizedSlug(routeKey, "en"));
   const ogLocale = ogLocaleOf(locale);
-  const ogImageUrl = getFinalExpenseGetCoveredOgImageUrl(locale);
+  const ogImageUrl = await getEffectiveAdsImageUrl("final-expense", "og", locale);
 
   return {
     title,
@@ -93,7 +92,7 @@ export default async function FinalExpenseGetCoveredAdsPage() {
     tMeta("breadcrumbPage")
   );
 
-  const heroImageUrl = await getEffectiveFeGetCoveredHeroUrl(locale);
+  const heroImageUrl = await getEffectiveAdsImageUrl("final-expense", "hero", locale);
 
   return (
     <div className="relative min-h-screen">

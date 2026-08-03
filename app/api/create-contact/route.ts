@@ -103,10 +103,13 @@ async function trySendMetaLeadCapiLead(
   const iulSource =
     typeof iulLeadGenData?.source === "string" ? iulLeadGenData.source : undefined;
   const isIulGetCoveredAds = iulSource === "iul_get_covered_ads";
-  // Duplicate-merge CAPI: FE get-covered and IUL get-covered ad funnels fire Lead on Step 1
-  // (contact) even for returning/duplicate contacts, using the same eventId as the Pixel.
+  const acaSource = typeof acaData?.source === "string" ? acaData.source : undefined;
+  const isAcaGetCoveredAds = acaSource === "aca_get_covered_ads";
+  // Duplicate-merge CAPI: FE get-covered, IUL get-covered, and ACA get-covered ad funnels fire
+  // Lead on Step 1 (contact) even for returning/duplicate contacts, using the same eventId as
+  // the Pixel.
   const allowDuplicateMergeCapi =
-    !isNewContact && (isFinalExpenseGetCoveredAds || isIulGetCoveredAds);
+    !isNewContact && (isFinalExpenseGetCoveredAds || isIulGetCoveredAds || isAcaGetCoveredAds);
 
   const willSend = !!(
     pixelId &&
@@ -143,41 +146,45 @@ async function trySendMetaLeadCapiLead(
       ? "iul_get_covered_ads"
       : isFinalExpenseGetCoveredAds
         ? "final_expense_get_covered_ads"
-        : shortTermMedicalData
-          ? "short_term_medical"
-          : acaData
-            ? "aca"
-            : contactPageData
-              ? "contact_page"
-              : dentalVisionData
-                ? "dental_vision"
-                : hospitalIndemnityData
-                  ? "hospital_indemnity"
-                  : finalExpenseData
-                    ? "final_expense"
-                    : getCoveredFastData
-                      ? "get_covered_fast"
-                      : "iul_lead_gen";
+        : isAcaGetCoveredAds
+          ? "aca_get_covered_ads"
+          : shortTermMedicalData
+            ? "short_term_medical"
+            : acaData
+              ? "aca"
+              : contactPageData
+                ? "contact_page"
+                : dentalVisionData
+                  ? "dental_vision"
+                  : hospitalIndemnityData
+                    ? "hospital_indemnity"
+                    : finalExpenseData
+                      ? "final_expense"
+                      : getCoveredFastData
+                        ? "get_covered_fast"
+                        : "iul_lead_gen";
 
     const contentName = isIulGetCoveredAds
       ? "IUL get covered (ads)"
       : isFinalExpenseGetCoveredAds
         ? "Final expense get covered (VA ads)"
-        : shortTermMedicalData
-          ? "Short Term Medical Lead"
-          : acaData
-            ? "ACA Lead"
-            : contactPageData
-              ? "Contact Page Lead"
-              : dentalVisionData
-                ? "Dental & Vision Lead"
-                : hospitalIndemnityData
-                  ? "Hospital Indemnity Lead"
-                  : finalExpenseData
-                    ? "Final Expense Lead"
-                    : getCoveredFastData
-                      ? "Get Covered Fast funnel"
-                      : "IUL Lead Generation Campaign";
+        : isAcaGetCoveredAds
+          ? "ACA get covered (ads)"
+          : shortTermMedicalData
+            ? "Short Term Medical Lead"
+            : acaData
+              ? "ACA Lead"
+              : contactPageData
+                ? "Contact Page Lead"
+                : dentalVisionData
+                  ? "Dental & Vision Lead"
+                  : hospitalIndemnityData
+                    ? "Hospital Indemnity Lead"
+                    : finalExpenseData
+                      ? "Final Expense Lead"
+                      : getCoveredFastData
+                        ? "Get Covered Fast funnel"
+                        : "IUL Lead Generation Campaign";
 
     const customData: Record<string, unknown> = {
       content_name: contentName,
@@ -190,6 +197,9 @@ async function trySendMetaLeadCapiLead(
     }
     if (isIulGetCoveredAds) {
       customData.lead_event_source = "iul_get_covered_funnel";
+    }
+    if (isAcaGetCoveredAds) {
+      customData.lead_event_source = "aca_get_covered_funnel";
     }
 
     console.log("[Meta CAPI] Sending event:", {
@@ -644,11 +654,14 @@ export async function POST(request: NextRequest) {
       contactPageTags.push(contactPageData.language === 'es' ? 'Spanish' : 'English');
     }
 
-    // Build tags for ACA page leads
+    // Build tags for ACA page leads (CRM workflows/attribution can branch on aca_get_covered_funnel)
     const acaTags: string[] = [];
     if (acaData) {
       acaTags.push('ACA Lead');
       acaTags.push(acaData.language === 'es' ? 'Spanish' : 'English');
+      if (acaData.source === 'aca_get_covered_ads') {
+        acaTags.push('aca_get_covered_funnel');
+      }
     }
 
     // Build tags for Dental & Vision page leads
