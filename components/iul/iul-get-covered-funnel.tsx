@@ -94,7 +94,12 @@ const QUIZ_STEPS = ["age", "state", "savings", "retirement", "investments"] as c
 type QuizStep = (typeof QUIZ_STEPS)[number];
 type Phase = "contact" | "quiz" | "done";
 
-export default function IulGetCoveredFunnel() {
+export default function IulGetCoveredFunnel({
+  heroImageUrl,
+}: {
+  /** Admin-overridable hero image (lib/ads-images/settings.ts); falls back to the built-in default. */
+  heroImageUrl?: string;
+}) {
   const locale = useLocale();
   const isES = locale.startsWith("es");
   const t = useTranslations("iulGetCoveredPage.funnel");
@@ -568,7 +573,7 @@ export default function IulGetCoveredFunnel() {
       <div className="relative z-10 mx-auto flex min-h-0 max-w-6xl flex-col lg:min-h-[min(100vh,920px)] lg:flex-row lg:items-stretch">
         <div className="relative hidden overflow-hidden bg-slate-900 lg:sticky lg:block lg:top-0 lg:min-h-[min(100vh,920px)] lg:w-[46%] lg:shrink-0">
           <Image
-            src={getIulGetCoveredHeroImageUrl(locale)}
+            src={heroImageUrl ?? getIulGetCoveredHeroImageUrl(locale)}
             alt=""
             fill
             priority

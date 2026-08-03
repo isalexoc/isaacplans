@@ -1082,6 +1082,57 @@ export const getIulGetCoveredAdsBreadcrumbLd = (
   };
 };
 
+/** Paid ads — ACA get-covered lead funnel; locale slug from routing. */
+const getAcaGetCoveredAdsPathFor = (locale: string) =>
+  locale?.toLowerCase().startsWith("es")
+    ? "aca/obtener-cobertura"
+    : "aca/get-covered";
+
+export const getAcaGetCoveredAdsPageLd = (
+  locale: string,
+  title: string,
+  description: string
+): WithContext<WebPage> => {
+  const path = getAcaGetCoveredAdsPathFor(locale);
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "@id": `${BASE_URL}/${locale}/${path}#webpage`,
+    url: `${BASE_URL}/${locale}/${path}`,
+    name: title,
+    description,
+    inLanguage: locale,
+    about: { "@id": `${BASE_URL}/#organization` },
+    isPartOf: { "@id": `${BASE_URL}/#website` },
+  };
+};
+
+export const getAcaGetCoveredAdsBreadcrumbLd = (
+  locale: string,
+  homeLabel: string,
+  pageLabel: string
+): WithContext<BreadcrumbList> => {
+  const path = getAcaGetCoveredAdsPathFor(locale);
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: homeLabel,
+        item: `${BASE_URL}/${locale}`,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: pageLabel,
+        item: `${BASE_URL}/${locale}/${path}`,
+      },
+    ],
+  };
+};
+
 /* ───────────── Blog Post Article JSON-LD ───────────── */
 export interface BlogPostData {
   title: string;

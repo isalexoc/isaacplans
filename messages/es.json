@@ -950,6 +950,7 @@
       "successTitle": "¡Gracias!",
       "successMessage": "Hemos recibido su información. Me comunicaré pronto para hablar de sus opciones ACA.",
       "successScheduleAppointment": "Agendar cita telefónica",
+      "successStartApplication": "Iniciar su solicitud de ACA",
       "successClose": "Cerrar"
     },
     "calendar": {

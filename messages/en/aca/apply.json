@@ -1,0 +1,53 @@
+{
+  "acaApply": {
+    "meta": {
+      "title": "Apply for ACA Health Coverage | Isaac Plans",
+      "description": "Start your Affordable Care Act health insurance application online — secure, guided, and only a few minutes.",
+      "image": "https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_1200,h_630,c_fill,g_center/pexels-wanda-yanery-villarraga-tole-584965425-17052722_ewanjk.jpg",
+      "imageAlt": "Apply for ACA health coverage with Isaac Plans"
+    },
+    "hero": {
+      "badge": "Affordable Care Act (ACA)",
+      "title": "Get the health coverage your family needs",
+      "subtitle": "Start your secure application online. It only takes a few minutes and your progress saves automatically."
+    },
+    "benefitsHeading": "Why apply with Isaac Plans?",
+    "benefits": [
+      {
+        "title": "No cost to you",
+        "desc": "Our guidance is free — we're paid by the insurance carrier, not by you."
+      },
+      {
+        "title": "Subsidies you may qualify for",
+        "desc": "Many families qualify for tax credits that lower your monthly premium."
+      },
+      {
+        "title": "Doctors & prescriptions covered",
+        "desc": "We help you find a plan that keeps your current doctors and medications in network."
+      },
+      {
+        "title": "Bilingual, licensed support",
+        "desc": "Get help in English or Spanish from a licensed advisor at every step."
+      }
+    ],
+    "howItWorksHeading": "How to apply",
+    "steps": [
+      {
+        "title": "Create your account",
+        "desc": "Sign up securely with your email or Google. It keeps your information private and lets you finish later on any device."
+      },
+      {
+        "title": "Fill out the secure form",
+        "desc": "Answer a few guided questions about your household. Everything is encrypted and saves automatically as you go."
+      },
+      {
+        "title": "We review and reach out",
+        "desc": "Once you submit, we review your application and contact you to finalize your plan."
+      }
+    ],
+    "secureNote": "Your information is encrypted and never shared. This process is 100% secure.",
+    "cta": "Apply now",
+    "ctaNote": "You'll sign in first to keep your application private.",
+    "starting": "Starting your application…"
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "acaGetCoveredPage": {
+    "metadata": {
+      "title": "ACA Health Insurance — get covered | Isaac Plans Insurance",
+      "description": "See if you qualify for Affordable Care Act health coverage — including subsidies that could lower your monthly cost. Tell us how to reach you for a free, no-obligation quote from a licensed, bilingual advisor.",
+      "keywords": "ACA, Affordable Care Act, health insurance, marketplace insurance, health coverage subsidies, Isaac Plans",
+      "imageAlt": "Getting help finding affordable health coverage from a trusted advisor",
+      "breadcrumbPage": "ACA — get covered"
+    },
+    "funnel": {
+      "banner": "Licensed guidance · Affordable Care Act",
+      "hero": {
+        "badge": "Free quote · No obligation",
+        "title": "Get the health coverage your family needs",
+        "mobileSubtitle": "See if you qualify for subsidies that lower your monthly cost.",
+        "subtitle": "Many families qualify for tax credits that lower their monthly premium. Tell us how to reach you and a licensed advisor will help you find the right plan."
+      },
+      "secureNote": "Secure · No obligation · Your data stays private",
+      "helpLine": "Need help? Call us at",
+      "contact": {
+        "cta": "See If I Qualify"
+      },
+      "done": {
+        "title": "You're all set",
+        "body": "We received your info. Expect Isaac's call within 24 hours.",
+        "optionIntro": "What would you like to do next?",
+        "applyCta": "Start your ACA application",
+        "bookCta": "Schedule your appointment",
+        "callCta": "Call now",
+        "callAria": "Call Isaac Plans Insurance at 540-426-1804",
+        "whatsappCta": "Message us on WhatsApp",
+        "whatsappAria": "Open WhatsApp with Isaac Plans Insurance",
+        "callerIntro": "Your personal health coverage advisor",
+        "callerSubline": "Isaac will call you within 24 hours from 540-426-1804. Save his number so you don't miss it.",
+        "agentName": "Isaac Orraiz",
+        "agentTitle": "Licensed insurance advisor",
+        "headshotAlt": "Isaac Orraiz, licensed insurance advisor",
+        "saveContactCta": "Save contact",
+        "saveContactAria": "Save Isaac Orraiz to your phone contacts (vCard download)"
+      }
+    }
+  }
+}

@@ -27,6 +27,8 @@ import {
   agentCrmGetBaseCredentials,
   agentCrmUpdateContact,
   agentCrmGetContactTags,
+  agentCrmEnsureContact,
+  agentCrmAddContactTags,
   type AgentCrmCustomFieldValue,
   type AgentCrmNativeFields,
 } from "@/lib/agent-crm-contacts";
@@ -43,6 +45,9 @@ export const ACA_SPANISH_TAG = "spanish";
 
 /** Contact tag that marks an English-speaking client (locale segmentation counterpart). */
 export const ACA_ENGLISH_TAG = "english";
+
+/** Contact tag applied when a prospect self-starts an application from the public apply page. */
+export const ACA_SELF_APPLY_TAG = "aca_self_apply";
 
 export type AcaIntakeSessionRow = typeof acaIntakeSessions.$inferSelect;
 
@@ -111,6 +116,103 @@ export async function createAcaIntakeSession(input: {
       updatedAt: now,
     })
     .returning();
+  return row;
+}
+
+/**
+ * Public "Apply now" entry point: resume the prospect's existing application, claim an
+ * unclaimed one the agent already created for their email, or create a fresh one. The agent
+ * (ACA_DEFAULT_OWNER_USER_ID) is always the owner so it lands in their dashboard; the signed-in
+ * prospect is the bound client. Returns the session row to redirect to its form. Mirrors
+ * lib/iul-intake/server.ts::selfStartIntakeForClient.
+ */
+export async function selfStartAcaIntakeForClient(input: {
+  clientUserId: string;
+  email?: string | null;
+  firstName?: string | null;
+  lastName?: string | null;
+  phone?: string | null;
+  locale?: string;
+}): Promise<AcaIntakeSessionRow> {
+  const ownerUserId = process.env.ACA_DEFAULT_OWNER_USER_ID;
+  if (!ownerUserId) {
+    throw new Error("ACA_DEFAULT_OWNER_USER_ID is not configured.");
+  }
+
+  // 1. Resume an application already bound to this user.
+  const [bound] = await db
+    .select()
+    .from(acaIntakeSessions)
+    .where(eq(acaIntakeSessions.clientUserId, input.clientUserId))
+    .orderBy(desc(acaIntakeSessions.updatedAt))
+    .limit(1);
+  if (bound) return bound;
+
+  const email = (input.email ?? "").trim().toLowerCase();
+
+  // 2. Claim an unclaimed session the agent already created for this email (avoids a duplicate).
+  if (email) {
+    const unclaimed = await findUnclaimedAcaSessionByEmail(ownerUserId, email);
+    if (unclaimed) {
+      await bindAcaClientUser(unclaimed.token, input.clientUserId);
+      return { ...unclaimed, clientUserId: input.clientUserId };
+    }
+  }
+
+  // 3. Create a new application — match-or-create the CRM contact and tag it.
+  const locale = input.locale === "es" ? "es" : "en";
+  const firstName = (input.firstName ?? "").trim();
+  const lastName = (input.lastName ?? "").trim();
+  const phone = (input.phone ?? "").replace(/[^\d+]/g, "");
+  const contactName = [firstName, lastName].filter(Boolean).join(" ") || null;
+
+  let crmContactId: string | null = null;
+  const creds = agentCrmGetBaseCredentials();
+  if (creds) {
+    // Best-effort — a CRM hiccup must never block the prospect from starting.
+    try {
+      crmContactId = await agentCrmEnsureContact(
+        {
+          email: email || undefined,
+          phone: phone || undefined,
+          firstName: firstName || undefined,
+          lastName: lastName || undefined,
+        },
+        creds.locationId,
+        creds.token,
+        "[ACA_SELF_APPLY]"
+      );
+      if (crmContactId) {
+        const tags = [ACA_SELF_APPLY_TAG, locale === "es" ? ACA_SPANISH_TAG : ACA_ENGLISH_TAG];
+        await agentCrmAddContactTags(crmContactId, tags, creds.token, "[ACA_SELF_APPLY]");
+      }
+    } catch (e) {
+      console.warn("[aca-intake] self-apply CRM ensure failed:", e);
+    }
+  } else {
+    console.warn("[aca-intake] Agent CRM credentials missing; self-apply session is unlinked.");
+  }
+
+  const prefill: AcaIntakeData = {};
+  if (firstName) prefill.firstName = firstName;
+  if (lastName) prefill.lastName = lastName;
+  if (email) prefill.email = email;
+  if (phone) prefill.phone = phone;
+
+  const row = await createAcaIntakeSession({
+    ownerUserId,
+    clientUserId: input.clientUserId,
+    crmContactId,
+    contactName,
+    contactEmail: email || null,
+    contactPhone: phone || null,
+    locale,
+    data: prefill,
+  });
+
+  // Seed the CRM share link (best-effort — never blocks the redirect).
+  await syncAcaIntakeLinkToCrm(row, locale);
+
   return row;
 }
 

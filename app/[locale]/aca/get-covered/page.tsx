@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
-import IulGetCoveredFunnel from "@/components/iul/iul-get-covered-funnel";
+import AcaGetCoveredFunnel from "@/components/aca/aca-get-covered-funnel";
 import ServicePageTracker from "@/components/service-page-tracker";
 import { getEffectiveAdsImageUrl } from "@/lib/ads-images/settings";
 import {
-  getIulGetCoveredAdsBreadcrumbLd,
-  getIulGetCoveredAdsPageLd,
+  getAcaGetCoveredAdsBreadcrumbLd,
+  getAcaGetCoveredAdsPageLd,
 } from "@/lib/seo/jsonld";
 import {
   ogLocaleOf,
@@ -15,25 +15,25 @@ import {
   type SupportedLocale,
 } from "@/lib/seo/i18n";
 
-/** Paid-ads landing: IUL lead funnel with minimal site header/footer (middleware + ads-landing). */
+/** Paid-ads landing: ACA lead funnel with minimal site header/footer (middleware + ads-landing). */
 export async function generateMetadata(): Promise<Metadata> {
   const locale = (await getLocale()) as SupportedLocale;
   const t = await getTranslations({
     locale,
-    namespace: "iulGetCoveredPage.metadata",
+    namespace: "acaGetCoveredPage.metadata",
   });
 
   const title = t("title");
   const description = t("description");
   const keywords = t("keywords", { default: "" });
   const imageAlt = t("imageAlt");
-  const routeKey = "/iul/get-covered";
+  const routeKey = "/aca/get-covered";
   const slug = localizedSlug(routeKey, locale);
   const canonical = withLocalePrefix(locale, slug);
   const languages = languageAlternatesPrefixed(routeKey);
   const xDefault = withLocalePrefix("en", localizedSlug(routeKey, "en"));
   const ogLocale = ogLocaleOf(locale);
-  const ogImageUrl = await getEffectiveAdsImageUrl("iul", "og", locale);
+  const ogImageUrl = await getEffectiveAdsImageUrl("aca", "og", locale);
 
   return {
     title,
@@ -74,33 +74,33 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function IulGetCoveredAdsPage() {
+export default async function AcaGetCoveredAdsPage() {
   const locale = (await getLocale()) as SupportedLocale;
   const tMeta = await getTranslations({
     locale,
-    namespace: "iulGetCoveredPage.metadata",
+    namespace: "acaGetCoveredPage.metadata",
   });
 
-  const pageLd = getIulGetCoveredAdsPageLd(
+  const pageLd = getAcaGetCoveredAdsPageLd(
     locale,
     tMeta("title"),
     tMeta("description")
   );
-  const crumbLd = getIulGetCoveredAdsBreadcrumbLd(
+  const crumbLd = getAcaGetCoveredAdsBreadcrumbLd(
     locale,
     locale.startsWith("es") ? "Inicio" : "Home",
     tMeta("breadcrumbPage")
   );
 
-  const heroImageUrl = await getEffectiveAdsImageUrl("iul", "hero", locale);
+  const heroImageUrl = await getEffectiveAdsImageUrl("aca", "hero", locale);
 
   return (
     <div className="relative min-h-screen">
       <ServicePageTracker
-        serviceName="IUL get covered"
-        serviceCategory="iul-get-covered-ads"
+        serviceName="ACA get covered"
+        serviceCategory="aca-get-covered-ads"
       />
-      <IulGetCoveredFunnel heroImageUrl={heroImageUrl} />
+      <AcaGetCoveredFunnel heroImageUrl={heroImageUrl} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{

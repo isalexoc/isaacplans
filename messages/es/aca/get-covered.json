@@ -1,0 +1,43 @@
+{
+  "acaGetCoveredPage": {
+    "metadata": {
+      "title": "Seguro de salud ACA — obtenga cobertura | Isaac Plans Insurance",
+      "description": "Vea si califica para cobertura de salud de la Ley de Cuidado de Salud a Bajo Precio — incluyendo subsidios que podrían reducir su costo mensual. Díganos cómo contactarlo para una cotización gratuita, sin compromiso, de un asesor licenciado y bilingüe.",
+      "keywords": "ACA, Ley de Cuidado de Salud a Bajo Precio, seguro de salud, seguro del mercado, subsidios de cobertura de salud, Isaac Plans",
+      "imageAlt": "Recibiendo ayuda para encontrar cobertura de salud accesible de un asesor de confianza",
+      "breadcrumbPage": "ACA — obtener cobertura"
+    },
+    "funnel": {
+      "banner": "Orientación licenciada · Ley de Cuidado de Salud a Bajo Precio",
+      "hero": {
+        "badge": "Cotización gratis · Sin compromiso",
+        "title": "Obtenga la cobertura de salud que su familia necesita",
+        "mobileSubtitle": "Vea si califica para subsidios que reducen su costo mensual.",
+        "subtitle": "Muchas familias califican para créditos fiscales que reducen su prima mensual. Díganos cómo contactarlo y un asesor licenciado le ayudará a encontrar el plan adecuado."
+      },
+      "secureNote": "Seguro · Sin compromiso · Sus datos permanecen privados",
+      "helpLine": "¿Necesita ayuda? Llámenos al",
+      "contact": {
+        "cta": "Ver Si Califico"
+      },
+      "done": {
+        "title": "Todo listo",
+        "body": "Recibimos su información. Espere la llamada de Isaac dentro de 24 horas.",
+        "optionIntro": "¿Qué le gustaría hacer ahora?",
+        "applyCta": "Iniciar su solicitud de ACA",
+        "bookCta": "Programe su cita",
+        "callCta": "Llamar ahora",
+        "callAria": "Llamar a Isaac Plans Insurance al 540-426-1804",
+        "whatsappCta": "Escríbanos por WhatsApp",
+        "whatsappAria": "Abrir WhatsApp con Isaac Plans Insurance",
+        "callerIntro": "Su asesor personal de cobertura de salud",
+        "callerSubline": "Isaac le llamará dentro de 24 horas desde el 540-426-1804. Guarde su número para no perdérselo.",
+        "agentName": "Isaac Orraiz",
+        "agentTitle": "Asesor de seguros licenciado",
+        "headshotAlt": "Isaac Orraiz, asesor de seguros licenciado",
+        "saveContactCta": "Guardar contacto",
+        "saveContactAria": "Guardar a Isaac Orraiz en sus contactos (descarga vCard)"
+      }
+    }
+  }
+}

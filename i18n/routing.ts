@@ -71,6 +71,18 @@ export const routing = defineRouting({
       en: "/aca/intake/[token]/view",
       es: "/aca/admision/[token]/view",
     },
+    "/aca/get-covered": {
+      en: "/aca/get-covered",
+      es: "/aca/obtener-cobertura",
+    },
+    "/aca/apply": {
+      en: "/aca/apply",
+      es: "/aca/aplicar",
+    },
+    "/aca/apply/start": {
+      en: "/aca/apply/start",
+      es: "/aca/aplicar/start",
+    },
     "/about": {
       en: "/about",
       es: "/sobre-mi",

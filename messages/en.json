@@ -960,6 +960,7 @@
       "successTitle": "Thank you!",
       "successMessage": "We've received your information. I'll reach out shortly to discuss your ACA options.",
       "successScheduleAppointment": "Book a phone appointment",
+      "successStartApplication": "Start your ACA application",
       "successClose": "Close"
     },
     "calendar": {

@@ -125,17 +125,21 @@ export default clerkMiddleware(async (auth, req) => {
     pathname.includes("/gastos-finales/obtener-cobertura") ||
     pathname.includes("/iul/get-covered") ||
     pathname.includes("/iul/obtener-cobertura") ||
+    pathname.includes("/aca/get-covered") ||
+    pathname.includes("/aca/obtener-cobertura") ||
     isAcaIntakeForm
   ) {
     response.headers.set("x-is-ads-landing", "1");
   }
-  // "Bare" funnels (IUL + final expense get-covered, ACA intake form) get an even barer
+  // "Bare" funnels (IUL + final expense + ACA get-covered, ACA intake form) get an even barer
   // footer (logo + copyright only, no links) and a logo-only + phone header.
   if (
     pathname.includes("/iul/get-covered") ||
     pathname.includes("/iul/obtener-cobertura") ||
     pathname.includes("/final-expense/get-covered") ||
     pathname.includes("/gastos-finales/obtener-cobertura") ||
+    pathname.includes("/aca/get-covered") ||
+    pathname.includes("/aca/obtener-cobertura") ||
     isAcaIntakeForm
   ) {
     response.headers.set("x-ads-landing-variant", "iul-bare");

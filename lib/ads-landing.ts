@@ -7,6 +7,8 @@ export const ADS_LANDING_PATHNAMES = [
   "/cobertura-salud-rapida",
   "/final-expense/get-covered",
   "/gastos-finales/obtener-cobertura",
+  "/aca/get-covered",
+  "/aca/obtener-cobertura",
 ] as const;
 
 export type AdsLandingPathname = (typeof ADS_LANDING_PATHNAMES)[number];
@@ -48,8 +50,8 @@ export function isAdsLandingPathResolved(pathname: string | null | undefined): b
 /**
  * "Bare" ads landings get an even barer chrome than the generic ads landings:
  * logo + phone only (logo NON-clickable), plus a bare footer (logo + copyright, no links).
- * The lead form is the sole interactive element / exit. Applies to the IUL and
- * final-expense get-covered funnels, plus the ACA intake client form.
+ * The lead form is the sole interactive element / exit. Applies to the IUL, final-expense,
+ * and ACA get-covered funnels, plus the ACA intake client form.
  * Pathnames are locale-agnostic (next-intl usePathname omits the locale prefix).
  */
 export const IUL_BARE_LANDING_PATHNAMES = [
@@ -57,6 +59,8 @@ export const IUL_BARE_LANDING_PATHNAMES = [
   "/iul/obtener-cobertura",
   "/final-expense/get-covered",
   "/gastos-finales/obtener-cobertura",
+  "/aca/get-covered",
+  "/aca/obtener-cobertura",
 ] as const;
 
 export function isIulBareLandingPath(pathname: string | null | undefined): boolean {

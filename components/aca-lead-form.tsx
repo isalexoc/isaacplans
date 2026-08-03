@@ -123,6 +123,12 @@ export default function AcaLeadForm({
             >
               {t("successScheduleAppointment")}
             </Link>
+            <Link
+              href="/aca/apply"
+              className="inline-flex items-center justify-center px-5 py-2.5 rounded-lg border-2 border-[hsl(var(--custom))] text-[hsl(var(--custom))] font-medium hover:bg-[hsl(var(--custom)/0.06)] transition-colors"
+            >
+              {t("successStartApplication")}
+            </Link>
           </div>
         </div>
       </div>
