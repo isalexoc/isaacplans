@@ -1,7 +1,13 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
-import { ExternalLink, Image as ImageIcon, Loader2, RotateCcw, Save } from "lucide-react";
+import { useRef, useMemo, useState, useTransition } from "react";
+import {
+  ExternalLink,
+  Image as ImageIcon,
+  Loader2,
+  RotateCcw,
+  UploadCloud,
+} from "lucide-react";
 import {
   Card,
   CardContent,
@@ -12,6 +18,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { saveAdsImageAction } from "@/app/actions/ads-images";
+import { compressImageFile, formatBytes } from "@/lib/image-compress";
 import {
   ADS_LOBS,
   ADS_LOB_LABELS,
@@ -22,10 +29,7 @@ import {
   type AdsImageSettingRow,
 } from "@/lib/ads-images/shared";
 
-/** Mirror of the server-side guard for instant client feedback. */
-function isAllowedAdsImageUrl(url: string): boolean {
-  return /^https:\/\/res\.cloudinary\.com\/isaacdev\/.+/i.test(url.trim());
-}
+const ACCEPTED_TYPES = "image/jpeg,image/png,image/webp";
 
 const LOCALE_LABEL: Record<AdsLocale, string> = {
   en: "English",
@@ -48,28 +52,70 @@ type Status =
   | { type: "error"; msg: string };
 
 function AdsImageEditor({ row }: { row: AdsImageSettingRow }) {
-  const [value, setValue] = useState(row.override ?? "");
+  const [previewUrl, setPreviewUrl] = useState(row.override ?? row.defaultUrl);
   const [savedOverride, setSavedOverride] = useState(row.override);
   const [status, setStatus] = useState<Status>({ type: "idle" });
+  const [uploading, setUploading] = useState(false);
+  const [dragOver, setDragOver] = useState(false);
   const [pending, startTransition] = useTransition();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const trimmed = value.trim();
-  const previewUrl = trimmed || row.defaultUrl;
-  const usingDefault = !trimmed;
-  const invalid = trimmed.length > 0 && !isAllowedAdsImageUrl(trimmed);
+  const usingDefault = !savedOverride;
+  const busy = uploading || pending;
 
-  const save = (nextValue: string) => {
+  const uploadFile = async (file: File) => {
+    setStatus({ type: "idle" });
+    setUploading(true);
+    try {
+      const compressed = await compressImageFile(file);
+      if (compressed.size > 4 * 1024 * 1024) {
+        setStatus({
+          type: "error",
+          msg: `Image is still ${formatBytes(compressed.size)} after compression — try a smaller photo.`,
+        });
+        return;
+      }
+
+      const objectUrl = URL.createObjectURL(compressed);
+      setPreviewUrl(objectUrl);
+
+      const formData = new FormData();
+      formData.append("file", compressed);
+      formData.append("lob", row.lob);
+      formData.append("kind", row.kind);
+      formData.append("locale", row.locale);
+
+      const res = await fetch("/api/admin/ads-images/upload", {
+        method: "POST",
+        body: formData,
+      });
+      const data: { success: boolean; url?: string; error?: string } = await res.json();
+
+      if (data.success && data.url) {
+        setPreviewUrl(data.url);
+        setSavedOverride(data.url);
+        setStatus({ type: "ok", msg: "Uploaded. The live page now uses this image." });
+      } else {
+        setPreviewUrl(savedOverride ?? row.defaultUrl);
+        setStatus({ type: "error", msg: data.error ?? "Upload failed." });
+      }
+      URL.revokeObjectURL(objectUrl);
+    } catch {
+      setPreviewUrl(savedOverride ?? row.defaultUrl);
+      setStatus({ type: "error", msg: "Upload failed. Please try again." });
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const resetToDefault = () => {
     setStatus({ type: "idle" });
     startTransition(async () => {
-      const res = await saveAdsImageAction(row.lob, row.kind, row.locale, nextValue);
+      const res = await saveAdsImageAction(row.lob, row.kind, row.locale, "");
       if (res.ok) {
-        setSavedOverride(nextValue.trim() || null);
-        setStatus({
-          type: "ok",
-          msg: nextValue.trim()
-            ? "Saved. The live page now uses this image."
-            : "Cleared. The live page is back to the default image.",
-        });
+        setPreviewUrl(row.defaultUrl);
+        setSavedOverride(null);
+        setStatus({ type: "ok", msg: "Cleared. The live page is back to the default image." });
       } else {
         setStatus({ type: "error", msg: res.error ?? "Could not save." });
       }
@@ -87,83 +133,90 @@ function AdsImageEditor({ row }: { row: AdsImageSettingRow }) {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
-        <div className="flex flex-col gap-3 sm:flex-row">
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept={ACCEPTED_TYPES}
+          className="hidden"
+          disabled={busy}
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) void uploadFile(file);
+            e.target.value = "";
+          }}
+        />
+
+        <button
+          type="button"
+          onClick={() => fileInputRef.current?.click()}
+          onDragOver={(e) => {
+            e.preventDefault();
+            if (!busy) setDragOver(true);
+          }}
+          onDragLeave={() => setDragOver(false)}
+          onDrop={(e) => {
+            e.preventDefault();
+            setDragOver(false);
+            const file = e.dataTransfer.files?.[0];
+            if (file && !busy) void uploadFile(file);
+          }}
+          disabled={busy}
+          className={`group relative ${previewAspect} w-full max-w-[220px] overflow-hidden rounded-lg border-2 bg-muted text-left transition-colors disabled:cursor-wait ${
+            dragOver ? "border-primary" : "border-dashed border-muted-foreground/30 hover:border-primary/60"
+          }`}
+        >
+          {/* Plain img — the preview can be a blob: URL mid-upload, or any Cloudinary URL. */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={previewUrl} alt="Preview" className="h-full w-full object-cover object-center" />
+          <span className="absolute left-1 top-1 rounded bg-black/70 px-1.5 py-0.5 text-[10px] font-medium text-white">
+            {usingDefault ? "Default" : "Custom"}
+          </span>
           <div
-            className={`relative ${previewAspect} w-full max-w-[220px] shrink-0 overflow-hidden rounded-lg border bg-muted`}
+            className={`absolute inset-0 flex flex-col items-center justify-center gap-1.5 bg-black/60 text-white opacity-0 transition-opacity group-hover:opacity-100 ${
+              dragOver || uploading ? "opacity-100" : ""
+            }`}
           >
-            {/* Plain img so any Cloudinary URL previews without next/image host limits. */}
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={previewUrl} alt="Preview" className="h-full w-full object-cover object-center" />
-            <span className="absolute left-1 top-1 rounded bg-black/70 px-1.5 py-0.5 text-[10px] font-medium text-white">
-              {usingDefault ? "Default" : "Custom"}
-            </span>
-          </div>
-
-          <div className="min-w-0 flex-1 space-y-2">
-            <label htmlFor={`ads-img-${row.lob}-${row.kind}-${row.locale}`} className="block text-sm font-medium">
-              Cloudinary image URL
-            </label>
-            <input
-              id={`ads-img-${row.lob}-${row.kind}-${row.locale}`}
-              type="url"
-              inputMode="url"
-              placeholder="https://res.cloudinary.com/isaacdev/image/upload/..."
-              value={value}
-              onChange={(e) => {
-                setValue(e.target.value);
-                setStatus({ type: "idle" });
-              }}
-              disabled={pending}
-              className="w-full rounded-md border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring disabled:opacity-60"
-            />
-            {invalid && (
-              <p className="text-xs text-red-600 dark:text-red-400">
-                Must be a Cloudinary URL on res.cloudinary.com/isaacdev/… (that is the only host
-                the live page can display).
-              </p>
-            )}
-            <p className="text-xs text-muted-foreground">
-              Upload your image to Cloudinary, then paste its delivery URL here. Leave empty and
-              save to go back to the default.
-            </p>
-
-            <div className="flex flex-wrap gap-2 pt-1">
-              <Button
-                type="button"
-                size="sm"
-                onClick={() => save(value)}
-                disabled={pending || invalid || trimmed === (savedOverride ?? "")}
-              >
-                {pending ? (
-                  <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
-                ) : (
-                  <Save className="mr-1.5 h-4 w-4" />
-                )}
-                Save
-              </Button>
-              <Button
-                type="button"
-                size="sm"
-                variant="outline"
-                onClick={() => {
-                  setValue("");
-                  save("");
-                }}
-                disabled={pending || (!trimmed && !savedOverride)}
-              >
-                <RotateCcw className="mr-1.5 h-4 w-4" />
-                Use default image
-              </Button>
-            </div>
-
-            {status.type === "ok" && (
-              <p className="text-xs font-medium text-green-600 dark:text-green-400">{status.msg}</p>
-            )}
-            {status.type === "error" && (
-              <p className="text-xs font-medium text-red-600 dark:text-red-400">{status.msg}</p>
+            {uploading ? (
+              <>
+                <Loader2 className="h-6 w-6 animate-spin" />
+                <span className="text-xs font-medium">Uploading…</span>
+              </>
+            ) : (
+              <>
+                <UploadCloud className="h-6 w-6" />
+                <span className="text-xs font-medium">Click or drag image to replace</span>
+              </>
             )}
           </div>
+        </button>
+
+        <p className="text-xs text-muted-foreground">
+          JPEG, PNG, or WebP. Large photos are compressed automatically before upload.
+        </p>
+
+        <div className="flex flex-wrap gap-2 pt-1">
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={resetToDefault}
+            disabled={busy || !savedOverride}
+          >
+            {pending ? (
+              <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+            ) : (
+              <RotateCcw className="mr-1.5 h-4 w-4" />
+            )}
+            Use default image
+          </Button>
         </div>
+
+        {status.type === "ok" && (
+          <p className="text-xs font-medium text-green-600 dark:text-green-400">{status.msg}</p>
+        )}
+        {status.type === "error" && (
+          <p className="text-xs font-medium text-red-600 dark:text-red-400">{status.msg}</p>
+        )}
       </CardContent>
     </Card>
   );

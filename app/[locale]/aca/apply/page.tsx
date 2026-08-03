@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
 import Image from "next/image";
 import AcaApplyCta from "@/components/aca-apply-cta";
-import { GET_COVERED_FAST_HERO_IMAGE } from "@/lib/get-covered-fast/constants";
+import { ACA_APPLY_HERO_IMAGE } from "@/lib/get-covered-fast/constants";
 import {
   ShieldCheck,
   HeartPulse,
@@ -68,7 +68,7 @@ export default async function AcaApplyPage() {
         {/* Media (placeholder image until real creative is provided) */}
         <div className="relative mt-8 aspect-video w-full overflow-hidden rounded-2xl border shadow-xl shadow-black/10">
           <Image
-            src={GET_COVERED_FAST_HERO_IMAGE}
+            src={ACA_APPLY_HERO_IMAGE}
             alt={t("meta.imageAlt")}
             fill
             className="object-cover"
