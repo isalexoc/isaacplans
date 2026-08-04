@@ -128,6 +128,7 @@ export default async function Footer() {
       },
       { name: tServices("life.title"), href: "/iul" },
       { name: tServices("lifeInsurance.title"), href: "/life-insurance" },
+      { name: tServices("healthAlternative.title"), href: "/health-alternative" },
       { name: tServices("finalExpense.title"), href: "/final-expense" },
       { name: tServices("carriers.title"), href: "/carriers" },
     ],

@@ -289,6 +289,10 @@
             "title": "Life Insurance",
             "description": "Affordable term coverage to protect your family's financial future."
           },
+          "healthAlternative": {
+            "title": "Health Coverage Alternative",
+            "description": "Affordable coverage options when ACA isn't the right fit for you."
+          },
           "finalExpense": {
             "title": "Final Expense (Burial)",
             "description": "Affordable, permanent coverage to help with funeral and final bills."
@@ -2815,6 +2819,158 @@
         "keywords": "life insurance appointment, life insurance calendar, life insurance consultation, bilingual agent",
         "image": "https://www.isaacplans.com/images/life-insurance.png",
         "imageAlt": "Life insurance appointment calendar"
+      }
+    }
+  },
+  "healthAlternativePage": {
+    "hero": {
+      "badge": "Health Coverage Alternative",
+      "name": "Isaac Orraiz – Insurance Agent",
+      "title": "Health Coverage When ACA Isn't the Right Fit",
+      "description": "If ACA subsidies don't cover you, the premiums feel out of reach, your immigration status doesn't qualify, or you're self-employed or a student without employer coverage, you still have options. Explore affordable short-term medical plans with fast approval and flexible enrollment—no waiting for open enrollment.",
+      "testimonials": [
+        {
+          "name": "Daniela R.",
+          "text": "I'm self-employed and ACA premiums were more than my rent. Isaac found me a plan I could actually afford, and I was covered within days."
+        },
+        {
+          "name": "Marcus O.",
+          "text": "My immigration status meant I couldn't get ACA coverage at all. Isaac walked me through an alternative that actually worked for my situation."
+        }
+      ],
+      "happyClient": {
+        "title": "Families Covered",
+        "subtitle": "Flexible options for every situation"
+      }
+    },
+    "ctaButton": {
+      "title": "Get My Free Quote",
+      "subtitle": "Personalized, no obligation"
+    },
+    "leadForm": {
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "email": "Email",
+      "phone": "Phone Number",
+      "submit": "Get My Free Quote",
+      "submitting": "Submitting...",
+      "required": "This field is required",
+      "invalidEmail": "Invalid email address",
+      "invalidPhone": "Please enter a valid 10-digit US phone number",
+      "firstNameMinLength": "First name must be at least 2 characters",
+      "lastNameMinLength": "Last name must be at least 2 characters",
+      "firstNameMaxLength": "First name is too long",
+      "lastNameMaxLength": "Last name is too long",
+      "smsConsent": "I consent to receive SMS notifications and alerts from Isaac Plans Insurance. Message frequency varies. Message & data rates may apply. Text HELP to (540) 426-1804 for assistance. Reply STOP to unsubscribe at any time.",
+      "marketingConsent": "By checking this box I agree to receive occasional marketing messages from Isaac Plans Insurance.",
+      "privacyPolicy": "Privacy Policy",
+      "termsAndConditions": "Terms & Conditions",
+      "successTitle": "Thank you!",
+      "successMessage": "We've received your information. I'll reach out shortly to discuss your health coverage options.",
+      "successScheduleAppointment": "Book a consultation",
+      "successClose": "Close"
+    },
+    "about": {
+      "badge": "About Isaac",
+      "headline": "Honest guidance when the ACA Marketplace isn't the answer",
+      "description": "I help people who fall outside the ACA Marketplace—whether by cost, eligibility, or circumstance—find real coverage options. We'll review what's available for your situation and get you a plan that fits your budget.",
+      "name": "Isaac Orraiz",
+      "role": "Licensed Insurance Agent",
+      "credential": "Licensed Insurance Agent"
+    },
+    "definition": {
+      "title": "What Is a Health Coverage Alternative?",
+      "description": "When ACA Marketplace coverage isn't available or affordable for you, short-term medical plans can fill the gap. These plans are not ACA Minimum Essential Coverage—they may use medical underwriting and have benefit limits—but they offer fast approval, flexible terms, and premiums that fit tighter budgets. Availability and benefits vary by state."
+    },
+    "eligibility": {
+      "headlineBeforeBold": "Who",
+      "headlineBold": "is this for?",
+      "intro": "This coverage is built for people the ACA Marketplace often leaves behind:",
+      "bullets": [
+        "Your income is too high for ACA subsidies, or premiums still feel unaffordable",
+        "Your immigration status doesn't qualify you for ACA Marketplace or Medicaid coverage",
+        "You're self-employed or freelance without access to employer-sponsored coverage",
+        "You're a college student who needs affordable coverage outside a parent's plan"
+      ],
+      "note": "Short-term medical plans are not ACA Minimum Essential Coverage and are subject to medical underwriting; availability varies by state."
+    },
+    "enroll": {
+      "headlineBeforeBold": "How we find",
+      "headlineBold": "your coverage",
+      "intro": "We'll match you with an option that fits your situation in a few simple steps:",
+      "steps": {
+        "0": "Tell us your situation and what you need coverage for",
+        "1": "We compare available plans for your state and budget"
+      },
+      "subHeading": "We'll review:",
+      "bullets": [
+        "Monthly premium and what fits your budget",
+        "Coverage start date and enrollment timing",
+        "Plan limits and what's excluded",
+        "Whether a short-term plan or another option is the better fit"
+      ],
+      "note": "Plans are subject to medical underwriting and state availability. Isaac reviews the details with you before you apply."
+    },
+    "faq": {
+      "label": "Common Questions",
+      "titleBeforeBold": "Frequently",
+      "titleBold": "Asked Questions",
+      "items": [
+        {
+          "q": "I don't qualify for ACA subsidies—what are my options?",
+          "a": "Short-term medical plans can offer meaningful coverage at a lower monthly cost, without waiting for the ACA open enrollment window. We'll walk through what's available in your state."
+        },
+        {
+          "q": "Does my immigration status disqualify me from all health coverage?",
+          "a": "Immigration status can disqualify you from ACA Marketplace and Medicaid coverage, but it does not disqualify you from short-term medical plans in most states. We'll confirm what's available where you live."
+        },
+        {
+          "q": "I'm self-employed—can I still get coverage?",
+          "a": "Yes. Many freelancers and self-employed workers use short-term medical plans as an affordable alternative to ACA coverage, especially between contracts or while building a business."
+        },
+        {
+          "q": "I'm a college student—is this for me?",
+          "a": "If you're aging out of a parent's plan or need coverage outside your school's plan, a short-term medical plan can be a lower-cost option while you're in school."
+        },
+        {
+          "q": "How is this different from ACA or the Short-Term Medical plans already on this site?",
+          "a": "The coverage itself may be the same short-term medical product—but this page is built specifically for people the ACA Marketplace doesn't serve well: cost, eligibility, immigration status, or nontraditional employment. We'll help you figure out if it's the right fit."
+        },
+        {
+          "q": "Can I apply online myself?",
+          "a": "Yes—if you'd rather skip the phone call, you can get an instant quote and apply online through our carrier partner."
+        }
+      ]
+    },
+    "ctaBanner": {
+      "message": "Ready to find coverage that fits your situation? Get your free quote in minutes."
+    },
+    "selfEnroll": {
+      "title": "Prefer to self-enroll?",
+      "subtitle": "Get an instant online quote through our Pivot Health partner and apply in minutes—no phone call required.",
+      "cta": "Get an Instant Quote",
+      "disclaimer": "Short-term medical plans are not ACA Minimum Essential Coverage and are subject to medical underwriting. Not available in all states. You'll leave IsaacPlans.com to complete your quote on Pivot Health's site."
+    },
+    "healthAlternativeMetadata": {
+      "title": "Health Coverage Alternative | Isaac Plans Insurance",
+      "description": "Affordable health coverage options when ACA subsidies, cost, immigration status, or employment situation don't fit. Get a free personalized quote today.",
+      "image": "https://www.isaacplans.com/images/health-alternative.png",
+      "imageAlt": "Health coverage alternative overview",
+      "keywords": "health insurance alternative, non-ACA health insurance, short-term medical, affordable health coverage, immigration status health insurance, self-employed health insurance",
+      "breadcrumbs": {
+        "home": "Home",
+        "healthAlternative": "Health Coverage Alternative"
+      }
+    },
+    "calendar": {
+      "title": "Book Your Health Coverage Phone Appointment",
+      "backButton": "Go Back",
+      "meta": {
+        "title": "Health Coverage Alternative Appointment Calendar | Isaac Plans Insurance",
+        "description": "Schedule your health coverage consultation with Isaac Plans Insurance. Get personalized guidance on affordable options when ACA isn't the right fit.",
+        "keywords": "health coverage appointment, health insurance alternative calendar, short-term medical consultation, bilingual agent",
+        "image": "https://www.isaacplans.com/images/health-alternative.png",
+        "imageAlt": "Health coverage alternative appointment calendar"
       }
     }
   },

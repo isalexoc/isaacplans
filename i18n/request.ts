@@ -107,6 +107,16 @@ async function loadSplitMessages(locale: string): Promise<Record<string, any>> {
       // File doesn't exist, skip
     }
 
+    // Load Health Coverage Alternative get-covered (Meta ads funnel) messages if they exist
+    try {
+      const healthAlternativeGetCovered = (
+        await import(`@/messages/${locale}/health-alternative/get-covered.json`)
+      ).default;
+      Object.assign(splitMessages, healthAlternativeGetCovered);
+    } catch {
+      // File doesn't exist, skip
+    }
+
     // Load Final Expense presentation messages if they exist
     try {
       const fePresentation = (await import(`@/messages/${locale}/final-expense/presentation.json`)).default;

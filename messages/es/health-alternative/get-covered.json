@@ -1,0 +1,43 @@
+{
+  "healthAlternativeGetCoveredPage": {
+    "metadata": {
+      "title": "Alternativa de Cobertura de Salud — obtenga cobertura | Isaac Plans Insurance",
+      "description": "Obtenga una cotización de cobertura de salud asequible en minutos cuando los subsidios de ACA, el costo, el estatus migratorio o su situación laboral no encajan. Díganos cómo contactarlo para una cotización gratuita, sin compromiso — o autoinscríbase en línea al instante.",
+      "keywords": "alternativa de seguro de salud, seguro de salud no ACA, seguro médico a corto plazo, cobertura de salud asequible, Isaac Plans",
+      "imageAlt": "Recibiendo ayuda para encontrar cobertura de salud asequible cuando ACA no es la opción adecuada",
+      "breadcrumbPage": "Alternativa de Cobertura de Salud — obtener cobertura"
+    },
+    "funnel": {
+      "banner": "Orientación licenciada · Alternativa de Cobertura de Salud",
+      "hero": {
+        "badge": "Cotización gratis · Sin compromiso",
+        "title": "Opciones de cobertura cuando el Mercado de ACA no es para usted",
+        "mobileSubtitle": "Obtenga una cotización gratuita y personalizada de cobertura de salud.",
+        "subtitle": "Ya sea por el costo, la elegibilidad para subsidios, el estatus migratorio o su situación laboral, todavía tiene opciones. Díganos cómo contactarlo y un asesor licenciado le ayudará a encontrar el plan adecuado."
+      },
+      "secureNote": "Seguro · Sin compromiso · Sus datos permanecen privados",
+      "helpLine": "¿Necesita ayuda? Llámenos al",
+      "contact": {
+        "cta": "Obtén Mi Cotización Gratis"
+      },
+      "done": {
+        "title": "Todo listo",
+        "body": "Recibimos su información. Espere la llamada de Isaac dentro de 24 horas.",
+        "optionIntro": "¿Qué le gustaría hacer ahora?",
+        "selfEnrollCta": "Inscribirse ahora con Pivot Health",
+        "bookCta": "Programe su cita",
+        "callCta": "Llamar ahora",
+        "callAria": "Llamar a Isaac Plans Insurance al 540-426-1804",
+        "whatsappCta": "Escríbanos por WhatsApp",
+        "whatsappAria": "Abrir WhatsApp con Isaac Plans Insurance",
+        "callerIntro": "Su asesor personal de cobertura de salud",
+        "callerSubline": "Isaac le llamará dentro de 24 horas desde el 540-426-1804. Guarde su número para no perdérselo.",
+        "agentName": "Isaac Orraiz",
+        "agentTitle": "Asesor de seguros licenciado",
+        "headshotAlt": "Isaac Orraiz, asesor de seguros licenciado",
+        "saveContactCta": "Guardar contacto",
+        "saveContactAria": "Guardar a Isaac Orraiz en sus contactos (descarga vCard)"
+      }
+    }
+  }
+}
