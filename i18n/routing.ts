@@ -259,6 +259,18 @@ export const routing = defineRouting({
       en: "/life-insurance/get-covered",
       es: "/seguro-de-vida/obtener-cobertura",
     },
+    "/health-alternative": {
+      en: "/health-alternative",
+      es: "/alternativa-de-salud",
+    },
+    "/health-alternative/calendar": {
+      en: "/health-alternative/calendar",
+      es: "/alternativa-de-salud/calendario",
+    },
+    "/health-alternative/get-covered": {
+      en: "/health-alternative/get-covered",
+      es: "/alternativa-de-salud/obtener-cobertura",
+    },
     "/faq": {
       en: "/faq",
       es: "/preguntas-frecuentes",

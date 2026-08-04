@@ -75,6 +75,7 @@ async function trySendMetaLeadCapiLead(
     getCoveredFastData?: OptLeadBlob;
     iulLeadGenData?: OptLeadBlob;
     lifeInsuranceData?: OptLeadBlob;
+    healthAlternativeData?: OptLeadBlob;
   }
 ): Promise<boolean> {
   const pixelId = process.env.NEXT_PUBLIC_FACEBOOK_PIXEL_ID;
@@ -97,6 +98,7 @@ async function trySendMetaLeadCapiLead(
     getCoveredFastData,
     iulLeadGenData,
     lifeInsuranceData,
+    healthAlternativeData,
   } = opts;
 
   const feSource =
@@ -110,15 +112,20 @@ async function trySendMetaLeadCapiLead(
   const lifeInsuranceSource =
     typeof lifeInsuranceData?.source === "string" ? lifeInsuranceData.source : undefined;
   const isLifeInsuranceGetCoveredAds = lifeInsuranceSource === "life_insurance_get_covered_ads";
-  // Duplicate-merge CAPI: FE get-covered, IUL get-covered, ACA get-covered, and Life Insurance
-  // get-covered ad funnels fire Lead on Step 1 (contact) even for returning/duplicate contacts,
-  // using the same eventId as the Pixel.
+  const healthAlternativeSource =
+    typeof healthAlternativeData?.source === "string" ? healthAlternativeData.source : undefined;
+  const isHealthAlternativeGetCoveredAds =
+    healthAlternativeSource === "health_alternative_get_covered_ads";
+  // Duplicate-merge CAPI: FE get-covered, IUL get-covered, ACA get-covered, Life Insurance, and
+  // Health Coverage Alternative get-covered ad funnels fire Lead on Step 1 (contact) even for
+  // returning/duplicate contacts, using the same eventId as the Pixel.
   const allowDuplicateMergeCapi =
     !isNewContact &&
     (isFinalExpenseGetCoveredAds ||
       isIulGetCoveredAds ||
       isAcaGetCoveredAds ||
-      isLifeInsuranceGetCoveredAds);
+      isLifeInsuranceGetCoveredAds ||
+      isHealthAlternativeGetCoveredAds);
 
   const willSend = !!(
     pixelId &&
@@ -159,23 +166,27 @@ async function trySendMetaLeadCapiLead(
           ? "aca_get_covered_ads"
           : isLifeInsuranceGetCoveredAds
             ? "life_insurance_get_covered_ads"
-            : shortTermMedicalData
-              ? "short_term_medical"
-              : acaData
-                ? "aca"
-                : contactPageData
-                  ? "contact_page"
-                  : dentalVisionData
-                    ? "dental_vision"
-                    : hospitalIndemnityData
-                      ? "hospital_indemnity"
-                      : finalExpenseData
-                        ? "final_expense"
-                        : getCoveredFastData
-                          ? "get_covered_fast"
-                          : lifeInsuranceData
-                            ? "life_insurance"
-                            : "iul_lead_gen";
+            : isHealthAlternativeGetCoveredAds
+              ? "health_alternative_get_covered_ads"
+              : shortTermMedicalData
+                ? "short_term_medical"
+                : acaData
+                  ? "aca"
+                  : contactPageData
+                    ? "contact_page"
+                    : dentalVisionData
+                      ? "dental_vision"
+                      : hospitalIndemnityData
+                        ? "hospital_indemnity"
+                        : finalExpenseData
+                          ? "final_expense"
+                          : getCoveredFastData
+                            ? "get_covered_fast"
+                            : lifeInsuranceData
+                              ? "life_insurance"
+                              : healthAlternativeData
+                                ? "health_alternative"
+                                : "iul_lead_gen";
 
     const contentName = isIulGetCoveredAds
       ? "IUL get covered (ads)"
@@ -185,23 +196,27 @@ async function trySendMetaLeadCapiLead(
           ? "ACA get covered (ads)"
           : isLifeInsuranceGetCoveredAds
             ? "Life Insurance get covered (ads)"
-            : shortTermMedicalData
-              ? "Short Term Medical Lead"
-              : acaData
-                ? "ACA Lead"
-                : contactPageData
-                  ? "Contact Page Lead"
-                  : dentalVisionData
-                    ? "Dental & Vision Lead"
-                    : hospitalIndemnityData
-                      ? "Hospital Indemnity Lead"
-                      : finalExpenseData
-                        ? "Final Expense Lead"
-                        : getCoveredFastData
-                          ? "Get Covered Fast funnel"
-                          : lifeInsuranceData
-                            ? "Life Insurance Lead"
-                            : "IUL Lead Generation Campaign";
+            : isHealthAlternativeGetCoveredAds
+              ? "Health Coverage Alternative get covered (ads)"
+              : shortTermMedicalData
+                ? "Short Term Medical Lead"
+                : acaData
+                  ? "ACA Lead"
+                  : contactPageData
+                    ? "Contact Page Lead"
+                    : dentalVisionData
+                      ? "Dental & Vision Lead"
+                      : hospitalIndemnityData
+                        ? "Hospital Indemnity Lead"
+                        : finalExpenseData
+                          ? "Final Expense Lead"
+                          : getCoveredFastData
+                            ? "Get Covered Fast funnel"
+                            : lifeInsuranceData
+                              ? "Life Insurance Lead"
+                              : healthAlternativeData
+                                ? "Health Coverage Alternative Lead"
+                                : "IUL Lead Generation Campaign";
 
     const customData: Record<string, unknown> = {
       content_name: contentName,
@@ -220,6 +235,9 @@ async function trySendMetaLeadCapiLead(
     }
     if (isLifeInsuranceGetCoveredAds) {
       customData.lead_event_source = "life_insurance_get_covered_funnel";
+    }
+    if (isHealthAlternativeGetCoveredAds) {
+      customData.lead_event_source = "health_alternative_get_covered_funnel";
     }
 
     console.log("[Meta CAPI] Sending event:", {
@@ -287,7 +305,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { firstName, lastName, email, phone, iulLeadGenData, shortTermMedicalData, contactPageData, acaData, dentalVisionData, hospitalIndemnityData, finalExpenseData, getCoveredFastData, lifeInsuranceData, meta } = body;
+    const { firstName, lastName, email, phone, iulLeadGenData, shortTermMedicalData, contactPageData, acaData, dentalVisionData, hospitalIndemnityData, finalExpenseData, getCoveredFastData, lifeInsuranceData, healthAlternativeData, meta } = body;
 
     // [Workflow Debug] Log incoming lead type - helps trace why IUL workflow may be assigned
     console.log("[create-contact] Incoming request lead type:", {
@@ -300,6 +318,7 @@ export async function POST(request: NextRequest) {
       hasFinalExpenseData: !!finalExpenseData,
       hasGetCoveredFastData: !!getCoveredFastData,
       hasLifeInsuranceData: !!lifeInsuranceData,
+      hasHealthAlternativeData: !!healthAlternativeData,
       iulLeadGenDataKeys: iulLeadGenData ? Object.keys(iulLeadGenData) : [],
       shortTermMedicalDataKeys: shortTermMedicalData ? Object.keys(shortTermMedicalData) : [],
       contactPageDataKeys: contactPageData ? Object.keys(contactPageData) : [],
@@ -308,6 +327,7 @@ export async function POST(request: NextRequest) {
       hospitalIndemnityDataKeys: hospitalIndemnityData ? Object.keys(hospitalIndemnityData) : [],
       finalExpenseDataKeys: finalExpenseData ? Object.keys(finalExpenseData) : [],
       lifeInsuranceDataKeys: lifeInsuranceData ? Object.keys(lifeInsuranceData) : [],
+      healthAlternativeDataKeys: healthAlternativeData ? Object.keys(healthAlternativeData) : [],
       leadSource: shortTermMedicalData
         ? "short_term_medical"
         : contactPageData
@@ -324,9 +344,11 @@ export async function POST(request: NextRequest) {
                     ? "get_covered_fast"
                     : lifeInsuranceData
                       ? "life_insurance"
-                      : iulLeadGenData
-                        ? "iul_lead_gen"
-                        : "other",
+                      : healthAlternativeData
+                        ? "health_alternative"
+                        : iulLeadGenData
+                          ? "iul_lead_gen"
+                          : "other",
     });
 
     // Validate required fields. Email is optional (e.g. the final-expense get-covered
@@ -622,6 +644,30 @@ export async function POST(request: NextRequest) {
         '',
         `Submitted: ${submittedAt}`,
       ].join('\n');
+    } else if (healthAlternativeData) {
+      const languageDisplay = healthAlternativeData.language === 'es' ? 'Spanish (Español)' :
+                              healthAlternativeData.language === 'en' ? 'English' : healthAlternativeData.language || 'Not provided';
+      const submittedAt = new Date().toLocaleString() + ' ' + (Intl.DateTimeFormat().resolvedOptions().timeZone || '');
+      const smsConsent = healthAlternativeData.smsConsent === true ? 'Yes' : 'No';
+      const marketingConsent = healthAlternativeData.marketingConsent === true ? 'Yes' : 'No';
+      leadDetailsText = [
+        'Health Coverage Alternative Lead',
+        '================================',
+        '',
+        'Contact:',
+        `  Name: ${firstName} ${lastName}`,
+        `  Email: ${email || 'Not provided'}`,
+        `  Phone: ${phone}`,
+        '',
+        'Lead Details:',
+        `  Source: ${healthAlternativeData.source || 'health_alternative_page'}`,
+        `  Language: ${languageDisplay}`,
+        `  SMS Consent: ${smsConsent}`,
+        `  Marketing Consent: ${marketingConsent}`,
+        `  Source URL: ${meta?.eventSourceUrl || 'Not provided'}`,
+        '',
+        `Submitted: ${submittedAt}`,
+      ].join('\n');
     } else if (getCoveredFastData) {
       const languageDisplay = getCoveredFastData.language === 'es' ? 'Spanish (Español)' :
                               getCoveredFastData.language === 'en' ? 'English' : getCoveredFastData.language || 'Not provided';
@@ -672,7 +718,8 @@ export async function POST(request: NextRequest) {
         finalExpenseData ||
         getCoveredFastData ||
         iulLeadGenData ||
-        lifeInsuranceData;
+        lifeInsuranceData ||
+        healthAlternativeData;
       const gd = guideMetaSource as
         | { guideName?: string; guideId?: string }
         | undefined;
@@ -766,6 +813,16 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Build tags for Health Coverage Alternative page CTA leads (CRM workflows branch on health_alternative_get_covered_funnel)
+    const healthAlternativeTags: string[] = [];
+    if (healthAlternativeData) {
+      healthAlternativeTags.push('Health Coverage Alternative Lead');
+      healthAlternativeTags.push(healthAlternativeData.language === 'es' ? 'Spanish' : 'English');
+      if (healthAlternativeData.source === 'health_alternative_get_covered_ads') {
+        healthAlternativeTags.push('health_alternative_get_covered_funnel');
+      }
+    }
+
     // Lowercase locale tag for every line of business (coexists with the capitalized tags above) —
     // one consistent language convention site-wide, matching the IUL apply/intake flow.
     const localeTags: string[] = [];
@@ -778,7 +835,8 @@ export async function POST(request: NextRequest) {
       hospitalIndemnityData?.language ||
       finalExpenseData?.language ||
       getCoveredFastData?.language ||
-      lifeInsuranceData?.language;
+      lifeInsuranceData?.language ||
+      healthAlternativeData?.language;
     if (typeof leadLanguage === 'string' && leadLanguage.trim()) {
       localeTags.push(leadLanguage.toLowerCase().startsWith('es') ? 'spanish' : 'english');
     }
@@ -798,10 +856,12 @@ export async function POST(request: NextRequest) {
                 ? "final_expense"
                 : lifeInsuranceData
                   ? "life_insurance"
-                  : getCoveredFastData
-                    ? "get_covered_fast"
-                    : iulLeadGenData
-                      ? "iul_lead_gen"
+                  : healthAlternativeData
+                    ? "health_alternative"
+                    : getCoveredFastData
+                      ? "get_covered_fast"
+                      : iulLeadGenData
+                        ? "iul_lead_gen"
                     : "website";
 
     // Create contact payload with customFields, tags, and source
@@ -858,6 +918,10 @@ export async function POST(request: NextRequest) {
     if (lifeInsuranceTags.length > 0) {
       contactPayload.tags = [...(contactPayload.tags || []), ...lifeInsuranceTags];
     }
+    // Add tags for Health Coverage Alternative leads
+    if (healthAlternativeTags.length > 0) {
+      contactPayload.tags = [...(contactPayload.tags || []), ...healthAlternativeTags];
+    }
     // Add lowercase locale tag (all lines of business)
     if (localeTags.length > 0) {
       contactPayload.tags = [...(contactPayload.tags || []), ...localeTags];
@@ -873,6 +937,7 @@ export async function POST(request: NextRequest) {
       getCoveredFastData,
       iulLeadGenData,
       lifeInsuranceData,
+      healthAlternativeData,
     ];
     const hasConsumerGuideDownload = consumerGuideTagSources.some(
       (d) => d && ((d as { guideId?: string }).guideId || (d as { guideName?: string }).guideName)
@@ -988,6 +1053,7 @@ export async function POST(request: NextRequest) {
             hasIulLeadGenData: !!iulLeadGenData,
             hasFinalExpenseData: !!finalExpenseData,
             hasLifeInsuranceData: !!lifeInsuranceData,
+            hasHealthAlternativeData: !!healthAlternativeData,
           });
 
           const incomingTags = [
@@ -1000,6 +1066,7 @@ export async function POST(request: NextRequest) {
             ...finalExpenseTags,
             ...getCoveredFastTags,
             ...lifeInsuranceTags,
+            ...healthAlternativeTags,
             ...localeTags,
           ];
 
@@ -1193,6 +1260,7 @@ export async function POST(request: NextRequest) {
                 getCoveredFastData,
                 iulLeadGenData,
                 lifeInsuranceData,
+                healthAlternativeData,
               });
               return NextResponse.json({
                 success: true,
@@ -1325,7 +1393,8 @@ export async function POST(request: NextRequest) {
       !iulLeadGenData &&
       !finalExpenseData &&
       !getCoveredFastData &&
-      !lifeInsuranceData
+      !lifeInsuranceData &&
+      !healthAlternativeData
     );
     console.log("[create-contact] Notification workflow:", {
       workflowId: notificationWorkflowId ?? "not configured",
@@ -1340,9 +1409,11 @@ export async function POST(request: NextRequest) {
               ? "Final Expense lead — tagged fe_get_covered_funnel (no notification workflow)"
               : lifeInsuranceData
                 ? "Life Insurance lead — use AGENT_CRM_WORKFLOW_LIFE_INSURANCE only"
-                : shortTermMedicalData || contactPageData || acaData || dentalVisionData || hospitalIndemnityData
-                  ? "specialty page lead - skipped"
-                  : "generic website lead",
+                : healthAlternativeData
+                  ? "Health Coverage Alternative lead — use AGENT_CRM_WORKFLOW_HEALTH_ALTERNATIVE only"
+                  : shortTermMedicalData || contactPageData || acaData || dentalVisionData || hospitalIndemnityData
+                    ? "specialty page lead - skipped"
+                    : "generic website lead",
     });
     if (willAddNotification) {
       await addContactToWorkflow(notificationWorkflowId, "Notification");
@@ -1586,6 +1657,41 @@ export async function POST(request: NextRequest) {
       await addContactToWorkflow(lifeInsuranceWorkflowId!, `Life Insurance (${lifeInsuranceLanguage})`);
     }
 
+    // Step 9: Health Coverage Alternative — dedicated workflow (optional; no-op until Isaac sets the env var)
+    const healthAlternativeWorkflowId = process.env.AGENT_CRM_WORKFLOW_HEALTH_ALTERNATIVE;
+    const healthAlternativeLanguage = healthAlternativeData?.language === "es" ? "es" : "en";
+    const willAddHealthAlternative = !!(
+      healthAlternativeData &&
+      !shortTermMedicalData &&
+      !contactPageData &&
+      !acaData &&
+      !dentalVisionData &&
+      !hospitalIndemnityData &&
+      contactId &&
+      healthAlternativeWorkflowId
+    );
+
+    console.log("[create-contact] Health Coverage Alternative workflow decision:", {
+      hasHealthAlternativeData: !!healthAlternativeData,
+      healthAlternativeLanguage,
+      workflowId: healthAlternativeWorkflowId ?? "not configured",
+      willAddHealthAlternative,
+      reason: !healthAlternativeData
+        ? "not a Health Coverage Alternative lead"
+        : shortTermMedicalData || contactPageData || acaData || dentalVisionData || hospitalIndemnityData
+          ? "other lead type — skipped"
+          : !healthAlternativeWorkflowId
+            ? "AGENT_CRM_WORKFLOW_HEALTH_ALTERNATIVE not set"
+            : "Health Coverage Alternative lead — adding to workflow",
+    });
+
+    if (willAddHealthAlternative) {
+      await addContactToWorkflow(
+        healthAlternativeWorkflowId!,
+        `Health Coverage Alternative (${healthAlternativeLanguage})`
+      );
+    }
+
     // Final Expense leads: fe_get_covered_funnel tag only (no AGENT_CRM_WORKFLOW_FINALE enrollment)
 
     // Meta CAPI Lead — newly created row; FE get-covered duplicate-merge path sends CAPI in duplicate branch helper
@@ -1605,6 +1711,7 @@ export async function POST(request: NextRequest) {
       getCoveredFastData,
       iulLeadGenData,
       lifeInsuranceData,
+      healthAlternativeData,
     });
 
     // Success!

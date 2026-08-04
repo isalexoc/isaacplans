@@ -129,6 +129,8 @@ export default clerkMiddleware(async (auth, req) => {
     pathname.includes("/aca/obtener-cobertura") ||
     pathname.includes("/life-insurance/get-covered") ||
     pathname.includes("/seguro-de-vida/obtener-cobertura") ||
+    pathname.includes("/health-alternative/get-covered") ||
+    pathname.includes("/alternativa-de-salud/obtener-cobertura") ||
     isAcaIntakeForm
   ) {
     response.headers.set("x-is-ads-landing", "1");
@@ -144,6 +146,8 @@ export default clerkMiddleware(async (auth, req) => {
     pathname.includes("/aca/obtener-cobertura") ||
     pathname.includes("/life-insurance/get-covered") ||
     pathname.includes("/seguro-de-vida/obtener-cobertura") ||
+    pathname.includes("/health-alternative/get-covered") ||
+    pathname.includes("/alternativa-de-salud/obtener-cobertura") ||
     isAcaIntakeForm
   ) {
     response.headers.set("x-ads-landing-variant", "iul-bare");

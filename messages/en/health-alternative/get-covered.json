@@ -1,0 +1,43 @@
+{
+  "healthAlternativeGetCoveredPage": {
+    "metadata": {
+      "title": "Health Coverage Alternative — get covered | Isaac Plans Insurance",
+      "description": "Get an affordable health coverage quote in minutes when ACA subsidies, cost, immigration status, or your work situation don't fit. Tell us how to reach you for a free, no-obligation quote — or self-enroll online instantly.",
+      "keywords": "health insurance alternative, non-ACA health insurance, short-term medical, affordable health coverage, Isaac Plans",
+      "imageAlt": "Getting help finding affordable health coverage when ACA isn't the right fit",
+      "breadcrumbPage": "Health Coverage Alternative — get covered"
+    },
+    "funnel": {
+      "banner": "Licensed guidance · Health Coverage Alternative",
+      "hero": {
+        "badge": "Free quote · No obligation",
+        "title": "Coverage options when the ACA Marketplace isn't right for you",
+        "mobileSubtitle": "Get a free, personalized health coverage quote.",
+        "subtitle": "Whether it's cost, subsidy eligibility, immigration status, or your work situation, there are still options. Tell us how to reach you and a licensed advisor will help you find the right plan."
+      },
+      "secureNote": "Secure · No obligation · Your data stays private",
+      "helpLine": "Need help? Call us at",
+      "contact": {
+        "cta": "Get My Free Quote"
+      },
+      "done": {
+        "title": "You're all set",
+        "body": "We received your info. Expect Isaac's call within 24 hours.",
+        "optionIntro": "What would you like to do next?",
+        "selfEnrollCta": "Enroll now with Pivot Health",
+        "bookCta": "Schedule your appointment",
+        "callCta": "Call now",
+        "callAria": "Call Isaac Plans Insurance at 540-426-1804",
+        "whatsappCta": "Message us on WhatsApp",
+        "whatsappAria": "Open WhatsApp with Isaac Plans Insurance",
+        "callerIntro": "Your personal health coverage advisor",
+        "callerSubline": "Isaac will call you within 24 hours from 540-426-1804. Save his number so you don't miss it.",
+        "agentName": "Isaac Orraiz",
+        "agentTitle": "Licensed insurance advisor",
+        "headshotAlt": "Isaac Orraiz, licensed insurance advisor",
+        "saveContactCta": "Save contact",
+        "saveContactAria": "Save Isaac Orraiz to your phone contacts (vCard download)"
+      }
+    }
+  }
+}

@@ -130,3 +130,24 @@ export function getLifeInsuranceGetCoveredHeroImageUrl(_locale: string): string 
 export function getLifeInsuranceGetCoveredOgImageUrl(_locale: string): string {
   return `${CLOUDINARY_ISAAC}/f_auto,q_auto,w_1200,h_630,c_fill,g_auto/${LIFE_INSURANCE_GET_COVERED_HERO_PUBLIC_ID}`;
 }
+
+/**
+ * Hero art for the Health Coverage Alternative get-covered (Meta ads) funnel — desktop split
+ * column. Placeholder (reused from the dental/STM carrier-card photo pool, not another
+ * get-covered ads funnel, to avoid visual duplication) — admin-overridable via /admin/hero, see
+ * lib/ads-images/settings.ts.
+ */
+const HEALTH_ALTERNATIVE_GET_COVERED_HERO_PUBLIC_ID = "pexels-august-de-richelieu-4260639_qgzqnk";
+
+export function getHealthAlternativeGetCoveredHeroImageUrl(_locale: string): string {
+  return `${CLOUDINARY_ISAAC}/f_auto,q_auto,w_1200,c_limit/${HEALTH_ALTERNATIVE_GET_COVERED_HERO_PUBLIC_ID}`;
+}
+
+/**
+ * OG / Twitter card (1200×630) for the Health Coverage Alternative get-covered funnel — same
+ * source photo, smart-cropped to the social card aspect ratio. Admin-overridable — see
+ * lib/ads-images/settings.ts.
+ */
+export function getHealthAlternativeGetCoveredOgImageUrl(_locale: string): string {
+  return `${CLOUDINARY_ISAAC}/f_auto,q_auto,w_1200,h_630,c_fill,g_auto/${HEALTH_ALTERNATIVE_GET_COVERED_HERO_PUBLIC_ID}`;
+}

@@ -11,6 +11,8 @@ export const ADS_LANDING_PATHNAMES = [
   "/aca/obtener-cobertura",
   "/life-insurance/get-covered",
   "/seguro-de-vida/obtener-cobertura",
+  "/health-alternative/get-covered",
+  "/alternativa-de-salud/obtener-cobertura",
 ] as const;
 
 export type AdsLandingPathname = (typeof ADS_LANDING_PATHNAMES)[number];
@@ -65,6 +67,8 @@ export const IUL_BARE_LANDING_PATHNAMES = [
   "/aca/obtener-cobertura",
   "/life-insurance/get-covered",
   "/seguro-de-vida/obtener-cobertura",
+  "/health-alternative/get-covered",
+  "/alternativa-de-salud/obtener-cobertura",
 ] as const;
 
 export function isIulBareLandingPath(pathname: string | null | undefined): boolean {

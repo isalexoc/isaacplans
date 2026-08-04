@@ -279,6 +279,10 @@
             "title": "Seguro de Vida",
             "description": "Cobertura de vida a término asequible para proteger el futuro financiero de su familia."
           },
+          "healthAlternative": {
+            "title": "Alternativa de Cobertura de Salud",
+            "description": "Opciones de cobertura asequibles cuando ACA no es la opción adecuada para usted."
+          },
           "finalExpense": {
             "title": "Gastos Finales",
             "description": "Cobertura permanente y asequible para ayudar con gastos funerarios y finales."
@@ -2806,6 +2810,158 @@
         "keywords": "cita de seguro de vida, calendario de seguro de vida, consulta de seguro de vida, agente bilingüe",
         "image": "https://www.isaacplans.com/images/life-insurance.png",
         "imageAlt": "Calendario de citas de seguro de vida"
+      }
+    }
+  },
+  "healthAlternativePage": {
+    "hero": {
+      "badge": "Alternativa de Cobertura de Salud",
+      "name": "Isaac Orraiz – Agente de Seguros",
+      "title": "Cobertura de Salud Cuando ACA No Es la Opción Adecuada",
+      "description": "Si los subsidios de ACA no lo cubren, las primas le parecen inalcanzables, su estatus migratorio no califica, o es trabajador independiente o estudiante sin cobertura de un empleador, todavía tiene opciones. Explore planes médicos a corto plazo asequibles con aprobación rápida e inscripción flexible—sin esperar el período de inscripción abierta.",
+      "testimonials": [
+        {
+          "name": "Daniela R.",
+          "text": "Soy trabajadora independiente y las primas de ACA eran más que mi renta. Isaac me encontró un plan que realmente podía pagar, y quedé cubierta en cuestión de días."
+        },
+        {
+          "name": "Marcus O.",
+          "text": "Mi estatus migratorio significaba que no podía obtener cobertura de ACA en absoluto. Isaac me guió hacia una alternativa que sí funcionó para mi situación."
+        }
+      ],
+      "happyClient": {
+        "title": "Familias Cubiertas",
+        "subtitle": "Opciones flexibles para cada situación"
+      }
+    },
+    "ctaButton": {
+      "title": "Obtén Mi Cotización Gratis",
+      "subtitle": "Personalizada, sin compromiso"
+    },
+    "leadForm": {
+      "firstName": "Nombre",
+      "lastName": "Apellido",
+      "email": "Correo Electrónico",
+      "phone": "Número de Teléfono",
+      "submit": "Obtén Mi Cotización Gratis",
+      "submitting": "Enviando...",
+      "required": "Este campo es obligatorio",
+      "invalidEmail": "Dirección de correo electrónico no válida",
+      "invalidPhone": "Ingrese un número de teléfono válido de EE. UU. de 10 dígitos",
+      "firstNameMinLength": "El nombre debe tener al menos 2 caracteres",
+      "lastNameMinLength": "El apellido debe tener al menos 2 caracteres",
+      "firstNameMaxLength": "El nombre es demasiado largo",
+      "lastNameMaxLength": "El apellido es demasiado largo",
+      "smsConsent": "Doy mi consentimiento para recibir notificaciones y alertas por SMS de Isaac Plans Insurance. La frecuencia de los mensajes varía. Pueden aplicar tarifas de mensajes y datos. Envíe HELP al (540) 426-1804 para asistencia. Responda STOP para cancelar la suscripción en cualquier momento.",
+      "marketingConsent": "Al marcar esta casilla, acepto recibir mensajes de marketing ocasionales de Isaac Plans Insurance.",
+      "privacyPolicy": "Política de Privacidad",
+      "termsAndConditions": "Términos y Condiciones",
+      "successTitle": "¡Gracias!",
+      "successMessage": "Hemos recibido su información. Me pondré en contacto pronto para hablar sobre sus opciones de cobertura de salud.",
+      "successScheduleAppointment": "Reservar una consulta",
+      "successClose": "Cerrar"
+    },
+    "about": {
+      "badge": "Sobre Isaac",
+      "headline": "Orientación honesta cuando el Mercado de ACA no es la respuesta",
+      "description": "Ayudo a personas que quedan fuera del Mercado de ACA—ya sea por costo, elegibilidad o circunstancias—a encontrar opciones de cobertura reales. Revisaremos qué está disponible para su situación y le conseguiremos un plan que se ajuste a su presupuesto.",
+      "name": "Isaac Orraiz",
+      "role": "Agente de Seguros Licenciado",
+      "credential": "Agente de Seguros Licenciado"
+    },
+    "definition": {
+      "title": "¿Qué Es una Alternativa de Cobertura de Salud?",
+      "description": "Cuando la cobertura del Mercado de ACA no está disponible o no es asequible para usted, los planes médicos a corto plazo pueden llenar ese vacío. Estos planes no son Cobertura Esencial Mínima de ACA—pueden usar suscripción médica y tener límites de beneficios—pero ofrecen aprobación rápida, términos flexibles y primas que se ajustan a presupuestos más ajustados. La disponibilidad y los beneficios varían según el estado."
+    },
+    "eligibility": {
+      "headlineBeforeBold": "¿Para quién",
+      "headlineBold": "es esto?",
+      "intro": "Esta cobertura está diseñada para personas que el Mercado de ACA a menudo deja fuera:",
+      "bullets": [
+        "Su ingreso es demasiado alto para los subsidios de ACA, o las primas aún le parecen inasequibles",
+        "Su estatus migratorio no lo califica para la cobertura del Mercado de ACA o Medicaid",
+        "Es trabajador independiente o freelance sin acceso a cobertura patrocinada por un empleador",
+        "Es estudiante universitario que necesita cobertura asequible fuera del plan de sus padres"
+      ],
+      "note": "Los planes médicos a corto plazo no son Cobertura Esencial Mínima de ACA y están sujetos a suscripción médica; la disponibilidad varía según el estado."
+    },
+    "enroll": {
+      "headlineBeforeBold": "Cómo encontramos",
+      "headlineBold": "su cobertura",
+      "intro": "Le ayudaremos a encontrar una opción que se ajuste a su situación en unos simples pasos:",
+      "steps": {
+        "0": "Cuéntenos su situación y para qué necesita cobertura",
+        "1": "Comparamos los planes disponibles para su estado y presupuesto"
+      },
+      "subHeading": "Revisaremos:",
+      "bullets": [
+        "Prima mensual y qué se ajusta a su presupuesto",
+        "Fecha de inicio de cobertura y tiempo de inscripción",
+        "Límites del plan y qué está excluido",
+        "Si un plan a corto plazo u otra opción es la mejor opción"
+      ],
+      "note": "Los planes están sujetos a suscripción médica y disponibilidad estatal. Isaac revisa los detalles con usted antes de que aplique."
+    },
+    "faq": {
+      "label": "Preguntas Comunes",
+      "titleBeforeBold": "Preguntas",
+      "titleBold": "Frecuentes",
+      "items": [
+        {
+          "q": "No califico para los subsidios de ACA—¿cuáles son mis opciones?",
+          "a": "Los planes médicos a corto plazo pueden ofrecer cobertura significativa a un costo mensual más bajo, sin esperar el período de inscripción abierta de ACA. Revisaremos juntos qué está disponible en su estado."
+        },
+        {
+          "q": "¿Mi estatus migratorio me descalifica de toda cobertura de salud?",
+          "a": "El estatus migratorio puede descalificarlo de la cobertura del Mercado de ACA y Medicaid, pero no lo descalifica de los planes médicos a corto plazo en la mayoría de los estados. Confirmaremos qué está disponible donde usted vive."
+        },
+        {
+          "q": "Soy trabajador independiente—¿aún puedo obtener cobertura?",
+          "a": "Sí. Muchos freelancers y trabajadores independientes usan planes médicos a corto plazo como una alternativa asequible a la cobertura de ACA, especialmente entre contratos o mientras construyen un negocio."
+        },
+        {
+          "q": "Soy estudiante universitario—¿esto es para mí?",
+          "a": "Si está saliendo del plan de sus padres o necesita cobertura fuera del plan de su escuela, un plan médico a corto plazo puede ser una opción de menor costo mientras estudia."
+        },
+        {
+          "q": "¿En qué se diferencia esto de ACA o de los planes de Seguro Médico a Corto Plazo que ya existen en este sitio?",
+          "a": "La cobertura en sí puede ser el mismo producto médico a corto plazo—pero esta página está diseñada específicamente para personas a quienes el Mercado de ACA no atiende bien: costo, elegibilidad, estatus migratorio o empleo no tradicional. Le ayudaremos a determinar si es la opción adecuada."
+        },
+        {
+          "q": "¿Puedo aplicar en línea yo mismo?",
+          "a": "Sí—si prefiere evitar la llamada telefónica, puede obtener una cotización instantánea y aplicar en línea a través de nuestro socio aseguradora."
+        }
+      ]
+    },
+    "ctaBanner": {
+      "message": "¿Listo para encontrar cobertura que se ajuste a su situación? Obtenga su cotización gratis en minutos."
+    },
+    "selfEnroll": {
+      "title": "¿Prefiere autoinscribirse?",
+      "subtitle": "Obtenga una cotización instantánea en línea a través de nuestro socio Pivot Health y aplique en minutos—sin necesidad de llamada telefónica.",
+      "cta": "Obtener Cotización Instantánea",
+      "disclaimer": "Los planes médicos a corto plazo no son Cobertura Esencial Mínima de ACA y están sujetos a suscripción médica. No disponible en todos los estados. Saldrá de IsaacPlans.com para completar su cotización en el sitio de Pivot Health."
+    },
+    "healthAlternativeMetadata": {
+      "title": "Alternativa de Cobertura de Salud | Isaac Plans Insurance",
+      "description": "Opciones de cobertura de salud asequibles cuando los subsidios de ACA, el costo, el estatus migratorio o la situación laboral no encajan. Obtenga una cotización personalizada gratis hoy.",
+      "image": "https://www.isaacplans.com/images/health-alternative.png",
+      "imageAlt": "Resumen de la alternativa de cobertura de salud",
+      "keywords": "alternativa de seguro de salud, seguro de salud no ACA, seguro médico a corto plazo, cobertura de salud asequible, seguro de salud estatus migratorio, seguro de salud trabajador independiente",
+      "breadcrumbs": {
+        "home": "Inicio",
+        "healthAlternative": "Alternativa de Cobertura de Salud"
+      }
+    },
+    "calendar": {
+      "title": "Reserve su Cita Telefónica de Cobertura de Salud",
+      "backButton": "Regresar",
+      "meta": {
+        "title": "Calendario de Citas de Alternativa de Cobertura de Salud | Isaac Plans Insurance",
+        "description": "Programe su consulta de cobertura de salud con Isaac Plans Insurance. Obtenga orientación personalizada sobre opciones asequibles cuando ACA no es la opción adecuada.",
+        "keywords": "cita de cobertura de salud, calendario de alternativa de seguro de salud, consulta de seguro médico a corto plazo, agente bilingüe",
+        "image": "https://www.isaacplans.com/images/health-alternative.png",
+        "imageAlt": "Calendario de citas de alternativa de cobertura de salud"
       }
     }
   },
