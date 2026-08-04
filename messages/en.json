@@ -285,6 +285,10 @@
             "title": "IUL - Indexed Universal Life",
             "description": "Flexible life insurance with cash value growth potential."
           },
+          "lifeInsurance": {
+            "title": "Life Insurance",
+            "description": "Affordable term coverage to protect your family's financial future."
+          },
           "finalExpense": {
             "title": "Final Expense (Burial)",
             "description": "Affordable, permanent coverage to help with funeral and final bills."
@@ -2659,6 +2663,158 @@
         "imageAlt": "Final Expense appointment calendar",
         "backButton": "← Go Back",
         "loadingIframe": "Loading calendar…"
+      }
+    }
+  },
+  "lifeInsurancePage": {
+    "hero": {
+      "badge": "Life Insurance",
+      "name": "Isaac Orraiz – Insurance Agent",
+      "title": "Protect Your Family's Future—Today",
+      "description": "Life insurance provides a tax-free death benefit to the people who depend on you—covering income replacement, a mortgage, or everyday bills if something happens to you. Affordable term coverage, simple applications, and coverage that can start in days, not weeks.",
+      "testimonials": [
+        {
+          "name": "Rachel T.",
+          "text": "I thought life insurance would be complicated and expensive. Isaac had me covered in one phone call, and it costs less than my streaming subscriptions."
+        },
+        {
+          "name": "Marcus D.",
+          "text": "After our first child was born we knew we needed coverage. Isaac explained everything clearly and got us approved fast."
+        }
+      ],
+      "happyClient": {
+        "title": "Families Protected",
+        "subtitle": "3,000+ policies guided"
+      }
+    },
+    "ctaButton": {
+      "title": "Get My Free Quote",
+      "subtitle": "Personalized, no obligation"
+    },
+    "leadForm": {
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "email": "Email",
+      "phone": "Phone Number",
+      "submit": "Get My Free Quote",
+      "submitting": "Submitting...",
+      "required": "This field is required",
+      "invalidEmail": "Invalid email address",
+      "invalidPhone": "Please enter a valid 10-digit US phone number",
+      "firstNameMinLength": "First name must be at least 2 characters",
+      "lastNameMinLength": "Last name must be at least 2 characters",
+      "firstNameMaxLength": "First name is too long",
+      "lastNameMaxLength": "Last name is too long",
+      "smsConsent": "I consent to receive SMS notifications and alerts from Isaac Plans Insurance. Message frequency varies. Message & data rates may apply. Text HELP to (540) 426-1804 for assistance. Reply STOP to unsubscribe at any time.",
+      "marketingConsent": "By checking this box I agree to receive occasional marketing messages from Isaac Plans Insurance.",
+      "privacyPolicy": "Privacy Policy",
+      "termsAndConditions": "Terms & Conditions",
+      "successTitle": "Thank you!",
+      "successMessage": "We've received your information. I'll reach out shortly to discuss your life insurance options.",
+      "successScheduleAppointment": "Book a consultation",
+      "successClose": "Close"
+    },
+    "about": {
+      "badge": "About Isaac",
+      "headline": "Simple, honest guidance—no pressure, no jargon",
+      "description": "I help families find affordable term life insurance that fits their budget and their goals. We'll review how much coverage you actually need, compare carriers, and get you approved as quickly as possible.",
+      "name": "Isaac Orraiz",
+      "role": "Licensed Insurance Agent",
+      "credential": "Licensed Insurance Agent"
+    },
+    "definition": {
+      "title": "What is Term Life Insurance?",
+      "description": "Term life insurance pays a tax-free death benefit to your beneficiaries if you pass away during the policy's term (e.g., 10, 20, or 30 years). It's the most affordable way to protect income, a mortgage, or your family's day-to-day expenses—no cash value, no investment component, just straightforward protection."
+    },
+    "eligibility": {
+      "headlineBeforeBold": "Who",
+      "headlineBold": "needs it?",
+      "intro": "Life insurance can fit almost anyone with people who depend on them financially:",
+      "bullets": [
+        "Parents who want to replace their income if something happens",
+        "Homeowners who want their mortgage paid off for their family",
+        "Anyone with debt, a business, or loved ones who'd be financially impacted",
+        "People who want affordable, predictable premiums for a set term"
+      ],
+      "note": "Rates and eligibility depend on your age, health, and coverage amount. Final approval is subject to underwriting."
+    },
+    "enroll": {
+      "headlineBeforeBold": "How we find",
+      "headlineBold": "your best rate",
+      "intro": "We'll match you with the right coverage in a few simple steps:",
+      "steps": {
+        "0": "Tell us about your goals and how much coverage you need",
+        "1": "We compare top carriers to find your best rate"
+      },
+      "subHeading": "We'll review:",
+      "bullets": [
+        "Coverage amount and term length",
+        "Monthly budget and premium options",
+        "Health questions and underwriting class",
+        "Instant-approval options when available"
+      ],
+      "note": "Quotes are estimates. Final rates are determined by the carrier during underwriting."
+    },
+    "faq": {
+      "label": "Life Insurance Basics",
+      "titleBeforeBold": "Common",
+      "titleBold": "Questions",
+      "items": [
+        {
+          "q": "How much life insurance do I need?",
+          "a": "A common guideline is 10-15x your annual income, but the right amount depends on your debts, dependents, and goals. We'll help you figure out a number that makes sense for your family."
+        },
+        {
+          "q": "How much does term life insurance cost?",
+          "a": "It's often more affordable than people expect—many healthy adults can get coverage for the cost of a monthly streaming subscription. Your exact rate depends on age, health, and coverage amount."
+        },
+        {
+          "q": "Do I need a medical exam?",
+          "a": "Not always. Many applicants qualify for simplified or accelerated underwriting with no exam, especially for smaller coverage amounts. We'll let you know your options upfront."
+        },
+        {
+          "q": "How fast can I get approved?",
+          "a": "Some policies can be approved in as little as a day with instant-decision underwriting. Others take a few weeks if a medical exam is required."
+        },
+        {
+          "q": "What's the difference between this and IUL or Final Expense?",
+          "a": "Term life insurance is straightforward death-benefit protection for a set number of years—no cash value. IUL adds permanent coverage with cash-value growth potential, and Final Expense is a smaller, guaranteed policy designed for funeral and end-of-life costs."
+        },
+        {
+          "q": "Can I apply online myself?",
+          "a": "Yes—if you'd rather skip the phone call, you can get an instant quote and apply online through our self-enroll partner."
+        }
+      ]
+    },
+    "ctaBanner": {
+      "message": "Ready to protect your family? Get your free quote in minutes."
+    },
+    "selfEnroll": {
+      "title": "Prefer to self-enroll?",
+      "subtitle": "Get an instant online quote and apply in minutes—no phone call required.",
+      "cta": "Get an Instant Quote",
+      "disclaimer": "Policies issued by the carrier. Subject to underwriting approval."
+    },
+    "lifeInsuranceMetadata": {
+      "title": "Life Insurance | Isaac Plans Insurance",
+      "description": "Affordable term life insurance to protect your family's income, mortgage, and future. Get a free personalized quote today.",
+      "image": "https://www.isaacplans.com/images/life-insurance.png",
+      "imageAlt": "Life insurance overview",
+      "keywords": "life insurance, term life insurance, affordable life insurance, family protection, income replacement",
+      "breadcrumbs": {
+        "home": "Home",
+        "lifeInsurance": "Life Insurance"
+      }
+    },
+    "calendar": {
+      "title": "Book Your Life Insurance Phone Appointment",
+      "backButton": "Go Back",
+      "meta": {
+        "title": "Life Insurance Appointment Calendar | Isaac Plans Insurance",
+        "description": "Schedule your life insurance consultation with Isaac Plans Insurance. Get personalized guidance on coverage, rates, and approval options.",
+        "keywords": "life insurance appointment, life insurance calendar, life insurance consultation, bilingual agent",
+        "image": "https://www.isaacplans.com/images/life-insurance.png",
+        "imageAlt": "Life insurance appointment calendar"
       }
     }
   },

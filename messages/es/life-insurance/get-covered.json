@@ -1,0 +1,43 @@
+{
+  "lifeInsuranceGetCoveredPage": {
+    "metadata": {
+      "title": "Seguro de Vida — obtenga cobertura | Isaac Plans Insurance",
+      "description": "Obtenga una cotización de seguro de vida a término asequible en minutos. Díganos cómo contactarlo para una cotización gratuita, sin compromiso, de un asesor licenciado y bilingüe — o autoinscríbase en línea al instante.",
+      "keywords": "seguro de vida, seguro de vida a término, seguro de vida asequible, protección familiar, Isaac Plans",
+      "imageAlt": "Recibiendo ayuda para proteger a su familia con un seguro de vida asequible",
+      "breadcrumbPage": "Seguro de Vida — obtener cobertura"
+    },
+    "funnel": {
+      "banner": "Orientación licenciada · Seguro de Vida",
+      "hero": {
+        "badge": "Cotización gratis · Sin compromiso",
+        "title": "Proteja a su familia con un seguro de vida asequible",
+        "mobileSubtitle": "Obtenga una cotización gratuita y personalizada de seguro de vida a término.",
+        "subtitle": "Muchas familias califican para cobertura a término asequible que comienza en días, no semanas. Díganos cómo contactarlo y un asesor licenciado le ayudará a encontrar el plan adecuado."
+      },
+      "secureNote": "Seguro · Sin compromiso · Sus datos permanecen privados",
+      "helpLine": "¿Necesita ayuda? Llámenos al",
+      "contact": {
+        "cta": "Obtén Mi Cotización Gratis"
+      },
+      "done": {
+        "title": "Todo listo",
+        "body": "Recibimos su información. Espere la llamada de Isaac dentro de 24 horas.",
+        "optionIntro": "¿Qué le gustaría hacer ahora?",
+        "selfEnrollCta": "Inscribirse ahora con Ethos",
+        "bookCta": "Programe su cita",
+        "callCta": "Llamar ahora",
+        "callAria": "Llamar a Isaac Plans Insurance al 540-426-1804",
+        "whatsappCta": "Escríbanos por WhatsApp",
+        "whatsappAria": "Abrir WhatsApp con Isaac Plans Insurance",
+        "callerIntro": "Su asesor personal de seguro de vida",
+        "callerSubline": "Isaac le llamará dentro de 24 horas desde el 540-426-1804. Guarde su número para no perdérselo.",
+        "agentName": "Isaac Orraiz",
+        "agentTitle": "Asesor de seguros licenciado",
+        "headshotAlt": "Isaac Orraiz, asesor de seguros licenciado",
+        "saveContactCta": "Guardar contacto",
+        "saveContactAria": "Guardar a Isaac Orraiz en sus contactos (descarga vCard)"
+      }
+    }
+  }
+}

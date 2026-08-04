@@ -247,6 +247,18 @@ export const routing = defineRouting({
       en: "/final-expense/[state]",
       es: "/final-expense/[state]",
     },
+    "/life-insurance": {
+      en: "/life-insurance",
+      es: "/seguro-de-vida",
+    },
+    "/life-insurance/calendar": {
+      en: "/life-insurance/calendar",
+      es: "/seguro-de-vida/calendario",
+    },
+    "/life-insurance/get-covered": {
+      en: "/life-insurance/get-covered",
+      es: "/seguro-de-vida/obtener-cobertura",
+    },
     "/faq": {
       en: "/faq",
       es: "/preguntas-frecuentes",

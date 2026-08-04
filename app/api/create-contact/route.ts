@@ -74,6 +74,7 @@ async function trySendMetaLeadCapiLead(
     finalExpenseData?: OptLeadBlob;
     getCoveredFastData?: OptLeadBlob;
     iulLeadGenData?: OptLeadBlob;
+    lifeInsuranceData?: OptLeadBlob;
   }
 ): Promise<boolean> {
   const pixelId = process.env.NEXT_PUBLIC_FACEBOOK_PIXEL_ID;
@@ -95,6 +96,7 @@ async function trySendMetaLeadCapiLead(
     finalExpenseData,
     getCoveredFastData,
     iulLeadGenData,
+    lifeInsuranceData,
   } = opts;
 
   const feSource =
@@ -105,11 +107,18 @@ async function trySendMetaLeadCapiLead(
   const isIulGetCoveredAds = iulSource === "iul_get_covered_ads";
   const acaSource = typeof acaData?.source === "string" ? acaData.source : undefined;
   const isAcaGetCoveredAds = acaSource === "aca_get_covered_ads";
-  // Duplicate-merge CAPI: FE get-covered, IUL get-covered, and ACA get-covered ad funnels fire
-  // Lead on Step 1 (contact) even for returning/duplicate contacts, using the same eventId as
-  // the Pixel.
+  const lifeInsuranceSource =
+    typeof lifeInsuranceData?.source === "string" ? lifeInsuranceData.source : undefined;
+  const isLifeInsuranceGetCoveredAds = lifeInsuranceSource === "life_insurance_get_covered_ads";
+  // Duplicate-merge CAPI: FE get-covered, IUL get-covered, ACA get-covered, and Life Insurance
+  // get-covered ad funnels fire Lead on Step 1 (contact) even for returning/duplicate contacts,
+  // using the same eventId as the Pixel.
   const allowDuplicateMergeCapi =
-    !isNewContact && (isFinalExpenseGetCoveredAds || isIulGetCoveredAds || isAcaGetCoveredAds);
+    !isNewContact &&
+    (isFinalExpenseGetCoveredAds ||
+      isIulGetCoveredAds ||
+      isAcaGetCoveredAds ||
+      isLifeInsuranceGetCoveredAds);
 
   const willSend = !!(
     pixelId &&
@@ -148,21 +157,25 @@ async function trySendMetaLeadCapiLead(
         ? "final_expense_get_covered_ads"
         : isAcaGetCoveredAds
           ? "aca_get_covered_ads"
-          : shortTermMedicalData
-            ? "short_term_medical"
-            : acaData
-              ? "aca"
-              : contactPageData
-                ? "contact_page"
-                : dentalVisionData
-                  ? "dental_vision"
-                  : hospitalIndemnityData
-                    ? "hospital_indemnity"
-                    : finalExpenseData
-                      ? "final_expense"
-                      : getCoveredFastData
-                        ? "get_covered_fast"
-                        : "iul_lead_gen";
+          : isLifeInsuranceGetCoveredAds
+            ? "life_insurance_get_covered_ads"
+            : shortTermMedicalData
+              ? "short_term_medical"
+              : acaData
+                ? "aca"
+                : contactPageData
+                  ? "contact_page"
+                  : dentalVisionData
+                    ? "dental_vision"
+                    : hospitalIndemnityData
+                      ? "hospital_indemnity"
+                      : finalExpenseData
+                        ? "final_expense"
+                        : getCoveredFastData
+                          ? "get_covered_fast"
+                          : lifeInsuranceData
+                            ? "life_insurance"
+                            : "iul_lead_gen";
 
     const contentName = isIulGetCoveredAds
       ? "IUL get covered (ads)"
@@ -170,21 +183,25 @@ async function trySendMetaLeadCapiLead(
         ? "Final expense get covered (VA ads)"
         : isAcaGetCoveredAds
           ? "ACA get covered (ads)"
-          : shortTermMedicalData
-            ? "Short Term Medical Lead"
-            : acaData
-              ? "ACA Lead"
-              : contactPageData
-                ? "Contact Page Lead"
-                : dentalVisionData
-                  ? "Dental & Vision Lead"
-                  : hospitalIndemnityData
-                    ? "Hospital Indemnity Lead"
-                    : finalExpenseData
-                      ? "Final Expense Lead"
-                      : getCoveredFastData
-                        ? "Get Covered Fast funnel"
-                        : "IUL Lead Generation Campaign";
+          : isLifeInsuranceGetCoveredAds
+            ? "Life Insurance get covered (ads)"
+            : shortTermMedicalData
+              ? "Short Term Medical Lead"
+              : acaData
+                ? "ACA Lead"
+                : contactPageData
+                  ? "Contact Page Lead"
+                  : dentalVisionData
+                    ? "Dental & Vision Lead"
+                    : hospitalIndemnityData
+                      ? "Hospital Indemnity Lead"
+                      : finalExpenseData
+                        ? "Final Expense Lead"
+                        : getCoveredFastData
+                          ? "Get Covered Fast funnel"
+                          : lifeInsuranceData
+                            ? "Life Insurance Lead"
+                            : "IUL Lead Generation Campaign";
 
     const customData: Record<string, unknown> = {
       content_name: contentName,
@@ -200,6 +217,9 @@ async function trySendMetaLeadCapiLead(
     }
     if (isAcaGetCoveredAds) {
       customData.lead_event_source = "aca_get_covered_funnel";
+    }
+    if (isLifeInsuranceGetCoveredAds) {
+      customData.lead_event_source = "life_insurance_get_covered_funnel";
     }
 
     console.log("[Meta CAPI] Sending event:", {
@@ -267,7 +287,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { firstName, lastName, email, phone, iulLeadGenData, shortTermMedicalData, contactPageData, acaData, dentalVisionData, hospitalIndemnityData, finalExpenseData, getCoveredFastData, meta } = body;
+    const { firstName, lastName, email, phone, iulLeadGenData, shortTermMedicalData, contactPageData, acaData, dentalVisionData, hospitalIndemnityData, finalExpenseData, getCoveredFastData, lifeInsuranceData, meta } = body;
 
     // [Workflow Debug] Log incoming lead type - helps trace why IUL workflow may be assigned
     console.log("[create-contact] Incoming request lead type:", {
@@ -279,6 +299,7 @@ export async function POST(request: NextRequest) {
       hasHospitalIndemnityData: !!hospitalIndemnityData,
       hasFinalExpenseData: !!finalExpenseData,
       hasGetCoveredFastData: !!getCoveredFastData,
+      hasLifeInsuranceData: !!lifeInsuranceData,
       iulLeadGenDataKeys: iulLeadGenData ? Object.keys(iulLeadGenData) : [],
       shortTermMedicalDataKeys: shortTermMedicalData ? Object.keys(shortTermMedicalData) : [],
       contactPageDataKeys: contactPageData ? Object.keys(contactPageData) : [],
@@ -286,6 +307,7 @@ export async function POST(request: NextRequest) {
       dentalVisionDataKeys: dentalVisionData ? Object.keys(dentalVisionData) : [],
       hospitalIndemnityDataKeys: hospitalIndemnityData ? Object.keys(hospitalIndemnityData) : [],
       finalExpenseDataKeys: finalExpenseData ? Object.keys(finalExpenseData) : [],
+      lifeInsuranceDataKeys: lifeInsuranceData ? Object.keys(lifeInsuranceData) : [],
       leadSource: shortTermMedicalData
         ? "short_term_medical"
         : contactPageData
@@ -300,9 +322,11 @@ export async function POST(request: NextRequest) {
                   ? "final_expense"
                   : getCoveredFastData
                     ? "get_covered_fast"
-                    : iulLeadGenData
-                      ? "iul_lead_gen"
-                      : "other",
+                    : lifeInsuranceData
+                      ? "life_insurance"
+                      : iulLeadGenData
+                        ? "iul_lead_gen"
+                        : "other",
     });
 
     // Validate required fields. Email is optional (e.g. the final-expense get-covered
@@ -574,6 +598,30 @@ export async function POST(request: NextRequest) {
         '',
         `Submitted: ${submittedAt}`,
       ].join('\n');
+    } else if (lifeInsuranceData) {
+      const languageDisplay = lifeInsuranceData.language === 'es' ? 'Spanish (Español)' :
+                              lifeInsuranceData.language === 'en' ? 'English' : lifeInsuranceData.language || 'Not provided';
+      const submittedAt = new Date().toLocaleString() + ' ' + (Intl.DateTimeFormat().resolvedOptions().timeZone || '');
+      const smsConsent = lifeInsuranceData.smsConsent === true ? 'Yes' : 'No';
+      const marketingConsent = lifeInsuranceData.marketingConsent === true ? 'Yes' : 'No';
+      leadDetailsText = [
+        'Life Insurance Lead',
+        '===================',
+        '',
+        'Contact:',
+        `  Name: ${firstName} ${lastName}`,
+        `  Email: ${email || 'Not provided'}`,
+        `  Phone: ${phone}`,
+        '',
+        'Lead Details:',
+        `  Source: ${lifeInsuranceData.source || 'life_insurance_page'}`,
+        `  Language: ${languageDisplay}`,
+        `  SMS Consent: ${smsConsent}`,
+        `  Marketing Consent: ${marketingConsent}`,
+        `  Source URL: ${meta?.eventSourceUrl || 'Not provided'}`,
+        '',
+        `Submitted: ${submittedAt}`,
+      ].join('\n');
     } else if (getCoveredFastData) {
       const languageDisplay = getCoveredFastData.language === 'es' ? 'Spanish (Español)' :
                               getCoveredFastData.language === 'en' ? 'English' : getCoveredFastData.language || 'Not provided';
@@ -623,7 +671,8 @@ export async function POST(request: NextRequest) {
         hospitalIndemnityData ||
         finalExpenseData ||
         getCoveredFastData ||
-        iulLeadGenData;
+        iulLeadGenData ||
+        lifeInsuranceData;
       const gd = guideMetaSource as
         | { guideName?: string; guideId?: string }
         | undefined;
@@ -707,6 +756,16 @@ export async function POST(request: NextRequest) {
       getCoveredFastTags.push(getCoveredFastData.language === 'es' ? 'Spanish' : 'English');
     }
 
+    // Build tags for Life Insurance page CTA leads (CRM workflows branch on life_insurance_get_covered_funnel)
+    const lifeInsuranceTags: string[] = [];
+    if (lifeInsuranceData) {
+      lifeInsuranceTags.push('Life Insurance Lead');
+      lifeInsuranceTags.push(lifeInsuranceData.language === 'es' ? 'Spanish' : 'English');
+      if (lifeInsuranceData.source === 'life_insurance_get_covered_ads') {
+        lifeInsuranceTags.push('life_insurance_get_covered_funnel');
+      }
+    }
+
     // Lowercase locale tag for every line of business (coexists with the capitalized tags above) —
     // one consistent language convention site-wide, matching the IUL apply/intake flow.
     const localeTags: string[] = [];
@@ -718,7 +777,8 @@ export async function POST(request: NextRequest) {
       dentalVisionData?.language ||
       hospitalIndemnityData?.language ||
       finalExpenseData?.language ||
-      getCoveredFastData?.language;
+      getCoveredFastData?.language ||
+      lifeInsuranceData?.language;
     if (typeof leadLanguage === 'string' && leadLanguage.trim()) {
       localeTags.push(leadLanguage.toLowerCase().startsWith('es') ? 'spanish' : 'english');
     }
@@ -736,10 +796,12 @@ export async function POST(request: NextRequest) {
               ? "hospital_indemnity"
               : finalExpenseData
                 ? "final_expense"
-                : getCoveredFastData
-                  ? "get_covered_fast"
-                  : iulLeadGenData
-                    ? "iul_lead_gen"
+                : lifeInsuranceData
+                  ? "life_insurance"
+                  : getCoveredFastData
+                    ? "get_covered_fast"
+                    : iulLeadGenData
+                      ? "iul_lead_gen"
                     : "website";
 
     // Create contact payload with customFields, tags, and source
@@ -792,6 +854,10 @@ export async function POST(request: NextRequest) {
     if (getCoveredFastTags.length > 0) {
       contactPayload.tags = [...(contactPayload.tags || []), ...getCoveredFastTags];
     }
+    // Add tags for Life Insurance leads
+    if (lifeInsuranceTags.length > 0) {
+      contactPayload.tags = [...(contactPayload.tags || []), ...lifeInsuranceTags];
+    }
     // Add lowercase locale tag (all lines of business)
     if (localeTags.length > 0) {
       contactPayload.tags = [...(contactPayload.tags || []), ...localeTags];
@@ -806,6 +872,7 @@ export async function POST(request: NextRequest) {
       finalExpenseData,
       getCoveredFastData,
       iulLeadGenData,
+      lifeInsuranceData,
     ];
     const hasConsumerGuideDownload = consumerGuideTagSources.some(
       (d) => d && ((d as { guideId?: string }).guideId || (d as { guideName?: string }).guideName)
@@ -920,6 +987,7 @@ export async function POST(request: NextRequest) {
             hasHospitalIndemnityData: !!hospitalIndemnityData,
             hasIulLeadGenData: !!iulLeadGenData,
             hasFinalExpenseData: !!finalExpenseData,
+            hasLifeInsuranceData: !!lifeInsuranceData,
           });
 
           const incomingTags = [
@@ -931,6 +999,7 @@ export async function POST(request: NextRequest) {
             ...iulLeadGenTags,
             ...finalExpenseTags,
             ...getCoveredFastTags,
+            ...lifeInsuranceTags,
             ...localeTags,
           ];
 
@@ -1123,6 +1192,7 @@ export async function POST(request: NextRequest) {
                 finalExpenseData,
                 getCoveredFastData,
                 iulLeadGenData,
+                lifeInsuranceData,
               });
               return NextResponse.json({
                 success: true,
@@ -1254,7 +1324,8 @@ export async function POST(request: NextRequest) {
       !hospitalIndemnityData &&
       !iulLeadGenData &&
       !finalExpenseData &&
-      !getCoveredFastData
+      !getCoveredFastData &&
+      !lifeInsuranceData
     );
     console.log("[create-contact] Notification workflow:", {
       workflowId: notificationWorkflowId ?? "not configured",
@@ -1267,9 +1338,11 @@ export async function POST(request: NextRequest) {
             ? "IUL lead — use AGENT_CRM_WORKFLOW_IUL only"
             : finalExpenseData
               ? "Final Expense lead — tagged fe_get_covered_funnel (no notification workflow)"
-              : shortTermMedicalData || contactPageData || acaData || dentalVisionData || hospitalIndemnityData
-                ? "specialty page lead - skipped"
-                : "generic website lead",
+              : lifeInsuranceData
+                ? "Life Insurance lead — use AGENT_CRM_WORKFLOW_LIFE_INSURANCE only"
+                : shortTermMedicalData || contactPageData || acaData || dentalVisionData || hospitalIndemnityData
+                  ? "specialty page lead - skipped"
+                  : "generic website lead",
     });
     if (willAddNotification) {
       await addContactToWorkflow(notificationWorkflowId, "Notification");
@@ -1481,6 +1554,38 @@ export async function POST(request: NextRequest) {
       await addContactToWorkflow(hiWorkflowId!, `Hospital Indemnity (${hiLanguage})`);
     }
 
+    // Step 8: Life Insurance — dedicated workflow (optional; no-op until Isaac sets the env var)
+    const lifeInsuranceWorkflowId = process.env.AGENT_CRM_WORKFLOW_LIFE_INSURANCE;
+    const lifeInsuranceLanguage = lifeInsuranceData?.language === "es" ? "es" : "en";
+    const willAddLifeInsurance = !!(
+      lifeInsuranceData &&
+      !shortTermMedicalData &&
+      !contactPageData &&
+      !acaData &&
+      !dentalVisionData &&
+      !hospitalIndemnityData &&
+      contactId &&
+      lifeInsuranceWorkflowId
+    );
+
+    console.log("[create-contact] Life Insurance workflow decision:", {
+      hasLifeInsuranceData: !!lifeInsuranceData,
+      lifeInsuranceLanguage,
+      workflowId: lifeInsuranceWorkflowId ?? "not configured",
+      willAddLifeInsurance,
+      reason: !lifeInsuranceData
+        ? "not a Life Insurance lead"
+        : shortTermMedicalData || contactPageData || acaData || dentalVisionData || hospitalIndemnityData
+          ? "other lead type — skipped"
+          : !lifeInsuranceWorkflowId
+            ? "AGENT_CRM_WORKFLOW_LIFE_INSURANCE not set"
+            : "Life Insurance lead — adding to workflow",
+    });
+
+    if (willAddLifeInsurance) {
+      await addContactToWorkflow(lifeInsuranceWorkflowId!, `Life Insurance (${lifeInsuranceLanguage})`);
+    }
+
     // Final Expense leads: fe_get_covered_funnel tag only (no AGENT_CRM_WORKFLOW_FINALE enrollment)
 
     // Meta CAPI Lead — newly created row; FE get-covered duplicate-merge path sends CAPI in duplicate branch helper
@@ -1499,6 +1604,7 @@ export async function POST(request: NextRequest) {
       finalExpenseData,
       getCoveredFastData,
       iulLeadGenData,
+      lifeInsuranceData,
     });
 
     // Success!

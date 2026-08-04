@@ -103,3 +103,30 @@ export const FINAL_EXPENSE_GET_COVERED_VCARD_URL =
 /** vCard for “Save contact” on the IUL get-covered success screen. */
 export const IUL_GET_COVERED_VCARD_URL =
   "https://res.cloudinary.com/isaacdev/raw/upload/v1782486525/isaac-orraiz_ficunl.vcf";
+
+/**
+ * Isaac's Ethos instant-enrollment link for term life insurance — single source of truth,
+ * used by the /life-insurance page's self-enroll section, the CTA lead form's success screen,
+ * and the /life-insurance/get-covered ads-funnel "done" screen.
+ */
+export const LIFE_INSURANCE_ENROLL_URL = "https://agents.ethoslife.com/invite/d723a";
+
+/**
+ * Hero art for the Life Insurance get-covered (Meta ads) funnel — desktop split column.
+ * Placeholder (reused from the /aca/apply marketing hero, not another get-covered ads funnel,
+ * to avoid visual duplication) — admin-overridable via /admin/hero, see lib/ads-images/settings.ts.
+ */
+const LIFE_INSURANCE_GET_COVERED_HERO_PUBLIC_ID =
+  "v1785777580/pexels-freestockpro-12969212_1_xck4cm";
+
+export function getLifeInsuranceGetCoveredHeroImageUrl(_locale: string): string {
+  return `${CLOUDINARY_ISAAC}/f_auto,q_auto,w_1200,c_limit/${LIFE_INSURANCE_GET_COVERED_HERO_PUBLIC_ID}`;
+}
+
+/**
+ * OG / Twitter card (1200×630) for the Life Insurance get-covered funnel — same source photo,
+ * smart-cropped to the social card aspect ratio. Admin-overridable — see lib/ads-images/settings.ts.
+ */
+export function getLifeInsuranceGetCoveredOgImageUrl(_locale: string): string {
+  return `${CLOUDINARY_ISAAC}/f_auto,q_auto,w_1200,h_630,c_fill,g_auto/${LIFE_INSURANCE_GET_COVERED_HERO_PUBLIC_ID}`;
+}
