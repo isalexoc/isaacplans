@@ -127,6 +127,7 @@ export default async function Footer() {
         href: "/hospital-indemnity",
       },
       { name: tServices("life.title"), href: "/iul" },
+      { name: tServices("lifeInsurance.title"), href: "/life-insurance" },
       { name: tServices("finalExpense.title"), href: "/final-expense" },
       { name: tServices("carriers.title"), href: "/carriers" },
     ],

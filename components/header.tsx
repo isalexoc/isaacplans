@@ -47,6 +47,7 @@ const serviceLinks = [
   { key: "dentalVision", href: "/dental-vision", icon: "Eye" },
   { key: "hospitalIndemnity", href: "/hospital-indemnity", icon: "Hospital" },
   { key: "life", href: "/iul", icon: "HeartPulse" },
+  { key: "lifeInsurance", href: "/life-insurance", icon: "Umbrella" },
   { key: "finalExpense", href: "/gastos-finales", icon: "Shield" },
   { key: "carriers", href: "/carriers", icon: "Building2" },
 ] as const satisfies ReadonlyArray<{

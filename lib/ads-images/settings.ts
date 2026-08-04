@@ -10,6 +10,8 @@ import {
   getIulGetCoveredOgImageUrl,
   getAcaGetCoveredHeroImageUrl,
   getAcaGetCoveredOgImageUrl,
+  getLifeInsuranceGetCoveredHeroImageUrl,
+  getLifeInsuranceGetCoveredOgImageUrl,
 } from "@/lib/get-covered-fast/constants";
 import {
   ADS_LOBS,
@@ -53,6 +55,7 @@ const LOB_KEY_PREFIX: Record<AdsLob, string> = {
   "final-expense": "fe",
   iul: "iul",
   aca: "aca",
+  "life-insurance": "life",
 };
 
 const DEFAULT_GETTERS: Record<AdsLob, Record<AdsImageKind, (locale: string) => string>> = {
@@ -62,6 +65,10 @@ const DEFAULT_GETTERS: Record<AdsLob, Record<AdsImageKind, (locale: string) => s
   },
   iul: { hero: getIulGetCoveredHeroImageUrl, og: getIulGetCoveredOgImageUrl },
   aca: { hero: getAcaGetCoveredHeroImageUrl, og: getAcaGetCoveredOgImageUrl },
+  "life-insurance": {
+    hero: getLifeInsuranceGetCoveredHeroImageUrl,
+    og: getLifeInsuranceGetCoveredOgImageUrl,
+  },
 };
 
 export const ADS_IMAGES_TAG = "ads-images";

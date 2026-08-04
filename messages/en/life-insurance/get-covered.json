@@ -1,0 +1,43 @@
+{
+  "lifeInsuranceGetCoveredPage": {
+    "metadata": {
+      "title": "Life Insurance — get covered | Isaac Plans Insurance",
+      "description": "Get an affordable term life insurance quote in minutes. Tell us how to reach you for a free, no-obligation quote from a licensed, bilingual advisor — or self-enroll online instantly.",
+      "keywords": "life insurance, term life insurance, affordable life insurance, family protection, Isaac Plans",
+      "imageAlt": "Getting help protecting your family with affordable life insurance",
+      "breadcrumbPage": "Life Insurance — get covered"
+    },
+    "funnel": {
+      "banner": "Licensed guidance · Life Insurance",
+      "hero": {
+        "badge": "Free quote · No obligation",
+        "title": "Protect your family with affordable life insurance",
+        "mobileSubtitle": "Get a free, personalized term life insurance quote.",
+        "subtitle": "Many families qualify for affordable term coverage that starts in days, not weeks. Tell us how to reach you and a licensed advisor will help you find the right plan."
+      },
+      "secureNote": "Secure · No obligation · Your data stays private",
+      "helpLine": "Need help? Call us at",
+      "contact": {
+        "cta": "Get My Free Quote"
+      },
+      "done": {
+        "title": "You're all set",
+        "body": "We received your info. Expect Isaac's call within 24 hours.",
+        "optionIntro": "What would you like to do next?",
+        "selfEnrollCta": "Enroll now with Ethos",
+        "bookCta": "Schedule your appointment",
+        "callCta": "Call now",
+        "callAria": "Call Isaac Plans Insurance at 540-426-1804",
+        "whatsappCta": "Message us on WhatsApp",
+        "whatsappAria": "Open WhatsApp with Isaac Plans Insurance",
+        "callerIntro": "Your personal life insurance advisor",
+        "callerSubline": "Isaac will call you within 24 hours from 540-426-1804. Save his number so you don't miss it.",
+        "agentName": "Isaac Orraiz",
+        "agentTitle": "Licensed insurance advisor",
+        "headshotAlt": "Isaac Orraiz, licensed insurance advisor",
+        "saveContactCta": "Save contact",
+        "saveContactAria": "Save Isaac Orraiz to your phone contacts (vCard download)"
+      }
+    }
+  }
+}

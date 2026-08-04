@@ -806,6 +806,56 @@ export const getFeBreadcrumbLd = (
   };
 };
 
+/** Life Insurance — locale-aware path helper (ES slug differs from EN, unlike IUL) */
+const lifeInsurancePathFor = (locale: string) =>
+  locale?.toLowerCase().startsWith("es") ? "seguro-de-vida" : "life-insurance";
+
+/** Life Insurance — WebPage JSON-LD */
+export const getLifeInsurancePageLd = (
+  locale: string,
+  title: string,
+  description: string
+): WithContext<WebPage> => {
+  const path = lifeInsurancePathFor(locale);
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "@id": `${BASE_URL}/${locale}/${path}#webpage`,
+    url: `${BASE_URL}/${locale}/${path}`,
+    name: title,
+    description,
+    inLanguage: locale,
+    about: { "@id": `${BASE_URL}/#organization` },
+  };
+};
+
+/** Life Insurance — BreadcrumbList JSON-LD (Home → Life Insurance) */
+export const getLifeInsuranceBreadcrumbLd = (
+  locale: string,
+  homeLabel: string,
+  lifeInsuranceLabel: string
+): WithContext<BreadcrumbList> => {
+  const path = lifeInsurancePathFor(locale);
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: homeLabel,
+        item: `${BASE_URL}/${locale}`,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: lifeInsuranceLabel,
+        item: `${BASE_URL}/${locale}/${path}`,
+      },
+    ],
+  };
+};
+
 /** Final Expense state page — WebPage JSON-LD */
 export const getFeStatePageLd = (
   locale: string,
@@ -1113,6 +1163,57 @@ export const getAcaGetCoveredAdsBreadcrumbLd = (
   pageLabel: string
 ): WithContext<BreadcrumbList> => {
   const path = getAcaGetCoveredAdsPathFor(locale);
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: homeLabel,
+        item: `${BASE_URL}/${locale}`,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: pageLabel,
+        item: `${BASE_URL}/${locale}/${path}`,
+      },
+    ],
+  };
+};
+
+/** Paid ads — Life Insurance get-covered lead funnel; locale slug from routing. */
+const getLifeInsuranceGetCoveredAdsPathFor = (locale: string) =>
+  locale?.toLowerCase().startsWith("es")
+    ? "seguro-de-vida/obtener-cobertura"
+    : "life-insurance/get-covered";
+
+export const getLifeInsuranceGetCoveredAdsPageLd = (
+  locale: string,
+  title: string,
+  description: string
+): WithContext<WebPage> => {
+  const path = getLifeInsuranceGetCoveredAdsPathFor(locale);
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "@id": `${BASE_URL}/${locale}/${path}#webpage`,
+    url: `${BASE_URL}/${locale}/${path}`,
+    name: title,
+    description,
+    inLanguage: locale,
+    about: { "@id": `${BASE_URL}/#organization` },
+    isPartOf: { "@id": `${BASE_URL}/#website` },
+  };
+};
+
+export const getLifeInsuranceGetCoveredAdsBreadcrumbLd = (
+  locale: string,
+  homeLabel: string,
+  pageLabel: string
+): WithContext<BreadcrumbList> => {
+  const path = getLifeInsuranceGetCoveredAdsPathFor(locale);
   return {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",

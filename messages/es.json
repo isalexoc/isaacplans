@@ -275,6 +275,10 @@
             "title": "IUL - Vida Universal Indexada",
             "description": "Seguro de vida flexible con potencial de crecimiento del valor en efectivo."
           },
+          "lifeInsurance": {
+            "title": "Seguro de Vida",
+            "description": "Cobertura de vida a término asequible para proteger el futuro financiero de su familia."
+          },
           "finalExpense": {
             "title": "Gastos Finales",
             "description": "Cobertura permanente y asequible para ayudar con gastos funerarios y finales."
@@ -2650,6 +2654,158 @@
         "imageAlt": "Calendario de citas de Gastos Finales",
         "backButton": "← Volver",
         "loadingIframe": "Cargando calendario…"
+      }
+    }
+  },
+  "lifeInsurancePage": {
+    "hero": {
+      "badge": "Seguro de Vida",
+      "name": "Isaac Orraiz – Agente de Seguros",
+      "title": "Proteja el Futuro de su Familia—Hoy",
+      "description": "El seguro de vida proporciona un beneficio por fallecimiento libre de impuestos a las personas que dependen de usted—cubriendo el reemplazo de ingresos, una hipoteca o gastos diarios si algo le sucede. Cobertura a término asequible, solicitudes sencillas y cobertura que puede comenzar en días, no semanas.",
+      "testimonials": [
+        {
+          "name": "Rachel T.",
+          "text": "Pensé que el seguro de vida sería complicado y costoso. Isaac me cubrió en una sola llamada, y cuesta menos que mis suscripciones de streaming."
+        },
+        {
+          "name": "Marcus D.",
+          "text": "Después de que nació nuestro primer hijo, supimos que necesitábamos cobertura. Isaac nos explicó todo claramente y nos aprobó rápidamente."
+        }
+      ],
+      "happyClient": {
+        "title": "Familias Protegidas",
+        "subtitle": "Más de 3,000 pólizas guiadas"
+      }
+    },
+    "ctaButton": {
+      "title": "Obtén Mi Cotización Gratis",
+      "subtitle": "Personalizada, sin compromiso"
+    },
+    "leadForm": {
+      "firstName": "Nombre",
+      "lastName": "Apellido",
+      "email": "Correo Electrónico",
+      "phone": "Número de Teléfono",
+      "submit": "Obtén Mi Cotización Gratis",
+      "submitting": "Enviando...",
+      "required": "Este campo es obligatorio",
+      "invalidEmail": "Dirección de correo electrónico no válida",
+      "invalidPhone": "Ingrese un número de teléfono válido de EE. UU. de 10 dígitos",
+      "firstNameMinLength": "El nombre debe tener al menos 2 caracteres",
+      "lastNameMinLength": "El apellido debe tener al menos 2 caracteres",
+      "firstNameMaxLength": "El nombre es demasiado largo",
+      "lastNameMaxLength": "El apellido es demasiado largo",
+      "smsConsent": "Doy mi consentimiento para recibir notificaciones y alertas por SMS de Isaac Plans Insurance. La frecuencia de los mensajes varía. Pueden aplicar tarifas de mensajes y datos. Envíe HELP al (540) 426-1804 para asistencia. Responda STOP para cancelar la suscripción en cualquier momento.",
+      "marketingConsent": "Al marcar esta casilla, acepto recibir mensajes de marketing ocasionales de Isaac Plans Insurance.",
+      "privacyPolicy": "Política de Privacidad",
+      "termsAndConditions": "Términos y Condiciones",
+      "successTitle": "¡Gracias!",
+      "successMessage": "Hemos recibido su información. Me pondré en contacto pronto para hablar sobre sus opciones de seguro de vida.",
+      "successScheduleAppointment": "Reservar una consulta",
+      "successClose": "Cerrar"
+    },
+    "about": {
+      "badge": "Sobre Isaac",
+      "headline": "Orientación sencilla y honesta—sin presión, sin jerga",
+      "description": "Ayudo a las familias a encontrar un seguro de vida a término asequible que se ajuste a su presupuesto y objetivos. Revisaremos cuánta cobertura realmente necesita, compararemos aseguradoras y le aprobaremos lo más rápido posible.",
+      "name": "Isaac Orraiz",
+      "role": "Agente de Seguros Licenciado",
+      "credential": "Agente de Seguros Licenciado"
+    },
+    "definition": {
+      "title": "¿Qué es el Seguro de Vida a Término?",
+      "description": "El seguro de vida a término paga un beneficio por fallecimiento libre de impuestos a sus beneficiarios si usted fallece durante el plazo de la póliza (por ejemplo, 10, 20 o 30 años). Es la forma más asequible de proteger sus ingresos, una hipoteca o los gastos diarios de su familia—sin valor en efectivo, sin componente de inversión, solo protección directa."
+    },
+    "eligibility": {
+      "headlineBeforeBold": "¿Quién",
+      "headlineBold": "lo necesita?",
+      "intro": "El seguro de vida puede ser adecuado para casi cualquier persona con personas que dependen financieramente de ella:",
+      "bullets": [
+        "Padres que quieren reemplazar sus ingresos si algo sucede",
+        "Propietarios de vivienda que quieren que su hipoteca quede pagada para su familia",
+        "Cualquier persona con deudas, un negocio o seres queridos que se verían afectados financieramente",
+        "Personas que desean primas asequibles y predecibles por un plazo determinado"
+      ],
+      "note": "Las tarifas y la elegibilidad dependen de su edad, salud y monto de cobertura. La aprobación final está sujeta a suscripción."
+    },
+    "enroll": {
+      "headlineBeforeBold": "Cómo encontramos",
+      "headlineBold": "su mejor tarifa",
+      "intro": "Le ayudaremos a encontrar la cobertura adecuada en unos simples pasos:",
+      "steps": {
+        "0": "Cuéntenos sus objetivos y cuánta cobertura necesita",
+        "1": "Comparamos las principales aseguradoras para encontrar su mejor tarifa"
+      },
+      "subHeading": "Revisaremos:",
+      "bullets": [
+        "Monto de cobertura y duración del plazo",
+        "Presupuesto mensual y opciones de prima",
+        "Preguntas de salud y clase de suscripción",
+        "Opciones de aprobación instantánea cuando estén disponibles"
+      ],
+      "note": "Las cotizaciones son estimaciones. Las tarifas finales las determina la aseguradora durante la suscripción."
+    },
+    "faq": {
+      "label": "Conceptos Básicos del Seguro de Vida",
+      "titleBeforeBold": "Preguntas",
+      "titleBold": "Frecuentes",
+      "items": [
+        {
+          "q": "¿Cuánto seguro de vida necesito?",
+          "a": "Una guía común es de 10 a 15 veces su ingreso anual, pero la cantidad adecuada depende de sus deudas, dependientes y objetivos. Le ayudaremos a determinar una cifra que tenga sentido para su familia."
+        },
+        {
+          "q": "¿Cuánto cuesta el seguro de vida a término?",
+          "a": "A menudo es más asequible de lo que la gente espera—muchos adultos sanos pueden obtener cobertura por el costo de una suscripción mensual de streaming. Su tarifa exacta depende de la edad, salud y monto de cobertura."
+        },
+        {
+          "q": "¿Necesito un examen médico?",
+          "a": "No siempre. Muchos solicitantes califican para suscripción simplificada o acelerada sin examen, especialmente para montos de cobertura más pequeños. Le informaremos sus opciones desde el principio."
+        },
+        {
+          "q": "¿Qué tan rápido puedo ser aprobado?",
+          "a": "Algunas pólizas pueden aprobarse en tan solo un día con suscripción de decisión instantánea. Otras tardan unas semanas si se requiere un examen médico."
+        },
+        {
+          "q": "¿Cuál es la diferencia con IUL o Gastos Finales?",
+          "a": "El seguro de vida a término es protección directa por fallecimiento durante un número determinado de años—sin valor en efectivo. El IUL agrega cobertura permanente con potencial de crecimiento de valor en efectivo, y Gastos Finales es una póliza más pequeña y garantizada diseñada para gastos funerarios y de fin de vida."
+        },
+        {
+          "q": "¿Puedo aplicar en línea yo mismo?",
+          "a": "Sí—si prefiere evitar la llamada telefónica, puede obtener una cotización instantánea y aplicar en línea a través de nuestro socio de autoinscripción."
+        }
+      ]
+    },
+    "ctaBanner": {
+      "message": "¿Listo para proteger a su familia? Obtenga su cotización gratis en minutos."
+    },
+    "selfEnroll": {
+      "title": "¿Prefiere autoinscribirse?",
+      "subtitle": "Obtenga una cotización instantánea en línea y aplique en minutos—sin necesidad de llamada telefónica.",
+      "cta": "Obtener Cotización Instantánea",
+      "disclaimer": "Pólizas emitidas por la aseguradora. Sujeto a aprobación de suscripción."
+    },
+    "lifeInsuranceMetadata": {
+      "title": "Seguro de Vida | Isaac Plans Insurance",
+      "description": "Seguro de vida a término asequible para proteger los ingresos, la hipoteca y el futuro de su familia. Obtenga una cotización personalizada gratis hoy.",
+      "image": "https://www.isaacplans.com/images/life-insurance.png",
+      "imageAlt": "Resumen del seguro de vida",
+      "keywords": "seguro de vida, seguro de vida a término, seguro de vida asequible, protección familiar, reemplazo de ingresos",
+      "breadcrumbs": {
+        "home": "Inicio",
+        "lifeInsurance": "Seguro de Vida"
+      }
+    },
+    "calendar": {
+      "title": "Reserve su Cita Telefónica de Seguro de Vida",
+      "backButton": "Regresar",
+      "meta": {
+        "title": "Calendario de Citas de Seguro de Vida | Isaac Plans Insurance",
+        "description": "Programe su consulta de seguro de vida con Isaac Plans Insurance. Obtenga orientación personalizada sobre cobertura, tarifas y opciones de aprobación.",
+        "keywords": "cita de seguro de vida, calendario de seguro de vida, consulta de seguro de vida, agente bilingüe",
+        "image": "https://www.isaacplans.com/images/life-insurance.png",
+        "imageAlt": "Calendario de citas de seguro de vida"
       }
     }
   },

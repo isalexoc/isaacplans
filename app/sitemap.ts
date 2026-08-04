@@ -97,6 +97,11 @@ const PAGES: Page[] = [
   { href: "/get-health-coverage-fast", changeFrequency: "weekly", priority: 0.82 },
   { href: "/final-expense/get-covered", changeFrequency: "weekly", priority: 0.82 },
 
+  // Life Insurance
+  { href: "/life-insurance", changeFrequency: "monthly", priority: 0.8 },
+  { href: "/life-insurance/calendar", changeFrequency: "monthly", priority: 0.6 },
+  { href: "/life-insurance/get-covered", changeFrequency: "weekly", priority: 0.82 },
+
   // Short Term Medical
   { href: "/short-term-medical", changeFrequency: "monthly", priority: 0.8 },
   {

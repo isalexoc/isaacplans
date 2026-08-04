@@ -2,7 +2,74 @@
 
 ## Status
 
-None — last completed: ads-image upload + sign-up-first Clerk default, merged to main from
+**Implemented, pending review/commit: Life Insurance line of business** (branch
+`feature/life-insurance-lob`). 7th line of business, distinct from IUL/Final Expense, positioned as
+plain term life insurance for consumers.
+
+- **Main page** `/life-insurance` (es: `/seguro-de-vida`): hero, about, a self-enroll section
+  (reuses the existing `PlanEnrollCard`/`components/SelfEnrollSection.tsx`, already used on
+  ACA/Dental-Vision/Hospital-Indemnity, linking to Isaac's Ethos instant-issue term life invite —
+  `https://agents.ethoslife.com/invite/d723a`), eligibility, "how we find your rate", FAQ, CTA
+  banner, JSON-LD. CTA button opens a lead-capture modal (`LifeInsuranceButton` →
+  `form-modal-life-insurance.tsx` → `life-insurance-lead-form.tsx` → `app/actions/life-insurance.ts`)
+  whose success screen includes the Ethos self-enroll CTA (`life-insurance-self-enroll-cta.tsx`,
+  mirrors `iul-apply-success-cta.tsx`'s self-contained-bilingual pattern) alongside "Book a
+  consultation".
+- **Booking page** `/life-insurance/calendar` mirrors `iul/calendar` exactly.
+- **Meta-ads landing page** `/life-insurance/get-covered` (es: `/seguro-de-vida/obtener-cobertura`):
+  bare chrome (logo+phone header, minimal footer — verified via `x-ads-landing-variant: iul-bare`
+  response header), 4-field form (`life-insurance-get-covered-funnel.tsx`, mirrors
+  `aca-get-covered-funnel.tsx`), admin-overridable hero/OG image via the existing `/admin/hero` tool
+  (added `"life-insurance"` to `lib/ads-images/{shared,settings}.ts`'s `ADS_LOBS`). "Done" screen
+  replaces ACA's "Start application" with the Ethos self-enroll button. Deliberately skipped
+  building a bespoke funnel-level GA4 analytics module (like `lib/analytics/aca-get-covered-ga.ts`)
+  — relies on `ServicePageTracker` + Meta Pixel/CAPI instead; not part of the explicit ask.
+- **Header/footer nav**: new `lifeInsurance` entry (key deliberately distinct from IUL's existing
+  `"life"` key/translations) in both `components/header.tsx`'s `serviceLinks` and
+  `components/footer.tsx`'s `footerLinks.services`.
+- **CRM integration**: new `lifeInsuranceData` payload key added throughout
+  `app/api/create-contact/route.ts` (17 edit points — Meta CAPI source/contentName branches,
+  duplicate-merge allowlist, lead-details text, CRM tags incl. `Life Insurance Lead` +
+  `life_insurance_get_covered_funnel`, the `contactPayload.source` field, the generic-Notification-
+  workflow exclusion guard, and an optional dedicated `AGENT_CRM_WORKFLOW_LIFE_INSURANCE` workflow
+  step) — mirrors `finalExpenseData`'s simple shape (not IUL's, which carries IUL-only fields).
+- **Routing/sitemap/JSON-LD**: full dual-locale entries in `i18n/routing.ts` + `i18n/navigation.ts`;
+  bare-chrome pathnames added to both `lib/ads-landing.ts` arrays AND `middleware.ts`'s independent
+  hardcoded lists; `getLifeInsurancePageLd`/`BreadcrumbLd` (Final-Expense-style locale-aware slug
+  helper, since ES slug differs from EN) and `getLifeInsuranceGetCoveredAdsPageLd`/`BreadcrumbLd` in
+  `lib/seo/jsonld.ts`; 3 new sitemap entries.
+
+Full plan at `C:\Users\isale\.claude\plans\please-help-me-create-glistening-meadow.md`.
+
+**Verified**: `pnpm build` + `tsc --noEmit` clean. Dev-server + headless-Chrome screenshots confirm
+both locales render correctly (hero, self-enroll section, FAQ content all present with no
+`MISSING_MESSAGE` errors) for the main page and both locales of the ads-landing page (bare chrome +
+form). Calendar iframe URLs resolve correctly per locale. Sitemap includes all 6 new URLs. Admin
+`/admin/hero` registration verified via code review (Clerk-gated, same as every other admin route —
+not logged in live, matching how the ACA feature verified this exact tool).
+
+**Not yet verified** (needs Isaac or a follow-up session): a live `/api/create-contact` submission
+end-to-end against production Agent CRM (GHL) — deliberately skipped in this session since it
+creates a real contact and could fire real automations in Isaac's live CRM; the ACA feature did this
+kind of live smoke test but with Isaac's direct real-time sign-off. Recommend doing this once ready
+to merge/deploy: submit a real test lead through `/life-insurance/get-covered`, confirm the contact
+tags/source and `capiDispatched: true` in the response, matching the process already used for ACA.
+
+Known open items (launched with sensible placeholders, to revisit with Isaac):
+- `/life-insurance/calendar` reuses the generic `/contact/calendar` GHL booking-widget IDs as a
+  placeholder — Isaac should create a dedicated "Life Insurance" calendar in GHL and hand over the
+  EN/ES widget URLs when ready (same pattern `dental-vision/calendar/page.tsx` used while waiting
+  on its final ES link).
+- Ads-page hero/OG image is a reused placeholder stock photo (`v1785777580/pexels-freestockpro-
+  12969212_1_xck4cm`, borrowed from the `/aca/apply` marketing hero) — swap anytime via
+  `/admin/hero`.
+- `AGENT_CRM_WORKFLOW_LIFE_INSURANCE` is an optional, no-op-until-set env var for a dedicated GHL
+  automation, matching every other optional per-LOB workflow var.
+- Header nav icon (`Umbrella`) and all EN/ES marketing copy are first-draft choices — easy to edit.
+
+## Prior feature
+
+Last completed: ads-image upload + sign-up-first Clerk default, merged to main from
 `feature/ads-image-upload-and-signup-default`.
 
 ## History
