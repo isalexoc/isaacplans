@@ -26,6 +26,7 @@ import {
   agentCrmGetBaseCredentials,
   agentCrmUpdateContact,
   agentCrmGetContactTags,
+  agentCrmGetContactNative,
   agentCrmEnsureContact,
   agentCrmAddContactTags,
   type AgentCrmCustomFieldValue,
@@ -163,13 +164,24 @@ export async function selfStartFeIntakeForClient(input: {
   const firstName = (input.firstName ?? "").trim();
   const lastName = (input.lastName ?? "").trim();
   const phone = (input.phone ?? "").replace(/[^\d+]/g, "");
-  const contactName = [firstName, lastName].filter(Boolean).join(" ") || null;
+
+  const prefill: FeIntakeData = {};
+  if (firstName) prefill.firstName = firstName;
+  if (lastName) prefill.lastName = lastName;
+  if (email) prefill.email = email;
+  if (phone) prefill.phone = phone;
 
   let crmContactId: string | null = null;
+  let contactName = [firstName, lastName].filter(Boolean).join(" ") || null;
+  let contactEmail = email || null;
+  let contactPhone = phone || null;
   const creds = agentCrmGetBaseCredentials();
   if (creds) {
     // Best-effort — a CRM hiccup must never block the prospect from starting.
     try {
+      // agentCrmEnsureContact matches by email/phone first, so a lead who already submitted a
+      // CTA/ads-funnel form (e.g. final-expense-lead-form or the get-covered funnel) resolves to
+      // that SAME contact rather than a fresh one.
       crmContactId = await agentCrmEnsureContact(
         {
           email: email || undefined,
@@ -185,6 +197,27 @@ export async function selfStartFeIntakeForClient(input: {
       if (crmContactId) {
         const tags = [FE_SELF_APPLY_TAG, locale === "es" ? FE_SPANISH_TAG : FE_ENGLISH_TAG];
         await agentCrmAddContactTags(crmContactId, tags, creds.token, "[FE_INTAKE_SELF_APPLY]");
+
+        // Reuse whatever this lead already gave us on an earlier CTA/ads-funnel submission —
+        // name, phone, DOB, address — instead of asking them to retype it in the intake form.
+        // Fields still show as their own question (per product decision: confirm, don't skip),
+        // just pre-filled. CRM values win over the Clerk profile since they reflect what this
+        // person explicitly typed for an insurance inquiry, not just an account signup.
+        const native = await agentCrmGetContactNative(crmContactId, creds.token);
+        if (native) {
+          if (native.firstName) prefill.firstName = native.firstName;
+          if (native.lastName) prefill.lastName = native.lastName;
+          if (native.email) prefill.email = native.email;
+          if (native.phone) prefill.phone = native.phone;
+          if (native.dateOfBirth) prefill.dateOfBirth = native.dateOfBirth.slice(0, 10);
+          if (native.address1) prefill.address1 = native.address1;
+          if (native.city) prefill.city = native.city;
+          if (native.state) prefill.state = native.state;
+          if (native.postalCode) prefill.postalCode = native.postalCode;
+          contactName = [native.firstName, native.lastName].filter(Boolean).join(" ") || contactName;
+          contactEmail = native.email || contactEmail;
+          contactPhone = native.phone || contactPhone;
+        }
       }
     } catch (e) {
       console.warn("[fe-intake] self-apply CRM ensure failed:", e);
@@ -193,19 +226,13 @@ export async function selfStartFeIntakeForClient(input: {
     console.warn("[fe-intake] Agent CRM credentials missing; self-apply session is unlinked.");
   }
 
-  const prefill: FeIntakeData = {};
-  if (firstName) prefill.firstName = firstName;
-  if (lastName) prefill.lastName = lastName;
-  if (email) prefill.email = email;
-  if (phone) prefill.phone = phone;
-
   const row = await createFeIntakeSession({
     ownerUserId,
     clientUserId: input.clientUserId,
     crmContactId,
     contactName,
-    contactEmail: email || null,
-    contactPhone: phone || null,
+    contactEmail,
+    contactPhone,
     locale,
     data: prefill,
   });
@@ -420,6 +447,19 @@ function formatMedications(rows: RepeaterRow[]): string {
     .join("; ");
 }
 
+/** Flatten the beneficiaries repeater into one CRM text value, e.g. "Jane Doe (Spouse)". */
+function formatBeneficiaries(rows: RepeaterRow[]): string {
+  return rows
+    .map((row) => {
+      const name = [str(row.firstName), str(row.lastName)].filter(Boolean).join(" ");
+      if (!name) return "";
+      const relationship = str(row.relationship);
+      return relationship ? `${name} (${relationship})` : name;
+    })
+    .filter(Boolean)
+    .join("; ");
+}
+
 /**
  * Build the CRM update payload from DECRYPTED intake data.
  * Native fields go on the contact body; custom fields resolve slug→id (unprovisioned ids
@@ -471,6 +511,12 @@ export function buildCrmPayloadFromData(data: FeIntakeData): {
     : [];
   const medsText = formatMedications(medications);
   if (medsText) pushCustom("medications_list", medsText);
+
+  const beneficiaries: RepeaterRow[] = Array.isArray(data.beneficiaries)
+    ? (data.beneficiaries as RepeaterRow[])
+    : [];
+  const beneficiariesText = formatBeneficiaries(beneficiaries);
+  if (beneficiariesText) pushCustom("beneficiaries_list", beneficiariesText);
 
   return { native, customFields, skippedSlugs };
 }

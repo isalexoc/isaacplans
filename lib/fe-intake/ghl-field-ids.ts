@@ -25,10 +25,29 @@ export type FeFieldSlug =
   | "has_ssn"
   | "ssn"
   | "mothers_maiden_name"
+  | "beneficiaries_list"
   | "physician_name"
   | "physician_city"
+  | "height"
+  | "weight"
   | "takes_medications"
   | "medications_list"
+  // Tobacco and Nicotine
+  | "tobacco_use"
+  | "tobacco_10yr"
+  | "tobacco_5yr"
+  | "tobacco_12mo"
+  // Health
+  | "cancer_stroke"
+  | "cancer_stroke_free_2yr"
+  | "cancer_stroke_free_5yr"
+  | "cancer_stroke_free_10yr"
+  // Hospitalizations
+  | "hospitalized_current"
+  | "hospitalized_10yr"
+  | "hospitalized_5yr"
+  | "hospitalized_3yr"
+  | "hospitalized_6mo"
   // Meta — the always-current client share link (written by the app, used by a GHL workflow)
   | "fe_intake_link";
 
@@ -42,9 +61,25 @@ export const feFieldIds: Record<FeFieldSlug, string> = {
   has_ssn: "fKXfh1v2IEiCocb6dAEm",
   ssn: "USoBLT8PDc81jNYGGn61",
   mothers_maiden_name: "6NZ8UianawuQ4XuIcaRs",
+  beneficiaries_list: "",
   physician_name: "Z4CdeiMRw1llA22JHnbU",
   physician_city: "eBKzMBpeMAbkxY0YGLcJ",
+  height: "",
+  weight: "",
   takes_medications: "xhbE1A6bZTXN7NMGQj07",
   medications_list: "iWD4oBOZlPG28adHtV7P",
+  tobacco_use: "",
+  tobacco_10yr: "",
+  tobacco_5yr: "",
+  tobacco_12mo: "",
+  cancer_stroke: "",
+  cancer_stroke_free_2yr: "",
+  cancer_stroke_free_5yr: "",
+  cancer_stroke_free_10yr: "",
+  hospitalized_current: "",
+  hospitalized_10yr: "",
+  hospitalized_5yr: "",
+  hospitalized_3yr: "",
+  hospitalized_6mo: "",
   fe_intake_link: "AL76ejBuUxCSIGQN8k9V",
 };

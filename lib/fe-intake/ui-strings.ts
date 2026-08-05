@@ -37,6 +37,14 @@ export function rowLabel(field: FeField, locale: FeLocale): string {
   return raw ?? "";
 }
 
+/** Replace the `{drug}` token in a medication row's question with the drug name already typed
+ * a screen earlier — "What is Lisinopril for?" instead of a generic "What is it for?". */
+export function applyDrugToken(text: string, drugName: string, locale: FeLocale): string {
+  if (!text.includes("{drug}")) return text;
+  const fallback = drugName.trim() || (locale === "es" ? "esto" : "it");
+  return text.replace(/\{drug\}/g, fallback);
+}
+
 type Dict = Record<FeLocale, string>;
 
 export const UI = {
@@ -115,7 +123,8 @@ export const UI = {
   lockClientEdit: { en: "Lock client edits", es: "Bloquear edición del cliente" } as Dict,
   reveal: { en: "Reveal", es: "Mostrar" } as Dict,
   hide: { en: "Hide", es: "Ocultar" } as Dict,
-  addAnother: { en: "Add another medication?", es: "¿Agregar otro medicamento?" } as Dict,
+  addMedication: { en: "Add another medication?", es: "¿Agregar otro medicamento?" } as Dict,
+  addBeneficiary: { en: "Add another beneficiary?", es: "¿Agregar otro beneficiario?" } as Dict,
   notProvided: { en: "Not provided", es: "No proporcionado" } as Dict,
   editForm: { en: "Edit form", es: "Editar formulario" } as Dict,
   empty: { en: "—", es: "—" } as Dict,
@@ -134,6 +143,15 @@ export const UI = {
   // Medication search
   notListed: { en: "Not listed — type it in", es: "No aparece — escríbalo" } as Dict,
   searchMedication: { en: "Search for a medication…", es: "Busque un medicamento…" } as Dict,
+
+  // Split date-of-birth selects
+  dobMonth: { en: "Month", es: "Mes" } as Dict,
+  dobDay: { en: "Day", es: "Día" } as Dict,
+  dobYear: { en: "Year", es: "Año" } as Dict,
+
+  // Split height selects
+  heightFeet: { en: "Feet", es: "Pies" } as Dict,
+  heightInches: { en: "Inches", es: "Pulgadas" } as Dict,
 } as const;
 
 export function tr(dict: Dict, locale: FeLocale): string {

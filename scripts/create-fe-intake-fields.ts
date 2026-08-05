@@ -74,6 +74,10 @@ function buildSpecs(): FieldSpec[] {
     specs.push({ slug: "medications_list", name: `${FIELD_PREFIX}Medications`, dataType: "TEXT" });
   }
 
+  if (!seen.has("beneficiaries_list")) {
+    specs.push({ slug: "beneficiaries_list", name: `${FIELD_PREFIX}Beneficiaries`, dataType: "TEXT" });
+  }
+
   // Meta field (not part of the form): the always-current client share link.
   if (!seen.has("fe_intake_link")) {
     specs.push({ slug: "fe_intake_link", name: `${FIELD_PREFIX}Share Link`, dataType: "TEXT" });

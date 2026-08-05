@@ -9,9 +9,11 @@
  *
  * Screens are derived from `data` on every render (not a fixed list): a repeater like
  * `medications` expands into one screen per sub-field per existing row, plus an "add another?"
- * control screen after each row. Answering a field writes straight into `data` (autosaved by
- * useFeIntakeAutosave); Next re-derives the screen list from the just-updated data so a newly
- * revealed conditional field (e.g. `ssn` after `hasSsn = yes`) appears immediately after it.
+ * control screen once its `minRows` are satisfied. Answering a field writes straight into `data`
+ * (autosaved by useFeIntakeAutosave); Next re-derives the screen list from the just-updated data
+ * so a newly revealed conditional field (e.g. `ssn` after `hasSsn = yes`) appears immediately
+ * after it. A field's `addressTargets` siblings (city/state/zip) never get their own screen —
+ * they're folded onto the same screen as the address search box.
  */
 
 import { useEffect, useMemo, useState } from "react";
@@ -42,6 +44,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import IntakeAddressInput, { type ResolvedAddress } from "@/components/shared/intake-address-input";
+import { MONTHS, buildDobIso, splitDobIso } from "@/lib/intake-shared/format";
 import { fetchFeIntake, completeFeIntake, searchMedications } from "@/lib/fe-intake-api";
 import { useFeIntakeAutosave } from "@/hooks/use-fe-intake-autosave";
 import {
@@ -62,6 +65,7 @@ import {
   fieldNote,
   fieldPlaceholder,
   optionLabel,
+  applyDrugToken,
   type FeLocale,
 } from "@/lib/fe-intake/ui-strings";
 import type { FeIntakeData } from "@/lib/fe-intake/schema";
@@ -77,18 +81,33 @@ type Screen =
   | { screenKey: string; kind: "addAnother"; repeaterKey: string; rowIndex: number }
   | { screenKey: string; kind: "finish" };
 
+/** Sibling keys folded onto an `address` field's own screen — never their own screen. */
+function addressTargetKeys(fields: FeField[]): Set<string> {
+  const keys = new Set<string>();
+  for (const f of fields) {
+    if (f.type !== "address" || !f.addressTargets) continue;
+    if (f.addressTargets.city) keys.add(f.addressTargets.city);
+    if (f.addressTargets.state) keys.add(f.addressTargets.state);
+    if (f.addressTargets.zip) keys.add(f.addressTargets.zip);
+  }
+  return keys;
+}
+
 function buildScreens(data: FeIntakeData): Screen[] {
   const screens: Screen[] = [];
   for (const section of FE_SECTIONS) {
+    const foldedKeys = addressTargetKeys(section.fields);
     for (const field of section.fields) {
+      if (foldedKeys.has(field.key)) continue;
       if (!isFieldVisible(field, data)) continue;
       if (field.type !== "repeater") {
         screens.push({ screenKey: `field:${field.key}`, kind: "field", field });
         continue;
       }
       const rows: RepeaterRow[] = Array.isArray(data[field.key]) ? (data[field.key] as RepeaterRow[]) : [];
-      const rowCount = Math.max(1, rows.length);
+      const minRows = field.minRows ?? 1;
       const maxRows = field.maxRows ?? 15;
+      const rowCount = Math.max(minRows, rows.length);
       for (let i = 0; i < rowCount; i++) {
         const row = rows[i] ?? {};
         for (const sub of field.rowFields ?? []) {
@@ -101,7 +120,8 @@ function buildScreens(data: FeIntakeData): Screen[] {
             rowIndex: i,
           });
         }
-        if (i < maxRows - 1) {
+        // Only offer "add another" once the mandatory minimum rows are satisfied.
+        if (i >= minRows - 1 && i < maxRows - 1) {
           screens.push({ screenKey: `addAnother:${field.key}:${i}`, kind: "addAnother", repeaterKey: field.key, rowIndex: i });
         }
       }
@@ -116,33 +136,53 @@ function rowOf(data: FeIntakeData, repeaterKey: string, rowIndex: number): Recor
   return (rows[rowIndex] ?? {}) as Record<string, unknown>;
 }
 
+function containerFor(screen: Screen, data: FeIntakeData): Record<string, unknown> {
+  return screen.kind === "repeaterRow" ? rowOf(data, screen.repeaterKey, screen.rowIndex) : data;
+}
+
 function isScreenValid(screen: Screen, data: FeIntakeData): boolean {
   if (screen.kind === "finish" || screen.kind === "addAnother") return true;
-  const container = screen.kind === "repeaterRow" ? rowOf(data, screen.repeaterKey, screen.rowIndex) : data;
-  const value = str(container[screen.field.key]).trim();
-  if (screen.field.required && !value) return false;
-  if (value && fieldFormatError(screen.field, value)) return false;
+  const container = containerFor(screen, data);
+  const field = screen.field;
+  const value = str(container[field.key]).trim();
+  if (field.required && !value) return false;
+  if (value && fieldFormatError(field, value)) return false;
+
+  // An address screen bundles its city/state/zip siblings — all of them must be valid too.
+  if (field.type === "address" && field.addressTargets) {
+    for (const key of [field.addressTargets.city, field.addressTargets.state, field.addressTargets.zip]) {
+      if (!key) continue;
+      const sibling = fieldByKey(key);
+      const siblingValue = str(container[key]).trim();
+      if (sibling?.required && !siblingValue) return false;
+      if (siblingValue && sibling && fieldFormatError(sibling, siblingValue)) return false;
+    }
+  }
   return true;
 }
 
-/** Resume at the first unanswered/invalid screen instead of always restarting at question 1. */
-function firstIncompleteScreenKey(screens: Screen[], data: FeIntakeData): string {
-  for (const s of screens) {
-    if (s.kind === "finish" || s.kind === "addAnother") continue;
-    if (!isScreenValid(s, data)) return s.screenKey;
-  }
-  return screens[screens.length - 1].screenKey;
+/**
+ * Resume at the screen the client last had open (`data.__cursor`, updated on every Next/Back),
+ * not the first unanswered field. A pre-filled-from-CRM field (name/email/phone/DOB/address
+ * reused from an earlier CTA submission) is deliberately still its own screen the first time —
+ * confirmed with a tap, not silently skipped — so a typo from the ad form gets one more look
+ * before it flows into an actual insurance application.
+ */
+function resumeScreenKey(screens: Screen[], data: FeIntakeData): string {
+  const cursor = typeof data.__cursor === "string" ? data.__cursor : null;
+  if (cursor && screens.some((s) => s.screenKey === cursor)) return cursor;
+  return screens[0].screenKey;
 }
 
 // ─── Icon choices for single-select "card" questions ──────────────────────────
 
-const YES_NO_ICON: Record<string, LucideIcon> = { yes: CheckCircle2, no: XCircle };
 const RELATIONSHIP_ICON: Record<string, LucideIcon> = {
   Self: User,
   Spouse: HeartHandshake,
   Son: Baby,
   Daughter: Baby,
   Parent: Users,
+  Sibling: Users,
   Grandchild: Sprout,
   Other: HelpCircle,
 };
@@ -159,7 +199,8 @@ const USAGE_ICON: Record<string, LucideIcon> = {
 };
 
 function iconForOption(fieldKey: string, value: string): LucideIcon {
-  if (fieldKey === "hasSsn" || fieldKey === "takesMedications") return YES_NO_ICON[value] ?? HelpCircle;
+  if (value === "yes") return CheckCircle2;
+  if (value === "no") return XCircle;
   if (fieldKey === "relationship") return RELATIONSHIP_ICON[value] ?? HelpCircle;
   if (fieldKey === "gender") return GENDER_ICON[value] ?? User;
   if (fieldKey === "usage") return USAGE_ICON[value] ?? HelpCircle;
@@ -170,6 +211,11 @@ function iconForOption(fieldKey: string, value: string): LucideIcon {
 
 const BIG_INPUT =
   "w-full rounded-2xl border-2 border-gray-200 bg-white px-5 py-4 text-lg text-gray-900 placeholder:text-gray-400 focus:border-brand focus:outline-none dark:border-gray-800 dark:bg-gray-900 dark:text-gray-100";
+
+const SMALL_INPUT =
+  "w-full rounded-xl border-2 border-gray-200 bg-white px-4 py-2.5 text-base text-gray-900 placeholder:text-gray-400 focus:border-brand focus:outline-none dark:border-gray-800 dark:bg-gray-900 dark:text-gray-100";
+
+const SMALL_LABEL = "mb-1 block text-xs font-medium text-muted-foreground";
 
 function ChoiceCard({
   selected,
@@ -306,6 +352,82 @@ function DrugSearchInput({
   );
 }
 
+function DobInput({ value, onChange, locale }: { value: string; onChange: (v: string) => void; locale: FeLocale }) {
+  const { month, day, year } = splitDobIso(value);
+  const months = MONTHS[locale];
+  const days = useMemo(() => Array.from({ length: 31 }, (_, i) => String(i + 1)), []);
+  const years = useMemo(() => {
+    const currentYear = new Date().getFullYear();
+    return Array.from({ length: 101 }, (_, i) => String(currentYear - 100 + i));
+  }, []);
+
+  function update(nextMonth: string, nextDay: string, nextYear: string) {
+    onChange(buildDobIso(nextMonth, nextDay, nextYear));
+  }
+
+  return (
+    <div className="grid grid-cols-3 gap-3">
+      <select autoFocus value={month} onChange={(e) => update(e.target.value, day, year)} className={BIG_INPUT}>
+        <option value="">{tr(UI.dobMonth, locale)}</option>
+        {months.map((m, i) => (
+          <option key={m} value={String(i + 1)}>
+            {m}
+          </option>
+        ))}
+      </select>
+      <select value={day} onChange={(e) => update(month, e.target.value, year)} className={BIG_INPUT}>
+        <option value="">{tr(UI.dobDay, locale)}</option>
+        {days.map((d) => (
+          <option key={d} value={d}>
+            {d}
+          </option>
+        ))}
+      </select>
+      <select value={year} onChange={(e) => update(month, day, e.target.value)} className={BIG_INPUT}>
+        <option value="">{tr(UI.dobYear, locale)}</option>
+        {years.map((y) => (
+          <option key={y} value={y}>
+            {y}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
+const HEIGHT_RE = /^(\d+)'(\d+)"?$/;
+
+function HeightInput({ value, onChange, locale }: { value: string; onChange: (v: string) => void; locale: FeLocale }) {
+  const match = HEIGHT_RE.exec(value.trim());
+  const feet = match ? match[1] : "";
+  const inches = match ? match[2] : "";
+
+  function update(nextFeet: string, nextInches: string) {
+    onChange(nextFeet && nextInches ? `${nextFeet}'${nextInches}"` : "");
+  }
+
+  return (
+    <div className="grid grid-cols-2 gap-3">
+      <select autoFocus value={feet} onChange={(e) => update(e.target.value, inches)} className={BIG_INPUT}>
+        <option value="">{tr(UI.heightFeet, locale)}</option>
+        {[3, 4, 5, 6, 7, 8].map((f) => (
+          <option key={f} value={String(f)}>
+            {f} ft
+          </option>
+        ))}
+      </select>
+      <select value={inches} onChange={(e) => update(feet, e.target.value)} className={BIG_INPUT}>
+        <option value="">{tr(UI.heightInches, locale)}</option>
+        {Array.from({ length: 12 }, (_, i) => i).map((i) => (
+          <option key={i} value={String(i)}>
+            {i} in
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
 export default function FeIntakeForm({ token }: { token: string }) {
   const locale = pickLocale(useLocale());
   const [session, setSession] = useState<FeIntakeSession | null>(null);
@@ -325,7 +447,7 @@ export default function FeIntakeForm({ token }: { token: string }) {
         setSession(s);
         setData(s.data ?? {});
         const screens = buildScreens(s.data ?? {});
-        setCurrentKey(firstIncompleteScreenKey(screens, s.data ?? {}));
+        setCurrentKey(resumeScreenKey(screens, s.data ?? {}));
         setLoadState("ready");
       } catch {
         if (active) setLoadState("error");
@@ -364,6 +486,15 @@ export default function FeIntakeForm({ token }: { token: string }) {
     setData({ ...data, [repeaterKey]: rows });
   }
 
+  /** Writes into whichever container (top-level data, or a repeater row) the active screen uses. */
+  function handleChangeField(key: string, value: string) {
+    if (screen.kind === "repeaterRow") {
+      setRowValue(screen.repeaterKey, screen.rowIndex, key, value);
+    } else {
+      setFieldValue(key, value);
+    }
+  }
+
   function handleAddressResolve(field: FeField, resolved: ResolvedAddress) {
     const next: FeIntakeData = { ...data, [field.key]: field.addressTargets ? resolved.line1 : resolved.formatted };
     if (field.addressTargets?.city) next[field.addressTargets.city] = resolved.city;
@@ -374,11 +505,15 @@ export default function FeIntakeForm({ token }: { token: string }) {
 
   function goNext() {
     const next = screens[idx + 1] ?? screens[screens.length - 1];
+    setData({ ...data, __cursor: next.screenKey });
     setCurrentKey(next.screenKey);
   }
 
   function goBack() {
-    if (idx > 0) setCurrentKey(screens[idx - 1].screenKey);
+    if (idx === 0) return;
+    const prev = screens[idx - 1];
+    setData({ ...data, __cursor: prev.screenKey });
+    setCurrentKey(prev.screenKey);
   }
 
   function handleAddAnother(repeaterKey: string, rowIndex: number, wantsMore: boolean) {
@@ -388,20 +523,23 @@ export default function FeIntakeForm({ token }: { token: string }) {
     if (wantsMore) {
       while (rows.length <= rowIndex + 1) rows.push(emptyRow(fieldDef));
     }
-    const nextData: FeIntakeData = {
-      ...data,
-      [repeaterKey]: wantsMore ? rows : rows.slice(0, rowIndex + 1),
-    };
 
-    const newScreens = buildScreens(nextData);
+    const newScreens = buildScreens({ ...data, [repeaterKey]: wantsMore ? rows : rows.slice(0, rowIndex + 1) });
+    const firstSubKey = fieldDef.rowFields?.[0]?.key ?? "";
     const targetKey = wantsMore
-      ? `repeater:${repeaterKey}:${rowIndex + 1}:drugName`
+      ? `repeater:${repeaterKey}:${rowIndex + 1}:${firstSubKey}`
       : `addAnother:${repeaterKey}:${rowIndex}`;
     const targetIdx = newScreens.findIndex((s) => s.screenKey === targetKey);
     const target = wantsMore ? newScreens[targetIdx] : newScreens[targetIdx + 1];
+    const targetScreenKey = (target ?? newScreens[newScreens.length - 1]).screenKey;
 
+    const nextData: FeIntakeData = {
+      ...data,
+      [repeaterKey]: wantsMore ? rows : rows.slice(0, rowIndex + 1),
+      __cursor: targetScreenKey,
+    };
     setData(nextData);
-    setCurrentKey((target ?? newScreens[newScreens.length - 1]).screenKey);
+    setCurrentKey(targetScreenKey);
   }
 
   async function handleSubmit() {
@@ -448,11 +586,15 @@ export default function FeIntakeForm({ token }: { token: string }) {
 
   const valid = isScreenValid(screen, data);
   const phoneNumber = process.env.NEXT_PUBLIC_PHONE_NUMBER;
+  const container = containerFor(screen, data);
 
   return (
-    <div className="flex min-h-screen flex-col">
+    // `h-dvh` + `overflow-hidden` pins the header/progress bar and the Next button to the
+    // visible viewport; only the question area scrolls. Fixes the Next button landing below
+    // the fold on mobile when `min-h-screen` let the page grow taller than the real viewport.
+    <div className="flex h-dvh flex-col overflow-hidden bg-white dark:bg-gray-950">
       {/* Progress bar */}
-      <div className="h-1.5 w-full bg-gray-100 dark:bg-gray-800">
+      <div className="h-1.5 w-full shrink-0 bg-gray-100 dark:bg-gray-800">
         <motion.div
           className="h-full bg-gradient-to-r from-brand to-accent"
           animate={{ width: `${progressPct}%` }}
@@ -461,7 +603,7 @@ export default function FeIntakeForm({ token }: { token: string }) {
       </div>
 
       {/* Chrome */}
-      <header className="flex items-center justify-between px-4 py-3">
+      <header className="flex shrink-0 items-center justify-between px-4 py-3">
         <button
           type="button"
           onClick={goBack}
@@ -484,9 +626,9 @@ export default function FeIntakeForm({ token }: { token: string }) {
         )}
       </header>
 
-      {/* Question */}
-      <main className="flex flex-1 flex-col px-5 pb-8 pt-2">
-        <div className="mx-auto flex w-full max-w-md flex-1 flex-col">
+      {/* Question — the only scrollable area, so the footer below always stays on screen */}
+      <main className="flex-1 overflow-y-auto px-5 pb-4 pt-2">
+        <div className="mx-auto w-full max-w-md">
           <AnimatePresence mode="wait">
             <motion.div
               key={screen.screenKey}
@@ -494,7 +636,6 @@ export default function FeIntakeForm({ token }: { token: string }) {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -16 }}
               transition={{ duration: 0.2 }}
-              className="flex-1"
             >
               {screen.kind === "finish" ? (
                 <FinishScreen
@@ -504,31 +645,34 @@ export default function FeIntakeForm({ token }: { token: string }) {
                   onSubmit={handleSubmit}
                 />
               ) : screen.kind === "addAnother" ? (
-                <AddAnotherScreen locale={locale} onAnswer={(more) => handleAddAnother(screen.repeaterKey, screen.rowIndex, more)} />
+                <AddAnotherScreen
+                  locale={locale}
+                  repeaterKey={screen.repeaterKey}
+                  onAnswer={(more) => handleAddAnother(screen.repeaterKey, screen.rowIndex, more)}
+                />
               ) : (
                 <FieldScreen
                   field={screen.field}
-                  value={str(
-                    screen.kind === "repeaterRow" ? rowOf(data, screen.repeaterKey, screen.rowIndex)[screen.field.key] : data[screen.field.key]
-                  )}
+                  container={container}
                   locale={locale}
-                  onChange={(v) =>
-                    screen.kind === "repeaterRow"
-                      ? setRowValue(screen.repeaterKey, screen.rowIndex, screen.field.key, v)
-                      : setFieldValue(screen.field.key, v)
-                  }
+                  onChangeField={handleChangeField}
                   onAddressResolve={(resolved) => handleAddressResolve(screen.field, resolved)}
                 />
               )}
             </motion.div>
           </AnimatePresence>
+        </div>
+      </main>
 
-          {screen.kind !== "addAnother" && screen.kind !== "finish" && (
+      {/* Sticky Next footer — pinned to the visible viewport, never pushed off-screen */}
+      {screen.kind !== "addAnother" && screen.kind !== "finish" && (
+        <div className="shrink-0 border-t border-gray-100 bg-white px-5 py-4 dark:border-gray-800 dark:bg-gray-950">
+          <div className="mx-auto w-full max-w-md">
             <button
               type="button"
               disabled={!valid}
               onClick={goNext}
-              className={`mt-8 w-full rounded-2xl px-6 py-4 text-center text-base font-semibold transition ${
+              className={`w-full rounded-2xl px-6 py-4 text-center text-base font-semibold transition ${
                 valid
                   ? "bg-gray-900 text-white hover:bg-gray-800 dark:bg-white dark:text-gray-900"
                   : "cursor-not-allowed bg-gray-200 text-gray-400 dark:bg-gray-800 dark:text-gray-600"
@@ -536,29 +680,36 @@ export default function FeIntakeForm({ token }: { token: string }) {
             >
               {tr(UI.next, locale)}
             </button>
-          )}
+          </div>
         </div>
-      </main>
+      )}
     </div>
   );
 }
 
 function FieldScreen({
   field,
-  value,
+  container,
   locale,
-  onChange,
+  onChangeField,
   onAddressResolve,
 }: {
   field: FeField;
-  value: string;
+  container: Record<string, unknown>;
   locale: FeLocale;
-  onChange: (v: string) => void;
+  onChangeField: (key: string, value: string) => void;
   onAddressResolve: (resolved: ResolvedAddress) => void;
 }) {
+  const value = str(container[field.key]);
+  const onChange = (v: string) => onChangeField(field.key, v);
+  const isMedicationUsage = field.key === "usage" || field.key === "usageOther";
+  const headline = isMedicationUsage
+    ? applyDrugToken(fieldLabel(field, locale), str(container.drugName), locale)
+    : fieldLabel(field, locale);
+
   return (
     <div>
-      <h1 className="text-2xl font-bold leading-snug text-gray-900 dark:text-gray-100">{fieldLabel(field, locale)}</h1>
+      <h1 className="text-2xl font-bold leading-snug text-gray-900 dark:text-gray-100">{headline}</h1>
       {fieldHelp(field, locale) && <p className="mt-2 text-sm text-muted-foreground">{fieldHelp(field, locale)}</p>}
 
       <div className="mt-6">
@@ -575,25 +726,59 @@ function FieldScreen({
             ))}
           </div>
         ) : field.type === "address" ? (
-          <IntakeAddressInput
-            id={field.key}
-            value={value}
-            onChange={onChange}
-            onResolve={onAddressResolve}
-            placeholder={fieldPlaceholder(field, locale)}
-            locale={locale}
-          />
+          <div className="space-y-4">
+            <IntakeAddressInput
+              id={field.key}
+              value={value}
+              onChange={onChange}
+              onResolve={onAddressResolve}
+              placeholder={fieldPlaceholder(field, locale)}
+              locale={locale}
+            />
+            {field.addressTargets && (
+              <div className="grid grid-cols-2 gap-3">
+                {field.addressTargets.city && (
+                  <div className="col-span-2">
+                    <label className={SMALL_LABEL}>{optionLabelForField(field.addressTargets.city, locale)}</label>
+                    <input
+                      value={str(container[field.addressTargets.city])}
+                      onChange={(e) => onChangeField(field.addressTargets!.city!, e.target.value)}
+                      className={SMALL_INPUT}
+                    />
+                  </div>
+                )}
+                {field.addressTargets.state && (
+                  <div>
+                    <label className={SMALL_LABEL}>{optionLabelForField(field.addressTargets.state, locale)}</label>
+                    <input
+                      value={str(container[field.addressTargets.state])}
+                      onChange={(e) => onChangeField(field.addressTargets!.state!, e.target.value)}
+                      className={SMALL_INPUT}
+                    />
+                  </div>
+                )}
+                {field.addressTargets.zip && (
+                  <div>
+                    <label className={SMALL_LABEL}>{optionLabelForField(field.addressTargets.zip, locale)}</label>
+                    <input
+                      value={str(container[field.addressTargets.zip])}
+                      onChange={(e) =>
+                        onChangeField(field.addressTargets!.zip!, e.target.value.replace(/\D/g, "").slice(0, 5))
+                      }
+                      inputMode="numeric"
+                      className={SMALL_INPUT}
+                    />
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         ) : field.type === "drug" ? (
           <DrugSearchInput value={value} onChange={onChange} placeholder={fieldPlaceholder(field, locale)} locale={locale} />
         ) : field.type === "dob" ? (
-          <input
-            autoFocus
-            type="date"
-            value={value}
-            max={new Date().toISOString().slice(0, 10)}
-            onChange={(e) => onChange(e.target.value)}
-            className={BIG_INPUT}
-          />
+          <DobInput value={value} onChange={onChange} locale={locale} />
+        ) : field.type === "height" ? (
+          <HeightInput value={value} onChange={onChange} locale={locale} />
         ) : field.type === "zip" ? (
           <input
             autoFocus
@@ -618,9 +803,12 @@ function FieldScreen({
           <input
             autoFocus
             type={field.type === "email" ? "email" : field.type === "tel" ? "tel" : "text"}
-            inputMode={field.type === "tel" ? "tel" : undefined}
+            inputMode={field.type === "tel" ? "tel" : field.digitsOnly ? "numeric" : undefined}
             value={value}
-            onChange={(e) => onChange(e.target.value)}
+            onChange={(e) => {
+              const raw = e.target.value;
+              onChange(field.digitsOnly ? raw.replace(/\D/g, "").slice(0, field.maxLength) : raw);
+            }}
             placeholder={fieldPlaceholder(field, locale)}
             className={BIG_INPUT}
           />
@@ -636,10 +824,25 @@ function FieldScreen({
   );
 }
 
-function AddAnotherScreen({ locale, onAnswer }: { locale: FeLocale; onAnswer: (wantsMore: boolean) => void }) {
+/** City/state/zip don't have their own screen, so borrow their catalog label for the inline field. */
+function optionLabelForField(key: string, locale: FeLocale): string {
+  const field = fieldByKey(key);
+  return field ? fieldLabel(field, locale) : key;
+}
+
+function AddAnotherScreen({
+  locale,
+  repeaterKey,
+  onAnswer,
+}: {
+  locale: FeLocale;
+  repeaterKey: string;
+  onAnswer: (wantsMore: boolean) => void;
+}) {
+  const dict = repeaterKey === "beneficiaries" ? UI.addBeneficiary : UI.addMedication;
   return (
     <div>
-      <h1 className="text-2xl font-bold leading-snug text-gray-900 dark:text-gray-100">{tr(UI.addAnother, locale)}</h1>
+      <h1 className="text-2xl font-bold leading-snug text-gray-900 dark:text-gray-100">{tr(dict, locale)}</h1>
       <div className="mt-6 space-y-2.5">
         <ChoiceCard selected={false} icon={CheckCircle2} label={locale === "es" ? "Sí" : "Yes"} onClick={() => onAnswer(true)} />
         <ChoiceCard selected={false} icon={XCircle} label="No" onClick={() => onAnswer(false)} />
