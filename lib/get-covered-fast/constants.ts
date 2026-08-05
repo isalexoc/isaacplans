@@ -92,6 +92,13 @@ export function getAcaGetCoveredOgImageUrl(_locale: string): string {
 /** Hero art on the public `/aca/apply` marketing page (16:9 media slot, `object-cover`). */
 export const ACA_APPLY_HERO_IMAGE = `${CLOUDINARY_ISAAC}/f_auto,q_auto,w_1200,c_limit/v1785777580/pexels-freestockpro-12969212_1_xck4cm`;
 
+/**
+ * Hero art on the public `/final-expense/apply` marketing page (16:9 media slot,
+ * `object-cover`). Reuses the get-covered funnel's existing EN hero photo as a placeholder —
+ * swap anytime via the same public-id pattern once a dedicated apply-page photo is chosen.
+ */
+export const FE_APPLY_HERO_IMAGE = `${CLOUDINARY_ISAAC}/f_auto,q_auto,w_1200,c_limit/${FINAL_EXPENSE_GET_COVERED_HERO_PUBLIC_ID_EN}`;
+
 /** Agent headshot on `/final-expense/get-covered` success (square, face-cropped; displayed as rounded-rect in UI). */
 export const FINAL_EXPENSE_GET_COVERED_AGENT_HEADSHOT =
   "https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_320,h_320,c_fill,g_face/v1764176212/isaacpic_c8kca5_3_hz35qm.png";

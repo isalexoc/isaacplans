@@ -2,6 +2,7 @@ import { pgTable, text, timestamp, boolean, integer, index, uniqueIndex, jsonb, 
 import type { LeaveBehindQuoteData } from "@/lib/leave-behind-clients";
 import type { IntakeData } from "@/lib/iul-intake/schema";
 import type { AcaIntakeData } from "@/lib/aca-intake/schema";
+import type { FeIntakeData } from "@/lib/fe-intake/schema";
 import type { StructuredCallSummary } from "@/lib/call-summary-structured";
 import type {
   SocialVideoJobState,
@@ -386,6 +387,35 @@ export const acaIntakeSessions = pgTable("aca_intake_sessions", {
   ownerIdx:       index("aca_intake_owner_idx").on(t.ownerUserId, t.updatedAt),
   clientIdx:      index("aca_intake_client_idx").on(t.clientUserId),
   contactIdx:     index("aca_intake_contact_idx").on(t.crmContactId),
+}));
+
+/**
+ * Final Expense client intake: resumable, autosaving data-collection sessions.
+ * Same shape as `iulIntakeSessions`/`acaIntakeSessions` but a separate table, kept independent
+ * so writing one line's intake can never overwrite what another line captured on the same
+ * contact. Deliberately lite — see lib/fe-intake/fields.ts.
+ */
+export const feIntakeSessions = pgTable("fe_intake_sessions", {
+  id:            text("id").primaryKey(), // nanoid
+  token:         text("token").notNull(), // unguessable URL slug
+  ownerUserId:   text("owner_user_id").notNull(), // agent Clerk id (creator)
+  clientUserId:  text("client_user_id"), // bound on first client visit (claim)
+  crmContactId:  text("crm_contact_id"), // Agent CRM (GHL) contact id
+  contactName:   text("contact_name"),
+  contactEmail:  text("contact_email"),
+  contactPhone:  text("contact_phone"),
+  status:        text("status").notNull().default("draft"), // draft|in_progress|completed
+  reopenedForClient: boolean("reopened_for_client").notNull().default(false), // admin let the client edit after submit
+  data:          jsonb("data").notNull().$type<FeIntakeData>().default({}),
+  locale:        text("locale").default("en"), // en|es
+  completedAt:   timestamp("completed_at"),
+  createdAt:     timestamp("created_at").defaultNow().notNull(),
+  updatedAt:     timestamp("updated_at").defaultNow().notNull(),
+}, (t) => ({
+  tokenUniqueIdx: uniqueIndex("fe_intake_token_unique_idx").on(t.token),
+  ownerIdx:       index("fe_intake_owner_idx").on(t.ownerUserId, t.updatedAt),
+  clientIdx:      index("fe_intake_client_idx").on(t.clientUserId),
+  contactIdx:     index("fe_intake_contact_idx").on(t.crmContactId),
 }));
 
 // ─── Leads the Way (Senior Life) email → GHL sync ─────────────────────────────

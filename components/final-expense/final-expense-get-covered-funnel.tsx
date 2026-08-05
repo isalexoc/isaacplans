@@ -1522,6 +1522,14 @@ export default function FinalExpenseGetCoveredFunnel({
                       asChild
                       size="lg"
                       variant="outline"
+                      className="h-16 w-full rounded-xl border-2 border-[hsl(var(--custom))] bg-white text-lg font-semibold text-[hsl(var(--custom))] shadow-sm hover:bg-[hsl(var(--custom)/0.06)] dark:bg-slate-900/40 dark:text-[hsl(var(--custom))] dark:hover:bg-slate-800"
+                    >
+                      <Link href="/final-expense/apply">{t("done.applyCta")}</Link>
+                    </Button>
+                    <Button
+                      asChild
+                      size="lg"
+                      variant="outline"
                       className="h-16 w-full rounded-xl border-2 border-slate-300 bg-white text-lg font-semibold text-slate-900 shadow-sm hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-900/50 dark:text-white dark:hover:bg-slate-800"
                     >
                       <a

@@ -124,6 +124,9 @@ export default function FinalExpenseLeadForm({
             >
               {t("successScheduleAppointment")}
             </Link>
+            <Button asChild variant="outline" size="lg" className="h-12 rounded-lg sm:min-w-[200px]">
+              <Link href="/final-expense/apply">{t("successStartApplication")}</Link>
+            </Button>
             {isES && (
               <Button
                 asChild

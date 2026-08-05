@@ -243,6 +243,26 @@ export const routing = defineRouting({
       en: "/final-expense/get-covered",
       es: "/gastos-finales/obtener-cobertura",
     },
+    "/final-expense/apply": {
+      en: "/final-expense/apply",
+      es: "/gastos-finales/aplicar",
+    },
+    "/final-expense/apply/start": {
+      en: "/final-expense/apply/start",
+      es: "/gastos-finales/aplicar/start",
+    },
+    "/final-expense/intake": {
+      en: "/final-expense/intake",
+      es: "/gastos-finales/admision",
+    },
+    "/final-expense/intake/[token]": {
+      en: "/final-expense/intake/[token]",
+      es: "/gastos-finales/admision/[token]",
+    },
+    "/final-expense/intake/[token]/view": {
+      en: "/final-expense/intake/[token]/view",
+      es: "/gastos-finales/admision/[token]/view",
+    },
     "/final-expense/[state]": {
       en: "/final-expense/[state]",
       es: "/final-expense/[state]",

@@ -117,6 +117,14 @@ async function loadSplitMessages(locale: string): Promise<Record<string, any>> {
       // File doesn't exist, skip
     }
 
+    // Load Final Expense apply (public self-service) messages if they exist
+    try {
+      const feApply = (await import(`@/messages/${locale}/final-expense/apply.json`)).default;
+      Object.assign(splitMessages, feApply);
+    } catch {
+      // File doesn't exist, skip
+    }
+
     // Load Final Expense presentation messages if they exist
     try {
       const fePresentation = (await import(`@/messages/${locale}/final-expense/presentation.json`)).default;

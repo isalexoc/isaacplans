@@ -1,0 +1,53 @@
+{
+  "finalExpenseApply": {
+    "meta": {
+      "title": "Solicite Cobertura de Gastos Finales | Isaac Plans",
+      "description": "Inicie su solicitud de seguro de gastos finales en línea — segura, guiada y en solo minutos.",
+      "image": "https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_1200,h_630,c_fill,g_center/pexels-gustavo-fring-4894565_seqt6k.jpg",
+      "imageAlt": "Solicite cobertura de gastos finales con Isaac Plans"
+    },
+    "hero": {
+      "badge": "Gastos Finales",
+      "title": "Proteja a su familia de los costos de funeral y entierro",
+      "subtitle": "Inicie su solicitud segura en línea. Solo toma unos minutos y su progreso se guarda automáticamente."
+    },
+    "benefitsHeading": "¿Por qué solicitar con Isaac Plans?",
+    "benefits": [
+      {
+        "title": "Sin costo para usted",
+        "desc": "Nuestra asesoría es gratuita — nos paga la aseguradora, no usted."
+      },
+      {
+        "title": "Cobertura incluso sin SSN",
+        "desc": "¿No tiene número de seguro social? Aún puede obtener excelente cobertura sin período de espera."
+      },
+      {
+        "title": "Preguntas sencillas y guiadas",
+        "desc": "Solo su información básica, dirección y medicamentos — nada complicado."
+      },
+      {
+        "title": "Apoyo bilingüe y con licencia",
+        "desc": "Reciba ayuda en inglés o español de un asesor con licencia en cada paso."
+      }
+    ],
+    "howItWorksHeading": "Cómo solicitar",
+    "steps": [
+      {
+        "title": "Cree su cuenta",
+        "desc": "Regístrese de forma segura con su correo o Google. Esto mantiene su información privada y le permite continuar después desde cualquier dispositivo."
+      },
+      {
+        "title": "Complete el formulario seguro",
+        "desc": "Responda unas preguntas guiadas, una a la vez. Todo está cifrado y se guarda automáticamente."
+      },
+      {
+        "title": "Revisamos y nos comunicamos",
+        "desc": "Una vez que envíe su información, la revisamos y nos pondremos en contacto para finalizar su cobertura."
+      }
+    ],
+    "secureNote": "Su información está cifrada y nunca se comparte. Este proceso es 100% seguro.",
+    "cta": "Solicitar ahora",
+    "ctaNote": "Primero iniciará sesión para mantener su solicitud privada.",
+    "starting": "Iniciando su solicitud…"
+  }
+}

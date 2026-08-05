@@ -1,0 +1,53 @@
+{
+  "finalExpenseApply": {
+    "meta": {
+      "title": "Apply for Final Expense Coverage | Isaac Plans",
+      "description": "Start your final expense life insurance application online — secure, guided, and only a few minutes.",
+      "image": "https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_1200,h_630,c_fill,g_center/pexels-gustavo-fring-4894565_seqt6k.jpg",
+      "imageAlt": "Apply for final expense coverage with Isaac Plans"
+    },
+    "hero": {
+      "badge": "Final Expense",
+      "title": "Protect your family from funeral and burial costs",
+      "subtitle": "Start your secure application online. It only takes a few minutes and your progress saves automatically."
+    },
+    "benefitsHeading": "Why apply with Isaac Plans?",
+    "benefits": [
+      {
+        "title": "No cost to you",
+        "desc": "Our guidance is free — we're paid by the insurance carrier, not by you."
+      },
+      {
+        "title": "Coverage even without an SSN",
+        "desc": "No Social Security number? You can still get great coverage with no waiting period."
+      },
+      {
+        "title": "Simple, guided questions",
+        "desc": "Just your basic information, address, and any medications — nothing complicated."
+      },
+      {
+        "title": "Bilingual, licensed support",
+        "desc": "Get help in English or Spanish from a licensed advisor at every step."
+      }
+    ],
+    "howItWorksHeading": "How to apply",
+    "steps": [
+      {
+        "title": "Create your account",
+        "desc": "Sign up securely with your email or Google. It keeps your information private and lets you finish later on any device."
+      },
+      {
+        "title": "Fill out the secure form",
+        "desc": "Answer a few guided questions, one at a time. Everything is encrypted and saves automatically as you go."
+      },
+      {
+        "title": "We review and reach out",
+        "desc": "Once you submit, we review your information and contact you to finalize your coverage."
+      }
+    ],
+    "secureNote": "Your information is encrypted and never shared. This process is 100% secure.",
+    "cta": "Apply now",
+    "ctaNote": "You'll sign in first to keep your application private.",
+    "starting": "Starting your application…"
+  }
+}

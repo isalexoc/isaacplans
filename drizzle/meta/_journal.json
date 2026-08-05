@@ -127,6 +127,13 @@
       "when": 1785259619663,
       "tag": "0017_dusty_dragon_lord",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "5",
+      "when": 1785888509116,
+      "tag": "0018_plain_sleepwalker",
+      "breakpoints": true
     }
   ]
 }

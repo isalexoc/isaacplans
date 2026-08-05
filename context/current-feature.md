@@ -2,7 +2,67 @@
 
 ## Status
 
-None — last completed: **Health Coverage Alternative line of business** (8th LOB — see History
+In progress: **Final Expense — Self-Apply Intake + Agent Dashboard**, on branch
+`feature/final-expense-apply`. Approved plan saved at
+`C:\Users\isale\.claude\plans\i-need-you-to-synthetic-cocke.md`.
+
+Adds a third self-serve intake pipeline (alongside IUL and ACA): `/final-expense/apply` →
+Clerk sign-up → `/final-expense/apply/start` → `/final-expense/intake/[token]`, plus an agent
+dashboard at `/final-expense/intake` to create/manage sessions ("the workflow page"). Backend
+(session table, field-catalog DSL, AES-256-GCM encryption, autosave, CRM sync) mirrors
+`lib/iul-intake/*`/`lib/aca-intake/*` exactly. Scope is deliberately lite — no
+tobacco/health/hospitalization questionnaire, single-person only (no owner-vs-insured
+branching) — just name/contact, DOB/gender, SSN with a graceful no-SSN path, address, mother's
+maiden name, treating physician, and a medication picker backed by NIH's free RxTerms API (drug
+name autocomplete) + a static curated condition list (usage/"what's it for").
+
+The client-facing wizard UI is intentionally **not** a copy of IUL/ACA's dense multi-field
+stepper — after reviewing Ethos reference screenshots, it's a one-question-per-screen animated
+flow (thin progress bar, icon-illustrated selectable cards, sticky disabled→active Next button,
+`framer-motion` transitions — already a dependency). The agent dashboard/read-only view stay in
+the existing denser style.
+
+Two existing FE success screens (`final-expense-get-covered-funnel.tsx`'s "done" phase,
+`final-expense-lead-form.tsx`'s SUCCESS state) get a new "Apply now" CTA pointing at
+`/final-expense/apply`, mirroring exactly what ACA did in `aca-get-covered-funnel.tsx:592`.
+
+**Implemented.** New: `lib/fe-intake/*` (fields/schema/validation/encryption/ghl-field-ids/
+server/ui-strings/types/share-url), `lib/fe-intake-api.ts`, `hooks/use-fe-intake-autosave.ts`,
+`app/api/fe-intake/**` (list/create, `[token]` GET/PATCH/DELETE, complete/reopen/reset/send-link,
+`medications/search` — proxies NIH's free RxTerms Clinical Table Search Service, keyless),
+`scripts/create-fe-intake-fields.ts` (`pnpm fe-intake:fields`), `fe_intake_sessions` Drizzle
+table + migration `0018_plain_sleepwalker.sql`, `components/final-expense-apply-cta.tsx`,
+`components/fe-intake/{intake-form,intake-dashboard,client-view,intake-breadcrumb}.tsx`, pages at
+`/final-expense/apply(/start)` and `/final-expense/intake(/[token](/view))`, i18n routing entries
+(ES: `/gastos-finales/aplicar`, `/gastos-finales/admision`), `messages/{en,es}/final-expense/
+apply.json`, `FE_APPLY_HERO_IMAGE` in `lib/get-covered-fast/constants.ts` (reuses the existing FE
+get-covered EN hero photo as a placeholder).
+- **Verified**: `pnpm tsc --noEmit` and `pnpm build` both clean — all 5 new routes compiled
+  (confirmed in the build's route manifest). Dev-server + headless-Chrome screenshots confirmed
+  `/en/final-expense/apply` and `/es/gastos-finales/aplicar` render correctly (hero, badge,
+  4-benefit grid, 3-step "how it works," secure note, CTA button) with no `MISSING_MESSAGE`
+  errors. Confirmed `/final-expense/apply/start` 307-redirects a signed-out visitor back to
+  `/final-expense/apply` (Clerk-gated, no session yet). Confirmed `/final-expense/get-covered`
+  and `/final-expense` still load cleanly after the CTA edits. **Not verified live** (Clerk-gated,
+  same reasoning as every prior LOB's self-apply flow): the actual one-question intake wizard at
+  `/final-expense/intake/[token]` and the agent dashboard at `/final-expense/intake` — both
+  require a real Clerk session; verified by careful code review instead, consistent with how
+  `/admin/hero` and the ACA/IUL intake forms were verified when first built.
+- **Known open items**: GHL custom fields not yet provisioned (`pnpm fe-intake:fields` needs to
+  run against production Agent CRM before CRM sync writes real values — currently all blank in
+  `lib/fe-intake/ghl-field-ids.ts`); new env var `FE_INTAKE_DEFAULT_OWNER_USER_ID` needs setting
+  in Vercel (mirrors `ACA_DEFAULT_OWNER_USER_ID`/`IUL_DEFAULT_OWNER_USER_ID`); `FE_APPLY_HERO_IMAGE`
+  is a reused placeholder photo, swappable anytime; the intake dashboard/view pages' unauthenticated
+  redirect target (`/${locale}/sign-in?...`) doesn't actually exist as a route in this app — an
+  inherited quirk copied verbatim from the ACA/IUL dashboards (which have the same latent 404 for
+  a signed-out direct visit), not something introduced or fixed here; migration
+  `0018_plain_sleepwalker.sql` needs `pnpm db:migrate` on production.
+- Not yet merged — on branch `feature/final-expense-apply`, awaiting review/build verification
+  and explicit go-ahead to commit.
+
+## Prior feature
+
+Last completed: **Health Coverage Alternative line of business** (8th LOB — see History
 below), implemented on branch `feature/health-alternative-lob`, pending review/commit.
 
 ## Prior feature
