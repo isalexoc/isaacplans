@@ -54,7 +54,7 @@ const ramp = (current: number | undefined, min: number, max: number, inc: number
   clamp(Math.min(max, Math.max(min, (current ?? min) + inc)), 0, 100);
 const lerp = (min: number, max: number, frac: number) => clamp(min + (max - min) * Math.max(0, Math.min(1, frac)));
 
-function renderStages(presenter: boolean): string[] {
+export function renderStages(presenter: boolean): string[] {
   return presenter
     ? ["Preparing", "Rendering avatar", "Composing", "Rendering video", "Finalizing"]
     : ["Preparing", "Composing", "Rendering video", "Finalizing"];

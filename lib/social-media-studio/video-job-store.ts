@@ -1,5 +1,5 @@
 import { nanoid } from "nanoid";
-import { and, eq, inArray, lte, or, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, lte, or, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { socialVideoJobs } from "@/lib/db/schema";
 import type {
@@ -91,6 +91,57 @@ export async function getActiveJobsForPost(sanityPostId: string): Promise<Social
     )
     .orderBy(socialVideoJobs.createdAt);
   return rows.map(toView);
+}
+
+/** Avoid reusing a HeyGen clip so old its CDN URL may have expired. */
+const PRESENTER_REUSE_WINDOW_MS = 24 * 60 * 60 * 1000;
+
+export type ReusablePresenter = {
+  presenterVideoId?: string;
+  presenterVideoUrl: string;
+  presenterDurationSec?: number;
+};
+
+/**
+ * Find an already-rendered HeyGen avatar clip from a recent (failed/done) render job on
+ * this post that a new render can reuse, so a retry after a compose/render failure doesn't
+ * re-pay to render the avatar again. Only reused when the narration + avatar + voice that
+ * produced it exactly match what the new render is about to submit — any change to the
+ * script, picked avatar, or picked voice invalidates it.
+ */
+export async function findReusablePresenter(
+  sanityPostId: string,
+  narration: string,
+  avatarId: string | undefined,
+  voiceId: string | undefined,
+): Promise<ReusablePresenter | null> {
+  const cutoff = new Date(Date.now() - PRESENTER_REUSE_WINDOW_MS);
+  const rows = await db
+    .select()
+    .from(socialVideoJobs)
+    .where(and(eq(socialVideoJobs.sanityPostId, sanityPostId), eq(socialVideoJobs.kind, "render")))
+    .orderBy(desc(socialVideoJobs.createdAt))
+    .limit(10);
+
+  for (const row of rows) {
+    if (row.createdAt < cutoff) continue;
+    const state = (row.jobState as SocialVideoJobState | null) ?? null;
+    if (!state?.presenterVideoUrl || state.presenterDropped) continue;
+
+    const sb = (row.input as SocialVideoJobInput | null)?.storyboard;
+    if (!sb) continue;
+    const prevNarration = sb.scenes.map((s) => s.narration.trim()).filter(Boolean).join(" ");
+    if (prevNarration !== narration) continue;
+    if ((sb.presenterAvatarId ?? undefined) !== avatarId) continue;
+    if ((sb.presenterVoiceId ?? undefined) !== voiceId) continue;
+
+    return {
+      presenterVideoId: state.presenterVideoId,
+      presenterVideoUrl: state.presenterVideoUrl,
+      presenterDurationSec: state.presenterDurationSec,
+    };
+  }
+  return null;
 }
 
 export async function setJobQstashMessageId(id: string, qstashMessageId: string | null): Promise<void> {

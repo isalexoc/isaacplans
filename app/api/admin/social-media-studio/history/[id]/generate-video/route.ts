@@ -1,9 +1,10 @@
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse, after } from "next/server";
-import { createVideoJob } from "@/lib/social-media-studio/video-job-store";
+import { createVideoJob, findReusablePresenter } from "@/lib/social-media-studio/video-job-store";
 import { enqueueVideoJobTick } from "@/lib/social-media-studio/video-job-queue";
-import { runVideoJobInline } from "@/lib/social-media-studio/video-job-processor";
+import { runVideoJobInline, renderStages } from "@/lib/social-media-studio/video-job-processor";
 import type { VideoRenderRequest, SocialStudioResponse } from "@/lib/social-media-studio/types";
+import type { SocialVideoJobState } from "@/lib/social-media-studio/video-job-types";
 
 export const maxDuration = 300;
 
@@ -35,6 +36,34 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   }
 
   try {
+    let jobState: SocialVideoJobState = { step: "queued", progress: 0, stageLabel: "Preparing" };
+
+    // A prior render on this post may have already paid to render the HeyGen avatar clip
+    // (e.g. it failed later, during compose/render). Reuse it instead of re-rendering the
+    // avatar, as long as the narration/avatar/voice it was rendered for haven't changed.
+    if (storyboard.presenter) {
+      const narration = storyboard.scenes.map((s) => s.narration.trim()).filter(Boolean).join(" ");
+      const reusable = await findReusablePresenter(
+        id, narration, storyboard.presenterAvatarId, storyboard.presenterVoiceId,
+      );
+      if (reusable) {
+        const stages = renderStages(true);
+        jobState = {
+          ...jobState,
+          step: "compose",
+          stages,
+          stageLabel: "Composing",
+          stepIndex: stages.indexOf("Composing"),
+          stepCount: stages.length,
+          progress: 46,
+          presenterVideoId: reusable.presenterVideoId,
+          presenterVideoUrl: reusable.presenterVideoUrl,
+          presenterDurationSec: reusable.presenterDurationSec,
+          notice: "Reusing the previously rendered avatar clip — skipping HeyGen re-render.",
+        };
+      }
+    }
+
     const job = await createVideoJob({
       userId,
       sanityPostId:  id,
@@ -42,7 +71,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       category:      storyboard.category ?? null,
       voiceLanguage: storyboard.voiceLanguage,
       input:         { storyboard, presenter: Boolean(storyboard.presenter) },
-      jobState:      { step: "queued", progress: 0, stageLabel: "Preparing" },
+      jobState,
     });
     const origin = new URL(req.url).origin;
     const messageId = await enqueueVideoJobTick(job.id, { delaySeconds: 1, requestOrigin: origin });
