@@ -25,6 +25,11 @@ const isProtectedRoute = createRouteMatcher([
   '/aca/admision(.*)',
   '/en/aca/intake(.*)',
   '/es/aca/admision(.*)',
+  // Final Expense intake (form + dashboard) — same token-scoped model as IUL/ACA.
+  '/final-expense/intake(.*)',
+  '/gastos-finales/admision(.*)',
+  '/en/final-expense/intake(.*)',
+  '/es/gastos-finales/admision(.*)',
 ]);
 
 // Admin-only surfaces: the /admin dashboard + tools, Sanity Studio, and every
@@ -82,6 +87,7 @@ export default clerkMiddleware(async (auth, req) => {
     req.nextUrl.pathname.startsWith('/api/sale-sticker') ||
     req.nextUrl.pathname.startsWith('/api/iul-intake') ||
     req.nextUrl.pathname.startsWith('/api/aca-intake') ||
+    req.nextUrl.pathname.startsWith('/api/fe-intake') ||
     req.nextUrl.pathname.startsWith('/api/newsletter')
   ) {
     return;
@@ -118,6 +124,12 @@ export default clerkMiddleware(async (auth, req) => {
   // The ACA intake CLIENT form only — the token segment rules out the agent dashboard
   // (/aca/intake) and the summary view (/aca/intake/<token>/view), which keep full chrome.
   const isAcaIntakeForm = /^(?:\/(?:en|es))?\/aca\/(?:intake|admision)\/[^/]+$/i.test(pathname);
+  // Same rule for the Final Expense intake CLIENT form — its one-question-per-screen wizard
+  // has its own header/progress bar and expects a bare page, not the full site chrome.
+  const isFeIntakeForm =
+    /^(?:\/(?:en|es))?\/(?:final-expense\/intake|gastos-finales\/admision)\/[^/]+$/i.test(
+      pathname
+    );
   if (
     pathname.includes("/get-health-coverage-fast") ||
     pathname.includes("/cobertura-salud-rapida") ||
@@ -131,12 +143,13 @@ export default clerkMiddleware(async (auth, req) => {
     pathname.includes("/seguro-de-vida/obtener-cobertura") ||
     pathname.includes("/health-alternative/get-covered") ||
     pathname.includes("/alternativa-de-salud/obtener-cobertura") ||
-    isAcaIntakeForm
+    isAcaIntakeForm ||
+    isFeIntakeForm
   ) {
     response.headers.set("x-is-ads-landing", "1");
   }
-  // "Bare" funnels (IUL + final expense + ACA get-covered, ACA intake form) get an even barer
-  // footer (logo + copyright only, no links) and a logo-only + phone header.
+  // "Bare" funnels (IUL + final expense + ACA get-covered, ACA/FE intake forms) get an even
+  // barer footer (logo + copyright only, no links) and a logo-only + phone header.
   if (
     pathname.includes("/iul/get-covered") ||
     pathname.includes("/iul/obtener-cobertura") ||
@@ -148,7 +161,8 @@ export default clerkMiddleware(async (auth, req) => {
     pathname.includes("/seguro-de-vida/obtener-cobertura") ||
     pathname.includes("/health-alternative/get-covered") ||
     pathname.includes("/alternativa-de-salud/obtener-cobertura") ||
-    isAcaIntakeForm
+    isAcaIntakeForm ||
+    isFeIntakeForm
   ) {
     response.headers.set("x-ads-landing-variant", "iul-bare");
   }
@@ -167,6 +181,7 @@ export const config = {
     "/api/sale-sticker/:path*",
     "/api/iul-intake/:path*",
     "/api/aca-intake/:path*",
+    "/api/fe-intake/:path*",
     "/api/admin/:path*",
     "/api/newsletter/:path*",
     "/studio/:path*",

@@ -36,11 +36,27 @@ export function isAcaIntakeFormPath(pathname: string | null | undefined): boolea
   return ACA_INTAKE_FORM_RE.test(pathname);
 }
 
+/**
+ * The Final Expense intake CLIENT form, `/final-expense/intake/<token>`
+ * (es: `/gastos-finales/admision/<token>`) — same rule as {@link isAcaIntakeFormPath}: its
+ * one-question-per-screen wizard has its own header/progress bar and expects a bare page.
+ * Deliberately NOT the agent surfaces — `/final-expense/intake` (dashboard) and
+ * `/final-expense/intake/<token>/view` (summary) keep the full site chrome.
+ */
+const FE_INTAKE_FORM_RE =
+  /^(?:\/(?:en|es))?\/(?:final-expense\/intake|gastos-finales\/admision)\/[^/]+$/i;
+
+export function isFeIntakeFormPath(pathname: string | null | undefined): boolean {
+  if (!pathname) return false;
+  return FE_INTAKE_FORM_RE.test(pathname);
+}
+
 export function isAdsLandingPath(pathname: string | null | undefined): boolean {
   if (!pathname) return false;
   return (
     (ADS_LANDING_PATHNAMES as readonly string[]).includes(pathname) ||
-    isAcaIntakeFormPath(pathname)
+    isAcaIntakeFormPath(pathname) ||
+    isFeIntakeFormPath(pathname)
   );
 }
 
@@ -75,6 +91,7 @@ export function isIulBareLandingPath(pathname: string | null | undefined): boole
   if (!pathname) return false;
   return (
     (IUL_BARE_LANDING_PATHNAMES as readonly string[]).includes(pathname) ||
-    isAcaIntakeFormPath(pathname)
+    isAcaIntakeFormPath(pathname) ||
+    isFeIntakeFormPath(pathname)
   );
 }
