@@ -113,11 +113,11 @@ function presenterCaptionOffsetY(plan: RenderPlan, boxHeightPx: number): number 
   const GAP       = 0.04;                                   // breathing room above the avatar's head
   const bandTop    = TOP_SAFE + boxHalf;                    // highest the box center may sit
   const bandBottom = Math.max(bandTop, avatarTopFrac - GAP - boxHalf); // lowest, just above the head
-  // Sit toward the LOWER part of that clear band (still above the avatar's head) rather than
-  // the midpoint — the AI-generated background photos usually place subjects' faces in the
-  // upper-middle of the frame, and a midpoint caption lands right on top of them.
-  const LOWER_BIAS = 0.7; // 0 = top of band, 1 = bottom of band (right above the avatar's head)
-  const centerFrac = bandTop + (bandBottom - bandTop) * LOWER_BIAS; // box center, fraction from the top
+  // Sit at the very BOTTOM of that clear band (right above the avatar's head) rather than
+  // splitting the difference with the top — the AI-generated background photos routinely put
+  // subjects' faces anywhere from the upper third down through chest height, so the caption
+  // needs every bit of the safe room it can get without touching the avatar.
+  const centerFrac = bandBottom; // box center, fraction from the top
   return round(0.5 - centerFrac);                           // center-anchored clip: +y moves up
 }
 
