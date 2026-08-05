@@ -347,7 +347,7 @@ function presenterSceneDurations(scenes: VideoScene[], totalSec: number): number
 
 function buildMovieJson(
   storyboard: VideoStoryboard,
-  presenter?: { url: string; durationSec: number }
+  presenter?: { url: string; durationSec: number; chromaColor?: string }
 ) {
   const voice        = elevenLabsVoiceFor(storyboard.voiceLanguage);
   const connection   = process.env.JSON2VIDEO_ELEVENLABS_CONNECTION;
@@ -432,7 +432,7 @@ function buildMovieJson(
             height:      -1,
             start:       0,
             duration:    presenter!.durationSec,
-            "chroma-key": { color: HEYGEN_CHROMA_COLOR, tolerance: 25 },
+            "chroma-key": { color: presenter!.chromaColor || HEYGEN_CHROMA_COLOR, tolerance: 25 },
             "fade-in":   0.4,
             "fade-out":  0.4,
           }]
@@ -471,7 +471,7 @@ function buildMovieJson(
 
 async function submitJson2VideoRender(
   storyboard: VideoStoryboard,
-  presenter?: { url: string; durationSec: number }
+  presenter?: { url: string; durationSec: number; chromaColor?: string }
 ): Promise<{ projectId: string }> {
   const apiKey = process.env.JSON2VIDEO_API_KEY;
   if (!apiKey) throw new Error("JSON2VIDEO_API_KEY is not configured");
@@ -573,7 +573,7 @@ async function musicUrlFittingDuration(
 
 async function submitShotstackRender(
   storyboard: VideoStoryboard,
-  presenter?: { url: string; durationSec: number }
+  presenter?: { url: string; durationSec: number; chromaColor?: string }
 ): Promise<{ projectId: string }> {
   const category     = storyboard.category ?? "general";
   const locale       = storyboard.voiceLanguage;
@@ -608,7 +608,9 @@ async function submitShotstackRender(
         src:         presenter!.url,
         start:       0,
         length:      presenter!.durationSec,
-        chromaColor: HEYGEN_CHROMA_COLOR,
+        // Detected off the clip when available — a custom photo avatar's baked-in green is
+        // far from the #00FF00 that stock avatars render against.
+        chromaColor: presenter!.chromaColor || HEYGEN_CHROMA_COLOR,
         placement:   storyboard.presenterPlacement === "bottom-right" ? "bottom-right" : "bottom-left",
         scale:       PRESENTER_SCALE,
       }
@@ -666,7 +668,7 @@ async function getShotstackStatus(
 
 export async function submitVideoRender(
   storyboard: VideoStoryboard,
-  presenter?: { url: string; durationSec: number }
+  presenter?: { url: string; durationSec: number; chromaColor?: string }
 ): Promise<{ projectId: string }> {
   return renderProvider() === "json2video"
     ? submitJson2VideoRender(storyboard, presenter)

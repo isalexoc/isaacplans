@@ -26,6 +26,7 @@ import { submitPresenterVideo, getPresenterStatus } from "./heygen-presenter";
 import { submitSceneClip, getSceneClipStatus } from "./veo";
 import { generateCategoryMusic } from "./music-generator";
 import { findReusableAsset } from "./video-asset-library";
+import { detectPresenterChromaColor } from "./chroma-detect";
 import { RenderPermanentError } from "./render/errors";
 import type { VideoStoryboard, VideoImage } from "./types";
 import type { SocialVideoJobState } from "./video-job-types";
@@ -370,11 +371,15 @@ async function handlePresenter(job: VideoJobRow, storyboard: VideoStoryboard, st
         });
         return { kind: "continue", delaySeconds: 5 };
       }
+      // Sample the clip's real background so the keyer targets the actual green — a custom
+      // photo avatar's baked-in green is nowhere near the #00FF00 stock avatars render on.
+      const chroma = st.url ? await detectPresenterChromaColor(st.url) : null;
       await updateJobProgress(job.id, {
         jobState: nextState(state, {
           step: "compose",
           presenterVideoUrl: st.url,
           presenterDurationSec: st.durationSeconds ?? storyboard.durationSeconds,
+          ...(chroma ? { presenterChromaColor: chroma } : {}),
         }, stages, "Composing", 46),
       });
       return { kind: "continue", delaySeconds: 1 };
@@ -429,7 +434,11 @@ async function handleCompose(
   await persistStoryboard(job.sanityPostId, finalStoryboard);
 
   const presenter = presenterActive
-    ? { url: state.presenterVideoUrl!, durationSec: state.presenterDurationSec ?? finalStoryboard.durationSeconds }
+    ? {
+        url:         state.presenterVideoUrl!,
+        durationSec: state.presenterDurationSec ?? finalStoryboard.durationSeconds,
+        chromaColor: state.presenterChromaColor,
+      }
     : undefined;
   const { projectId } = await submitVideoRender(finalStoryboard, presenter);
 

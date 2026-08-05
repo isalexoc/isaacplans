@@ -55,6 +55,8 @@ export type SocialVideoJobState = {
   presenterVideoId?: string;
   presenterVideoUrl?: string;
   presenterDurationSec?: number;
+  presenterChromaColor?: string; // background colour sampled off the clip (photo-avatar greens
+                                 // are a muted ~#53BD5F, not the #00FF00 stock avatars get)
   presenterDropped?: boolean; // presenter failed → fell back to a faceless render
   renderProjectId?: string;
   veoOperationName?: string;
