@@ -20,6 +20,7 @@ import {
   PhoneCall,
   BarChart3,
   HeartPulse,
+  Shield,
   Image as ImageIcon,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -86,6 +87,12 @@ const OPERATIONS_TOOLS: ToolCard[] = [
       "Send a secure health coverage form, then review household details and uploaded documents.",
     href: "/en/aca/intake",
     icon: HeartPulse,
+  },
+  {
+    title: "Final Expense Intake",
+    description: "Send a secure client intake link, then review submitted final expense applications.",
+    href: "/en/final-expense/intake",
+    icon: Shield,
   },
   {
     title: "Agent Licenses",

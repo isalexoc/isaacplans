@@ -1,5 +1,6 @@
 import HeroWithTestimonials from "@/components/hero-template";
 import FEButton from "@/components/FEButton"; // simple wrapper like HIButton (or reuse your generic CTA)
+import FinalExpenseApplyHeroButton from "@/components/final-expense-apply-hero-button";
 import FinalExpensePresentationButton from "@/components/FinalExpensePresentationButton";
 import CTABanner from "@/components/CTABanner-template";
 import FaqSection from "@/components/FaqSection";
@@ -128,6 +129,7 @@ export default async function FinalExpensePage() {
         imagePublicId="final_expense_hero_fbimsc"
         imagePosition="left"
         cta={<FEButton />}
+        ctaSecondary={<FinalExpenseApplyHeroButton />}
         testimonials={[
           {
             name: t("hero.testimonials.0.name"),

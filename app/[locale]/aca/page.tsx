@@ -10,6 +10,7 @@ import FaqSection from "@/components/FaqSection";
 import CTABanner from "@/components/CTABanner-template";
 import PlanEnrollCard from "@/components/SelfEnrollSection";
 import ACAButton from "@/components/ACAButton";
+import AcaApplyHeroButton from "@/components/aca-apply-hero-button";
 import { BackHome } from "@/components/back-home";
 import { getAcaPageLd, getAcaBreadcrumbLd } from "@/lib/seo/jsonld";
 import ServicePageTracker from "@/components/service-page-tracker";
@@ -132,6 +133,7 @@ export default async function AcaPage() {
         imagePublicId="tmpfs1tzoqj_1_qqzvsx"
         imagePosition="left"
         cta={<ACAButton />}
+        ctaSecondary={<AcaApplyHeroButton />}
         testimonials={[testimonial0]}
         happyClient={{
           title: t("hero.happyClient.title"),
