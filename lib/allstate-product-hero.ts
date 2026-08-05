@@ -45,16 +45,6 @@ function transform(src: string): string {
   return src.replace("/upload/", `/upload/${HERO_TRANSFORM}/`);
 }
 
-export function getAllstateSeniorHeroSrc(slug: AllstateSeniorProductSlug): string {
-  return transform(SENIOR[slug]);
-}
-
-export function getAllstateIndividualHeroSrc(
-  slug: AllstateIndividualProductSlug
-): string {
-  return transform(INDIVIDUAL[slug]);
-}
-
 export function getAllstateCancerOnlyHeroSrc(): string {
   return transform(CANCER);
 }

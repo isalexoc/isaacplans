@@ -63,6 +63,4 @@ export type AppHref =
   | "/carriers/manhattan/shortterm"
   | "/carriers/allstate"
   | "/carriers/allstate/shortterm"
-  | "/carriers/allstate/seniors/[product]"
-  | "/carriers/allstate/individual/[product]"
   | "/carriers/allstate/cancer-only";

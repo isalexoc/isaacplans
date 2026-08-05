@@ -119,14 +119,6 @@ export const routing = defineRouting({
       en: "/carriers/allstate/shortterm",
       es: "/carriers/allstate/shortterm",
     },
-    "/carriers/allstate/seniors/[product]": {
-      en: "/carriers/allstate/seniors/[product]",
-      es: "/carriers/allstate/seniors/[product]",
-    },
-    "/carriers/allstate/individual/[product]": {
-      en: "/carriers/allstate/individual/[product]",
-      es: "/carriers/allstate/individual/[product]",
-    },
     "/carriers/allstate/cancer-only": {
       en: "/carriers/allstate/cancer-only",
       es: "/carriers/allstate/cancer-only",

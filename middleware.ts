@@ -68,6 +68,16 @@ export default clerkMiddleware(async (auth, req) => {
     return NextResponse.redirect(url, 308);
   }
 
+  // Removed Allstate seniors/individual product pages → carrier hub
+  const removedAllstateProduct = req.nextUrl.pathname.match(
+    /^\/(en|es)\/carriers\/allstate\/(?:seniors|individual)(?:\/.*)?$/
+  );
+  if (removedAllstateProduct) {
+    const url = req.nextUrl.clone();
+    url.pathname = `/${removedAllstateProduct[1]}/carriers/allstate`;
+    return NextResponse.redirect(url, 308);
+  }
+
   // /api/admin/*: admin role required (401 signed-out, 403 non-admin)
   if (req.nextUrl.pathname.startsWith('/api/admin')) {
     const { userId } = await auth();
