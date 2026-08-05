@@ -1,6 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
-import { listHeyGenVoices } from "@/lib/social-media-studio/heygen-presenter";
+import { listHeyGenVoices, findHeyGenVoiceById } from "@/lib/social-media-studio/heygen-presenter";
 
 // HeyGen's catalog endpoints are slow (~60s) on the first uncached fetch — give headroom.
 export const maxDuration = 120;
@@ -12,6 +12,19 @@ export async function GET(req: Request) {
   }
 
   const { searchParams } = new URL(req.url);
+
+  // ?id= → resolve one voice by its exact HeyGen id (for a cloned/custom voice).
+  const id = searchParams.get("id")?.trim();
+  if (id) {
+    try {
+      const voice = await findHeyGenVoiceById(id);
+      return NextResponse.json({ success: true, data: { voice } });
+    } catch (err) {
+      console.error("[heygen/voices] id lookup error:", err);
+      return NextResponse.json({ success: false, error: (err as Error).message }, { status: 500 });
+    }
+  }
+
   const language = searchParams.get("language") ?? undefined;
   const gender   = searchParams.get("gender") ?? undefined;
   const search   = searchParams.get("search") ?? undefined;

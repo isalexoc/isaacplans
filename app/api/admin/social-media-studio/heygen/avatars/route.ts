@@ -1,6 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
-import { listHeyGenAvatars } from "@/lib/social-media-studio/heygen-presenter";
+import { listHeyGenAvatars, findHeyGenAvatarById } from "@/lib/social-media-studio/heygen-presenter";
 
 // HeyGen's /v2/avatars can take ~60s+ to respond (server-side, not payload size), so the
 // first uncached fetch needs generous headroom. Subsequent calls hit the cached catalog.
@@ -13,6 +13,19 @@ export async function GET(req: Request) {
   }
 
   const { searchParams } = new URL(req.url);
+
+  // ?id= → resolve one avatar by its exact HeyGen id (for "I made my own avatar").
+  const id = searchParams.get("id")?.trim();
+  if (id) {
+    try {
+      const avatar = await findHeyGenAvatarById(id);
+      return NextResponse.json({ success: true, data: { avatar } });
+    } catch (err) {
+      console.error("[heygen/avatars] id lookup error:", err);
+      return NextResponse.json({ success: false, error: (err as Error).message }, { status: 500 });
+    }
+  }
+
   const search = searchParams.get("search") ?? undefined;
   const gender = searchParams.get("gender") ?? undefined;
   const offset = Math.max(0, Number(searchParams.get("offset") ?? 0) || 0);

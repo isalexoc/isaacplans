@@ -167,14 +167,15 @@ let avatarCache: { at: number; data: any[] } | null = null;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let voiceCache: { at: number; data: any[] } | null = null;
 
-async function fetchHeyGen(url: string): Promise<unknown> {
+async function fetchHeyGen(url: string, force = false): Promise<unknown> {
   const apiKey = process.env.HEYGEN_API_KEY;
   if (!apiKey) throw new Error("HEYGEN_API_KEY is not configured");
   // Persist the slow catalog response in the Vercel Data Cache so cold instances don't each
-  // pay HeyGen's ~60s latency — only the (daily) revalidation does.
+  // pay HeyGen's ~60s latency — only the (daily) revalidation does. `force` bypasses every
+  // cache layer, so a just-created custom avatar/voice can be resolved immediately by id.
   const res = await fetch(url, {
     headers: { "x-api-key": apiKey },
-    next: { revalidate: CATALOG_REVALIDATE_S },
+    ...(force ? { cache: "no-store" as const } : { next: { revalidate: CATALOG_REVALIDATE_S } }),
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
@@ -184,24 +185,91 @@ async function fetchHeyGen(url: string): Promise<unknown> {
   return data;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function loadAvatarCatalog(force = false): Promise<any[]> {
+  if (force || !avatarCache || Date.now() - avatarCache.at > CATALOG_TTL_MS) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const data = (await fetchHeyGen(HEYGEN_AVATARS_URL, force)) as any;
+    avatarCache = { at: Date.now(), data: Array.isArray(data?.data?.avatars) ? data.data.avatars : [] };
+  }
+  return avatarCache.data;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function loadVoiceCatalog(force = false): Promise<any[]> {
+  if (force || !voiceCache || Date.now() - voiceCache.at > CATALOG_TTL_MS) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const data = (await fetchHeyGen(HEYGEN_VOICES_URL, force)) as any;
+    voiceCache = { at: Date.now(), data: Array.isArray(data?.data?.voices) ? data.data.voices : [] };
+  }
+  return voiceCache.data;
+}
+
+function toAvatar(a: Record<string, unknown>): HeyGenAvatar {
+  return {
+    avatarId:        String(a.avatar_id),
+    name:            String(a.avatar_name ?? a.avatar_id),
+    gender:          a.gender ? String(a.gender) : undefined,
+    previewImageUrl: a.preview_image_url ? String(a.preview_image_url) : undefined,
+    previewVideoUrl: a.preview_video_url ? String(a.preview_video_url) : undefined,
+  };
+}
+
+function toVoice(v: Record<string, unknown>): HeyGenVoice {
+  return {
+    voiceId:      String(v.voice_id),
+    name:         String(v.name ?? v.voice_id),
+    language:     v.language ? String(v.language) : undefined,
+    gender:       v.gender ? String(v.gender) : undefined,
+    previewAudio: v.preview_audio ? String(v.preview_audio) : undefined,
+  };
+}
+
+/**
+ * Resolve one avatar by its exact HeyGen id — the path for "I made my own avatar and have
+ * its id". A brand-new custom avatar won't be in the cached catalog yet, so a miss retries
+ * once against a force-refreshed catalog before giving up.
+ */
+export async function findHeyGenAvatarById(avatarId: string): Promise<HeyGenAvatar | null> {
+  const id = avatarId.trim();
+  if (!id) return null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const match = (rows: any[]) => rows.find((a) => String(a?.avatar_id ?? "") === id);
+
+  let hit = match(await loadAvatarCatalog());
+  if (!hit) hit = match(await loadAvatarCatalog(true));
+  return hit ? toAvatar(hit) : null;
+}
+
+/** Resolve one voice by its exact HeyGen id (same fresh-catalog retry as avatars). */
+export async function findHeyGenVoiceById(voiceId: string): Promise<HeyGenVoice | null> {
+  const id = voiceId.trim();
+  if (!id) return null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const match = (rows: any[]) => rows.find((v) => String(v?.voice_id ?? "") === id);
+
+  let hit = match(await loadVoiceCatalog());
+  if (!hit) hit = match(await loadVoiceCatalog(true));
+  return hit ? toVoice(hit) : null;
+}
+
 export async function listHeyGenAvatars(
   search?: string,
   gender?: string,
   offset = 0,
   limit = 40
 ): Promise<{ avatars: HeyGenAvatar[]; total: number }> {
-  if (!avatarCache || Date.now() - avatarCache.at > CATALOG_TTL_MS) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const data = (await fetchHeyGen(HEYGEN_AVATARS_URL)) as any;
-    avatarCache = { at: Date.now(), data: Array.isArray(data?.data?.avatars) ? data.data.avatars : [] };
-  }
+  const rows = await loadAvatarCatalog();
 
   const q = (search ?? "").trim().toLowerCase();
   const g = (gender ?? "").trim().toLowerCase();
 
   // Filter the full (cached) list, then return only the requested page — the heavy list
   // never leaves the server, so the client only ever holds one page at a time.
-  const filtered = avatarCache.data.filter((a: Record<string, unknown>) => {
+  const filtered = rows.filter((a: Record<string, unknown>) => {
+    // An exact avatar-id search always wins: a custom avatar may carry a gender value that
+    // the active filter would otherwise hide.
+    if (q && String(a.avatar_id ?? "").toLowerCase() === q) return true;
     const name = String(a.avatar_name ?? "").toLowerCase();
     if (q && !name.includes(q) && !String(a.avatar_id ?? "").toLowerCase().includes(q)) return false;
     if (g && String(a.gender ?? "").toLowerCase() !== g) return false;
@@ -209,15 +277,7 @@ export async function listHeyGenAvatars(
   });
 
   const safeOffset = Math.max(0, offset);
-  const avatars = filtered
-    .slice(safeOffset, safeOffset + limit)
-    .map((a: Record<string, unknown>): HeyGenAvatar => ({
-      avatarId:        String(a.avatar_id),
-      name:            String(a.avatar_name ?? a.avatar_id),
-      gender:          a.gender ? String(a.gender) : undefined,
-      previewImageUrl: a.preview_image_url ? String(a.preview_image_url) : undefined,
-      previewVideoUrl: a.preview_video_url ? String(a.preview_video_url) : undefined,
-    }));
+  const avatars = filtered.slice(safeOffset, safeOffset + limit).map(toAvatar);
 
   return { avatars, total: filtered.length };
 }
@@ -225,11 +285,7 @@ export async function listHeyGenAvatars(
 export async function listHeyGenVoices(
   opts: { language?: string; gender?: string; search?: string; limit?: number } = {}
 ): Promise<{ voices: HeyGenVoice[]; languages: string[] }> {
-  if (!voiceCache || Date.now() - voiceCache.at > CATALOG_TTL_MS) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const data = (await fetchHeyGen(HEYGEN_VOICES_URL)) as any;
-    voiceCache = { at: Date.now(), data: Array.isArray(data?.data?.voices) ? data.data.voices : [] };
-  }
+  const rows = await loadVoiceCatalog();
 
   const lang = (opts.language ?? "").trim().toLowerCase();
   const g    = (opts.gender ?? "").trim().toLowerCase();
@@ -237,24 +293,23 @@ export async function listHeyGenVoices(
 
   // Distinct languages across the whole catalog → powers the language dropdown.
   const languages = Array.from(
-    new Set(voiceCache.data.map((v: Record<string, unknown>) => String(v.language ?? "").trim()).filter(Boolean))
+    new Set(rows.map((v: Record<string, unknown>) => String(v.language ?? "").trim()).filter(Boolean))
   ).sort();
 
-  const voices = voiceCache.data
+  const voices = rows
     .filter((v: Record<string, unknown>) => {
+      // An exact voice-id search always wins — a cloned/custom voice often carries a
+      // language or gender that the active filters would otherwise hide.
+      if (q && String(v.voice_id ?? "").toLowerCase() === q) return true;
       if (lang && String(v.language ?? "").toLowerCase() !== lang) return false;
       if (g && String(v.gender ?? "").toLowerCase() !== g) return false;
-      if (q && !String(v.name ?? "").toLowerCase().includes(q)) return false;
+      // Search matches the voice id as well as the name (parity with the avatar catalog).
+      if (q && !String(v.name ?? "").toLowerCase().includes(q)
+            && !String(v.voice_id ?? "").toLowerCase().includes(q)) return false;
       return true;
     })
     .slice(0, opts.limit ?? 300)
-    .map((v: Record<string, unknown>): HeyGenVoice => ({
-      voiceId:      String(v.voice_id),
-      name:         String(v.name ?? v.voice_id),
-      language:     v.language ? String(v.language) : undefined,
-      gender:       v.gender ? String(v.gender) : undefined,
-      previewAudio: v.preview_audio ? String(v.preview_audio) : undefined,
-    }));
+    .map(toVoice);
 
   return { voices, languages };
 }

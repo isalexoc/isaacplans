@@ -33,6 +33,38 @@ type Gender = "" | "male" | "female";
 // HeyGen stock avatars only expose gender + name, so "styles" are name-based shortcuts.
 const AVATAR_STYLES = ["Business", "Casual", "Professional", "Doctor", "Nurse", "Suit", "Office", "Outdoor"];
 
+/**
+ * Paste-an-exact-HeyGen-id row. Your own custom avatar / cloned voice may not appear in the
+ * browsable catalog yet (HeyGen's list is cached for hours), so this always applies the id
+ * you typed — it just also tries to resolve a friendly name to confirm it's real.
+ */
+function IdEntryRow({ label, placeholder, value, onChange, onUse, busy, message }: {
+  label: string;
+  placeholder: string;
+  value: string;
+  onChange: (v: string) => void;
+  onUse: () => void;
+  busy: boolean;
+  message?: string;
+}) {
+  return (
+    <div className="flex items-center gap-2 flex-wrap rounded-md border bg-muted/30 px-3 py-2">
+      <span className="text-xs text-muted-foreground shrink-0">{label}</span>
+      <Input
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); onUse(); } }}
+        placeholder={placeholder}
+        className="h-8 flex-1 min-w-48 font-mono text-xs"
+      />
+      <Button size="sm" variant="outline" disabled={!value.trim() || busy} onClick={onUse}>
+        {busy ? <Loader2 className="h-3 w-3 animate-spin" /> : "Use ID"}
+      </Button>
+      {message && <span className="text-[11px] text-muted-foreground basis-full">{message}</span>}
+    </div>
+  );
+}
+
 export function PresenterPicker({ open, onOpenChange, locale, current, onConfirm }: Props) {
   const [avatars, setAvatars] = useState<HeyGenAvatar[]>([]);
   const [voices, setVoices]   = useState<HeyGenVoice[]>([]);
@@ -52,8 +84,64 @@ export function PresenterPicker({ open, onOpenChange, locale, current, onConfirm
   const [playingId, setPlayingId] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
+  // Direct-by-id entry (own avatar / cloned voice).
+  const [aIdInput, setAIdInput] = useState("");
+  const [aIdBusy, setAIdBusy]   = useState(false);
+  const [aIdMsg, setAIdMsg]     = useState<string | undefined>();
+  const [vIdInput, setVIdInput] = useState("");
+  const [vIdBusy, setVIdBusy]   = useState(false);
+  const [vIdMsg, setVIdMsg]     = useState<string | undefined>();
+
   // Reset working selection + browsing state each time the modal opens.
-  useEffect(() => { if (open) { setSel(current); setPage(0); } }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (!open) return;
+    setSel(current);
+    setPage(0);
+    setAIdInput(""); setAIdMsg(undefined);
+    setVIdInput(""); setVIdMsg(undefined);
+  }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Apply a pasted avatar id. The id is always applied even when HeyGen's cached catalog
+  // doesn't know it yet — a freshly created avatar can lag the catalog by hours.
+  async function useAvatarId() {
+    const id = aIdInput.trim();
+    if (!id) return;
+    setAIdBusy(true); setAIdMsg(undefined);
+    try {
+      const r = await fetch(`/api/admin/social-media-studio/heygen/avatars?id=${encodeURIComponent(id)}`);
+      const d = await r.json();
+      const found: HeyGenAvatar | null = d?.success ? d.data.avatar : null;
+      setSel((s) => ({ ...s, avatarId: id, avatarName: found?.name ?? "Custom avatar" }));
+      setAIdMsg(found
+        ? `Matched “${found.name}” — selected.`
+        : "Not in the HeyGen catalog yet, but the ID will be used as typed.");
+    } catch {
+      setSel((s) => ({ ...s, avatarId: id, avatarName: "Custom avatar" }));
+      setAIdMsg("Couldn't reach HeyGen to verify, but the ID will be used as typed.");
+    } finally {
+      setAIdBusy(false);
+    }
+  }
+
+  async function useVoiceId() {
+    const id = vIdInput.trim();
+    if (!id) return;
+    setVIdBusy(true); setVIdMsg(undefined);
+    try {
+      const r = await fetch(`/api/admin/social-media-studio/heygen/voices?id=${encodeURIComponent(id)}`);
+      const d = await r.json();
+      const found: HeyGenVoice | null = d?.success ? d.data.voice : null;
+      setSel((s) => ({ ...s, voiceId: id, voiceName: found?.name ?? "Custom voice" }));
+      setVIdMsg(found
+        ? `Matched “${found.name}” — selected.`
+        : "Not in the HeyGen catalog yet, but the ID will be used as typed.");
+    } catch {
+      setSel((s) => ({ ...s, voiceId: id, voiceName: "Custom voice" }));
+      setVIdMsg("Couldn't reach HeyGen to verify, but the ID will be used as typed.");
+    } finally {
+      setVIdBusy(false);
+    }
+  }
 
   // Search / gender changes restart at page 0.
   function onSearchChange(v: string) { setSearch(v); setPage(0); }
@@ -151,12 +239,22 @@ export function PresenterPicker({ open, onOpenChange, locale, current, onConfirm
                 <Input
                   value={search}
                   onChange={(e) => onSearchChange(e.target.value)}
-                  placeholder="Search avatars (e.g. Imelda, Georgia, business)…"
+                  placeholder="Search avatars by name or ID (e.g. Imelda, business)…"
                   className="pl-8"
                 />
               </div>
               {genderBtns(aGender, onAvatarGender)}
             </div>
+
+            <IdEntryRow
+              label="Have your own avatar ID?"
+              placeholder="Paste a HeyGen avatar ID…"
+              value={aIdInput}
+              onChange={setAIdInput}
+              onUse={useAvatarId}
+              busy={aIdBusy}
+              message={aIdMsg}
+            />
 
             {/* Style quick-filters (name-based shortcuts) */}
             <div className="flex flex-wrap gap-1">
@@ -286,11 +384,21 @@ export function PresenterPicker({ open, onOpenChange, locale, current, onConfirm
                 <Input
                   value={vSearch}
                   onChange={(e) => setVSearch(e.target.value)}
-                  placeholder="Search voices by name…"
+                  placeholder="Search voices by name or ID…"
                   className="pl-8"
                 />
               </div>
             </div>
+
+            <IdEntryRow
+              label="Have your own voice ID?"
+              placeholder="Paste a HeyGen voice ID…"
+              value={vIdInput}
+              onChange={setVIdInput}
+              onUse={useVoiceId}
+              busy={vIdBusy}
+              message={vIdMsg}
+            />
 
             <ScrollArea className="h-80">
               {loadingV ? (
