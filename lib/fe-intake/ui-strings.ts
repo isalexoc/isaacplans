@@ -124,8 +124,23 @@ export const UI = {
   reveal: { en: "Reveal", es: "Mostrar" } as Dict,
   hide: { en: "Hide", es: "Ocultar" } as Dict,
   addMedication: { en: "Add another medication?", es: "¿Agregar otro medicamento?" } as Dict,
-  addBeneficiary: { en: "Add another beneficiary?", es: "¿Agregar otro beneficiario?" } as Dict,
   notProvided: { en: "Not provided", es: "No proporcionado" } as Dict,
+
+  // Beneficiaries — explicit intro → add → review-roster flow
+  addFirstBeneficiary: { en: "Add first beneficiary", es: "Agregar primer beneficiario" } as Dict,
+  addSecondBeneficiary: { en: "Add second beneficiary", es: "Agregar segundo beneficiario" } as Dict,
+  addAnotherBeneficiary: { en: "Add another beneficiary", es: "Agregar otro beneficiario" } as Dict,
+  yourBeneficiaries: { en: "Your beneficiaries", es: "Sus beneficiarios" } as Dict,
+  needTwoBeneficiaries: {
+    en: "One more to go — at least two beneficiaries are required.",
+    es: "Falta uno más — se requieren al menos dos beneficiarios.",
+  } as Dict,
+  beneficiariesDone: {
+    en: "You can add more beneficiaries, or continue.",
+    es: "Puede agregar más beneficiarios o continuar.",
+  } as Dict,
+  continueBtn: { en: "Continue", es: "Continuar" } as Dict,
+  remove: { en: "Remove", es: "Eliminar" } as Dict,
   editForm: { en: "Edit form", es: "Editar formulario" } as Dict,
   empty: { en: "—", es: "—" } as Dict,
   viewTitle: { en: "Client summary", es: "Resumen del cliente" } as Dict,

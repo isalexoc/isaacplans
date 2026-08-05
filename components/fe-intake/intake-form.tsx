@@ -41,6 +41,8 @@ import {
   CircleDot,
   Bone,
   Phone,
+  Plus,
+  Trash2,
   type LucideIcon,
 } from "lucide-react";
 import IntakeAddressInput, { type ResolvedAddress } from "@/components/shared/intake-address-input";
@@ -79,7 +81,18 @@ type Screen =
   | { screenKey: string; kind: "field"; field: FeField }
   | { screenKey: string; kind: "repeaterRow"; field: FeField; repeaterKey: string; rowIndex: number }
   | { screenKey: string; kind: "addAnother"; repeaterKey: string; rowIndex: number }
+  // `rosterUi` repeaters (beneficiaries): an explanatory intro before the first row, and a
+  // review list after the last one, instead of a bare "add another? yes/no".
+  | { screenKey: string; kind: "repeaterIntro"; repeaterKey: string }
+  | { screenKey: string; kind: "roster"; repeaterKey: string }
   | { screenKey: string; kind: "finish" };
+
+/** A screen that asks for one field value — the only kind that uses the shared Next bar. */
+type QuestionScreen = Extract<Screen, { kind: "field" } | { kind: "repeaterRow" }>;
+
+function isQuestionScreen(screen: Screen): screen is QuestionScreen {
+  return screen.kind === "field" || screen.kind === "repeaterRow";
+}
 
 /** Sibling keys folded onto an `address` field's own screen — never their own screen. */
 function addressTargetKeys(fields: FeField[]): Set<string> {
@@ -105,10 +118,8 @@ function buildScreens(data: FeIntakeData): Screen[] {
         continue;
       }
       const rows: RepeaterRow[] = Array.isArray(data[field.key]) ? (data[field.key] as RepeaterRow[]) : [];
-      const minRows = field.minRows ?? 1;
-      const maxRows = field.maxRows ?? 15;
-      const rowCount = Math.max(minRows, rows.length);
-      for (let i = 0; i < rowCount; i++) {
+
+      const pushRowScreens = (i: number) => {
         const row = rows[i] ?? {};
         for (const sub of field.rowFields ?? []) {
           if (!isFieldVisible(sub, row as Record<string, unknown>)) continue;
@@ -120,6 +131,25 @@ function buildScreens(data: FeIntakeData): Screen[] {
             rowIndex: i,
           });
         }
+      };
+
+      // Roster flow: rows only exist once the client explicitly adds them, so the intro screen
+      // stands alone until then and a single review screen closes out the section.
+      if (field.rosterUi) {
+        if (rows.length === 0) {
+          screens.push({ screenKey: `intro:${field.key}`, kind: "repeaterIntro", repeaterKey: field.key });
+        } else {
+          for (let i = 0; i < rows.length; i++) pushRowScreens(i);
+          screens.push({ screenKey: `roster:${field.key}`, kind: "roster", repeaterKey: field.key });
+        }
+        continue;
+      }
+
+      const minRows = field.minRows ?? 1;
+      const maxRows = field.maxRows ?? 15;
+      const rowCount = Math.max(minRows, rows.length);
+      for (let i = 0; i < rowCount; i++) {
+        pushRowScreens(i);
         // Only offer "add another" once the mandatory minimum rows are satisfied.
         if (i >= minRows - 1 && i < maxRows - 1) {
           screens.push({ screenKey: `addAnother:${field.key}:${i}`, kind: "addAnother", repeaterKey: field.key, rowIndex: i });
@@ -141,7 +171,7 @@ function containerFor(screen: Screen, data: FeIntakeData): Record<string, unknow
 }
 
 function isScreenValid(screen: Screen, data: FeIntakeData): boolean {
-  if (screen.kind === "finish" || screen.kind === "addAnother") return true;
+  if (!isQuestionScreen(screen)) return true;
   const container = containerFor(screen, data);
   const field = screen.field;
   const value = str(container[field.key]).trim();
@@ -214,6 +244,10 @@ const BIG_INPUT =
 
 const SMALL_INPUT =
   "w-full rounded-xl border-2 border-gray-200 bg-white px-4 py-2.5 text-base text-gray-900 placeholder:text-gray-400 focus:border-brand focus:outline-none dark:border-gray-800 dark:bg-gray-900 dark:text-gray-100";
+
+/** Narrower padding than BIG_INPUT so 2–3 selects fit side by side on a phone. */
+const SELECT_INPUT =
+  "w-full rounded-2xl border-2 border-gray-200 bg-white px-3 py-4 text-center text-base font-medium text-gray-900 focus:border-brand focus:outline-none dark:border-gray-800 dark:bg-gray-900 dark:text-gray-100";
 
 const SMALL_LABEL = "mb-1 block text-xs font-medium text-muted-foreground";
 
@@ -352,22 +386,55 @@ function DrugSearchInput({
   );
 }
 
+/**
+ * Month/day/year selects. The partial selections live in local state on purpose: the committed
+ * value is a single ISO string that only exists once all three parts are chosen, so deriving the
+ * dropdowns straight from it would blank out each pick as it was made (the reported bug — the
+ * selection never appeared and Next never enabled).
+ */
 function DobInput({ value, onChange, locale }: { value: string; onChange: (v: string) => void; locale: FeLocale }) {
-  const { month, day, year } = splitDobIso(value);
+  const initial = splitDobIso(value);
+  const [month, setMonth] = useState(initial.month);
+  const [day, setDay] = useState(initial.day);
+  const [year, setYear] = useState(initial.year);
+
   const months = MONTHS[locale];
   const days = useMemo(() => Array.from({ length: 31 }, (_, i) => String(i + 1)), []);
   const years = useMemo(() => {
     const currentYear = new Date().getFullYear();
-    return Array.from({ length: 101 }, (_, i) => String(currentYear - 100 + i));
+    // Newest first — nobody should scroll through a century to reach their birth year.
+    return Array.from({ length: 101 }, (_, i) => String(currentYear - i));
   }, []);
 
-  function update(nextMonth: string, nextDay: string, nextYear: string) {
+  // Adopt an externally-set value (CRM prefill, or resuming a saved session). Can't clobber a
+  // partial local selection, since `value` stays "" until all three parts are chosen.
+  useEffect(() => {
+    if (!value) return;
+    const parts = splitDobIso(value);
+    if (!parts.month) return;
+    if (buildDobIso(month, day, year) === value) return;
+    setMonth(parts.month);
+    setDay(parts.day);
+    setYear(parts.year);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value]);
+
+  function commit(nextMonth: string, nextDay: string, nextYear: string) {
+    setMonth(nextMonth);
+    setDay(nextDay);
+    setYear(nextYear);
     onChange(buildDobIso(nextMonth, nextDay, nextYear));
   }
 
   return (
-    <div className="grid grid-cols-3 gap-3">
-      <select autoFocus value={month} onChange={(e) => update(e.target.value, day, year)} className={BIG_INPUT}>
+    <div className="grid grid-cols-3 gap-2">
+      <select
+        autoFocus
+        aria-label={tr(UI.dobMonth, locale)}
+        value={month}
+        onChange={(e) => commit(e.target.value, day, year)}
+        className={SELECT_INPUT}
+      >
         <option value="">{tr(UI.dobMonth, locale)}</option>
         {months.map((m, i) => (
           <option key={m} value={String(i + 1)}>
@@ -375,7 +442,12 @@ function DobInput({ value, onChange, locale }: { value: string; onChange: (v: st
           </option>
         ))}
       </select>
-      <select value={day} onChange={(e) => update(month, e.target.value, year)} className={BIG_INPUT}>
+      <select
+        aria-label={tr(UI.dobDay, locale)}
+        value={day}
+        onChange={(e) => commit(month, e.target.value, year)}
+        className={SELECT_INPUT}
+      >
         <option value="">{tr(UI.dobDay, locale)}</option>
         {days.map((d) => (
           <option key={d} value={d}>
@@ -383,7 +455,12 @@ function DobInput({ value, onChange, locale }: { value: string; onChange: (v: st
           </option>
         ))}
       </select>
-      <select value={year} onChange={(e) => update(month, day, e.target.value)} className={BIG_INPUT}>
+      <select
+        aria-label={tr(UI.dobYear, locale)}
+        value={year}
+        onChange={(e) => commit(month, day, e.target.value)}
+        className={SELECT_INPUT}
+      >
         <option value="">{tr(UI.dobYear, locale)}</option>
         {years.map((y) => (
           <option key={y} value={y}>
@@ -397,18 +474,38 @@ function DobInput({ value, onChange, locale }: { value: string; onChange: (v: st
 
 const HEIGHT_RE = /^(\d+)'(\d+)"?$/;
 
+/** Feet/inches selects — same local-state reasoning as {@link DobInput}. */
 function HeightInput({ value, onChange, locale }: { value: string; onChange: (v: string) => void; locale: FeLocale }) {
-  const match = HEIGHT_RE.exec(value.trim());
-  const feet = match ? match[1] : "";
-  const inches = match ? match[2] : "";
+  const initialMatch = HEIGHT_RE.exec(value.trim());
+  const [feet, setFeet] = useState(initialMatch ? initialMatch[1] : "");
+  const [inches, setInches] = useState(initialMatch ? initialMatch[2] : "");
 
-  function update(nextFeet: string, nextInches: string) {
-    onChange(nextFeet && nextInches ? `${nextFeet}'${nextInches}"` : "");
+  useEffect(() => {
+    if (!value) return;
+    const match = HEIGHT_RE.exec(value.trim());
+    if (!match) return;
+    if (match[1] === feet && match[2] === inches) return;
+    setFeet(match[1]);
+    setInches(match[2]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value]);
+
+  function commit(nextFeet: string, nextInches: string) {
+    setFeet(nextFeet);
+    setInches(nextInches);
+    // Explicit empty-string checks: 0 inches is a real answer ("6 ft 0 in").
+    onChange(nextFeet !== "" && nextInches !== "" ? `${nextFeet}'${nextInches}"` : "");
   }
 
   return (
-    <div className="grid grid-cols-2 gap-3">
-      <select autoFocus value={feet} onChange={(e) => update(e.target.value, inches)} className={BIG_INPUT}>
+    <div className="grid grid-cols-2 gap-2">
+      <select
+        autoFocus
+        aria-label={tr(UI.heightFeet, locale)}
+        value={feet}
+        onChange={(e) => commit(e.target.value, inches)}
+        className={SELECT_INPUT}
+      >
         <option value="">{tr(UI.heightFeet, locale)}</option>
         {[3, 4, 5, 6, 7, 8].map((f) => (
           <option key={f} value={String(f)}>
@@ -416,7 +513,12 @@ function HeightInput({ value, onChange, locale }: { value: string; onChange: (v:
           </option>
         ))}
       </select>
-      <select value={inches} onChange={(e) => update(feet, e.target.value)} className={BIG_INPUT}>
+      <select
+        aria-label={tr(UI.heightInches, locale)}
+        value={inches}
+        onChange={(e) => commit(feet, e.target.value)}
+        className={SELECT_INPUT}
+      >
         <option value="">{tr(UI.heightInches, locale)}</option>
         {Array.from({ length: 12 }, (_, i) => i).map((i) => (
           <option key={i} value={String(i)}>
@@ -516,6 +618,43 @@ export default function FeIntakeForm({ token }: { token: string }) {
     setCurrentKey(prev.screenKey);
   }
 
+  /** Roster flow: append a blank row and jump straight into its first question. */
+  function handleAddRow(repeaterKey: string) {
+    const fieldDef = fieldByKey(repeaterKey);
+    if (!fieldDef) return;
+    const rows: RepeaterRow[] = Array.isArray(data[repeaterKey]) ? [...(data[repeaterKey] as RepeaterRow[])] : [];
+    if (rows.length >= (fieldDef.maxRows ?? 10)) return;
+    const newIndex = rows.length;
+    rows.push(emptyRow(fieldDef));
+
+    const nextData: FeIntakeData = { ...data, [repeaterKey]: rows };
+    const firstSubKey = fieldDef.rowFields?.[0]?.key ?? "";
+    const targetScreenKey = `repeater:${repeaterKey}:${newIndex}:${firstSubKey}`;
+    const newScreens = buildScreens(nextData);
+    const resolved = newScreens.find((s) => s.screenKey === targetScreenKey) ?? newScreens[newScreens.length - 1];
+
+    setData({ ...nextData, __cursor: resolved.screenKey });
+    setCurrentKey(resolved.screenKey);
+  }
+
+  /** Roster flow: drop a row the client no longer wants. */
+  function handleRemoveRow(repeaterKey: string, rowIndex: number) {
+    const rows: RepeaterRow[] = Array.isArray(data[repeaterKey]) ? [...(data[repeaterKey] as RepeaterRow[])] : [];
+    if (rowIndex < 0 || rowIndex >= rows.length) return;
+    rows.splice(rowIndex, 1);
+
+    const nextData: FeIntakeData = { ...data, [repeaterKey]: rows };
+    const newScreens = buildScreens(nextData);
+    // Removing the last row collapses the roster back to the intro screen.
+    const target =
+      newScreens.find((s) => s.screenKey === `roster:${repeaterKey}`) ??
+      newScreens.find((s) => s.screenKey === `intro:${repeaterKey}`) ??
+      newScreens[newScreens.length - 1];
+
+    setData({ ...nextData, __cursor: target.screenKey });
+    setCurrentKey(target.screenKey);
+  }
+
   function handleAddAnother(repeaterKey: string, rowIndex: number, wantsMore: boolean) {
     const fieldDef = fieldByKey(repeaterKey);
     if (!fieldDef) return;
@@ -587,12 +726,13 @@ export default function FeIntakeForm({ token }: { token: string }) {
   const valid = isScreenValid(screen, data);
   const phoneNumber = process.env.NEXT_PUBLIC_PHONE_NUMBER;
   const container = containerFor(screen, data);
+  const showNextBar = isQuestionScreen(screen);
 
   return (
-    // `h-dvh` + `overflow-hidden` pins the header/progress bar and the Next button to the
-    // visible viewport; only the question area scrolls. Fixes the Next button landing below
-    // the fold on mobile when `min-h-screen` let the page grow taller than the real viewport.
-    <div className="flex h-dvh flex-col overflow-hidden bg-white dark:bg-gray-950">
+    // The Next bar is `fixed` to the viewport rather than laid out at the end of the page: this
+    // page renders below the site header, so any height-based approach (100dvh, sticky in a flex
+    // column) pushes the bar below the fold and forces a scroll to reach it.
+    <div className="flex min-h-[60vh] flex-col bg-white dark:bg-gray-950">
       {/* Progress bar */}
       <div className="h-1.5 w-full shrink-0 bg-gray-100 dark:bg-gray-800">
         <motion.div
@@ -626,8 +766,8 @@ export default function FeIntakeForm({ token }: { token: string }) {
         )}
       </header>
 
-      {/* Question — the only scrollable area, so the footer below always stays on screen */}
-      <main className="flex-1 overflow-y-auto px-5 pb-4 pt-2">
+      {/* Question. Bottom padding clears the fixed Next bar so the last control is never hidden. */}
+      <main className={`flex-1 px-5 pt-2 ${showNextBar ? "pb-40" : "pb-12"}`}>
         <div className="mx-auto w-full max-w-md">
           <AnimatePresence mode="wait">
             <motion.div
@@ -647,8 +787,22 @@ export default function FeIntakeForm({ token }: { token: string }) {
               ) : screen.kind === "addAnother" ? (
                 <AddAnotherScreen
                   locale={locale}
-                  repeaterKey={screen.repeaterKey}
                   onAnswer={(more) => handleAddAnother(screen.repeaterKey, screen.rowIndex, more)}
+                />
+              ) : screen.kind === "repeaterIntro" ? (
+                <RepeaterIntroScreen
+                  repeaterKey={screen.repeaterKey}
+                  locale={locale}
+                  onAdd={() => handleAddRow(screen.repeaterKey)}
+                />
+              ) : screen.kind === "roster" ? (
+                <RosterScreen
+                  repeaterKey={screen.repeaterKey}
+                  rows={Array.isArray(data[screen.repeaterKey]) ? (data[screen.repeaterKey] as RepeaterRow[]) : []}
+                  locale={locale}
+                  onAdd={() => handleAddRow(screen.repeaterKey)}
+                  onRemove={(i) => handleRemoveRow(screen.repeaterKey, i)}
+                  onContinue={goNext}
                 />
               ) : (
                 <FieldScreen
@@ -664,9 +818,12 @@ export default function FeIntakeForm({ token }: { token: string }) {
         </div>
       </main>
 
-      {/* Sticky Next footer — pinned to the visible viewport, never pushed off-screen */}
-      {screen.kind !== "addAnother" && screen.kind !== "finish" && (
-        <div className="shrink-0 border-t border-gray-100 bg-white px-5 py-4 dark:border-gray-800 dark:bg-gray-950">
+      {/* Fixed Next bar — always on screen, no scrolling required to reach it. */}
+      {showNextBar && (
+        <div
+          className="fixed inset-x-0 bottom-0 z-40 border-t border-gray-200 bg-white/95 px-5 pt-4 backdrop-blur dark:border-gray-800 dark:bg-gray-950/95"
+          style={{ paddingBottom: "max(1rem, env(safe-area-inset-bottom))" }}
+        >
           <div className="mx-auto w-full max-w-md">
             <button
               type="button"
@@ -830,22 +987,139 @@ function optionLabelForField(key: string, locale: FeLocale): string {
   return field ? fieldLabel(field, locale) : key;
 }
 
-function AddAnotherScreen({
-  locale,
-  repeaterKey,
-  onAnswer,
-}: {
-  locale: FeLocale;
-  repeaterKey: string;
-  onAnswer: (wantsMore: boolean) => void;
-}) {
-  const dict = repeaterKey === "beneficiaries" ? UI.addBeneficiary : UI.addMedication;
+function AddAnotherScreen({ locale, onAnswer }: { locale: FeLocale; onAnswer: (wantsMore: boolean) => void }) {
   return (
     <div>
-      <h1 className="text-2xl font-bold leading-snug text-gray-900 dark:text-gray-100">{tr(dict, locale)}</h1>
+      <h1 className="text-2xl font-bold leading-snug text-gray-900 dark:text-gray-100">
+        {tr(UI.addMedication, locale)}
+      </h1>
       <div className="mt-6 space-y-2.5">
         <ChoiceCard selected={false} icon={CheckCircle2} label={locale === "es" ? "Sí" : "Yes"} onClick={() => onAnswer(true)} />
         <ChoiceCard selected={false} icon={XCircle} label="No" onClick={() => onAnswer(false)} />
+      </div>
+    </div>
+  );
+}
+
+/** Label for the "add" button, made explicit so the two-beneficiary requirement is obvious. */
+function addRowLabel(count: number, locale: FeLocale): string {
+  if (count === 0) return tr(UI.addFirstBeneficiary, locale);
+  if (count === 1) return tr(UI.addSecondBeneficiary, locale);
+  return tr(UI.addAnotherBeneficiary, locale);
+}
+
+const PRIMARY_BTN =
+  "flex w-full items-center justify-center gap-2 rounded-2xl bg-gray-900 px-6 py-4 text-base font-semibold text-white transition hover:bg-gray-800 dark:bg-white dark:text-gray-900";
+
+const OUTLINE_BTN =
+  "flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-gray-300 px-6 py-4 text-base font-semibold text-gray-900 transition hover:bg-gray-50 dark:border-gray-700 dark:text-gray-100 dark:hover:bg-gray-900";
+
+/** Intro screen for a roster repeater — states the requirement before asking for any names. */
+function RepeaterIntroScreen({
+  repeaterKey,
+  locale,
+  onAdd,
+}: {
+  repeaterKey: string;
+  locale: FeLocale;
+  onAdd: () => void;
+}) {
+  const field = fieldByKey(repeaterKey);
+  return (
+    <div>
+      <h1 className="text-2xl font-bold leading-snug text-gray-900 dark:text-gray-100">
+        {field ? fieldLabel(field, locale) : ""}
+      </h1>
+      {field && fieldHelp(field, locale) && (
+        <p className="mt-3 text-base leading-relaxed text-muted-foreground">{fieldHelp(field, locale)}</p>
+      )}
+      <button type="button" onClick={onAdd} className={`mt-8 ${PRIMARY_BTN}`}>
+        <Plus className="h-5 w-5" />
+        {addRowLabel(0, locale)}
+      </button>
+    </div>
+  );
+}
+
+/** Review screen: who's been added so far, plus add-another / continue. */
+function RosterScreen({
+  repeaterKey,
+  rows,
+  locale,
+  onAdd,
+  onRemove,
+  onContinue,
+}: {
+  repeaterKey: string;
+  rows: RepeaterRow[];
+  locale: FeLocale;
+  onAdd: () => void;
+  onRemove: (rowIndex: number) => void;
+  onContinue: () => void;
+}) {
+  const field = fieldByKey(repeaterKey);
+  const minRows = field?.minRows ?? 2;
+  const maxRows = field?.maxRows ?? 10;
+  const relationshipOptions = field?.rowFields?.find((f) => f.key === "relationship")?.options ?? [];
+  const canContinue = rows.length >= minRows;
+
+  return (
+    <div>
+      <h1 className="text-2xl font-bold leading-snug text-gray-900 dark:text-gray-100">
+        {tr(UI.yourBeneficiaries, locale)}
+      </h1>
+      <p className="mt-2 text-sm text-muted-foreground">
+        {canContinue ? tr(UI.beneficiariesDone, locale) : tr(UI.needTwoBeneficiaries, locale)}
+      </p>
+
+      <ul className="mt-6 space-y-2.5">
+        {rows.map((row, i) => {
+          const name = [str(row.firstName), str(row.lastName)].filter(Boolean).join(" ");
+          const relValue = str(row.relationship);
+          const relOption = relationshipOptions.find((o) => o.value === relValue);
+          return (
+            <li
+              key={i}
+              className="flex items-center gap-3 rounded-2xl border-2 border-gray-200 p-4 dark:border-gray-800"
+            >
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand/10 text-sm font-bold text-brand">
+                {i + 1}
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block truncate font-medium text-gray-900 dark:text-gray-100">
+                  {name || tr(UI.notProvided, locale)}
+                </span>
+                {relOption && (
+                  <span className="block truncate text-xs text-muted-foreground">
+                    {optionLabel(relOption, locale)}
+                  </span>
+                )}
+              </span>
+              <button
+                type="button"
+                onClick={() => onRemove(i)}
+                aria-label={tr(UI.remove, locale)}
+                className="shrink-0 rounded-full p-2 text-gray-400 transition hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/40"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+
+      <div className="mt-6 space-y-3">
+        {rows.length < maxRows && (
+          <button type="button" onClick={onAdd} className={canContinue ? OUTLINE_BTN : PRIMARY_BTN}>
+            <Plus className="h-5 w-5" />
+            {addRowLabel(rows.length, locale)}
+          </button>
+        )}
+        {canContinue && (
+          <button type="button" onClick={onContinue} className={PRIMARY_BTN}>
+            {tr(UI.continueBtn, locale)}
+          </button>
+        )}
       </div>
     </div>
   );

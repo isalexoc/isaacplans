@@ -95,6 +95,12 @@ export type FeField = {
   maxRows?: number;
   rowLabelEn?: string;
   rowLabelEs?: string;
+  /**
+   * Use the explicit "intro → add row → review roster" flow instead of the simple
+   * "add another? yes/no" prompt. Chosen for beneficiaries, where the client has to understand
+   * up front that two are required and needs to see who they've already added.
+   */
+  rosterUi?: boolean;
 };
 
 export type FeSection = {
@@ -243,10 +249,12 @@ export const FE_SECTIONS: FeSection[] = [
     fields: [
       {
         key: "beneficiaries", labelEn: "Beneficiaries", labelEs: "Beneficiarios", type: "repeater",
-        rowFields: BENEFICIARY_FIELDS, minRows: 2, maxRows: 10,
+        rowFields: BENEFICIARY_FIELDS, minRows: 2, maxRows: 10, rosterUi: true,
         rowLabelEn: "Beneficiary", rowLabelEs: "Beneficiario",
-        helpEn: "Who should receive the payout? At least two, and you can add more.",
-        helpEs: "¿Quién debe recibir el pago? Al menos dos, y puede agregar más.",
+        helpEn:
+          "A beneficiary is the person who receives the payout. You'll need to add at least two — we'll walk you through them one at a time.",
+        helpEs:
+          "Un beneficiario es la persona que recibe el pago. Debe agregar al menos dos — lo guiaremos uno por uno.",
       },
     ],
   },
@@ -272,7 +280,9 @@ export const FE_SECTIONS: FeSection[] = [
         type: "text", crm: custom("physician_name"), crmLabel: "Physician / facility name",
       },
       {
-        key: "physicianCity", labelEn: "What city is that in?", labelEs: "¿En qué ciudad está ubicado?",
+        key: "physicianCity",
+        labelEn: "In what city is your doctor or medical facility located?",
+        labelEs: "¿En qué ciudad está ubicado su médico o centro médico?",
         type: "text", crm: custom("physician_city"), crmLabel: "Physician / facility city",
       },
       {
