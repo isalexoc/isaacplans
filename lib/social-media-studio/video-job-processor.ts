@@ -25,6 +25,7 @@ import {
 import { submitPresenterVideo, getPresenterStatus } from "./heygen-presenter";
 import { submitSceneClip, getSceneClipStatus } from "./veo";
 import { generateCategoryMusic } from "./music-generator";
+import { findReusableAsset } from "./video-asset-library";
 import { RenderPermanentError } from "./render/errors";
 import type { VideoStoryboard, VideoImage } from "./types";
 import type { SocialVideoJobState } from "./video-job-types";
@@ -201,6 +202,8 @@ async function processImages(job: VideoJobRow): Promise<StepOutcome> {
   const scenes = storyboard.scenes.map((s) => ({ ...s }));
   const total = scenes.length;
   const category = job.category ?? storyboard.category ?? "general";
+  const reuseAssets = Boolean(input.reuseAssets);
+  const preferClipAssets = Boolean(input.preferClipAssets);
   const start = Date.now();
   let done = scenes.filter((s) => s.imageUrl).length;
 
@@ -208,7 +211,24 @@ async function processImages(job: VideoJobRow): Promise<StepOutcome> {
     if (scenes[i].imageUrl) continue;
     if (await isCancelled(job.id)) return { kind: "done" };
 
-    scenes[i].imageUrl = await regenerateSceneImage(scenes[i].imageConcept, category, storyboard.voiceLanguage);
+    // Check the cross-post library before paying to generate a fresh image (and, when a
+    // cinematic clip is preferred, this can attach motion too — no manual "Animate" needed.
+    if (reuseAssets) {
+      const hit = await findReusableAsset({
+        category,
+        locale: storyboard.voiceLanguage,
+        concept: scenes[i].imageConcept,
+        preferClip: preferClipAssets,
+        excludeImageUrls: scenes.map((s) => s.imageUrl).filter(Boolean),
+      });
+      if (hit) {
+        scenes[i].imageUrl = hit.imageUrl;
+        if (hit.videoClipUrl) scenes[i].videoClipUrl = hit.videoClipUrl;
+      }
+    }
+    if (!scenes[i].imageUrl) {
+      scenes[i].imageUrl = await regenerateSceneImage(scenes[i].imageConcept, category, storyboard.voiceLanguage);
+    }
     done++;
     resultData = { ...resultData, storyboard: { ...storyboard, scenes } };
     await updateJobProgress(job.id, {
@@ -248,6 +268,7 @@ async function processClip(job: VideoJobRow): Promise<StepOutcome> {
       imageConcept: input.imageConcept ?? "",
       tier:         input.tier,
       durationSec:  input.clipDurationSec,
+      sceneIndex,
     });
     await updateJobProgress(job.id, {
       jobState: nextState(state, { step: "poll", veoOperationName: operationName }, stages, label, 10),
@@ -255,7 +276,12 @@ async function processClip(job: VideoJobRow): Promise<StepOutcome> {
     return { kind: "continue", delaySeconds: 8 };
   }
 
-  const res = await getSceneClipStatus(state.veoOperationName, category);
+  const res = await getSceneClipStatus(state.veoOperationName, category, {
+    imageUrl:        input.imageUrl,
+    imageConcept:    input.imageConcept,
+    clipDurationSec: input.clipDurationSec,
+    sourcePostId:    job.sanityPostId,
+  });
   if (res.status !== "done") {
     await updateJobProgress(job.id, {
       jobState: nextState(state, { step: "poll" }, stages, label, ramp(state.progress, 10, 90, 6)),

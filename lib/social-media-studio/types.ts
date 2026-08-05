@@ -158,6 +158,8 @@ export interface VideoStoryboard {
   scriptHash?: string;         // fingerprint of the script this narration was built from — lets a
                                 // re-render detect "script unchanged" (skip the GPT rebuild) or
                                 // "script changed" (force a fresh avatar render instead of reusing one)
+  reuseAssets?: boolean;       // true (default) → check the cross-post asset library for a similar
+                                // image/clip before generating a fresh one (see video-asset-library.ts)
 }
 
 /**
@@ -256,6 +258,8 @@ export interface VideoImagesRequest {
   source: SocialPostSource;
   videoScript: VideoScript;
   locale?: SocialLocale;         // voice/subject language; defaults to source locale
+  reuseAssets?: boolean;         // check the cross-post asset library before generating each scene
+  preferClipAssets?: boolean;    // when reusing, prefer a library match that already has a Veo clip
 }
 
 export interface VideoImagesResult {

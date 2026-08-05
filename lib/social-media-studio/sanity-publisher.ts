@@ -145,6 +145,7 @@ export async function publishSocialPost(
             veoTier:             req.videoStoryboard.veoTier ?? null,
             veoDurationSec:      req.videoStoryboard.veoDurationSec ?? null,
             scriptHash:          req.videoStoryboard.scriptHash ?? null,
+            reuseAssets:         req.videoStoryboard.reuseAssets ?? true,
             scenes: req.videoStoryboard.scenes.map((s, i) => ({
               _key:         `sc_${i}`,
               narration:    s.narration,

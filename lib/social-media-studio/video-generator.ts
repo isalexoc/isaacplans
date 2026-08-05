@@ -4,6 +4,7 @@ import cloudinary from "@/config/cloudinary";
 import { getDemographicHint, pickVariationMood } from "./image-generator";
 import { musicUrlForCategory } from "./video-music";
 import { generateCategoryMusic } from "./music-generator";
+import { registerImageAsset } from "./video-asset-library";
 import { HEYGEN_CHROMA_COLOR } from "./heygen-presenter";
 import { synthesizeNarration } from "./voiceover";
 import { shotstackProvider } from "./render/shotstack";
@@ -52,16 +53,31 @@ function elevenLabsVoiceFor(locale: SocialLocale): string {
 // clean, render-ready scene list: spoken narration + a short on-screen headline per
 // scene. Mirrors the JSON-mode pattern in script-generator.ts.
 
-const STORYBOARD_SYSTEM_PROMPT = `You are a short-form video director for an insurance brand. You convert a talking-head video script into a clean storyboard for a vertical (9:16) YouTube Short built from still images + AI voiceover + on-screen captions.
+const STORYBOARD_SYSTEM_PROMPT = `You are a short-form video director for an insurance brand. You turn a talking-head script into a cinematic, emotionally engaging storyboard for a vertical (9:16) Short built from AI-generated images + AI voiceover + on-screen captions.
+
+DIRECT LIKE A FILMMAKER, NOT A STOCK-PHOTO SEARCH. The scenes must add up to ONE continuous visual story that carries the script's emotional arc — never a slideshow of unrelated smiling strangers.
+
+Before writing any scenes, silently decide these three things and hold them consistent the whole way through:
+1. THE PERSON — one specific human this script is really for, who is a believable customer for THIS exact topic (e.g. a 67-year-old grandmother for final expense; a 34-year-old self-employed carpenter for ACA; a young couple with a new baby for life insurance). Fix their age, build, hair, skin tone and clothing.
+2. THE ARC — where they begin emotionally (a quiet question, an unspoken worry, an ordinary morning), what shifts in the middle, and where they land (relief, control, a protected family). Spread that arc across the scenes IN ORDER.
+3. THE WORLD — one home/neighborhood, one time of day, one color palette that recurs, so the whole video reads as a single film rather than a folder of stock shots.
 
 Rules:
 - Output ONLY valid JSON: { "scenes": [ { "narration": string, "onScreenText": string, "imageConcept": string } ] }.
 - "narration" is the exact words the voiceover will SPEAK for that scene — natural spoken sentences only. NO timestamps, NO stage directions, NO brackets, NO emojis, NO hashtags.
 - "onScreenText" is a SHORT punchy caption/headline (max ~6 words) burned on screen for that scene. Title Case. No ending period.
-- "imageConcept" is a SPECIFIC 1-2 sentence photographic scene description for a vertical background image that visually matches THIS scene's narration (subjects, emotion, setting, key visual detail). Each scene's imageConcept MUST be visually DISTINCT from the others. Do NOT use the word "insurance". No text or graphics in the scene.
-- Expressions must read as NATURAL and CANDID, not staged. Describe calm, warm, believable reactions (a soft genuine smile, quiet relief, present attention) — NEVER a gasping mouth, wide-eyed shock, jaw-drop surprise, or over-the-top "shocked/excited" stock-photo reaction. Restrained and real beats theatrical every time.
-- CRITICAL IMAGE SAFETY: imageConcept must always be WHOLESOME, POSITIVE and HOPEFUL — happy, healthy, dignified people in warm everyday settings (family at home, outdoors, a friendly advisor meeting, a person smiling). NEVER describe death, dying, funerals, coffins, caskets, graves, cemeteries, grief, crying, illness, disease, hospital beds, medical procedures, blood, injury, frailty, or anything somber, morbid or distressing — even if the narration mentions them. For sensitive topics, show the POSITIVE outcome (a protected, joyful family; peace of mind; a loving moment) instead.
-- The FIRST scene must be a scroll-stopping hook.
+- "imageConcept" is a 1-2 sentence photographic description of THIS story beat — the specific moment in your story, not a generic illustration of the topic. Do NOT use the word "insurance". No text, signage or graphics in the scene.
+- CONTINUITY: whenever your person appears, restate the SAME physical details (age, build, hair, skin tone, clothing) so every scene renders recognisably the same human in the same world.
+- SHOT VARIETY — cut like a real edit; do NOT put a face in every frame. AT MOST HALF the scenes should show a person's face. Mix in:
+  - wide establishing shots (the house from the street, a kitchen in morning light, an empty porch)
+  - close detail shots with NO people at all (two mugs on a table, keys by the door, a handwritten note, a child's drawing on the fridge, folded laundry, a framed photo on a shelf, sun moving across a windowsill)
+  - hands only (hands around a warm mug, one hand resting on another, a pen over paper)
+  - from behind or over the shoulder, the person looking out at something
+  - the person alone in a quiet, unguarded moment
+- NEVER a crowd. Never more than 3 people in a frame, and most frames should contain zero or one person.
+- EMOTION: match the beat honestly. Early "problem" beats may be still, quiet and contemplative — that is not sadness, it is truth, and it is what makes the resolution land. Later beats warm and open up. Never a grinning stock-photo reaction, no gasping mouths, no wide-eyed shock, no theatrical surprise.
+- IMAGE SAFETY (hard rule): NEVER describe death, dying, funerals, coffins, caskets, graves, cemeteries, grief, crying, illness, disease, hospital beds, medical procedures, blood, injury or frailty — even if the narration mentions them. For sensitive topics show the life being protected, or a quiet dignified hopeful moment, instead. Quiet and contemplative is welcome; morbid or distressing is forbidden.
+- The FIRST scene must be a scroll-stopping hook — an intriguing, specific image, not a talking head.
 - Keep total narration tight so the whole video fits the target duration when spoken at a natural pace (~2.5 words/second).
 - Write narration AND onScreenText in the TARGET LANGUAGE stated in the user message — if the source script is in a different language, TRANSLATE it into the target language. imageConcept is ALWAYS in English (it prompts an image model), regardless of the target language.
 - Do not mention you are an AI. Do not add a disclaimer.`;
@@ -77,6 +93,7 @@ function buildStoryboardUserPrompt(
     `TARGET LANGUAGE: ${langName}. Write EVERY "narration" and "onScreenText" value in ${langName} — translate the script below if it is in another language. ("imageConcept" stays in English.)`,
     `Target duration: ${videoScript.duration} seconds → produce exactly ${sceneCount} scenes.`,
     `Topic: ${source.title}`,
+    source.category ? `Product / line of business: ${source.category} — cast a protagonist who is a believable real customer for THIS product.` : "",
     source.subtitle ? `Subtitle: ${source.subtitle}` : "",
     `Hook: ${videoScript.hookScript}`,
     `Full script:\n${videoScript.fullScript}`,
@@ -149,22 +166,26 @@ function buildVideoImagePrompt(concept: string, locale?: string): string {
   const mood = pickVariationMood();
   const demographic = getDemographicHint(locale);
   return [
-    `Candid documentary-style vertical (9:16) photograph: ${concept}.`,
+    `A single frame from a documentary-style short film, vertical 9:16: ${concept}.`,
     `Lighting: ${mood}.`,
     `Camera: Canon EOS R5, 35mm f/1.8, natural depth of field, full-frame composition that fills a tall vertical portrait frame top to bottom.`,
-    `Mood: warm, positive, hopeful, emotionally authentic. Healthy, happy, dignified people in a bright, wholesome everyday setting.`,
-    demographic,
-    `EXPRESSIONS: Natural, subtle, unposed expressions — a soft genuine smile or calm, present look, like a real candid moment caught mid-conversation. AVOID exaggerated or theatrical reactions: no gasping or wide-open mouths, no wide-eyed shock, no jazz-hands excitement, no forced ear-to-ear grins, no stock-photo "surprised at the camera" poses. Subtle and believable, not performative.`,
-    `REALISM: Natural skin with visible texture and pores, slight natural asymmetry in faces, realistic imperfect lighting and catchlights in the eyes. Avoid airbrushed, plastic, waxy, or overly-symmetrical "AI face" skin. This should read as an authentic photograph of real people, not a generated or overly-polished stock image.`,
+    `Mood: emotionally authentic and quietly cinematic — a real, observed moment from someone's life. Warm and hopeful in feeling even when the moment is still or contemplative.`,
+    // The storyboard deliberately calls for people-free detail/establishing shots, so the
+    // people-specific direction has to be conditional or the model inserts figures anyway.
+    `IF PEOPLE APPEAR IN THIS SCENE: ${demographic} Their expressions must be natural, subtle and unposed — a soft genuine smile, quiet relief, or calm presence, as if caught mid-moment and unaware of the camera. NEVER exaggerated or theatrical: no gasping or wide-open mouths, no wide-eyed shock, no jazz-hands excitement, no forced ear-to-ear grins, no posing for the camera. One or two people at most — never a crowd.`,
+    `IF THE SCENE DESCRIBES NO PEOPLE (an object, a detail, an empty room, a landscape): render it completely empty of people — do NOT add any figures, hands or faces.`,
+    `REALISM: Natural skin with visible texture and pores, slight natural asymmetry in faces, realistic imperfect lighting and catchlights in the eyes. Avoid airbrushed, plastic, waxy, or overly-symmetrical "AI face" skin. This should read as an authentic photograph, not a generated or overly-polished stock image.`,
     `PROHIBITED CONTENT: nothing morbid or distressing — no death, funerals, coffins, graves, illness, hospitals, injury, blood, or grief.`,
     `PROHIBITED: No text, words, numbers, signs, logos, watermarks, captions, or graphic overlays anywhere in the image.`,
     `STYLE: Hyper-realistic photograph, candid and editorial rather than staged/glossy stock photography. Absolutely NOT an illustration, NOT vector art, NOT a painting, NOT a CGI render, NOT digital art. Real photography only.`,
   ].join(" ");
 }
 
-// A guaranteed-safe, wholesome fallback used when a concept is rejected by moderation.
+// A guaranteed-safe fallback used when a concept is rejected by moderation. Deliberately
+// people-free: figures are what trip the safety filters, and an empty lived-in interior still
+// fits the documentary storytelling look far better than a grinning stock family did.
 const SAFE_FALLBACK_CONCEPT =
-  "a happy, healthy multigenerational family smiling together in a bright, warm living room at home, genuine joyful expressions, cozy and hopeful atmosphere";
+  "a warm, lived-in family kitchen in soft morning light — two mugs on a wooden table, a folded newspaper, sunlight falling across the counter, no people in the frame";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function describeError(err: any): { status?: number; message: string; safety: boolean } {
@@ -217,7 +238,9 @@ async function generateOneSceneImage(
 
   for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
     try {
-      return await generateImageOnce(openai, currentConcept, category, locale);
+      const url = await generateImageOnce(openai, currentConcept, category, locale);
+      await registerImageAsset({ imageUrl: url, concept: currentConcept, category, locale });
+      return url;
     } catch (err) {
       const { status, message, safety } = describeError(err);
       lastError = `(${status ?? "?"}) ${message}`;

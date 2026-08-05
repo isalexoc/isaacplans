@@ -333,6 +333,32 @@ export const socialVideoJobs = pgTable("social_video_jobs", {
 }));
 
 /**
+ * Cross-post library of generated scene images/clips, so a new video scene can reuse an
+ * existing similar image/clip instead of always paying to generate a fresh one. One row per
+ * generated image; `videoClipUrl` is filled in if a Veo cinematic clip was ever animated from
+ * that same image. Matching is done in application code via cosine similarity over `embedding`
+ * (an OpenAI text-embedding-3-small vector of `concept`), scoped by `category`+`locale`.
+ * @see lib/social-media-studio/video-asset-library.ts
+ */
+export const videoAssets = pgTable("video_assets", {
+  id:              text("id").primaryKey(), // nanoid
+  imageUrl:        text("image_url").notNull(),
+  videoClipUrl:    text("video_clip_url"),          // Veo clip animating imageUrl, if one exists
+  clipDurationSec: integer("clip_duration_sec"),
+  concept:         text("concept").notNull(),        // the imageConcept prompt that produced imageUrl
+  category:        text("category").notNull(),
+  locale:          text("locale"),                   // "en" | "es" — subject demographic differs by locale
+  embedding:       jsonb("embedding").notNull().$type<number[]>(),
+  sourcePostId:    text("source_post_id"),
+  useCount:        integer("use_count").notNull().default(0),
+  createdAt:       timestamp("created_at").defaultNow().notNull(),
+  updatedAt:       timestamp("updated_at").defaultNow().notNull(),
+}, (t) => ({
+  categoryLocaleIdx: index("video_assets_category_locale_idx").on(t.category, t.locale),
+  imageUrlUniqueIdx: uniqueIndex("video_assets_image_url_unique_idx").on(t.imageUrl),
+}));
+
+/**
  * IUL client intake: resumable, autosaving data-collection sessions.
  * `data` holds the form answers (sensitive fields encrypted at rest). The CRM contact is
  * the system of record; this table is the live working store + audit during capture.

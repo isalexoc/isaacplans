@@ -33,7 +33,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       kind:          "images",
       category:      loaded.source.category ?? null,
       voiceLanguage: loaded.locale,
-      input:         { locale: loaded.locale },
+      input:         { locale: loaded.locale, reuseAssets: body.reuseAssets, preferClipAssets: body.preferClipAssets },
       jobState:      { step: "queued", progress: 0, stageLabel: "Planning storyboard" },
     });
     const origin = new URL(req.url).origin;

@@ -19,7 +19,10 @@ export interface VideoImageStudioProps {
   canGenerate: boolean;            // false → show a hint (e.g. no script yet)
   disabledHint?: string;
   /** Phase A — start a durable image-build job; returns its jobId. */
-  startImages: (locale: SocialLocale) => Promise<{ jobId: string }>;
+  startImages: (
+    locale: SocialLocale,
+    opts?: { reuseAssets?: boolean; preferClipAssets?: boolean },
+  ) => Promise<{ jobId: string }>;
   /** Regenerate one scene's image from a concept (fast, synchronous); returns the new URL. */
   regenerateImage: (concept: string, sceneIndex: number, locale: SocialLocale) => Promise<string>;
   /** Phase B — start a durable render job (presenter → compose → render → finalize). */
@@ -98,6 +101,10 @@ export function VideoImageStudio({
   const [renderStartedAt, setRenderStartedAt] = useState<number | undefined>();
   const [imagesView, setImagesView] = useState<SocialVideoJobView | null>(null);
 
+  // Cross-post asset library reuse — defaults ON (undefined → true) so existing posts and new
+  // ones both save money by default; explicitly saved `false` sticks.
+  const [reuseAssets, setReuseAssets] = useState<boolean>(initialStoryboard?.reuseAssets ?? true);
+
   // Cinematic motion (Veo 3.1)
   const cinematicSupported = Boolean(startClip);
   const [cinematic, setCinematic]     = useState<boolean>(Boolean(initialStoryboard?.cinematic));
@@ -167,14 +174,23 @@ export function VideoImageStudio({
     return { ...sb, cinematic: c, veoTier: t, veoDurationSec: d };
   }
 
-  // Apply both presenter + cinematic settings onto a (possibly fresh) storyboard.
+  // Stamp the reuse-library toggle onto a storyboard (so it round-trips through Sanity).
+  function withReuseAssets(sb: VideoStoryboard, r: boolean = reuseAssets): VideoStoryboard {
+    return { ...sb, reuseAssets: r };
+  }
+
+  // Apply presenter + cinematic + reuse settings onto a (possibly fresh) storyboard.
   function decorate(sb: VideoStoryboard): VideoStoryboard {
-    return withCinematic(withPresenter(sb));
+    return withReuseAssets(withCinematic(withPresenter(sb)));
   }
 
   function toggleCinematic(value: boolean) {
     setCinematic(value);
     if (storyboard) commitStoryboard(withCinematic(storyboard, value));
+  }
+  function toggleReuseAssets(value: boolean) {
+    setReuseAssets(value);
+    if (storyboard) commitStoryboard(withReuseAssets(storyboard, value));
   }
   function changeTier(t: VeoTier) {
     setVeoTier(t);
@@ -398,7 +414,7 @@ export function VideoImageStudio({
     setBusyImages(true);
     let jobId: string;
     try {
-      ({ jobId } = await startImages(voiceLang));
+      ({ jobId } = await startImages(voiceLang, { reuseAssets, preferClipAssets: cinematic }));
     } catch (err) {
       if (aliveRef.current) { setError(err instanceof Error ? err.message : "Could not start image generation."); setBusyImages(false); }
       return;
@@ -609,6 +625,29 @@ export function VideoImageStudio({
           </span>
         </div>
       )}
+
+      {/* Reuse cross-post asset library toggle */}
+      <div className="flex items-center gap-3 flex-wrap">
+        <span className="text-xs font-medium text-muted-foreground">Reuse asset library:</span>
+        <button
+          type="button"
+          role="switch"
+          aria-checked={reuseAssets}
+          disabled={anyBusy}
+          onClick={() => toggleReuseAssets(!reuseAssets)}
+          className={cn(
+            "relative inline-flex h-5 w-9 items-center rounded-full transition-colors disabled:opacity-50",
+            reuseAssets ? "bg-blue-600" : "bg-muted-foreground/30"
+          )}
+        >
+          <span className={cn("inline-block h-4 w-4 transform rounded-full bg-white transition-transform", reuseAssets ? "translate-x-4" : "translate-x-0.5")} />
+        </button>
+        <span className="text-xs text-muted-foreground">
+          {cinematic
+            ? "Reuse a similar image or clip from past posts before generating a new one — prefers a clip when one matches"
+            : "Reuse a similar image from past posts before generating a new one"}
+        </span>
+      </div>
 
       {/* Phase A trigger / image controls */}
       {!hasImages ? (

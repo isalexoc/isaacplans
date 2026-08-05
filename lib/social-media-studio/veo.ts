@@ -1,4 +1,5 @@
 import cloudinary from "@/config/cloudinary";
+import { registerClipAsset } from "./video-asset-library";
 
 // ─── Google Veo 3.1 image-to-video (Gemini API) ──────────────────────────────────
 // Animates an approved scene image into a short cinematic clip. Async: submit a
@@ -29,11 +30,29 @@ function getApiKey(): string {
   return k;
 }
 
+// Camera moves cycled per scene so a video's clips don't all read as the same slow push-in
+// (mirrors the Ken Burns rotation used for still scenes in the Shotstack renderer).
+const VEO_CAMERA_MOVES = [
+  "a slow, steady push in toward the subject",
+  "a gentle drift to the left, parallax revealing depth",
+  "a slow pull back, quietly opening up the space",
+  "an almost imperceptible handheld float, breathing with the moment",
+  "a slow tilt down that settles on the subject",
+  "a gentle drift to the right with soft parallax",
+];
+
 // Tame, motion-focused prompt that discourages the morphing/warping artifacts that
-// image-to-video is prone to.
-export function buildVeoPrompt(imageConcept: string): string {
+// image-to-video is prone to, while framing the clip as one observed story beat.
+export function buildVeoPrompt(imageConcept: string, sceneIndex = 0): string {
   const c = (imageConcept ?? "").trim() || "the scene";
-  return `Subtle, photorealistic cinematic motion. ${c}. Gentle natural movement and a slow camera push-in; keep faces and hands stable and lifelike; no morphing, no distortion, no text or captions.`;
+  const move = VEO_CAMERA_MOVES[sceneIndex % VEO_CAMERA_MOVES.length];
+  return [
+    `A single continuous cinematic shot from a documentary short film. ${c}.`,
+    `Camera: ${move}.`,
+    `Motion: subtle and real — natural micro-movements only (a slow blink, a breath, hair or fabric shifting, light changing softly). The moment should feel alive and observed, never performed or acted.`,
+    `Keep faces, hands and body proportions completely stable and lifelike; absolutely no morphing, warping, melting, extra fingers or identity drift.`,
+    `No text, captions, logos or watermarks.`,
+  ].join(" ");
 }
 
 // Veo only outputs 16:9 or 9:16. Our scene images are 2:3 (taller-but-wider than 9:16), so
@@ -59,6 +78,7 @@ export async function submitSceneClip(opts: {
   tier?: VeoTier;
   durationSec?: 4 | 6 | 8;
   aspectRatio?: "9:16" | "16:9";
+  sceneIndex?: number;   // cycles the camera move so clips don't all look identical
 }): Promise<{ operationName: string }> {
   const key   = getApiKey();
   const model = VEO_MODELS[opts.tier ?? "lite"];
@@ -66,7 +86,7 @@ export async function submitSceneClip(opts: {
 
   const body = {
     instances: [{
-      prompt: buildVeoPrompt(opts.imageConcept),
+      prompt: buildVeoPrompt(opts.imageConcept, opts.sceneIndex),
       // predictLongRunning uses the Vertex-style image field (NOT inlineData).
       image: { bytesBase64Encoded: image.data, mimeType: image.mimeType },
     }],
@@ -93,7 +113,8 @@ export async function submitSceneClip(opts: {
 
 export async function getSceneClipStatus(
   operationName: string,
-  category?: string
+  category?: string,
+  meta?: { imageUrl?: string; imageConcept?: string; clipDurationSec?: number; sourcePostId?: string },
 ): Promise<{ status: "running" | "done"; videoUrl?: string }> {
   const key = getApiKey();
 
@@ -128,6 +149,17 @@ export async function getSceneClipStatus(
     );
     stream.end(bytes);
   });
+
+  if (meta?.imageUrl) {
+    await registerClipAsset({
+      imageUrl:        meta.imageUrl,
+      videoClipUrl:    videoUrl,
+      clipDurationSec: meta.clipDurationSec,
+      concept:         meta.imageConcept,
+      category,
+      sourcePostId:    meta.sourcePostId,
+    });
+  }
 
   return { status: "done", videoUrl };
 }

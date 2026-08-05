@@ -72,8 +72,8 @@ export function VideoGenerator({
       canGenerate={Boolean(videoScript?.fullScript)}
       disabledHint="Generate a video script first to enable AI video."
       onStoryboardChange={onStoryboardChange}
-      startImages={async (locale) => {
-        const data = await postJson(`${await base()}/generate-video-images`, { locale });
+      startImages={async (locale, opts) => {
+        const data = await postJson(`${await base()}/generate-video-images`, { locale, ...opts });
         return { jobId: data.jobId as string };
       }}
       regenerateImage={async (concept, sceneIndex, locale) => {

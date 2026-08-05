@@ -58,8 +58,8 @@ export function HistoryVideoGenerator({
       initialVideoUrl={initialVideoUrl}
       canGenerate={Boolean(videoScript?.fullScript)}
       disabledHint="This post has no video script yet."
-      startImages={async (locale) => {
-        const data = await postJson(`${base}/generate-video-images`, { locale });
+      startImages={async (locale, opts) => {
+        const data = await postJson(`${base}/generate-video-images`, { locale, ...opts });
         return { jobId: data.jobId as string };
       }}
       regenerateImage={async (concept, sceneIndex, locale) => {

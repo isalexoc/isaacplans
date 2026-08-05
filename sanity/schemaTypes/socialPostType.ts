@@ -240,6 +240,7 @@ export const socialPostType = defineType({
         { name: "veoTier",             title: "Veo Tier",              type: "string" },
         { name: "veoDurationSec",      title: "Veo Clip Length (s)",   type: "number" },
         { name: "scriptHash", title: "Script Hash", type: "string", hidden: true, description: "Fingerprint of the script this narration was built from" },
+        { name: "reuseAssets", title: "Reuse Asset Library", type: "boolean", description: "Check the cross-post asset library for a similar image/clip before generating a fresh one" },
         {
           name: "scenes",
           title: "Scenes",

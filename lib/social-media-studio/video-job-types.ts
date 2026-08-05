@@ -68,6 +68,8 @@ export type SocialVideoJobInput = {
   storyboard?: VideoStoryboard;   // render (with presenter/cinematic flags), or images-after-build
   locale?: SocialLocale;          // images
   presenter?: boolean;            // render — whether to run the HeyGen phase
+  reuseAssets?: boolean;          // images — check the asset library before generating each scene
+  preferClipAssets?: boolean;     // images — when reusing, prefer a match that already has a Veo clip
   // clip
   imageUrl?: string;
   imageConcept?: string;

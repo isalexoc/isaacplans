@@ -43,6 +43,7 @@ export function toStoryboardDoc(sb: VideoStoryboard) {
     veoTier:             sb.veoTier ?? null,
     veoDurationSec:      sb.veoDurationSec ?? null,
     scriptHash:          sb.scriptHash ?? null,
+    reuseAssets:         sb.reuseAssets ?? true,
     scenes: sb.scenes.map((s, i) => ({
       _key:         `sc_${i}`,
       narration:    s.narration,
