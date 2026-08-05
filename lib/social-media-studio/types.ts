@@ -150,6 +150,8 @@ export interface VideoStoryboard {
   presenterPlacement?: "bottom-right" | "bottom-left"; // corner for the presenter (default bottom-right)
   presenterAvatarId?: string;  // in-app picked HeyGen avatar (overrides env default)
   presenterAvatarName?: string; // display label for the picked avatar
+  presenterAvatarType?: "avatar" | "talking_photo"; // custom photo-avatar looks need the
+                                // talking_photo payload shape; stock/instant avatars don't
   presenterVoiceId?: string;   // in-app picked HeyGen voice (overrides env default)
   presenterVoiceName?: string; // display label for the picked voice
   cinematic?: boolean;         // true → animated scenes use their Veo clip instead of the still

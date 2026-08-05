@@ -234,6 +234,7 @@ export const socialPostType = defineType({
         { name: "presenterPlacement", title: "Presenter Corner",  type: "string" },
         { name: "presenterAvatarId",   title: "Presenter Avatar ID",   type: "string" },
         { name: "presenterAvatarName", title: "Presenter Avatar Name", type: "string" },
+        { name: "presenterAvatarType", title: "Presenter Avatar Type", type: "string", description: "avatar | talking_photo (custom photo-avatar looks use talking_photo)" },
         { name: "presenterVoiceId",    title: "Presenter Voice ID",    type: "string" },
         { name: "presenterVoiceName",  title: "Presenter Voice Name",  type: "string" },
         { name: "cinematic",           title: "Cinematic Motion (Veo)", type: "boolean" },

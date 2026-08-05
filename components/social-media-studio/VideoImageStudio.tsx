@@ -82,6 +82,7 @@ export function VideoImageStudio({
   const [presenterSel, setPresenterSel] = useState<PresenterSelection>({
     avatarId:   initialStoryboard?.presenterAvatarId,
     avatarName: initialStoryboard?.presenterAvatarName,
+    avatarType: initialStoryboard?.presenterAvatarType,
     voiceId:    initialStoryboard?.presenterVoiceId,
     voiceName:  initialStoryboard?.presenterVoiceName,
   });
@@ -140,6 +141,7 @@ export function VideoImageStudio({
       presenter:           p,
       presenterAvatarId:   s.avatarId,
       presenterAvatarName: s.avatarName,
+      presenterAvatarType: s.avatarType,
       presenterVoiceId:    s.voiceId,
       presenterVoiceName:  s.voiceName,
     };

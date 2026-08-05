@@ -15,6 +15,7 @@ interface Body {
   locale?: SocialLocale;
   avatarId?: string;        // in-app picked avatar (overrides env default)
   voiceId?: string;         // in-app picked voice (overrides env default)
+  avatarType?: "avatar" | "talking_photo"; // custom photo-avatar looks need talking_photo
 }
 
 export async function POST(req: Request) {
@@ -36,11 +37,12 @@ export async function POST(req: Request) {
     );
   }
 
-  const avatarId = body.avatarId || body.storyboard?.presenterAvatarId;
-  const voiceId  = body.voiceId  || body.storyboard?.presenterVoiceId;
+  const avatarId   = body.avatarId || body.storyboard?.presenterAvatarId;
+  const voiceId    = body.voiceId  || body.storyboard?.presenterVoiceId;
+  const avatarType = body.avatarType || body.storyboard?.presenterAvatarType;
 
   try {
-    const { videoId } = await submitPresenterVideo(narration, locale, { avatarId, voiceId });
+    const { videoId } = await submitPresenterVideo(narration, locale, { avatarId, voiceId, avatarType });
     const response: SocialStudioResponse<{ presenterVideoId: string }> = {
       success: true,
       data: { presenterVideoId: videoId },

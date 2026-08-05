@@ -74,6 +74,7 @@ interface SocialPostDetail {
     presenterPlacement?: string;
     presenterAvatarId?: string;
     presenterAvatarName?: string;
+    presenterAvatarType?: string;
     presenterVoiceId?: string;
     presenterVoiceName?: string;
     cinematic?: boolean;
@@ -152,6 +153,7 @@ export default async function SocialPostDetailPage({
         presenterPlacement: post.videoStoryboard.presenterPlacement === "bottom-left" ? "bottom-left" : "bottom-right",
         presenterAvatarId:   post.videoStoryboard.presenterAvatarId,
         presenterAvatarName: post.videoStoryboard.presenterAvatarName,
+        presenterAvatarType: post.videoStoryboard.presenterAvatarType === "talking_photo" ? "talking_photo" : undefined,
         presenterVoiceId:    post.videoStoryboard.presenterVoiceId,
         presenterVoiceName:  post.videoStoryboard.presenterVoiceName,
         cinematic:       post.videoStoryboard.cinematic ?? false,

@@ -37,6 +37,7 @@ export function toStoryboardDoc(sb: VideoStoryboard) {
     presenterPlacement:  sb.presenterPlacement ?? null,
     presenterAvatarId:   sb.presenterAvatarId ?? null,
     presenterAvatarName: sb.presenterAvatarName ?? null,
+    presenterAvatarType: sb.presenterAvatarType ?? null,
     presenterVoiceId:    sb.presenterVoiceId ?? null,
     presenterVoiceName:  sb.presenterVoiceName ?? null,
     cinematic:           sb.cinematic ?? false,

@@ -50,7 +50,7 @@ function heygenVoiceFor(locale: SocialLocale): string | undefined {
 export async function submitPresenterVideo(
   narration: string,
   locale: SocialLocale,
-  opts?: { avatarId?: string; voiceId?: string }
+  opts?: { avatarId?: string; voiceId?: string; avatarType?: HeyGenAvatarType }
 ): Promise<{ videoId: string }> {
   const apiKey = process.env.HEYGEN_API_KEY;
   if (!apiKey) throw new Error("HEYGEN_API_KEY is not configured — disable the presenter toggle to render faceless.");
@@ -65,10 +65,16 @@ export async function submitPresenterVideo(
   const text = narration.trim();
   if (!text) throw new Error("No narration text to send to the presenter.");
 
+  // Custom avatars built from photos ("looks" inside an avatar group) are talking photos and
+  // take a completely different character shape than HeyGen's stock/instant avatars.
+  const character = opts?.avatarType === "talking_photo"
+    ? { type: "talking_photo", talking_photo_id: avatarId }
+    : { type: "avatar", avatar_id: avatarId, avatar_style: "normal" };
+
   const body = {
     video_inputs: [
       {
-        character: { type: "avatar", avatar_id: avatarId, avatar_style: "normal" },
+        character,
         voice:     { type: "text", input_text: text, voice_id: voiceId },
         // Solid color background → chroma-keyed out by JSON2Video.
         background: { type: "color", value: HEYGEN_CHROMA_COLOR },
@@ -146,12 +152,24 @@ const HEYGEN_VOICES_URL  = "https://api.heygen.com/v2/voices";
 const CATALOG_TTL_MS      = 6 * 60 * 60 * 1000; // in-memory (per warm instance)
 const CATALOG_REVALIDATE_S = 24 * 60 * 60;      // Vercel Data Cache (shared across instances)
 
+/**
+ * Stock/instant avatars use `{ type: "avatar", avatar_id }`; a custom avatar built from photos
+ * is a "look" inside an avatar group and uses `{ type: "talking_photo", talking_photo_id }`.
+ * The two are NOT interchangeable in the generate payload, so the kind travels with the pick.
+ */
+export type HeyGenAvatarType = "avatar" | "talking_photo";
+
 export interface HeyGenAvatar {
   avatarId: string;
   name: string;
   gender?: string;
   previewImageUrl?: string;
   previewVideoUrl?: string;
+  type?: HeyGenAvatarType;
+  /** Photo-avatar looks carry the voice trained alongside them (often your own cloned voice). */
+  defaultVoiceId?: string;
+  /** Owning avatar-group name, so "Isaac Orraiz · Black Blazer" reads sensibly in the picker. */
+  groupName?: string;
 }
 
 export interface HeyGenVoice {
@@ -212,7 +230,53 @@ function toAvatar(a: Record<string, unknown>): HeyGenAvatar {
     gender:          a.gender ? String(a.gender) : undefined,
     previewImageUrl: a.preview_image_url ? String(a.preview_image_url) : undefined,
     previewVideoUrl: a.preview_video_url ? String(a.preview_video_url) : undefined,
+    type:            "avatar",
   };
+}
+
+/** One "look" from a private avatar group → a selectable talking-photo presenter. */
+function lookToAvatar(look: Record<string, unknown>, groupName?: string): HeyGenAvatar {
+  return {
+    avatarId:        String(look.id),
+    name:            String(look.name ?? look.id),
+    gender:          look.gender ? String(look.gender) : undefined,
+    previewImageUrl: look.preview_image_url ? String(look.preview_image_url) : undefined,
+    type:            "talking_photo",
+    defaultVoiceId:  look.default_voice_id ? String(look.default_voice_id) : undefined,
+    groupName,
+  };
+}
+
+const HEYGEN_GROUPS_URL = "https://api.heygen.com/v3/avatars";
+const HEYGEN_LOOKS_URL  = "https://api.heygen.com/v3/avatars/looks";
+
+/**
+ * Your OWN avatars: every look across every private avatar group, flattened into one
+ * selectable list. This is the only place a custom photo-avatar's outfits/looks surface —
+ * they are absent from the stock `/v2/avatars` list the main browser paginates.
+ */
+export async function listMyHeyGenAvatars(): Promise<{ avatars: HeyGenAvatar[] }> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const groupsRes = (await fetchHeyGen(`${HEYGEN_GROUPS_URL}?ownership=private&limit=50`, true)) as any;
+  const groups: Record<string, unknown>[] = Array.isArray(groupsRes?.data) ? groupsRes.data : [];
+
+  const perGroup = await Promise.all(
+    groups.map(async (g) => {
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const res = (await fetchHeyGen(`${HEYGEN_LOOKS_URL}?group_id=${encodeURIComponent(String(g.id))}`, true)) as any;
+        const looks: Record<string, unknown>[] = Array.isArray(res?.data) ? res.data : [];
+        return looks
+          .filter((l) => !l.status || String(l.status) === "completed")
+          .map((l) => lookToAvatar(l, g.name ? String(g.name) : undefined));
+      } catch (e) {
+        console.warn(`[heygen] looks fetch failed for group ${String(g.id)}:`, (e as Error).message);
+        return [];
+      }
+    }),
+  );
+
+  return { avatars: perGroup.flat() };
 }
 
 function toVoice(v: Record<string, unknown>): HeyGenVoice {
@@ -238,7 +302,18 @@ export async function findHeyGenAvatarById(avatarId: string): Promise<HeyGenAvat
 
   let hit = match(await loadAvatarCatalog());
   if (!hit) hit = match(await loadAvatarCatalog(true));
-  return hit ? toAvatar(hit) : null;
+  if (hit) return toAvatar(hit);
+
+  // Not a stock/instant avatar — it may be one of your own photo-avatar looks, which live
+  // in the private avatar groups rather than the main catalog.
+  try {
+    const { avatars } = await listMyHeyGenAvatars();
+    const look = avatars.find((a) => a.avatarId === id);
+    if (look) return look;
+  } catch (e) {
+    console.warn("[heygen] private look lookup failed:", (e as Error).message);
+  }
+  return null;
 }
 
 /** Resolve one voice by its exact HeyGen id (same fresh-catalog retry as avatars). */

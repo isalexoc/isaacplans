@@ -1,6 +1,10 @@
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
-import { listHeyGenAvatars, findHeyGenAvatarById } from "@/lib/social-media-studio/heygen-presenter";
+import {
+  listHeyGenAvatars,
+  findHeyGenAvatarById,
+  listMyHeyGenAvatars,
+} from "@/lib/social-media-studio/heygen-presenter";
 
 // HeyGen's /v2/avatars can take ~60s+ to respond (server-side, not payload size), so the
 // first uncached fetch needs generous headroom. Subsequent calls hit the cached catalog.
@@ -22,6 +26,27 @@ export async function GET(req: Request) {
       return NextResponse.json({ success: true, data: { avatar } });
     } catch (err) {
       console.error("[heygen/avatars] id lookup error:", err);
+      return NextResponse.json({ success: false, error: (err as Error).message }, { status: 500 });
+    }
+  }
+
+  // ?scope=mine → your own avatar groups' looks (custom photo avatars + their outfits).
+  if (searchParams.get("scope") === "mine") {
+    try {
+      const { avatars } = await listMyHeyGenAvatars();
+      const q = (searchParams.get("search") ?? "").trim().toLowerCase();
+      const filtered = q
+        ? avatars.filter((a) =>
+            a.name.toLowerCase().includes(q) ||
+            (a.groupName ?? "").toLowerCase().includes(q) ||
+            a.avatarId.toLowerCase().includes(q))
+        : avatars;
+      return NextResponse.json({
+        success: true,
+        data: { avatars: filtered, total: filtered.length, offset: 0, limit: filtered.length },
+      });
+    } catch (err) {
+      console.error("[heygen/avatars] scope=mine error:", err);
       return NextResponse.json({ success: false, error: (err as Error).message }, { status: 500 });
     }
   }

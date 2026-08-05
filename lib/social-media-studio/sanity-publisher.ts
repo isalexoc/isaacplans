@@ -139,6 +139,7 @@ export async function publishSocialPost(
             presenterPlacement:  req.videoStoryboard.presenterPlacement ?? null,
             presenterAvatarId:   req.videoStoryboard.presenterAvatarId ?? null,
             presenterAvatarName: req.videoStoryboard.presenterAvatarName ?? null,
+            presenterAvatarType: req.videoStoryboard.presenterAvatarType ?? null,
             presenterVoiceId:    req.videoStoryboard.presenterVoiceId ?? null,
             presenterVoiceName:  req.videoStoryboard.presenterVoiceName ?? null,
             cinematic:           req.videoStoryboard.cinematic ?? false,

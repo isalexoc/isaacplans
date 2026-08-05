@@ -16,6 +16,7 @@ import type { SocialLocale } from "@/lib/social-media-studio/types";
 export interface PresenterSelection {
   avatarId?: string;
   avatarName?: string;
+  avatarType?: "avatar" | "talking_photo";
   voiceId?: string;
   voiceName?: string;
 }
@@ -72,6 +73,7 @@ export function PresenterPicker({ open, onOpenChange, locale, current, onConfirm
   const [loadingV, setLoadingV] = useState(false);
   const [search, setSearch]   = useState("");
   const [aGender, setAGender] = useState<Gender>("");
+  const [mine, setMine]       = useState(false);   // browse your own avatar groups' looks
   const [page, setPage]       = useState(0);
   const [total, setTotal]     = useState(0);
   const AVATAR_PAGE_SIZE = 40;
@@ -111,7 +113,7 @@ export function PresenterPicker({ open, onOpenChange, locale, current, onConfirm
       const r = await fetch(`/api/admin/social-media-studio/heygen/avatars?id=${encodeURIComponent(id)}`);
       const d = await r.json();
       const found: HeyGenAvatar | null = d?.success ? d.data.avatar : null;
-      setSel((s) => ({ ...s, avatarId: id, avatarName: found?.name ?? "Custom avatar" }));
+      setSel((s) => ({ ...s, avatarId: id, avatarName: found?.name ?? "Custom avatar", avatarType: found?.type }));
       setAIdMsg(found
         ? `Matched “${found.name}” — selected.`
         : "Not in the HeyGen catalog yet, but the ID will be used as typed.");
@@ -146,6 +148,25 @@ export function PresenterPicker({ open, onOpenChange, locale, current, onConfirm
   // Search / gender changes restart at page 0.
   function onSearchChange(v: string) { setSearch(v); setPage(0); }
   function onAvatarGender(g: Gender) { setAGender(g); setPage(0); }
+  function onScopeChange(v: boolean) { setMine(v); setPage(0); setSearch(""); }
+
+  /**
+   * Apply an avatar pick. Carries the avatar KIND (stock avatar vs. your own photo-avatar
+   * look) because the two need different HeyGen payloads, and adopts the look's own trained
+   * voice when you haven't picked one — that voice is usually your cloned voice.
+   */
+  async function pickAvatar(a: HeyGenAvatar) {
+    setSel((s) => ({ ...s, avatarId: a.avatarId, avatarName: a.name, avatarType: a.type }));
+    if (!a.defaultVoiceId || sel.voiceId) return;
+    try {
+      const r = await fetch(`/api/admin/social-media-studio/heygen/voices?id=${encodeURIComponent(a.defaultVoiceId)}`);
+      const d = await r.json();
+      const v: HeyGenVoice | null = d?.success ? d.data.voice : null;
+      setSel((s) => ({ ...s, voiceId: a.defaultVoiceId, voiceName: v?.name ?? "Avatar's own voice" }));
+    } catch {
+      setSel((s) => ({ ...s, voiceId: a.defaultVoiceId, voiceName: "Avatar's own voice" }));
+    }
+  }
 
   // Fetch one page of avatars (debounced). Only this page is held client-side.
   useEffect(() => {
@@ -154,14 +175,15 @@ export function PresenterPicker({ open, onOpenChange, locale, current, onConfirm
     const t = setTimeout(() => {
       const qs = new URLSearchParams({ offset: String(page * AVATAR_PAGE_SIZE), limit: String(AVATAR_PAGE_SIZE) });
       if (search.trim()) qs.set("search", search.trim());
-      if (aGender) qs.set("gender", aGender);
+      if (mine) qs.set("scope", "mine");        // your own looks — not paginated, no gender facet
+      else if (aGender) qs.set("gender", aGender);
       fetch(`/api/admin/social-media-studio/heygen/avatars?${qs}`)
         .then((r) => r.json())
         .then((d) => { if (d.success) { setAvatars(d.data.avatars); setTotal(d.data.total); } })
         .finally(() => setLoadingA(false));
     }, 300);
     return () => clearTimeout(t);
-  }, [open, search, aGender, page]);
+  }, [open, search, aGender, page, mine]);
 
   // Fetch voices on language/gender/search change (debounced for the search box).
   useEffect(() => {
@@ -243,7 +265,23 @@ export function PresenterPicker({ open, onOpenChange, locale, current, onConfirm
                   className="pl-8"
                 />
               </div>
-              {genderBtns(aGender, onAvatarGender)}
+              {!mine && genderBtns(aGender, onAvatarGender)}
+            </div>
+
+            {/* Scope: HeyGen's stock library vs. your own avatar groups (and their looks). */}
+            <div className="flex gap-1">
+              {([[false, "All avatars"], [true, "My avatars & looks"]] as const).map(([v, label]) => (
+                <button
+                  key={label}
+                  onClick={() => onScopeChange(v)}
+                  className={cn(
+                    "px-2.5 py-1 text-xs border rounded-md transition-colors",
+                    mine === v ? "bg-blue-600 text-white border-blue-600" : "border-border hover:bg-muted"
+                  )}
+                >
+                  {label}
+                </button>
+              ))}
             </div>
 
             <IdEntryRow
@@ -256,8 +294,8 @@ export function PresenterPicker({ open, onOpenChange, locale, current, onConfirm
               message={aIdMsg}
             />
 
-            {/* Style quick-filters (name-based shortcuts) */}
-            <div className="flex flex-wrap gap-1">
+            {/* Style quick-filters (name-based shortcuts) — stock library only */}
+            <div className={cn("flex flex-wrap gap-1", mine && "hidden")}>
               <button
                 onClick={() => onSearchChange("")}
                 className={cn(
@@ -295,12 +333,12 @@ export function PresenterPicker({ open, onOpenChange, locale, current, onConfirm
                     return (
                       <button
                         key={a.avatarId}
-                        onClick={() => setSel((s) => ({ ...s, avatarId: a.avatarId, avatarName: a.name }))}
+                        onClick={() => void pickAvatar(a)}
                         className={cn(
                           "relative block w-full rounded-md border overflow-hidden text-left group",
                           selected ? "ring-2 ring-blue-600 border-blue-600" : "hover:border-blue-400"
                         )}
-                        title={a.name}
+                        title={a.groupName ? `${a.groupName} · ${a.name}` : a.name}
                       >
                         {/* Aspect ratio lives on this plain div — set on the <button> it sizes
                             unreliably in iPadOS/WebKit and crops the portrait to just the forehead. */}
@@ -327,7 +365,9 @@ export function PresenterPicker({ open, onOpenChange, locale, current, onConfirm
                   })}
                   {avatars.length === 0 && (
                     <p className="col-span-4 text-sm text-muted-foreground py-8 text-center">
-                      No avatars — try a different search.
+                      {mine
+                        ? "No custom avatars found on this HeyGen account."
+                        : "No avatars — try a different search."}
                     </p>
                   )}
                 </div>

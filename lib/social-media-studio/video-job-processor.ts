@@ -347,7 +347,9 @@ async function handlePresenter(job: VideoJobRow, storyboard: VideoStoryboard, st
   if (!state.presenterVideoId && !state.presenterVideoUrl) {
     try {
       const { videoId } = await submitPresenterVideo(fullNarration(storyboard), storyboard.voiceLanguage, {
-        avatarId: storyboard.presenterAvatarId, voiceId: storyboard.presenterVoiceId,
+        avatarId:   storyboard.presenterAvatarId,
+        voiceId:    storyboard.presenterVoiceId,
+        avatarType: storyboard.presenterAvatarType,
       });
       await updateJobProgress(job.id, {
         jobState: nextState(state, { step: "presenter", presenterVideoId: videoId }, stages, "Rendering avatar", 12),
