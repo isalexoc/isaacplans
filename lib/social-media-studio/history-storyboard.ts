@@ -1,5 +1,5 @@
 import { createClient, type SanityClient } from "next-sanity";
-import { buildVideoStoryboard } from "./video-generator";
+import { buildVideoStoryboard, hashScript } from "./video-generator";
 import type {
   VideoStoryboard,
   VideoScript,
@@ -42,6 +42,7 @@ export function toStoryboardDoc(sb: VideoStoryboard) {
     cinematic:           sb.cinematic ?? false,
     veoTier:             sb.veoTier ?? null,
     veoDurationSec:      sb.veoDurationSec ?? null,
+    scriptHash:          sb.scriptHash ?? null,
     scenes: sb.scenes.map((s, i) => ({
       _key:         `sc_${i}`,
       narration:    s.narration,
@@ -86,11 +87,19 @@ export async function loadSourceAndScript(
   return { source, videoScript, locale };
 }
 
+/** Hash of the currently-saved script, or null if the post has none yet. Cheap — no GPT call. */
+export async function latestScriptHash(id: string, locale?: SocialLocale): Promise<string | null> {
+  const loaded = await loadSourceAndScript(id, locale);
+  return loaded ? hashScript(loaded.videoScript) : null;
+}
+
 /**
  * Rebuild scene narration from the latest saved script while KEEPING the curated images
  * (mapped by index, reused cyclically if the scene count changed) + cinematic clips + presenter
- * picks. Guarantees the faceless video always speaks the user's most recently edited script.
- * Returns `current` unchanged when there's no saved script or no images yet.
+ * picks. Guarantees the video always speaks the user's most recently edited script — presenter
+ * or faceless alike. Skips the GPT rebuild entirely when the script hasn't changed since
+ * `current` was built (same `scriptHash`), and returns `current` unchanged when there's no
+ * saved script or no images yet.
  */
 export async function rebuildFromLatestScript(
   id: string,
@@ -98,6 +107,7 @@ export async function rebuildFromLatestScript(
 ): Promise<VideoStoryboard> {
   const loaded = await loadSourceAndScript(id, current.voiceLanguage);
   if (!loaded) return current;
+  if (current.scriptHash && current.scriptHash === hashScript(loaded.videoScript)) return current;
 
   const fresh = await buildVideoStoryboard(loaded.source, loaded.videoScript, current.voiceLanguage);
   const images = current.scenes.map((s) => s.imageUrl).filter(Boolean);

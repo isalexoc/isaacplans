@@ -155,6 +155,9 @@ export interface VideoStoryboard {
   cinematic?: boolean;         // true → animated scenes use their Veo clip instead of the still
   veoTier?: "lite" | "fast" | "standard"; // Veo quality tier for cinematic motion (default lite)
   veoDurationSec?: 4 | 6 | 8;  // Veo clip length per scene (default 6)
+  scriptHash?: string;         // fingerprint of the script this narration was built from — lets a
+                                // re-render detect "script unchanged" (skip the GPT rebuild) or
+                                // "script changed" (force a fresh avatar render instead of reusing one)
 }
 
 /**

@@ -79,6 +79,7 @@ interface SocialPostDetail {
     cinematic?: boolean;
     veoTier?: string;
     veoDurationSec?: number;
+    scriptHash?: string;
     scenes?: { narration?: string; onScreenText?: string; imageConcept?: string; imageUrl?: string; videoClipUrl?: string }[];
   };
 }
@@ -155,6 +156,7 @@ export default async function SocialPostDetailPage({
         cinematic:       post.videoStoryboard.cinematic ?? false,
         veoTier:         (post.videoStoryboard.veoTier as "lite" | "fast" | "standard" | undefined),
         veoDurationSec:  (post.videoStoryboard.veoDurationSec === 4 || post.videoStoryboard.veoDurationSec === 8 ? post.videoStoryboard.veoDurationSec : 6),
+        scriptHash:      post.videoStoryboard.scriptHash,
         scenes: post.videoStoryboard.scenes.map((s) => ({
           narration:    s.narration ?? "",
           onScreenText: s.onScreenText ?? "",

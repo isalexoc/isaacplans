@@ -2,6 +2,7 @@ import {
   getVideoJob,
   claimVideoJob,
   updateJobProgress,
+  updateJobInput,
   markJobDone,
   markJobFailed,
   type VideoJobRow,
@@ -281,13 +282,27 @@ async function processMusic(job: VideoJobRow): Promise<StepOutcome> {
   return { kind: "done" };
 }
 
-// ── render: presenter (optional) → compose → render poll → finalize ──
+// ── render: sync narration → presenter (optional) → compose → render poll → finalize ──
 async function processRender(job: VideoJobRow): Promise<StepOutcome> {
   const input = job.input ?? {};
-  const storyboard = input.storyboard;
+  let storyboard = input.storyboard;
   if (!storyboard?.scenes?.length) return { kind: "error", error: "Render job missing a storyboard", transient: false };
   const category = job.category ?? storyboard.category ?? undefined;
-  const state = job.jobState ?? {};
+  let state = job.jobState ?? {};
+
+  // Once per job: make sure the narration matches the LATEST saved script (keeping the
+  // existing images/clips) before doing anything else — covers presenter (so HeyGen speaks
+  // the current script) and faceless renders alike. A no-op (no GPT call) when the script
+  // hasn't changed since this storyboard's narration was built.
+  if (!state.scriptSynced) {
+    const synced = await rebuildFromLatestScript(job.sanityPostId, storyboard);
+    if (synced !== storyboard) {
+      await updateJobInput(job.id, { ...input, storyboard: synced });
+      storyboard = synced;
+    }
+    state = { ...state, scriptSynced: true };
+    await updateJobProgress(job.id, { jobState: state });
+  }
 
   const wantsPresenter = Boolean(storyboard.presenter && input.presenter !== false) && !state.presenterDropped;
   const step = (["presenter", "compose", "render"] as const).includes(state.step as never)
@@ -379,13 +394,11 @@ async function handleCompose(
     return { kind: "continue", delaySeconds: 3 };
   }
 
-  let finalStoryboard = storyboard;
-  if (presenterActive) {
-    await persistStoryboard(job.sanityPostId, storyboard);
-  } else {
-    // Faceless: re-derive narration from the latest saved script (keeps curated images/clips).
-    finalStoryboard = await rebuildFromLatestScript(job.sanityPostId, { ...storyboard, presenter: false });
-  }
+  // Narration is already synced to the latest saved script (see processRender). If the
+  // presenter got dropped this run (HeyGen failure → faceless fallback), record that so the
+  // studio doesn't show the presenter toggle still on for a video that actually rendered faceless.
+  const finalStoryboard = presenterActive ? storyboard : { ...storyboard, presenter: false };
+  await persistStoryboard(job.sanityPostId, finalStoryboard);
 
   const presenter = presenterActive
     ? { url: state.presenterVideoUrl!, durationSec: state.presenterDurationSec ?? finalStoryboard.durationSeconds }

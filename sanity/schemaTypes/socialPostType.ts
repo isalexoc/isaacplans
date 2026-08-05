@@ -239,6 +239,7 @@ export const socialPostType = defineType({
         { name: "cinematic",           title: "Cinematic Motion (Veo)", type: "boolean" },
         { name: "veoTier",             title: "Veo Tier",              type: "string" },
         { name: "veoDurationSec",      title: "Veo Clip Length (s)",   type: "number" },
+        { name: "scriptHash", title: "Script Hash", type: "string", hidden: true, description: "Fingerprint of the script this narration was built from" },
         {
           name: "scenes",
           title: "Scenes",

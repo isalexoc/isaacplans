@@ -105,16 +105,17 @@ export type ReusablePresenter = {
 /**
  * Find an already-rendered HeyGen avatar clip from a recent (failed/done) render job on
  * this post that a new render can reuse, so a retry after a compose/render failure doesn't
- * re-pay to render the avatar again. Only reused when the narration + avatar + voice that
- * produced it exactly match what the new render is about to submit — any change to the
- * script, picked avatar, or picked voice invalidates it.
+ * re-pay to render the avatar again. Only reused when the LATEST SAVED SCRIPT's hash + the
+ * picked avatar/voice exactly match what produced it — if the script was edited since (or the
+ * avatar/voice pick changed), reuse is skipped and a fresh avatar is rendered for the new words.
  */
 export async function findReusablePresenter(
   sanityPostId: string,
-  narration: string,
+  latestScriptHash: string | null,
   avatarId: string | undefined,
   voiceId: string | undefined,
 ): Promise<ReusablePresenter | null> {
+  if (!latestScriptHash) return null;
   const cutoff = new Date(Date.now() - PRESENTER_REUSE_WINDOW_MS);
   const rows = await db
     .select()
@@ -129,9 +130,7 @@ export async function findReusablePresenter(
     if (!state?.presenterVideoUrl || state.presenterDropped) continue;
 
     const sb = (row.input as SocialVideoJobInput | null)?.storyboard;
-    if (!sb) continue;
-    const prevNarration = sb.scenes.map((s) => s.narration.trim()).filter(Boolean).join(" ");
-    if (prevNarration !== narration) continue;
+    if (!sb?.scriptHash || sb.scriptHash !== latestScriptHash) continue;
     if ((sb.presenterAvatarId ?? undefined) !== avatarId) continue;
     if ((sb.presenterVoiceId ?? undefined) !== voiceId) continue;
 
@@ -142,6 +141,11 @@ export async function findReusablePresenter(
     };
   }
   return null;
+}
+
+/** Persist an updated job input (e.g. after re-syncing the storyboard's narration mid-job). */
+export async function updateJobInput(id: string, input: SocialVideoJobInput): Promise<void> {
+  await db.update(socialVideoJobs).set({ input, updatedAt: new Date() }).where(eq(socialVideoJobs.id, id));
 }
 
 export async function setJobQstashMessageId(id: string, qstashMessageId: string | null): Promise<void> {

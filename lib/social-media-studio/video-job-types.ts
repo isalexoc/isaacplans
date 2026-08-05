@@ -60,6 +60,7 @@ export type SocialVideoJobState = {
   veoOperationName?: string;
   durationSeconds?: number;
   lastError?: string;
+  scriptSynced?: boolean; // render already re-synced its narration to the latest saved script (once per job)
 };
 
 /** Self-contained inputs the worker needs (so it never depends on client state). */

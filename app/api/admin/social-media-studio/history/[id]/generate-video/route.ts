@@ -3,6 +3,7 @@ import { NextResponse, after } from "next/server";
 import { createVideoJob, findReusablePresenter } from "@/lib/social-media-studio/video-job-store";
 import { enqueueVideoJobTick } from "@/lib/social-media-studio/video-job-queue";
 import { runVideoJobInline, renderStages } from "@/lib/social-media-studio/video-job-processor";
+import { latestScriptHash } from "@/lib/social-media-studio/history-storyboard";
 import type { VideoRenderRequest, SocialStudioResponse } from "@/lib/social-media-studio/types";
 import type { SocialVideoJobState } from "@/lib/social-media-studio/video-job-types";
 
@@ -40,11 +41,13 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
     // A prior render on this post may have already paid to render the HeyGen avatar clip
     // (e.g. it failed later, during compose/render). Reuse it instead of re-rendering the
-    // avatar, as long as the narration/avatar/voice it was rendered for haven't changed.
+    // avatar, as long as the LATEST SAVED SCRIPT + picked avatar/voice it was rendered for
+    // haven't changed — the render job re-syncs to this same latest script either way, so
+    // this check is what actually decides "does the reused clip still speak the right words."
     if (storyboard.presenter) {
-      const narration = storyboard.scenes.map((s) => s.narration.trim()).filter(Boolean).join(" ");
+      const hash = await latestScriptHash(id, storyboard.voiceLanguage);
       const reusable = await findReusablePresenter(
-        id, narration, storyboard.presenterAvatarId, storyboard.presenterVoiceId,
+        id, hash, storyboard.presenterAvatarId, storyboard.presenterVoiceId,
       );
       if (reusable) {
         const stages = renderStages(true);

@@ -1,7 +1,9 @@
 import OpenAI from "openai";
+import { createHash } from "crypto";
 import cloudinary from "@/config/cloudinary";
 import { getDemographicHint, pickVariationMood } from "./image-generator";
 import { musicUrlForCategory } from "./video-music";
+import { generateCategoryMusic } from "./music-generator";
 import { HEYGEN_CHROMA_COLOR } from "./heygen-presenter";
 import { synthesizeNarration } from "./voiceover";
 import { shotstackProvider } from "./render/shotstack";
@@ -57,6 +59,7 @@ Rules:
 - "narration" is the exact words the voiceover will SPEAK for that scene — natural spoken sentences only. NO timestamps, NO stage directions, NO brackets, NO emojis, NO hashtags.
 - "onScreenText" is a SHORT punchy caption/headline (max ~6 words) burned on screen for that scene. Title Case. No ending period.
 - "imageConcept" is a SPECIFIC 1-2 sentence photographic scene description for a vertical background image that visually matches THIS scene's narration (subjects, emotion, setting, key visual detail). Each scene's imageConcept MUST be visually DISTINCT from the others. Do NOT use the word "insurance". No text or graphics in the scene.
+- Expressions must read as NATURAL and CANDID, not staged. Describe calm, warm, believable reactions (a soft genuine smile, quiet relief, present attention) — NEVER a gasping mouth, wide-eyed shock, jaw-drop surprise, or over-the-top "shocked/excited" stock-photo reaction. Restrained and real beats theatrical every time.
 - CRITICAL IMAGE SAFETY: imageConcept must always be WHOLESOME, POSITIVE and HOPEFUL — happy, healthy, dignified people in warm everyday settings (family at home, outdoors, a friendly advisor meeting, a person smiling). NEVER describe death, dying, funerals, coffins, caskets, graves, cemeteries, grief, crying, illness, disease, hospital beds, medical procedures, blood, injury, frailty, or anything somber, morbid or distressing — even if the narration mentions them. For sensitive topics, show the POSITIVE outcome (a protected, joyful family; peace of mind; a loving moment) instead.
 - The FIRST scene must be a scroll-stopping hook.
 - Keep total narration tight so the whole video fits the target duration when spoken at a natural pace (~2.5 words/second).
@@ -84,6 +87,13 @@ function buildStoryboardUserPrompt(
   ]
     .filter(Boolean)
     .join("\n");
+}
+
+/** Deterministic fingerprint of the script content a storyboard's narration was built from. */
+export function hashScript(script: Pick<VideoScript, "duration" | "hookScript" | "fullScript">): string {
+  return createHash("sha256")
+    .update(`${script.duration}|${script.hookScript}|${script.fullScript}`)
+    .digest("hex");
 }
 
 export async function buildVideoStoryboard(
@@ -123,7 +133,13 @@ export async function buildVideoStoryboard(
 
   if (scenes.length === 0) throw new Error("Storyboard produced no usable narration");
 
-  return { scenes, voiceLanguage, durationSeconds: videoScript.duration, category: source.category };
+  return {
+    scenes,
+    voiceLanguage,
+    durationSeconds: videoScript.duration,
+    category:        source.category,
+    scriptHash:      hashScript(videoScript),
+  };
 }
 
 // ─── Step 1b: Generate one portrait image per scene (Phase A) ─────────────────────
@@ -133,14 +149,16 @@ function buildVideoImagePrompt(concept: string, locale?: string): string {
   const mood = pickVariationMood();
   const demographic = getDemographicHint(locale);
   return [
-    `Cinematic vertical (9:16) professional photograph: ${concept}.`,
+    `Candid documentary-style vertical (9:16) photograph: ${concept}.`,
     `Lighting: ${mood}.`,
     `Camera: Canon EOS R5, 35mm f/1.8, natural depth of field, full-frame composition that fills a tall vertical portrait frame top to bottom.`,
-    `Mood: warm, positive, hopeful, emotionally authentic, hyper-realistic. Healthy, happy, dignified people in a bright, wholesome everyday setting.`,
+    `Mood: warm, positive, hopeful, emotionally authentic. Healthy, happy, dignified people in a bright, wholesome everyday setting.`,
     demographic,
+    `EXPRESSIONS: Natural, subtle, unposed expressions — a soft genuine smile or calm, present look, like a real candid moment caught mid-conversation. AVOID exaggerated or theatrical reactions: no gasping or wide-open mouths, no wide-eyed shock, no jazz-hands excitement, no forced ear-to-ear grins, no stock-photo "surprised at the camera" poses. Subtle and believable, not performative.`,
+    `REALISM: Natural skin with visible texture and pores, slight natural asymmetry in faces, realistic imperfect lighting and catchlights in the eyes. Avoid airbrushed, plastic, waxy, or overly-symmetrical "AI face" skin. This should read as an authentic photograph of real people, not a generated or overly-polished stock image.`,
     `PROHIBITED CONTENT: nothing morbid or distressing — no death, funerals, coffins, graves, illness, hospitals, injury, blood, or grief.`,
     `PROHIBITED: No text, words, numbers, signs, logos, watermarks, captions, or graphic overlays anywhere in the image.`,
-    `STYLE: Hyper-realistic professional photograph. Absolutely NOT an illustration, NOT vector art, NOT a painting, NOT a CGI render, NOT digital art. Real photography only.`,
+    `STYLE: Hyper-realistic photograph, candid and editorial rather than staged/glossy stock photography. Absolutely NOT an illustration, NOT vector art, NOT a painting, NOT a CGI render, NOT digital art. Real photography only.`,
   ].join(" ");
 }
 
@@ -504,6 +522,32 @@ const VIDEO_FPS    = 30;
 // Presenter clip size as a fraction of the frame — large, like a person standing in the corner.
 const PRESENTER_SCALE = Number(process.env.SHOTSTACK_PRESENTER_SCALE) || 0.62;
 
+// Shotstack's soundtrack has no loop — it just stops when the file ends, leaving silence for
+// the rest of the video. Our AI music is generated up front (before the real narration/avatar
+// length is known) at a nominal 30/60s, so it's often short. Re-fit it to the ACTUAL audio
+// length right before submitting, so the render never has a music track shorter than the video.
+// A tail buffer covers the closing fade-out; a fallback (env) loop track is left alone since we
+// don't control its length.
+const MUSIC_TAIL_BUFFER_SEC = 3;
+
+async function musicUrlFittingDuration(
+  storyboard: VideoStoryboard,
+  totalAudioSec: number,
+  category: string,
+): Promise<string | undefined> {
+  if (!storyboard.musicUrl || !process.env.ELEVENLABS_API_KEY) return storyboard.musicUrl;
+  try {
+    const { musicUrl } = await generateCategoryMusic({
+      category,
+      durationSeconds: Math.ceil(totalAudioSec + MUSIC_TAIL_BUFFER_SEC),
+    });
+    return musicUrl;
+  } catch (err) {
+    console.warn(`[video-generator] music re-fit failed, keeping the existing track: ${(err as Error).message}`);
+    return storyboard.musicUrl;
+  }
+}
+
 async function submitShotstackRender(
   storyboard: VideoStoryboard,
   presenter?: { url: string; durationSec: number }
@@ -547,6 +591,8 @@ async function submitShotstackRender(
       }
     : undefined;
 
+  const musicUrl = await musicUrlFittingDuration(storyboard, totalAudioSec, category);
+
   const plan: RenderPlan = {
     width:          VIDEO_WIDTH,
     height:         VIDEO_HEIGHT,
@@ -554,7 +600,7 @@ async function submitShotstackRender(
     scenes,
     narrationAudio,
     presenter:      presenterPlan,
-    musicUrl:       storyboard.musicUrl || musicUrlForCategory(category),
+    musicUrl:       musicUrl || musicUrlForCategory(category),
     captions:       true,
   };
 
