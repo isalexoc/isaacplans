@@ -317,19 +317,22 @@ export const FE_SECTIONS: FeSection[] = [
       },
       {
         key: "tobacco10yr",
-        labelEn: "In the past 10 years, have you used any form of tobacco or nicotine products, or had a blood pressure reading over 135/85?",
-        labelEs: "En los últimos 10 años, ¿ha usado algún producto de tabaco o nicotina, o ha tenido una lectura de presión arterial superior a 135/85?",
-        type: "select", required: true, crm: custom("tobacco_10yr"), crmLabel: "Tobacco/BP — past 10 years", options: YES_NO,
+        labelEn: "In the past 10 years, have you used any form of tobacco or nicotine products?",
+        labelEs: "En los últimos 10 años, ¿ha usado algún producto de tabaco o nicotina?",
+        type: "select", required: true, crm: custom("tobacco_10yr"), crmLabel: "Tobacco — past 10 years", options: YES_NO,
       },
+      // Narrowing chain: each shorter window is only worth asking if the longer one was a yes.
       {
         key: "tobacco5yr", labelEn: "In the past 5 years, have you used any form of tobacco or nicotine products?",
         labelEs: "En los últimos 5 años, ¿ha usado algún producto de tabaco o nicotina?",
         type: "select", required: true, crm: custom("tobacco_5yr"), crmLabel: "Tobacco — past 5 years", options: YES_NO,
+        showIf: { field: "tobacco10yr", equals: "yes" },
       },
       {
         key: "tobacco12mo", labelEn: "In the past 12 months, have you used any form of tobacco or nicotine products?",
         labelEs: "En los últimos 12 meses, ¿ha usado algún producto de tabaco o nicotina?",
         type: "select", required: true, crm: custom("tobacco_12mo"), crmLabel: "Tobacco — past 12 months", options: YES_NO,
+        showIf: { field: "tobacco5yr", equals: "yes" },
       },
     ],
   },
@@ -343,20 +346,25 @@ export const FE_SECTIONS: FeSection[] = [
         labelEs: "¿Alguna vez le han diagnosticado cáncer o ha tenido un derrame cerebral?",
         type: "select", required: true, crm: custom("cancer_stroke"), crmLabel: "Cancer or stroke history", options: YES_NO,
       },
+      // Only relevant once there's a cancer/stroke history, and each longer window is only
+      // worth asking while the answers keep coming back yes.
       {
         key: "cancerStrokeFree2yr", labelEn: "In the past 2 years, have you been cancer and stroke free?",
         labelEs: "En los últimos 2 años, ¿ha estado libre de cáncer y derrame cerebral?",
         type: "select", required: true, crm: custom("cancer_stroke_free_2yr"), crmLabel: "Cancer/stroke free — 2 years", options: YES_NO,
+        showIf: { field: "cancerStroke", equals: "yes" },
       },
       {
         key: "cancerStrokeFree5yr", labelEn: "In the past 5 years, have you been cancer and stroke free?",
         labelEs: "En los últimos 5 años, ¿ha estado libre de cáncer y derrame cerebral?",
         type: "select", required: true, crm: custom("cancer_stroke_free_5yr"), crmLabel: "Cancer/stroke free — 5 years", options: YES_NO,
+        showIf: { field: "cancerStrokeFree2yr", equals: "yes" },
       },
       {
         key: "cancerStrokeFree10yr", labelEn: "In the past 10 years, have you been cancer and stroke free?",
         labelEs: "En los últimos 10 años, ¿ha estado libre de cáncer y derrame cerebral?",
         type: "select", required: true, crm: custom("cancer_stroke_free_10yr"), crmLabel: "Cancer/stroke free — 10 years", options: YES_NO,
+        showIf: { field: "cancerStrokeFree5yr", equals: "yes" },
       },
     ],
   },
@@ -375,20 +383,24 @@ export const FE_SECTIONS: FeSection[] = [
         labelEs: "¿Ha sido hospitalizado(a) dos o más veces en los últimos 10 años?",
         type: "select", required: true, crm: custom("hospitalized_10yr"), crmLabel: "Hospitalized 2+ — 10 years", options: YES_NO,
       },
+      // Same narrowing chain as tobacco: a "no" on the 10-year window ends the line of questions.
       {
         key: "hospitalized5yr", labelEn: "Have you been hospitalized two or more times in the past 5 years?",
         labelEs: "¿Ha sido hospitalizado(a) dos o más veces en los últimos 5 años?",
         type: "select", required: true, crm: custom("hospitalized_5yr"), crmLabel: "Hospitalized 2+ — 5 years", options: YES_NO,
+        showIf: { field: "hospitalized10yr", equals: "yes" },
       },
       {
         key: "hospitalized3yr", labelEn: "Have you been hospitalized two or more times in the past 3 years?",
         labelEs: "¿Ha sido hospitalizado(a) dos o más veces en los últimos 3 años?",
         type: "select", required: true, crm: custom("hospitalized_3yr"), crmLabel: "Hospitalized 2+ — 3 years", options: YES_NO,
+        showIf: { field: "hospitalized5yr", equals: "yes" },
       },
       {
         key: "hospitalized6mo", labelEn: "Have you been hospitalized two or more times in the past 6 months?",
         labelEs: "¿Ha sido hospitalizado(a) dos o más veces en los últimos 6 meses?",
         type: "select", required: true, crm: custom("hospitalized_6mo"), crmLabel: "Hospitalized 2+ — 6 months", options: YES_NO,
+        showIf: { field: "hospitalized3yr", equals: "yes" },
       },
     ],
   },

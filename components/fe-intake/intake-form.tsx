@@ -67,6 +67,7 @@ import {
   fieldNote,
   fieldPlaceholder,
   optionLabel,
+  rowLabel,
   applyDrugToken,
   type FeLocale,
 } from "@/lib/fe-intake/ui-strings";
@@ -809,6 +810,9 @@ export default function FeIntakeForm({ token }: { token: string }) {
                   field={screen.field}
                   container={container}
                   locale={locale}
+                  eyebrow={
+                    screen.kind === "repeaterRow" ? rowEyebrow(screen.repeaterKey, screen.rowIndex, locale) : undefined
+                  }
                   onChangeField={handleChangeField}
                   onAddressResolve={(resolved) => handleAddressResolve(screen.field, resolved)}
                 />
@@ -844,16 +848,25 @@ export default function FeIntakeForm({ token }: { token: string }) {
   );
 }
 
+/** "Beneficiary 2" / "Medication 3" — tells the client which row they're filling in. */
+function rowEyebrow(repeaterKey: string, rowIndex: number, locale: FeLocale): string {
+  const field = fieldByKey(repeaterKey);
+  const label = field ? rowLabel(field, locale) : "";
+  return label ? `${label} ${rowIndex + 1}` : "";
+}
+
 function FieldScreen({
   field,
   container,
   locale,
+  eyebrow,
   onChangeField,
   onAddressResolve,
 }: {
   field: FeField;
   container: Record<string, unknown>;
   locale: FeLocale;
+  eyebrow?: string;
   onChangeField: (key: string, value: string) => void;
   onAddressResolve: (resolved: ResolvedAddress) => void;
 }) {
@@ -866,6 +879,9 @@ function FieldScreen({
 
   return (
     <div>
+      {eyebrow && (
+        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-brand">{eyebrow}</p>
+      )}
       <h1 className="text-2xl font-bold leading-snug text-gray-900 dark:text-gray-100">{headline}</h1>
       {fieldHelp(field, locale) && <p className="mt-2 text-sm text-muted-foreground">{fieldHelp(field, locale)}</p>}
 
@@ -1014,7 +1030,10 @@ const PRIMARY_BTN =
 const OUTLINE_BTN =
   "flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-gray-300 px-6 py-4 text-base font-semibold text-gray-900 transition hover:bg-gray-50 dark:border-gray-700 dark:text-gray-100 dark:hover:bg-gray-900";
 
-/** Intro screen for a roster repeater — states the requirement before asking for any names. */
+/**
+ * Intro screen for a roster repeater. Explains what a beneficiary is and that two are the
+ * minimum *before* asking for any names, so the requirement never comes as a surprise.
+ */
 function RepeaterIntroScreen({
   repeaterKey,
   locale,
@@ -1025,15 +1044,40 @@ function RepeaterIntroScreen({
   onAdd: () => void;
 }) {
   const field = fieldByKey(repeaterKey);
+  const minRows = field?.minRows ?? 2;
+
   return (
     <div>
       <h1 className="text-2xl font-bold leading-snug text-gray-900 dark:text-gray-100">
-        {field ? fieldLabel(field, locale) : ""}
+        {tr(UI.beneficiariesIntroTitle, locale)}
       </h1>
-      {field && fieldHelp(field, locale) && (
-        <p className="mt-3 text-base leading-relaxed text-muted-foreground">{fieldHelp(field, locale)}</p>
-      )}
-      <button type="button" onClick={onAdd} className={`mt-8 ${PRIMARY_BTN}`}>
+      <p className="mt-3 text-base leading-relaxed text-muted-foreground">{tr(UI.beneficiariesWhatIs, locale)}</p>
+
+      <div className="mt-5 flex items-start gap-3 rounded-2xl border-2 border-brand/20 bg-brand/5 p-4">
+        <Users className="mt-0.5 h-5 w-5 shrink-0 text-brand" />
+        <p className="text-sm font-medium leading-relaxed text-gray-800 dark:text-gray-200">
+          {tr(UI.beneficiariesTwoRequired, locale)}
+        </p>
+      </div>
+
+      {/* Empty slots make the "two required" count concrete before they start. */}
+      <ul className="mt-5 space-y-2.5">
+        {Array.from({ length: minRows }, (_, i) => (
+          <li
+            key={i}
+            className="flex items-center gap-3 rounded-2xl border-2 border-dashed border-gray-200 p-4 dark:border-gray-800"
+          >
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gray-100 text-sm font-bold text-gray-400 dark:bg-gray-800 dark:text-gray-500">
+              {i + 1}
+            </span>
+            <span className="text-sm text-muted-foreground">
+              {field ? `${rowLabel(field, locale)} ${i + 1}` : ""}
+            </span>
+          </li>
+        ))}
+      </ul>
+
+      <button type="button" onClick={onAdd} className={`mt-6 ${PRIMARY_BTN}`}>
         <Plus className="h-5 w-5" />
         {addRowLabel(0, locale)}
       </button>
@@ -1063,13 +1107,26 @@ function RosterScreen({
   const relationshipOptions = field?.rowFields?.find((f) => f.key === "relationship")?.options ?? [];
   const canContinue = rows.length >= minRows;
 
+  const countLabel = tr(UI.beneficiaryCount, locale)
+    .replace("{added}", String(rows.length))
+    .replace("{min}", String(minRows));
+
   return (
     <div>
-      <h1 className="text-2xl font-bold leading-snug text-gray-900 dark:text-gray-100">
-        {tr(UI.yourBeneficiaries, locale)}
-      </h1>
+      <div className="flex items-baseline justify-between gap-3">
+        <h1 className="text-2xl font-bold leading-snug text-gray-900 dark:text-gray-100">
+          {tr(UI.yourBeneficiaries, locale)}
+        </h1>
+        <span
+          className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ${
+            canContinue ? "bg-green-100 text-green-700 dark:bg-green-950/50 dark:text-green-400" : "bg-brand/10 text-brand"
+          }`}
+        >
+          {countLabel}
+        </span>
+      </div>
       <p className="mt-2 text-sm text-muted-foreground">
-        {canContinue ? tr(UI.beneficiariesDone, locale) : tr(UI.needTwoBeneficiaries, locale)}
+        {canContinue ? tr(UI.beneficiariesDone, locale) : tr(UI.firstBeneficiaryAdded, locale)}
       </p>
 
       <ul className="mt-6 space-y-2.5">

@@ -127,17 +127,30 @@ export const UI = {
   notProvided: { en: "Not provided", es: "No proporcionado" } as Dict,
 
   // Beneficiaries — explicit intro → add → review-roster flow
+  beneficiariesIntroTitle: {
+    en: "Now let's add your beneficiaries",
+    es: "Ahora agreguemos sus beneficiarios",
+  } as Dict,
+  beneficiariesWhatIs: {
+    en: "A beneficiary is the person who receives the money from your policy.",
+    es: "Un beneficiario es la persona que recibe el dinero de su póliza.",
+  } as Dict,
+  beneficiariesTwoRequired: {
+    en: "You need at least two. We'll add them one at a time — just a name and their relationship to you.",
+    es: "Necesita al menos dos. Los agregaremos uno a la vez — solo un nombre y su relación con usted.",
+  } as Dict,
   addFirstBeneficiary: { en: "Add first beneficiary", es: "Agregar primer beneficiario" } as Dict,
   addSecondBeneficiary: { en: "Add second beneficiary", es: "Agregar segundo beneficiario" } as Dict,
   addAnotherBeneficiary: { en: "Add another beneficiary", es: "Agregar otro beneficiario" } as Dict,
   yourBeneficiaries: { en: "Your beneficiaries", es: "Sus beneficiarios" } as Dict,
-  needTwoBeneficiaries: {
-    en: "One more to go — at least two beneficiaries are required.",
-    es: "Falta uno más — se requieren al menos dos beneficiarios.",
+  beneficiaryCount: { en: "{added} of {min} added", es: "{added} de {min} agregados" } as Dict,
+  firstBeneficiaryAdded: {
+    en: "Nice — that's your first one. Add one more to continue.",
+    es: "Bien — ese es el primero. Agregue uno más para continuar.",
   } as Dict,
   beneficiariesDone: {
-    en: "You can add more beneficiaries, or continue.",
-    es: "Puede agregar más beneficiarios o continuar.",
+    en: "You're all set. Add another beneficiary if you'd like, or continue.",
+    es: "Todo listo. Agregue otro beneficiario si lo desea, o continúe.",
   } as Dict,
   continueBtn: { en: "Continue", es: "Continuar" } as Dict,
   remove: { en: "Remove", es: "Eliminar" } as Dict,
