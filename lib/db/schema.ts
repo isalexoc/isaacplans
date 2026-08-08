@@ -529,3 +529,43 @@ export const appSettings = pgTable("app_settings", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+// ─── Mailing labels (printed folder/envelope labels for final expense mailers) ──
+
+/**
+ * One row per prospect we intend to mail something to. Rows arrive either by hand (admin
+ * types them) or automatically the moment a lead's home address is captured — see
+ * `upsertMailingLabelFromLead` in lib/mailing-labels/server.ts.
+ *
+ * `(source, sourceRef)` is the idempotency key for auto-created rows: re-submitting the same
+ * lead updates the existing label instead of queueing a duplicate. Manual rows leave
+ * `sourceRef` null, and Postgres treats NULLs as distinct, so they never collide.
+ *
+ * PII: name + mailing address are stored in PLAINTEXT here, because a label has to be
+ * printable — unlike lib/fe-intake, which encrypts at rest. Deliberately no DOB, no health
+ * answers, no SSN. Admin-only access (Clerk publicMetadata.role === "admin").
+ */
+export const mailingLabels = pgTable("mailing_labels", {
+  id: text("id").primaryKey(), // nanoid
+  source: text("source").notNull().default("manual"), // manual | fe_get_covered | fe_intake | leads_the_way
+  sourceRef: text("source_ref"), // CRM contactId / intake token / leadKey — dedup key
+  createdByUserId: text("created_by_user_id"), // Clerk id for manual rows; null for auto-created
+  firstName: text("first_name").notNull().default(""),
+  lastName: text("last_name").notNull().default(""),
+  addressLine1: text("address_line1").notNull(),
+  addressLine2: text("address_line2"), // apt / unit / suite
+  city: text("city").notNull(),
+  state: text("state").notNull(), // 2-letter
+  postalCode: text("postal_code").notNull(),
+  language: text("language").notNull().default("en"), // en | es — picks the tagline
+  phone: text("phone"), // search/reference only; never printed on the label
+  email: text("email"),
+  status: text("status").notNull().default("pending"), // pending | printed | archived
+  printedAt: timestamp("printed_at"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => ({
+  statusIdx: index("mailing_labels_status_idx").on(table.status, table.createdAt),
+  sourceRefIdx: uniqueIndex("mailing_labels_source_ref_idx").on(table.source, table.sourceRef),
+}));
+

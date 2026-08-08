@@ -32,6 +32,7 @@ import {
 } from "@/lib/leads-the-way/config";
 import { deriveLeadKey, parseLeadEmail, toE164, type ParsedLead } from "@/lib/leads-the-way/parse";
 import { resolveTimezone } from "@/lib/leads-the-way/timezone";
+import { upsertMailingLabelFromLead } from "@/lib/mailing-labels/server";
 import { extractLeadWithOpenAI } from "@/lib/leads-the-way/extract-openai";
 import {
   claimLeadByMessageId,
@@ -350,6 +351,23 @@ export async function processLeadJobById(
       },
       log
     );
+
+    // 6. Queue a printable mailing label (see /admin/mailing-labels). Senior Life lead emails
+    //    already carry a home address, so these arrive print-ready. Errors are swallowed inside
+    //    the helper — the lead is already synced and a label must never fail the job.
+    await upsertMailingLabelFromLead({
+      source: "leads_the_way",
+      sourceRef: leadKey,
+      firstName: parsed.firstName ?? "",
+      lastName: parsed.lastName ?? "",
+      addressLine1: parsed.address1 ?? "",
+      city: parsed.city ?? "",
+      state: parsed.state ?? "",
+      postalCode: parsed.postalCode ?? "",
+      language: (parsed.leadType ?? "").toLowerCase().includes("spanish") ? "es" : "en",
+      phone: phoneE164,
+      email: parsed.email ?? "",
+    });
 
     log.info("Lead synced to CRM", { leadKey, contactId, matchedBy, tags });
     return { processed: true, ok: true, contactId };

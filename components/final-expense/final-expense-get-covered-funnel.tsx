@@ -817,6 +817,10 @@ export default function FinalExpenseGetCoveredFunnel({
         state: stateVal.trim(),
         postalCode: postalCode.trim(),
         country: "US",
+        // Tells the shared endpoint this is a final expense lead, so it also queues a printable
+        // mailing label (see /admin/mailing-labels). The IUL/ACA funnels omit this.
+        leadSource: "final_expense",
+        language: isES ? "es" : "en",
       };
       // Email is optional now (collected in Step 2). Only send it when provided so the
       // CRM contact — created in Step 1 with phone only — gets the email set.

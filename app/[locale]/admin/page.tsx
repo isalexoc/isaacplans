@@ -17,6 +17,7 @@ import {
   Presentation,
   Database,
   IdCard,
+  Mailbox,
   PhoneCall,
   BarChart3,
   HeartPulse,
@@ -153,6 +154,13 @@ const FINAL_EXPENSE_TOOLS: ToolCard[] = [
       "Build a branded final expense quote package to share or leave behind with clients.",
     href: "/en/final-expense/leave-behind",
     icon: Package,
+  },
+  {
+    title: "Mailing Labels",
+    description:
+      "Print name-and-address labels for mailed folders, plus USPS Priority Mail FROM/TO labels.",
+    href: "/en/admin/mailing-labels",
+    icon: Mailbox,
   },
 ];
 

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { ianaTimezoneFromUsPostalCode } from "@/lib/iana-timezone-from-us-postal";
+import { upsertMailingLabelFromLead } from "@/lib/mailing-labels/server";
 
 /**
  * Append / update mailing address on an existing CRM contact (after initial lead capture).
@@ -332,6 +333,10 @@ export async function POST(request: NextRequest) {
       state,
       postalCode,
       country,
+      // Which funnel sent this. Only the final expense funnel queues a mailing label — this
+      // endpoint is shared with the IUL / ACA / life / health-alternative step 2s.
+      leadSource,
+      language,
     } = body as Record<string, string | undefined>;
 
     // Email is optional here (the get-covered funnel now collects it in Step 2, and the
@@ -617,6 +622,26 @@ export async function POST(request: NextRequest) {
           { status: 502 }
         );
       }
+    }
+
+    // Queue a printable mailing label for final expense leads. Non-blocking by design:
+    // upsertMailingLabelFromLead swallows its own errors, and the address is already saved in
+    // the CRM by this point, so a label problem must never turn into a failed lead.
+    if (leadSource === "final_expense") {
+      await upsertMailingLabelFromLead({
+        source: "fe_get_covered",
+        sourceRef: contactId,
+        firstName: typeof contact.firstName === "string" ? contact.firstName : "",
+        lastName: typeof contact.lastName === "string" ? contact.lastName : "",
+        addressLine1: addressLine1.trim(),
+        addressLine2: addressLine2?.trim() || "",
+        city: city.trim(),
+        state: state.trim(),
+        postalCode: postalCode.trim(),
+        language: language === "es" ? "es" : "en",
+        phone: phone?.trim() || "",
+        email: emailTrimmed,
+      });
     }
 
     return NextResponse.json({ success: true });

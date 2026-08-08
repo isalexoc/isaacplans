@@ -17,7 +17,13 @@ export default function AdminBackNav() {
   const LABELS: Record<string, string> = {
     "agent-licenses": "Agent Licenses",
     "blog-generator": "Blog Generator",
+    "call-dashboard": "Callback Priority",
+    "call-metrics": "Call Metrics",
+    hero: "Ads Page Images",
+    "lead-backup": "Lead Backup",
     "lead-magnet-generator": "Lead Magnet Generator",
+    "mailing-labels": "Mailing Labels",
+    "script-generator": "Script Generator",
     "social-media-studio": "Social Media Studio",
     "social-publishing": "Social Publishing",
     history: "History",

@@ -23,6 +23,7 @@ import {
   agentCrmAddContactTags,
 } from "@/lib/agent-crm-contacts";
 import { createContactNote } from "@/lib/agent-crm-call-summary";
+import { upsertMailingLabelFromLead } from "@/lib/mailing-labels/server";
 
 type RouteContext = { params: Promise<{ token: string }> };
 
@@ -118,6 +119,24 @@ export async function POST(_request: NextRequest, context: RouteContext) {
     if (!updated) {
       return NextResponse.json({ success: false, error: "Not found" }, { status: 404 });
     }
+
+    // Queue a printable mailing label (see /admin/mailing-labels). Read from `decrypted`, not
+    // `row.data` — intake data is encrypted at rest, and FE_INTAKE_PURGE_AFTER_SYNC may have
+    // just wiped the stored copy. Errors are swallowed inside the helper.
+    const str = (value: unknown) => (typeof value === "string" ? value.trim() : "");
+    await upsertMailingLabelFromLead({
+      source: "fe_intake",
+      sourceRef: token,
+      firstName: str(decrypted.firstName),
+      lastName: str(decrypted.lastName),
+      addressLine1: str(decrypted.address1),
+      city: str(decrypted.city),
+      state: str(decrypted.state),
+      postalCode: str(decrypted.postalCode),
+      language: row.locale === "es" ? "es" : "en",
+      phone: str(decrypted.phone),
+      email: str(decrypted.email),
+    });
 
     return NextResponse.json({
       success: true,
