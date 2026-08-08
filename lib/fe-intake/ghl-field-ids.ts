@@ -48,6 +48,12 @@ export type FeFieldSlug =
   | "hospitalized_5yr"
   | "hospitalized_3yr"
   | "hospitalized_6mo"
+  // Payment / bank draft — optional, collected on the completion screen after submitting
+  | "bank_name"
+  | "routing_number"
+  | "account_number"
+  | "account_type"
+  | "first_payment_day"
   // Meta — the always-current client share link (written by the app, used by a GHL workflow)
   | "fe_intake_link";
 
@@ -81,5 +87,10 @@ export const feFieldIds: Record<FeFieldSlug, string> = {
   hospitalized_5yr: "odA5atsT1eWeSmer1kqi",
   hospitalized_3yr: "OCPGlXIjBKj7PMAOr6NP",
   hospitalized_6mo: "ivLiRDZYTbiUrX8ACfog",
+  bank_name: "rUsY1ycx4o2tl3eZJ9Qx",
+  routing_number: "AHjhvWnKf2e20hq8c0l0",
+  account_number: "FfVatznNpJdj9s9eLyAY",
+  account_type: "gBCcnmPSNwcNS16y6KQG",
+  first_payment_day: "9DFXFsBnaIrpUyr53zTl",
   fe_intake_link: "AL76ejBuUxCSIGQN8k9V",
 };

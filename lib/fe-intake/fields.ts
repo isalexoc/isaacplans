@@ -68,6 +68,9 @@ export type FeField = {
   digitsOnly?: boolean;
   /** Maximum number of characters accepted. */
   maxLength?: number;
+  /** Inclusive numeric bounds for a number-ish field (weight), checked by fieldFormatError. */
+  min?: number;
+  max?: number;
   /** For `address` fields: sibling field keys to populate from autocomplete, folded onto the
    * same screen as the address search input (shown once resolved) rather than asked separately. */
   addressTargets?: AddressTargets;
@@ -107,6 +110,14 @@ export type FeSection = {
   key: string;
   titleEn: string;
   titleEs: string;
+  /**
+   * Collected *after* the client submits, from the completion screen — never part of the wizard
+   * and never required to submit. Banking details live here: asking for them mid-application
+   * would spook people, but offering them once the application is already in is a natural
+   * "you're almost done" moment. Still encrypted and CRM-synced like everything else, because
+   * this section is a normal member of FE_SECTIONS.
+   */
+  postSubmit?: boolean;
   fields: FeField[];
 };
 
@@ -160,6 +171,12 @@ export const USAGE_OPTIONS: FeOption[] = [
  * lib/fe-intake/ui-strings.ts::applyDrugToken) — "What is Lisinopril for?" instead of a
  * generic "What is it for?", since by this point in the row the drug name is already known.
  */
+/** 1st–28th only: every month has a 28th, so a draft date never silently shifts. */
+const PAYMENT_DAY_OPTIONS: FeOption[] = Array.from({ length: 28 }, (_, i) => {
+  const day = String(i + 1);
+  return { value: day, labelEn: day, labelEs: day };
+});
+
 const MEDICATION_FIELDS: FeField[] = [
   {
     key: "drugName", labelEn: "What medication is it?", labelEs: "¿Qué medicamento es?", type: "drug", required: true,
@@ -199,6 +216,16 @@ export const FE_SECTIONS: FeSection[] = [
       },
       { key: "phone", labelEn: "Phone number", labelEs: "Número de teléfono", type: "tel", required: true, crm: native("phone") },
       { key: "dateOfBirth", labelEn: "Date of birth", labelEs: "Fecha de nacimiento", type: "dob", required: true, crm: native("dateOfBirth") },
+      {
+        key: "height", labelEn: "What is your height?", labelEs: "¿Cuál es su estatura?", type: "height",
+        required: true, crm: custom("height"),
+      },
+      {
+        key: "weight", labelEn: "What is your weight?", labelEs: "¿Cuál es su peso?", type: "text",
+        required: true, digitsOnly: true, maxLength: 3, min: 50, max: 600, crm: custom("weight"),
+        placeholderEn: "e.g. 175", placeholderEs: "ej. 175",
+        helpEn: "In pounds (lbs).", helpEs: "En libras (lbs).",
+      },
       { key: "gender", labelEn: "Gender", labelEs: "Género", type: "select", required: true, crm: custom("gender"), options: GENDER_OPTIONS },
       {
         key: "relationship", labelEn: "What is your relationship to the Insured?", labelEs: "¿Cuál es su relación con el asegurado?",
@@ -206,24 +233,6 @@ export const FE_SECTIONS: FeSection[] = [
         options: RELATIONSHIP_OPTIONS,
         helpEn: "\"Self\" if you're the one being insured.",
         helpEs: "\"Yo mismo(a)\" si usted es la persona asegurada.",
-      },
-    ],
-  },
-  {
-    key: "ssn",
-    titleEn: "Social Security Number",
-    titleEs: "Número de seguro social",
-    fields: [
-      {
-        key: "hasSsn", labelEn: "Do you have a Social Security number?", labelEs: "¿Tiene número de seguro social?",
-        type: "select", required: true, crm: custom("has_ssn"), crmLabel: "Has SSN", options: YES_NO,
-        noteEn: "No problem — we can still get you great coverage with no waiting period. Without an SSN, you'll be placed on a standard plan rather than preferred or super-preferred rates.",
-        noteEs: "No hay problema — de igual forma podemos ofrecerle excelente cobertura sin período de espera. Sin un SSN, se le colocará en un plan estándar en lugar de tarifas preferentes o súper preferentes.",
-      },
-      {
-        key: "ssn", labelEn: "Social Security number", labelEs: "Número de seguro social", type: "ssn",
-        required: true, sensitive: true, digitsOnly: true, maxLength: 9, crm: custom("ssn"),
-        showIf: { field: "hasSsn", equals: "yes" },
       },
     ],
   },
@@ -271,8 +280,8 @@ export const FE_SECTIONS: FeSection[] = [
   },
   {
     key: "medical",
-    titleEn: "Height, Weight & Medications",
-    titleEs: "Estatura, peso y medicamentos",
+    titleEn: "Doctor & Medications",
+    titleEs: "Médico y medicamentos",
     fields: [
       {
         key: "physicianOrFacilityName", labelEn: "Who is your doctor, or what's the name of the medical facility you go to?",
@@ -284,15 +293,6 @@ export const FE_SECTIONS: FeSection[] = [
         labelEn: "In what city is your doctor or medical facility located?",
         labelEs: "¿En qué ciudad está ubicado su médico o centro médico?",
         type: "text", crm: custom("physician_city"), crmLabel: "Physician / facility city",
-      },
-      {
-        key: "height", labelEn: "What is your height?", labelEs: "¿Cuál es su estatura?", type: "height",
-        required: true, crm: custom("height"),
-      },
-      {
-        key: "weight", labelEn: "What is your weight (lbs)?", labelEs: "¿Cuál es su peso (lbs)?", type: "text",
-        required: true, digitsOnly: true, maxLength: 3, crm: custom("weight"),
-        placeholderEn: "e.g. 175", placeholderEs: "ej. 175",
       },
       {
         key: "takesMedications", labelEn: "Do you take any medications?", labelEs: "¿Toma algún medicamento?",
@@ -404,11 +404,83 @@ export const FE_SECTIONS: FeSection[] = [
       },
     ],
   },
+  // Deliberately last: the SSN is the most sensitive thing we ask for, and asking once every
+  // other answer is already invested is the difference between "one more field" and a wall.
+  {
+    key: "ssn",
+    titleEn: "Social Security Number",
+    titleEs: "Número de seguro social",
+    fields: [
+      {
+        key: "hasSsn", labelEn: "Do you have a Social Security number?", labelEs: "¿Tiene número de seguro social?",
+        type: "select", required: true, crm: custom("has_ssn"), crmLabel: "Has SSN", options: YES_NO,
+        noteEn: "No problem — we can still get you great coverage with no waiting period. Without an SSN, you'll be placed on a standard plan rather than preferred or super-preferred rates.",
+        noteEs: "No hay problema — de igual forma podemos ofrecerle excelente cobertura sin período de espera. Sin un SSN, se le colocará en un plan estándar en lugar de tarifas preferentes o súper preferentes.",
+      },
+      {
+        key: "ssn", labelEn: "Social Security number", labelEs: "Número de seguro social", type: "ssn",
+        required: true, sensitive: true, digitsOnly: true, maxLength: 9, crm: custom("ssn"),
+        showIf: { field: "hasSsn", equals: "yes" },
+      },
+    ],
+  },
+  // Post-submission only — offered on the completion screen, never in the wizard.
+  {
+    key: "banking",
+    titleEn: "Payment Information",
+    titleEs: "Información de pago",
+    postSubmit: true,
+    fields: [
+      {
+        key: "bankName", labelEn: "Bank name", labelEs: "Nombre del banco", type: "text",
+        crm: custom("bank_name"), placeholderEn: "e.g. Bank of America", placeholderEs: "ej. Bank of America",
+      },
+      {
+        key: "routingNumber", labelEn: "Routing number", labelEs: "Número de ruta", type: "text",
+        sensitive: true, digitsOnly: true, maxLength: 9, crm: custom("routing_number"),
+        helpEn: "9 digits, bottom-left of a check.", helpEs: "9 dígitos, abajo a la izquierda de un cheque.",
+      },
+      {
+        key: "accountNumber", labelEn: "Account number", labelEs: "Número de cuenta", type: "text",
+        sensitive: true, digitsOnly: true, maxLength: 17, crm: custom("account_number"),
+      },
+      {
+        key: "accountType", labelEn: "Account type", labelEs: "Tipo de cuenta", type: "select",
+        crm: custom("account_type"),
+        options: [
+          { value: "Checking", labelEn: "Checking", labelEs: "Corriente" },
+          { value: "Savings", labelEn: "Savings", labelEs: "Ahorros" },
+        ],
+      },
+      {
+        key: "firstPaymentDay", labelEn: "Preferred day of the month for your payment",
+        labelEs: "Día del mes preferido para su pago", type: "select",
+        crm: custom("first_payment_day"), crmLabel: "Preferred payment day",
+        options: PAYMENT_DAY_OPTIONS,
+        helpEn: "We'll aim for this day each month.", helpEs: "Buscaremos este día cada mes.",
+      },
+    ],
+  },
 ];
 
 /** Sections a given role should see/step through. No owner-only section exists (yet). */
 export function visibleSections(_isOwner: boolean): FeSection[] {
   return FE_SECTIONS;
+}
+
+/** Sections that make up the wizard — everything except the post-submission add-ons. */
+export function wizardSections(): FeSection[] {
+  return FE_SECTIONS.filter((s) => !s.postSubmit);
+}
+
+/** The post-submission sections, offered on the completion screen. */
+export function postSubmitSections(): FeSection[] {
+  return FE_SECTIONS.filter((s) => s.postSubmit);
+}
+
+/** Keys belonging to post-submission sections — the only ones the banking endpoint may write. */
+export function postSubmitFieldKeys(): string[] {
+  return postSubmitSections().flatMap((s) => s.fields.map((f) => f.key));
 }
 
 /** One row of a repeater. Every sub-value is a plain string (no file uploads in this intake). */

@@ -50,18 +50,19 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import IntakeAddressInput, { type ResolvedAddress } from "@/components/shared/intake-address-input";
-import { MONTHS, buildDobIso, splitDobIso } from "@/lib/intake-shared/format";
-import { fetchFeIntake, completeFeIntake, searchMedications } from "@/lib/fe-intake-api";
+import { MONTHS, buildDobIso, splitDobIso, formatUsPhone } from "@/lib/intake-shared/format";
+import { fetchFeIntake, completeFeIntake, searchMedications, saveFeIntakeBanking } from "@/lib/fe-intake-api";
 import { useFeIntakeAutosave } from "@/hooks/use-fe-intake-autosave";
 import {
-  FE_SECTIONS,
+  wizardSections,
+  postSubmitSections,
   isFieldVisible,
   emptyRow,
   fieldByKey,
   type FeField,
   type RepeaterRow,
 } from "@/lib/fe-intake/fields";
-import { fieldFormatError } from "@/lib/fe-intake/validation";
+import { fieldFormatError, isValidRouting } from "@/lib/fe-intake/validation";
 import { isMaskedValue } from "@/lib/fe-intake/masking";
 import {
   UI,
@@ -130,7 +131,8 @@ function addressTargetKeys(fields: FeField[]): Set<string> {
 
 function buildScreens(data: FeIntakeData): Screen[] {
   const screens: Screen[] = [];
-  for (const section of FE_SECTIONS) {
+  // `wizardSections()` excludes the banking section — that one is offered after submitting.
+  for (const section of wizardSections()) {
     const foldedKeys = addressTargetKeys(section.fields);
     for (const field of section.fields) {
       if (foldedKeys.has(field.key)) continue;
@@ -375,10 +377,10 @@ function DrugSearchInput({
         <div className="mt-2 max-h-60 overflow-y-auto rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900">
           {loading ? (
             <div className="flex items-center gap-2 p-3 text-sm text-muted-foreground">
-              <Loader2 className="h-4 w-4 animate-spin" /> {tr(UI.searching, locale)}
+              <Loader2 className="h-4 w-4 animate-spin" /> {tr(UI.drugSearching, locale)}
             </div>
           ) : results.length === 0 ? (
-            <p className="p-3 text-sm text-muted-foreground">{tr(UI.noMatches, locale)}</p>
+            <p className="p-3 text-sm text-muted-foreground">{tr(UI.drugNoMatches, locale)}</p>
           ) : (
             results.map((name) => (
               <button
@@ -492,6 +494,49 @@ function DobInput({ value, onChange, locale }: { value: string; onChange: (v: st
           </option>
         ))}
       </select>
+    </div>
+  );
+}
+
+/**
+ * US phone entry that formats as you type — "3055551234" becomes "(305) 555-1234" in place, so
+ * the shape of a correct number is obvious and the field physically can't take an 11th digit.
+ * A live digit counter plus a green check on the 10th digit replace the usual "invalid number"
+ * scolding after the fact.
+ */
+function PhoneField({
+  value,
+  onChange,
+  locale,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  locale: FeLocale;
+}) {
+  const digitCount = value.replace(/\D/g, "").length;
+  const complete = digitCount === 10;
+
+  return (
+    <div>
+      <div className="relative">
+        <input
+          autoFocus
+          type="tel"
+          inputMode="tel"
+          autoComplete="tel"
+          value={formatUsPhone(value)}
+          onChange={(e) => onChange(formatUsPhone(e.target.value))}
+          placeholder="(555) 123-4567"
+          aria-invalid={digitCount > 0 && !complete}
+          className={`${BIG_INPUT} pr-12 tracking-wide ${complete ? "border-green-500" : ""}`}
+        />
+        {complete && (
+          <CheckCircle2 className="absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 text-green-600" />
+        )}
+      </div>
+      <p className="mt-2 text-xs text-muted-foreground">
+        {complete ? tr(UI.phoneComplete, locale) : tr(UI.phoneHint, locale).replace("{n}", String(10 - digitCount))}
+      </p>
     </div>
   );
 }
@@ -777,7 +822,7 @@ export default function FeIntakeForm({ token }: { token: string }) {
     );
   }
   if (locked || justSubmitted) {
-    return <CompletedScreen locale={locale} />;
+    return <CompletedScreen locale={locale} token={token} />;
   }
 
   const valid = isScreenValid(screen, data);
@@ -1011,6 +1056,8 @@ function FieldScreen({
           <DobInput value={value} onChange={onChange} locale={locale} />
         ) : field.type === "height" ? (
           <HeightInput value={value} onChange={onChange} locale={locale} />
+        ) : field.type === "tel" ? (
+          <PhoneField value={value} onChange={onChange} locale={locale} />
         ) : field.type === "zip" ? (
           <input
             autoFocus
@@ -1039,8 +1086,8 @@ function FieldScreen({
         ) : (
           <input
             autoFocus
-            type={field.type === "email" ? "email" : field.type === "tel" ? "tel" : "text"}
-            inputMode={field.type === "tel" ? "tel" : field.digitsOnly ? "numeric" : undefined}
+            type={field.type === "email" ? "email" : "text"}
+            inputMode={field.digitsOnly ? "numeric" : undefined}
             value={value}
             onChange={(e) => {
               const raw = e.target.value;
@@ -1117,7 +1164,15 @@ function RepeaterIntroScreen({
       </h1>
       <p className="mt-3 text-base leading-relaxed text-muted-foreground">{tr(UI.beneficiariesWhatIs, locale)}</p>
 
-      <div className="mt-5 flex items-start gap-3 rounded-2xl border-2 border-brand/20 bg-brand/5 p-4">
+      {/* Demystify the jargon before it appears as a field label. */}
+      <div className="mt-4 flex items-start gap-3 rounded-2xl bg-gray-50 p-4 dark:bg-gray-900">
+        <HelpCircle className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground" />
+        <p className="text-sm leading-relaxed text-gray-700 dark:text-gray-300">
+          {tr(UI.beneficiariesPlainly, locale)}
+        </p>
+      </div>
+
+      <div className="mt-4 flex items-start gap-3 rounded-2xl border-2 border-brand/20 bg-brand/5 p-4">
         <Users className="mt-0.5 h-5 w-5 shrink-0 text-brand" />
         <p className="text-sm font-medium leading-relaxed text-gray-800 dark:text-gray-200">
           {tr(UI.beneficiariesTwoRequired, locale)}
@@ -1247,11 +1302,154 @@ function RosterScreen({
 }
 
 /**
+ * Optional payment capture, offered only after the application is already in. Collapsed behind a
+ * yes/no so it never reads as another required step — the client has just finished and is free to
+ * decline. Writes through a dedicated endpoint that accepts banking keys on a locked session.
+ */
+function BankingCapture({ locale, token }: { locale: FeLocale; token: string }) {
+  const [phase, setPhase] = useState<"ask" | "form" | "saved">("ask");
+  const [values, setValues] = useState<Record<string, string>>({});
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const fields = useMemo(() => postSubmitSections().flatMap((s) => s.fields), []);
+  const set = (key: string, value: string) => setValues((v) => ({ ...v, [key]: value }));
+
+  // Everything but the preferred payment day is needed for the agent to set up a draft.
+  const requiredKeys = ["bankName", "routingNumber", "accountNumber", "accountType"];
+  const complete = requiredKeys.every((k) => (values[k] ?? "").trim().length > 0);
+  const routingValid = !values.routingNumber || isValidRouting(values.routingNumber);
+
+  async function handleSave() {
+    if (!complete || !routingValid) {
+      setError(tr(UI.bankingIncomplete, locale));
+      return;
+    }
+    setSaving(true);
+    setError(null);
+    try {
+      await saveFeIntakeBanking(token, values);
+      setPhase("saved");
+    } catch {
+      setError(tr(UI.bankingError, locale));
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  if (phase === "saved") {
+    return (
+      <section className="mt-6 flex items-start gap-3 rounded-2xl border-2 border-green-300 bg-green-50 p-5 dark:border-green-900 dark:bg-green-950/40">
+        <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-green-600 dark:text-green-400" />
+        <p className="text-sm font-medium leading-relaxed text-green-900 dark:text-green-200">
+          {tr(UI.bankingSaved, locale)}
+        </p>
+      </section>
+    );
+  }
+
+  if (phase === "ask") {
+    return (
+      <section className="mt-6 rounded-2xl border-2 border-gray-200 p-5 dark:border-gray-800">
+        <h2 className="text-base font-bold text-gray-900 dark:text-gray-100">{tr(UI.bankingPrompt, locale)}</h2>
+        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{tr(UI.bankingPromptBody, locale)}</p>
+        <div className="mt-4 space-y-2.5">
+          <button type="button" onClick={() => setPhase("form")} className={PRIMARY_BTN}>
+            <Landmark className="h-5 w-5" />
+            {tr(UI.bankingAddNow, locale)}
+          </button>
+          <button type="button" onClick={() => setPhase("saved")} className={OUTLINE_BTN}>
+            {tr(UI.bankingLater, locale)}
+          </button>
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section className="mt-6 rounded-2xl border-2 border-brand/30 p-5">
+      <h2 className="flex items-center gap-2 text-base font-bold text-gray-900 dark:text-gray-100">
+        <Landmark className="h-5 w-5 shrink-0 text-brand" />
+        {tr(UI.bankingTitle, locale)}
+      </h2>
+      <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{tr(UI.bankingIntro, locale)}</p>
+
+      <div className="mt-5 space-y-4">
+        {fields.map((field) => {
+          const value = values[field.key] ?? "";
+          const label = fieldLabel(field, locale);
+          const help = fieldHelp(field, locale);
+          return (
+            <div key={field.key}>
+              <label htmlFor={`bank-${field.key}`} className={SMALL_LABEL}>
+                {label}
+              </label>
+              {field.type === "select" && field.options ? (
+                <select
+                  id={`bank-${field.key}`}
+                  value={value}
+                  onChange={(e) => set(field.key, e.target.value)}
+                  className={SMALL_INPUT}
+                >
+                  <option value="">{tr(UI.choose, locale)}</option>
+                  {field.options.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {optionLabel(opt, locale)}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <input
+                  id={`bank-${field.key}`}
+                  type="text"
+                  inputMode={field.digitsOnly ? "numeric" : undefined}
+                  value={value}
+                  onChange={(e) =>
+                    set(
+                      field.key,
+                      field.digitsOnly
+                        ? e.target.value.replace(/\D/g, "").slice(0, field.maxLength)
+                        : e.target.value
+                    )
+                  }
+                  placeholder={fieldPlaceholder(field, locale)}
+                  className={SMALL_INPUT}
+                />
+              )}
+              {help && <p className="mt-1 text-xs text-muted-foreground">{help}</p>}
+              {field.key === "routingNumber" && !routingValid && (
+                <p className="mt-1 text-xs text-red-600">{tr(UI.errRouting, locale)}</p>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {error && (
+        <p className="mt-4 flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300">
+          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" /> {error}
+        </p>
+      )}
+
+      <button
+        type="button"
+        disabled={saving}
+        onClick={handleSave}
+        className={`mt-5 ${PRIMARY_BTN} disabled:opacity-60`}
+      >
+        {saving && <Loader2 className="h-4 w-4 animate-spin" />}
+        {saving ? tr(UI.bankingSaving, locale) : tr(UI.bankingSave, locale)}
+      </button>
+    </section>
+  );
+}
+
+/**
  * Post-submission screen. Beyond thanking them, this is the last reliable chance to tell the
  * client what the agent call needs from them — above all that the payment step is bank-account
  * only, so nobody shows up to the call holding a debit card.
  */
-function CompletedScreen({ locale }: { locale: FeLocale }) {
+function CompletedScreen({ locale, token }: { locale: FeLocale; token: string }) {
   const phoneNumber = process.env.NEXT_PUBLIC_PHONE_NUMBER;
   const steps: Array<{ icon: LucideIcon; text: string }> = [
     { icon: PhoneCall, text: tr(UI.nextStep1, locale) },
@@ -1307,6 +1505,9 @@ function CompletedScreen({ locale }: { locale: FeLocale }) {
           {tr(UI.noCards, locale)}
         </p>
       </section>
+
+      {/* If they have it in hand right now, capturing it here saves the call a round trip. */}
+      <BankingCapture locale={locale} token={token} />
 
       {phoneNumber && (
         <p className="mt-6 text-center text-sm text-muted-foreground">

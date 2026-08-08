@@ -159,6 +159,18 @@ export async function completeFeIntake(
   return { success: true };
 }
 
+/** Optional payment details from the completion screen — allowed on a submitted session. */
+export async function saveFeIntakeBanking(token: string, banking: FeIntakeData): Promise<void> {
+  await parseJson<{ success: boolean }>(
+    await fetch(`/api/fe-intake/${token}/banking`, {
+      method: "PATCH",
+      credentials: "same-origin",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ data: banking }),
+    })
+  );
+}
+
 /** Proxies NIH RxTerms — free, keyless drug-name autocomplete. Returns display names. */
 export async function searchMedications(query: string): Promise<string[]> {
   const q = query.trim();

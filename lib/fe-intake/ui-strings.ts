@@ -148,6 +148,38 @@ export const UI = {
     es: "Solo cuenta bancaria — no se aceptan tarjetas de crédito ni de débito.",
   } as Dict,
   doneQuestions: { en: "Questions before then? Call us at", es: "¿Preguntas antes? Llámenos al" } as Dict,
+
+  // Optional banking capture, offered on the completion screen
+  bankingPrompt: {
+    en: "Have your banking information handy right now?",
+    es: "¿Tiene su información bancaria a la mano ahora?",
+  } as Dict,
+  bankingPromptBody: {
+    en: "Add it here and your agent can finalize everything on the call — no scrambling for a checkbook.",
+    es: "Agréguela aquí y su agente podrá finalizar todo en la llamada — sin buscar la chequera.",
+  } as Dict,
+  bankingAddNow: { en: "Yes, add it now", es: "Sí, agregarla ahora" } as Dict,
+  bankingLater: { en: "I'll do it on the call", es: "Lo haré en la llamada" } as Dict,
+  bankingTitle: { en: "Payment information", es: "Información de pago" } as Dict,
+  choose: { en: "Choose…", es: "Elegir…" } as Dict,
+  bankingIntro: {
+    en: "Bank account only — credit and debit cards are not accepted. This is encrypted and goes straight to your agent.",
+    es: "Solo cuenta bancaria — no se aceptan tarjetas de crédito ni de débito. Esto va cifrado directamente a su agente.",
+  } as Dict,
+  bankingSave: { en: "Save payment information", es: "Guardar información de pago" } as Dict,
+  bankingSaving: { en: "Saving…", es: "Guardando…" } as Dict,
+  bankingSaved: {
+    en: "Got it — your payment information is saved. Your agent will confirm everything on the call.",
+    es: "Listo — su información de pago está guardada. Su agente confirmará todo en la llamada.",
+  } as Dict,
+  bankingIncomplete: {
+    en: "Please fill in the bank name, routing number, account number, and account type.",
+    es: "Complete el nombre del banco, número de ruta, número de cuenta y tipo de cuenta.",
+  } as Dict,
+  bankingError: {
+    en: "We couldn't save that. Please try again, or share it with your agent on the call.",
+    es: "No pudimos guardar eso. Intente de nuevo o compártalo con su agente en la llamada.",
+  } as Dict,
   // Admin re-open controls
   allowClientEdit: { en: "Allow client to edit", es: "Permitir que el cliente edite" } as Dict,
   lockClientEdit: { en: "Lock client edits", es: "Bloquear edición del cliente" } as Dict,
@@ -161,9 +193,15 @@ export const UI = {
     en: "Now let's add your beneficiaries",
     es: "Ahora agreguemos sus beneficiarios",
   } as Dict,
+  // "Beneficiary" is industry jargon many clients have never heard — lead with what it means in
+  // plain terms, and frame it as the people they're protecting rather than a form field.
   beneficiariesWhatIs: {
-    en: "A beneficiary is the person who receives the money from your policy.",
-    es: "Un beneficiario es la persona que recibe el dinero de su póliza.",
+    en: "These are the people you want to protect — the ones who receive the money from your policy.",
+    es: "Estas son las personas que usted quiere proteger — quienes reciben el dinero de su póliza.",
+  } as Dict,
+  beneficiariesPlainly: {
+    en: "In insurance this person is called a \"beneficiary.\" It simply means whoever you choose to receive the payment — usually a spouse, a son or daughter, or whoever would handle your final arrangements.",
+    es: "En seguros, a esta persona se le llama \"beneficiario\". Simplemente significa quien usted elija para recibir el pago — normalmente un cónyuge, un hijo o hija, o quien se encargue de sus arreglos finales.",
   } as Dict,
   beneficiariesTwoRequired: {
     en: "You need at least two. We'll add them one at a time — just a name and their relationship to you.",
@@ -197,10 +235,21 @@ export const UI = {
   errZip: { en: "Enter a valid 5-digit zip code.", es: "Ingrese un código postal válido de 5 dígitos." } as Dict,
   errSsn: { en: "Enter a valid 9-digit number.", es: "Ingrese un número válido de 9 dígitos." } as Dict,
   errDob: { en: "Enter a valid date of birth.", es: "Ingrese una fecha de nacimiento válida." } as Dict,
+  errRange: { en: "Please enter a realistic value.", es: "Ingrese un valor realista." } as Dict,
+  errRouting: { en: "Routing numbers are 9 digits.", es: "Los números de ruta tienen 9 dígitos." } as Dict,
 
-  // Medication search
+  // Phone entry
+  phoneHint: { en: "{n} more digit(s) to go", es: "Faltan {n} dígito(s)" } as Dict,
+  phoneComplete: { en: "Looks good", es: "Se ve bien" } as Dict,
+
+  // Medication search — its own strings; the dashboard's CRM-contact copy leaked in here before.
   notListed: { en: "Not listed — type it in", es: "No aparece — escríbalo" } as Dict,
   searchMedication: { en: "Search for a medication…", es: "Busque un medicamento…" } as Dict,
+  drugSearching: { en: "Searching medications…", es: "Buscando medicamentos…" } as Dict,
+  drugNoMatches: {
+    en: "No medications found. Tap \"Not listed\" below to type it in yourself.",
+    es: "No se encontraron medicamentos. Toque \"No aparece\" abajo para escribirlo.",
+  } as Dict,
 
   // Split date-of-birth selects
   dobMonth: { en: "Month", es: "Mes" } as Dict,

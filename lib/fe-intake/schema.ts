@@ -9,6 +9,7 @@
 import { z } from "zod";
 import {
   FE_SECTIONS,
+  wizardSections,
   isFieldVisible,
   isRowFilled,
   type FeField,
@@ -127,10 +128,14 @@ export function sectionMissingFields(section: FeSection, data: FeIntakeData): st
   return missing;
 }
 
-/** Required-field check used at completion time. Respects conditional visibility. */
+/**
+ * Required-field check used at completion time. Respects conditional visibility, and skips
+ * post-submission sections (banking) — those are offered *after* submitting and must never
+ * block it.
+ */
 export function validateForCompletion(data: FeIntakeData): CompletionCheck {
   const missing: string[] = [];
-  for (const section of FE_SECTIONS) {
+  for (const section of wizardSections()) {
     missing.push(...sectionMissingFields(section, data));
   }
 

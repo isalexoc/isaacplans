@@ -28,6 +28,11 @@ export function isValidSsn(v: string): boolean {
   return digits(v).length === 9;
 }
 
+/** Bank routing numbers are always 9 digits. */
+export function isValidRouting(v: string): boolean {
+  return digits(v).length === 9;
+}
+
 /** Title-case a person's name: "MARthA saNCHEZ" → "Martha Sanchez" (handles spaces, - and ʼ). */
 export function titleCaseName(v: string): string {
   return (v ?? "")
@@ -58,7 +63,7 @@ export function isValidDob(v: string): boolean {
   return y >= now.getFullYear() - 120;
 }
 
-export type FieldErrorKey = "email" | "phone" | "zip" | "ssn" | "dob";
+export type FieldErrorKey = "email" | "phone" | "zip" | "ssn" | "dob" | "range" | "routing";
 
 /**
  * Format error for a single field, or null if the value is empty or well-formed.
@@ -80,6 +85,19 @@ export function fieldFormatError(field: FeField, value: string): FieldErrorKey |
     case "zip":
       return isValidZip(v) ? null : "zip";
     default:
-      return null;
+      break;
   }
+
+  // Bank routing numbers are always 9 digits — catches a transposed/short entry immediately.
+  if (field.key === "routingNumber") return isValidRouting(v) ? null : "routing";
+
+  // Numeric bounds (weight): stops "1000 lbs" from reaching underwriting.
+  if (field.min !== undefined || field.max !== undefined) {
+    const n = Number(digits(v));
+    if (!Number.isFinite(n)) return "range";
+    if (field.min !== undefined && n < field.min) return "range";
+    if (field.max !== undefined && n > field.max) return "range";
+  }
+
+  return null;
 }

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
+import { readFeDeviceId } from "@/lib/fe-intake/device";
 
 /**
  * Proxies NIH's free, keyless RxTerms Clinical Table Search Service for medication-name
@@ -13,8 +14,13 @@ const RXTERMS_BASE = "https://clinicaltables.nlm.nih.gov/api/rxterms/v1/search";
 
 export async function GET(request: NextRequest) {
   try {
+    // Clients filling the form are anonymous now (passwordless intake), so requiring a Clerk
+    // session here broke the picker outright — every lookup 401'd and the dropdown just said
+    // "no medications found". A device cookie (set the moment a session is opened) or a signed-in
+    // agent is enough of a gate for what is a lookup against a public NIH database with no PII.
     const { userId } = await auth();
-    if (!userId) {
+    const deviceId = await readFeDeviceId();
+    if (!userId && !deviceId) {
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
     const { searchParams } = new URL(request.url);
