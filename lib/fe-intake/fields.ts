@@ -210,9 +210,10 @@ export const FE_SECTIONS: FeSection[] = [
       { key: "firstName", labelEn: "First name", labelEs: "Primer nombre", type: "text", required: true, crm: native("firstName") },
       { key: "lastName", labelEn: "Last name", labelEs: "Apellido", type: "text", required: true, crm: native("lastName") },
       {
+        // No account exists to fall back to since intake went passwordless — just mark it optional.
         key: "email", labelEn: "Email", labelEs: "Correo electrónico", type: "email", crm: native("email"),
-        helpEn: "Optional — we'll use the email on your account if you skip this.",
-        helpEs: "Opcional — usaremos el correo de su cuenta si omite esto.",
+        helpEn: "(Optional)",
+        helpEs: "(Opcional)",
       },
       { key: "phone", labelEn: "Phone number", labelEs: "Número de teléfono", type: "tel", required: true, crm: native("phone") },
       { key: "dateOfBirth", labelEn: "Date of birth", labelEs: "Fecha de nacimiento", type: "dob", required: true, crm: native("dateOfBirth") },

@@ -50,7 +50,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import IntakeAddressInput, { type ResolvedAddress } from "@/components/shared/intake-address-input";
-import { MONTHS, buildDobIso, splitDobIso, formatUsPhone } from "@/lib/intake-shared/format";
+import { MONTHS, buildDobIso, splitDobIso, formatUsPhone, formatSsn } from "@/lib/intake-shared/format";
 import { fetchFeIntake, completeFeIntake, searchMedications, saveFeIntakeBanking } from "@/lib/fe-intake-api";
 import { useFeIntakeAutosave } from "@/hooks/use-fe-intake-autosave";
 import {
@@ -499,43 +499,65 @@ function DobInput({ value, onChange, locale }: { value: string; onChange: (v: st
 }
 
 /**
- * US phone entry that formats as you type — "3055551234" becomes "(305) 555-1234" in place, so
- * the shape of a correct number is obvious and the field physically can't take an 11th digit.
- * A live digit counter plus a green check on the 10th digit replace the usual "invalid number"
- * scolding after the fact.
+ * Fixed-length numeric entry (phone, SSN, zip) that formats as you type and always says why it
+ * isn't accepted yet. Without this, a mistyped SSN just leaves Next greyed out with no
+ * explanation — the client can't tell whether the form is broken or they did something wrong.
  */
-function PhoneField({
+function CountedDigitsField({
   value,
   onChange,
   locale,
+  format,
+  digitsNeeded,
+  placeholder,
+  inputMode = "numeric",
+  autoComplete,
+  /** Masked values come from the server for sensitive fields; typing replaces them. */
+  maskedNote,
 }: {
   value: string;
   onChange: (v: string) => void;
   locale: FeLocale;
+  format: (raw: string) => string;
+  digitsNeeded: number;
+  placeholder?: string;
+  inputMode?: "numeric" | "tel";
+  autoComplete?: string;
+  maskedNote?: string;
 }) {
+  const masked = isMaskedValue(value);
   const digitCount = value.replace(/\D/g, "").length;
-  const complete = digitCount === 10;
+  const complete = !masked && digitCount === digitsNeeded;
+  const remaining = digitsNeeded - digitCount;
 
   return (
     <div>
       <div className="relative">
         <input
           autoFocus
-          type="tel"
-          inputMode="tel"
-          autoComplete="tel"
-          value={formatUsPhone(value)}
-          onChange={(e) => onChange(formatUsPhone(e.target.value))}
-          placeholder="(555) 123-4567"
-          aria-invalid={digitCount > 0 && !complete}
+          type="text"
+          inputMode={inputMode}
+          autoComplete={autoComplete}
+          value={masked ? value : format(value)}
+          onFocus={() => {
+            // A stored sensitive value shows as a mask; focusing to edit starts it fresh.
+            if (masked) onChange("");
+          }}
+          onChange={(e) => onChange(format(e.target.value))}
+          placeholder={placeholder}
+          aria-invalid={!masked && digitCount > 0 && !complete}
           className={`${BIG_INPUT} pr-12 tracking-wide ${complete ? "border-green-500" : ""}`}
         />
-        {complete && (
+        {(complete || masked) && (
           <CheckCircle2 className="absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 text-green-600" />
         )}
       </div>
-      <p className="mt-2 text-xs text-muted-foreground">
-        {complete ? tr(UI.phoneComplete, locale) : tr(UI.phoneHint, locale).replace("{n}", String(10 - digitCount))}
+      <p className={`mt-2 text-xs ${complete || masked ? "text-green-600" : "text-muted-foreground"}`}>
+        {masked
+          ? maskedNote ?? tr(UI.looksGood, locale)
+          : complete
+            ? tr(UI.looksGood, locale)
+            : tr(UI.digitsRemaining, locale).replace("{n}", String(Math.max(0, remaining)))}
       </p>
     </div>
   );
@@ -950,6 +972,36 @@ export default function FeIntakeForm({ token }: { token: string }) {
   );
 }
 
+/**
+ * Human-readable reason a value isn't accepted, or null when it's fine. Every error the
+ * validator can produce maps to a message here — a silently disabled Next button is the one
+ * outcome this must never allow.
+ */
+function validationMessage(field: FeField, value: string, locale: FeLocale): string | null {
+  const error = fieldFormatError(field, value);
+  if (!error) return null;
+  switch (error) {
+    case "email":
+      return tr(UI.errEmail, locale);
+    case "phone":
+      return tr(UI.errPhone, locale);
+    case "zip":
+      return tr(UI.errZip, locale);
+    case "ssn":
+      return tr(UI.errSsn, locale);
+    case "dob":
+      return tr(UI.errDob, locale);
+    case "routing":
+      return tr(UI.errRouting, locale);
+    case "range":
+      return tr(UI.errRange, locale)
+        .replace("{min}", String(field.min ?? ""))
+        .replace("{max}", String(field.max ?? ""));
+    default:
+      return null;
+  }
+}
+
 /** "Beneficiary 2" / "Medication 3" — tells the client which row they're filling in. */
 function rowEyebrow(repeaterKey: string, rowIndex: number, locale: FeLocale): string {
   const field = fieldByKey(repeaterKey);
@@ -980,6 +1032,14 @@ function FieldScreen({
   const headline = isMedicationUsage
     ? applyDrugToken(fieldLabel(field, locale), str(container.drugName), locale)
     : fieldLabel(field, locale);
+
+  // `CountedDigitsField` shows its own live progress, so suppress the generic message there to
+  // avoid saying the same thing twice.
+  const selfReporting = field.type === "tel" || field.type === "zip" || field.type === "ssn";
+  const inlineError =
+    selfReporting || !value.trim() || isMaskedValue(value)
+      ? null
+      : validationMessage(field, value.trim(), locale);
 
   return (
     <div>
@@ -1057,31 +1117,35 @@ function FieldScreen({
         ) : field.type === "height" ? (
           <HeightInput value={value} onChange={onChange} locale={locale} />
         ) : field.type === "tel" ? (
-          <PhoneField value={value} onChange={onChange} locale={locale} />
-        ) : field.type === "zip" ? (
-          <input
-            autoFocus
-            type="text"
-            inputMode="numeric"
+          <CountedDigitsField
             value={value}
-            onChange={(e) => onChange(e.target.value.replace(/\D/g, "").slice(0, field.maxLength ?? 5))}
+            onChange={onChange}
+            locale={locale}
+            format={formatUsPhone}
+            digitsNeeded={10}
+            placeholder="(555) 123-4567"
+            inputMode="tel"
+            autoComplete="tel"
+          />
+        ) : field.type === "zip" ? (
+          <CountedDigitsField
+            value={value}
+            onChange={onChange}
+            locale={locale}
+            format={(raw) => raw.replace(/\D/g, "").slice(0, field.maxLength ?? 5)}
+            digitsNeeded={field.maxLength ?? 5}
             placeholder={fieldPlaceholder(field, locale)}
-            className={BIG_INPUT}
+            autoComplete="postal-code"
           />
         ) : field.type === "ssn" ? (
-          <input
-            autoFocus
-            type="text"
-            inputMode="numeric"
+          <CountedDigitsField
             value={value}
-            // A masked value means "already on file" — the server never sends the real digits to
-            // the browser. Focusing to edit clears it so they type a fresh number.
-            onFocus={() => {
-              if (isMaskedValue(value)) onChange("");
-            }}
-            onChange={(e) => onChange(e.target.value.replace(/\D/g, "").slice(0, field.maxLength ?? 9))}
-            placeholder="123456789"
-            className={BIG_INPUT}
+            onChange={onChange}
+            locale={locale}
+            format={formatSsn}
+            digitsNeeded={9}
+            placeholder="123-45-6789"
+            maskedNote={tr(UI.ssnOnFile, locale)}
           />
         ) : (
           <input
@@ -1098,6 +1162,15 @@ function FieldScreen({
           />
         )}
       </div>
+
+      {/* Say why Next is disabled. The counted-digit fields report their own progress, so this
+          covers everything else — a malformed email, an out-of-range weight, a bad date. */}
+      {inlineError && (
+        <p className="mt-3 flex items-start gap-2 text-sm font-medium text-amber-700 dark:text-amber-500">
+          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+          {inlineError}
+        </p>
+      )}
 
       {field.key === "hasSsn" && value === "no" && fieldNote(field, locale) && (
         <div className="mt-4 rounded-2xl border border-brand/20 bg-brand/5 p-4 text-sm text-gray-700 dark:text-gray-300">

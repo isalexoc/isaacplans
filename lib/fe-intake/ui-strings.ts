@@ -235,12 +235,20 @@ export const UI = {
   errZip: { en: "Enter a valid 5-digit zip code.", es: "Ingrese un código postal válido de 5 dígitos." } as Dict,
   errSsn: { en: "Enter a valid 9-digit number.", es: "Ingrese un número válido de 9 dígitos." } as Dict,
   errDob: { en: "Enter a valid date of birth.", es: "Ingrese una fecha de nacimiento válida." } as Dict,
-  errRange: { en: "Please enter a realistic value.", es: "Ingrese un valor realista." } as Dict,
+  errRange: {
+    en: "Please enter a value between {min} and {max}.",
+    es: "Ingrese un valor entre {min} y {max}.",
+  } as Dict,
   errRouting: { en: "Routing numbers are 9 digits.", es: "Los números de ruta tienen 9 dígitos." } as Dict,
 
-  // Phone entry
-  phoneHint: { en: "{n} more digit(s) to go", es: "Faltan {n} dígito(s)" } as Dict,
-  phoneComplete: { en: "Looks good", es: "Se ve bien" } as Dict,
+  // Live feedback for fixed-length numeric entry (phone, SSN, zip) — tells the client why Next
+  // isn't lit yet instead of leaving them staring at a disabled button.
+  digitsRemaining: { en: "{n} more digit(s) to go", es: "Faltan {n} dígito(s)" } as Dict,
+  looksGood: { en: "Looks good", es: "Se ve bien" } as Dict,
+  ssnOnFile: {
+    en: "Already saved — tap to replace it.",
+    es: "Ya guardado — toque para reemplazarlo.",
+  } as Dict,
 
   // Medication search — its own strings; the dashboard's CRM-contact copy leaked in here before.
   notListed: { en: "Not listed — type it in", es: "No aparece — escríbalo" } as Dict,

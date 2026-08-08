@@ -48,6 +48,14 @@ export function formatUsPhone(value: string): string {
   return `(${d.slice(0, 3)}) ${d.slice(3, 6)}-${d.slice(6)}`;
 }
 
+/** Progressive SSN format: digits → 123-45-6789. Caps at 9 digits. */
+export function formatSsn(value: string): string {
+  const d = (value ?? "").replace(/\D/g, "").slice(0, 9);
+  if (d.length <= 3) return d;
+  if (d.length <= 5) return `${d.slice(0, 3)}-${d.slice(3)}`;
+  return `${d.slice(0, 3)}-${d.slice(3, 5)}-${d.slice(5)}`;
+}
+
 /** Progressive card expiration format: digits → MM/YY. */
 export function formatCardExpiration(value: string): string {
   const d = (value ?? "").replace(/\D/g, "").slice(0, 4);
