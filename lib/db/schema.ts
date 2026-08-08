@@ -425,7 +425,11 @@ export const feIntakeSessions = pgTable("fe_intake_sessions", {
   id:            text("id").primaryKey(), // nanoid
   token:         text("token").notNull(), // unguessable URL slug
   ownerUserId:   text("owner_user_id").notNull(), // agent Clerk id (creator)
-  clientUserId:  text("client_user_id"), // bound on first client visit (claim)
+  clientUserId:  text("client_user_id"), // legacy: bound on first client visit when Clerk sign-in was required
+  // Passwordless access: the unguessable token is the credential, and the first browser to open
+  // it claims the session via an httpOnly cookie. A forwarded/leaked link then opens to nothing.
+  clientDeviceId: text("client_device_id"),
+  expiresAt:     timestamp("expires_at"), // capability links shouldn't live forever
   crmContactId:  text("crm_contact_id"), // Agent CRM (GHL) contact id
   contactName:   text("contact_name"),
   contactEmail:  text("contact_email"),
@@ -441,6 +445,7 @@ export const feIntakeSessions = pgTable("fe_intake_sessions", {
   tokenUniqueIdx: uniqueIndex("fe_intake_token_unique_idx").on(t.token),
   ownerIdx:       index("fe_intake_owner_idx").on(t.ownerUserId, t.updatedAt),
   clientIdx:      index("fe_intake_client_idx").on(t.clientUserId),
+  deviceIdx:      index("fe_intake_device_idx").on(t.clientDeviceId),
   contactIdx:     index("fe_intake_contact_idx").on(t.crmContactId),
 }));
 

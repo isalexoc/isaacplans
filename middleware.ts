@@ -25,11 +25,19 @@ const isProtectedRoute = createRouteMatcher([
   '/aca/admision(.*)',
   '/en/aca/intake(.*)',
   '/es/aca/admision(.*)',
-  // Final Expense intake (form + dashboard) — same token-scoped model as IUL/ACA.
-  '/final-expense/intake(.*)',
-  '/gastos-finales/admision(.*)',
-  '/en/final-expense/intake(.*)',
-  '/es/gastos-finales/admision(.*)',
+  // Final Expense intake: the AGENT surfaces only. The client form at
+  // /final-expense/intake/<token> is deliberately public — it authenticates with the unguessable
+  // token plus a device cookie instead of an account, so a prospect never hits a sign-in wall.
+  // Matching the dashboard exactly (no trailing wildcard) is what leaves the token path open.
+  '/final-expense/intake',
+  '/gastos-finales/admision',
+  '/en/final-expense/intake',
+  '/es/gastos-finales/admision',
+  // The read-only summary is agent-facing and stays protected.
+  '/final-expense/intake/:token/view',
+  '/gastos-finales/admision/:token/view',
+  '/en/final-expense/intake/:token/view',
+  '/es/gastos-finales/admision/:token/view',
 ]);
 
 // Admin-only surfaces: the /admin dashboard + tools, Sanity Studio, and every

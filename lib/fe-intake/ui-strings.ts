@@ -112,12 +112,42 @@ export const UI = {
   needHelp: { en: "Need help?", es: "¿Necesita ayuda?" } as Dict,
   submitApplication: { en: "Submit my information", es: "Enviar mi información" } as Dict,
   submitting: { en: "Submitting…", es: "Enviando…" } as Dict,
-  // Client thank-you (shown after a client submits and is locked out of editing)
-  thankYouTitle: { en: "Thank you!", es: "¡Gracias!" } as Dict,
-  thankYouBody: {
-    en: "Your information has been submitted. We're reviewing it and will reach out to you shortly. There's nothing else you need to do.",
-    es: "Su información ha sido enviada. La estamos revisando y nos pondremos en contacto con usted en breve. No necesita hacer nada más.",
+  // Pre-submit review screen
+  reviewTitle: { en: "That's everything!", es: "¡Eso es todo!" } as Dict,
+  reviewBody: {
+    en: "Send your information securely to your agent — it only takes a second.",
+    es: "Envíe su información de forma segura a su agente — solo toma un segundo.",
   } as Dict,
+
+  // Client completion screen (after submitting, and when returning to a submitted form)
+  thankYouTitle: { en: "Thank you — you're all done!", es: "Gracias — ¡ya terminó!" } as Dict,
+  thankYouBody: {
+    en: "We have everything we need to start working on your coverage.",
+    es: "Tenemos todo lo que necesitamos para comenzar a trabajar en su cobertura.",
+  } as Dict,
+  nextStepsTitle: { en: "What happens next", es: "Qué sigue" } as Dict,
+  nextStep1: {
+    en: "A licensed agent for your state will call you shortly.",
+    es: "Un agente con licencia en su estado lo llamará en breve.",
+  } as Dict,
+  nextStep2: {
+    en: "Together you'll confirm your details and sign your application.",
+    es: "Juntos confirmarán sus datos y firmará su solicitud.",
+  } as Dict,
+  nextStep3: {
+    en: "You'll set up your monthly payment to activate your coverage.",
+    es: "Configurará su pago mensual para activar su cobertura.",
+  } as Dict,
+  readyTitle: { en: "Please have this ready for the call", es: "Tenga esto listo para la llamada" } as Dict,
+  readyBody: {
+    en: "Your bank routing number and account number. You'll find both on a check or in your banking app.",
+    es: "Su número de ruta bancaria y número de cuenta. Encontrará ambos en un cheque o en su aplicación bancaria.",
+  } as Dict,
+  noCards: {
+    en: "Bank account only — credit and debit cards are not accepted.",
+    es: "Solo cuenta bancaria — no se aceptan tarjetas de crédito ni de débito.",
+  } as Dict,
+  doneQuestions: { en: "Questions before then? Call us at", es: "¿Preguntas antes? Llámenos al" } as Dict,
   // Admin re-open controls
   allowClientEdit: { en: "Allow client to edit", es: "Permitir que el cliente edite" } as Dict,
   lockClientEdit: { en: "Lock client edits", es: "Bloquear edición del cliente" } as Dict,

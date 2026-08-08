@@ -16,7 +16,7 @@
  * they're folded onto the same screen as the address search box.
  */
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocale } from "next-intl";
 import { AnimatePresence, motion } from "framer-motion";
 import {
@@ -41,6 +41,10 @@ import {
   CircleDot,
   Bone,
   Phone,
+  PhoneCall,
+  PenLine,
+  Landmark,
+  CreditCard,
   Plus,
   Trash2,
   type LucideIcon,
@@ -58,6 +62,7 @@ import {
   type RepeaterRow,
 } from "@/lib/fe-intake/fields";
 import { fieldFormatError } from "@/lib/fe-intake/validation";
+import { isMaskedValue } from "@/lib/fe-intake/masking";
 import {
   UI,
   pickLocale,
@@ -93,6 +98,22 @@ type QuestionScreen = Extract<Screen, { kind: "field" } | { kind: "repeaterRow" 
 
 function isQuestionScreen(screen: Screen): screen is QuestionScreen {
   return screen.kind === "field" || screen.kind === "repeaterRow";
+}
+
+/** Pause after a card tap so the checkmark registers before the screen slides away. */
+const AUTO_ADVANCE_MS = 280;
+
+/**
+ * Which answers move on by themselves. Single-select cards are unambiguous, so the Next tap is
+ * redundant — but a choice that reveals explanatory copy (the no-SSN note) has to stay put long
+ * enough to be read, and typed fields always need an explicit Next.
+ */
+function shouldAutoAdvance(screen: Screen, value: string): boolean {
+  if (!isQuestionScreen(screen)) return false;
+  const field = screen.field;
+  if (field.type !== "select") return false;
+  if (field.noteEn && value === "no") return false;
+  return true;
 }
 
 /** Sibling keys folded onto an `address` field's own screen — never their own screen. */
@@ -177,7 +198,9 @@ function isScreenValid(screen: Screen, data: FeIntakeData): boolean {
   const field = screen.field;
   const value = str(container[field.key]).trim();
   if (field.required && !value) return false;
-  if (value && fieldFormatError(field, value)) return false;
+  // A mask stands in for a value already stored server-side — it can't pass a format check
+  // (bullets aren't digits) but the underlying value is valid.
+  if (value && !isMaskedValue(value) && fieldFormatError(field, value)) return false;
 
   // An address screen bundles its city/state/zip siblings — all of them must be valid too.
   if (field.type === "address" && field.addressTargets) {
@@ -536,10 +559,17 @@ export default function FeIntakeForm({ token }: { token: string }) {
   const [session, setSession] = useState<FeIntakeSession | null>(null);
   const [data, setData] = useState<FeIntakeData>({});
   const [loadState, setLoadState] = useState<"loading" | "ready" | "error">("loading");
+  const [loadErrorMessage, setLoadErrorMessage] = useState<string | null>(null);
   const [currentKey, setCurrentKey] = useState<string>("finish");
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [justSubmitted, setJustSubmitted] = useState(false);
+  const advanceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Don't let a queued auto-advance fire after the form is gone.
+  useEffect(() => () => {
+    if (advanceTimer.current) clearTimeout(advanceTimer.current);
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -552,8 +582,12 @@ export default function FeIntakeForm({ token }: { token: string }) {
         const screens = buildScreens(s.data ?? {});
         setCurrentKey(resumeScreenKey(screens, s.data ?? {}));
         setLoadState("ready");
-      } catch {
-        if (active) setLoadState("error");
+      } catch (e) {
+        if (!active) return;
+        // The API explains an expired or already-claimed link precisely; show that rather than
+        // a generic failure, since the client's next move differs (call us vs. use the first device).
+        setLoadErrorMessage(e instanceof Error ? e.message : null);
+        setLoadState("error");
       }
     })();
     return () => {
@@ -576,26 +610,43 @@ export default function FeIntakeForm({ token }: { token: string }) {
   const isOwner = session?.role === "owner";
   const locked = Boolean(session && !isOwner && session.status === "completed" && !session.reopenedForClient);
 
-  function setFieldValue(key: string, value: string) {
-    setData({ ...data, [key]: value });
-  }
-
-  function setRowValue(repeaterKey: string, rowIndex: number, subKey: string, value: string) {
-    const fieldDef = fieldByKey(repeaterKey);
-    if (!fieldDef) return;
-    const rows: RepeaterRow[] = Array.isArray(data[repeaterKey]) ? [...(data[repeaterKey] as RepeaterRow[])] : [];
-    while (rows.length <= rowIndex) rows.push(emptyRow(fieldDef));
-    rows[rowIndex] = { ...rows[rowIndex], [subKey]: value };
-    setData({ ...data, [repeaterKey]: rows });
+  /** The data that *would* result from writing `value`, without committing it yet. */
+  function computeNextData(key: string, value: string): FeIntakeData {
+    if (screen.kind !== "repeaterRow") return { ...data, [key]: value };
+    const fieldDef = fieldByKey(screen.repeaterKey);
+    if (!fieldDef) return data;
+    const rows: RepeaterRow[] = Array.isArray(data[screen.repeaterKey])
+      ? [...(data[screen.repeaterKey] as RepeaterRow[])]
+      : [];
+    while (rows.length <= screen.rowIndex) rows.push(emptyRow(fieldDef));
+    rows[screen.rowIndex] = { ...rows[screen.rowIndex], [key]: value };
+    return { ...data, [screen.repeaterKey]: rows };
   }
 
   /** Writes into whichever container (top-level data, or a repeater row) the active screen uses. */
   function handleChangeField(key: string, value: string) {
-    if (screen.kind === "repeaterRow") {
-      setRowValue(screen.repeaterKey, screen.rowIndex, key, value);
-    } else {
-      setFieldValue(key, value);
-    }
+    setData(computeNextData(key, value));
+  }
+
+  /**
+   * Tapping a choice card is an unambiguous answer, so most select screens advance on their own
+   * — the extra Next tap is pure friction. The screen list is rebuilt from the *new* data before
+   * picking the target, since an answer can reveal the very next question (the tobacco / health /
+   * hospitalization chains).
+   */
+  function handleChoose(key: string, value: string) {
+    const nextData = computeNextData(key, value);
+    setData(nextData);
+    if (!shouldAutoAdvance(screen, value)) return;
+
+    if (advanceTimer.current) clearTimeout(advanceTimer.current);
+    advanceTimer.current = setTimeout(() => {
+      const newScreens = buildScreens(nextData);
+      const here = newScreens.findIndex((s) => s.screenKey === screen.screenKey);
+      const next = newScreens[here + 1] ?? newScreens[newScreens.length - 1];
+      setData({ ...nextData, __cursor: next.screenKey });
+      setCurrentKey(next.screenKey);
+    }, AUTO_ADVANCE_MS);
   }
 
   function handleAddressResolve(field: FeField, resolved: ResolvedAddress) {
@@ -614,6 +665,8 @@ export default function FeIntakeForm({ token }: { token: string }) {
 
   function goBack() {
     if (idx === 0) return;
+    // Cancel a queued auto-advance, or it would immediately undo the Back tap.
+    if (advanceTimer.current) clearTimeout(advanceTimer.current);
     const prev = screens[idx - 1];
     setData({ ...data, __cursor: prev.screenKey });
     setCurrentKey(prev.screenKey);
@@ -708,20 +761,23 @@ export default function FeIntakeForm({ token }: { token: string }) {
     );
   }
   if (loadState === "error" || !session) {
+    const phoneNumber = process.env.NEXT_PUBLIC_PHONE_NUMBER;
     return (
-      <div className="flex min-h-[60vh] items-center justify-center text-red-600">
-        <AlertCircle className="mr-2 h-5 w-5" /> {tr(UI.loadError, locale)}
+      <div className="mx-auto flex min-h-[60vh] max-w-md flex-col items-center justify-center gap-3 px-6 text-center">
+        <AlertCircle className="h-10 w-10 text-amber-500" />
+        <p className="text-base font-medium text-gray-900 dark:text-gray-100">
+          {loadErrorMessage || tr(UI.loadError, locale)}
+        </p>
+        {phoneNumber && (
+          <a href={`tel:${phoneNumber}`} className="text-sm font-semibold text-brand hover:underline">
+            {phoneNumber}
+          </a>
+        )}
       </div>
     );
   }
   if (locked || justSubmitted) {
-    return (
-      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-3 px-6 text-center">
-        <CheckCircle2 className="h-12 w-12 text-brand" />
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{tr(UI.thankYouTitle, locale)}</h1>
-        <p className="max-w-sm text-muted-foreground">{tr(UI.thankYouBody, locale)}</p>
-      </div>
-    );
+    return <CompletedScreen locale={locale} />;
   }
 
   const valid = isScreenValid(screen, data);
@@ -814,6 +870,7 @@ export default function FeIntakeForm({ token }: { token: string }) {
                     screen.kind === "repeaterRow" ? rowEyebrow(screen.repeaterKey, screen.rowIndex, locale) : undefined
                   }
                   onChangeField={handleChangeField}
+                  onChoose={handleChoose}
                   onAddressResolve={(resolved) => handleAddressResolve(screen.field, resolved)}
                 />
               )}
@@ -861,6 +918,7 @@ function FieldScreen({
   locale,
   eyebrow,
   onChangeField,
+  onChoose,
   onAddressResolve,
 }: {
   field: FeField;
@@ -868,6 +926,7 @@ function FieldScreen({
   locale: FeLocale;
   eyebrow?: string;
   onChangeField: (key: string, value: string) => void;
+  onChoose: (key: string, value: string) => void;
   onAddressResolve: (resolved: ResolvedAddress) => void;
 }) {
   const value = str(container[field.key]);
@@ -894,7 +953,7 @@ function FieldScreen({
                 selected={value === opt.value}
                 icon={iconForOption(field.key, opt.value)}
                 label={optionLabel(opt, locale)}
-                onClick={() => onChange(opt.value)}
+                onClick={() => onChoose(field.key, opt.value)}
               />
             ))}
           </div>
@@ -968,6 +1027,11 @@ function FieldScreen({
             type="text"
             inputMode="numeric"
             value={value}
+            // A masked value means "already on file" — the server never sends the real digits to
+            // the browser. Focusing to edit clears it so they type a fresh number.
+            onFocus={() => {
+              if (isMaskedValue(value)) onChange("");
+            }}
             onChange={(e) => onChange(e.target.value.replace(/\D/g, "").slice(0, field.maxLength ?? 9))}
             placeholder="123456789"
             className={BIG_INPUT}
@@ -1182,6 +1246,80 @@ function RosterScreen({
   );
 }
 
+/**
+ * Post-submission screen. Beyond thanking them, this is the last reliable chance to tell the
+ * client what the agent call needs from them — above all that the payment step is bank-account
+ * only, so nobody shows up to the call holding a debit card.
+ */
+function CompletedScreen({ locale }: { locale: FeLocale }) {
+  const phoneNumber = process.env.NEXT_PUBLIC_PHONE_NUMBER;
+  const steps: Array<{ icon: LucideIcon; text: string }> = [
+    { icon: PhoneCall, text: tr(UI.nextStep1, locale) },
+    { icon: PenLine, text: tr(UI.nextStep2, locale) },
+    { icon: Landmark, text: tr(UI.nextStep3, locale) },
+  ];
+
+  return (
+    <div className="mx-auto w-full max-w-md px-5 py-10">
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35 }}
+        className="text-center"
+      >
+        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-950/50">
+          <CheckCircle2 className="h-9 w-9 text-green-600 dark:text-green-400" />
+        </div>
+        <h1 className="mt-5 text-2xl font-bold leading-snug text-gray-900 dark:text-gray-100">
+          {tr(UI.thankYouTitle, locale)}
+        </h1>
+        <p className="mt-2 text-base text-muted-foreground">{tr(UI.thankYouBody, locale)}</p>
+      </motion.div>
+
+      <section className="mt-8">
+        <h2 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          {tr(UI.nextStepsTitle, locale)}
+        </h2>
+        <ol className="mt-3 space-y-2.5">
+          {steps.map(({ icon: Icon, text }, i) => (
+            <li
+              key={i}
+              className="flex items-start gap-3 rounded-2xl border-2 border-gray-200 p-4 dark:border-gray-800"
+            >
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand/10 text-brand">
+                <Icon className="h-4 w-4" />
+              </span>
+              <span className="pt-1.5 text-sm leading-relaxed text-gray-800 dark:text-gray-200">{text}</span>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      {/* The one thing they must physically go find before the call. */}
+      <section className="mt-6 rounded-2xl border-2 border-brand/30 bg-brand/5 p-5">
+        <h2 className="flex items-center gap-2 text-base font-bold text-gray-900 dark:text-gray-100">
+          <Landmark className="h-5 w-5 shrink-0 text-brand" />
+          {tr(UI.readyTitle, locale)}
+        </h2>
+        <p className="mt-2 text-sm leading-relaxed text-gray-700 dark:text-gray-300">{tr(UI.readyBody, locale)}</p>
+        <p className="mt-3 flex items-start gap-2 rounded-xl bg-white/70 p-3 text-sm font-medium text-gray-800 dark:bg-gray-900/60 dark:text-gray-200">
+          <CreditCard className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
+          {tr(UI.noCards, locale)}
+        </p>
+      </section>
+
+      {phoneNumber && (
+        <p className="mt-6 text-center text-sm text-muted-foreground">
+          {tr(UI.doneQuestions, locale)}{" "}
+          <a href={`tel:${phoneNumber}`} className="font-semibold text-brand hover:underline">
+            {phoneNumber}
+          </a>
+        </p>
+      )}
+    </div>
+  );
+}
+
 function FinishScreen({
   locale,
   submitting,
@@ -1195,8 +1333,8 @@ function FinishScreen({
 }) {
   return (
     <div>
-      <h1 className="text-2xl font-bold leading-snug text-gray-900 dark:text-gray-100">{tr(UI.thankYouTitle, locale)}</h1>
-      <p className="mt-2 text-sm text-muted-foreground">{tr(UI.submitApplication, locale)}</p>
+      <h1 className="text-2xl font-bold leading-snug text-gray-900 dark:text-gray-100">{tr(UI.reviewTitle, locale)}</h1>
+      <p className="mt-2 text-sm text-muted-foreground">{tr(UI.reviewBody, locale)}</p>
       {submitError && (
         <p className="mt-4 flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300">
           <AlertCircle className="h-4 w-4 shrink-0" /> {submitError}

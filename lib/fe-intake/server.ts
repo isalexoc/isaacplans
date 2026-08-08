@@ -49,6 +49,18 @@ export const FE_ENGLISH_TAG = "english";
 /** Contact tag applied when a prospect self-starts an application from the public apply page. */
 export const FE_SELF_APPLY_TAG = "fe_self_apply";
 
+/**
+ * How long a passwordless intake link stays usable. Long enough that a client can finish over a
+ * few days, short enough that an old link in a text thread stops being a live credential. The
+ * agent can always issue a fresh one with "Reset link".
+ */
+export const FE_INTAKE_LINK_TTL_DAYS = 30;
+const FE_INTAKE_LINK_TTL_MS = FE_INTAKE_LINK_TTL_DAYS * 24 * 60 * 60 * 1000;
+
+export function isFeIntakeExpired(row: FeIntakeSessionRow): boolean {
+  return Boolean(row.expiresAt && row.expiresAt.getTime() < Date.now());
+}
+
 export type FeIntakeSessionRow = typeof feIntakeSessions.$inferSelect;
 
 export type FeIntakeStatus = "draft" | "in_progress" | "completed";
@@ -94,6 +106,7 @@ export async function createFeIntakeSession(input: {
   contactPhone?: string | null;
   locale?: string;
   data?: FeIntakeData;
+  clientDeviceId?: string | null;
 }): Promise<FeIntakeSessionRow> {
   const id = nanoid();
   const token = nanoid(24);
@@ -105,6 +118,8 @@ export async function createFeIntakeSession(input: {
       token,
       ownerUserId: input.ownerUserId,
       clientUserId: input.clientUserId ?? null,
+      clientDeviceId: input.clientDeviceId ?? null,
+      expiresAt: new Date(now.getTime() + FE_INTAKE_LINK_TTL_MS),
       crmContactId: input.crmContactId ?? null,
       contactName: input.contactName ?? null,
       contactEmail: input.contactEmail ?? null,
@@ -122,12 +137,14 @@ export async function createFeIntakeSession(input: {
 /**
  * Public "Apply now" entry point: resume the prospect's existing application, claim an
  * unclaimed one the agent already created for their email, or create a fresh one. The agent
- * (FE_INTAKE_DEFAULT_OWNER_USER_ID) is always the owner so it lands in their dashboard; the
- * signed-in prospect is the bound client. Returns the session row to redirect to its form.
- * Mirrors lib/aca-intake/server.ts::selfStartAcaIntakeForClient.
+ * (FE_INTAKE_DEFAULT_OWNER_USER_ID) is always the owner so it lands in their dashboard.
+ *
+ * No account required — the caller is identified by their device cookie. `clientUserId` is still
+ * honored so sessions created under the old Clerk-gated flow keep working.
  */
 export async function selfStartFeIntakeForClient(input: {
-  clientUserId: string;
+  clientDeviceId: string;
+  clientUserId?: string | null;
   email?: string | null;
   firstName?: string | null;
   lastName?: string | null;
@@ -139,14 +156,20 @@ export async function selfStartFeIntakeForClient(input: {
     throw new Error("FE_INTAKE_DEFAULT_OWNER_USER_ID is not configured.");
   }
 
-  // 1. Resume an application already bound to this user.
-  const [bound] = await db
-    .select()
-    .from(feIntakeSessions)
-    .where(eq(feIntakeSessions.clientUserId, input.clientUserId))
-    .orderBy(desc(feIntakeSessions.updatedAt))
-    .limit(1);
-  if (bound) return bound;
+  // 1a. Resume an application already bound to this Clerk user (legacy sessions).
+  if (input.clientUserId) {
+    const [bound] = await db
+      .select()
+      .from(feIntakeSessions)
+      .where(eq(feIntakeSessions.clientUserId, input.clientUserId))
+      .orderBy(desc(feIntakeSessions.updatedAt))
+      .limit(1);
+    if (bound && !isFeIntakeExpired(bound)) return bound;
+  }
+
+  // 1b. Resume the application this browser already started.
+  const byDevice = await findFeSessionByDevice(input.clientDeviceId);
+  if (byDevice && !isFeIntakeExpired(byDevice)) return byDevice;
 
   const email = (input.email ?? "").trim().toLowerCase();
 
@@ -154,8 +177,8 @@ export async function selfStartFeIntakeForClient(input: {
   if (email) {
     const unclaimed = await findUnclaimedFeSessionByEmail(ownerUserId, email);
     if (unclaimed) {
-      await bindFeClientUser(unclaimed.token, input.clientUserId);
-      return { ...unclaimed, clientUserId: input.clientUserId };
+      await bindFeClientDevice(unclaimed.token, input.clientDeviceId);
+      return { ...unclaimed, clientDeviceId: input.clientDeviceId };
     }
   }
 
@@ -176,7 +199,11 @@ export async function selfStartFeIntakeForClient(input: {
   let contactEmail = email || null;
   let contactPhone = phone || null;
   const creds = agentCrmGetBaseCredentials();
-  if (creds) {
+  // Without an account there is nothing to identify an anonymous starter by, and creating a
+  // contact from nothing would litter the CRM with blank records on every "Apply" tap. The
+  // contact is created lazily instead, on the first autosave that carries an email or phone
+  // (see ensureCrmContactForSession).
+  if (creds && (email || phone)) {
     // Best-effort — a CRM hiccup must never block the prospect from starting.
     try {
       // agentCrmEnsureContact matches by email/phone first, so a lead who already submitted a
@@ -222,13 +249,14 @@ export async function selfStartFeIntakeForClient(input: {
     } catch (e) {
       console.warn("[fe-intake] self-apply CRM ensure failed:", e);
     }
-  } else {
+  } else if (!creds) {
     console.warn("[fe-intake] Agent CRM credentials missing; self-apply session is unlinked.");
   }
 
   const row = await createFeIntakeSession({
     ownerUserId,
-    clientUserId: input.clientUserId,
+    clientUserId: input.clientUserId ?? null,
+    clientDeviceId: input.clientDeviceId,
     crmContactId,
     contactName,
     contactEmail,
@@ -329,20 +357,23 @@ export async function updateFeIntakeData(
  * client so the next person to open the new link claims it. Admin-only at the route layer.
  */
 export async function resetFeIntakeLink(token: string): Promise<FeIntakeSessionRow | null> {
+  const now = new Date();
   const [row] = await db
     .update(feIntakeSessions)
-    .set({ token: nanoid(24), clientUserId: null, updatedAt: new Date() })
+    // Clearing the device binding is also the recovery path when a client loses the browser they
+    // started on: a fresh link, claimable by whichever device opens it next.
+    .set({
+      token: nanoid(24),
+      clientUserId: null,
+      clientDeviceId: null,
+      expiresAt: new Date(now.getTime() + FE_INTAKE_LINK_TTL_MS),
+      updatedAt: now,
+    })
     .where(eq(feIntakeSessions.token, token))
     .returning();
   return row ?? null;
 }
 
-export async function bindFeClientUser(token: string, clientUserId: string): Promise<void> {
-  await db
-    .update(feIntakeSessions)
-    .set({ clientUserId, updatedAt: new Date() })
-    .where(eq(feIntakeSessions.token, token));
-}
 
 export async function markFeIntakeCompleted(
   token: string,
@@ -415,15 +446,72 @@ export async function syncFeIntakeLinkToCrm(
   }
 }
 
-/** Access rule: owner agent always; the bound client; or an unclaimed session (to claim). */
-export function canAccessFeIntake(
-  row: FeIntakeSessionRow,
-  userId: string
-): { allowed: boolean; shouldClaim: boolean } {
-  if (row.ownerUserId === userId) return { allowed: true, shouldClaim: false };
-  if (row.clientUserId === userId) return { allowed: true, shouldClaim: false };
-  if (!row.clientUserId) return { allowed: true, shouldClaim: true };
-  return { allowed: false, shouldClaim: false };
+export type FeIntakeCaller = {
+  /** Clerk user id, when the caller happens to be signed in (the agent always is). */
+  userId?: string | null;
+  /** Device id from the httpOnly cookie — how an anonymous client proves continuity. */
+  deviceId?: string | null;
+};
+
+export type FeIntakeAccess = {
+  allowed: boolean;
+  /** The session is unclaimed: bind it to this caller's device on the way through. */
+  shouldClaim: boolean;
+  role: "owner" | "client";
+  /** Denied because a different browser already claimed the link (vs. simply not found). */
+  claimedByOtherDevice: boolean;
+};
+
+const DENIED: FeIntakeAccess = {
+  allowed: false,
+  shouldClaim: false,
+  role: "client",
+  claimedByOtherDevice: false,
+};
+
+/**
+ * Access rule for a token-scoped session. The agent (owner) always gets in. Otherwise the
+ * unguessable token plus one of: the Clerk id it was bound to under the old sign-in flow, or the
+ * device cookie that claimed it. An unclaimed session is claimable by whoever opens it first —
+ * which is safe precisely because the token is unguessable.
+ */
+export function canAccessFeIntake(row: FeIntakeSessionRow, caller: FeIntakeCaller): FeIntakeAccess {
+  const userId = caller.userId ?? null;
+  const deviceId = caller.deviceId ?? null;
+
+  if (userId && row.ownerUserId === userId) {
+    return { allowed: true, shouldClaim: false, role: "owner", claimedByOtherDevice: false };
+  }
+  // Sessions created before passwordless access stay bound to their Clerk user.
+  if (userId && row.clientUserId === userId) {
+    return { allowed: true, shouldClaim: false, role: "client", claimedByOtherDevice: false };
+  }
+  if (deviceId && row.clientDeviceId === deviceId) {
+    return { allowed: true, shouldClaim: false, role: "client", claimedByOtherDevice: false };
+  }
+  if (!row.clientUserId && !row.clientDeviceId && deviceId) {
+    return { allowed: true, shouldClaim: true, role: "client", claimedByOtherDevice: false };
+  }
+  return { ...DENIED, claimedByOtherDevice: Boolean(row.clientDeviceId || row.clientUserId) };
+}
+
+/** Bind an unclaimed session to the browser that just opened it. */
+export async function bindFeClientDevice(token: string, deviceId: string): Promise<void> {
+  await db
+    .update(feIntakeSessions)
+    .set({ clientDeviceId: deviceId, updatedAt: new Date() })
+    .where(eq(feIntakeSessions.token, token));
+}
+
+/** Find a session already claimed by this browser, so "Apply" resumes instead of duplicating. */
+export async function findFeSessionByDevice(deviceId: string): Promise<FeIntakeSessionRow | null> {
+  const [row] = await db
+    .select()
+    .from(feIntakeSessions)
+    .where(eq(feIntakeSessions.clientDeviceId, deviceId))
+    .orderBy(desc(feIntakeSessions.updatedAt))
+    .limit(1);
+  return row ?? null;
 }
 
 /** Human-readable label for a usage value, falling back to a free-text "Other" answer. */
@@ -526,11 +614,77 @@ export function buildCrmPayloadFromData(data: FeIntakeData): {
  * returns false and logs on any miss (missing creds/contact, API error) without throwing,
  * so it can run on every autosave without breaking the save.
  */
+/**
+ * Attach a CRM contact to a session that started anonymously, as soon as the client has typed
+ * enough to identify them. Matching on email/phone means a prospect who already came through a
+ * CTA or ads funnel lands on their existing contact rather than a duplicate.
+ * Returns the contact id, or null while there's still nothing to match on.
+ */
+export async function ensureCrmContactForSession(
+  row: FeIntakeSessionRow,
+  decrypted: FeIntakeData
+): Promise<string | null> {
+  if (row.crmContactId) return row.crmContactId;
+
+  const email = str(decrypted.email).toLowerCase();
+  const phone = str(decrypted.phone).replace(/[^\d+]/g, "");
+  if (!email && !phone) return null;
+
+  const creds = agentCrmGetBaseCredentials();
+  if (!creds) return null;
+
+  const firstName = str(decrypted.firstName);
+  const lastName = str(decrypted.lastName);
+  try {
+    const contactId = await agentCrmEnsureContact(
+      {
+        email: email || undefined,
+        phone: phone || undefined,
+        firstName: firstName || undefined,
+        lastName: lastName || undefined,
+        source: "fe_intake",
+      },
+      creds.locationId,
+      creds.token,
+      "[FE_INTAKE]"
+    );
+    if (!contactId) return null;
+
+    const locale = row.locale === "es" ? "es" : "en";
+    await agentCrmAddContactTags(
+      contactId,
+      [FE_SELF_APPLY_TAG, locale === "es" ? FE_SPANISH_TAG : FE_ENGLISH_TAG],
+      creds.token,
+      "[FE_INTAKE]"
+    );
+
+    await db
+      .update(feIntakeSessions)
+      .set({
+        crmContactId: contactId,
+        contactName: [firstName, lastName].filter(Boolean).join(" ") || row.contactName,
+        contactEmail: email || row.contactEmail,
+        contactPhone: phone || row.contactPhone,
+        updatedAt: new Date(),
+      })
+      .where(eq(feIntakeSessions.token, row.token));
+
+    row.crmContactId = contactId;
+    // The share link field is only writable once a contact exists.
+    await syncFeIntakeLinkToCrm(row, locale);
+    return contactId;
+  } catch (e) {
+    console.warn("[fe-intake] lazy CRM contact creation failed:", e);
+    return null;
+  }
+}
+
 export async function syncFeIntakeToCrm(
   row: FeIntakeSessionRow,
   decrypted: FeIntakeData
 ): Promise<boolean> {
-  if (!row.crmContactId) return false;
+  const contactId = await ensureCrmContactForSession(row, decrypted);
+  if (!contactId) return false;
   const creds = agentCrmGetBaseCredentials();
   if (!creds) return false;
   try {
@@ -542,12 +696,7 @@ export async function syncFeIntakeToCrm(
       );
     }
     if (Object.keys(native).length === 0 && customFields.length === 0) return false;
-    return await agentCrmUpdateContact(
-      row.crmContactId,
-      { native, customFields },
-      creds.token,
-      "[FE_INTAKE]"
-    );
+    return await agentCrmUpdateContact(contactId, { native, customFields }, creds.token, "[FE_INTAKE]");
   } catch (e) {
     console.warn("[fe-intake] CRM sync failed:", e);
     return false;

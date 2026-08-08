@@ -141,6 +141,13 @@
       "when": 1785938419841,
       "tag": "0019_blue_celestials",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "5",
+      "when": 1786125713509,
+      "tag": "0020_polite_maximus",
+      "breakpoints": true
     }
   ]
 }

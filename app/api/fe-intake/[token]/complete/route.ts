@@ -7,8 +7,11 @@ import {
   buildCrmPayloadFromData,
   markFeIntakeCompleted,
   toFeIntakeSummary,
+  isFeIntakeExpired,
+  ensureCrmContactForSession,
   FE_INTAKE_COMPLETED_TAG,
 } from "@/lib/fe-intake/server";
+import { readFeDeviceId } from "@/lib/fe-intake/device";
 import { validateForCompletion, type FeIntakeData } from "@/lib/fe-intake/schema";
 import {
   decryptFeIntakeData,
@@ -28,20 +31,27 @@ const PURGE_AFTER_SYNC = process.env.FE_INTAKE_PURGE_AFTER_SYNC === "true";
 // POST /api/fe-intake/[token]/complete — validate, sync to CRM, mark completed
 export async function POST(_request: NextRequest, context: RouteContext) {
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
-    }
     const { token } = await context.params;
     const row = await getFeIntakeByToken(token);
     if (!row) {
       return NextResponse.json({ success: false, error: "Not found" }, { status: 404 });
     }
-    if (!canAccessFeIntake(row, userId).allowed) {
+
+    const { userId } = await auth();
+    const deviceId = await readFeDeviceId();
+
+    const access = canAccessFeIntake(row, { userId, deviceId });
+    if (!access.allowed) {
       return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 });
     }
+    if (access.role === "client" && isFeIntakeExpired(row)) {
+      return NextResponse.json(
+        { success: false, error: "This link has expired. Please call us for a new one.", code: "expired" },
+        { status: 410 }
+      );
+    }
     // A client cannot re-submit a locked (already-completed) form; the admin re-opens it first.
-    if (row.ownerUserId !== userId && !feClientCanEdit(row)) {
+    if (access.role === "client" && !feClientCanEdit(row)) {
       return NextResponse.json({ success: false, error: "This form has already been submitted." }, { status: 403 });
     }
 
@@ -55,6 +65,9 @@ export async function POST(_request: NextRequest, context: RouteContext) {
     }
 
     const creds = agentCrmGetBaseCredentials();
+    // A session that started anonymously has no contact until the client supplies an email or
+    // phone — by submission time they have, so create it now if the autosaves somehow missed it.
+    await ensureCrmContactForSession(row, decrypted);
     let crmSynced = false;
     if (creds && row.crmContactId) {
       const { native, customFields, skippedSlugs } = buildCrmPayloadFromData(decrypted);
