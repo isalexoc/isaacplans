@@ -20,11 +20,18 @@ const isProtectedRoute = createRouteMatcher([
   '/iul/admision(.*)',
   '/en/iul/intake(.*)',
   '/es/iul/admision(.*)',
-  // ACA intake (form + dashboard) — same token-scoped model as IUL.
-  '/aca/intake(.*)',
-  '/aca/admision(.*)',
-  '/en/aca/intake(.*)',
-  '/es/aca/admision(.*)',
+  // ACA intake: the AGENT surfaces only. The client form at /aca/intake/<token> authenticates
+  // with the unguessable token plus a device cookie instead of an account, so a prospect never
+  // hits a sign-in wall. Matching the dashboard exactly (no trailing wildcard) is what leaves the
+  // token path open; the read-only summary stays protected.
+  '/aca/intake',
+  '/aca/admision',
+  '/en/aca/intake',
+  '/es/aca/admision',
+  '/aca/intake/:token/view',
+  '/aca/admision/:token/view',
+  '/en/aca/intake/:token/view',
+  '/es/aca/admision/:token/view',
   // Final Expense intake: the AGENT surfaces only. The client form at
   // /final-expense/intake/<token> is deliberately public — it authenticates with the unguessable
   // token plus a device cookie instead of an account, so a prospect never hits a sign-in wall.

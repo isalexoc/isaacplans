@@ -367,7 +367,10 @@ export const iulIntakeSessions = pgTable("iul_intake_sessions", {
   id:            text("id").primaryKey(), // nanoid
   token:         text("token").notNull(), // unguessable URL slug
   ownerUserId:   text("owner_user_id").notNull(), // agent Clerk id (creator)
-  clientUserId:  text("client_user_id"), // bound on first client visit (claim)
+  clientUserId:  text("client_user_id"), // legacy: bound on first client visit when sign-in was required
+  // Passwordless access — see lib/intake-shared/{device,access}.ts.
+  clientDeviceId: text("client_device_id"),
+  expiresAt:     timestamp("expires_at"),
   crmContactId:  text("crm_contact_id"), // Agent CRM (GHL) contact id
   contactName:   text("contact_name"),
   contactEmail:  text("contact_email"),
@@ -383,6 +386,7 @@ export const iulIntakeSessions = pgTable("iul_intake_sessions", {
   tokenUniqueIdx: uniqueIndex("iul_intake_token_unique_idx").on(t.token),
   ownerIdx:       index("iul_intake_owner_idx").on(t.ownerUserId, t.updatedAt),
   clientIdx:      index("iul_intake_client_idx").on(t.clientUserId),
+  deviceIdx:      index("iul_intake_device_idx").on(t.clientDeviceId),
   contactIdx:     index("iul_intake_contact_idx").on(t.crmContactId),
 }));
 
@@ -396,7 +400,10 @@ export const acaIntakeSessions = pgTable("aca_intake_sessions", {
   id:            text("id").primaryKey(), // nanoid
   token:         text("token").notNull(), // unguessable URL slug
   ownerUserId:   text("owner_user_id").notNull(), // agent Clerk id (creator)
-  clientUserId:  text("client_user_id"), // bound on first client visit (claim)
+  clientUserId:  text("client_user_id"), // legacy: bound on first client visit when sign-in was required
+  // Passwordless access — see lib/intake-shared/{device,access}.ts.
+  clientDeviceId: text("client_device_id"),
+  expiresAt:     timestamp("expires_at"),
   crmContactId:  text("crm_contact_id"), // Agent CRM (GHL) contact id
   contactName:   text("contact_name"),
   contactEmail:  text("contact_email"),
@@ -412,6 +419,7 @@ export const acaIntakeSessions = pgTable("aca_intake_sessions", {
   tokenUniqueIdx: uniqueIndex("aca_intake_token_unique_idx").on(t.token),
   ownerIdx:       index("aca_intake_owner_idx").on(t.ownerUserId, t.updatedAt),
   clientIdx:      index("aca_intake_client_idx").on(t.clientUserId),
+  deviceIdx:      index("aca_intake_device_idx").on(t.clientDeviceId),
   contactIdx:     index("aca_intake_contact_idx").on(t.crmContactId),
 }));
 

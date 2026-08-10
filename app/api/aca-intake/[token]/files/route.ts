@@ -2,14 +2,17 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import {
   getAcaIntakeByToken,
-  bindAcaClientUser,
+  bindAcaClientDevice,
   canAccessAcaIntake,
   acaClientCanEdit,
   updateAcaIntakeData,
   toAcaIntakeSession,
   memberDisplayName,
+  isAcaIntakeExpired,
+  ensureAcaCrmContactForSession,
   type AcaIntakeSessionRow,
 } from "@/lib/aca-intake/server";
+import { ensureAcaDeviceId, readAcaDeviceId } from "@/lib/aca-intake/device";
 import {
   fieldByKey,
   rowFieldByKey,
@@ -47,10 +50,6 @@ type FileTarget = {
   repeaterKey?: string;
   rowIndex?: number;
 };
-
-function roleOf(row: AcaIntakeSessionRow, userId: string): "owner" | "client" {
-  return row.ownerUserId === userId ? "owner" : "client";
-}
 
 function crmIdFor(field: AcaField | undefined): string | null {
   if (!field || field.type !== "file" || field.crm?.kind !== "custom") return null;
@@ -178,22 +177,27 @@ function buildFileName(
 // POST /api/aca-intake/[token]/files — upload a file, store in CRM media, attach to the field
 export async function POST(request: NextRequest, context: RouteContext) {
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
-    }
     const { token } = await context.params;
     const row = await getAcaIntakeByToken(token);
     if (!row) return NextResponse.json({ success: false, error: "Not found" }, { status: 404 });
 
-    const access = canAccessAcaIntake(row, userId);
+    const { userId } = await auth();
+    const deviceId = await ensureAcaDeviceId();
+
+    const access = canAccessAcaIntake(row, { userId, deviceId });
     if (!access.allowed) return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 });
+    if (access.role === "client" && isAcaIntakeExpired(row)) {
+      return NextResponse.json(
+        { success: false, error: "This link has expired. Please call us for a new one.", code: "expired" },
+        { status: 410 }
+      );
+    }
     if (access.shouldClaim) {
-      await bindAcaClientUser(token, userId);
-      row.clientUserId = userId;
+      await bindAcaClientDevice(token, deviceId);
+      row.clientDeviceId = deviceId;
     }
     // A client cannot attach files to a submitted form unless the admin re-opened it.
-    if (roleOf(row, userId) === "client" && !acaClientCanEdit(row)) {
+    if (access.role === "client" && !acaClientCanEdit(row)) {
       return NextResponse.json({ success: false, error: "This form has already been submitted." }, { status: 403 });
     }
 
@@ -219,7 +223,13 @@ export async function POST(request: NextRequest, context: RouteContext) {
       );
     }
 
+    const decrypted = decryptAcaIntakeData((row.data ?? {}) as AcaIntakeData);
+
     const creds = agentCrmGetBaseCredentials();
+    // A session started anonymously has no CRM contact until the client supplies an email or
+    // phone. Uploads attach to a contact's file field, so make sure one exists rather than
+    // failing a document upload the client can't do anything about.
+    await ensureAcaCrmContactForSession(row, decrypted);
     if (!creds || !row.crmContactId) {
       return NextResponse.json(
         { success: false, error: "CRM is not configured for this session." },
@@ -227,7 +237,6 @@ export async function POST(request: NextRequest, context: RouteContext) {
       );
     }
 
-    const decrypted = decryptAcaIntakeData((row.data ?? {}) as AcaIntakeData);
     const slug = target.field.crm?.kind === "custom" ? target.field.crm.slug : "";
     const before = knownUrlsForSlug(decrypted, slug);
 
@@ -265,7 +274,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
       files: next,
       session: toAcaIntakeSession(
         { ...row, status: row.status === "completed" ? "completed" : "in_progress" },
-        roleOf(row, userId),
+        access.role,
         decrypted
       ),
     });
@@ -278,18 +287,19 @@ export async function POST(request: NextRequest, context: RouteContext) {
 // DELETE /api/aca-intake/[token]/files?field=…&url=… (&repeaterKey=…&rowIndex=…)
 export async function DELETE(request: NextRequest, context: RouteContext) {
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
-    }
     const { token } = await context.params;
     const row = await getAcaIntakeByToken(token);
     if (!row) return NextResponse.json({ success: false, error: "Not found" }, { status: 404 });
-    if (!canAccessAcaIntake(row, userId).allowed) {
+
+    const { userId } = await auth();
+    const deviceId = await readAcaDeviceId();
+
+    const access = canAccessAcaIntake(row, { userId, deviceId });
+    if (!access.allowed) {
       return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 });
     }
     // A client cannot remove files from a submitted form unless the admin re-opened it.
-    if (roleOf(row, userId) === "client" && !acaClientCanEdit(row)) {
+    if (access.role === "client" && !acaClientCanEdit(row)) {
       return NextResponse.json({ success: false, error: "This form has already been submitted." }, { status: 403 });
     }
 
@@ -324,7 +334,7 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
       repeaterKey: target.repeaterKey ?? null,
       rowIndex: target.rowIndex ?? null,
       files: next,
-      session: toAcaIntakeSession(row, roleOf(row, userId), decrypted),
+      session: toAcaIntakeSession(row, access.role, decrypted),
     });
   } catch (error) {
     console.error("[aca-intake/:token/files] DELETE", error);

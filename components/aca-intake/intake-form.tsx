@@ -56,6 +56,7 @@ import {
 import { fieldFormatError, type FieldErrorKey } from "@/lib/aca-intake/validation";
 import { digitsToStored, formatMoneyDisplay } from "@/lib/iul-intake/money";
 import { sectionMissingFields, type AcaIntakeData } from "@/lib/aca-intake/schema";
+import { isMaskedValue } from "@/lib/intake-shared/masking";
 import type { AcaIntakeSession } from "@/lib/aca-intake/types";
 import {
   MONTHS,
@@ -944,6 +945,11 @@ function FieldInput({
           placeholder={placeholder}
           disabled={disabled}
           maxLength={field.type === "ssn" ? 9 : field.maxLength}
+          onFocus={() => {
+            // The server sends a mask for stored sensitive values; clear it so handleDigits
+            // can't strip the bullets and leave a 4-digit stub behind.
+            if (field.sensitive && isMaskedValue(value)) onChange("");
+          }}
           onChange={(e) => handleDigits(e.target.value)}
           onBlur={(e) => onBlur(e.target.value)}
           className={`${inputBase} ${invalidCls} ${disabledCls}`}
@@ -958,6 +964,9 @@ function FieldInput({
           placeholder={placeholder}
           disabled={disabled}
           maxLength={field.maxLength}
+          onFocus={() => {
+            if (field.sensitive && isMaskedValue(value)) onChange("");
+          }}
           onChange={(e) => onChange(e.target.value)}
           onBlur={(e) => onBlur(e.target.value)}
           className={`${inputBase} ${invalidCls} ${disabledCls}`}

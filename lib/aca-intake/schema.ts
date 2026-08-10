@@ -20,6 +20,7 @@ import {
   type RepeaterRow,
 } from "./fields";
 import { fieldFormatError } from "./validation";
+import { isMaskedValue } from "@/lib/intake-shared/masking";
 
 /** The shape stored in `acaIntakeSessions.data` (jsonb). */
 export type AcaIntakeData = Record<string, unknown>;
@@ -113,7 +114,7 @@ function repeaterMissingFields(field: AcaField, data: AcaIntakeData): string[] {
         missing.push(path);
         continue;
       }
-      if (value && fieldFormatError(sub, value)) missing.push(path);
+      if (value && !isMaskedValue(value) && fieldFormatError(sub, value)) missing.push(path);
     }
   });
 
@@ -156,7 +157,7 @@ export function sectionMissingFields(section: AcaSection, data: AcaIntakeData): 
     }
 
     // Present but clearly malformed (email/phone/zip/ssn/dob/routing/card).
-    if (value && fieldFormatError(field, value)) missing.push(field.key);
+    if (value && !isMaskedValue(value) && fieldFormatError(field, value)) missing.push(field.key);
   }
   return missing;
 }

@@ -1,37 +1,30 @@
 "use client";
 
 /**
- * "Apply now" CTA. Signed-in users go straight to the start handoff; signed-out users get
- * Clerk's sign-in/sign-up modal (this app has no /sign-in route), then are redirected to the
- * localized start path. Mirrors components/iul-apply-cta.tsx.
+ * "Apply now" CTA — goes straight into the application.
+ *
+ * No sign-in wall: the start handler mints a device cookie, creates the session, and redirects
+ * into the token-scoped form. Requiring an account here was pure friction for a prospect who just
+ * wants coverage, and the unguessable link plus device binding is what secures the session.
+ *
+ * A plain <a> rather than next/link because the target is a Route Handler that sets a cookie and
+ * issues a redirect — it needs a real navigation, not a client-side transition.
  */
-import { SignUpButton, useUser } from "@clerk/nextjs";
-import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
+import { useLocale } from "next-intl";
 
 const CTA_CLS =
   "gap-2 bg-gradient-to-r from-brand to-accent px-8 text-base text-white shadow-md shadow-brand/30 transition hover:opacity-95";
 
-export default function AcaApplyCta({ label, startHref }: { label: string; startHref: string }) {
-  const { isLoaded, isSignedIn } = useUser();
+export default function AcaApplyCta({ label }: { label: string; startHref?: string }) {
+  const locale = useLocale().startsWith("es") ? "es" : "en";
 
-  if (isLoaded && isSignedIn) {
-    return (
-      <Button asChild size="lg" className={CTA_CLS}>
-        <Link href="/aca/apply/start">
-          {label} <ArrowRight className="h-5 w-5" />
-        </Link>
-      </Button>
-    );
-  }
-
-  // Signed out (or still loading): open Clerk's modal, then return to the start handoff.
   return (
-    <SignUpButton mode="modal" forceRedirectUrl={startHref} signInForceRedirectUrl={startHref}>
-      <Button size="lg" className={CTA_CLS}>
+    <Button asChild size="lg" className={CTA_CLS}>
+      <a href={`/api/aca-intake/start?locale=${locale}`}>
         {label} <ArrowRight className="h-5 w-5" />
-      </Button>
-    </SignUpButton>
+      </a>
+    </Button>
   );
 }

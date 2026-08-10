@@ -7,9 +7,11 @@ import type { FileRef } from "@/lib/aca-intake/fields";
 async function parseJson<T>(res: Response): Promise<T> {
   const contentType = res.headers.get("content-type") ?? "";
   if (!contentType.includes("application/json")) {
+    // 401 no longer means "sign in" for clients — the form is token-scoped and passwordless, so a
+    // non-JSON 401 here is an agent-only endpoint being hit without a session.
     throw new Error(
       res.status === 401
-        ? "Please sign in to continue."
+        ? "You don't have access to this. Please use the link we sent you."
         : "Server returned an unexpected response. Try refreshing the page."
     );
   }

@@ -4,51 +4,77 @@ import {
   getAcaIntakeByToken,
   updateAcaIntakeData,
   deleteAcaIntakeSession,
-  bindAcaClientUser,
+  bindAcaClientDevice,
   canAccessAcaIntake,
   acaClientCanEdit,
   toAcaIntakeSession,
   syncAcaIntakeToCrm,
-  type AcaIntakeSessionRow,
+  isAcaIntakeExpired,
 } from "@/lib/aca-intake/server";
 import { sanitizeAcaIntakeData, type AcaIntakeData } from "@/lib/aca-intake/schema";
 import {
   encryptAcaIntakeData,
   decryptAcaIntakeData,
 } from "@/lib/aca-intake/encryption";
+import { ensureAcaDeviceId } from "@/lib/aca-intake/device";
+import {
+  maskAcaSensitiveForClient,
+  mergePreservedAcaSensitive,
+} from "@/lib/aca-intake/masking";
 
 type RouteContext = { params: Promise<{ token: string }> };
 
-function roleOf(row: AcaIntakeSessionRow, userId: string): "owner" | "client" {
-  return row.ownerUserId === userId ? "owner" : "client";
+/** Shared 403 body so the form can tell "someone else opened this" from a plain denial. */
+function forbidden(claimedByOtherDevice: boolean) {
+  return NextResponse.json(
+    {
+      success: false,
+      error: claimedByOtherDevice
+        ? "This link was already opened on another device. Please continue there, or call us for a new link."
+        : "Forbidden",
+      code: claimedByOtherDevice ? "claimed_elsewhere" : "forbidden",
+    },
+    { status: 403 }
+  );
 }
 
-// GET /api/aca-intake/[token] — load (decrypts sensitive; claims unbound sessions)
+function expired() {
+  return NextResponse.json(
+    { success: false, error: "This link has expired. Please call us for a new one.", code: "expired" },
+    { status: 410 }
+  );
+}
+
+// GET /api/aca-intake/[token] — load (decrypts sensitive; claims unbound sessions to this device)
 export async function GET(_request: NextRequest, context: RouteContext) {
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
-    }
     const { token } = await context.params;
     const row = await getAcaIntakeByToken(token);
     if (!row) {
       return NextResponse.json({ success: false, error: "Not found" }, { status: 404 });
     }
 
-    const access = canAccessAcaIntake(row, userId);
-    if (!access.allowed) {
-      return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 });
-    }
+    const { userId } = await auth();
+    // Minting here is what claims an unclaimed link for the first browser that opens it.
+    const deviceId = await ensureAcaDeviceId();
+
+    const access = canAccessAcaIntake(row, { userId, deviceId });
+    if (!access.allowed) return forbidden(access.claimedByOtherDevice);
+    if (access.role === "client" && isAcaIntakeExpired(row)) return expired();
+
     if (access.shouldClaim) {
-      await bindAcaClientUser(token, userId);
-      row.clientUserId = userId;
+      await bindAcaClientDevice(token, deviceId);
+      row.clientDeviceId = deviceId;
     }
 
     const decrypted = decryptAcaIntakeData((row.data ?? {}) as AcaIntakeData);
+    // The agent needs real values to work an application; the client's own browser only needs to
+    // see that a value is on file, so a stolen link can never surface an SSN.
+    const forClient = access.role === "owner" ? decrypted : maskAcaSensitiveForClient(decrypted);
+
     return NextResponse.json({
       success: true,
-      session: toAcaIntakeSession(row, roleOf(row, userId), decrypted),
+      session: toAcaIntakeSession(row, access.role, forClient),
     });
   } catch (error) {
     console.error("[aca-intake/:token] GET", error);
@@ -59,33 +85,36 @@ export async function GET(_request: NextRequest, context: RouteContext) {
 // PATCH /api/aca-intake/[token] — autosave partial data (encrypts sensitive at rest)
 export async function PATCH(request: NextRequest, context: RouteContext) {
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
-    }
     const { token } = await context.params;
     const row = await getAcaIntakeByToken(token);
     if (!row) {
       return NextResponse.json({ success: false, error: "Not found" }, { status: 404 });
     }
 
-    const access = canAccessAcaIntake(row, userId);
-    if (!access.allowed) {
-      return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 });
-    }
+    const { userId } = await auth();
+    const deviceId = await ensureAcaDeviceId();
+
+    const access = canAccessAcaIntake(row, { userId, deviceId });
+    if (!access.allowed) return forbidden(access.claimedByOtherDevice);
+    if (access.role === "client" && isAcaIntakeExpired(row)) return expired();
+
     if (access.shouldClaim) {
-      await bindAcaClientUser(token, userId);
-      row.clientUserId = userId;
+      await bindAcaClientDevice(token, deviceId);
+      row.clientDeviceId = deviceId;
     }
 
     // A client cannot edit a submitted form unless the admin re-opened it (admin always can).
-    if (roleOf(row, userId) === "client" && !acaClientCanEdit(row)) {
+    if (access.role === "client" && !acaClientCanEdit(row)) {
       return NextResponse.json({ success: false, error: "This form has already been submitted." }, { status: 403 });
     }
 
     const body = await request.json().catch(() => ({}));
     const clean = sanitizeAcaIntakeData(body?.data);
-    const encrypted = encryptAcaIntakeData(clean);
+    // The client never received the real sensitive values, so a masked placeholder coming back
+    // must not overwrite what's stored.
+    const stored = decryptAcaIntakeData((row.data ?? {}) as AcaIntakeData);
+    const merged = mergePreservedAcaSensitive(clean, stored);
+    const encrypted = encryptAcaIntakeData(merged);
     const nextStatus = row.status === "completed" ? "completed" : "in_progress";
 
     const updated = await updateAcaIntakeData(token, encrypted, nextStatus);
@@ -98,9 +127,10 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     // Progressive CRM sync (best-effort — never blocks the save).
     await syncAcaIntakeToCrm(updated, decrypted);
 
+    const forClient = access.role === "owner" ? decrypted : maskAcaSensitiveForClient(decrypted);
     return NextResponse.json({
       success: true,
-      session: toAcaIntakeSession(updated, roleOf(updated, userId), decrypted),
+      session: toAcaIntakeSession(updated, access.role, forClient),
     });
   } catch (error) {
     console.error("[aca-intake/:token] PATCH", error);

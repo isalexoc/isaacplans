@@ -7,8 +7,11 @@ import {
   buildCrmPayloadFromData,
   markAcaIntakeCompleted,
   toAcaIntakeSummary,
+  isAcaIntakeExpired,
+  ensureAcaCrmContactForSession,
   ACA_INTAKE_COMPLETED_TAG,
 } from "@/lib/aca-intake/server";
+import { readAcaDeviceId } from "@/lib/aca-intake/device";
 import { validateForCompletion, type AcaIntakeData } from "@/lib/aca-intake/schema";
 import {
   decryptAcaIntakeData,
@@ -37,20 +40,27 @@ function householdSize(data: AcaIntakeData): number {
 // POST /api/aca-intake/[token]/complete — validate, sync to CRM, mark completed
 export async function POST(_request: NextRequest, context: RouteContext) {
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
-    }
     const { token } = await context.params;
     const row = await getAcaIntakeByToken(token);
     if (!row) {
       return NextResponse.json({ success: false, error: "Not found" }, { status: 404 });
     }
-    if (!canAccessAcaIntake(row, userId).allowed) {
+
+    const { userId } = await auth();
+    const deviceId = await readAcaDeviceId();
+
+    const access = canAccessAcaIntake(row, { userId, deviceId });
+    if (!access.allowed) {
       return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 });
     }
+    if (access.role === "client" && isAcaIntakeExpired(row)) {
+      return NextResponse.json(
+        { success: false, error: "This link has expired. Please call us for a new one.", code: "expired" },
+        { status: 410 }
+      );
+    }
     // A client cannot re-submit a locked (already-completed) form; the admin re-opens it first.
-    if (row.ownerUserId !== userId && !acaClientCanEdit(row)) {
+    if (access.role === "client" && !acaClientCanEdit(row)) {
       return NextResponse.json({ success: false, error: "This form has already been submitted." }, { status: 403 });
     }
 
@@ -65,6 +75,9 @@ export async function POST(_request: NextRequest, context: RouteContext) {
 
     // Sync to the CRM contact (native + custom fields), then tag + add a note.
     const creds = agentCrmGetBaseCredentials();
+    // A session that started anonymously has no contact until the client supplies an email or
+    // phone — by submission time they have, so create it now if the autosaves somehow missed it.
+    await ensureAcaCrmContactForSession(row, decrypted);
     let crmSynced = false;
     if (creds && row.crmContactId) {
       const { native, customFields, skippedSlugs } = buildCrmPayloadFromData(decrypted);

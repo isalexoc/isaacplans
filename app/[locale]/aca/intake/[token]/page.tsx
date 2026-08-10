@@ -29,7 +29,10 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title,
     description,
-    robots: { index: false, follow: false },
+    robots: { index: false, follow: false, nocache: true },
+    // With no sign-in, the token in this URL is the credential — keep it out of the Referer
+    // header on any outbound request (Google Maps, analytics, a tapped link).
+    referrer: "no-referrer",
     openGraph: {
       title,
       description,
