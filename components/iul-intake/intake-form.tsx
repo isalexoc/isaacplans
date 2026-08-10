@@ -38,6 +38,7 @@ import {
   uploadIntakeFile,
   removeIntakeFile,
 } from "@/lib/iul-intake-api";
+import { isMaskedValue } from "@/lib/intake-shared/masking";
 import { useIulIntakeAutosave } from "@/hooks/use-iul-intake-autosave";
 import IntakeBreadcrumb from "@/components/iul-intake/intake-breadcrumb";
 import IntakeAddressInput, { type ResolvedAddress } from "@/components/shared/intake-address-input";
@@ -908,6 +909,11 @@ function FieldInput({
         <Input
           id={id}
           type={field.sensitive && !reveal ? "password" : "text"}
+          onFocus={() => {
+            // The server sends a mask for stored sensitive values; clear it before the
+            // digits-only handler strips the bullets and leaves a stub behind.
+            if (field.sensitive && isMaskedValue(value)) onChange("");
+          }}
           inputMode="numeric"
           autoComplete={field.sensitive ? "off" : undefined}
           value={value}
@@ -921,6 +927,9 @@ function FieldInput({
         <Input
           id={id}
           type={field.sensitive && !reveal ? "password" : field.type === "email" ? "email" : "text"}
+          onFocus={() => {
+            if (field.sensitive && isMaskedValue(value)) onChange("");
+          }}
           inputMode={field.type === "email" ? "email" : undefined}
           autoComplete={field.sensitive ? "off" : undefined}
           value={value}
@@ -1267,7 +1276,15 @@ function BeneficiariesEditor({
               <LabeledInput
                 label={tr(UI.benSsn, locale)}
                 value={b.ssn}
-                onChange={(v) => update(idx, { ssn: v.replace(/\D/g, "").slice(0, 9) })}
+                onChange={(v) =>
+                  update(idx, {
+                    // A masked beneficiary SSN must not be digit-stripped into a stub.
+                    ssn: isMaskedValue(v) ? v : v.replace(/\D/g, "").slice(0, 9),
+                  })
+                }
+                onFocus={() => {
+                  if (isMaskedValue(b.ssn)) update(idx, { ssn: "" });
+                }}
                 type={reveal ? "text" : "password"}
                 inputMode="numeric"
               />
@@ -1293,19 +1310,28 @@ function LabeledInput({
   label,
   value,
   onChange,
+  onFocus,
   type = "text",
   inputMode,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
+  onFocus?: () => void;
   type?: string;
   inputMode?: "decimal" | "numeric";
 }) {
   return (
     <div>
       <Label className="text-xs">{label}</Label>
-      <Input type={type} inputMode={inputMode} value={value} onChange={(e) => onChange(e.target.value)} className={inputBase} />
+      <Input
+        type={type}
+        inputMode={inputMode}
+        value={value}
+        onFocus={onFocus}
+        onChange={(e) => onChange(e.target.value)}
+        className={inputBase}
+      />
     </div>
   );
 }

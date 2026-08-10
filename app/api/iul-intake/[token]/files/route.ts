@@ -2,12 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import {
   getIntakeByToken,
-  bindClientUser,
+  bindClientDevice,
   canAccessIntake,
   updateIntakeData,
   toIntakeSession,
   type IntakeSessionRow,
+  isIulIntakeExpired,
+  clientCanEdit,
+  ensureIulCrmContactForSession,
 } from "@/lib/iul-intake/server";
+import { ensureIulDeviceId, readIulDeviceId } from "@/lib/iul-intake/device";
 import { fieldByKey, type FileRef } from "@/lib/iul-intake/fields";
 import { ghlFieldIds } from "@/lib/iul-intake/ghl-field-ids";
 import type { IntakeData } from "@/lib/iul-intake/schema";
@@ -21,10 +25,6 @@ import {
 type RouteContext = { params: Promise<{ token: string }> };
 
 const MAX_FILE_BYTES = 15 * 1024 * 1024; // 15 MB
-
-function roleOf(row: IntakeSessionRow, userId: string): "owner" | "client" {
-  return row.ownerUserId === userId ? "owner" : "client";
-}
 
 function fileFieldId(fieldKey: string): string | null {
   const field = fieldByKey(fieldKey);
@@ -75,19 +75,29 @@ async function persistAndClearCrm(
 // POST /api/iul-intake/[token]/files — upload a file, store in CRM media, append to field
 export async function POST(request: NextRequest, context: RouteContext) {
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
-    }
     const { token } = await context.params;
     const row = await getIntakeByToken(token);
     if (!row) return NextResponse.json({ success: false, error: "Not found" }, { status: 404 });
 
-    const access = canAccessIntake(row, userId);
+    const { userId } = await auth();
+    const deviceId = await ensureIulDeviceId();
+
+    const access = canAccessIntake(row, { userId, deviceId });
     if (!access.allowed) return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 });
+    if (access.role === "client" && isIulIntakeExpired(row)) {
+      return NextResponse.json(
+        { success: false, error: "This link has expired. Please call us for a new one.", code: "expired" },
+        { status: 410 }
+      );
+    }
     if (access.shouldClaim) {
-      await bindClientUser(token, userId);
-      row.clientUserId = userId;
+      await bindClientDevice(token, deviceId);
+      row.clientDeviceId = deviceId;
+    }
+    // A client cannot attach files to a submitted form unless the admin re-opened it. (The old
+    // Clerk-gated version omitted this check.)
+    if (access.role === "client" && !clientCanEdit(row)) {
+      return NextResponse.json({ success: false, error: "This form has already been submitted." }, { status: 403 });
     }
 
     const form = await request.formData();
@@ -139,7 +149,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
       success: true,
       field: fieldKey,
       files: next,
-      session: toIntakeSession({ ...row, status: row.status === "completed" ? "completed" : "in_progress" }, roleOf(row, userId), decrypted),
+      session: toIntakeSession({ ...row, status: row.status === "completed" ? "completed" : "in_progress" }, access.role, decrypted),
     });
   } catch (error) {
     console.error("[iul-intake/:token/files] POST", error);
@@ -150,15 +160,19 @@ export async function POST(request: NextRequest, context: RouteContext) {
 // DELETE /api/iul-intake/[token]/files?field=...&url=... — remove a file from a field
 export async function DELETE(request: NextRequest, context: RouteContext) {
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
-    }
     const { token } = await context.params;
     const row = await getIntakeByToken(token);
     if (!row) return NextResponse.json({ success: false, error: "Not found" }, { status: 404 });
-    if (!canAccessIntake(row, userId).allowed) {
+
+    const { userId } = await auth();
+    const deviceId = await readIulDeviceId();
+
+    const access = canAccessIntake(row, { userId, deviceId });
+    if (!access.allowed) {
       return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 });
+    }
+    if (access.role === "client" && !clientCanEdit(row)) {
+      return NextResponse.json({ success: false, error: "This form has already been submitted." }, { status: 403 });
     }
 
     const { searchParams } = new URL(request.url);
@@ -176,7 +190,7 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
       success: true,
       field: fieldKey,
       files: next,
-      session: toIntakeSession(row, roleOf(row, userId), decrypted),
+      session: toIntakeSession(row, access.role, decrypted),
     });
   } catch (error) {
     console.error("[iul-intake/:token/files] DELETE", error);

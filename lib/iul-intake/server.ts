@@ -27,6 +27,13 @@ import {
   type AgentCrmNativeFields,
 } from "@/lib/agent-crm-contacts";
 import { buildIntakeShareUrl } from "./share-url";
+import {
+  resolveIntakeAccess,
+  isIntakeExpired,
+  intakeLinkExpiry,
+  type IntakeAccess,
+  type IntakeCaller,
+} from "@/lib/intake-shared/access";
 
 /** Tag added to the contact when the agent sends the link — triggers the GHL workflow. */
 export const IUL_INTAKE_LINK_SENT_TAG = "iul_intake_link_sent";
@@ -85,6 +92,7 @@ export async function createIntakeSession(input: {
   contactPhone?: string | null;
   locale?: string;
   data?: IntakeData;
+  clientDeviceId?: string | null;
 }): Promise<IntakeSessionRow> {
   const id = nanoid();
   const token = nanoid(24);
@@ -96,6 +104,8 @@ export async function createIntakeSession(input: {
       token,
       ownerUserId: input.ownerUserId,
       clientUserId: input.clientUserId ?? null,
+      clientDeviceId: input.clientDeviceId ?? null,
+      expiresAt: intakeLinkExpiry(now),
       crmContactId: input.crmContactId ?? null,
       contactName: input.contactName ?? null,
       contactEmail: input.contactEmail ?? null,
@@ -113,11 +123,14 @@ export async function createIntakeSession(input: {
 /**
  * Public "Apply now" entry point: resume the prospect's existing application, claim an
  * unclaimed one the agent already created for their email, or create a fresh one. The agent
- * (IUL_DEFAULT_OWNER_USER_ID) is always the owner so it lands in their dashboard; the signed-in
- * prospect is the bound client. Returns the session row to redirect to its form.
+ * (IUL_DEFAULT_OWNER_USER_ID) is always the owner so it lands in their dashboard.
+ *
+ * No account required — the caller is identified by their device cookie. `clientUserId` is still
+ * honored so sessions created under the old Clerk-gated flow keep working.
  */
 export async function selfStartIntakeForClient(input: {
-  clientUserId: string;
+  clientDeviceId: string;
+  clientUserId?: string | null;
   email?: string | null;
   firstName?: string | null;
   lastName?: string | null;
@@ -129,14 +142,20 @@ export async function selfStartIntakeForClient(input: {
     throw new Error("IUL_DEFAULT_OWNER_USER_ID is not configured.");
   }
 
-  // 1. Resume an application already bound to this user.
-  const [bound] = await db
-    .select()
-    .from(iulIntakeSessions)
-    .where(eq(iulIntakeSessions.clientUserId, input.clientUserId))
-    .orderBy(desc(iulIntakeSessions.updatedAt))
-    .limit(1);
-  if (bound) return bound;
+  // 1a. Resume an application already bound to this Clerk user (legacy sessions).
+  if (input.clientUserId) {
+    const [bound] = await db
+      .select()
+      .from(iulIntakeSessions)
+      .where(eq(iulIntakeSessions.clientUserId, input.clientUserId))
+      .orderBy(desc(iulIntakeSessions.updatedAt))
+      .limit(1);
+    if (bound && !isIntakeExpired(bound)) return bound;
+  }
+
+  // 1b. Resume the application this browser already started.
+  const byDevice = await findIulSessionByDevice(input.clientDeviceId);
+  if (byDevice && !isIntakeExpired(byDevice)) return byDevice;
 
   const email = (input.email ?? "").trim().toLowerCase();
 
@@ -155,8 +174,8 @@ export async function selfStartIntakeForClient(input: {
       .orderBy(desc(iulIntakeSessions.updatedAt))
       .limit(1);
     if (unclaimed) {
-      await bindClientUser(unclaimed.token, input.clientUserId);
-      return { ...unclaimed, clientUserId: input.clientUserId };
+      await bindClientDevice(unclaimed.token, input.clientDeviceId);
+      return { ...unclaimed, clientDeviceId: input.clientDeviceId };
     }
   }
 
@@ -169,7 +188,11 @@ export async function selfStartIntakeForClient(input: {
 
   let crmContactId: string | null = null;
   const creds = agentCrmGetBaseCredentials();
-  if (creds) {
+  // Without an account there is nothing to identify an anonymous starter by, and creating a
+  // contact from nothing would litter the CRM with blank records on every "Apply" tap. The contact
+  // is created lazily instead, on the first autosave carrying an email or phone — see
+  // ensureIulCrmContactForSession.
+  if (creds && (email || phone)) {
     // Best-effort — a CRM hiccup must never block the prospect from starting.
     try {
       crmContactId = await agentCrmEnsureContact(
@@ -190,7 +213,7 @@ export async function selfStartIntakeForClient(input: {
     } catch (e) {
       console.warn("[iul-intake] self-apply CRM ensure failed:", e);
     }
-  } else {
+  } else if (!creds) {
     console.warn("[iul-intake] Agent CRM credentials missing; self-apply session is unlinked.");
   }
 
@@ -202,7 +225,8 @@ export async function selfStartIntakeForClient(input: {
 
   const row = await createIntakeSession({
     ownerUserId,
-    clientUserId: input.clientUserId,
+    clientUserId: input.clientUserId ?? null,
+    clientDeviceId: input.clientDeviceId,
     crmContactId,
     contactName,
     contactEmail: email || null,
@@ -305,7 +329,15 @@ export async function updateIntakeData(
 export async function resetIntakeLink(token: string): Promise<IntakeSessionRow | null> {
   const [row] = await db
     .update(iulIntakeSessions)
-    .set({ token: nanoid(24), clientUserId: null, updatedAt: new Date() })
+    // Clearing the device binding is also the recovery path when a client loses the browser they
+    // started on: a fresh link, claimable by whichever device opens it next.
+    .set({
+      token: nanoid(24),
+      clientUserId: null,
+      clientDeviceId: null,
+      expiresAt: intakeLinkExpiry(),
+      updatedAt: new Date(),
+    })
     .where(eq(iulIntakeSessions.token, token))
     .returning();
   return row ?? null;
@@ -394,16 +426,35 @@ export async function syncIntakeLinkToCrm(
   }
 }
 
-/** Access rule: owner agent always; the bound client; or an unclaimed session (to claim). */
-export function canAccessIntake(
-  row: IntakeSessionRow,
-  userId: string
-): { allowed: boolean; shouldClaim: boolean } {
-  if (row.ownerUserId === userId) return { allowed: true, shouldClaim: false };
-  if (row.clientUserId === userId) return { allowed: true, shouldClaim: false };
-  if (!row.clientUserId) return { allowed: true, shouldClaim: true };
-  return { allowed: false, shouldClaim: false };
+/**
+ * Access rule for a token-scoped session — see lib/intake-shared/access.ts. The agent always gets
+ * in; otherwise the unguessable token plus either the device cookie that claimed the session or the
+ * Clerk id it was bound to under the old sign-in flow.
+ */
+export function canAccessIntake(row: IntakeSessionRow, caller: IntakeCaller): IntakeAccess {
+  return resolveIntakeAccess(row, caller);
 }
+
+/** Bind an unclaimed session to the browser that just opened it. */
+export async function bindClientDevice(token: string, deviceId: string): Promise<void> {
+  await db
+    .update(iulIntakeSessions)
+    .set({ clientDeviceId: deviceId, updatedAt: new Date() })
+    .where(eq(iulIntakeSessions.token, token));
+}
+
+/** Find a session already claimed by this browser, so "Apply" resumes instead of duplicating. */
+export async function findIulSessionByDevice(deviceId: string): Promise<IntakeSessionRow | null> {
+  const [row] = await db
+    .select()
+    .from(iulIntakeSessions)
+    .where(eq(iulIntakeSessions.clientDeviceId, deviceId))
+    .orderBy(desc(iulIntakeSessions.updatedAt))
+    .limit(1);
+  return row ?? null;
+}
+
+export { isIntakeExpired as isIulIntakeExpired };
 
 function formatBeneficiary(b: Beneficiary): string {
   const parts: string[] = [];
@@ -478,11 +529,77 @@ export function buildCrmPayloadFromData(data: IntakeData): {
  * returns false and logs on any miss (missing creds/contact, API error) without throwing,
  * so it can run on every autosave without breaking the save.
  */
+/**
+ * Attach a CRM contact to a session that started anonymously, as soon as the client has typed
+ * enough to identify them. Matching on email/phone means a prospect who already came through a CTA
+ * or ads funnel lands on their existing contact rather than a duplicate.
+ * Returns the contact id, or null while there's still nothing to match on.
+ */
+export async function ensureIulCrmContactForSession(
+  row: IntakeSessionRow,
+  decrypted: IntakeData
+): Promise<string | null> {
+  if (row.crmContactId) return row.crmContactId;
+
+  const str = (v: unknown) => (typeof v === "string" ? v.trim() : "");
+  const email = str(decrypted.email).toLowerCase();
+  const phone = str(decrypted.phone).replace(/[^\d+]/g, "");
+  if (!email && !phone) return null;
+
+  const creds = agentCrmGetBaseCredentials();
+  if (!creds) return null;
+
+  const firstName = str(decrypted.firstName);
+  const lastName = str(decrypted.lastName);
+  try {
+    const contactId = await agentCrmEnsureContact(
+      {
+        email: email || undefined,
+        phone: phone || undefined,
+        firstName: firstName || undefined,
+        lastName: lastName || undefined,
+      },
+      creds.locationId,
+      creds.token,
+      "[IUL_INTAKE]"
+    );
+    if (!contactId) return null;
+
+    const locale = row.locale === "es" ? "es" : "en";
+    await agentCrmAddContactTags(
+      contactId,
+      [IUL_SELF_APPLY_TAG, locale === "es" ? IUL_SPANISH_TAG : IUL_ENGLISH_TAG],
+      creds.token,
+      "[IUL_INTAKE]"
+    );
+
+    await db
+      .update(iulIntakeSessions)
+      .set({
+        crmContactId: contactId,
+        contactName: [firstName, lastName].filter(Boolean).join(" ") || row.contactName,
+        contactEmail: email || row.contactEmail,
+        contactPhone: phone || row.contactPhone,
+        updatedAt: new Date(),
+      })
+      .where(eq(iulIntakeSessions.token, row.token));
+
+    row.crmContactId = contactId;
+    // The share-link field is only writable once a contact exists.
+    await syncIntakeLinkToCrm(row, locale);
+    return contactId;
+  } catch (e) {
+    console.warn("[iul-intake] lazy CRM contact creation failed:", e);
+    return null;
+  }
+}
+
 export async function syncIntakeToCrm(
   row: IntakeSessionRow,
   decrypted: IntakeData
 ): Promise<boolean> {
-  if (!row.crmContactId) return false;
+  const contactId = await ensureIulCrmContactForSession(row, decrypted);
+  if (!contactId) return false;
   const creds = agentCrmGetBaseCredentials();
   if (!creds) return false;
   try {
@@ -494,12 +611,7 @@ export async function syncIntakeToCrm(
       );
     }
     if (Object.keys(native).length === 0 && customFields.length === 0) return false;
-    return await agentCrmUpdateContact(
-      row.crmContactId,
-      { native, customFields },
-      creds.token,
-      "[IUL_INTAKE]"
-    );
+    return await agentCrmUpdateContact(contactId, { native, customFields }, creds.token, "[IUL_INTAKE]");
   } catch (e) {
     console.warn("[iul-intake] CRM sync failed:", e);
     return false;

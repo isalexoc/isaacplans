@@ -6,8 +6,11 @@ import {
   clientCanEdit,
   buildCrmPayloadFromData,
   markIntakeCompleted,
+  isIulIntakeExpired,
+  ensureIulCrmContactForSession,
   toIntakeSummary,
 } from "@/lib/iul-intake/server";
+import { readIulDeviceId } from "@/lib/iul-intake/device";
 import { validateForCompletion, type IntakeData } from "@/lib/iul-intake/schema";
 import {
   decryptIntakeData,
@@ -26,20 +29,27 @@ const PURGE_AFTER_SYNC = process.env.IUL_INTAKE_PURGE_AFTER_SYNC === "true";
 // POST /api/iul-intake/[token]/complete — validate, sync to CRM, mark completed
 export async function POST(_request: NextRequest, context: RouteContext) {
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
-    }
     const { token } = await context.params;
     const row = await getIntakeByToken(token);
     if (!row) {
       return NextResponse.json({ success: false, error: "Not found" }, { status: 404 });
     }
-    if (!canAccessIntake(row, userId).allowed) {
+
+    const { userId } = await auth();
+    const deviceId = await readIulDeviceId();
+
+    const access = canAccessIntake(row, { userId, deviceId });
+    if (!access.allowed) {
       return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 });
     }
+    if (access.role === "client" && isIulIntakeExpired(row)) {
+      return NextResponse.json(
+        { success: false, error: "This link has expired. Please call us for a new one.", code: "expired" },
+        { status: 410 }
+      );
+    }
     // A client cannot re-submit a locked (already-completed) form; the admin re-opens it first.
-    if (row.ownerUserId !== userId && !clientCanEdit(row)) {
+    if (access.role === "client" && !clientCanEdit(row)) {
       return NextResponse.json({ success: false, error: "This form has already been submitted." }, { status: 403 });
     }
 
@@ -54,6 +64,9 @@ export async function POST(_request: NextRequest, context: RouteContext) {
 
     // Sync to the CRM contact (native + custom fields), then add a note.
     const creds = agentCrmGetBaseCredentials();
+    // A session that started anonymously has no contact until the client supplies an email or
+    // phone — by submission time they have, so create it now if the autosaves somehow missed it.
+    await ensureIulCrmContactForSession(row, decrypted);
     let crmSynced = false;
     if (creds && row.crmContactId) {
       const { native, customFields, skippedSlugs } = buildCrmPayloadFromData(decrypted);

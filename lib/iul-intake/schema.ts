@@ -15,6 +15,7 @@ import {
   type IntakeSection,
 } from "./fields";
 import { fieldFormatError } from "./validation";
+import { isMaskedValue } from "@/lib/intake-shared/masking";
 
 /** The shape stored in `iulIntakeSessions.data` (jsonb). */
 export type IntakeData = Record<string, unknown> & {
@@ -90,7 +91,7 @@ export function sectionMissingFields(section: IntakeSection, data: IntakeData): 
     }
 
     // Present but clearly malformed (email/phone/zip/ssn/routing/age/dob).
-    if (value && fieldFormatError(field, value)) missing.push(field.key);
+    if (value && !isMaskedValue(value) && fieldFormatError(field, value)) missing.push(field.key);
   }
   return missing;
 }

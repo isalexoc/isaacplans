@@ -8,7 +8,7 @@ async function parseJson<T>(res: Response): Promise<T> {
   if (!contentType.includes("application/json")) {
     throw new Error(
       res.status === 401
-        ? "Please sign in to continue."
+        ? "You don't have access to this. Please use the link we sent you."
         : "Server returned an unexpected response. Try refreshing the page."
     );
   }

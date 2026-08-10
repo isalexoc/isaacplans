@@ -15,11 +15,17 @@ const isProtectedRoute = createRouteMatcher([
   '/admin(.*)',
   '/en/admin(.*)',
   '/es/admin(.*)',
-  // IUL intake (form + dashboard) requires login for both agent and client.
-  '/iul/intake(.*)',
-  '/iul/admision(.*)',
-  '/en/iul/intake(.*)',
-  '/es/iul/admision(.*)',
+  // IUL intake: the AGENT surfaces only. The client form at /iul/intake/<token> authenticates with
+  // the unguessable token plus a device cookie instead of an account. Matching the dashboard
+  // exactly (no trailing wildcard) is what leaves the token path open.
+  '/iul/intake',
+  '/iul/admision',
+  '/en/iul/intake',
+  '/es/iul/admision',
+  '/iul/intake/:token/view',
+  '/iul/admision/:token/view',
+  '/en/iul/intake/:token/view',
+  '/es/iul/admision/:token/view',
   // ACA intake: the AGENT surfaces only. The client form at /aca/intake/<token> authenticates
   // with the unguessable token plus a device cookie instead of an account, so a prospect never
   // hits a sign-in wall. Matching the dashboard exactly (no trailing wildcard) is what leaves the

@@ -4,14 +4,17 @@ import {
   getIntakeByToken,
   updateIntakeData,
   deleteIntakeSession,
-  bindClientUser,
+  bindClientDevice,
   canAccessIntake,
   clientCanEdit,
   toIntakeSession,
   syncIntakeToCrm,
+  isIulIntakeExpired,
   type IntakeSessionRow,
 } from "@/lib/iul-intake/server";
 import { sanitizeIntakeData, type IntakeData } from "@/lib/iul-intake/schema";
+import { ensureIulDeviceId } from "@/lib/iul-intake/device";
+import { maskIulSensitiveForClient, mergePreservedIulSensitive } from "@/lib/iul-intake/masking";
 import {
   encryptIntakeData,
   decryptIntakeData,
@@ -19,36 +22,56 @@ import {
 
 type RouteContext = { params: Promise<{ token: string }> };
 
-function roleOf(row: IntakeSessionRow, userId: string): "owner" | "client" {
-  return row.ownerUserId === userId ? "owner" : "client";
+/** Shared 403 body so the form can tell "someone else opened this" from a plain denial. */
+function forbidden(claimedByOtherDevice: boolean) {
+  return NextResponse.json(
+    {
+      success: false,
+      error: claimedByOtherDevice
+        ? "This link was already opened on another device. Please continue there, or call us for a new link."
+        : "Forbidden",
+      code: claimedByOtherDevice ? "claimed_elsewhere" : "forbidden",
+    },
+    { status: 403 }
+  );
+}
+
+function expired() {
+  return NextResponse.json(
+    { success: false, error: "This link has expired. Please call us for a new one.", code: "expired" },
+    { status: 410 }
+  );
 }
 
 // GET /api/iul-intake/[token] — load (decrypts sensitive; claims unbound sessions)
 export async function GET(_request: NextRequest, context: RouteContext) {
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
-    }
     const { token } = await context.params;
     const row = await getIntakeByToken(token);
     if (!row) {
       return NextResponse.json({ success: false, error: "Not found" }, { status: 404 });
     }
 
-    const access = canAccessIntake(row, userId);
-    if (!access.allowed) {
-      return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 });
-    }
+    const { userId } = await auth();
+    // Minting here is what claims an unclaimed link for the first browser that opens it.
+    const deviceId = await ensureIulDeviceId();
+
+    const access = canAccessIntake(row, { userId, deviceId });
+    if (!access.allowed) return forbidden(access.claimedByOtherDevice);
+    if (access.role === "client" && isIulIntakeExpired(row)) return expired();
+
     if (access.shouldClaim) {
-      await bindClientUser(token, userId);
-      row.clientUserId = userId;
+      await bindClientDevice(token, deviceId);
+      row.clientDeviceId = deviceId;
     }
 
     const decrypted = decryptIntakeData((row.data ?? {}) as IntakeData);
+    // The agent needs real values to work an application; the client's own browser only needs to
+    // see that a value is on file, so a stolen link can never surface an SSN.
+    const forClient = access.role === "owner" ? decrypted : maskIulSensitiveForClient(decrypted);
     return NextResponse.json({
       success: true,
-      session: toIntakeSession(row, roleOf(row, userId), decrypted),
+      session: toIntakeSession(row, access.role, forClient),
     });
   } catch (error) {
     console.error("[iul-intake/:token] GET", error);
@@ -59,33 +82,36 @@ export async function GET(_request: NextRequest, context: RouteContext) {
 // PATCH /api/iul-intake/[token] — autosave partial data (encrypts sensitive at rest)
 export async function PATCH(request: NextRequest, context: RouteContext) {
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
-    }
     const { token } = await context.params;
     const row = await getIntakeByToken(token);
     if (!row) {
       return NextResponse.json({ success: false, error: "Not found" }, { status: 404 });
     }
 
-    const access = canAccessIntake(row, userId);
-    if (!access.allowed) {
-      return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 });
-    }
+    const { userId } = await auth();
+    const deviceId = await ensureIulDeviceId();
+
+    const access = canAccessIntake(row, { userId, deviceId });
+    if (!access.allowed) return forbidden(access.claimedByOtherDevice);
+    if (access.role === "client" && isIulIntakeExpired(row)) return expired();
+
     if (access.shouldClaim) {
-      await bindClientUser(token, userId);
-      row.clientUserId = userId;
+      await bindClientDevice(token, deviceId);
+      row.clientDeviceId = deviceId;
     }
 
     // A client cannot edit a submitted form unless the admin re-opened it (admin always can).
-    if (roleOf(row, userId) === "client" && !clientCanEdit(row)) {
+    if (access.role === "client" && !clientCanEdit(row)) {
       return NextResponse.json({ success: false, error: "This form has already been submitted." }, { status: 403 });
     }
 
     const body = await request.json().catch(() => ({}));
     const clean = sanitizeIntakeData(body?.data);
-    const encrypted = encryptIntakeData(clean);
+    // The client never received the real sensitive values, so a masked placeholder coming back
+    // must not overwrite what's stored.
+    const stored = decryptIntakeData((row.data ?? {}) as IntakeData);
+    const merged = mergePreservedIulSensitive(clean, stored);
+    const encrypted = encryptIntakeData(merged);
     const nextStatus = row.status === "completed" ? "completed" : "in_progress";
 
     const updated = await updateIntakeData(token, encrypted, nextStatus);
@@ -98,9 +124,10 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     // Progressive CRM sync (best-effort — never blocks the save).
     await syncIntakeToCrm(updated, decrypted);
 
+    const forClient = access.role === "owner" ? decrypted : maskIulSensitiveForClient(decrypted);
     return NextResponse.json({
       success: true,
-      session: toIntakeSession(updated, roleOf(updated, userId), decrypted),
+      session: toIntakeSession(updated, access.role, forClient),
     });
   } catch (error) {
     console.error("[iul-intake/:token] PATCH", error);
