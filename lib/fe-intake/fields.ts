@@ -50,8 +50,13 @@ export type FeOption = {
   labelEs: string;
 };
 
-/** Where an `address` field writes the resolved city/state/zip from autocomplete. */
+/**
+ * Sibling fields folded onto an `address` field's own screen. `city`/`state`/`zip` are filled
+ * from the autocomplete result; `line2` is the apartment/unit the client types themselves, since
+ * Google returns the building but never the unit.
+ */
 export type AddressTargets = {
+  line2?: string;
   city?: string;
   state?: string;
   zip?: string;
@@ -244,8 +249,16 @@ export const FE_SECTIONS: FeSection[] = [
     fields: [
       {
         key: "address1", labelEn: "Home address", labelEs: "Dirección", type: "address", required: true, crm: native("address1"),
-        addressTargets: { city: "city", state: "state", zip: "postalCode" },
+        addressTargets: { line2: "address2", city: "city", state: "state", zip: "postalCode" },
         placeholderEn: "Start typing your address…", placeholderEs: "Empiece a escribir su dirección…",
+      },
+      {
+        // Google resolves the building but never the unit, so this is always hand-entered.
+        // No `crm` target: GHL has no native address-2 slot, so it's composed into address1 by
+        // buildCrmPayloadFromData (same approach as the ACA intake).
+        key: "address2", labelEn: "Apartment, unit, or suite", labelEs: "Apartamento, unidad o suite",
+        type: "text", placeholderEn: "e.g. Apt 4B", placeholderEs: "ej. Apto 4B",
+        helpEn: "(Optional)", helpEs: "(Opcional)",
       },
       { key: "city", labelEn: "City", labelEs: "Ciudad", type: "text", required: true, crm: native("city") },
       { key: "state", labelEn: "State", labelEs: "Estado", type: "text", required: true, crm: native("state") },

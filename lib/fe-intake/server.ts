@@ -594,6 +594,14 @@ export function buildCrmPayloadFromData(data: FeIntakeData): {
     }
   }
 
+  // GHL's contact record has no native address-2 slot, and an apartment number belongs with the
+  // street it qualifies — mail without it doesn't arrive. Composed rather than dropped, and
+  // idempotent because it always rebuilds from our own stored fields.
+  const address2 = str(data.address2);
+  if (address2 && native.address1) {
+    native.address1 = `${native.address1}, ${address2}`;
+  }
+
   const medications: RepeaterRow[] = Array.isArray(data.medications)
     ? (data.medications as RepeaterRow[])
     : [];

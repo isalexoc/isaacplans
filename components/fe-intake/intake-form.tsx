@@ -122,6 +122,7 @@ function addressTargetKeys(fields: FeField[]): Set<string> {
   const keys = new Set<string>();
   for (const f of fields) {
     if (f.type !== "address" || !f.addressTargets) continue;
+    if (f.addressTargets.line2) keys.add(f.addressTargets.line2);
     if (f.addressTargets.city) keys.add(f.addressTargets.city);
     if (f.addressTargets.state) keys.add(f.addressTargets.state);
     if (f.addressTargets.zip) keys.add(f.addressTargets.zip);
@@ -204,9 +205,15 @@ function isScreenValid(screen: Screen, data: FeIntakeData): boolean {
   // (bullets aren't digits) but the underlying value is valid.
   if (value && !isMaskedValue(value) && fieldFormatError(field, value)) return false;
 
-  // An address screen bundles its city/state/zip siblings — all of them must be valid too.
+  // An address screen bundles its siblings — all of them must be valid too. `line2` is optional,
+  // so it only participates via the required/format checks below (both no-ops when blank).
   if (field.type === "address" && field.addressTargets) {
-    for (const key of [field.addressTargets.city, field.addressTargets.state, field.addressTargets.zip]) {
+    for (const key of [
+      field.addressTargets.line2,
+      field.addressTargets.city,
+      field.addressTargets.state,
+      field.addressTargets.zip,
+    ]) {
       if (!key) continue;
       const sibling = fieldByKey(key);
       const siblingValue = str(container[key]).trim();
@@ -1074,6 +1081,18 @@ function FieldScreen({
             />
             {field.addressTargets && (
               <div className="grid grid-cols-2 gap-3">
+                {field.addressTargets.line2 && (
+                  <div className="col-span-2">
+                    <label className={SMALL_LABEL}>{optionLabelForField(field.addressTargets.line2, locale)}</label>
+                    <input
+                      value={str(container[field.addressTargets.line2])}
+                      onChange={(e) => onChangeField(field.addressTargets!.line2!, e.target.value)}
+                      placeholder={addressTargetPlaceholder(field.addressTargets.line2, locale)}
+                      autoComplete="address-line2"
+                      className={SMALL_INPUT}
+                    />
+                  </div>
+                )}
                 {field.addressTargets.city && (
                   <div className="col-span-2">
                     <label className={SMALL_LABEL}>{optionLabelForField(field.addressTargets.city, locale)}</label>
@@ -1181,10 +1200,15 @@ function FieldScreen({
   );
 }
 
-/** City/state/zip don't have their own screen, so borrow their catalog label for the inline field. */
+/** Folded address siblings have no screen of their own, so borrow their catalog label/placeholder. */
 function optionLabelForField(key: string, locale: FeLocale): string {
   const field = fieldByKey(key);
   return field ? fieldLabel(field, locale) : key;
+}
+
+function addressTargetPlaceholder(key: string, locale: FeLocale): string | undefined {
+  const field = fieldByKey(key);
+  return field ? fieldPlaceholder(field, locale) : undefined;
 }
 
 function AddAnotherScreen({ locale, onAnswer }: { locale: FeLocale; onAnswer: (wantsMore: boolean) => void }) {

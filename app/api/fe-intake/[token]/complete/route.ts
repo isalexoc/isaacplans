@@ -130,6 +130,7 @@ export async function POST(_request: NextRequest, context: RouteContext) {
       firstName: str(decrypted.firstName),
       lastName: str(decrypted.lastName),
       addressLine1: str(decrypted.address1),
+      addressLine2: str(decrypted.address2),
       city: str(decrypted.city),
       state: str(decrypted.state),
       postalCode: str(decrypted.postalCode),
