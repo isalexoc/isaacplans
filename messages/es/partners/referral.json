@@ -166,6 +166,79 @@
       "cta": "Ir a nuestra página de cobertura médica"
     }
   },
+  "partnerPortal": {
+    "metadata": {
+      "title": "Portal de Socios | Isaac Plans Insurance",
+      "description": "Inicie sesión para ver sus referidos, sus clientes inscritos y sus ganancias como socio de Isaac Plans Insurance."
+    },
+    "badge": "Programa de Socios",
+    "title": "Su panel de socio, en un solo lugar",
+    "subtitle": "Vea cuántas personas ha referido, cuáles ya se inscribieron y cuánto ha ganado. Actualizado en tiempo real.",
+    "signIn": "Iniciar sesión",
+    "howCta": "Ver cómo funciona",
+    "signInNote": "Use el correo que registró con Isaac Plans. Si entra con otro, se lo decimos y puede cambiar de cuenta.",
+    "preview": {
+      "heading": "Su panel",
+      "badge": "Ejemplo",
+      "earnings": "Su ganancia",
+      "perMonth": "al mes",
+      "clients": "Clientes activos",
+      "people": "{count} personas cubiertas",
+      "members": "{count} miembros"
+    },
+    "features": {
+      "label": "Lo que va a ver",
+      "title": "Todo lo de su alianza, claro y a la mano",
+      "items": [
+        {
+          "title": "Su enlace de referidos",
+          "body": "Compártalo con sus clientes. Todo el que se registre por ahí queda acreditado a usted automáticamente."
+        },
+        {
+          "title": "Referidos en proceso",
+          "body": "Quiénes pidieron información y en qué va cada uno."
+        },
+        {
+          "title": "Clientes inscritos",
+          "body": "Nombre, cuántos miembros cubre y la prima mensual de cada uno."
+        },
+        {
+          "title": "Sus ganancias",
+          "body": "Su comisión calculada sola, por cliente y en total, cada mes."
+        }
+      ]
+    },
+    "steps": {
+      "label": "Cómo funciona",
+      "title": "Usted refiere. Nosotros nos encargamos del resto.",
+      "items": [
+        {
+          "title": "Comparta su enlace",
+          "body": "Cada socio tiene su propia página con su logo, hecha para sus clientes."
+        },
+        {
+          "title": "Nosotros atendemos",
+          "body": "Un agente con licencia los llama en español, los asesora y los inscribe."
+        },
+        {
+          "title": "Usted gana",
+          "body": "Recibe un porcentaje de la prima mensual mientras el cliente siga activo."
+        }
+      ]
+    },
+    "existing": {
+      "title": "¿Ya es socio?",
+      "body": "Inicie sesión y vea sus números al instante.",
+      "noAccount": "¿Primera vez aquí?",
+      "createAccount": "Cree su cuenta con el correo que registró."
+    },
+    "prospective": {
+      "title": "¿Quiere ser socio?",
+      "body": "Si atiende a familias que necesitan cobertura médica, hablemos. Usted acompaña a su cliente y recibe una comisión por cada persona que se inscriba.",
+      "cta": "Escríbanos"
+    },
+    "footerNote": "¿Preguntas sobre su cuenta de socio? Escriba a"
+  },
   "partnerDashboard": {
     "metadata": {
       "title": "Panel de Socio | Isaac Plans",
@@ -173,8 +246,10 @@
     },
     "greeting": "Bienvenida, {name}",
     "subtitle": "Sus referidos y ganancias con Isaac Plans Insurance",
-    "yourLink": "Su enlace de referidos",
-    "yourLinkHelp": "Comparta este enlace con sus clientes. Toda persona que se registre por ahí queda acreditada a usted automáticamente.",
+    "yourLink": "Sus enlaces de referidos",
+    "yourLinkHelp": "Comparta el enlace en el idioma que prefiera su cliente. Toda persona que se registre por cualquiera de los dos queda acreditada a usted automáticamente.",
+    "linkSpanish": "Español",
+    "linkEnglish": "English",
     "copyLink": "Copiar enlace",
     "copied": "Copiado",
     "openLink": "Abrir página",

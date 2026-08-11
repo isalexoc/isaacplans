@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import { currentUser } from "@clerk/nextjs/server";
+import { auth, currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { hasLocale } from "next-intl";
 import { Users, UserCheck, TrendingUp, Wallet, HandCoins, CalendarClock } from "lucide-react";
-import PartnerLinkCopy from "@/components/referral-partners/partner-link-copy";
+import { PartnerShareLinks } from "@/components/referral-partners/partner-link-copy";
 import PartnerNoAccess from "@/components/referral-partners/partner-no-access";
+import PartnerPortalLanding from "@/components/referral-partners/partner-portal-landing";
 import { getPartnerByEmail, getPartnerDashboard } from "@/lib/referral-partners/server";
 import {
   bpsToPercentLabel,
@@ -30,11 +31,17 @@ type PageProps = { params: Promise<{ locale: string }> };
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { locale } = await params;
   const safeLocale = hasLocale(routing.locales, locale) ? locale : routing.defaultLocale;
-  const t = await getTranslations({ locale: safeLocale, namespace: "partnerDashboard.metadata" });
+  const { userId } = await auth();
+
+  // Signed out this is a real marketing page for prospective partners, so let it be indexed.
+  // Signed in it is somebody's earnings, so it must not be. Same split as the sale-sticker tool.
+  const namespace = userId ? "partnerDashboard.metadata" : "partnerPortal.metadata";
+  const t = await getTranslations({ locale: safeLocale, namespace });
+
   return {
     title: t("title"),
     description: t("description"),
-    robots: { index: false, follow: false },
+    robots: userId ? { index: false, follow: false } : { index: true, follow: true },
   };
 }
 
@@ -105,9 +112,10 @@ export default async function PartnerDashboardPage({ params }: PageProps) {
   const moneyLocale = safeLocale === "es" ? "es" : "en";
   const t = await getTranslations({ locale: safeLocale, namespace: "partnerDashboard" });
 
-  // Middleware already required a signed-in user; this is the belt-and-braces check.
+  // This route is intentionally public — see the note in middleware.ts. Signed out, it is the
+  // partner portal's front door: what the program is, what the dashboard holds, and a way in.
   const user = await currentUser();
-  if (!user) redirect(`/${safeLocale}`);
+  if (!user) return <PartnerPortalLanding />;
 
   // Check every verified address on the Clerk account, not just the primary — partners sign up
   // with whatever address they happen to be logged into, and we'd rather match than lock them out.
@@ -147,9 +155,6 @@ export default async function PartnerDashboardPage({ params }: PageProps) {
   const { leads, clients, summary } = dashboard;
   const accent = partner.accentColor;
   const rateLabel = bpsToPercentLabel(partner.commissionBps);
-  const referralUrl = `${resolveSiteUrl()}/${partner.defaultLocale}/${
-    partner.defaultLocale === "es" ? "socios" : "partners"
-  }/${partner.slug}`;
 
   const leadStatusLabel: Record<ReferralLeadStatus, string> = {
     new: t("leads.statusNew"),
@@ -219,7 +224,13 @@ export default async function PartnerDashboardPage({ params }: PageProps) {
           </h2>
           <p className="mt-1.5 text-sm text-slate-600 dark:text-slate-300">{t("yourLinkHelp")}</p>
           <div className="mt-4">
-            <PartnerLinkCopy url={referralUrl} accentColor={accent} />
+            <PartnerShareLinks
+              slug={partner.slug}
+              siteUrl={resolveSiteUrl()}
+              accentColor={accent}
+              spanishLabel={t("linkSpanish")}
+              englishLabel={t("linkEnglish")}
+            />
           </div>
         </section>
 

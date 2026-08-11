@@ -51,15 +51,13 @@ const isProtectedRoute = createRouteMatcher([
   '/gastos-finales/admision/:token/view',
   '/en/final-expense/intake/:token/view',
   '/es/gastos-finales/admision/:token/view',
-  // Referral partner dashboard. Sign-in only — authorization is by email match against the
-  // partner record (see app/[locale]/partner/page.tsx), so any signed-in user reaches the page
-  // and a non-partner gets the "not linked to a partner" screen rather than a redirect loop.
-  // The partner's own PUBLIC landing page at /partners/<slug> is deliberately not matched here.
-  '/partner',
-  '/socio',
-  '/en/partner',
-  '/es/socio',
 ]);
+// NOTE: /partner and /socio are deliberately NOT protected. The page is the partner portal: it
+// renders a public marketing landing with a sign-in button when signed out, and the dashboard
+// once signed in — the same shape as the sale-sticker and leave-behind agent tools. Gating it in
+// middleware would bounce a partner who just wants to find the sign-in button, and there is no
+// /sign-in route in this app to bounce them to. Authorization still happens in the page: the
+// signed-in email must match a partner record, or they get the "not linked" screen.
 
 // Admin-only surfaces: the /admin dashboard + tools, Sanity Studio, and every
 // /api/admin route. (Agent tools like sale-sticker/leave-behind stay open to

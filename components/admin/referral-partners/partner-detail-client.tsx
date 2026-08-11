@@ -3,7 +3,6 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-  ExternalLink,
   Loader2,
   Pencil,
   Plus,
@@ -14,6 +13,7 @@ import {
 } from "lucide-react";
 import { cloudinaryOgImageUrl } from "@/lib/blog-featured-image";
 import { resolvePartnerOgSource } from "@/lib/referral-partners/images";
+import { PartnerShareLinks } from "@/components/referral-partners/partner-link-copy";
 import {
   bpsToPercentLabel,
   commissionCents,
@@ -135,9 +135,6 @@ export default function PartnerDetailClient({ partner, leads, clients, siteUrl }
 
   const summary = useMemo(() => summarize(leads, clients), [leads, clients]);
   const rateLabel = bpsToPercentLabel(partner.commissionBps);
-  const partnerUrl = `${siteUrl}/${partner.defaultLocale}/${
-    partner.defaultLocale === "es" ? "socios" : "partners"
-  }/${partner.slug}`;
 
   // Live preview of what this row will pay, so a typo in the premium is obvious before saving.
   const draftPremiumCents = parsePremiumToCents(clientDraft.monthlyPremium);
@@ -282,26 +279,22 @@ export default function PartnerDetailClient({ partner, leads, clients, siteUrl }
         </p>
       )}
 
-      {/* Shareable link */}
+      {/* Shareable links — both languages, since their clients are not all Spanish-first. */}
       <section className="rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="min-w-0">
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-              Their shareable link
-            </p>
-            <code className="mt-1 block truncate text-sm text-slate-700 dark:text-slate-200">
-              {partnerUrl}
-            </code>
-          </div>
-          <a
-            href={partnerUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800"
-          >
-            <ExternalLink className="h-4 w-4" />
-            Preview
-          </a>
+        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+          Their shareable links
+        </p>
+        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+          The same links the partner sees on their own dashboard.
+        </p>
+        <div className="mt-4">
+          <PartnerShareLinks
+            slug={settings.slug}
+            siteUrl={siteUrl}
+            accentColor={partner.accentColor}
+            spanishLabel="Spanish — /socios"
+            englishLabel="English — /partners"
+          />
         </div>
       </section>
 

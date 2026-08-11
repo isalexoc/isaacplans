@@ -166,6 +166,79 @@
       "cta": "Go to our health coverage page"
     }
   },
+  "partnerPortal": {
+    "metadata": {
+      "title": "Partner Portal | Isaac Plans Insurance",
+      "description": "Sign in to see your referrals, your enrolled clients, and your earnings as an Isaac Plans Insurance partner."
+    },
+    "badge": "Partner Program",
+    "title": "Your partner dashboard, all in one place",
+    "subtitle": "See how many people you've referred, which ones enrolled, and what you've earned. Updated in real time.",
+    "signIn": "Sign in",
+    "howCta": "See how it works",
+    "signInNote": "Use the email you registered with Isaac Plans. If you sign in with a different one, we'll tell you and you can switch accounts.",
+    "preview": {
+      "heading": "Your dashboard",
+      "badge": "Example",
+      "earnings": "Your earnings",
+      "perMonth": "per month",
+      "clients": "Active clients",
+      "people": "{count} people covered",
+      "members": "{count} members"
+    },
+    "features": {
+      "label": "What you'll see",
+      "title": "Everything about your partnership, in plain view",
+      "items": [
+        {
+          "title": "Your referral link",
+          "body": "Share it with your clients. Anyone who signs up through it is credited to you automatically."
+        },
+        {
+          "title": "Referrals in progress",
+          "body": "Who asked for information, and where each one stands."
+        },
+        {
+          "title": "Enrolled clients",
+          "body": "Name, how many members are covered, and each one's monthly premium."
+        },
+        {
+          "title": "Your earnings",
+          "body": "Your commission worked out for you, per client and in total, every month."
+        }
+      ]
+    },
+    "steps": {
+      "label": "How it works",
+      "title": "You refer. We handle the rest.",
+      "items": [
+        {
+          "title": "Share your link",
+          "body": "Every partner gets their own page, carrying their logo, built for their clients."
+        },
+        {
+          "title": "We take it from there",
+          "body": "A licensed agent calls them, walks them through the options, and enrolls them."
+        },
+        {
+          "title": "You earn",
+          "body": "You receive a percentage of the monthly premium for as long as the client stays active."
+        }
+      ]
+    },
+    "existing": {
+      "title": "Already a partner?",
+      "body": "Sign in and see your numbers right away.",
+      "noAccount": "First time here?",
+      "createAccount": "Create your account with the email you registered."
+    },
+    "prospective": {
+      "title": "Want to become a partner?",
+      "body": "If you work with families who need health coverage, let's talk. You look after your client and earn a commission for everyone who enrolls.",
+      "cta": "Get in touch"
+    },
+    "footerNote": "Questions about your partner account? Email"
+  },
   "partnerDashboard": {
     "metadata": {
       "title": "Partner Dashboard | Isaac Plans",
@@ -173,8 +246,10 @@
     },
     "greeting": "Welcome, {name}",
     "subtitle": "Your referrals and earnings with Isaac Plans Insurance",
-    "yourLink": "Your referral link",
-    "yourLinkHelp": "Share this link with your clients. Anyone who signs up through it is credited to you automatically.",
+    "yourLink": "Your referral links",
+    "yourLinkHelp": "Share whichever link matches your client's language. Anyone who signs up through either one is credited to you automatically.",
+    "linkSpanish": "Español",
+    "linkEnglish": "English",
     "copyLink": "Copy link",
     "copied": "Copied",
     "openLink": "Open page",

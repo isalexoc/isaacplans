@@ -151,6 +151,22 @@ export default function PartnerLeadForm({ partnerSlug, accentColor }: Props) {
     "w-full rounded-xl border-2 border-slate-200 bg-white px-4 py-3 text-slate-900 placeholder:text-slate-400 transition-colors focus:outline-none focus:ring-2 dark:border-slate-700 dark:bg-slate-800/60 dark:text-white dark:placeholder:text-slate-500";
   const inputErrorClass = "border-red-500 dark:border-red-500";
 
+  /**
+   * react-phone-number-input renders its own <input> inside the element we style, and that inner
+   * input keeps the library stylesheet's background — which shows up as a grey slab sitting inside
+   * the field in dark mode. Flattening the inner input and the country select is the same fix the
+   * ACA, Final Expense, and Health Alternative funnels already carry.
+   */
+  const phoneInputBase = [
+    inputBase,
+    "flex items-center gap-2",
+    "[&_.PhoneInputCountry]:m-0 [&_.PhoneInputCountry]:self-stretch [&_.PhoneInputCountry]:rounded-md [&_.PhoneInputCountry]:bg-transparent",
+    "[&_.PhoneInputCountrySelect]:h-full [&_.PhoneInputCountrySelect]:rounded-md [&_.PhoneInputCountrySelect]:bg-transparent",
+    "[&_.PhoneInputCountrySelectArrow]:text-slate-500 dark:[&_.PhoneInputCountrySelectArrow]:text-slate-300",
+    "[&_.PhoneInputCountryIcon]:shadow-none",
+    "[&_.PhoneInputInput]:h-full [&_.PhoneInputInput]:flex-1 [&_.PhoneInputInput]:border-0 [&_.PhoneInputInput]:bg-transparent [&_.PhoneInputInput]:p-0 [&_.PhoneInputInput]:text-slate-900 [&_.PhoneInputInput]:outline-none [&_.PhoneInputInput]:placeholder:text-slate-400 dark:[&_.PhoneInputInput]:text-white dark:[&_.PhoneInputInput]:placeholder:text-slate-500",
+  ].join(" ");
+
   if (done) {
     return (
       <div className="text-center">
@@ -306,7 +322,7 @@ export default function PartnerLeadForm({ partnerSlug, accentColor }: Props) {
           onChange={(value) => setField("phone", value ?? "")}
           placeholder={t("phonePlaceholder")}
           disabled={isPending}
-          className={`${inputBase} ${errors.phone ? inputErrorClass : ""}`}
+          className={`${phoneInputBase} ${errors.phone ? inputErrorClass : ""}`}
           style={{ ["--tw-ring-color" as string]: `${accentColor}40` }}
         />
         {errors.phone && (
