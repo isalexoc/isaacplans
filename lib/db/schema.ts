@@ -599,3 +599,108 @@ export const mailingLabels = pgTable("mailing_labels", {
   sourceRefIdx: uniqueIndex("mailing_labels_source_ref_idx").on(table.source, table.sourceRef),
 }));
 
+// ─── Referral partners (co-branded landing pages + partner commission dashboards) ──
+
+/**
+ * A business that sends us clients — e.g. an immigration office whose clients need proof of
+ * health coverage. Each partner owns one co-branded landing page at /partners/<slug> and one
+ * read-only dashboard at /partner showing the clients we closed for them and what they earned.
+ *
+ * `email` is the login key: whoever signs in with Clerk using this address owns the dashboard.
+ * That deliberately avoids a second source of truth — no Clerk metadata to edit per partner,
+ * no invite table. Stored lowercased; matching is exact.
+ *
+ * The copy columns (headline/intro/audience) are what make the shared landing template feel
+ * hand-built per partner. Blank falls back to the generic copy in lib/referral-partners/content.ts,
+ * so a partner added in a hurry still gets a complete page.
+ */
+export const referralPartners = pgTable("referral_partners", {
+  id: text("id").primaryKey(), // nanoid
+  slug: text("slug").notNull(), // URL segment: /partners/<slug>, /socios/<slug>
+  companyName: text("company_name").notNull(),
+  contactName: text("contact_name").notNull().default(""), // the person we deal with
+  contactTitle: text("contact_title").notNull().default(""), // e.g. "CEO"
+  email: text("email").notNull(), // lowercased; matched against the Clerk sign-in email
+  phone: text("phone"),
+  website: text("website"),
+  logoUrl: text("logo_url"), // shown next to ours in the co-branded header
+  accentColor: text("accent_color").notNull().default("#0077B6"), // hex, tints the partner page
+  /**
+   * Commission in basis points rather than a float — 500 = 5%. Integer math end to end means
+   * a partner statement never drifts by a cent.
+   */
+  commissionBps: integer("commission_bps").notNull().default(500),
+  defaultLocale: text("default_locale").notNull().default("es"), // en | es — page + dashboard language
+  headlineEn: text("headline_en"),
+  headlineEs: text("headline_es"),
+  introEn: text("intro_en"),
+  introEs: text("intro_es"),
+  /** Why THIS partner's clients specifically need coverage (immigration, work visa, school…). */
+  audienceEn: text("audience_en"),
+  audienceEs: text("audience_es"),
+  status: text("status").notNull().default("active"), // active | paused — paused 404s the page
+  notes: text("notes"), // internal only, never shown to the partner
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (t) => ({
+  slugIdx: uniqueIndex("referral_partners_slug_idx").on(t.slug),
+  emailIdx: index("referral_partners_email_idx").on(t.email),
+}));
+
+/**
+ * Every form submission from a partner's landing page. This is a thin mirror of what already
+ * went to Agent CRM — the CRM stays the system of record for working the lead — kept here only
+ * so the partner can see referral volume and conversion without being given CRM access.
+ *
+ * PII: name/email/phone in plaintext, same posture as mailingLabels. No health answers.
+ */
+export const referralPartnerLeads = pgTable("referral_partner_leads", {
+  id: text("id").primaryKey(), // nanoid
+  partnerId: text("partner_id")
+    .notNull()
+    .references(() => referralPartners.id, { onDelete: "cascade" }),
+  firstName: text("first_name").notNull().default(""),
+  lastName: text("last_name").notNull().default(""),
+  email: text("email"),
+  phone: text("phone"),
+  locale: text("locale").notNull().default("es"), // en | es
+  status: text("status").notNull().default("new"), // new | contacted | closed | lost
+  crmContactId: text("crm_contact_id"), // Agent CRM contact id when the push succeeded
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (t) => ({
+  partnerIdx: index("referral_partner_leads_partner_idx").on(t.partnerId, t.createdAt),
+  partnerStatusIdx: index("referral_partner_leads_status_idx").on(t.partnerId, t.status),
+}));
+
+/**
+ * A closed, paying client credited to a partner. Rows are created BY HAND in the admin tool
+ * once the policy is actually issued — a submitted form is not a sale, and the partner is paid
+ * on real premium.
+ *
+ * `commissionBps` is snapshotted from the partner at insert time so that changing a partner's
+ * future rate never silently rewrites what past months were worth.
+ * `monthlyPremiumCents` is an integer for the same reason floats are avoided above.
+ */
+export const referralPartnerClients = pgTable("referral_partner_clients", {
+  id: text("id").primaryKey(), // nanoid
+  partnerId: text("partner_id")
+    .notNull()
+    .references(() => referralPartners.id, { onDelete: "cascade" }),
+  leadId: text("lead_id").references(() => referralPartnerLeads.id, { onDelete: "set null" }),
+  firstName: text("first_name").notNull().default(""),
+  lastName: text("last_name").notNull().default(""),
+  memberCount: integer("member_count").notNull().default(1), // people on the policy
+  monthlyPremiumCents: integer("monthly_premium_cents").notNull().default(0),
+  commissionBps: integer("commission_bps").notNull().default(500), // snapshot of the partner rate
+  status: text("status").notNull().default("active"), // active | pending | cancelled
+  effectiveDate: date("effective_date", { mode: "string" }), // YYYY-MM-DD, coverage start
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (t) => ({
+  partnerIdx: index("referral_partner_clients_partner_idx").on(t.partnerId, t.createdAt),
+  partnerStatusIdx: index("referral_partner_clients_status_idx").on(t.partnerId, t.status),
+}));
+

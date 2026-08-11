@@ -1,0 +1,210 @@
+{
+  "partnerReferral": {
+    "metadata": {
+      "title": "Health Coverage for {partner} Clients | Isaac Plans",
+      "description": "Affordable health coverage with a licensed bilingual agent. A free consultation, a plan that fits your budget, and proof of coverage you can use right away.",
+      "imageAlt": "Isaac Plans Insurance — affordable health coverage"
+    },
+    "badge": "An exclusive benefit for {partner} clients",
+    "trustLine": "Recommended by {partner}",
+    "heroCta": "Request my coverage",
+    "heroSecondaryCta": "See how it works",
+    "heroNote": "Free consultation · No obligation · Se habla español",
+    "audience": {
+      "label": "Why this matters",
+      "title": "Coverage that meets the requirement — and that you can actually use"
+    },
+    "benefits": {
+      "label": "What you get",
+      "title": "Real coverage, explained in plain language",
+      "items": [
+        {
+          "title": "Built around your budget",
+          "body": "We start from what you can pay each month and work backwards to the best plan at that price."
+        },
+        {
+          "title": "Coverage that starts fast",
+          "body": "No waiting for an open enrollment window. Coverage can begin in days, not months."
+        },
+        {
+          "title": "Proof of coverage in writing",
+          "body": "You get documentation you can present wherever you are asked to show you have medical coverage."
+        },
+        {
+          "title": "Doctors, urgent care, and prescriptions",
+          "body": "Benefits you will actually use — office visits, urgent care, labs, and help with prescription costs."
+        },
+        {
+          "title": "Everything in Spanish",
+          "body": "From the first call to the day you use your card, you are never left guessing what something means."
+        },
+        {
+          "title": "A licensed agent, not a call center",
+          "body": "The same person who enrolls you is the person you call when you have a question later."
+        }
+      ]
+    },
+    "steps": {
+      "label": "How it works",
+      "title": "Three steps, about a minute of your time",
+      "items": [
+        {
+          "title": "Send your information",
+          "body": "Fill out the short form. It takes about a minute and there is no obligation."
+        },
+        {
+          "title": "We call you",
+          "body": "A licensed agent calls you in English or Spanish, listens to your situation, and explains what fits."
+        },
+        {
+          "title": "You get covered",
+          "body": "If you like the plan, you enroll the same day and receive your proof of coverage by email."
+        }
+      ]
+    },
+    "agent": {
+      "label": "Who you will talk to",
+      "name": "Isaac Aleman",
+      "title": "Licensed insurance agent",
+      "body": "I have spent years helping Hispanic families find coverage they can afford and understand. When you call, you talk to me — not a script. If nothing fits your budget, I will tell you that honestly.",
+      "photoAlt": "Isaac Aleman, licensed insurance agent"
+    },
+    "form": {
+      "title": "Request your free consultation",
+      "subtitle": "Fill this out and we will call you. It costs nothing to ask.",
+      "firstName": "First name",
+      "firstNamePlaceholder": "Maria",
+      "lastName": "Last name",
+      "lastNamePlaceholder": "Rodriguez",
+      "email": "Email",
+      "emailPlaceholder": "you@email.com",
+      "phone": "Phone",
+      "phonePlaceholder": "(555) 555-5555",
+      "required": "This field is required",
+      "invalidEmail": "Please enter a valid email",
+      "invalidPhone": "Please enter a valid phone number",
+      "firstNameMinLength": "First name must be at least 2 characters",
+      "lastNameMinLength": "Last name must be at least 2 characters",
+      "firstNameMaxLength": "First name is too long",
+      "lastNameMaxLength": "Last name is too long",
+      "smsConsent": "I agree to receive text messages about my coverage options. Message and data rates may apply. Reply STOP to opt out.",
+      "marketingConsent": "I would like to receive helpful updates about health coverage.",
+      "submit": "Request my consultation",
+      "submitting": "Sending...",
+      "error": "Something went wrong. Please try again or call us.",
+      "privacyNote": "Your information is only used to contact you about coverage. We never sell it.",
+      "successTitle": "Thank you — we received your information",
+      "successMessage": "A licensed agent will call you shortly. If you would like to talk right now, call us directly.",
+      "successCall": "Call now",
+      "successWhatsapp": "WhatsApp us",
+      "successAnother": "Send another request"
+    },
+    "faq": {
+      "label": "Common questions",
+      "title": "The questions people ask us first",
+      "items": [
+        {
+          "q": "Do I need a Social Security number or a green card?",
+          "a": "No. These plans do not require a Social Security number or permanent residency to apply. We will confirm what applies to your specific situation on the call."
+        },
+        {
+          "q": "How much does it cost?",
+          "a": "It depends on your age, where you live, and how many people you are covering. Tell us your budget and we will show you what is possible at that number before you commit to anything."
+        },
+        {
+          "q": "Is this Obamacare?",
+          "a": "No. This is a private alternative for people who do not qualify for a marketplace subsidy or who need coverage outside open enrollment. If you do qualify for the marketplace, we will tell you honestly — we handle that too."
+        },
+        {
+          "q": "What does it cost me to ask?",
+          "a": "Nothing. The consultation is free and there is no obligation to enroll. If nothing fits your budget, we will say so."
+        },
+        {
+          "q": "Can I cover my spouse and children?",
+          "a": "Yes. Family coverage is common and usually costs far less per person than covering everyone separately."
+        },
+        {
+          "q": "Does this affect my immigration case?",
+          "a": "Buying private health coverage is a normal, lawful purchase. We are insurance agents, not attorneys, so for questions about your case itself, keep talking to {partner} — that is what they are there for."
+        }
+      ]
+    },
+    "closing": {
+      "title": "Ready to see what you qualify for?",
+      "body": "One short call, in your language, with no pressure and no cost.",
+      "cta": "Request my coverage",
+      "call": "Or call {phone}"
+    },
+    "partnership": {
+      "label": "About this partnership",
+      "body": "{partner} recommends Isaac Plans Insurance to its clients who need affordable health coverage. You are under no obligation to enroll, and your coverage decision has no effect on the services {partner} provides you."
+    },
+    "notFound": {
+      "title": "This page is not available",
+      "body": "The partner link you followed is not active. If someone gave you this link, please contact them, or reach out to us directly.",
+      "cta": "Go to our health coverage page"
+    }
+  },
+  "partnerDashboard": {
+    "metadata": {
+      "title": "Partner Dashboard | Isaac Plans",
+      "description": "Track your referrals and earnings."
+    },
+    "greeting": "Welcome, {name}",
+    "subtitle": "Your referrals and earnings with Isaac Plans Insurance",
+    "yourLink": "Your referral link",
+    "yourLinkHelp": "Share this link with your clients. Anyone who signs up through it is credited to you automatically.",
+    "copyLink": "Copy link",
+    "copied": "Copied",
+    "openLink": "Open page",
+    "stats": {
+      "referrals": "Total referrals",
+      "inProgress": "In progress",
+      "closed": "Enrolled",
+      "conversion": "Conversion rate",
+      "activeClients": "Active clients",
+      "members": "People covered",
+      "monthlyPremium": "Total monthly premium",
+      "monthlyCommission": "Your monthly earnings",
+      "annualCommission": "Projected yearly",
+      "commissionRate": "at {rate} of premium"
+    },
+    "clients": {
+      "title": "Your enrolled clients",
+      "subtitle": "Clients who completed enrollment. Earnings are {rate} of the monthly premium.",
+      "client": "Client",
+      "members": "Members",
+      "premium": "Monthly premium",
+      "commission": "Your earnings",
+      "status": "Status",
+      "effectiveDate": "Start date",
+      "total": "Total",
+      "empty": "No enrolled clients yet. As soon as we close your first referral, it will appear here.",
+      "statusActive": "Active",
+      "statusPending": "Pending",
+      "statusCancelled": "Cancelled"
+    },
+    "leads": {
+      "title": "Referrals in progress",
+      "subtitle": "People who requested a consultation through your link and have not enrolled yet.",
+      "name": "Name",
+      "date": "Received",
+      "status": "Status",
+      "empty": "No referrals yet. Share your link to get started.",
+      "statusNew": "New",
+      "statusContacted": "Contacted",
+      "statusClosed": "Enrolled",
+      "statusLost": "Not a fit"
+    },
+    "noAccess": {
+      "title": "This account is not linked to a partner",
+      "body": "You are signed in as {email}, but that address is not registered as a referral partner. If you believe this is a mistake, contact Isaac Plans and ask to have this email added to your partner profile.",
+      "cta": "Go to homepage"
+    },
+    "paused": {
+      "title": "Your partner account is paused",
+      "body": "Please contact Isaac Plans to reactivate it."
+    },
+    "questions": "Questions about your account? Contact {email}."
+  }
+}

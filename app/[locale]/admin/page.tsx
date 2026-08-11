@@ -21,6 +21,7 @@ import {
   PhoneCall,
   BarChart3,
   HeartPulse,
+  Handshake,
   Shield,
   Image as ImageIcon,
 } from "lucide-react";
@@ -107,6 +108,13 @@ const OPERATIONS_TOOLS: ToolCard[] = [
       "Swap the hero and OG images on the Final Expense, IUL, and ACA get-covered ads pages to A/B test what converts.",
     href: "/en/admin/hero",
     icon: ImageIcon,
+  },
+  {
+    title: "Referral Partners",
+    description:
+      "Manage referral partners, their co-branded landing pages, and the commissions you owe them.",
+    href: "/en/admin/referral-partners",
+    icon: Handshake,
   },
 ];
 

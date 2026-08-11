@@ -351,6 +351,16 @@ export const routing = defineRouting({
       en: "/lead-magnets/[slug]",
       es: "/imanes-de-leads/[slug]",
     },
+    // Referral partners: the co-branded landing page a partner shares with their clients, and
+    // the read-only dashboard that same partner signs into.
+    "/partners/[slug]": {
+      en: "/partners/[slug]",
+      es: "/socios/[slug]",
+    },
+    "/partner": {
+      en: "/partner",
+      es: "/socio",
+    },
   },
 });
 

@@ -51,6 +51,14 @@ const isProtectedRoute = createRouteMatcher([
   '/gastos-finales/admision/:token/view',
   '/en/final-expense/intake/:token/view',
   '/es/gastos-finales/admision/:token/view',
+  // Referral partner dashboard. Sign-in only — authorization is by email match against the
+  // partner record (see app/[locale]/partner/page.tsx), so any signed-in user reaches the page
+  // and a non-partner gets the "not linked to a partner" screen rather than a redirect loop.
+  // The partner's own PUBLIC landing page at /partners/<slug> is deliberately not matched here.
+  '/partner',
+  '/socio',
+  '/en/partner',
+  '/es/socio',
 ]);
 
 // Admin-only surfaces: the /admin dashboard + tools, Sanity Studio, and every

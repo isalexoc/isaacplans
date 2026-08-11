@@ -650,6 +650,17 @@ export async function POST(request: NextRequest) {
       const submittedAt = new Date().toLocaleString() + ' ' + (Intl.DateTimeFormat().resolvedOptions().timeZone || '');
       const smsConsent = healthAlternativeData.smsConsent === true ? 'Yes' : 'No';
       const marketingConsent = healthAlternativeData.marketingConsent === true ? 'Yes' : 'No';
+      // Referral partners get their own block so whoever opens the contact in GHL can see who
+      // sent this person without decoding a tag.
+      const referralLines = healthAlternativeData.referralPartnerSlug
+        ? [
+            '',
+            'Referred by:',
+            `  Partner: ${healthAlternativeData.referralPartnerName || healthAlternativeData.referralPartnerSlug}`,
+            `  Partner contact: ${healthAlternativeData.referralPartnerContact || 'Not provided'}`,
+            `  Partner slug: ${healthAlternativeData.referralPartnerSlug}`,
+          ]
+        : [];
       leadDetailsText = [
         'Health Coverage Alternative Lead',
         '================================',
@@ -658,6 +669,7 @@ export async function POST(request: NextRequest) {
         `  Name: ${firstName} ${lastName}`,
         `  Email: ${email || 'Not provided'}`,
         `  Phone: ${phone}`,
+        ...referralLines,
         '',
         'Lead Details:',
         `  Source: ${healthAlternativeData.source || 'health_alternative_page'}`,
@@ -820,6 +832,20 @@ export async function POST(request: NextRequest) {
       healthAlternativeTags.push(healthAlternativeData.language === 'es' ? 'Spanish' : 'English');
       if (healthAlternativeData.source === 'health_alternative_get_covered_ads') {
         healthAlternativeTags.push('health_alternative_get_covered_funnel');
+      }
+      // Referral partner attribution. Two tags on purpose: the readable one ("Referral: Sin
+      // Fronteras USA") is what you scan in the CRM contact list, and the slug one
+      // (referral_sin_fronteras) is what GHL workflow filters and smart lists match on — same
+      // split as the funnel tags above. This is how a partner's referrals stay separable at
+      // commission time.
+      if (typeof healthAlternativeData.referralPartnerSlug === 'string' && healthAlternativeData.referralPartnerSlug) {
+        healthAlternativeTags.push('Referral Partner Lead');
+        healthAlternativeTags.push(
+          `referral_${healthAlternativeData.referralPartnerSlug.replace(/-/g, '_')}`
+        );
+        if (typeof healthAlternativeData.referralPartnerName === 'string' && healthAlternativeData.referralPartnerName) {
+          healthAlternativeTags.push(`Referral: ${healthAlternativeData.referralPartnerName}`);
+        }
       }
     }
 

@@ -1,0 +1,341 @@
+"use client";
+
+import { useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
+import PhoneInput from "react-phone-number-input";
+import "react-phone-number-input/style.css";
+import { CheckCircle2, Loader2, MessageCircle, Phone } from "lucide-react";
+import { shortTermMedicalFormSchema } from "@/lib/validation/shortTermMedicalSchema";
+import { generateEventId, getFacebookCookies } from "@/lib/meta-capi";
+import { trackLead, updateAdvancedMatching } from "@/lib/facebook-pixel";
+
+/** Same CRM line the rest of the site uses. */
+const CRM_PHONE_TEL = "tel:+15404261804";
+const CRM_PHONE_DISPLAY = "540-426-1804";
+const WHATSAPP_CHAT_HREF = "https://wa.me/15406813507";
+
+/** Lead value reported to Meta — matches the other health-alternative funnels. */
+const PARTNER_LEAD_VALUE = 100;
+
+type FormValues = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+};
+
+const EMPTY: FormValues = { firstName: "", lastName: "", email: "", phone: "" };
+
+type Props = {
+  partnerSlug: string;
+  /** Hex from the partner record — tints the submit button so the form feels co-branded. */
+  accentColor: string;
+};
+
+export default function PartnerLeadForm({ partnerSlug, accentColor }: Props) {
+  const locale = useLocale();
+  const isES = locale.startsWith("es");
+  const t = useTranslations("partnerReferral.form");
+
+  const [values, setValues] = useState<FormValues>(EMPTY);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [smsConsent, setSmsConsent] = useState(false);
+  const [marketingConsent, setMarketingConsent] = useState(false);
+  const [isPending, setIsPending] = useState(false);
+  const [submitError, setSubmitError] = useState("");
+  const [done, setDone] = useState(false);
+
+  const messageForIssue = (key: string): string => {
+    switch (key) {
+      case "invalidEmail":
+        return t("invalidEmail");
+      case "invalidPhone":
+        return t("invalidPhone");
+      case "firstNameMinLength":
+        return t("firstNameMinLength");
+      case "lastNameMinLength":
+        return t("lastNameMinLength");
+      case "firstNameMaxLength":
+        return t("firstNameMaxLength");
+      case "lastNameMaxLength":
+        return t("lastNameMaxLength");
+      default:
+        return t("required");
+    }
+  };
+
+  const setField = (field: keyof FormValues, value: string) => {
+    setValues((prev) => ({ ...prev, [field]: value }));
+    if (errors[field]) {
+      setErrors((prev) => {
+        const next = { ...prev };
+        delete next[field];
+        return next;
+      });
+    }
+  };
+
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setSubmitError("");
+
+    const parsed = shortTermMedicalFormSchema.safeParse(values);
+    if (!parsed.success) {
+      const nextErrors: Record<string, string> = {};
+      for (const issue of parsed.error.issues) {
+        const field = String(issue.path[0]);
+        if (nextErrors[field]) continue;
+        nextErrors[field] = messageForIssue(issue.message);
+      }
+      setErrors(nextErrors);
+      return;
+    }
+
+    setIsPending(true);
+    try {
+      // Pixel + CAPI share one eventId so Meta deduplicates the browser and server events.
+      const eventId = generateEventId();
+      const { fbp, fbc } = getFacebookCookies();
+
+      const response = await fetch("/api/partners/lead", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          slug: partnerSlug,
+          ...parsed.data,
+          locale: isES ? "es" : "en",
+          smsConsent,
+          marketingConsent,
+          meta: {
+            eventId,
+            eventSourceUrl: typeof window !== "undefined" ? window.location.href : undefined,
+            fbp,
+            fbc,
+          },
+        }),
+      });
+
+      const data = (await response.json().catch(() => ({}))) as { success?: boolean };
+      if (!response.ok || !data.success) {
+        setSubmitError(t("error"));
+        return;
+      }
+
+      void updateAdvancedMatching({
+        em: parsed.data.email.trim().toLowerCase(),
+        fn: parsed.data.firstName.trim().toLowerCase(),
+        ln: parsed.data.lastName.trim().toLowerCase(),
+        ph: parsed.data.phone.replace(/\D/g, "").replace(/^1/, ""),
+      });
+
+      trackLead(
+        {
+          contentName: `Referral partner — ${partnerSlug}`,
+          value: PARTNER_LEAD_VALUE,
+          currency: "USD",
+          source: `partner_referral_${partnerSlug.replace(/-/g, "_")}`,
+        },
+        eventId
+      );
+
+      setDone(true);
+    } catch {
+      setSubmitError(t("error"));
+    } finally {
+      setIsPending(false);
+    }
+  }
+
+  const inputBase =
+    "w-full rounded-xl border-2 border-slate-200 bg-white px-4 py-3 text-slate-900 placeholder:text-slate-400 transition-colors focus:outline-none focus:ring-2 dark:border-slate-700 dark:bg-slate-800/60 dark:text-white dark:placeholder:text-slate-500";
+  const inputErrorClass = "border-red-500 dark:border-red-500";
+
+  if (done) {
+    return (
+      <div className="rounded-2xl border-2 border-emerald-200 bg-emerald-50/70 p-6 text-center dark:border-emerald-800 dark:bg-emerald-950/30 sm:p-8">
+        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/15">
+          <CheckCircle2 className="h-8 w-8 text-emerald-600 dark:text-emerald-400" />
+        </div>
+        <p className="text-lg font-semibold text-emerald-900 dark:text-emerald-100">
+          {t("successTitle")}
+        </p>
+        <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-emerald-800 dark:text-emerald-200">
+          {t("successMessage")}
+        </p>
+        <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
+          <a
+            href={CRM_PHONE_TEL}
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 py-3 font-semibold text-white shadow-sm transition-colors hover:bg-emerald-700"
+          >
+            <Phone className="h-4 w-4" />
+            {t("successCall")} · {CRM_PHONE_DISPLAY}
+          </a>
+          <a
+            href={WHATSAPP_CHAT_HREF}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center justify-center gap-2 rounded-xl border-2 border-emerald-300 px-5 py-3 font-semibold text-emerald-800 transition-colors hover:bg-emerald-100 dark:border-emerald-700 dark:text-emerald-200 dark:hover:bg-emerald-900/40"
+          >
+            <MessageCircle className="h-4 w-4" />
+            {t("successWhatsapp")}
+          </a>
+        </div>
+        <button
+          type="button"
+          onClick={() => {
+            setValues(EMPTY);
+            setSmsConsent(false);
+            setMarketingConsent(false);
+            setDone(false);
+          }}
+          className="mt-5 text-sm font-medium text-emerald-700 underline-offset-4 hover:underline dark:text-emerald-300"
+        >
+          {t("successAnother")}
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <form onSubmit={handleSubmit} noValidate className="space-y-4">
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div>
+          <label htmlFor="partner-first-name" className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-200">
+            {t("firstName")} <span className="text-red-500">*</span>
+          </label>
+          <input
+            id="partner-first-name"
+            name="firstName"
+            type="text"
+            autoComplete="given-name"
+            value={values.firstName}
+            onChange={(e) => setField("firstName", e.target.value)}
+            placeholder={t("firstNamePlaceholder")}
+            disabled={isPending}
+            aria-invalid={Boolean(errors.firstName)}
+            className={`${inputBase} ${errors.firstName ? inputErrorClass : ""}`}
+            style={{ ["--tw-ring-color" as string]: `${accentColor}40` }}
+          />
+          {errors.firstName && (
+            <p className="mt-1.5 text-sm text-red-600 dark:text-red-400">{errors.firstName}</p>
+          )}
+        </div>
+
+        <div>
+          <label htmlFor="partner-last-name" className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-200">
+            {t("lastName")} <span className="text-red-500">*</span>
+          </label>
+          <input
+            id="partner-last-name"
+            name="lastName"
+            type="text"
+            autoComplete="family-name"
+            value={values.lastName}
+            onChange={(e) => setField("lastName", e.target.value)}
+            placeholder={t("lastNamePlaceholder")}
+            disabled={isPending}
+            aria-invalid={Boolean(errors.lastName)}
+            className={`${inputBase} ${errors.lastName ? inputErrorClass : ""}`}
+            style={{ ["--tw-ring-color" as string]: `${accentColor}40` }}
+          />
+          {errors.lastName && (
+            <p className="mt-1.5 text-sm text-red-600 dark:text-red-400">{errors.lastName}</p>
+          )}
+        </div>
+      </div>
+
+      <div>
+        <label htmlFor="partner-phone" className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-200">
+          {t("phone")} <span className="text-red-500">*</span>
+        </label>
+        <PhoneInput
+          id="partner-phone"
+          international={false}
+          defaultCountry="US"
+          countries={["US"]}
+          limitMaxLength
+          value={values.phone}
+          onChange={(value) => setField("phone", value ?? "")}
+          placeholder={t("phonePlaceholder")}
+          disabled={isPending}
+          className={`${inputBase} ${errors.phone ? inputErrorClass : ""}`}
+          style={{ ["--tw-ring-color" as string]: `${accentColor}40` }}
+        />
+        {errors.phone && (
+          <p className="mt-1.5 text-sm text-red-600 dark:text-red-400">{errors.phone}</p>
+        )}
+      </div>
+
+      <div>
+        <label htmlFor="partner-email" className="mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-200">
+          {t("email")} <span className="text-red-500">*</span>
+        </label>
+        <input
+          id="partner-email"
+          name="email"
+          type="email"
+          autoComplete="email"
+          value={values.email}
+          onChange={(e) => setField("email", e.target.value)}
+          placeholder={t("emailPlaceholder")}
+          disabled={isPending}
+          aria-invalid={Boolean(errors.email)}
+          className={`${inputBase} ${errors.email ? inputErrorClass : ""}`}
+          style={{ ["--tw-ring-color" as string]: `${accentColor}40` }}
+        />
+        {errors.email && (
+          <p className="mt-1.5 text-sm text-red-600 dark:text-red-400">{errors.email}</p>
+        )}
+      </div>
+
+      <div className="space-y-2.5 pt-1">
+        <label className="flex cursor-pointer items-start gap-2.5 text-xs leading-relaxed text-slate-600 dark:text-slate-300">
+          <input
+            type="checkbox"
+            checked={smsConsent}
+            onChange={(e) => setSmsConsent(e.target.checked)}
+            disabled={isPending}
+            className="mt-0.5 h-4 w-4 flex-shrink-0 rounded border-slate-300 dark:border-slate-600"
+          />
+          <span>{t("smsConsent")}</span>
+        </label>
+        <label className="flex cursor-pointer items-start gap-2.5 text-xs leading-relaxed text-slate-600 dark:text-slate-300">
+          <input
+            type="checkbox"
+            checked={marketingConsent}
+            onChange={(e) => setMarketingConsent(e.target.checked)}
+            disabled={isPending}
+            className="mt-0.5 h-4 w-4 flex-shrink-0 rounded border-slate-300 dark:border-slate-600"
+          />
+          <span>{t("marketingConsent")}</span>
+        </label>
+      </div>
+
+      {submitError && (
+        <p className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700 dark:bg-red-950/40 dark:text-red-300">
+          {submitError}
+        </p>
+      )}
+
+      <button
+        type="submit"
+        disabled={isPending}
+        className="flex w-full items-center justify-center gap-2 rounded-xl px-6 py-4 text-base font-bold text-white shadow-lg transition-all hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
+        style={{ backgroundColor: accentColor }}
+      >
+        {isPending ? (
+          <>
+            <Loader2 className="h-5 w-5 animate-spin" />
+            {t("submitting")}
+          </>
+        ) : (
+          t("submit")
+        )}
+      </button>
+
+      <p className="text-center text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+        {t("privacyNote")}
+      </p>
+    </form>
+  );
+}

@@ -176,6 +176,13 @@
       "when": 1786465955771,
       "tag": "0024_crazy_jimmy_woo",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "5",
+      "when": 1786468378337,
+      "tag": "0025_vengeful_lester",
+      "breakpoints": true
     }
   ]
 }
