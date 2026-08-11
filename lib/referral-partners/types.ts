@@ -7,6 +7,11 @@
  */
 
 export type ReferralPartnerStatus = "active" | "paused";
+/**
+ * Which extra landing-page sections a partner gets. `immigration` turns on the "when this
+ * matters" and "what being uninsured costs" blocks, written for someone with a pending case.
+ */
+export type ReferralAudienceKind = "general" | "immigration";
 export type ReferralLeadStatus = "new" | "contacted" | "closed" | "lost";
 export type ReferralClientStatus = "active" | "pending" | "cancelled";
 
@@ -45,6 +50,7 @@ export type ReferralPartnerRecord = {
   introEs: string;
   audienceEn: string;
   audienceEs: string;
+  audienceKind: ReferralAudienceKind;
   status: ReferralPartnerStatus;
   notes: string;
   createdAt: string | null;

@@ -183,6 +183,13 @@
       "when": 1786468378337,
       "tag": "0025_vengeful_lester",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "5",
+      "when": 1786473050021,
+      "tag": "0026_smart_silver_centurion",
+      "breakpoints": true
     }
   ]
 }

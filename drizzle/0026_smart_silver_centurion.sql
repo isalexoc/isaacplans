@@ -1,0 +1,1 @@
+ALTER TABLE "referral_partners" ADD COLUMN "audience_kind" text DEFAULT 'general' NOT NULL;

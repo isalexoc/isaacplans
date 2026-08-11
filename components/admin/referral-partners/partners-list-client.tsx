@@ -33,6 +33,7 @@ export default function PartnersListClient({ initialRows }: { initialRows: Row[]
     accentColor: "#0077B6",
     commissionPercent: "5",
     defaultLocale: "es" as "en" | "es",
+    audienceKind: "general" as "general" | "immigration",
   });
 
   // Slug mirrors the company name until the admin edits it by hand, then it stops following.
@@ -240,6 +241,28 @@ export default function PartnersListClient({ initialRows }: { initialRows: Row[]
                 <option value="es">Spanish</option>
                 <option value="en">English</option>
               </select>
+            </div>
+
+            <div>
+              <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">
+                Audience
+              </label>
+              <select
+                value={form.audienceKind}
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    audienceKind: e.target.value === "immigration" ? "immigration" : "general",
+                  })
+                }
+                className={inputClass}
+              >
+                <option value="general">General</option>
+                <option value="immigration">Immigration clients</option>
+              </select>
+              <p className="mt-1 text-xs text-slate-500">
+                Adds the &quot;when coverage matters during a case&quot; sections to their page.
+              </p>
             </div>
 
             <div>

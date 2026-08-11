@@ -12,6 +12,7 @@ import {
   Phone,
   ShieldCheck,
   Stethoscope,
+  TriangleAlert,
   Wallet,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -109,6 +110,16 @@ export default async function PartnerLandingPage({ params }: PageProps) {
   const benefits = t.raw("benefits.items") as { title: string; body: string }[];
   const steps = t.raw("steps.items") as { title: string; body: string }[];
   const faqs = t.raw("faq.items") as { q: string; a: string }[];
+
+  // The immigration blocks are opt-in per partner: this copy is written for someone with a
+  // pending case, and would read as nonsense on, say, a realtor's referral page.
+  const isImmigration = partner.audienceKind === "immigration";
+  const situations = isImmigration
+    ? (t.raw("situations.items") as { title: string; body: string }[])
+    : [];
+  const stakes = isImmigration
+    ? (t.raw("stakes.items") as { title: string; body: string }[])
+    : [];
 
   return (
     <main className="bg-white dark:bg-slate-950">
@@ -224,6 +235,101 @@ export default async function PartnerLandingPage({ params }: PageProps) {
           </p>
         </div>
       </section>
+
+      {/* ── When this matters (immigration partners only) ── */}
+      {isImmigration && (
+        <section className="mx-auto max-w-6xl px-4 py-14 sm:py-20">
+          <div className="mx-auto max-w-2xl text-center">
+            <span className="text-xs font-bold uppercase tracking-widest" style={{ color: accent }}>
+              {t("situations.label")}
+            </span>
+            <h2 className="mt-3 text-2xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-3xl">
+              {t("situations.title")}
+            </h2>
+          </div>
+
+          <div className="mt-10 grid gap-5 sm:grid-cols-2">
+            {situations.map((item, index) => (
+              <div
+                key={item.title}
+                className="rounded-2xl border-l-4 border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900"
+                style={{ borderLeftColor: accent }}
+              >
+                <div className="flex items-start gap-3">
+                  <span
+                    className="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full text-xs font-extrabold text-white"
+                    style={{ backgroundColor: accent }}
+                  >
+                    {index + 1}
+                  </span>
+                  <div>
+                    <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                      {item.title}
+                    </h3>
+                    <p className="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+                      {item.body}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* The honest caveat sits with the claims it qualifies, not buried in a footer. */}
+          <p className="mx-auto mt-8 max-w-3xl rounded-xl bg-slate-50 px-5 py-4 text-center text-xs leading-relaxed text-slate-500 dark:bg-slate-900/60 dark:text-slate-400">
+            {t("situations.footnote", { partner: partner.companyName })}
+          </p>
+        </section>
+      )}
+
+      {/* ── What being uninsured costs (immigration partners only) ── */}
+      {isImmigration && (
+        <section className="border-y border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-900/40">
+          <div className="mx-auto max-w-6xl px-4 py-14 sm:py-20">
+            <div className="mx-auto max-w-2xl text-center">
+              <span
+                className="text-xs font-bold uppercase tracking-widest"
+                style={{ color: accent }}
+              >
+                {t("stakes.label")}
+              </span>
+              <h2 className="mt-3 text-2xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-3xl">
+                {t("stakes.title")}
+              </h2>
+            </div>
+
+            <div className="mt-10 grid gap-5 md:grid-cols-3">
+              {stakes.map((item) => (
+                <div
+                  key={item.title}
+                  className="rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900"
+                >
+                  <div className="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-xl bg-amber-100 dark:bg-amber-900/30">
+                    <TriangleAlert className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                  </div>
+                  <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                    {item.title}
+                  </h3>
+                  <p className="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+                    {item.body}
+                  </p>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-10 text-center">
+              <a
+                href="#request"
+                className="inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3.5 text-base font-bold text-white shadow-lg transition-all hover:brightness-110"
+                style={{ backgroundColor: accent }}
+              >
+                {t("heroCta")}
+                <ArrowRight className="h-4 w-4" />
+              </a>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ── Benefits ── */}
       <section className="mx-auto max-w-6xl px-4 py-14 sm:py-20">

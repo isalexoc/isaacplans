@@ -638,6 +638,13 @@ export const referralPartners = pgTable("referral_partners", {
   /** Why THIS partner's clients specifically need coverage (immigration, work visa, school…). */
   audienceEn: text("audience_en"),
   audienceEs: text("audience_es"),
+  /**
+   * Which extra sections the landing page shows. `immigration` adds the "when this matters"
+   * situations block and the cost-of-being-uninsured block, both written for someone with a
+   * pending case. Kept as a column rather than inferred, because the next partner might be a
+   * realtor or a tax preparer and that copy would be wrong for their clients.
+   */
+  audienceKind: text("audience_kind").notNull().default("general"), // general | immigration
   status: text("status").notNull().default("active"), // active | paused — paused 404s the page
   notes: text("notes"), // internal only, never shown to the partner
   createdAt: timestamp("created_at").defaultNow().notNull(),

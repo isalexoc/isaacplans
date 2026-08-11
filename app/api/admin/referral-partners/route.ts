@@ -95,6 +95,7 @@ export async function POST(request: NextRequest) {
       introEs: String(body.introEs ?? "").trim(),
       audienceEn: String(body.audienceEn ?? "").trim(),
       audienceEs: String(body.audienceEs ?? "").trim(),
+      audienceKind: body.audienceKind === "immigration" ? "immigration" : "general",
       status: body.status === "paused" ? "paused" : "active",
       notes: String(body.notes ?? "").trim(),
     });

@@ -20,7 +20,7 @@ export const PARTNER_DEFAULT_HEADLINE: Bilingual = {
 };
 
 export const PARTNER_DEFAULT_INTRO: Bilingual = {
-  en: "A licensed agent walks you through your options in your language, finds a plan that fits your budget, and sends you proof of coverage you can use right away. Asking costs nothing.",
+  en: "A licensed agent walks you through your options in plain language, finds a plan that fits your budget, and sends you proof of coverage you can use right away. Asking costs nothing.",
   es: "Un agente con licencia le explica sus opciones en su idioma, busca un plan que se ajuste a su presupuesto y le envía la constancia de cobertura que necesita. Preguntar no cuesta nada.",
 };
 

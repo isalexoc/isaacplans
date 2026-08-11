@@ -9,10 +9,51 @@
     "trustLine": "Recommended by {partner}",
     "heroCta": "Request my coverage",
     "heroSecondaryCta": "See how it works",
-    "heroNote": "Free consultation · No obligation · Se habla español",
+    "heroNote": "Free consultation · No obligation · No pressure",
     "audience": {
-      "label": "Why this matters",
-      "title": "Coverage that meets the requirement — and that you can actually use"
+      "label": "Why we bring this up",
+      "title": "Your case moves at its own pace. Your health can't wait for it."
+    },
+    "situations": {
+      "label": "When this deserves a serious look",
+      "title": "Situations where health coverage really matters",
+      "items": [
+        {
+          "title": "You don't qualify for Medicaid or the marketplace",
+          "body": "Because of immigration status, many families do not qualify for Medicaid or for marketplace subsidies. When that door is closed, a private plan is often the only realistic route."
+        },
+        {
+          "title": "You are building your financial stability",
+          "body": "In an adjustment of status (Form I-485) or an immigrant visa case at a consulate, the government weighs age, health, family size, income, and resources, unless your category is exempt. Being able to pay for your own medical care is part of that same stability you are already building. A large medical debt pulls in the opposite direction."
+        },
+        {
+          "title": "Your category is exempt — the hospital bill isn't",
+          "body": "Refugees, asylees, and several humanitarian categories are exempt from the public charge assessment. The bill for one night in the hospital still arrives, and it still comes out of the same pocket."
+        },
+        {
+          "title": "Your family depends on your income",
+          "body": "If your household runs on what you bring home each week, an uninsured accident brings more than a hospital bill; it brings the weeks you cannot work. The whole family can go on one plan."
+        }
+      ],
+      "footnote": "In fairness: none of this is a legal requirement, and this analysis does not apply to everyone. Refugees, asylees, and several humanitarian categories, including VAWA, T visa, and U visa, are exempt from the public charge assessment. We are licensed insurance agents, not attorneys. We do not give legal advice and we do not weigh in on your case. For anything about your immigration matter, keep talking to {partner}; that is what they are there for. Our job is making sure you and your family are not left without health coverage."
+    },
+    "stakes": {
+      "label": "What's at stake",
+      "title": "What being uninsured actually costs",
+      "items": [
+        {
+          "title": "One night in the ER costs thousands",
+          "body": "In the US, a single emergency room visit costs thousands of dollars. A hospital stay or a surgery runs into the tens of thousands. No family's savings absorb that."
+        },
+        {
+          "title": "Medical debt sinks entire families",
+          "body": "Medical debt is one of the most common causes of financial ruin in this country. And it hits exactly where you have worked hardest: your savings, your credit, your peace of mind at home."
+        },
+        {
+          "title": "Waiting always costs more",
+          "body": "Premiums rise with age, so the same plan costs a little more every year you wait. And after the accident you can no longer buy it. The accident does not wait for your case to be resolved."
+        }
+      ]
     },
     "benefits": {
       "label": "What you get",
@@ -35,8 +76,8 @@
           "body": "Benefits you will actually use — office visits, urgent care, labs, and help with prescription costs."
         },
         {
-          "title": "Everything in Spanish",
-          "body": "From the first call to the day you use your card, you are never left guessing what something means."
+          "title": "Explained in plain English",
+          "body": "No jargon, and no fine print you need a lawyer to read. From the first call to the day you use your card, you know exactly what you have."
         },
         {
           "title": "A licensed agent, not a call center",
@@ -64,10 +105,10 @@
     },
     "agent": {
       "label": "Who you will talk to",
-      "name": "Isaac Aleman",
+      "name": "Isaac Orraiz",
       "title": "Licensed insurance agent",
       "body": "I have spent years helping Hispanic families find coverage they can afford and understand. When you call, you talk to me — not a script. If nothing fits your budget, I will tell you that honestly.",
-      "photoAlt": "Isaac Aleman, licensed insurance agent"
+      "photoAlt": "Isaac Orraiz, licensed insurance agent"
     },
     "form": {
       "title": "Request your free consultation",
@@ -130,8 +171,8 @@
       ]
     },
     "closing": {
-      "title": "Ready to see what you qualify for?",
-      "body": "One short call, in your language, with no pressure and no cost.",
+      "title": "Protect what you have already built",
+      "body": "A short call, free and with no obligation. We tell you exactly what it would cost to cover your family, and you decide with the number in front of you. If nothing fits your budget, we will tell you that too.",
       "cta": "Request my coverage",
       "call": "Or call {phone}"
     },

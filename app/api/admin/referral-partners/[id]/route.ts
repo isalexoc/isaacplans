@@ -119,6 +119,9 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     if (body.defaultLocale !== undefined) {
       updates.defaultLocale = body.defaultLocale === "en" ? "en" : "es";
     }
+    if (body.audienceKind !== undefined) {
+      updates.audienceKind = body.audienceKind === "immigration" ? "immigration" : "general";
+    }
     if (body.status !== undefined) {
       updates.status = body.status === "paused" ? "paused" : "active";
     }

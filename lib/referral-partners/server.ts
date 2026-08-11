@@ -10,6 +10,7 @@ import {
 import {
   DEFAULT_COMMISSION_BPS,
   summarize,
+  type ReferralAudienceKind,
   type ReferralClientRecord,
   type ReferralClientStatus,
   type ReferralLeadRecord,
@@ -47,6 +48,9 @@ export function rowToPartner(row: PartnerRow): ReferralPartnerRecord {
     introEs: row.introEs ?? "",
     audienceEn: row.audienceEn ?? "",
     audienceEs: row.audienceEs ?? "",
+    audienceKind: (row.audienceKind === "immigration"
+      ? "immigration"
+      : "general") as ReferralAudienceKind,
     status: (row.status === "paused" ? "paused" : "active") as ReferralPartnerStatus,
     notes: row.notes ?? "",
     createdAt: row.createdAt ? row.createdAt.toISOString() : null,
@@ -144,6 +148,7 @@ export type PartnerInput = {
   introEs?: string;
   audienceEn?: string;
   audienceEs?: string;
+  audienceKind?: ReferralAudienceKind;
   status?: ReferralPartnerStatus;
   notes?: string;
 };
@@ -170,6 +175,7 @@ export async function createPartner(input: PartnerInput): Promise<ReferralPartne
       introEs: input.introEs || null,
       audienceEn: input.audienceEn || null,
       audienceEs: input.audienceEs || null,
+      audienceKind: input.audienceKind ?? "general",
       status: input.status ?? "active",
       notes: input.notes || null,
     })
@@ -199,6 +205,7 @@ export async function updatePartner(
   if (updates.introEs !== undefined) values.introEs = updates.introEs || null;
   if (updates.audienceEn !== undefined) values.audienceEn = updates.audienceEn || null;
   if (updates.audienceEs !== undefined) values.audienceEs = updates.audienceEs || null;
+  if (updates.audienceKind !== undefined) values.audienceKind = updates.audienceKind;
   if (updates.status !== undefined) values.status = updates.status;
   if (updates.notes !== undefined) values.notes = updates.notes || null;
 

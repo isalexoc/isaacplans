@@ -11,8 +11,49 @@
     "heroSecondaryCta": "Ver cómo funciona",
     "heroNote": "Consulta gratis · Sin compromiso · Atención en español",
     "audience": {
-      "label": "Por qué es importante",
-      "title": "Una cobertura que cumple el requisito — y que de verdad puede usar"
+      "label": "Por qué le hablamos de esto",
+      "title": "Su caso avanza a su ritmo. Su salud no puede esperar a que termine."
+    },
+    "situations": {
+      "label": "Cuándo conviene pensarlo en serio",
+      "title": "Situaciones en las que una cobertura médica pesa de verdad",
+      "items": [
+        {
+          "title": "No califica para Medicaid ni para el mercado",
+          "body": "Por su estatus migratorio, muchas familias no califican para Medicaid ni para los subsidios del mercado de salud. Cuando esa puerta está cerrada, un plan privado suele ser el único camino real."
+        },
+        {
+          "title": "Está construyendo su estabilidad económica",
+          "body": "En un ajuste de estatus (formulario I-485) o en una visa de inmigrante en el consulado, el gobierno considera la edad, la salud, el tamaño de la familia, los ingresos y los recursos de la persona, salvo que su categoría esté exenta. Poder cubrir su propia atención médica es parte de esa misma estabilidad que usted ya está construyendo. Una deuda médica grande va en la dirección contraria."
+        },
+        {
+          "title": "Su categoría está exenta — la cuenta del hospital no lo está",
+          "body": "Los refugiados, los asilados y varias categorías humanitarias están exentos de la evaluación de carga pública. Aun así, la factura de una noche de hospital llega igual, y sale del mismo bolsillo."
+        },
+        {
+          "title": "Su familia depende de lo que usted trae",
+          "body": "Si su casa depende de lo que usted trae cada semana, un accidente sin cobertura no solo trae la cuenta del hospital: trae las semanas sin poder trabajar. Se puede cubrir a toda la familia en un mismo plan."
+        }
+      ],
+      "footnote": "Con toda honestidad: nada de esto es un requisito legal, y este análisis no le aplica a todo el mundo. Los refugiados, los asilados y varias categorías humanitarias, como VAWA, visa T y visa U, están exentos de la evaluación de carga pública. Nosotros somos agentes de seguros con licencia, no abogados: no damos asesoría legal ni opinamos sobre su caso. Para cualquier duda migratoria, siga hablando con {partner}, que para eso están. Lo nuestro es que usted y su familia no se queden sin cobertura médica."
+    },
+    "stakes": {
+      "label": "Lo que está en juego",
+      "title": "Lo que de verdad cuesta no tener cobertura",
+      "items": [
+        {
+          "title": "Una noche en emergencias cuesta miles",
+          "body": "En Estados Unidos, una sola visita a la sala de emergencias cuesta miles de dólares. Una hospitalización o una cirugía llega a decenas de miles. No hay ahorro familiar que aguante eso."
+        },
+        {
+          "title": "La deuda médica hunde a familias enteras",
+          "body": "La deuda médica es una de las causas más comunes de ruina económica en este país. Y pega justo donde usted más ha trabajado: los ahorros, el crédito, la tranquilidad de la casa."
+        },
+        {
+          "title": "Esperar siempre sale más caro",
+          "body": "Las primas suben con la edad, así que el mismo plan cuesta un poco más cada año que pasa. Y después del accidente ya no se puede comprar. El accidente no espera a que salga su respuesta."
+        }
+      ]
     },
     "benefits": {
       "label": "Lo que recibe",
@@ -64,10 +105,10 @@
     },
     "agent": {
       "label": "Con quién va a hablar",
-      "name": "Isaac Aleman",
+      "name": "Isaac Orraiz",
       "title": "Agente de seguros con licencia",
       "body": "Llevo años ayudando a familias hispanas a encontrar una cobertura que puedan pagar y entender. Cuando llame, habla conmigo — no con un guion. Si nada se ajusta a su presupuesto, se lo digo con honestidad.",
-      "photoAlt": "Isaac Aleman, agente de seguros con licencia"
+      "photoAlt": "Isaac Orraiz, agente de seguros con licencia"
     },
     "form": {
       "title": "Solicite su consulta gratis",
@@ -130,8 +171,8 @@
       ]
     },
     "closing": {
-      "title": "¿Listo para ver a qué califica?",
-      "body": "Una llamada corta, en su idioma, sin presión y sin costo.",
+      "title": "Proteja lo que ya construyó",
+      "body": "Una llamada corta, en español, sin costo y sin compromiso. Le decimos exactamente cuánto costaría cubrir a su familia y usted decide con el número en la mano. Si nada se ajusta a su presupuesto, también se lo decimos.",
       "cta": "Solicitar mi cobertura",
       "call": "O llame al {phone}"
     },

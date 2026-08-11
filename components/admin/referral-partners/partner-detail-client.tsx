@@ -78,6 +78,7 @@ export default function PartnerDetailClient({ partner, leads, clients, siteUrl }
     accentColor: partner.accentColor,
     commissionPercent: String(partner.commissionBps / 100),
     defaultLocale: partner.defaultLocale,
+    audienceKind: partner.audienceKind,
     status: partner.status,
     headlineEs: partner.headlineEs,
     headlineEn: partner.headlineEn,
@@ -738,6 +739,29 @@ export default function PartnerDetailClient({ partner, leads, clients, siteUrl }
                   <option value="active">Active</option>
                   <option value="paused">Paused (page returns 404)</option>
                 </select>
+              </div>
+
+              <div>
+                <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">
+                  Audience
+                </label>
+                <select
+                  value={settings.audienceKind}
+                  onChange={(e) =>
+                    setSettings({
+                      ...settings,
+                      audienceKind: e.target.value === "immigration" ? "immigration" : "general",
+                    })
+                  }
+                  className={inputClass}
+                >
+                  <option value="general">General</option>
+                  <option value="immigration">Immigration clients</option>
+                </select>
+                <p className="mt-1 text-xs text-slate-500">
+                  &quot;Immigration clients&quot; adds two sections to their page: when coverage
+                  matters during a case, and what going uninsured actually costs.
+                </p>
               </div>
 
               <div>
