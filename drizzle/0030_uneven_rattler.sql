@@ -1,0 +1,1 @@
+ALTER TABLE "referral_partners" DROP COLUMN IF EXISTS "og_image_url";

@@ -40,7 +40,33 @@ export function partnerSectionImage(url: string): string {
  * Note: non-Cloudinary sources must be allowlisted under Cloudinary → Settings → Security →
  * Allowed fetch domains, same caveat as the blog's OG images.
  */
-export function partnerOgImage(ogImageUrl: string, heroImageUrl: string): string {
-  const chosen = ogImageUrl.trim() || heroImageUrl.trim() || PARTNER_HERO_IMAGE_PLACEHOLDER;
-  return cloudinaryOgImageUrl(chosen);
+export function partnerOgImage(
+  locale: "en" | "es",
+  partner: { ogImageUrlEn: string; ogImageUrlEs: string; heroImageUrl: string }
+): string {
+  return cloudinaryOgImageUrl(resolvePartnerOgSource(locale, partner));
+}
+
+/**
+ * The un-normalized source URL behind {@link partnerOgImage}, in priority order:
+ * this language → the other language → the hero image → the placeholder.
+ *
+ * Falling through to the other language matters because the two are usually the same design with
+ * translated text: a partner who has only made the Spanish card yet should still get a real image
+ * on the English page rather than an unrelated hero crop.
+ *
+ * Exported so the admin preview can show exactly what will be used without duplicating the chain.
+ */
+export function resolvePartnerOgSource(
+  locale: "en" | "es",
+  partner: { ogImageUrlEn: string; ogImageUrlEs: string; heroImageUrl: string }
+): string {
+  const preferred = locale === "es" ? partner.ogImageUrlEs : partner.ogImageUrlEn;
+  const other = locale === "es" ? partner.ogImageUrlEn : partner.ogImageUrlEs;
+  return (
+    preferred.trim() ||
+    other.trim() ||
+    partner.heroImageUrl.trim() ||
+    PARTNER_HERO_IMAGE_PLACEHOLDER
+  );
 }

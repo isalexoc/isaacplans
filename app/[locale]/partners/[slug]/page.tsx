@@ -54,7 +54,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const description = t("description");
   // This page's whole distribution is the partner pasting the link into WhatsApp and Facebook,
   // so the share card matters more here than on a page people reach through search.
-  const ogImage = partnerOgImage(partner.ogImageUrl, partner.heroImageUrl);
+  const ogImage = partnerOgImage(safeLocale === "es" ? "es" : "en", partner);
   const alt = t("imageAlt");
 
   return {
