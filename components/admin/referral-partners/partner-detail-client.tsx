@@ -50,6 +50,31 @@ type ClientDraft = {
   notes: string;
 };
 
+/** Manual referral entry — for the ones a partner texts over instead of sending to their page. */
+type LeadDraft = {
+  firstName: string;
+  lastName: string;
+  phone: string;
+  email: string;
+  locale: "en" | "es";
+  status: ReferralLeadStatus;
+  notes: string;
+  smsConsent: boolean;
+  marketingConsent: boolean;
+};
+
+const EMPTY_LEAD: LeadDraft = {
+  firstName: "",
+  lastName: "",
+  phone: "",
+  email: "",
+  locale: "es",
+  status: "new",
+  notes: "",
+  smsConsent: false,
+  marketingConsent: false,
+};
+
 const EMPTY_CLIENT: ClientDraft = {
   firstName: "",
   lastName: "",
@@ -95,6 +120,14 @@ export default function PartnerDetailClient({ partner, leads, clients, siteUrl }
   const [clientDraft, setClientDraft] = useState<ClientDraft>(EMPTY_CLIENT);
   const [showClientForm, setShowClientForm] = useState(false);
   const [editingClientId, setEditingClientId] = useState<string | null>(null);
+
+  const [leadDraft, setLeadDraft] = useState<LeadDraft>({
+    ...EMPTY_LEAD,
+    locale: partner.defaultLocale,
+  });
+  const [showLeadForm, setShowLeadForm] = useState(false);
+  /** Set when the referral saved but the CRM push failed — worth surfacing, not worth blocking. */
+  const [leadWarning, setLeadWarning] = useState("");
 
   const summary = useMemo(() => summarize(leads, clients), [leads, clients]);
   const rateLabel = bpsToPercentLabel(partner.commissionBps);
@@ -172,6 +205,41 @@ export default function PartnerDetailClient({ partner, leads, clients, siteUrl }
       setClientDraft(EMPTY_CLIENT);
       setShowClientForm(false);
       setEditingClientId(null);
+    }
+  }
+
+  async function submitLead(event: React.FormEvent) {
+    event.preventDefault();
+    setLeadWarning("");
+    setBusy("lead-create");
+    setError("");
+    try {
+      const response = await fetch(`/api/admin/referral-partners/${partner.id}/leads`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(leadDraft),
+      });
+      const data = (await response.json().catch(() => ({}))) as {
+        success?: boolean;
+        error?: string;
+        crmWarning?: string | null;
+      };
+      if (!response.ok || !data.success) {
+        setError(data.error || "Could not add the referral.");
+        return;
+      }
+      router.refresh();
+      if (data.crmWarning) {
+        // Keep the form open so the warning is actually read — the row is saved regardless.
+        setLeadWarning(data.crmWarning);
+        return;
+      }
+      setLeadDraft({ ...EMPTY_LEAD, locale: partner.defaultLocale });
+      setShowLeadForm(false);
+    } catch {
+      setError("Network error. Please try again.");
+    } finally {
+      setBusy(null);
     }
   }
 
@@ -539,18 +607,192 @@ export default function PartnerDetailClient({ partner, leads, clients, siteUrl }
 
       {/* Referrals */}
       <section className="rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
-        <div className="border-b border-slate-200 p-5 dark:border-slate-800">
-          <h2 className="font-semibold text-slate-900 dark:text-white">
-            Referrals ({openLeads.length} open of {leads.length})
-          </h2>
-          <p className="text-sm text-slate-500 dark:text-slate-400">
-            Everyone who submitted the form on their page. Also in your CRM, tagged{" "}
-            <code className="rounded bg-slate-100 px-1 text-xs dark:bg-slate-800">
-              referral_{partner.slug.replace(/-/g, "_")}
-            </code>
-            .
-          </p>
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 p-5 dark:border-slate-800">
+          <div>
+            <h2 className="font-semibold text-slate-900 dark:text-white">
+              Referrals ({openLeads.length} open of {leads.length})
+            </h2>
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+              From their landing page, or added by hand. Either way it lands in your CRM tagged{" "}
+              <code className="rounded bg-slate-100 px-1 text-xs dark:bg-slate-800">
+                referral_{partner.slug.replace(/-/g, "_")}
+              </code>
+              .
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              setLeadDraft(EMPTY_LEAD);
+              setShowLeadForm((prev) => !prev);
+            }}
+            className="inline-flex items-center gap-2 rounded-lg border-2 border-primary/40 px-4 py-2 text-sm font-semibold text-primary hover:bg-primary/5"
+          >
+            <Plus className="h-4 w-4" />
+            Add referral
+          </button>
         </div>
+
+        {showLeadForm && (
+          <form onSubmit={submitLead} className="border-b border-slate-200 p-5 dark:border-slate-800">
+            <div className="mb-3 flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
+                New referral from {partner.companyName}
+              </h3>
+              <button
+                type="button"
+                onClick={() => setShowLeadForm(false)}
+                className="text-slate-400 hover:text-slate-600"
+                aria-label="Close"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <p className="mb-4 text-xs text-slate-500 dark:text-slate-400">
+              For referrals a partner texts or calls in. This runs the same intake as their landing
+              page: the contact is created in Agent CRM with the same referral tags, and it shows on
+              their dashboard exactly like a form submission. Email is optional — phone is what we
+              need.
+            </p>
+
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <div>
+                <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">
+                  First name *
+                </label>
+                <input
+                  required
+                  value={leadDraft.firstName}
+                  onChange={(e) => setLeadDraft({ ...leadDraft, firstName: e.target.value })}
+                  className={inputClass}
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">
+                  Last name *
+                </label>
+                <input
+                  required
+                  value={leadDraft.lastName}
+                  onChange={(e) => setLeadDraft({ ...leadDraft, lastName: e.target.value })}
+                  className={inputClass}
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">
+                  Phone *
+                </label>
+                <input
+                  required
+                  inputMode="tel"
+                  placeholder="(555) 555-5555"
+                  value={leadDraft.phone}
+                  onChange={(e) => setLeadDraft({ ...leadDraft, phone: e.target.value })}
+                  className={inputClass}
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">
+                  Email (optional)
+                </label>
+                <input
+                  type="email"
+                  value={leadDraft.email}
+                  onChange={(e) => setLeadDraft({ ...leadDraft, email: e.target.value })}
+                  className={inputClass}
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">
+                  Language
+                </label>
+                <select
+                  value={leadDraft.locale}
+                  onChange={(e) =>
+                    setLeadDraft({ ...leadDraft, locale: e.target.value === "en" ? "en" : "es" })
+                  }
+                  className={inputClass}
+                >
+                  <option value="es">Spanish</option>
+                  <option value="en">English</option>
+                </select>
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">
+                  Status
+                </label>
+                <select
+                  value={leadDraft.status}
+                  onChange={(e) =>
+                    setLeadDraft({ ...leadDraft, status: e.target.value as ReferralLeadStatus })
+                  }
+                  className={inputClass}
+                >
+                  {LEAD_STATUSES.map((s) => (
+                    <option key={s} value={s}>
+                      {s}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="mt-4">
+              <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">
+                Notes
+              </label>
+              <input
+                value={leadDraft.notes}
+                onChange={(e) => setLeadDraft({ ...leadDraft, notes: e.target.value })}
+                placeholder="How it came in, what they asked for, anything worth remembering"
+                className={inputClass}
+              />
+            </div>
+
+            <div className="mt-4 flex flex-wrap items-center gap-4">
+              <label className="flex cursor-pointer items-center gap-2 text-xs text-slate-600 dark:text-slate-300">
+                <input
+                  type="checkbox"
+                  checked={leadDraft.smsConsent}
+                  onChange={(e) => setLeadDraft({ ...leadDraft, smsConsent: e.target.checked })}
+                  className="h-4 w-4 rounded border-slate-300 dark:border-slate-600"
+                />
+                They agreed to texts
+              </label>
+              <label className="flex cursor-pointer items-center gap-2 text-xs text-slate-600 dark:text-slate-300">
+                <input
+                  type="checkbox"
+                  checked={leadDraft.marketingConsent}
+                  onChange={(e) =>
+                    setLeadDraft({ ...leadDraft, marketingConsent: e.target.checked })
+                  }
+                  className="h-4 w-4 rounded border-slate-300 dark:border-slate-600"
+                />
+                They agreed to marketing
+              </label>
+            </div>
+
+            {leadWarning && (
+              <p className="mt-4 rounded-lg bg-amber-50 px-4 py-2.5 text-sm text-amber-800 dark:bg-amber-950/40 dark:text-amber-300">
+                Referral saved, but the CRM push failed: {leadWarning}. It is safe here — add the
+                contact in Agent CRM by hand, or delete this row and re-add it.
+              </p>
+            )}
+
+            <button
+              type="submit"
+              disabled={busy === "lead-create"}
+              className="mt-4 inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:opacity-90 disabled:opacity-60"
+            >
+              {busy === "lead-create" ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <UserPlus className="h-4 w-4" />
+              )}
+              Add referral
+            </button>
+          </form>
+        )}
 
         {leads.length === 0 ? (
           <p className="p-5 text-sm text-slate-500 dark:text-slate-400">No referrals yet.</p>
