@@ -32,6 +32,8 @@ export type MailingLabelRecord = {
   id: string;
   source: MailingLabelSource;
   sourceRef: string | null;
+  /** Agent CRM contact id when known — what lets the letter read past call summaries. */
+  crmContactId: string | null;
   firstName: string;
   lastName: string;
   addressLine1: string;
@@ -45,6 +47,11 @@ export type MailingLabelRecord = {
   status: MailingLabelStatus;
   printedAt: string | null;
   notes: string;
+  /** Personal letter for the envelope: AI-drafted, then hand-edited. Empty until generated. */
+  letterBody: string;
+  letterGeneratedAt: string | null;
+  letterEditedAt: string | null;
+  letterContext: string;
   createdAt: string | null;
   updatedAt: string | null;
 };
@@ -62,6 +69,8 @@ export type MailingLabelInput = {
   phone?: string;
   email?: string;
   notes?: string;
+  /** Nullable so a full record can be spread straight into a patch. */
+  crmContactId?: string | null;
 };
 
 /** Return address for Priority Mail labels only — never printed on the Avery sticker. */

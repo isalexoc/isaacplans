@@ -160,6 +160,7 @@ export function normalizeMailingLabelInput(
     phone: clean(input.phone),
     email: clean(input.email).toLowerCase(),
     notes: clean(input.notes),
+    crmContactId: clean(input.crmContactId) || null,
   };
   return isPrintableAddress(candidate) ? candidate : null;
 }

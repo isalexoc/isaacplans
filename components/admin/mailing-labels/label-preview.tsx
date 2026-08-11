@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import { LEAVE_BEHIND_SENIOR_LIFE_LOGO_SINGLE } from "@/lib/leave-behind-assets";
 import { formatAddressBlock, resolveTagline, senderNameLines, uspsLine } from "@/lib/mailing-labels/format";
 import {
   isStickerPreset,
@@ -12,6 +11,7 @@ import {
   EYEBROW_TEXT,
   LABEL_TYPE_SCALE,
   SENIOR_LIFE,
+  SENIOR_LIFE_LOGO_PRINT,
   SHIPPING_TYPE_SCALE,
 } from "@/lib/mailing-labels/theme";
 import type {
@@ -115,25 +115,29 @@ function StickerPreviewBody({
       style={{ fontFamily: "Helvetica, Arial, sans-serif", color: SENIOR_LIFE.ink }}
     >
       {showHeader ? (
-        <div
-          className="flex items-center"
-          style={{
-            height: pt(scale.headerHeight),
-            backgroundColor: SENIOR_LIFE.blue,
-            paddingLeft: pt(scale.padX),
-            paddingRight: pt(scale.padX),
-            justifyContent: isFolder ? "center" : "flex-start",
-          }}
-        >
-          <Image
-            src={LEAVE_BEHIND_SENIOR_LIFE_LOGO_SINGLE}
-            alt="Senior Life"
-            width={280}
-            height={80}
-            unoptimized
-            style={{ height: pt(scale.logoHeight), width: "auto", objectFit: "contain" }}
+        <>
+          <div
+            className="flex items-center justify-center"
+            style={{
+              height: pt(scale.headerHeight),
+              backgroundColor: SENIOR_LIFE.blue,
+              paddingLeft: pt(scale.padX),
+              paddingRight: pt(scale.padX),
+            }}
+          >
+            <Image
+              src={SENIOR_LIFE_LOGO_PRINT}
+              alt="Senior Life"
+              width={600}
+              height={170}
+              unoptimized
+              style={{ height: pt(scale.logoHeight), width: "auto", objectFit: "contain" }}
+            />
+          </div>
+          <div
+            style={{ height: pt(scale.accentHeight), backgroundColor: SENIOR_LIFE.gold }}
           />
-        </div>
+        </>
       ) : null}
 
       <div
@@ -149,9 +153,10 @@ function StickerPreviewBody({
           <div
             style={{
               fontSize: pt(scale.eyebrowSize),
-              letterSpacing: pt(1.2),
-              color: SENIOR_LIFE.muted,
-              marginBottom: pt(scale.lineGap + 1),
+              fontWeight: 700,
+              letterSpacing: pt(1.4),
+              color: SENIOR_LIFE.blue,
+              marginBottom: pt(scale.lineGap + 2),
             }}
           >
             {EYEBROW_TEXT[record.language]}
@@ -178,19 +183,32 @@ function StickerPreviewBody({
 
       {showFooter ? (
         <div
-          className="flex items-end justify-between"
           style={{
             paddingLeft: pt(scale.padX),
             paddingRight: pt(scale.padX),
             paddingBottom: pt(scale.padY - 2),
           }}
         >
-          <span style={{ fontSize: pt(scale.footerSize), color: SENIOR_LIFE.muted }}>
-            {tagline}
-          </span>
-          <span style={{ fontSize: pt(scale.footerSize), color: SENIOR_LIFE.blue }}>
-            {agentLine}
-          </span>
+          <div
+            style={{
+              borderTop: `1px solid ${SENIOR_LIFE.hairline}`,
+              marginBottom: pt(scale.lineGap + 1),
+            }}
+          />
+          <div className="flex items-end justify-between">
+            <span
+              style={{
+                fontSize: pt(scale.footerSize),
+                color: SENIOR_LIFE.muted,
+                paddingRight: pt(10),
+              }}
+            >
+              {tagline}
+            </span>
+            <span style={{ fontSize: pt(scale.footerSize), color: SENIOR_LIFE.blue }}>
+              {agentLine}
+            </span>
+          </div>
         </div>
       ) : null}
     </div>
@@ -252,10 +270,10 @@ function ShippingPreviewBody({
         </div>
         {options.showLogo ? (
           <Image
-            src={LEAVE_BEHIND_SENIOR_LIFE_LOGO_SINGLE}
+            src={SENIOR_LIFE_LOGO_PRINT}
             alt="Senior Life"
-            width={280}
-            height={80}
+            width={600}
+            height={170}
             unoptimized
             style={{ height: pt(scale.logoHeight), width: "auto", objectFit: "contain" }}
           />
@@ -307,6 +325,7 @@ export const PREVIEW_SAMPLE: MailingLabelRecord = {
   id: "preview",
   source: "manual",
   sourceRef: null,
+  crmContactId: null,
   firstName: "Maria",
   lastName: "Rodriguez",
   addressLine1: "4821 SW 8th St",
@@ -320,6 +339,10 @@ export const PREVIEW_SAMPLE: MailingLabelRecord = {
   status: "pending",
   printedAt: null,
   notes: "",
+  letterBody: "",
+  letterGeneratedAt: null,
+  letterEditedAt: null,
+  letterContext: "",
   createdAt: null,
   updatedAt: null,
 };

@@ -631,6 +631,7 @@ export async function POST(request: NextRequest) {
       await upsertMailingLabelFromLead({
         source: "fe_get_covered",
         sourceRef: contactId,
+        crmContactId: contactId,
         firstName: typeof contact.firstName === "string" ? contact.firstName : "",
         lastName: typeof contact.lastName === "string" ? contact.lastName : "",
         addressLine1: addressLine1.trim(),

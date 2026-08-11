@@ -82,6 +82,26 @@ export async function bulkMailingLabelAction(
   return data.affected;
 }
 
+/** Draft or redraft the letter for one prospect. Slow — it calls the model. */
+export async function generateLetterRequest(id: string): Promise<MailingLabelRecord> {
+  const res = await fetch(`${BASE}/${id}/letter`, { method: "POST" });
+  const data = await readJson<{ label: MailingLabelRecord }>(res);
+  return data.label;
+}
+
+export async function saveLetterRequest(
+  id: string,
+  letterBody: string
+): Promise<MailingLabelRecord> {
+  const res = await fetch(`${BASE}/${id}/letter`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ letterBody }),
+  });
+  const data = await readJson<{ label: MailingLabelRecord }>(res);
+  return data.label;
+}
+
 export async function saveMailingLabelSettingsRequest(
   patch: Partial<{ sender: unknown; defaults: unknown }>
 ): Promise<MailingLabelSettings> {
@@ -105,10 +125,19 @@ export async function printMailingLabels(params: {
   options: Partial<LabelSheetOptions>;
   markPrinted?: boolean;
 }): Promise<void> {
-  const res = await fetch(`${BASE}/print`, {
+  return openPdf(`${BASE}/print`, params, "mailing-labels.pdf");
+}
+
+/** Build a PDF of the selected prospects' letters and open it for printing. */
+export async function printProspectLetters(ids: string[]): Promise<void> {
+  return openPdf(`${BASE}/letters/print`, { ids }, "prospect-letters.pdf");
+}
+
+async function openPdf(url: string, payload: unknown, filename: string): Promise<void> {
+  const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(params),
+    body: JSON.stringify(payload),
   });
 
   if (!res.ok) {
@@ -117,17 +146,17 @@ export async function printMailingLabels(params: {
   }
 
   const blob = await res.blob();
-  const url = URL.createObjectURL(blob);
-  const opened = window.open(url, "_blank");
+  const blobUrl = URL.createObjectURL(blob);
+  const opened = window.open(blobUrl, "_blank");
   if (!opened) {
     // Popup blocked — fall back to a download so the work isn't lost.
     const a = document.createElement("a");
-    a.href = url;
-    a.download = "mailing-labels.pdf";
+    a.href = blobUrl;
+    a.download = filename;
     document.body.appendChild(a);
     a.click();
     a.remove();
   }
   // Give the new tab time to load the blob before the URL is revoked.
-  setTimeout(() => URL.revokeObjectURL(url), 60_000);
+  setTimeout(() => URL.revokeObjectURL(blobUrl), 60_000);
 }

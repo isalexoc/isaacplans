@@ -557,6 +557,12 @@ export const mailingLabels = pgTable("mailing_labels", {
   source: text("source").notNull().default("manual"), // manual | fe_get_covered | fe_intake | leads_the_way
   sourceRef: text("source_ref"), // CRM contactId / intake token / leadKey — dedup key
   createdByUserId: text("created_by_user_id"), // Clerk id for manual rows; null for auto-created
+  /**
+   * Agent CRM (GHL) contact id, when we know it. Distinct from `sourceRef`, which is only the
+   * contact id for the get-covered source. This is what lets the letter generator read the
+   * contact's call-summary notes for personalization; null just means a generic letter.
+   */
+  crmContactId: text("crm_contact_id"),
   firstName: text("first_name").notNull().default(""),
   lastName: text("last_name").notNull().default(""),
   addressLine1: text("address_line1").notNull(),
@@ -570,6 +576,16 @@ export const mailingLabels = pgTable("mailing_labels", {
   status: text("status").notNull().default("pending"), // pending | printed | archived
   printedAt: timestamp("printed_at"),
   notes: text("notes"),
+  /**
+   * The personal letter that goes inside the envelope: AI-drafted from the contact's call
+   * summaries, then hand-editable. Stored as plain text (one paragraph per blank-line-separated
+   * block) so the agent can edit it in a textarea without fighting markup.
+   */
+  letterBody: text("letter_body"),
+  letterGeneratedAt: timestamp("letter_generated_at"),
+  letterEditedAt: timestamp("letter_edited_at"),
+  /** Human-readable note of what informed the draft, e.g. "3 call notes" or "no call history". */
+  letterContext: text("letter_context"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 }, (table) => ({

@@ -127,6 +127,7 @@ export async function POST(_request: NextRequest, context: RouteContext) {
     await upsertMailingLabelFromLead({
       source: "fe_intake",
       sourceRef: token,
+      crmContactId: row.crmContactId ?? undefined,
       firstName: str(decrypted.firstName),
       lastName: str(decrypted.lastName),
       addressLine1: str(decrypted.address1),

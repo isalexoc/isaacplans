@@ -18,6 +18,7 @@ export function rowToMailingLabelRecord(row: MailingLabelRow): MailingLabelRecor
     id: row.id,
     source: row.source as MailingLabelSource,
     sourceRef: row.sourceRef ?? null,
+    crmContactId: row.crmContactId ?? null,
     firstName: row.firstName,
     lastName: row.lastName,
     addressLine1: row.addressLine1,
@@ -31,6 +32,10 @@ export function rowToMailingLabelRecord(row: MailingLabelRow): MailingLabelRecor
     status: row.status as MailingLabelStatus,
     printedAt: row.printedAt ? row.printedAt.toISOString() : null,
     notes: row.notes ?? "",
+    letterBody: row.letterBody ?? "",
+    letterGeneratedAt: row.letterGeneratedAt ? row.letterGeneratedAt.toISOString() : null,
+    letterEditedAt: row.letterEditedAt ? row.letterEditedAt.toISOString() : null,
+    letterContext: row.letterContext ?? "",
     createdAt: row.createdAt ? row.createdAt.toISOString() : null,
     updatedAt: row.updatedAt ? row.updatedAt.toISOString() : null,
   };
@@ -97,6 +102,7 @@ export async function createMailingLabel(
       id: nanoid(),
       source: "manual",
       sourceRef: null,
+      crmContactId: clean.crmContactId || null,
       createdByUserId,
       firstName: clean.firstName,
       lastName: clean.lastName,
@@ -228,6 +234,9 @@ export async function upsertMailingLabelFromLead(
       language: clean.language ?? "en",
       phone: clean.phone || null,
       email: clean.email || null,
+      // Only ever set this, never clear it: a later refresh that happens not to know the contact
+      // id must not wipe the link the letter generator depends on.
+      ...(clean.crmContactId ? { crmContactId: clean.crmContactId } : {}),
     };
 
     await db
@@ -250,6 +259,52 @@ export async function upsertMailingLabelFromLead(
       error instanceof Error ? error.message : error
     );
   }
+}
+
+/** Store a freshly generated draft, replacing whatever was there. */
+export async function saveGeneratedLetter(
+  id: string,
+  body: string,
+  context: string
+): Promise<MailingLabelRecord | null> {
+  const now = new Date();
+  const rows = await db
+    .update(mailingLabels)
+    .set({
+      letterBody: body,
+      letterContext: context,
+      letterGeneratedAt: now,
+      letterEditedAt: null, // A regenerate discards the "hand-edited" state.
+      updatedAt: now,
+    })
+    .where(eq(mailingLabels.id, id))
+    .returning();
+  return rows[0] ? rowToMailingLabelRecord(rows[0]) : null;
+}
+
+/** Store the agent's hand edits, keeping the original generation timestamp. */
+export async function saveEditedLetter(
+  id: string,
+  body: string
+): Promise<MailingLabelRecord | null> {
+  const now = new Date();
+  const rows = await db
+    .update(mailingLabels)
+    .set({ letterBody: body, letterEditedAt: now, updatedAt: now })
+    .where(eq(mailingLabels.id, id))
+    .returning();
+  return rows[0] ? rowToMailingLabelRecord(rows[0]) : null;
+}
+
+/** Attach a CRM contact id we discovered later (e.g. a phone lookup at letter time). */
+export async function setMailingLabelCrmContactId(
+  id: string,
+  crmContactId: string
+): Promise<void> {
+  await db
+    .update(mailingLabels)
+    .set({ crmContactId, updatedAt: new Date() })
+    .where(eq(mailingLabels.id, id));
 }
 
 /** Re-exported so hooks can pre-check before assembling an input object. */

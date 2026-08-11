@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Loader2 } from "lucide-react";
+import { AlertTriangle, Check, Loader2 } from "lucide-react";
 import IntakeAddressInput, { type ResolvedAddress } from "@/components/shared/intake-address-input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,6 +17,11 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { US_STATE_OPTIONS } from "@/lib/get-covered-fast/us-states";
 import {
+  missingSenderFields,
+  normalizeStateCode,
+  normalizeZip,
+} from "@/lib/mailing-labels/format";
+import {
   LABEL_PRESETS,
   SHIPPING_PRESET_IDS,
   STICKER_PRESET_IDS,
@@ -29,6 +34,10 @@ import type { MailingLabelSettings, SenderAddress } from "@/lib/mailing-labels/t
  *  - print defaults that pre-fill the sheet options
  */
 
+function RequiredMark() {
+  return <span className="text-destructive">*</span>;
+}
+
 export function LabelSettingsPanel({
   settings,
   onSave,
@@ -36,13 +45,26 @@ export function LabelSettingsPanel({
   error,
 }: {
   settings: MailingLabelSettings;
-  onSave: (patch: { sender?: SenderAddress; defaults?: MailingLabelSettings["defaults"] }) => Promise<void>;
+  /** Resolves true only when the save actually succeeded, so "Saved" can't lie. */
+  onSave: (patch: {
+    sender?: SenderAddress;
+    defaults?: MailingLabelSettings["defaults"];
+  }) => Promise<boolean>;
   saving: boolean;
   error: string | null;
 }) {
   const [sender, setSender] = useState<SenderAddress>(settings.sender);
   const [defaults, setDefaults] = useState(settings.defaults);
   const [saved, setSaved] = useState(false);
+
+  // A partly filled sender is the failure mode that bit us: everything looked filled in, but the
+  // state dropdown was untouched, so Priority Mail silently stayed disabled with no explanation
+  // on this screen. Surface exactly what's still missing, per field and in summary.
+  const missing = missingSenderFields(sender);
+  const senderTouched = Object.values(sender).some((v) => v.trim() !== "");
+  const senderIncomplete = senderTouched && missing.length > 0;
+  const needsState = !normalizeStateCode(sender.state);
+  const needsZip = !normalizeZip(sender.postalCode);
 
   const setSenderField = <K extends keyof SenderAddress>(key: K, value: SenderAddress[K]) =>
     setSender((prev) => ({ ...prev, [key]: value }));
@@ -58,7 +80,8 @@ export function LabelSettingsPanel({
 
   const save = async () => {
     setSaved(false);
-    await onSave({ sender, defaults });
+    const ok = await onSave({ sender, defaults });
+    if (!ok) return; // The shared error banner explains why.
     setSaved(true);
     window.setTimeout(() => setSaved(false), 2500);
   };
@@ -70,10 +93,20 @@ export function LabelSettingsPanel({
           <CardTitle className="text-base">Sender address (Priority Mail only)</CardTitle>
           <CardDescription>
             Printed in the FROM block of a Priority Mail label. It never appears on the everyday
-            Avery sticker.
+            Avery sticker. Every field except the suite and phone is required — USPS won&apos;t take
+            a partial return address, so Priority Mail stays locked until this is complete.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          {senderIncomplete ? (
+            <div className="flex items-start gap-2 rounded-md border border-amber-300 bg-amber-50 p-3 text-sm dark:border-amber-900 dark:bg-amber-950/40">
+              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+              <span>
+                Still needed before you can print a Priority Mail label:{" "}
+                <strong>{missing.join(", ")}</strong>.
+              </span>
+            </div>
+          ) : null}
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="ml-sender-business">Business name</Label>
@@ -95,7 +128,10 @@ export function LabelSettingsPanel({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="ml-sender-address1">Street address</Label>
+            <Label htmlFor="ml-sender-address1">
+              Street address{" "}
+              {senderTouched && !sender.addressLine1.trim() ? <RequiredMark /> : null}
+            </Label>
             <IntakeAddressInput
               id="ml-sender-address1"
               value={sender.addressLine1}
@@ -117,20 +153,28 @@ export function LabelSettingsPanel({
 
           <div className="grid gap-4 sm:grid-cols-3">
             <div className="space-y-2">
-              <Label htmlFor="ml-sender-city">City</Label>
+              <Label htmlFor="ml-sender-city">
+                City {senderTouched && !sender.city.trim() ? <RequiredMark /> : null}
+              </Label>
               <Input
                 id="ml-sender-city"
                 value={sender.city}
                 onChange={(e) => setSenderField("city", e.target.value)}
+                className={senderTouched && !sender.city.trim() ? "border-destructive" : ""}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="ml-sender-state">State</Label>
+              <Label htmlFor="ml-sender-state">
+                State {senderTouched && needsState ? <RequiredMark /> : null}
+              </Label>
               <Select
                 value={sender.state || undefined}
                 onValueChange={(v) => setSenderField("state", v)}
               >
-                <SelectTrigger id="ml-sender-state">
+                <SelectTrigger
+                  id="ml-sender-state"
+                  className={senderTouched && needsState ? "border-destructive" : ""}
+                >
                   <SelectValue placeholder="Select" />
                 </SelectTrigger>
                 <SelectContent>
@@ -143,12 +187,15 @@ export function LabelSettingsPanel({
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="ml-sender-zip">ZIP</Label>
+              <Label htmlFor="ml-sender-zip">
+                ZIP {senderTouched && needsZip ? <RequiredMark /> : null}
+              </Label>
               <Input
                 id="ml-sender-zip"
                 value={sender.postalCode}
                 onChange={(e) => setSenderField("postalCode", e.target.value)}
                 inputMode="numeric"
+                className={senderTouched && needsZip ? "border-destructive" : ""}
               />
             </div>
           </div>

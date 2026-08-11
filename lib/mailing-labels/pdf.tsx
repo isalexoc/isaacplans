@@ -2,7 +2,6 @@ import "server-only";
 import { renderToBuffer, Document, Page, View, Text, Image } from "@react-pdf/renderer";
 import type { DocumentProps } from "@react-pdf/renderer";
 import type { ReactElement } from "react";
-import { LEAVE_BEHIND_SENIOR_LIFE_LOGO_SINGLE } from "@/lib/leave-behind-assets";
 import { formatAddressBlock, resolveTagline, senderNameLines, uspsLine } from "./format";
 import {
   clampStartOffset,
@@ -16,6 +15,7 @@ import {
   EYEBROW_TEXT,
   LABEL_TYPE_SCALE,
   SENIOR_LIFE,
+  SENIOR_LIFE_LOGO_PRINT,
   SHIPPING_TYPE_SCALE,
 } from "./theme";
 import type {
@@ -47,7 +47,7 @@ export function loadSeniorLifeLogo(): Promise<Buffer | null> {
   if (!logoPromise) {
     logoPromise = (async () => {
       try {
-        const res = await fetch(LEAVE_BEHIND_SENIOR_LIFE_LOGO_SINGLE);
+        const res = await fetch(SENIOR_LIFE_LOGO_PRINT);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return Buffer.from(await res.arrayBuffer());
       } catch (error) {
@@ -97,18 +97,21 @@ function StickerLabel({
   return (
     <View style={{ width: "100%", height: "100%", fontFamily: FONT, color: SENIOR_LIFE.ink }}>
       {showHeader && logo ? (
-        <View
-          style={{
-            height: scale.headerHeight,
-            backgroundColor: SENIOR_LIFE.blue,
-            paddingHorizontal: scale.padX,
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: isFolder ? "center" : "flex-start",
-          }}
-        >
-          <LogoImage data={logo} height={scale.logoHeight} />
-        </View>
+        <>
+          <View
+            style={{
+              height: scale.headerHeight,
+              backgroundColor: SENIOR_LIFE.blue,
+              paddingHorizontal: scale.padX,
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <LogoImage data={logo} height={scale.logoHeight} />
+          </View>
+          <View style={{ height: scale.accentHeight, backgroundColor: SENIOR_LIFE.gold }} />
+        </>
       ) : null}
 
       <View
@@ -124,9 +127,10 @@ function StickerLabel({
           <Text
             style={{
               fontSize: scale.eyebrowSize,
-              letterSpacing: 1.2,
-              color: SENIOR_LIFE.muted,
-              marginBottom: scale.lineGap + 1,
+              fontWeight: "bold",
+              letterSpacing: 1.4,
+              color: SENIOR_LIFE.blue,
+              marginBottom: scale.lineGap + 2,
             }}
           >
             {EYEBROW_TEXT[record.language]}
@@ -152,17 +156,35 @@ function StickerLabel({
       </View>
 
       {showFooter ? (
-        <View
-          style={{
-            paddingHorizontal: scale.padX,
-            paddingBottom: scale.padY - 2,
-            flexDirection: "row",
-            alignItems: "flex-end",
-            justifyContent: "space-between",
-          }}
-        >
-          <Text style={{ fontSize: scale.footerSize, color: SENIOR_LIFE.muted }}>{tagline}</Text>
-          <Text style={{ fontSize: scale.footerSize, color: SENIOR_LIFE.blue }}>{agentLine}</Text>
+        <View style={{ paddingHorizontal: scale.padX, paddingBottom: scale.padY - 2 }}>
+          <View
+            style={{
+              borderTopWidth: 0.5,
+              borderTopColor: SENIOR_LIFE.hairline,
+              marginBottom: scale.lineGap + 1,
+            }}
+          />
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "flex-end",
+              justifyContent: "space-between",
+            }}
+          >
+            {/* paddingRight, not just space-between: with a long name the two ran together. */}
+            <Text
+              style={{
+                fontSize: scale.footerSize,
+                color: SENIOR_LIFE.muted,
+                paddingRight: 10,
+              }}
+            >
+              {tagline}
+            </Text>
+            <Text style={{ fontSize: scale.footerSize, color: SENIOR_LIFE.blue }}>
+              {agentLine}
+            </Text>
+          </View>
         </View>
       ) : null}
     </View>

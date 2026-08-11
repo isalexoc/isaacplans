@@ -1,13 +1,16 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   bulkMailingLabelAction,
   createMailingLabelRequest,
   fetchMailingLabels,
+  generateLetterRequest,
   printMailingLabels,
+  printProspectLetters,
+  saveLetterRequest,
   saveMailingLabelSettingsRequest,
   updateMailingLabelRequest,
 } from "@/lib/mailing-labels/api";
@@ -29,6 +32,7 @@ import {
 } from "@/lib/mailing-labels/types";
 import { EMPTY_LABEL_FORM, LabelForm, labelToFormValues, type LabelFormValues } from "./label-form";
 import { LabelQueuePanel } from "./label-queue-panel";
+import { LetterPanel } from "./letter-panel";
 import { LabelSettingsPanel } from "./label-settings-panel";
 import { PriorityMailPanel } from "./priority-mail-panel";
 
@@ -64,11 +68,16 @@ export function MailingLabelsClient({ agent }: { agent: LabelAgentContact | null
   const [formError, setFormError] = useState<string | null>(null);
   const [savingForm, setSavingForm] = useState(false);
 
+  /**
+   * Status is filtered client-side rather than in the query: the Letter and Priority Mail tabs
+   * need prospects whose sticker was already printed, and the queue defaults to "pending".
+   * One fetch, three views.
+   */
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await fetchMailingLabels(filters);
+      const data = await fetchMailingLabels({ source: filters.source, q: filters.q });
       setLabels(data.labels);
       setSettings(data.settings);
       setSettingsLoaded(true);
@@ -77,7 +86,7 @@ export function MailingLabelsClient({ agent }: { agent: LabelAgentContact | null
     } finally {
       setLoading(false);
     }
-  }, [filters]);
+  }, [filters.source, filters.q]);
 
   // Debounced so typing in the search box doesn't fire a request per keystroke.
   useEffect(() => {
@@ -85,13 +94,30 @@ export function MailingLabelsClient({ agent }: { agent: LabelAgentContact | null
     return () => window.clearTimeout(timer);
   }, [load, filters.q]);
 
-  const withBusy = async (fn: () => Promise<void>) => {
+  const queueLabels = useMemo(
+    () =>
+      filters.status === "all"
+        ? labels
+        : labels.filter((l) => l.status === filters.status),
+    [labels, filters.status]
+  );
+
+  /** Archived prospects are done with — they shouldn't clutter the letter or shipping pickers. */
+  const activeLabels = useMemo(
+    () => labels.filter((l) => l.status !== "archived"),
+    [labels]
+  );
+
+  /** Runs `fn`, surfacing any failure in the shared banner. Returns whether it succeeded. */
+  const withBusy = async (fn: () => Promise<void>): Promise<boolean> => {
     setBusy(true);
     setError(null);
     try {
       await fn();
+      return true;
     } catch (e) {
       setError(e instanceof Error ? e.message : "Something went wrong");
+      return false;
     } finally {
       setBusy(false);
     }
@@ -150,21 +176,47 @@ export function MailingLabelsClient({ agent }: { agent: LabelAgentContact | null
     setTab("add");
   };
 
+  /** Replace one label in place so the letter editor updates without a full reload. */
+  const mergeLabel = (updated: MailingLabelRecord) =>
+    setLabels((prev) => prev.map((l) => (l.id === updated.id ? updated : l)));
+
+  const generateLetter = async (id: string): Promise<MailingLabelRecord | null> => {
+    let result: MailingLabelRecord | null = null;
+    await withBusy(async () => {
+      result = await generateLetterRequest(id);
+      mergeLabel(result);
+    });
+    return result;
+  };
+
+  const saveLetter = async (id: string, body: string): Promise<MailingLabelRecord | null> => {
+    let result: MailingLabelRecord | null = null;
+    await withBusy(async () => {
+      result = await saveLetterRequest(id, body);
+      mergeLabel(result);
+    });
+    return result;
+  };
+
+  const printLetters = async (ids: string[]) => {
+    await withBusy(() => printProspectLetters(ids));
+  };
+
   const saveSettings = async (patch: {
     sender?: SenderAddress;
     defaults?: MailingLabelSettings["defaults"];
-  }) => {
-    await withBusy(async () => {
+  }): Promise<boolean> =>
+    withBusy(async () => {
       const next = await saveMailingLabelSettingsRequest(patch);
       setSettings(next);
     });
-  };
 
   return (
     <Tabs value={tab} onValueChange={setTab} className="space-y-6">
       <TabsList>
         <TabsTrigger value="queue">Queue</TabsTrigger>
         <TabsTrigger value="add">{editing ? "Edit prospect" : "Add prospect"}</TabsTrigger>
+        <TabsTrigger value="letter">Letter</TabsTrigger>
         <TabsTrigger value="priority">Priority Mail</TabsTrigger>
         <TabsTrigger value="settings">Settings</TabsTrigger>
       </TabsList>
@@ -172,7 +224,7 @@ export function MailingLabelsClient({ agent }: { agent: LabelAgentContact | null
       <TabsContent value="queue">
         {settingsLoaded ? (
           <LabelQueuePanel
-            labels={labels}
+            labels={queueLabels}
             settings={settings}
             agent={agent}
             loading={loading}
@@ -223,10 +275,21 @@ export function MailingLabelsClient({ agent }: { agent: LabelAgentContact | null
         </Card>
       </TabsContent>
 
+      <TabsContent value="letter">
+        <LetterPanel
+          labels={activeLabels}
+          onGenerate={generateLetter}
+          onSave={saveLetter}
+          onPrint={printLetters}
+          busy={busy}
+          error={error}
+        />
+      </TabsContent>
+
       <TabsContent value="priority">
         {settingsLoaded ? (
           <PriorityMailPanel
-            labels={labels}
+            labels={activeLabels}
             settings={settings}
             onPrint={(ids, preset, options) => handlePrint(ids, preset, options, false)}
             onGoToSettings={() => setTab("settings")}
@@ -241,7 +304,9 @@ export function MailingLabelsClient({ agent }: { agent: LabelAgentContact | null
       <TabsContent value="settings">
         {settingsLoaded ? (
           <LabelSettingsPanel
-            key={`${settings.sender.addressLine1}-${settings.defaults.stickerPreset}`}
+            // Remount after a successful save so the form shows what was actually stored
+            // (the server normalizes state/ZIP, and seeing the real stored value is the point).
+            key={JSON.stringify(settings.sender)}
             settings={settings}
             onSave={saveSettings}
             saving={busy}
