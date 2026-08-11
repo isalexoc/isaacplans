@@ -190,6 +190,13 @@
       "when": 1786473050021,
       "tag": "0026_smart_silver_centurion",
       "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "5",
+      "when": 1786476004529,
+      "tag": "0027_blushing_devos",
+      "breakpoints": true
     }
   ]
 }

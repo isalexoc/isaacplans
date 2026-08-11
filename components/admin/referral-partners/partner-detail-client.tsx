@@ -75,6 +75,8 @@ export default function PartnerDetailClient({ partner, leads, clients, siteUrl }
     phone: partner.phone,
     website: partner.website,
     logoUrl: partner.logoUrl,
+    heroImageUrl: partner.heroImageUrl,
+    sectionImageUrl: partner.sectionImageUrl,
     accentColor: partner.accentColor,
     commissionPercent: String(partner.commissionBps / 100),
     defaultLocale: partner.defaultLocale,
@@ -671,6 +673,8 @@ export default function PartnerDetailClient({ partner, leads, clients, siteUrl }
                   ["phone", "Phone"],
                   ["website", "Website"],
                   ["logoUrl", "Logo URL"],
+                  ["heroImageUrl", "Hero image URL (blank = placeholder)"],
+                  ["sectionImageUrl", "Section image URL (blank = placeholder)"],
                 ] as const
               ).map(([field, label]) => (
                 <div key={field}>

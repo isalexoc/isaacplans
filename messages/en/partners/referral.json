@@ -2,86 +2,70 @@
   "partnerReferral": {
     "metadata": {
       "title": "Health Coverage for {partner} Clients | Isaac Plans",
-      "description": "Affordable health coverage with a licensed bilingual agent. A free consultation, a plan that fits your budget, and proof of coverage you can use right away.",
+      "description": "Affordable health coverage for people in an immigration process. Free consultation with a licensed bilingual agent.",
       "imageAlt": "Isaac Plans Insurance — affordable health coverage"
     },
-    "badge": "An exclusive benefit for {partner} clients",
-    "trustLine": "Recommended by {partner}",
-    "heroCta": "Request my coverage",
+    "badge": "A benefit for {partner} clients",
+    "heroCta": "Request information",
     "heroSecondaryCta": "See how it works",
     "heroNote": "Free consultation · No obligation · No pressure",
-    "audience": {
-      "label": "Why we bring this up",
-      "title": "Your case moves at its own pace. Your health can't wait for it."
+    "heroImageAlt": "A family at ease at home",
+    "factors": {
+      "label": "What the government weighs",
+      "title": "Your health is one of the factors",
+      "body": "For an immigrant visa at a consulate or an adjustment of status (Form I-485), the government assesses whether someone is likely to depend on public assistance. It weighs several factors at once, and health is one of them.",
+      "items": [
+        "Age",
+        "Health",
+        "Family size",
+        "Income and resources",
+        "Education and skills",
+        "Sponsor (Form I-864)"
+      ],
+      "imageAlt": "A couple reviewing documents together"
     },
     "situations": {
-      "label": "When this deserves a serious look",
-      "title": "Situations where health coverage really matters",
+      "label": "When it's worth having",
+      "title": "Why people come to us",
       "items": [
+        {
+          "title": "You're building your proof of self-sufficiency",
+          "body": "Being able to pay for your own medical care supports the self-sufficiency picture you're already building with work, savings, and a sponsor."
+        },
         {
           "title": "You don't qualify for Medicaid or the marketplace",
-          "body": "Because of immigration status, many families do not qualify for Medicaid or for marketplace subsidies. When that door is closed, a private plan is often the only realistic route."
+          "body": "Because of status, many families are shut out. A private plan is often the only realistic route."
         },
         {
-          "title": "You are building your financial stability",
-          "body": "In an adjustment of status (Form I-485) or an immigrant visa case at a consulate, the government weighs age, health, family size, income, and resources, unless your category is exempt. Being able to pay for your own medical care is part of that same stability you are already building. A large medical debt pulls in the opposite direction."
+          "title": "You have a condition going untreated",
+          "body": "A serious condition with no treatment and no clear way to pay for it weighs on the overall picture."
         },
         {
-          "title": "Your category is exempt — the hospital bill isn't",
-          "body": "Refugees, asylees, and several humanitarian categories are exempt from the public charge assessment. The bill for one night in the hospital still arrives, and it still comes out of the same pocket."
-        },
-        {
-          "title": "Your family depends on your income",
-          "body": "If your household runs on what you bring home each week, an uninsured accident brings more than a hospital bill; it brings the weeks you cannot work. The whole family can go on one plan."
+          "title": "Your category is exempt",
+          "body": "Asylees, refugees, and several humanitarian categories are exempt. The hospital bill still arrives."
         }
       ],
-      "footnote": "In fairness: none of this is a legal requirement, and this analysis does not apply to everyone. Refugees, asylees, and several humanitarian categories, including VAWA, T visa, and U visa, are exempt from the public charge assessment. We are licensed insurance agents, not attorneys. We do not give legal advice and we do not weigh in on your case. For anything about your immigration matter, keep talking to {partner}; that is what they are there for. Our job is making sure you and your family are not left without health coverage."
-    },
-    "stakes": {
-      "label": "What's at stake",
-      "title": "What being uninsured actually costs",
-      "items": [
-        {
-          "title": "One night in the ER costs thousands",
-          "body": "In the US, a single emergency room visit costs thousands of dollars. A hospital stay or a surgery runs into the tens of thousands. No family's savings absorb that."
-        },
-        {
-          "title": "Medical debt sinks entire families",
-          "body": "Medical debt is one of the most common causes of financial ruin in this country. And it hits exactly where you have worked hardest: your savings, your credit, your peace of mind at home."
-        },
-        {
-          "title": "Waiting always costs more",
-          "body": "Premiums rise with age, so the same plan costs a little more every year you wait. And after the accident you can no longer buy it. The accident does not wait for your case to be resolved."
-        }
-      ]
+      "footnote": "Honestly: health insurance is not a legal requirement for a green card, and not having it is not by itself a reason for denial. We are licensed insurance agents, not attorneys. For your case, stay with {partner}."
     },
     "benefits": {
       "label": "What you get",
-      "title": "Real coverage, explained in plain language",
+      "title": "Simple, with no roadblocks",
       "items": [
         {
-          "title": "Built around your budget",
-          "body": "We start from what you can pay each month and work backwards to the best plan at that price."
+          "title": "No SSN or residency",
+          "body": "Neither document is required to apply."
         },
         {
-          "title": "Coverage that starts fast",
-          "body": "No waiting for an open enrollment window. Coverage can begin in days, not months."
+          "title": "Starts in days",
+          "body": "No enrollment season to wait for."
         },
         {
-          "title": "Proof of coverage in writing",
-          "body": "You get documentation you can present wherever you are asked to show you have medical coverage."
-        },
-        {
-          "title": "Doctors, urgent care, and prescriptions",
-          "body": "Benefits you will actually use — office visits, urgent care, labs, and help with prescription costs."
+          "title": "Proof in writing",
+          "body": "Documentation you can present when it's asked for."
         },
         {
           "title": "Explained in plain English",
-          "body": "No jargon, and no fine print you need a lawyer to read. From the first call to the day you use your card, you know exactly what you have."
-        },
-        {
-          "title": "A licensed agent, not a call center",
-          "body": "The same person who enrolls you is the person you call when you have a question later."
+          "body": "No jargon, from the first call to the day you use your card."
         }
       ]
     },
@@ -91,15 +75,15 @@
       "items": [
         {
           "title": "Send your information",
-          "body": "Fill out the short form. It takes about a minute and there is no obligation."
+          "body": "The form takes less than a minute."
         },
         {
           "title": "We call you",
-          "body": "A licensed agent calls you in English or Spanish, listens to your situation, and explains what fits."
+          "body": "A licensed agent listens to your situation and explains what fits."
         },
         {
           "title": "You get covered",
-          "body": "If you like the plan, you enroll the same day and receive your proof of coverage by email."
+          "body": "If you like the plan, you enroll the same day."
         }
       ]
     },
@@ -107,7 +91,7 @@
       "label": "Who you will talk to",
       "name": "Isaac Orraiz",
       "title": "Licensed insurance agent",
-      "body": "I have spent years helping Hispanic families find coverage they can afford and understand. When you call, you talk to me — not a script. If nothing fits your budget, I will tell you that honestly.",
+      "body": "I have spent years helping families find coverage they can afford and understand. If nothing fits your budget, I will tell you that honestly.",
       "photoAlt": "Isaac Orraiz, licensed insurance agent"
     },
     "form": {
@@ -142,47 +126,39 @@
     },
     "faq": {
       "label": "Common questions",
-      "title": "The questions people ask us first",
+      "title": "What people ask first",
       "items": [
         {
           "q": "Do I need a Social Security number or a green card?",
-          "a": "No. These plans do not require a Social Security number or permanent residency to apply. We will confirm what applies to your specific situation on the call."
+          "a": "No. These plans require neither one to apply."
         },
         {
           "q": "How much does it cost?",
-          "a": "It depends on your age, where you live, and how many people you are covering. Tell us your budget and we will show you what is possible at that number before you commit to anything."
+          "a": "It depends on your age, where you live, and how many people you're covering. Tell us your budget and we'll show you what's possible at that number."
         },
         {
           "q": "Is this Obamacare?",
-          "a": "No. This is a private alternative for people who do not qualify for a marketplace subsidy or who need coverage outside open enrollment. If you do qualify for the marketplace, we will tell you honestly — we handle that too."
-        },
-        {
-          "q": "What does it cost me to ask?",
-          "a": "Nothing. The consultation is free and there is no obligation to enroll. If nothing fits your budget, we will say so."
-        },
-        {
-          "q": "Can I cover my spouse and children?",
-          "a": "Yes. Family coverage is common and usually costs far less per person than covering everyone separately."
+          "a": "No. This is a private alternative for people who don't qualify for a marketplace subsidy or need coverage outside open enrollment."
         },
         {
           "q": "Does this affect my immigration case?",
-          "a": "Buying private health coverage is a normal, lawful purchase. We are insurance agents, not attorneys, so for questions about your case itself, keep talking to {partner} — that is what they are there for."
+          "a": "Buying private coverage is a normal, lawful purchase. We are insurance agents, not attorneys — for your case, keep talking to {partner}."
         }
       ]
     },
     "closing": {
-      "title": "Protect what you have already built",
-      "body": "A short call, free and with no obligation. We tell you exactly what it would cost to cover your family, and you decide with the number in front of you. If nothing fits your budget, we will tell you that too.",
-      "cta": "Request my coverage",
+      "title": "Ask first. Decide after.",
+      "body": "A short call, free and with no obligation.",
+      "cta": "Request information",
       "call": "Or call {phone}"
     },
     "partnership": {
       "label": "About this partnership",
-      "body": "{partner} recommends Isaac Plans Insurance to its clients who need affordable health coverage. You are under no obligation to enroll, and your coverage decision has no effect on the services {partner} provides you."
+      "body": "{partner} recommends Isaac Plans Insurance to its clients. You are under no obligation to enroll, and your decision does not affect the services {partner} provides you."
     },
     "notFound": {
       "title": "This page is not available",
-      "body": "The partner link you followed is not active. If someone gave you this link, please contact them, or reach out to us directly.",
+      "body": "The partner link you followed is not active.",
       "cta": "Go to our health coverage page"
     }
   },

@@ -2,86 +2,70 @@
   "partnerReferral": {
     "metadata": {
       "title": "Cobertura Médica para Clientes de {partner} | Isaac Plans",
-      "description": "Cobertura médica asequible con un agente bilingüe con licencia. Consulta gratis, un plan que se ajusta a su presupuesto y constancia de cobertura que puede usar de inmediato.",
+      "description": "Cobertura médica asequible para quienes están en un proceso migratorio. Consulta gratis con un agente bilingüe con licencia.",
       "imageAlt": "Isaac Plans Insurance — cobertura médica asequible"
     },
-    "badge": "Un beneficio exclusivo para los clientes de {partner}",
-    "trustLine": "Recomendado por {partner}",
-    "heroCta": "Solicitar mi cobertura",
+    "badge": "Un beneficio para los clientes de {partner}",
+    "heroCta": "Solicitar información",
     "heroSecondaryCta": "Ver cómo funciona",
     "heroNote": "Consulta gratis · Sin compromiso · Atención en español",
-    "audience": {
-      "label": "Por qué le hablamos de esto",
-      "title": "Su caso avanza a su ritmo. Su salud no puede esperar a que termine."
+    "heroImageAlt": "Familia hispana tranquila en casa",
+    "factors": {
+      "label": "Lo que el gobierno toma en cuenta",
+      "title": "Su salud es uno de los factores",
+      "body": "En una visa de inmigrante en el consulado o en un ajuste de estatus (I-485), el gobierno evalúa si la persona podría depender de la asistencia pública. Mira varios factores a la vez, y la salud es uno de ellos.",
+      "items": [
+        "Edad",
+        "Salud",
+        "Tamaño de la familia",
+        "Ingresos y recursos",
+        "Educación y experiencia",
+        "Patrocinador (I-864)"
+      ],
+      "imageAlt": "Pareja revisando documentos juntos"
     },
     "situations": {
-      "label": "Cuándo conviene pensarlo en serio",
-      "title": "Situaciones en las que una cobertura médica pesa de verdad",
+      "label": "Cuándo conviene tenerla",
+      "title": "Situaciones en las que nos buscan",
       "items": [
+        {
+          "title": "Está armando su prueba de solvencia",
+          "body": "Poder pagar su propia atención médica apoya la imagen de autosuficiencia que ya está construyendo con su trabajo, sus ahorros y su patrocinador."
+        },
         {
           "title": "No califica para Medicaid ni para el mercado",
-          "body": "Por su estatus migratorio, muchas familias no califican para Medicaid ni para los subsidios del mercado de salud. Cuando esa puerta está cerrada, un plan privado suele ser el único camino real."
+          "body": "Por su estatus, muchas familias quedan fuera. Un plan privado suele ser el único camino real."
         },
         {
-          "title": "Está construyendo su estabilidad económica",
-          "body": "En un ajuste de estatus (formulario I-485) o en una visa de inmigrante en el consulado, el gobierno considera la edad, la salud, el tamaño de la familia, los ingresos y los recursos de la persona, salvo que su categoría esté exenta. Poder cubrir su propia atención médica es parte de esa misma estabilidad que usted ya está construyendo. Una deuda médica grande va en la dirección contraria."
+          "title": "Tiene una condición sin atender",
+          "body": "Una condición seria sin tratamiento y sin forma clara de pagarla pesa en el panorama general."
         },
         {
-          "title": "Su categoría está exenta — la cuenta del hospital no lo está",
-          "body": "Los refugiados, los asilados y varias categorías humanitarias están exentos de la evaluación de carga pública. Aun así, la factura de una noche de hospital llega igual, y sale del mismo bolsillo."
-        },
-        {
-          "title": "Su familia depende de lo que usted trae",
-          "body": "Si su casa depende de lo que usted trae cada semana, un accidente sin cobertura no solo trae la cuenta del hospital: trae las semanas sin poder trabajar. Se puede cubrir a toda la familia en un mismo plan."
+          "title": "Su categoría está exenta",
+          "body": "Los asilados, refugiados y varias categorías humanitarias están exentos. Aun así, la cuenta del hospital llega igual."
         }
       ],
-      "footnote": "Con toda honestidad: nada de esto es un requisito legal, y este análisis no le aplica a todo el mundo. Los refugiados, los asilados y varias categorías humanitarias, como VAWA, visa T y visa U, están exentos de la evaluación de carga pública. Nosotros somos agentes de seguros con licencia, no abogados: no damos asesoría legal ni opinamos sobre su caso. Para cualquier duda migratoria, siga hablando con {partner}, que para eso están. Lo nuestro es que usted y su familia no se queden sin cobertura médica."
-    },
-    "stakes": {
-      "label": "Lo que está en juego",
-      "title": "Lo que de verdad cuesta no tener cobertura",
-      "items": [
-        {
-          "title": "Una noche en emergencias cuesta miles",
-          "body": "En Estados Unidos, una sola visita a la sala de emergencias cuesta miles de dólares. Una hospitalización o una cirugía llega a decenas de miles. No hay ahorro familiar que aguante eso."
-        },
-        {
-          "title": "La deuda médica hunde a familias enteras",
-          "body": "La deuda médica es una de las causas más comunes de ruina económica en este país. Y pega justo donde usted más ha trabajado: los ahorros, el crédito, la tranquilidad de la casa."
-        },
-        {
-          "title": "Esperar siempre sale más caro",
-          "body": "Las primas suben con la edad, así que el mismo plan cuesta un poco más cada año que pasa. Y después del accidente ya no se puede comprar. El accidente no espera a que salga su respuesta."
-        }
-      ]
+      "footnote": "Con honestidad: el seguro médico no es un requisito legal para la residencia, y no tenerlo no es por sí solo motivo de negación. Somos agentes de seguros con licencia, no abogados. Para su caso, siga con {partner}."
     },
     "benefits": {
       "label": "Lo que recibe",
-      "title": "Cobertura real, explicada en palabras claras",
+      "title": "Simple y sin trabas",
       "items": [
         {
-          "title": "Pensado para su presupuesto",
-          "body": "Empezamos por lo que usted puede pagar al mes y buscamos el mejor plan a ese precio."
+          "title": "Sin Seguro Social ni residencia",
+          "body": "No se piden esos documentos para solicitar."
         },
         {
-          "title": "Cobertura que empieza rápido",
-          "body": "No hay que esperar un período de inscripción abierta. La cobertura puede empezar en días, no en meses."
+          "title": "Empieza en días",
+          "body": "No hay que esperar una temporada de inscripción."
         },
         {
-          "title": "Constancia de cobertura por escrito",
-          "body": "Recibe la documentación que puede presentar donde le pidan comprobar que tiene cobertura médica."
-        },
-        {
-          "title": "Doctores, urgencias y medicamentos",
-          "body": "Beneficios que sí va a usar — consultas, urgencias, laboratorios y ayuda con el costo de medicamentos."
+          "title": "Constancia por escrito",
+          "body": "Documentación que puede presentar cuando se la pidan."
         },
         {
           "title": "Todo en español",
-          "body": "Desde la primera llamada hasta el día que use su tarjeta, nunca se queda con la duda."
-        },
-        {
-          "title": "Un agente con licencia, no un centro de llamadas",
-          "body": "La misma persona que lo inscribe es la persona a la que llama después si tiene una pregunta."
+          "body": "Desde la primera llamada hasta el día que use su tarjeta."
         }
       ]
     },
@@ -91,15 +75,15 @@
       "items": [
         {
           "title": "Envíe sus datos",
-          "body": "Llene el formulario corto. Toma menos de un minuto y no tiene ningún compromiso."
+          "body": "El formulario toma menos de un minuto."
         },
         {
           "title": "Le llamamos",
-          "body": "Un agente con licencia le llama en español o inglés, escucha su situación y le explica qué le conviene."
+          "body": "Un agente con licencia escucha su situación y le explica qué le conviene."
         },
         {
           "title": "Queda cubierto",
-          "body": "Si le gusta el plan, se inscribe el mismo día y recibe su constancia de cobertura por correo."
+          "body": "Si le gusta el plan, se inscribe el mismo día."
         }
       ]
     },
@@ -107,7 +91,7 @@
       "label": "Con quién va a hablar",
       "name": "Isaac Orraiz",
       "title": "Agente de seguros con licencia",
-      "body": "Llevo años ayudando a familias hispanas a encontrar una cobertura que puedan pagar y entender. Cuando llame, habla conmigo — no con un guion. Si nada se ajusta a su presupuesto, se lo digo con honestidad.",
+      "body": "Llevo años ayudando a familias hispanas a encontrar cobertura que puedan pagar y entender. Si nada se ajusta a su presupuesto, se lo digo con honestidad.",
       "photoAlt": "Isaac Orraiz, agente de seguros con licencia"
     },
     "form": {
@@ -142,47 +126,39 @@
     },
     "faq": {
       "label": "Preguntas frecuentes",
-      "title": "Lo que la gente nos pregunta primero",
+      "title": "Lo que nos preguntan primero",
       "items": [
         {
           "q": "¿Necesito número de Seguro Social o residencia?",
-          "a": "No. Estos planes no requieren número de Seguro Social ni residencia permanente para solicitar. En la llamada le confirmamos qué aplica en su caso específico."
+          "a": "No. Estos planes no requieren ninguno de los dos para solicitar."
         },
         {
           "q": "¿Cuánto cuesta?",
-          "a": "Depende de su edad, dónde vive y cuántas personas va a cubrir. Díganos su presupuesto y le mostramos qué se puede lograr con esa cantidad antes de que se comprometa a nada."
+          "a": "Depende de su edad, dónde vive y cuántas personas va a cubrir. Díganos su presupuesto y le mostramos qué se puede lograr con esa cantidad."
         },
         {
           "q": "¿Esto es Obamacare?",
-          "a": "No. Es una alternativa privada para quienes no califican para un subsidio del mercado o necesitan cobertura fuera del período de inscripción abierta. Si usted sí califica para el mercado, se lo decimos con honestidad — también manejamos eso."
-        },
-        {
-          "q": "¿Qué me cuesta preguntar?",
-          "a": "Nada. La consulta es gratis y no tiene ninguna obligación de inscribirse. Si nada se ajusta a su presupuesto, se lo decimos."
-        },
-        {
-          "q": "¿Puedo cubrir a mi esposo/a y a mis hijos?",
-          "a": "Sí. La cobertura familiar es común y normalmente cuesta mucho menos por persona que cubrir a cada quien por separado."
+          "a": "No. Es una alternativa privada para quienes no califican para un subsidio del mercado o necesitan cobertura fuera del período de inscripción abierta."
         },
         {
           "q": "¿Esto afecta mi caso migratorio?",
-          "a": "Comprar una cobertura médica privada es una compra normal y legal. Nosotros somos agentes de seguros, no abogados, así que para preguntas sobre su caso siga hablando con {partner} — para eso están ellos."
+          "a": "Comprar una cobertura privada es una compra normal y legal. Somos agentes de seguros, no abogados: para su caso, siga hablando con {partner}."
         }
       ]
     },
     "closing": {
-      "title": "Proteja lo que ya construyó",
-      "body": "Una llamada corta, en español, sin costo y sin compromiso. Le decimos exactamente cuánto costaría cubrir a su familia y usted decide con el número en la mano. Si nada se ajusta a su presupuesto, también se lo decimos.",
-      "cta": "Solicitar mi cobertura",
+      "title": "Pregunte primero. Decida después.",
+      "body": "Una llamada corta, en español, sin costo y sin compromiso.",
+      "cta": "Solicitar información",
       "call": "O llame al {phone}"
     },
     "partnership": {
       "label": "Sobre esta alianza",
-      "body": "{partner} recomienda Isaac Plans Insurance a sus clientes que necesitan una cobertura médica asequible. Usted no tiene ninguna obligación de inscribirse, y su decisión sobre la cobertura no afecta de ninguna manera los servicios que {partner} le brinda."
+      "body": "{partner} recomienda Isaac Plans Insurance a sus clientes. Usted no tiene ninguna obligación de inscribirse, y su decisión no afecta los servicios que {partner} le brinda."
     },
     "notFound": {
       "title": "Esta página no está disponible",
-      "body": "El enlace de socio que siguió no está activo. Si alguien le dio este enlace, comuníquese con esa persona, o contáctenos directamente.",
+      "body": "El enlace de socio que siguió no está activo.",
       "cta": "Ir a nuestra página de cobertura médica"
     }
   },

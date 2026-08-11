@@ -3,19 +3,7 @@ import Image from "next/image";
 import { getTranslations } from "next-intl/server";
 import { hasLocale } from "next-intl";
 import { notFound } from "next/navigation";
-import {
-  ArrowRight,
-  BadgeCheck,
-  Clock,
-  FileCheck2,
-  Languages,
-  Phone,
-  ShieldCheck,
-  Stethoscope,
-  TriangleAlert,
-  Wallet,
-} from "lucide-react";
-import type { LucideIcon } from "lucide-react";
+import { ArrowRight, BadgeCheck, Check, Phone } from "lucide-react";
 import {
   Accordion,
   AccordionContent,
@@ -30,6 +18,7 @@ import {
   PARTNER_DEFAULT_INTRO,
   pickCopy,
 } from "@/lib/referral-partners/content";
+import { partnerHeroImage, partnerSectionImage } from "@/lib/referral-partners/images";
 import { FINAL_EXPENSE_GET_COVERED_AGENT_HEADSHOT } from "@/lib/get-covered-fast/constants";
 import { routing } from "@/i18n/routing";
 
@@ -46,16 +35,6 @@ type PageProps = {
   params: Promise<{ locale: string; slug: string }>;
 };
 
-/** Benefit icons, positionally matched to `partnerReferral.benefits.items` in the message files. */
-const BENEFIT_ICONS: LucideIcon[] = [
-  Wallet,
-  Clock,
-  FileCheck2,
-  Stethoscope,
-  Languages,
-  ShieldCheck,
-];
-
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { locale, slug } = await params;
   const partner = await getPartnerBySlug(slug);
@@ -69,8 +48,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return {
     title: t("title", { partner: partner.companyName }),
     description: t("description"),
-    // A partner link is meant to be shared by the partner, not found in search — and two partners
-    // pitching the same product would otherwise compete with our own pages for the same terms.
+    // Meant to be shared by the partner, not found in search — and two partner pages pitching the
+    // same product would otherwise compete with our own pages for the same terms.
     robots: { index: false, follow: true },
     openGraph: {
       title: t("title", { partner: partner.companyName }),
@@ -111,19 +90,17 @@ export default async function PartnerLandingPage({ params }: PageProps) {
   const steps = t.raw("steps.items") as { title: string; body: string }[];
   const faqs = t.raw("faq.items") as { q: string; a: string }[];
 
-  // The immigration blocks are opt-in per partner: this copy is written for someone with a
-  // pending case, and would read as nonsense on, say, a realtor's referral page.
+  // The public-charge blocks are opt-in per partner: this copy is written for someone with a
+  // pending case and would read as nonsense on, say, a realtor's referral page.
   const isImmigration = partner.audienceKind === "immigration";
+  const factorItems = isImmigration ? (t.raw("factors.items") as string[]) : [];
   const situations = isImmigration
     ? (t.raw("situations.items") as { title: string; body: string }[])
-    : [];
-  const stakes = isImmigration
-    ? (t.raw("stakes.items") as { title: string; body: string }[])
     : [];
 
   return (
     <main className="bg-white dark:bg-slate-950">
-      {/* ── Co-branded bar: both logos, so the client instantly sees who vouched for us ── */}
+      {/* ── Co-branded bar: the client sees immediately who vouched for us ── */}
       <div className="border-b border-slate-200 bg-white/90 backdrop-blur dark:border-slate-800 dark:bg-slate-950/90">
         <div className="mx-auto flex max-w-6xl items-center justify-center gap-4 px-4 py-4 sm:gap-6">
           <Image
@@ -154,15 +131,13 @@ export default async function PartnerLandingPage({ params }: PageProps) {
         </div>
       </div>
 
-      {/* ── Hero ── */}
+      {/* ── Hero: copy left, photo right ── */}
       <section
         className="relative overflow-hidden"
-        style={{
-          backgroundImage: `linear-gradient(160deg, ${accent}14 0%, transparent 55%)`,
-        }}
+        style={{ backgroundImage: `linear-gradient(160deg, ${accent}14 0%, transparent 60%)` }}
       >
-        <div className="mx-auto grid max-w-6xl gap-10 px-4 py-12 lg:grid-cols-[1.05fr_1fr] lg:gap-14 lg:py-20">
-          <div className="flex flex-col justify-center">
+        <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 py-12 lg:grid-cols-2 lg:gap-14 lg:py-20">
+          <div>
             <span
               className="inline-flex w-fit items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-semibold sm:text-sm"
               style={{ backgroundColor: `${accent}1a`, color: accent }}
@@ -175,11 +150,11 @@ export default async function PartnerLandingPage({ params }: PageProps) {
               {headline}
             </h1>
 
-            <p className="mt-5 max-w-xl text-base leading-relaxed text-slate-600 dark:text-slate-300 sm:text-lg">
+            <p className="mt-4 max-w-lg text-base leading-relaxed text-slate-600 dark:text-slate-300 sm:text-lg">
               {intro}
             </p>
 
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <div className="mt-7 flex flex-col gap-3 sm:flex-row">
               <a
                 href="#request"
                 className="inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3.5 text-base font-bold text-white shadow-lg transition-all hover:brightness-110"
@@ -201,138 +176,125 @@ export default async function PartnerLandingPage({ params }: PageProps) {
             </p>
           </div>
 
-          {/* Form sits in the hero on desktop — the whole point of the page is this form. */}
-          <div id="request" className="scroll-mt-8">
-            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xl dark:border-slate-800 dark:bg-slate-900 sm:p-8">
-              <h2 className="text-xl font-bold text-slate-900 dark:text-white">
-                {t("form.title")}
-              </h2>
-              <p className="mt-1.5 text-sm text-slate-600 dark:text-slate-300">
-                {t("form.subtitle")}
-              </p>
-              <div className="mt-6">
-                <PartnerLeadForm partnerSlug={partner.slug} accentColor={accent} />
-              </div>
-            </div>
+          {/* PLACEHOLDER art — swap per partner in /admin/referral-partners. */}
+          <div className="relative aspect-[4/3] w-full overflow-hidden rounded-3xl shadow-xl lg:aspect-[5/6]">
+            <Image
+              src={partnerHeroImage(partner.heroImageUrl)}
+              alt={t("heroImageAlt")}
+              fill
+              unoptimized
+              priority
+              className="object-cover"
+              sizes="(max-width: 1024px) 100vw, 50vw"
+            />
           </div>
         </div>
       </section>
 
-      {/* ── Why this matters for THIS partner's clients — the one truly per-partner section ── */}
-      <section className="border-y border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-900/40">
-        <div className="mx-auto max-w-3xl px-4 py-14 text-center sm:py-16">
-          <span
-            className="text-xs font-bold uppercase tracking-widest"
-            style={{ color: accent }}
-          >
-            {t("audience.label")}
-          </span>
-          <h2 className="mt-3 text-2xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-3xl">
-            {t("audience.title")}
-          </h2>
-          <p className="mt-5 text-base leading-relaxed text-slate-600 dark:text-slate-300 sm:text-lg">
-            {audience}
-          </p>
+      {/* ── The form. Its own section so the hero can stay visual. ── */}
+      <section id="request" className="scroll-mt-4 border-y border-slate-200 bg-slate-50 px-4 py-12 dark:border-slate-800 dark:bg-slate-900/40 sm:py-16">
+        <div className="mx-auto max-w-xl rounded-2xl border border-slate-200 bg-white p-6 shadow-xl dark:border-slate-800 dark:bg-slate-900 sm:p-8">
+          <h2 className="text-xl font-bold text-slate-900 dark:text-white">{t("form.title")}</h2>
+          <p className="mt-1.5 text-sm text-slate-600 dark:text-slate-300">{t("form.subtitle")}</p>
+          <div className="mt-6">
+            <PartnerLeadForm partnerSlug={partner.slug} accentColor={accent} />
+          </div>
         </div>
       </section>
 
-      {/* ── When this matters (immigration partners only) ── */}
+      {/* ── What the government weighs (immigration partners only) ── */}
       {isImmigration && (
         <section className="mx-auto max-w-6xl px-4 py-14 sm:py-20">
-          <div className="mx-auto max-w-2xl text-center">
-            <span className="text-xs font-bold uppercase tracking-widest" style={{ color: accent }}>
-              {t("situations.label")}
-            </span>
-            <h2 className="mt-3 text-2xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-3xl">
-              {t("situations.title")}
-            </h2>
-          </div>
+          <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-14">
+            {/* PLACEHOLDER art — swap per partner in /admin/referral-partners. */}
+            <div className="relative aspect-[4/3] w-full overflow-hidden rounded-3xl shadow-lg">
+              <Image
+                src={partnerSectionImage(partner.sectionImageUrl)}
+                alt={t("factors.imageAlt")}
+                fill
+                unoptimized
+                className="object-cover"
+                sizes="(max-width: 1024px) 100vw, 50vw"
+              />
+            </div>
 
-          <div className="mt-10 grid gap-5 sm:grid-cols-2">
-            {situations.map((item, index) => (
-              <div
-                key={item.title}
-                className="rounded-2xl border-l-4 border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900"
-                style={{ borderLeftColor: accent }}
+            <div>
+              <span
+                className="text-xs font-bold uppercase tracking-widest"
+                style={{ color: accent }}
               >
-                <div className="flex items-start gap-3">
-                  <span
-                    className="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full text-xs font-extrabold text-white"
-                    style={{ backgroundColor: accent }}
-                  >
-                    {index + 1}
-                  </span>
-                  <div>
-                    <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                      {item.title}
-                    </h3>
-                    <p className="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-                      {item.body}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+                {t("factors.label")}
+              </span>
+              <h2 className="mt-3 text-2xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-3xl">
+                {t("factors.title")}
+              </h2>
+              <p className="mt-4 text-base leading-relaxed text-slate-600 dark:text-slate-300">
+                {t("factors.body")}
+              </p>
 
-          {/* The honest caveat sits with the claims it qualifies, not buried in a footer. */}
-          <p className="mx-auto mt-8 max-w-3xl rounded-xl bg-slate-50 px-5 py-4 text-center text-xs leading-relaxed text-slate-500 dark:bg-slate-900/60 dark:text-slate-400">
-            {t("situations.footnote", { partner: partner.companyName })}
-          </p>
+              <ul className="mt-6 grid grid-cols-2 gap-x-4 gap-y-3">
+                {factorItems.map((item) => (
+                  <li
+                    key={item}
+                    className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-200"
+                  >
+                    <Check className="h-4 w-4 flex-shrink-0" style={{ color: accent }} />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
         </section>
       )}
 
-      {/* ── What being uninsured costs (immigration partners only) ── */}
+      {/* ── Why people come to us (immigration partners only) ── */}
       {isImmigration && (
         <section className="border-y border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-900/40">
-          <div className="mx-auto max-w-6xl px-4 py-14 sm:py-20">
+          <div className="mx-auto max-w-5xl px-4 py-14 sm:py-20">
             <div className="mx-auto max-w-2xl text-center">
               <span
                 className="text-xs font-bold uppercase tracking-widest"
                 style={{ color: accent }}
               >
-                {t("stakes.label")}
+                {t("situations.label")}
               </span>
               <h2 className="mt-3 text-2xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-3xl">
-                {t("stakes.title")}
+                {t("situations.title")}
               </h2>
+              {audience && (
+                <p className="mt-4 text-base leading-relaxed text-slate-600 dark:text-slate-300">
+                  {audience}
+                </p>
+              )}
             </div>
 
-            <div className="mt-10 grid gap-5 md:grid-cols-3">
-              {stakes.map((item) => (
+            <div className="mt-10 grid gap-4 sm:grid-cols-2">
+              {situations.map((item) => (
                 <div
                   key={item.title}
-                  className="rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900"
+                  className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900"
                 >
-                  <div className="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-xl bg-amber-100 dark:bg-amber-900/30">
-                    <TriangleAlert className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-                  </div>
                   <h3 className="text-base font-bold text-slate-900 dark:text-white">
                     {item.title}
                   </h3>
-                  <p className="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+                  <p className="mt-1.5 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
                     {item.body}
                   </p>
                 </div>
               ))}
             </div>
 
-            <div className="mt-10 text-center">
-              <a
-                href="#request"
-                className="inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3.5 text-base font-bold text-white shadow-lg transition-all hover:brightness-110"
-                style={{ backgroundColor: accent }}
-              >
-                {t("heroCta")}
-                <ArrowRight className="h-4 w-4" />
-              </a>
-            </div>
+            {/* The honest caveat sits with the claims it qualifies, not buried in a footer. */}
+            <p className="mx-auto mt-8 max-w-3xl text-center text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+              {t("situations.footnote", { partner: partner.companyName })}
+            </p>
           </div>
         </section>
       )}
 
       {/* ── Benefits ── */}
-      <section className="mx-auto max-w-6xl px-4 py-14 sm:py-20">
+      <section className="mx-auto max-w-5xl px-4 py-14 sm:py-20">
         <div className="mx-auto max-w-2xl text-center">
           <span className="text-xs font-bold uppercase tracking-widest" style={{ color: accent }}>
             {t("benefits.label")}
@@ -342,29 +304,24 @@ export default async function PartnerLandingPage({ params }: PageProps) {
           </h2>
         </div>
 
-        <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {benefits.map((benefit, index) => {
-            const Icon = BENEFIT_ICONS[index] ?? ShieldCheck;
-            return (
+        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {benefits.map((benefit) => (
+            <div
+              key={benefit.title}
+              className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900"
+            >
               <div
-                key={benefit.title}
-                className="rounded-2xl border border-slate-200 bg-white p-6 transition-shadow hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
+                className="mb-3 inline-flex h-9 w-9 items-center justify-center rounded-lg"
+                style={{ backgroundColor: `${accent}1a` }}
               >
-                <div
-                  className="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-xl"
-                  style={{ backgroundColor: `${accent}1a` }}
-                >
-                  <Icon className="h-5 w-5" style={{ color: accent }} />
-                </div>
-                <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                  {benefit.title}
-                </h3>
-                <p className="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-                  {benefit.body}
-                </p>
+                <Check className="h-4 w-4" style={{ color: accent }} />
               </div>
-            );
-          })}
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white">{benefit.title}</h3>
+              <p className="mt-1.5 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+                {benefit.body}
+              </p>
+            </div>
+          ))}
         </div>
       </section>
 
@@ -373,7 +330,7 @@ export default async function PartnerLandingPage({ params }: PageProps) {
         id="how"
         className="scroll-mt-8 border-y border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-900/40"
       >
-        <div className="mx-auto max-w-6xl px-4 py-14 sm:py-20">
+        <div className="mx-auto max-w-5xl px-4 py-14 sm:py-20">
           <div className="mx-auto max-w-2xl text-center">
             <span className="text-xs font-bold uppercase tracking-widest" style={{ color: accent }}>
               {t("steps.label")}
@@ -383,22 +340,22 @@ export default async function PartnerLandingPage({ params }: PageProps) {
             </h2>
           </div>
 
-          <ol className="mt-10 grid gap-6 md:grid-cols-3">
+          <ol className="mt-10 grid gap-5 md:grid-cols-3">
             {steps.map((step, index) => (
               <li
                 key={step.title}
-                className="relative rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900"
+                className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900"
               >
                 <div
-                  className="flex h-10 w-10 items-center justify-center rounded-full text-base font-extrabold text-white"
+                  className="flex h-9 w-9 items-center justify-center rounded-full text-sm font-extrabold text-white"
                   style={{ backgroundColor: accent }}
                 >
                   {index + 1}
                 </div>
-                <h3 className="mt-4 text-base font-bold text-slate-900 dark:text-white">
+                <h3 className="mt-3 text-base font-bold text-slate-900 dark:text-white">
                   {step.title}
                 </h3>
-                <p className="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+                <p className="mt-1.5 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
                   {step.body}
                 </p>
               </li>
@@ -408,34 +365,34 @@ export default async function PartnerLandingPage({ params }: PageProps) {
       </section>
 
       {/* ── Who you'll talk to ── */}
-      <section className="mx-auto max-w-4xl px-4 py-14 sm:py-20">
-        <div className="flex flex-col items-center gap-7 rounded-2xl border border-slate-200 bg-white p-7 dark:border-slate-800 dark:bg-slate-900 sm:flex-row sm:items-start sm:p-9">
-          <div className="relative h-28 w-28 flex-shrink-0 overflow-hidden rounded-2xl ring-4 ring-slate-100 dark:ring-slate-800">
+      <section className="mx-auto max-w-3xl px-4 py-14 sm:py-16">
+        <div className="flex flex-col items-center gap-6 rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900 sm:flex-row sm:items-start sm:p-8">
+          <div className="relative h-24 w-24 flex-shrink-0 overflow-hidden rounded-2xl ring-4 ring-slate-100 dark:ring-slate-800">
             <Image
               src={FINAL_EXPENSE_GET_COVERED_AGENT_HEADSHOT}
               alt={t("agent.photoAlt")}
-              width={224}
-              height={224}
+              width={192}
+              height={192}
               className="h-full w-full object-cover object-[center_20%]"
-              sizes="112px"
+              sizes="96px"
             />
           </div>
           <div className="text-center sm:text-left">
             <span className="text-xs font-bold uppercase tracking-widest" style={{ color: accent }}>
               {t("agent.label")}
             </span>
-            <h3 className="mt-2 text-xl font-bold text-slate-900 dark:text-white">
+            <h3 className="mt-2 text-lg font-bold text-slate-900 dark:text-white">
               {t("agent.name")}
             </h3>
             <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
               {t("agent.title")}
             </p>
-            <p className="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+            <p className="mt-2.5 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
               {t("agent.body")}
             </p>
             <a
               href={CRM_PHONE_TEL}
-              className="mt-4 inline-flex items-center gap-2 text-sm font-semibold"
+              className="mt-3 inline-flex items-center gap-2 text-sm font-semibold"
               style={{ color: accent }}
             >
               <Phone className="h-4 w-4" />
@@ -498,7 +455,7 @@ export default async function PartnerLandingPage({ params }: PageProps) {
         </div>
       </section>
 
-      {/* ── Partnership disclosure: says plainly that enrolling is optional and independent ── */}
+      {/* ── Partnership disclosure: enrolling is optional and independent ── */}
       <section className="border-t border-slate-200 dark:border-slate-800">
         <div className="mx-auto max-w-3xl px-4 py-10 text-center">
           <span className="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">

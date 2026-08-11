@@ -104,6 +104,8 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       "phone",
       "website",
       "logoUrl",
+      "heroImageUrl",
+      "sectionImageUrl",
       "accentColor",
       "headlineEn",
       "headlineEs",

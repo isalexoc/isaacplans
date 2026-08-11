@@ -624,6 +624,12 @@ export const referralPartners = pgTable("referral_partners", {
   phone: text("phone"),
   website: text("website"),
   logoUrl: text("logo_url"), // shown next to ours in the co-branded header
+  /**
+   * Landing-page art. Both are admin-editable so swapping the photography never needs a deploy;
+   * blank falls back to the placeholders in lib/referral-partners/images.ts.
+   */
+  heroImageUrl: text("hero_image_url"), // beside the hero headline
+  sectionImageUrl: text("section_image_url"), // beside the "what they look at" block
   accentColor: text("accent_color").notNull().default("#0077B6"), // hex, tints the partner page
   /**
    * Commission in basis points rather than a float — 500 = 5%. Integer math end to end means

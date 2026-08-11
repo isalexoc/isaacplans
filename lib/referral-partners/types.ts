@@ -41,6 +41,8 @@ export type ReferralPartnerRecord = {
   phone: string;
   website: string;
   logoUrl: string;
+  heroImageUrl: string;
+  sectionImageUrl: string;
   accentColor: string;
   commissionBps: number;
   defaultLocale: "en" | "es";

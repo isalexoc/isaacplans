@@ -20,13 +20,14 @@ export const PARTNER_DEFAULT_HEADLINE: Bilingual = {
 };
 
 export const PARTNER_DEFAULT_INTRO: Bilingual = {
-  en: "A licensed agent walks you through your options in plain language, finds a plan that fits your budget, and sends you proof of coverage you can use right away. Asking costs nothing.",
-  es: "Un agente con licencia le explica sus opciones en su idioma, busca un plan que se ajuste a su presupuesto y le envía la constancia de cobertura que necesita. Preguntar no cuesta nada.",
+  en: "A licensed agent finds a plan that fits your budget and sends you proof of coverage you can use right away. Asking costs nothing.",
+  es: "Un agente con licencia busca un plan que se ajuste a su presupuesto y le envía la constancia de cobertura que necesita. Preguntar no cuesta nada.",
 };
 
+/** Optional short lead-in under the situations heading. Blank on a partner renders nothing. */
 export const PARTNER_DEFAULT_AUDIENCE: Bilingual = {
-  en: "Many applications ask you to show you can cover your own medical costs. We help you meet that requirement with real coverage you can actually afford — not a policy that looks good on paper and leaves you stuck when you need it.",
-  es: "Muchos trámites le piden demostrar que usted puede cubrir sus propios gastos médicos. Le ayudamos a cumplir ese requisito con una cobertura real y a un precio que sí puede pagar — no una póliza que se ve bien en papel y lo deja desamparado cuando la necesita.",
+  en: "",
+  es: "",
 };
 
 export function pickCopy(

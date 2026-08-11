@@ -33,18 +33,18 @@ const PARTNER = {
   defaultLocale: "es",
   status: "active",
 
-  headlineEs: "No deje que una sola cuenta del hospital borre años de trabajo",
-  headlineEn: "Don't let one hospital bill undo years of work",
+  headlineEs: "Demuestre que puede hacerse cargo de su salud",
+  headlineEn: "Show that you can take care of your own health",
 
   introEs:
-    "Usted ha puesto años, esfuerzo y miles de dólares en su caso y en su familia. Una sola visita a emergencias sin cobertura puede costar miles de dólares en una tarde, y esa deuda no espera a que su trámite se resuelva. Una cobertura médica privada protege lo que ya construyó. No pide número de Seguro Social ni residencia, y puede empezar en días.",
+    "Una cobertura médica asequible, sin número de Seguro Social ni residencia, que empieza en días. Es una forma clara de demostrar que usted puede cubrir su propia atención médica.",
   introEn:
-    "You have put years, effort, and thousands of dollars into your case and your family. One uninsured emergency room visit can cost thousands of dollars in a single afternoon, and that debt does not wait for your case to be resolved. Private health coverage protects what you have already built. It does not require a Social Security number or permanent residency, and it can start in days.",
+    "Affordable health coverage, with no Social Security number or residency required, starting in days. A clear way to show you can pay for your own medical care.",
 
   audienceEs:
-    "Sin Fronteras USA lo acompaña en su trámite. Nosotros nos encargamos de su salud. Estas son las situaciones más comunes que vemos en las familias que ellos nos envían, y lo que cuesta que lo agarren desprevenido.",
+    "Sin Fronteras USA lo acompaña en su trámite. Nosotros nos encargamos de su salud.",
   audienceEn:
-    "Sin Fronteras USA handles your case. We handle your health coverage. These are the situations we see most often in the families they send us, and what it costs to be caught without it.",
+    "Sin Fronteras USA handles your case. We handle your health coverage.",
 
   // Turns on the "when this matters" + "what being uninsured costs" blocks on their page.
   audienceKind: "immigration",
