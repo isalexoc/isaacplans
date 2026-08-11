@@ -12,6 +12,7 @@ import {
   printProspectLetters,
   saveLetterRequest,
   saveMailingLabelSettingsRequest,
+  setLetterKindRequest,
   updateMailingLabelRequest,
 } from "@/lib/mailing-labels/api";
 import { DEFAULT_TAGLINES } from "@/lib/mailing-labels/format";
@@ -25,6 +26,7 @@ import {
   EMPTY_SENDER_ADDRESS,
   type LabelAgentContact,
   type LabelAgentOverride,
+  type LetterKind,
   type LabelSheetOptions,
   type MailingLabelRecord,
   type MailingLabelSettings,
@@ -201,6 +203,18 @@ export function MailingLabelsClient({ agent }: { agent: LabelAgentContact | null
     return result;
   };
 
+  const setLetterKind = async (
+    id: string,
+    kind: LetterKind
+  ): Promise<MailingLabelRecord | null> => {
+    let result: MailingLabelRecord | null = null;
+    await withBusy(async () => {
+      result = await setLetterKindRequest(id, kind);
+      mergeLabel(result);
+    });
+    return result;
+  };
+
   const printLetters = async (ids: string[]) => {
     await withBusy(() => printProspectLetters(ids));
   };
@@ -285,6 +299,7 @@ export function MailingLabelsClient({ agent }: { agent: LabelAgentContact | null
           labels={activeLabels}
           onGenerate={generateLetter}
           onSave={saveLetter}
+          onSetKind={setLetterKind}
           onPrint={printLetters}
           busy={busy}
           error={error}

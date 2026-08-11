@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { mailingLabels } from "@/lib/db/schema";
 import { isPrintableAddress, normalizeMailingLabelInput, normalizeLanguage } from "./format";
 import type {
+  LetterKind,
   MailingLabelInput,
   MailingLabelRecord,
   MailingLabelSource,
@@ -33,6 +34,7 @@ export function rowToMailingLabelRecord(row: MailingLabelRow): MailingLabelRecor
     printedAt: row.printedAt ? row.printedAt.toISOString() : null,
     notes: row.notes ?? "",
     letterBody: row.letterBody ?? "",
+    letterKind: row.letterKind === "welcome" ? "welcome" : "prospect",
     letterGeneratedAt: row.letterGeneratedAt ? row.letterGeneratedAt.toISOString() : null,
     letterEditedAt: row.letterEditedAt ? row.letterEditedAt.toISOString() : null,
     letterContext: row.letterContext ?? "",
@@ -291,6 +293,22 @@ export async function saveEditedLetter(
   const rows = await db
     .update(mailingLabels)
     .set({ letterBody: body, letterEditedAt: now, updatedAt: now })
+    .where(eq(mailingLabels.id, id))
+    .returning();
+  return rows[0] ? rowToMailingLabelRecord(rows[0]) : null;
+}
+
+/**
+ * Flip a prospect to a client (or back). The existing draft is left in place deliberately — the
+ * UI prompts to regenerate, rather than silently discarding a letter the agent may have edited.
+ */
+export async function setLetterKind(
+  id: string,
+  letterKind: LetterKind
+): Promise<MailingLabelRecord | null> {
+  const rows = await db
+    .update(mailingLabels)
+    .set({ letterKind, updatedAt: new Date() })
     .where(eq(mailingLabels.id, id))
     .returning();
   return rows[0] ? rowToMailingLabelRecord(rows[0]) : null;

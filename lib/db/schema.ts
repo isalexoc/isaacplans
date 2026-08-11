@@ -582,6 +582,12 @@ export const mailingLabels = pgTable("mailing_labels", {
    * block) so the agent can edit it in a textarea without fighting markup.
    */
   letterBody: text("letter_body"),
+  /**
+   * Which letter this person gets: `prospect` (still deciding) or `welcome` (they bought).
+   * Final expense is an emotional sale and the weeks after it are when buyer's remorse and
+   * chargebacks happen, so a new client gets a warm welcome rather than another pitch.
+   */
+  letterKind: text("letter_kind").notNull().default("prospect"), // prospect | welcome
   letterGeneratedAt: timestamp("letter_generated_at"),
   letterEditedAt: timestamp("letter_edited_at"),
   /** Human-readable note of what informed the draft, e.g. "3 call notes" or "no call history". */

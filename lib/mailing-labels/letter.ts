@@ -1,7 +1,12 @@
 import "server-only";
 import OpenAI from "openai";
 import { buildLetterContext, type LetterContext } from "./letter-context";
-import type { LabelAgentContact, MailingLabelLanguage, MailingLabelRecord } from "./types";
+import type {
+  LabelAgentContact,
+  LetterKind,
+  MailingLabelLanguage,
+  MailingLabelRecord,
+} from "./types";
 
 /**
  * Drafts the personal letter that goes inside the envelope with the mailed folder.
@@ -92,9 +97,15 @@ export function stripSignature(body: string, agentName: string): string {
     return agentParts.length > 0 && l.split(/\s+/).every((w) => agentParts.includes(w));
   };
 
+  /**
+   * A valedictory ends in a comma; a real sentence ends in . ! or ?. That shape catches the
+   * ones no fixed list ever will — "Looking forward to staying connected," and friends.
+   */
+  const isValediction = (line: string) => line.length <= 60 && /,$/.test(line);
+
   while (lines.length > 0) {
     const last = lines[lines.length - 1].trim();
-    if (last === "" || CLOSING_LINE.test(last) || isAgentLine(last)) {
+    if (last === "" || CLOSING_LINE.test(last) || isAgentLine(last) || isValediction(last)) {
       lines.pop();
       continue;
     }
@@ -104,13 +115,50 @@ export function stripSignature(body: string, agentName: string): string {
   return lines.join("\n").trim();
 }
 
-function buildSystemPrompt(language: MailingLabelLanguage, agent: LetterAgentInfo): string {
+function buildSystemPrompt(
+  language: MailingLabelLanguage,
+  agent: LetterAgentInfo,
+  kind: LetterKind
+): string {
   const inSpanish = language === "es";
+  const isWelcome = kind === "welcome";
   return [
     `You write short personal letters for ${agent.name}, a licensed agent who helps people set up`,
-    `final expense coverage through Senior Life. The letter is printed and mailed to someone who`,
-    `already asked for information about final expense coverage.`,
+    `final expense coverage through Senior Life.`,
+    isWelcome
+      ? `This letter is printed and mailed to someone who has JUST BECOME A CLIENT. They decided to` +
+        ` go ahead. This is a welcome letter, not a pitch — there is nothing left to sell.`
+      : `The letter is printed and mailed to someone who already asked for information about final` +
+        ` expense coverage but has not decided yet.`,
     ``,
+    ...(isWelcome
+      ? [
+          `WHAT THIS LETTER IS FOR`,
+          `Final expense is an emotional decision, and the weeks right after it are when people`,
+          `second-guess themselves. This letter exists to make them feel good about what they did`,
+          `and to make sure they know a real person is looking after them.`,
+          `- Welcome them warmly to the Senior Life family.`,
+          `- Affirm the decision. They did something real and loving for the people they care about.`,
+          `  Say so plainly, without flattery.`,
+          `- If you know who they are protecting, tie the decision to those people by name. That is`,
+          `  the heart of the letter.`,
+          `- Make clear they are not on their own: they have ${agent.name} personally, not a call`,
+          `  center, and can call about anything at all.`,
+          `- Ask them, warmly, to call FIRST if anything ever changes — money gets tight, a question`,
+          `  comes up, something looks off. Frame it as "let me help you sort it out before you do`,
+          `  anything", never as pressure and never as a warning about consequences.`,
+          ``,
+          `NEVER, in a welcome letter:`,
+          `- State or imply amounts, prices, draft dates, effective dates, or coverage details.`,
+          `  You do not have reliable values for any of that and a wrong one destroys the trust`,
+          `  this letter is meant to build.`,
+          `- Say the coverage is already active, approved, or paid up.`,
+          `- Suggest they cannot cancel, that cancelling costs them, or anything that pressures them`,
+          `  into keeping it. Asking them to call first is fine; implying they are trapped is not.`,
+          `- Ask for referrals, upsell, or mention any other product.`,
+          ``,
+        ]
+      : []),
     `Write the letter ${inSpanish ? "in warm, natural Latin American Spanish" : "in warm, natural English"}.`,
     ...(inSpanish
       ? [
@@ -172,18 +220,24 @@ function buildUserPrompt(
   ];
 
   const hasContext = context.facts.length > 0 || context.conversations.length > 0;
+  const isWelcome = record.letterKind === "welcome";
   const hasSpoken = context.conversations.length > 0;
 
   // Knowing facts about someone is not the same as having spoken to them. Details pulled from a
   // form they filled out led drafts to open with "it was a pleasure speaking with you" and refer
-  // to "the program we discussed" for people who had never had a call.
+  // to "the program we discussed" for people who had never had a call. A new client is the
+  // exception — they plainly dealt with you — but the specifics of those calls are still off
+  // limits unless the notes below actually contain them.
   lines.push(
     ``,
-    hasSpoken
-      ? `YOU HAVE SPOKEN WITH THIS PERSON BEFORE. Referring to that conversation is natural and good.`
-      : `YOU HAVE NEVER SPOKEN WITH THIS PERSON. Anything you know came from a form they filled` +
-        ` out, not a conversation. Never write "it was a pleasure speaking with you", "as we` +
-        ` discussed", "the plan we talked about", or anything else implying a previous call.`
+    isWelcome
+      ? `THIS PERSON IS NOW YOUR CLIENT, so you have clearly worked together. Do not invent` +
+        ` specifics of past conversations beyond what the notes below actually say.`
+      : hasSpoken
+        ? `YOU HAVE SPOKEN WITH THIS PERSON BEFORE. Referring to that conversation is natural and good.`
+        : `YOU HAVE NEVER SPOKEN WITH THIS PERSON. Anything you know came from a form they filled` +
+          ` out, not a conversation. Never write "it was a pleasure speaking with you", "as we` +
+          ` discussed", "the plan we talked about", or anything else implying a previous call.`
   );
 
   if (context.facts.length > 0) {
@@ -260,7 +314,7 @@ export async function generateProspectLetter(params: {
   }
 
   const context = await buildLetterContext(record);
-  const system = buildSystemPrompt(record.language, agent);
+  const system = buildSystemPrompt(record.language, agent, record.letterKind);
   const user = buildUserPrompt(record, agent, context);
 
   let body = await callModel(system, user);

@@ -1,0 +1,1 @@
+ALTER TABLE "mailing_labels" ADD COLUMN "letter_kind" text DEFAULT 'prospect' NOT NULL;

@@ -11,8 +11,10 @@ import {
   getMailingLabelById,
   saveEditedLetter,
   saveGeneratedLetter,
+  setLetterKind,
   setMailingLabelCrmContactId,
 } from "@/lib/mailing-labels/server";
+import { LETTER_KINDS, type LetterKind } from "@/lib/mailing-labels/types";
 import { resolveMailingLabelAgent } from "@/lib/mailing-labels/agent";
 
 // The model call can take a few seconds; Node runtime for the OpenAI SDK.
@@ -122,6 +124,19 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
 
     const { id } = await context.params;
     const body = await request.json();
+
+    // Flipping the prospect/client switch comes through here too, on its own.
+    if (typeof body?.letterKind === "string") {
+      if (!(LETTER_KINDS as readonly string[]).includes(body.letterKind)) {
+        return NextResponse.json({ success: false, error: "Unknown letter kind" }, { status: 400 });
+      }
+      const updated = await setLetterKind(id, body.letterKind as LetterKind);
+      if (!updated) {
+        return NextResponse.json({ success: false, error: "Not found" }, { status: 404 });
+      }
+      return NextResponse.json({ success: true, label: updated });
+    }
+
     const letterBody = typeof body?.letterBody === "string" ? body.letterBody.trim() : "";
     if (!letterBody) {
       return NextResponse.json(

@@ -1,15 +1,24 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Check, Loader2, Printer, RefreshCw, Search, Sparkles } from "lucide-react";
+import {
+  Check,
+  Loader2,
+  PartyPopper,
+  Printer,
+  RefreshCw,
+  Search,
+  Sparkles,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { mailingLabelDisplayName } from "@/lib/mailing-labels/format";
-import type { MailingLabelRecord } from "@/lib/mailing-labels/types";
+import type { LetterKind, MailingLabelRecord } from "@/lib/mailing-labels/types";
 
 /**
  * The letter that goes inside the envelope.
@@ -35,6 +44,7 @@ export function LetterPanel({
   labels,
   onGenerate,
   onSave,
+  onSetKind,
   onPrint,
   busy,
   error,
@@ -42,6 +52,7 @@ export function LetterPanel({
   labels: MailingLabelRecord[];
   onGenerate: (id: string) => Promise<MailingLabelRecord | null>;
   onSave: (id: string, body: string) => Promise<MailingLabelRecord | null>;
+  onSetKind: (id: string, kind: LetterKind) => Promise<MailingLabelRecord | null>;
   onPrint: (ids: string[]) => Promise<void>;
   busy: boolean;
   error: string | null;
@@ -52,6 +63,12 @@ export function LetterPanel({
   const [dirty, setDirty] = useState(false);
   const [saved, setSaved] = useState(false);
   const [generating, setGenerating] = useState(false);
+  /**
+   * Which label has had its prospect/client switch flipped since its letter was written. Flipping
+   * deliberately keeps the existing draft (it may have been hand-edited), so this drives a nudge
+   * to regenerate rather than silently leaving a welcome letter for a prospect.
+   */
+  const [staleKindId, setStaleKindId] = useState<string | null>(null);
 
   const selected = useMemo(
     () => labels.find((l) => l.id === selectedId) ?? null,
@@ -65,7 +82,19 @@ export function LetterPanel({
   useEffect(() => {
     setDraft(selected?.letterBody ?? "");
     setDirty(false);
+    setStaleKindId(null); // A fresh draft always matches the current kind.
   }, [selected?.id, selected?.letterGeneratedAt, selected?.letterEditedAt, selected?.letterBody]);
+
+  const isClient = selected?.letterKind === "welcome";
+  const kindChanged = Boolean(
+    selected && staleKindId === selected.id && selected.letterBody.trim()
+  );
+
+  const setKind = async (id: string, kind: LetterKind) => {
+    const hadLetter = Boolean(selected?.letterBody.trim());
+    const result = await onSetKind(id, kind);
+    if (result && hadLetter) setStaleKindId(id);
+  };
 
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -133,7 +162,14 @@ export function LetterPanel({
                         : "hover:bg-muted"
                     }`}
                   >
-                    <span className="block truncate">{mailingLabelDisplayName(record)}</span>
+                    <span className="block truncate">
+                      {mailingLabelDisplayName(record)}
+                      {record.letterKind === "welcome" ? (
+                        <span className="ml-1 text-emerald-600" title="Client">
+                          ●
+                        </span>
+                      ) : null}
+                    </span>
                     <span className="block truncate text-xs text-muted-foreground">
                       {record.city}, {record.state}
                       {record.letterBody.trim() ? " · letter ready" : ""}
@@ -206,6 +242,38 @@ export function LetterPanel({
             </CardHeader>
 
             <CardContent className="space-y-4">
+              <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border p-3">
+                <div className="flex items-center gap-3">
+                  <Switch
+                    id="ml-sold"
+                    checked={isClient}
+                    disabled={busy}
+                    onCheckedChange={(v) => void setKind(selected.id, v ? "welcome" : "prospect")}
+                  />
+                  <Label htmlFor="ml-sold" className="font-normal">
+                    <span className="font-medium">Sold — they&apos;re a client now</span>
+                    <span className="block text-xs text-muted-foreground">
+                      {isClient
+                        ? "Drafts a welcome letter: thanks them, reassures them about the decision, and asks them to call you first if anything changes."
+                        : "Drafts a prospect letter inviting them to get covered."}
+                    </span>
+                  </Label>
+                </div>
+                {isClient ? (
+                  <Badge className="bg-emerald-600 hover:bg-emerald-600">
+                    <PartyPopper className="mr-1 h-3 w-3" />
+                    Client
+                  </Badge>
+                ) : null}
+              </div>
+
+              {kindChanged ? (
+                <p className="rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm dark:border-amber-900 dark:bg-amber-950/40">
+                  This letter was written as a{" "}
+                  <strong>{isClient ? "prospect letter" : "welcome letter"}</strong>. Regenerate it
+                  to match.
+                </p>
+              ) : null}
               {!selected.crmContactId ? (
                 <p className="rounded-md bg-muted px-3 py-2 text-xs text-muted-foreground">
                   This prospect isn&apos;t linked to a CRM contact yet, so there are no call notes to

@@ -27,6 +27,10 @@ export type MailingLabelStatus = (typeof MAILING_LABEL_STATUSES)[number];
 
 export type MailingLabelLanguage = "en" | "es";
 
+/** `prospect` = still deciding; `welcome` = they bought, so the letter welcomes them instead. */
+export const LETTER_KINDS = ["prospect", "welcome"] as const;
+export type LetterKind = (typeof LETTER_KINDS)[number];
+
 /** A queued prospect, as returned by the API. */
 export type MailingLabelRecord = {
   id: string;
@@ -49,6 +53,7 @@ export type MailingLabelRecord = {
   notes: string;
   /** Personal letter for the envelope: AI-drafted, then hand-edited. Empty until generated. */
   letterBody: string;
+  letterKind: LetterKind;
   letterGeneratedAt: string | null;
   letterEditedAt: string | null;
   letterContext: string;

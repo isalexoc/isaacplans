@@ -5,6 +5,7 @@
 
 import type {
   LabelSheetOptions,
+  LetterKind,
   MailingLabelInput,
   MailingLabelRecord,
   MailingLabelSettings,
@@ -119,6 +120,20 @@ export async function loadCrmContact(contactId: string): Promise<CrmContactNativ
 /** Draft or redraft the letter for one prospect. Slow — it calls the model. */
 export async function generateLetterRequest(id: string): Promise<MailingLabelRecord> {
   const res = await fetch(`${BASE}/${id}/letter`, { method: "POST" });
+  const data = await readJson<{ label: MailingLabelRecord }>(res);
+  return data.label;
+}
+
+/** Mark the person a client (or back to a prospect). Drives which letter gets drafted. */
+export async function setLetterKindRequest(
+  id: string,
+  letterKind: LetterKind
+): Promise<MailingLabelRecord> {
+  const res = await fetch(`${BASE}/${id}/letter`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ letterKind }),
+  });
   const data = await readJson<{ label: MailingLabelRecord }>(res);
   return data.label;
 }

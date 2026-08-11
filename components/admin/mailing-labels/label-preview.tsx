@@ -350,6 +350,7 @@ export const PREVIEW_SAMPLE: MailingLabelRecord = {
   printedAt: null,
   notes: "",
   letterBody: "",
+  letterKind: "prospect",
   letterGeneratedAt: null,
   letterEditedAt: null,
   letterContext: "",
