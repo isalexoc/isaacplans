@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Loader2 } from "lucide-react";
+import { Link2, Loader2 } from "lucide-react";
 import IntakeAddressInput, { type ResolvedAddress } from "@/components/shared/intake-address-input";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,7 +15,12 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { US_STATE_OPTIONS } from "@/lib/get-covered-fast/us-states";
-import { isPrintableAddress } from "@/lib/mailing-labels/format";
+import {
+  isPrintableAddress,
+  normalizeStateCode,
+  normalizeZip,
+} from "@/lib/mailing-labels/format";
+import { CrmContactPicker } from "./crm-contact-picker";
 import type {
   MailingLabelInput,
   MailingLabelLanguage,
@@ -42,6 +47,7 @@ const EMPTY: LabelFormValues = {
   phone: "",
   email: "",
   notes: "",
+  crmContactId: null,
 };
 
 export function labelToFormValues(record: MailingLabelRecord): LabelFormValues {
@@ -57,6 +63,7 @@ export function labelToFormValues(record: MailingLabelRecord): LabelFormValues {
     phone: record.phone,
     email: record.email,
     notes: record.notes,
+    crmContactId: record.crmContactId,
   };
 }
 
@@ -68,6 +75,7 @@ export function LabelForm({
   submitLabel,
   saving,
   error,
+  showCrmPicker,
 }: {
   values: LabelFormValues;
   onChange: (next: LabelFormValues) => void;
@@ -76,6 +84,8 @@ export function LabelForm({
   submitLabel: string;
   saving: boolean;
   error: string | null;
+  /** Hidden while editing an existing row — the CRM link is already settled by then. */
+  showCrmPicker?: boolean;
 }) {
   const [touched, setTouched] = useState(false);
   const set = <K extends keyof LabelFormValues>(key: K, value: LabelFormValues[K]) =>
@@ -103,6 +113,33 @@ export function LabelForm({
         if (canSubmit) onSubmit();
       }}
     >
+      {showCrmPicker ? (
+        <CrmContactPicker
+          disabled={saving}
+          onPick={(contact) =>
+            onChange({
+              ...values,
+              firstName: contact.firstName || values.firstName,
+              lastName: contact.lastName || values.lastName,
+              addressLine1: contact.address1 || values.addressLine1,
+              city: contact.city || values.city,
+              state: normalizeStateCode(contact.state) || values.state,
+              postalCode: normalizeZip(contact.postalCode) || values.postalCode,
+              phone: contact.phone || values.phone,
+              email: contact.email || values.email,
+              crmContactId: contact.id,
+            })
+          }
+        />
+      ) : null}
+
+      {values.crmContactId ? (
+        <p className="flex items-center gap-2 rounded-md bg-emerald-50 px-3 py-2 text-sm text-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-200">
+          <Link2 className="h-4 w-4" />
+          Linked to a CRM contact — their call notes will personalize the letter.
+        </p>
+      ) : null}
+
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="ml-first-name">First name</Label>

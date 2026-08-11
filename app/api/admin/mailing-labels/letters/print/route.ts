@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { renderProspectLetters } from "@/lib/mailing-labels/letter-pdf";
-import { resolveLetterAgent } from "@/lib/mailing-labels/letter-agent";
+import { resolveMailingLabelAgent } from "@/lib/mailing-labels/agent";
 import { getMailingLabelsByIds } from "@/lib/mailing-labels/server";
 
 // @react-pdf/renderer needs the Node runtime.
@@ -29,13 +29,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const agent = await resolveLetterAgent(userId);
+    const agent = await resolveMailingLabelAgent(userId);
     if (!agent) {
       return NextResponse.json(
         {
           success: false,
           error:
-            "Add your name and phone to the Leave-Behind agent profile first — the letter is signed with them.",
+            "Set the name that signs your letters in Settings (or fill in the Leave-Behind agent profile).",
         },
         { status: 400 }
       );

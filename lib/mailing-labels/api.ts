@@ -82,6 +82,40 @@ export async function bulkMailingLabelAction(
   return data.affected;
 }
 
+export type CrmContactSummary = {
+  id: string;
+  name: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+};
+
+export type CrmContactNative = CrmContactSummary & {
+  address1: string;
+  city: string;
+  state: string;
+  postalCode: string;
+};
+
+export async function searchCrmContacts(q: string): Promise<CrmContactSummary[]> {
+  const res = await fetch(`${BASE}/crm-search?q=${encodeURIComponent(q)}`, {
+    cache: "no-store",
+  });
+  const data = await readJson<{ contacts: CrmContactSummary[] }>(res);
+  return data.contacts;
+}
+
+export async function loadCrmContact(contactId: string): Promise<CrmContactNative> {
+  const res = await fetch(`${BASE}/crm-search`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ contactId }),
+  });
+  const data = await readJson<{ contact: CrmContactNative }>(res);
+  return data.contact;
+}
+
 /** Draft or redraft the letter for one prospect. Slow — it calls the model. */
 export async function generateLetterRequest(id: string): Promise<MailingLabelRecord> {
   const res = await fetch(`${BASE}/${id}/letter`, { method: "POST" });

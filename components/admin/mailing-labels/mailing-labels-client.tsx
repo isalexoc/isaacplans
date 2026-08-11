@@ -21,8 +21,10 @@ import {
   type LabelPresetId,
 } from "@/lib/mailing-labels/presets";
 import {
+  EMPTY_AGENT_OVERRIDE,
   EMPTY_SENDER_ADDRESS,
   type LabelAgentContact,
+  type LabelAgentOverride,
   type LabelSheetOptions,
   type MailingLabelRecord,
   type MailingLabelSettings,
@@ -38,6 +40,7 @@ import { PriorityMailPanel } from "./priority-mail-panel";
 
 const FALLBACK_SETTINGS: MailingLabelSettings = {
   sender: EMPTY_SENDER_ADDRESS,
+  agent: EMPTY_AGENT_OVERRIDE,
   defaults: {
     stickerPreset: DEFAULT_STICKER_PRESET,
     shippingPreset: DEFAULT_SHIPPING_PRESET,
@@ -204,6 +207,7 @@ export function MailingLabelsClient({ agent }: { agent: LabelAgentContact | null
 
   const saveSettings = async (patch: {
     sender?: SenderAddress;
+    agent?: LabelAgentOverride;
     defaults?: MailingLabelSettings["defaults"];
   }): Promise<boolean> =>
     withBusy(async () => {
@@ -270,6 +274,7 @@ export function MailingLabelsClient({ agent }: { agent: LabelAgentContact | null
               submitLabel={editing ? "Save changes" : "Add to queue"}
               saving={savingForm}
               error={formError}
+              showCrmPicker={!editing}
             />
           </CardContent>
         </Card>

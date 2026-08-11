@@ -1,0 +1,42 @@
+import "server-only";
+import {
+  agentDisplayName,
+  formatLeaveBehindEmailForImage,
+  formatLeaveBehindPhoneForImage,
+} from "@/lib/leave-behind-agent-profile";
+import { getLeaveBehindAgentProfile } from "@/lib/leave-behind-agent-profile-server";
+import { getMailingLabelSettings } from "./settings";
+import type { LabelAgentContact } from "./types";
+
+/**
+ * The single source of truth for how the agent appears on a printed label or letter.
+ *
+ * Starts from the shared leave-behind profile (the record Sale Sticker and Leave-Behind already
+ * use), then lets the mailing-label Settings override any field. That override is the point: the
+ * profile carries the full legal name, while the printed piece may want a shorter one.
+ */
+
+export type ResolvedLabelAgent = LabelAgentContact & { email?: string };
+
+export async function resolveMailingLabelAgent(
+  userId: string
+): Promise<ResolvedLabelAgent | null> {
+  const [profile, settings] = await Promise.all([
+    getLeaveBehindAgentProfile(userId).catch(() => null),
+    getMailingLabelSettings(),
+  ]);
+
+  const override = settings.agent;
+  const profileName = profile ? agentDisplayName(profile.firstName, profile.lastName) : "";
+  const name = override.name.trim() || profileName;
+  if (!name) return null; // Nothing to sign with — the caller turns this into a clear message.
+
+  const phoneSource = override.phone.trim() || profile?.phone || "";
+  const emailSource = override.email.trim() || profile?.email || "";
+
+  return {
+    name,
+    phone: phoneSource ? formatLeaveBehindPhoneForImage(phoneSource) : "",
+    email: emailSource ? formatLeaveBehindEmailForImage(emailSource) : undefined,
+  };
+}

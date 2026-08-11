@@ -3,11 +3,7 @@ import { redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { MailingLabelsClient } from "@/components/admin/mailing-labels/mailing-labels-client";
 import { getIsAdmin } from "@/lib/auth/admin";
-import {
-  agentDisplayName,
-  formatLeaveBehindPhoneForImage,
-} from "@/lib/leave-behind-agent-profile";
-import { getLeaveBehindAgentProfile } from "@/lib/leave-behind-agent-profile-server";
+import { resolveMailingLabelAgent } from "@/lib/mailing-labels/agent";
 import type { LabelAgentContact } from "@/lib/mailing-labels/types";
 
 export const metadata: Metadata = {
@@ -21,19 +17,12 @@ export default async function MailingLabelsPage() {
   if (!userId) redirect("/sign-in");
   if (!(await getIsAdmin())) redirect("/admin");
 
-  // The agent footer reuses the shared branding record that Sale Sticker and Leave-Behind write.
-  // Resolved on the server so the preview matches the PDF without an extra client round trip.
+  // Resolved on the server so the on-screen preview shows the same name the PDF will print.
   let agent: LabelAgentContact | null = null;
   try {
-    const profile = await getLeaveBehindAgentProfile(userId);
-    if (profile) {
-      agent = {
-        name: agentDisplayName(profile.firstName, profile.lastName),
-        phone: formatLeaveBehindPhoneForImage(profile.phone),
-      };
-    }
+    agent = await resolveMailingLabelAgent(userId);
   } catch (error) {
-    console.warn("[mailing-labels] Could not read the agent profile:", error);
+    console.warn("[mailing-labels] Could not resolve the agent identity:", error);
   }
 
   return (

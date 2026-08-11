@@ -36,6 +36,9 @@ export type LabelTypeScale = {
   eyebrowSize: number;
   nameSize: number;
   addressSize: number;
+  /** Floor for the auto-fit in ./metrics.ts — long addresses step down to here before wrapping. */
+  nameSizeMin: number;
+  addressSizeMin: number;
   footerSize: number;
   lineGap: number;
 };
@@ -55,14 +58,17 @@ export type LabelTypeScale = {
 export const LABEL_TYPE_SCALE: Record<StickerVariant, LabelTypeScale> = {
   standard: {
     padX: 16,
-    padY: 8,
+    padY: 6,
     headerHeight: 29,
     accentHeight: 2,
     logoHeight: 19,
     eyebrowSize: 0,
     nameSize: 17,
-    addressSize: 14.5,
-    footerSize: 8.5,
+    addressSize: 14,
+    // Low floors so an unusually long name or street wraps at most once on this small label.
+    nameSizeMin: 11,
+    addressSizeMin: 9,
+    footerSize: 7.5,
     lineGap: 2,
   },
   folder: {
@@ -74,7 +80,9 @@ export const LABEL_TYPE_SCALE: Record<StickerVariant, LabelTypeScale> = {
     eyebrowSize: 9.5,
     nameSize: 23,
     addressSize: 17.5,
-    footerSize: 10,
+    nameSizeMin: 15,
+    addressSizeMin: 12,
+    footerSize: 9.5,
     lineGap: 3,
   },
   // 2⅝" × 1" leaves no room for branding — text only, tuned to fit four lines in 72 pt.
@@ -87,6 +95,8 @@ export const LABEL_TYPE_SCALE: Record<StickerVariant, LabelTypeScale> = {
     eyebrowSize: 0,
     nameSize: 10,
     addressSize: 9.5,
+    nameSizeMin: 8,
+    addressSizeMin: 7,
     footerSize: 0,
     lineGap: 1,
   },

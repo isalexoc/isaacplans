@@ -9,7 +9,13 @@ import {
   isLabelPresetId,
   LABEL_PRESETS,
 } from "./presets";
-import { EMPTY_SENDER_ADDRESS, type MailingLabelSettings, type SenderAddress } from "./types";
+import {
+  EMPTY_AGENT_OVERRIDE,
+  EMPTY_SENDER_ADDRESS,
+  type LabelAgentOverride,
+  type MailingLabelSettings,
+  type SenderAddress,
+} from "./types";
 
 /**
  * Tool settings kept in the shared `app_settings` key/value table (same mechanism as
@@ -22,9 +28,11 @@ import { EMPTY_SENDER_ADDRESS, type MailingLabelSettings, type SenderAddress } f
 
 const SENDER_KEY = "mailing_labels_sender";
 const DEFAULTS_KEY = "mailing_labels_defaults";
+const AGENT_KEY = "mailing_labels_agent";
 
 export const DEFAULT_MAILING_LABEL_SETTINGS: MailingLabelSettings = {
   sender: EMPTY_SENDER_ADDRESS,
+  agent: EMPTY_AGENT_OVERRIDE,
   defaults: {
     stickerPreset: DEFAULT_STICKER_PRESET,
     shippingPreset: DEFAULT_SHIPPING_PRESET,
@@ -53,6 +61,15 @@ export function normalizeSenderAddress(value: unknown): SenderAddress {
     state: normalizeStateCode(str(raw.state)) || str(raw.state).toUpperCase().slice(0, 2),
     postalCode: normalizeZip(str(raw.postalCode)) || str(raw.postalCode),
     phone: str(raw.phone),
+  };
+}
+
+export function normalizeAgentOverride(value: unknown): LabelAgentOverride {
+  const raw = (value ?? {}) as Record<string, unknown>;
+  return {
+    name: str(raw.name),
+    phone: str(raw.phone),
+    email: str(raw.email).toLowerCase(),
   };
 }
 
@@ -96,11 +113,12 @@ export async function getMailingLabelSettings(): Promise<MailingLabelSettings> {
     const rows = await db
       .select({ key: appSettings.key, value: appSettings.value })
       .from(appSettings)
-      .where(inArray(appSettings.key, [SENDER_KEY, DEFAULTS_KEY]));
+      .where(inArray(appSettings.key, [SENDER_KEY, DEFAULTS_KEY, AGENT_KEY]));
 
     const byKey = new Map(rows.map((r) => [r.key, r.value]));
     return {
       sender: normalizeSenderAddress(parseJson(byKey.get(SENDER_KEY))),
+      agent: normalizeAgentOverride(parseJson(byKey.get(AGENT_KEY))),
       defaults: normalizeDefaults(parseJson(byKey.get(DEFAULTS_KEY))),
     };
   } catch (error) {
@@ -126,11 +144,14 @@ async function writeSetting(key: string, value: unknown): Promise<void> {
 }
 
 export async function saveMailingLabelSettings(
-  patch: Partial<{ sender: unknown; defaults: unknown }>
+  patch: Partial<{ sender: unknown; agent: unknown; defaults: unknown }>
 ): Promise<MailingLabelSettings | { error: string }> {
   try {
     if (patch.sender !== undefined) {
       await writeSetting(SENDER_KEY, normalizeSenderAddress(patch.sender));
+    }
+    if (patch.agent !== undefined) {
+      await writeSetting(AGENT_KEY, normalizeAgentOverride(patch.agent));
     }
     if (patch.defaults !== undefined) {
       await writeSetting(DEFAULTS_KEY, normalizeDefaults(patch.defaults));

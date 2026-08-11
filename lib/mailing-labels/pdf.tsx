@@ -1,8 +1,9 @@
 import "server-only";
-import { renderToBuffer, Document, Page, View, Text, Image } from "@react-pdf/renderer";
+import { renderToBuffer, Document, Page, View, Text, Image, Font } from "@react-pdf/renderer";
 import type { DocumentProps } from "@react-pdf/renderer";
 import type { ReactElement } from "react";
 import { formatAddressBlock, resolveTagline, senderNameLines, uspsLine } from "./format";
+import { fitFontSize } from "./metrics";
 import {
   clampStartOffset,
   isStickerPreset,
@@ -35,6 +36,13 @@ import type {
  */
 
 const FONT = "Helvetica";
+
+/**
+ * Never hyphenate. Left to itself @react-pdf broke a street across lines as "BOULE-VARD", which
+ * is both ugly and, on a mailing label, genuinely confusing. Anything too wide now wraps at a
+ * space instead — and ./metrics.ts usually keeps it from wrapping at all.
+ */
+Font.registerHyphenationCallback((word) => [word]);
 
 /**
  * The gold Senior Life logo, fetched once per lambda instance. Cleared on failure so a transient
@@ -94,6 +102,22 @@ function StickerLabel({
       : "";
   const showFooter = Boolean(tagline || agentLine) && scale.footerSize > 0;
 
+  // Fit the type to this particular address instead of sizing every label for the worst case.
+  const textWidth = preset.labelWidth - scale.padX * 2;
+  const addressLines = [block.line1, block.line2, block.cityStateZip].filter(
+    (l): l is string => Boolean(l)
+  );
+  const nameSize = fitFontSize([block.nameLine], textWidth, scale.nameSize, scale.nameSizeMin, {
+    bold: true,
+  });
+  const addressSize = fitFontSize(
+    addressLines,
+    textWidth,
+    scale.addressSize,
+    scale.addressSizeMin
+  );
+  const footerSize = fitFontSize([tagline, agentLine], textWidth, scale.footerSize, 6.5);
+
   return (
     <View style={{ width: "100%", height: "100%", fontFamily: FONT, color: SENIOR_LIFE.ink }}>
       {showHeader && logo ? (
@@ -139,20 +163,18 @@ function StickerLabel({
 
         <Text
           style={{
-            fontSize: scale.nameSize,
+            fontSize: nameSize,
             fontWeight: "bold",
             marginBottom: scale.lineGap,
           }}
         >
           {block.nameLine}
         </Text>
-        <Text style={{ fontSize: scale.addressSize, lineHeight: 1.25 }}>{block.line1}</Text>
-        {block.line2 ? (
-          <Text style={{ fontSize: scale.addressSize, lineHeight: 1.25 }}>{block.line2}</Text>
-        ) : null}
-        <Text style={{ fontSize: scale.addressSize, lineHeight: 1.25 }}>
-          {block.cityStateZip}
-        </Text>
+        {addressLines.map((line, i) => (
+          <Text key={i} style={{ fontSize: addressSize, lineHeight: 1.25 }}>
+            {line}
+          </Text>
+        ))}
       </View>
 
       {showFooter ? (
@@ -164,27 +186,25 @@ function StickerLabel({
               marginBottom: scale.lineGap + 1,
             }}
           />
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "flex-end",
-              justifyContent: "space-between",
-            }}
-          >
-            {/* paddingRight, not just space-between: with a long name the two ran together. */}
+          {/*
+            Stacked, not side by side. On one row the two strings are wider than the label and
+            @react-pdf overlapped them rather than shrinking — the printed sheet read
+            "Personal y ConfidencIsaac Orraiz Corrales" with the phone running off the edge.
+          */}
+          {tagline ? (
+            <Text style={{ fontSize: footerSize, color: SENIOR_LIFE.muted }}>{tagline}</Text>
+          ) : null}
+          {agentLine ? (
             <Text
               style={{
-                fontSize: scale.footerSize,
-                color: SENIOR_LIFE.muted,
-                paddingRight: 10,
+                fontSize: footerSize,
+                color: SENIOR_LIFE.blue,
+                marginTop: tagline ? 1.5 : 0,
               }}
             >
-              {tagline}
-            </Text>
-            <Text style={{ fontSize: scale.footerSize, color: SENIOR_LIFE.blue }}>
               {agentLine}
             </Text>
-          </View>
+          ) : null}
         </View>
       ) : null}
     </View>

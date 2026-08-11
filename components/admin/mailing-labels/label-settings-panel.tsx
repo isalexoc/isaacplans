@@ -26,7 +26,11 @@ import {
   SHIPPING_PRESET_IDS,
   STICKER_PRESET_IDS,
 } from "@/lib/mailing-labels/presets";
-import type { MailingLabelSettings, SenderAddress } from "@/lib/mailing-labels/types";
+import type {
+  LabelAgentOverride,
+  MailingLabelSettings,
+  SenderAddress,
+} from "@/lib/mailing-labels/types";
 
 /**
  * Two groups of settings, both stored in the shared `app_settings` table:
@@ -48,12 +52,14 @@ export function LabelSettingsPanel({
   /** Resolves true only when the save actually succeeded, so "Saved" can't lie. */
   onSave: (patch: {
     sender?: SenderAddress;
+    agent?: LabelAgentOverride;
     defaults?: MailingLabelSettings["defaults"];
   }) => Promise<boolean>;
   saving: boolean;
   error: string | null;
 }) {
   const [sender, setSender] = useState<SenderAddress>(settings.sender);
+  const [agent, setAgent] = useState<LabelAgentOverride>(settings.agent);
   const [defaults, setDefaults] = useState(settings.defaults);
   const [saved, setSaved] = useState(false);
 
@@ -80,7 +86,7 @@ export function LabelSettingsPanel({
 
   const save = async () => {
     setSaved(false);
-    const ok = await onSave({ sender, defaults });
+    const ok = await onSave({ sender, agent, defaults });
     if (!ok) return; // The shared error banner explains why.
     setSaved(true);
     window.setTimeout(() => setSaved(false), 2500);
@@ -208,6 +214,47 @@ export function LabelSettingsPanel({
               onChange={(e) => setSenderField("phone", e.target.value)}
               placeholder="(407) 555-0123"
             />
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="pb-4">
+          <CardTitle className="text-base">How you sign labels and letters</CardTitle>
+          <CardDescription>
+            Leave a field blank to use your Leave-Behind agent profile. Fill one in to print
+            something different — a shorter name, or a separate number for mailers.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-4 sm:grid-cols-3">
+            <div className="space-y-2">
+              <Label htmlFor="ml-agent-name">Name to print</Label>
+              <Input
+                id="ml-agent-name"
+                value={agent.name}
+                onChange={(e) => setAgent((p) => ({ ...p, name: e.target.value }))}
+                placeholder="Isaac Orraiz"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="ml-agent-phone">Phone to print</Label>
+              <Input
+                id="ml-agent-phone"
+                value={agent.phone}
+                onChange={(e) => setAgent((p) => ({ ...p, phone: e.target.value }))}
+                placeholder="(540) 426-1804"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="ml-agent-email">Email on letters</Label>
+              <Input
+                id="ml-agent-email"
+                type="email"
+                value={agent.email}
+                onChange={(e) => setAgent((p) => ({ ...p, email: e.target.value }))}
+              />
+            </div>
           </div>
         </CardContent>
       </Card>

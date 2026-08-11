@@ -12,7 +12,7 @@ import {
   saveGeneratedLetter,
   setMailingLabelCrmContactId,
 } from "@/lib/mailing-labels/server";
-import { resolveLetterAgent } from "@/lib/mailing-labels/letter-agent";
+import { resolveMailingLabelAgent } from "@/lib/mailing-labels/agent";
 
 // The model call can take a few seconds; Node runtime for the OpenAI SDK.
 export const runtime = "nodejs";
@@ -65,13 +65,13 @@ export async function POST(_request: NextRequest, context: RouteContext) {
       return NextResponse.json({ success: false, error: "Not found" }, { status: 404 });
     }
 
-    const agent = await resolveLetterAgent(userId);
+    const agent = await resolveMailingLabelAgent(userId);
     if (!agent) {
       return NextResponse.json(
         {
           success: false,
           error:
-            "Add your name and phone to the Leave-Behind agent profile first — the letter is signed with them.",
+            "Set the name that signs your letters in Settings (or fill in the Leave-Behind agent profile).",
           code: "agent_profile_missing",
         },
         { status: 400 }

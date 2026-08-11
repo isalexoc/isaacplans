@@ -1,10 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import {
-  agentDisplayName,
-  formatLeaveBehindPhoneForImage,
-} from "@/lib/leave-behind-agent-profile";
-import { getLeaveBehindAgentProfile } from "@/lib/leave-behind-agent-profile-server";
+import { resolveMailingLabelAgent } from "@/lib/mailing-labels/agent";
 import {
   DEFAULT_TAGLINES,
   isCompleteSenderAddress,
@@ -95,17 +91,10 @@ export async function POST(request: NextRequest) {
       },
     };
 
-    // Reuse the agent branding record the Sale Sticker and Leave-Behind tools already share.
-    let agent: LabelAgentContact | null = null;
-    if (options.showAgentContact) {
-      const profile = await getLeaveBehindAgentProfile(userId);
-      if (profile) {
-        agent = {
-          name: agentDisplayName(profile.firstName, profile.lastName),
-          phone: formatLeaveBehindPhoneForImage(profile.phone),
-        };
-      }
-    }
+    // Settings override first, then the shared leave-behind profile.
+    const agent: LabelAgentContact | null = options.showAgentContact
+      ? await resolveMailingLabelAgent(userId)
+      : null;
 
     const pdf = await renderLabels({
       labels,

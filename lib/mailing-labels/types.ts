@@ -112,8 +112,22 @@ export type LabelAgentContact = {
   phone: string;
 };
 
+/**
+ * How the agent signs labels and letters. Blank fields fall back to the shared leave-behind
+ * profile — this exists so the printed name can differ from the legal one on the profile
+ * (e.g. "Isaac Orraiz" rather than "Isaac Orraiz Corrales").
+ */
+export type LabelAgentOverride = {
+  name: string;
+  phone: string;
+  email: string;
+};
+
+export const EMPTY_AGENT_OVERRIDE: LabelAgentOverride = { name: "", phone: "", email: "" };
+
 export type MailingLabelSettings = {
   sender: SenderAddress;
+  agent: LabelAgentOverride;
   defaults: {
     stickerPreset: string;
     shippingPreset: string;

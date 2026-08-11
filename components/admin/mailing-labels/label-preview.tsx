@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { formatAddressBlock, resolveTagline, senderNameLines, uspsLine } from "@/lib/mailing-labels/format";
+import { fitFontSize } from "@/lib/mailing-labels/metrics";
 import {
   isStickerPreset,
   PT_PER_INCH,
@@ -109,6 +110,17 @@ function StickerPreviewBody({
       : "";
   const showFooter = Boolean(tagline || agentLine) && scale.footerSize > 0;
 
+  // Same auto-fit the PDF applies, so the preview shows the size that will actually print.
+  const textWidth = preset.labelWidth - scale.padX * 2;
+  const addressLines = [block.line1, block.line2, block.cityStateZip].filter(
+    (l): l is string => Boolean(l)
+  );
+  const nameSize = fitFontSize([block.nameLine], textWidth, scale.nameSize, scale.nameSizeMin, {
+    bold: true,
+  });
+  const addressSize = fitFontSize(addressLines, textWidth, scale.addressSize, scale.addressSizeMin);
+  const footerSize = fitFontSize([tagline, agentLine], textWidth, scale.footerSize, 6.5);
+
   return (
     <div
       className="flex h-full w-full flex-col"
@@ -165,20 +177,18 @@ function StickerPreviewBody({
 
         <div
           style={{
-            fontSize: pt(scale.nameSize),
+            fontSize: pt(nameSize),
             fontWeight: 700,
             marginBottom: pt(scale.lineGap),
           }}
         >
           {block.nameLine}
         </div>
-        <div style={{ fontSize: pt(scale.addressSize), lineHeight: 1.25 }}>{block.line1}</div>
-        {block.line2 ? (
-          <div style={{ fontSize: pt(scale.addressSize), lineHeight: 1.25 }}>{block.line2}</div>
-        ) : null}
-        <div style={{ fontSize: pt(scale.addressSize), lineHeight: 1.25 }}>
-          {block.cityStateZip}
-        </div>
+        {addressLines.map((line, i) => (
+          <div key={i} style={{ fontSize: pt(addressSize), lineHeight: 1.25 }}>
+            {line}
+          </div>
+        ))}
       </div>
 
       {showFooter ? (
@@ -195,20 +205,20 @@ function StickerPreviewBody({
               marginBottom: pt(scale.lineGap + 1),
             }}
           />
-          <div className="flex items-end justify-between">
-            <span
+          {tagline ? (
+            <div style={{ fontSize: pt(footerSize), color: SENIOR_LIFE.muted }}>{tagline}</div>
+          ) : null}
+          {agentLine ? (
+            <div
               style={{
-                fontSize: pt(scale.footerSize),
-                color: SENIOR_LIFE.muted,
-                paddingRight: pt(10),
+                fontSize: pt(footerSize),
+                color: SENIOR_LIFE.blue,
+                marginTop: tagline ? pt(1.5) : 0,
               }}
             >
-              {tagline}
-            </span>
-            <span style={{ fontSize: pt(scale.footerSize), color: SENIOR_LIFE.blue }}>
               {agentLine}
-            </span>
-          </div>
+            </div>
+          ) : null}
         </div>
       ) : null}
     </div>
