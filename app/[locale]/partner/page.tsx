@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import { auth, currentUser } from "@clerk/nextjs/server";
+import { UserButton } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { hasLocale } from "next-intl";
 import { Users, UserCheck, TrendingUp, Wallet, HandCoins, CalendarClock } from "lucide-react";
 import { PartnerShareLinks } from "@/components/referral-partners/partner-link-copy";
+import { partnerPortalOgImage } from "@/lib/referral-partners/images";
 import PartnerNoAccess from "@/components/referral-partners/partner-no-access";
 import PartnerPortalLanding from "@/components/referral-partners/partner-portal-landing";
 import { getPartnerByEmail, getPartnerDashboard } from "@/lib/referral-partners/server";
@@ -38,10 +40,30 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const namespace = userId ? "partnerDashboard.metadata" : "partnerPortal.metadata";
   const t = await getTranslations({ locale: safeLocale, namespace });
 
+  const title = t("title");
+  const description = t("description");
+  // Per-language share card — a partner sending this link to another partner should see a card
+  // written in the language the link actually opens in.
+  const ogImage = partnerPortalOgImage(safeLocale === "es" ? "es" : "en");
+
   return {
-    title: t("title"),
-    description: t("description"),
+    title,
+    description,
     robots: userId ? { index: false, follow: false } : { index: true, follow: true },
+    openGraph: {
+      title,
+      description,
+      siteName: "Isaac Plans Insurance",
+      locale: safeLocale === "es" ? "es_ES" : "en_US",
+      type: "website",
+      images: [{ url: ogImage, alt: title }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [{ url: ogImage, alt: title }],
+    },
   };
 }
 
@@ -208,13 +230,22 @@ export default async function PartnerDashboardPage({ params }: PageProps) {
               <p className="text-sm text-slate-500 dark:text-slate-400">{t("subtitle")}</p>
             </div>
           </div>
-          <Image
-            src={ISAAC_LOGO}
-            alt="Isaac Plans Insurance"
-            width={44}
-            height={44}
-            className="h-11 w-11 rounded-lg object-contain"
-          />
+          {/* Clerk's own control: avatar, account management, and sign out. A partner who lands
+              here on the wrong account needs a way off it from the dashboard too, not only from
+              the "not linked" screen. */}
+          <div className="flex items-center gap-4">
+            <Image
+              src={ISAAC_LOGO}
+              alt="Isaac Plans Insurance"
+              width={44}
+              height={44}
+              className="hidden h-11 w-11 rounded-lg object-contain sm:block"
+            />
+            <UserButton
+              appearance={{ elements: { avatarBox: "h-10 w-10" } }}
+              afterSignOutUrl={`/${safeLocale}/${safeLocale === "es" ? "socio" : "partner"}`}
+            />
+          </div>
         </div>
 
         {/* Referral link */}

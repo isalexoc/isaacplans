@@ -3,7 +3,7 @@
 import Script from "next/script";
 import { usePathname } from "@/i18n/navigation";
 import { isAgentCrmBookingCalendarPathname } from "@/lib/agent-crm-calendar-route";
-import { isAdsLandingPathResolved } from "@/lib/ads-landing";
+import { isAdsLandingPathResolved, isPartnerLandingPath } from "@/lib/ads-landing";
 
 type Props = {
   trackingId: string;
@@ -31,6 +31,12 @@ export default function AgentCrmExternalTracking({
   }
 
   if (isAdsLandingPathResolved(path)) {
+    return null;
+  }
+
+  // Referral partner pages own their lead capture; this script's form capture would create a
+  // second, blank contact off the same submit. See isPartnerLandingPath.
+  if (isPartnerLandingPath(path)) {
     return null;
   }
 

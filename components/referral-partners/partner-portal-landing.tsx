@@ -9,8 +9,8 @@ import {
   Link2,
   LogIn,
   Mail,
+  RefreshCw,
   Users,
-  Wallet,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -19,7 +19,7 @@ const CRM_PHONE_TEL = "tel:+15404261804";
 const CRM_PHONE_DISPLAY = "540-426-1804";
 
 /** Positional icons for `partnerPortal.features.items`. */
-const FEATURE_ICONS: LucideIcon[] = [Link2, Users, Handshake, Wallet];
+const FEATURE_ICONS: LucideIcon[] = [Link2, Users, Handshake, RefreshCw];
 
 /**
  * The signed-out face of /partner (ES: /socio).
@@ -42,7 +42,7 @@ export default function PartnerPortalLanding() {
       <section className="relative overflow-hidden bg-gradient-to-br from-sky-50 via-white to-white dark:from-slate-900 dark:via-slate-950 dark:to-slate-950">
         <div className="mx-auto grid max-w-6xl items-center gap-12 px-4 py-14 lg:grid-cols-2 lg:py-20">
           <div>
-            <span className="inline-flex w-fit items-center gap-2 rounded-full bg-primary/10 px-3.5 py-1.5 text-xs font-semibold text-primary sm:text-sm">
+            <span className="inline-flex w-fit items-center gap-2 rounded-full bg-custom/10 px-3.5 py-1.5 text-xs font-semibold text-custom sm:text-sm">
               <Handshake className="h-4 w-4 flex-shrink-0" />
               {t("badge")}
             </span>
@@ -59,7 +59,7 @@ export default function PartnerPortalLanding() {
               <SignInButton mode="modal">
                 <button
                   type="button"
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3.5 text-base font-bold text-primary-foreground shadow-lg transition-opacity hover:opacity-90"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-custom px-6 py-3.5 text-base font-bold text-custom-foreground shadow-lg transition-opacity hover:opacity-90"
                 >
                   <LogIn className="h-4 w-4" />
                   {t("signIn")}
@@ -90,16 +90,16 @@ export default function PartnerPortalLanding() {
             </div>
 
             <div className="mt-4 grid grid-cols-2 gap-3">
-              <div className="rounded-xl bg-gradient-to-br from-primary to-primary/80 p-4 text-white">
-                <p className="text-xs font-semibold uppercase tracking-wide text-white/80">
-                  {t("preview.earnings")}
+              <div className="rounded-xl bg-custom p-4 text-custom-foreground">
+                <p className="text-xs font-semibold uppercase tracking-wide opacity-80">
+                  {t("preview.referrals")}
                 </p>
-                <p className="mt-1 text-2xl font-extrabold tabular-nums">$162.00</p>
-                <p className="text-xs text-white/75">{t("preview.perMonth")}</p>
+                <p className="mt-1 text-2xl font-extrabold tabular-nums">14</p>
+                <p className="text-xs opacity-75">{t("preview.inProgress", { count: 6 })}</p>
               </div>
               <div className="rounded-xl border border-slate-200 p-4 dark:border-slate-700">
                 <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                  {t("preview.clients")}
+                  {t("preview.covered")}
                 </p>
                 <p className="mt-1 text-2xl font-extrabold tabular-nums text-slate-900 dark:text-white">
                   8
@@ -112,19 +112,24 @@ export default function PartnerPortalLanding() {
 
             <div className="mt-3 space-y-2">
               {[
-                { name: "María R.", members: 4, amount: "$24.00" },
-                { name: "Juan P.", members: 1, amount: "$7.75" },
-                { name: "Familia G.", members: 5, amount: "$30.50" },
+                { name: "María R.", status: t("preview.statusCovered"), done: true },
+                { name: "Juan P.", status: t("preview.statusInProgress"), done: false },
+                { name: "Familia G.", status: t("preview.statusCovered"), done: true },
               ].map((row) => (
                 <div
                   key={row.name}
                   className="flex items-center justify-between rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700"
                 >
                   <span className="font-medium text-slate-700 dark:text-slate-200">{row.name}</span>
-                  <span className="text-xs text-slate-400">
-                    {t("preview.members", { count: row.members })}
+                  <span
+                    className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
+                      row.done
+                        ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300"
+                        : "bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300"
+                    }`}
+                  >
+                    {row.status}
                   </span>
-                  <span className="font-semibold tabular-nums text-primary">{row.amount}</span>
                 </div>
               ))}
             </div>
@@ -135,7 +140,7 @@ export default function PartnerPortalLanding() {
       {/* ── What's inside ── */}
       <section className="mx-auto max-w-5xl px-4 py-14 sm:py-20">
         <div className="mx-auto max-w-2xl text-center">
-          <span className="text-xs font-bold uppercase tracking-widest text-primary">
+          <span className="text-xs font-bold uppercase tracking-widest text-custom">
             {t("features.label")}
           </span>
           <h2 className="mt-3 text-2xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-3xl">
@@ -151,8 +156,8 @@ export default function PartnerPortalLanding() {
                 key={feature.title}
                 className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900"
               >
-                <div className="mb-3 inline-flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10">
-                  <Icon className="h-4 w-4 text-primary" />
+                <div className="mb-3 inline-flex h-9 w-9 items-center justify-center rounded-lg bg-custom/10">
+                  <Icon className="h-4 w-4 text-custom" />
                 </div>
                 <h3 className="text-sm font-bold text-slate-900 dark:text-white">
                   {feature.title}
@@ -173,7 +178,7 @@ export default function PartnerPortalLanding() {
       >
         <div className="mx-auto max-w-5xl px-4 py-14 sm:py-20">
           <div className="mx-auto max-w-2xl text-center">
-            <span className="text-xs font-bold uppercase tracking-widest text-primary">
+            <span className="text-xs font-bold uppercase tracking-widest text-custom">
               {t("steps.label")}
             </span>
             <h2 className="mt-3 text-2xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-3xl">
@@ -187,7 +192,7 @@ export default function PartnerPortalLanding() {
                 key={step.title}
                 className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900"
               >
-                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-sm font-extrabold text-primary-foreground">
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-custom text-sm font-extrabold text-custom-foreground">
                   {index + 1}
                 </div>
                 <h3 className="mt-3 text-base font-bold text-slate-900 dark:text-white">
@@ -205,19 +210,21 @@ export default function PartnerPortalLanding() {
       {/* ── Two doors: sign in, or ask to become a partner ── */}
       <section className="mx-auto max-w-5xl px-4 py-14 sm:py-20">
         <div className="grid gap-5 md:grid-cols-2">
-          <div className="rounded-2xl bg-gradient-to-br from-primary to-primary/80 p-7 text-white">
+          {/* text-custom-foreground, not text-white: --custom lightens in dark mode and its
+              paired foreground darkens with it, which is what keeps this card legible in both. */}
+          <div className="rounded-2xl bg-custom p-7 text-custom-foreground">
             <h3 className="text-xl font-extrabold">{t("existing.title")}</h3>
-            <p className="mt-2 text-sm leading-relaxed text-white/90">{t("existing.body")}</p>
+            <p className="mt-2 text-sm font-medium leading-relaxed">{t("existing.body")}</p>
             <SignInButton mode="modal">
               <button
                 type="button"
-                className="mt-5 inline-flex items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-bold text-primary shadow-sm transition-transform hover:scale-[1.02]"
+                className="mt-5 inline-flex items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-bold text-slate-900 shadow-sm transition-transform hover:scale-[1.02]"
               >
                 <LogIn className="h-4 w-4" />
                 {t("signIn")}
               </button>
             </SignInButton>
-            <p className="mt-3 text-xs text-white/75">
+            <p className="mt-3 text-xs font-medium">
               {t("existing.noAccount")}{" "}
               <SignUpButton mode="modal">
                 <button type="button" className="font-semibold underline underline-offset-2">
@@ -254,7 +261,7 @@ export default function PartnerPortalLanding() {
 
         <p className="mt-8 text-center text-sm text-slate-500 dark:text-slate-400">
           {t("footerNote")}{" "}
-          <a href={`mailto:${SUPPORT_EMAIL}`} className="font-semibold text-primary hover:underline">
+          <a href={`mailto:${SUPPORT_EMAIL}`} className="font-semibold text-custom hover:underline">
             {SUPPORT_EMAIL}
           </a>
         </p>

@@ -1,6 +1,6 @@
 "use client";
 
-import { SignOutButton } from "@clerk/nextjs";
+import { SignOutButton, UserButton } from "@clerk/nextjs";
 import { useTranslations } from "next-intl";
 import { LogOut, ShieldAlert } from "lucide-react";
 import { Link } from "@/i18n/navigation";
@@ -27,7 +27,17 @@ export default function PartnerNoAccess({ email, name, imageUrl, redirectUrl }: 
 
   return (
     <main className="mx-auto flex min-h-[70vh] max-w-lg flex-col items-center justify-center px-4 py-16 text-center">
+      {/* Clerk's account control, same as the dashboard — the sign-out button below is the
+          signposted route out, this is the familiar one. */}
+      <div className="mb-8 flex w-full justify-end">
+        <UserButton
+          appearance={{ elements: { avatarBox: "h-10 w-10" } }}
+          afterSignOutUrl={redirectUrl}
+        />
+      </div>
+
       <div className="flex h-14 w-14 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-950/50">
+
         <ShieldAlert className="h-7 w-7 text-amber-600 dark:text-amber-400" />
       </div>
 

@@ -51,6 +51,28 @@ export function isFeIntakeFormPath(pathname: string | null | undefined): boolean
   return FE_INTAKE_FORM_RE.test(pathname);
 }
 
+/**
+ * Referral partner landing pages: `/partners/<slug>` (es: `/socios/<slug>`).
+ *
+ * These run their own lead capture and POST to /api/create-contact themselves. Agent CRM's
+ * external-tracking script also does automatic FORM CAPTURE, so leaving it loaded here makes GHL
+ * create a second contact alongside ours off the same submit — and in practice a BLANK one, since
+ * it cannot read a React-controlled form reliably. Every get-covered funnel already avoids this by
+ * being in ADS_LANDING_PATHNAMES; the partner pages need the same suppression.
+ *
+ * Deliberately a separate predicate rather than an entry in ADS_LANDING_PATHNAMES: that list also
+ * drives the bare page chrome in components/header.tsx, and these pages keep the full site header.
+ *
+ * `/partner` and `/socio` (the portal, no slug) are excluded by the required trailing segment —
+ * they have no lead form.
+ */
+const PARTNER_LANDING_RE = /^(?:\/(?:en|es))?\/(?:partners|socios)\/[^/]+$/i;
+
+export function isPartnerLandingPath(pathname: string | null | undefined): boolean {
+  if (!pathname) return false;
+  return PARTNER_LANDING_RE.test(pathname);
+}
+
 export function isAdsLandingPath(pathname: string | null | undefined): boolean {
   if (!pathname) return false;
   return (

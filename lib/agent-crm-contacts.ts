@@ -394,6 +394,22 @@ export async function agentCrmEnsureContact(
   if (input.firstName?.trim()) body.firstName = input.firstName.trim();
   if (input.lastName?.trim()) body.lastName = input.lastName.trim();
 
+  /**
+   * Refuse to create a contact carrying no identifying information.
+   *
+   * Every current caller already guards on email-or-phone, so this never fires today — but with
+   * all fields empty the POST above would send `{locationId, source}` alone and GHL would happily
+   * create a blank contact. A CRM full of nameless rows is expensive to clean up and quietly
+   * breaks referral attribution, so the floor belongs here rather than in seven call sites that
+   * each have to remember it.
+   */
+  if (!email && !phone && !body.firstName && !body.lastName) {
+    console.warn(
+      `${logPrefix ?? "[agent-crm]"} Refusing to create a contact with no email, phone, or name.`
+    );
+    return null;
+  }
+
   const res = await fetch(`${AGENT_CRM_API_BASE}/contacts/`, {
     method: "POST",
     headers: agentCrmJsonHeaders(token),

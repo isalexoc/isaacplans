@@ -21,6 +21,27 @@ export const PARTNER_HERO_IMAGE_PLACEHOLDER = `${CLOUDINARY}/f_auto,q_auto,w_100
 /** Art beside the "what immigration looks at" block — landscape. PLACEHOLDER. */
 export const PARTNER_SECTION_IMAGE_PLACEHOLDER = `${CLOUDINARY}/f_auto,q_auto,w_1000,h_750,c_fill,g_auto/pexels-gustavo-fring-4894565_seqt6k`;
 
+/**
+ * Social share cards for the GLOBAL partner portal at /partner (es: /socio) — distinct from the
+ * per-partner cards, which are DB fields on the partner record.
+ *
+ * Purpose-designed artwork carrying its own text, one per language. Deliberately NOT run through
+ * `cloudinaryOgImageUrl`: these are 1200×686, and normalizing to a 1200×630 `c_fill` would shave
+ * ~8% of the height off a card whose text sits near the edges. Platforms handle 1.75:1 fine.
+ *
+ * Dimensions are intentionally not declared in the metadata — crawlers read them from the file,
+ * so swapping either URL for a differently-sized card cannot leave a stale width/height behind.
+ */
+export const PARTNER_PORTAL_OG_IMAGE_ES =
+  "https://res.cloudinary.com/isaacdev/image/upload/w_1200,q_auto,f_auto/v1786485443/34736723-e344-4203-ac18-73707ed1b6be_syny7f.png";
+
+export const PARTNER_PORTAL_OG_IMAGE_EN =
+  "https://res.cloudinary.com/isaacdev/image/upload/w_1200,q_auto,f_auto/v1786485479/09990451-0bd3-4c52-bf23-e3942f9ff297_bm4kuo.png";
+
+export function partnerPortalOgImage(locale: "en" | "es"): string {
+  return locale === "es" ? PARTNER_PORTAL_OG_IMAGE_ES : PARTNER_PORTAL_OG_IMAGE_EN;
+}
+
 export function partnerHeroImage(url: string): string {
   return url.trim() || PARTNER_HERO_IMAGE_PLACEHOLDER;
 }

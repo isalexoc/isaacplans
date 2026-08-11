@@ -169,42 +169,44 @@
   "partnerPortal": {
     "metadata": {
       "title": "Partner Portal | Isaac Plans Insurance",
-      "description": "Sign in to see your referrals, your enrolled clients, and your earnings as an Isaac Plans Insurance partner."
+      "description": "Sign in to see the people you've referred, where each one stands, and who already has coverage."
     },
     "badge": "Partner Program",
-    "title": "Your partner dashboard, all in one place",
-    "subtitle": "See how many people you've referred, which ones enrolled, and what you've earned. Updated in real time.",
+    "title": "Your dashboard for the people you refer",
+    "subtitle": "See who you've referred, where each person stands, and who already has coverage. All in one place and always current.",
     "signIn": "Sign in",
     "howCta": "See how it works",
     "signInNote": "Use the email you registered with Isaac Plans. If you sign in with a different one, we'll tell you and you can switch accounts.",
     "preview": {
       "heading": "Your dashboard",
       "badge": "Example",
-      "earnings": "Your earnings",
-      "perMonth": "per month",
-      "clients": "Active clients",
+      "referrals": "People referred",
+      "covered": "Now covered",
+      "inProgress": "{count} in progress",
       "people": "{count} people covered",
-      "members": "{count} members"
+      "statusCovered": "Covered",
+      "statusInProgress": "In progress",
+      "statusNew": "New"
     },
     "features": {
       "label": "What you'll see",
-      "title": "Everything about your partnership, in plain view",
+      "title": "The people you referred, always in view",
       "items": [
         {
-          "title": "Your referral link",
-          "body": "Share it with your clients. Anyone who signs up through it is credited to you automatically."
+          "title": "Your link",
+          "body": "Share it with your clients. Anyone who arrives through it appears in your dashboard automatically."
         },
         {
-          "title": "Referrals in progress",
-          "body": "Who asked for information, and where each one stands."
+          "title": "Where each one stands",
+          "body": "Who asked for information, and what stage each person is at."
         },
         {
-          "title": "Enrolled clients",
-          "body": "Name, how many members are covered, and each one's monthly premium."
+          "title": "Who now has coverage",
+          "body": "The families you referred who have completed their coverage."
         },
         {
-          "title": "Your earnings",
-          "body": "Your commission worked out for you, per client and in total, every month."
+          "title": "Current, without asking",
+          "body": "The dashboard updates itself. You never have to call us to find out how it's going."
         }
       ]
     },
@@ -221,20 +223,20 @@
           "body": "A licensed agent calls them, walks them through the options, and enrolls them."
         },
         {
-          "title": "You earn",
-          "body": "You receive a percentage of the monthly premium for as long as the client stays active."
+          "title": "You follow along",
+          "body": "Your dashboard shows the progress of everyone you referred, without you having to ask."
         }
       ]
     },
     "existing": {
       "title": "Already a partner?",
-      "body": "Sign in and see your numbers right away.",
+      "body": "Sign in and see the people you've referred right away.",
       "noAccount": "First time here?",
       "createAccount": "Create your account with the email you registered."
     },
     "prospective": {
       "title": "Want to become a partner?",
-      "body": "If you work with families who need health coverage, let's talk. You look after your client and earn a commission for everyone who enrolls.",
+      "body": "If you work with families who need health coverage, let's talk. You look after your client's case and we look after their coverage.",
       "cta": "Get in touch"
     },
     "footerNote": "Questions about your partner account? Email"

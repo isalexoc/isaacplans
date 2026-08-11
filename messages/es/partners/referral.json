@@ -169,48 +169,50 @@
   "partnerPortal": {
     "metadata": {
       "title": "Portal de Socios | Isaac Plans Insurance",
-      "description": "Inicie sesión para ver sus referidos, sus clientes inscritos y sus ganancias como socio de Isaac Plans Insurance."
+      "description": "Inicie sesión para ver a las personas que ha recomendado, en qué va cada una y quiénes ya quedaron con cobertura."
     },
     "badge": "Programa de Socios",
-    "title": "Su panel de socio, en un solo lugar",
-    "subtitle": "Vea cuántas personas ha referido, cuáles ya se inscribieron y cuánto ha ganado. Actualizado en tiempo real.",
+    "title": "Su panel para manejar a quienes recomienda",
+    "subtitle": "Vea a quién ha recomendado, en qué va cada persona y quiénes ya quedaron cubiertos. Todo en un solo lugar y al día.",
     "signIn": "Iniciar sesión",
     "howCta": "Ver cómo funciona",
     "signInNote": "Use el correo que registró con Isaac Plans. Si entra con otro, se lo decimos y puede cambiar de cuenta.",
     "preview": {
       "heading": "Su panel",
       "badge": "Ejemplo",
-      "earnings": "Su ganancia",
-      "perMonth": "al mes",
-      "clients": "Clientes activos",
+      "referrals": "Personas recomendadas",
+      "covered": "Ya con cobertura",
+      "inProgress": "{count} en proceso",
       "people": "{count} personas cubiertas",
-      "members": "{count} miembros"
+      "statusCovered": "Con cobertura",
+      "statusInProgress": "En proceso",
+      "statusNew": "Nuevo"
     },
     "features": {
       "label": "Lo que va a ver",
-      "title": "Todo lo de su alianza, claro y a la mano",
+      "title": "Sus recomendados, siempre a la vista",
       "items": [
         {
-          "title": "Su enlace de referidos",
-          "body": "Compártalo con sus clientes. Todo el que se registre por ahí queda acreditado a usted automáticamente."
+          "title": "Su enlace",
+          "body": "Compártalo con sus clientes. Todo el que llegue por ahí aparece en su panel automáticamente."
         },
         {
-          "title": "Referidos en proceso",
-          "body": "Quiénes pidieron información y en qué va cada uno."
+          "title": "En qué va cada uno",
+          "body": "Quiénes pidieron información y en qué punto está cada persona."
         },
         {
-          "title": "Clientes inscritos",
-          "body": "Nombre, cuántos miembros cubre y la prima mensual de cada uno."
+          "title": "Quiénes ya quedaron cubiertos",
+          "body": "Las familias que recomendó y ya completaron su cobertura."
         },
         {
-          "title": "Sus ganancias",
-          "body": "Su comisión calculada sola, por cliente y en total, cada mes."
+          "title": "Al día, sin preguntar",
+          "body": "El panel se actualiza solo. No tiene que llamarnos para saber cómo va."
         }
       ]
     },
     "steps": {
       "label": "Cómo funciona",
-      "title": "Usted refiere. Nosotros nos encargamos del resto.",
+      "title": "Usted recomienda. Nosotros nos encargamos del resto.",
       "items": [
         {
           "title": "Comparta su enlace",
@@ -221,20 +223,20 @@
           "body": "Un agente con licencia los llama en español, los asesora y los inscribe."
         },
         {
-          "title": "Usted gana",
-          "body": "Recibe un porcentaje de la prima mensual mientras el cliente siga activo."
+          "title": "Usted da seguimiento",
+          "body": "Desde su panel ve el avance de cada persona que recomendó, sin tener que preguntar."
         }
       ]
     },
     "existing": {
       "title": "¿Ya es socio?",
-      "body": "Inicie sesión y vea sus números al instante.",
+      "body": "Inicie sesión y vea a sus recomendados al instante.",
       "noAccount": "¿Primera vez aquí?",
       "createAccount": "Cree su cuenta con el correo que registró."
     },
     "prospective": {
       "title": "¿Quiere ser socio?",
-      "body": "Si atiende a familias que necesitan cobertura médica, hablemos. Usted acompaña a su cliente y recibe una comisión por cada persona que se inscriba.",
+      "body": "Si atiende a familias que necesitan cobertura médica, hablemos. Usted las acompaña en su trámite y nosotros nos encargamos de su cobertura.",
       "cta": "Escríbanos"
     },
     "footerNote": "¿Preguntas sobre su cuenta de socio? Escriba a"
