@@ -1,7 +1,6 @@
 import "server-only";
 import OpenAI from "openai";
-import { agentCrmFetchContactNotes } from "@/lib/agent-crm-notes";
-import { maskSensitiveNumbers } from "@/lib/call-summary-structured";
+import { buildLetterContext, type LetterContext } from "./letter-context";
 import type { LabelAgentContact, MailingLabelLanguage, MailingLabelRecord } from "./types";
 
 /**
@@ -17,10 +16,6 @@ import type { LabelAgentContact, MailingLabelLanguage, MailingLabelRecord } from
  *
  * The draft is always editable afterward. This is a first draft, never the final word.
  */
-
-/** How many recent notes to feed the model, and how much of each. Keeps the prompt small and recent. */
-const MAX_NOTES = 6;
-const MAX_NOTE_CHARS = 700;
 
 /**
  * Words that make the letter read like an industry document instead of a person. Isaac writes to
@@ -160,7 +155,7 @@ function buildSystemPrompt(language: MailingLabelLanguage, agent: LetterAgentInf
 function buildUserPrompt(
   record: MailingLabelRecord,
   agent: LetterAgentInfo,
-  notes: string[]
+  context: LetterContext
 ): string {
   const greeting =
     record.language === "es"
@@ -176,23 +171,60 @@ function buildUserPrompt(
     `Agent's phone: ${agent.phone || "(not provided)"}`,
   ];
 
-  if (notes.length > 0) {
+  const hasContext = context.facts.length > 0 || context.conversations.length > 0;
+  const hasSpoken = context.conversations.length > 0;
+
+  // Knowing facts about someone is not the same as having spoken to them. Details pulled from a
+  // form they filled out led drafts to open with "it was a pleasure speaking with you" and refer
+  // to "the program we discussed" for people who had never had a call.
+  lines.push(
+    ``,
+    hasSpoken
+      ? `YOU HAVE SPOKEN WITH THIS PERSON BEFORE. Referring to that conversation is natural and good.`
+      : `YOU HAVE NEVER SPOKEN WITH THIS PERSON. Anything you know came from a form they filled` +
+        ` out, not a conversation. Never write "it was a pleasure speaking with you", "as we` +
+        ` discussed", "the plan we talked about", or anything else implying a previous call.`
+  );
+
+  if (context.facts.length > 0) {
     lines.push(
       ``,
-      `NOTES FROM PREVIOUS PHONE CONVERSATIONS WITH THIS PERSON.`,
-      `Use one or two genuinely relevant details so the letter feels like it remembers them —`,
-      `for example something they said they were worried about, or who they want to protect.`,
-      `Reference details naturally and only if you are confident. Ignore anything unclear,`,
-      `and never mention money amounts, health conditions, or anything sensitive.`,
+      `WHAT YOU KNOW ABOUT THIS PERSON`,
+      hasSpoken
+        ? `These are confirmed details. Weave in the ones that make the letter feel personal.`
+        : `These came from the form they filled out. Weave in the ones that make the letter feel` +
+          ` personal, but do not present them as things they told you on a call.`,
+      ...context.facts.map((f) => `- ${f}`)
+    );
+  }
+
+  if (context.conversations.length > 0) {
+    lines.push(
       ``,
-      ...notes.map((n, i) => `--- Note ${i + 1} ---\n${n}`)
+      `NOTES FROM PREVIOUS PHONE CONVERSATIONS WITH THIS PERSON (newest first)`,
+      ...context.conversations.map((n, i) => `--- Call ${i + 1} ---\n${n}`)
+    );
+  }
+
+  if (hasContext) {
+    lines.push(
+      ``,
+      `HOW TO USE WHAT YOU KNOW`,
+      `- Pick the TWO most meaningful details. A letter stuffed with facts feels like a file`,
+      `  review; one or two feels like someone who remembers them.`,
+      `- Naming the people they want taken care of is the single warmest thing you can do.`,
+      `  If you have them, refer to them by name and relationship — "making sure Maria and`,
+      `  the kids are looked after" lands far harder than "protecting your family".`,
+      `- If they raised a worry before, acknowledge it gently and say you can walk through it`,
+      `  together. Never argue with it or sell against it.`,
+      `- If something was agreed last time, honor it: pick the thread back up where it was left.`,
+      `- Only state what the notes actually support. If a detail is ambiguous, leave it out.`,
+      `- Never mention health conditions, medications, money amounts, prices, or dates of birth,`,
+      `  even if you can infer them. This letter travels through the mail and anyone in the`,
+      `  household may open it.`
     );
   } else {
-    lines.push(
-      ``,
-      `There is no call history for this person yet, so keep the letter general and welcoming.`,
-      `Do not imply you have already spoken with them.`
-    );
+    lines.push(``, `There is no history for this person yet, so keep the letter general and welcoming.`);
   }
 
   return lines.join("\n");
@@ -227,16 +259,9 @@ export async function generateProspectLetter(params: {
     throw new Error("OPENAI_API_KEY is not configured, so letters can't be drafted.");
   }
 
-  // Call summaries can carry card/account digits; mask before anything leaves for the model.
-  const rawNotes = record.crmContactId
-    ? await agentCrmFetchContactNotes(record.crmContactId)
-    : [];
-  const notes = rawNotes
-    .slice(0, MAX_NOTES)
-    .map((n) => maskSensitiveNumbers(n.body).slice(0, MAX_NOTE_CHARS));
-
+  const context = await buildLetterContext(record);
   const system = buildSystemPrompt(record.language, agent);
-  const user = buildUserPrompt(record, agent, notes);
+  const user = buildUserPrompt(record, agent, context);
 
   let body = await callModel(system, user);
 
@@ -256,14 +281,7 @@ export async function generateProspectLetter(params: {
     throw new Error("The model returned an empty letter. Try regenerating.");
   }
 
-  const context =
-    notes.length > 0
-      ? `Personalized from ${notes.length} recent call ${notes.length === 1 ? "note" : "notes"}`
-      : record.crmContactId
-        ? "No call notes on this contact yet — general letter"
-        : "Not linked to a CRM contact — general letter";
-
-  return { body: body.trim(), context };
+  return { body: body.trim(), context: context.label };
 }
 
 /** Closing used above the signature on the printed page. */

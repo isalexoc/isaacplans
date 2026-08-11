@@ -5,8 +5,12 @@ import type { ReactElement } from "react";
 import { formatAddressBlock } from "./format";
 import { letterClosing, letterDate, type LetterAgentInfo } from "./letter";
 import { loadSeniorLifeLogo } from "./pdf";
-import { SENIOR_LIFE } from "./theme";
-import type { MailingLabelRecord } from "./types";
+import {
+  AGENT_CREDENTIAL_ASPECT,
+  AGENT_CREDENTIAL_IMAGE,
+  SENIOR_LIFE,
+} from "./theme";
+import type { MailingLabelLanguage, MailingLabelRecord } from "./types";
 
 /**
  * The letter that goes inside the envelope, one prospect per page.
@@ -30,6 +34,36 @@ const LOGO_H = 42;
 const BODY_SIZE = 13.5;
 const BODY_LEADING = 1.65;
 
+/** 450 px of source art across ~105 pt lands right around 300 DPI. */
+const CREDENTIAL_W = 105;
+const CREDENTIAL_H = CREDENTIAL_W / AGENT_CREDENTIAL_ASPECT;
+
+/**
+ * Credential art, fetched once per language per lambda instance. Cleared on failure so a transient
+ * Cloudinary blip doesn't drop the card for the life of the instance; null just omits it.
+ */
+const credentialCache = new Map<MailingLabelLanguage, Promise<Buffer | null>>();
+
+function loadCredential(language: MailingLabelLanguage): Promise<Buffer | null> {
+  const cached = credentialCache.get(language);
+  if (cached) return cached;
+
+  const pending = (async () => {
+    try {
+      const res = await fetch(AGENT_CREDENTIAL_IMAGE[language]);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return Buffer.from(await res.arrayBuffer());
+    } catch (error) {
+      console.warn(`[mailing-labels] Credential image unavailable (${language}):`, error);
+      credentialCache.delete(language);
+      return null;
+    }
+  })();
+
+  credentialCache.set(language, pending);
+  return pending;
+}
+
 /** Split the stored plain-text letter into paragraphs on blank lines. */
 export function letterParagraphs(body: string): string[] {
   return body
@@ -43,10 +77,12 @@ function LetterPage({
   record,
   agent,
   logo,
+  credential,
 }: {
   record: MailingLabelRecord;
   agent: LetterAgentInfo;
   logo: Buffer | null;
+  credential: Buffer | null;
 }) {
   const paragraphs = letterParagraphs(record.letterBody);
   const to = formatAddressBlock(record);
@@ -105,22 +141,44 @@ function LetterPage({
           </Text>
         ))}
 
-        <View style={{ marginTop: 18 }}>
-          <Text style={{ fontSize: BODY_SIZE, color: SENIOR_LIFE.ink, marginBottom: 26 }}>
-            {letterClosing(record.language)}
-          </Text>
-          <Text style={{ fontSize: 15, fontWeight: "bold", color: SENIOR_LIFE.blue }}>
-            {agent.name}
-          </Text>
-          {agent.phone ? (
-            <Text style={{ fontSize: 12.5, color: SENIOR_LIFE.ink, marginTop: 4 }}>
-              {agent.phone}
+        {/* Signature on the left, credential card on the right — a face and a license do more
+            for a senior's trust than any sentence in the body can. */}
+        <View
+          style={{
+            marginTop: 18,
+            flexDirection: "row",
+            alignItems: "flex-end",
+            justifyContent: "space-between",
+          }}
+        >
+          <View style={{ flexGrow: 1, paddingRight: 16 }}>
+            <Text style={{ fontSize: BODY_SIZE, color: SENIOR_LIFE.ink, marginBottom: 26 }}>
+              {letterClosing(record.language)}
             </Text>
-          ) : null}
-          {agent.email ? (
-            <Text style={{ fontSize: 11, color: SENIOR_LIFE.muted, marginTop: 2 }}>
-              {agent.email}
+            <Text style={{ fontSize: 15, fontWeight: "bold", color: SENIOR_LIFE.blue }}>
+              {agent.name}
             </Text>
+            {agent.phone ? (
+              <Text style={{ fontSize: 12.5, color: SENIOR_LIFE.ink, marginTop: 4 }}>
+                {agent.phone}
+              </Text>
+            ) : null}
+            {agent.email ? (
+              <Text style={{ fontSize: 11, color: SENIOR_LIFE.muted, marginTop: 2 }}>
+                {agent.email}
+              </Text>
+            ) : null}
+          </View>
+
+          {credential ? (
+            <Image
+              src={{ data: credential, format: "jpg" }}
+              style={{
+                width: CREDENTIAL_W,
+                height: CREDENTIAL_H,
+                objectFit: "contain",
+              }}
+            />
           ) : null}
         </View>
       </View>
@@ -153,12 +211,25 @@ export async function renderProspectLetters(params: {
   agent: LetterAgentInfo;
 }): Promise<Buffer> {
   const { records, agent } = params;
-  const logo = await loadSeniorLifeLogo();
+
+  // Only fetch the credential for languages actually present in this batch.
+  const languages = new Set(records.map((r) => r.language));
+  const [logo, ...loaded] = await Promise.all([
+    loadSeniorLifeLogo(),
+    ...[...languages].map(async (lang) => [lang, await loadCredential(lang)] as const),
+  ]);
+  const credentials = new Map(loaded);
 
   const doc: ReactElement<DocumentProps> = (
     <Document title="Prospect letters" author="Isaac Plans Insurance">
       {records.map((record) => (
-        <LetterPage key={record.id} record={record} agent={agent} logo={logo} />
+        <LetterPage
+          key={record.id}
+          record={record}
+          agent={agent}
+          logo={logo}
+          credential={credentials.get(record.language) ?? null}
+        />
       ))}
     </Document>
   );

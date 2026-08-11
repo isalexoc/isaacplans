@@ -25,6 +25,21 @@ export const SENIOR_LIFE = {
 export const SENIOR_LIFE_LOGO_PRINT =
   "https://res.cloudinary.com/isaacdev/image/upload/w_1200,f_png/v1773060314/Full-Logo-Gold.144f1298_iluidv.png";
 
+/**
+ * Isaac's agent credential card, printed beside the signature on the letter. Seeing a face and a
+ * credential does more for a senior's trust than anything the text can say.
+ *
+ * These are 450x716 originals — no upscaling transform, since that would only soften them. At the
+ * printed width in letter-pdf.tsx they land near 300 DPI.
+ */
+export const AGENT_CREDENTIAL_IMAGE: Record<"en" | "es", string> = {
+  en: "https://res.cloudinary.com/isaacdev/image/upload/v1786465121/id_en_1_kj5l89.jpg",
+  es: "https://res.cloudinary.com/isaacdev/image/upload/v1786464995/id_es_1_a32eby.jpg",
+};
+
+/** Native pixel size of the credential art, used to hold its aspect ratio on the page. */
+export const AGENT_CREDENTIAL_ASPECT = 450 / 716;
+
 export type LabelTypeScale = {
   padX: number;
   padY: number;

@@ -5,6 +5,7 @@ import {
   agentCrmFindContactByPhone,
   agentCrmGetBaseCredentials,
 } from "@/lib/agent-crm-contacts";
+import { getFeIntakeByToken } from "@/lib/fe-intake/server";
 import { generateProspectLetter } from "@/lib/mailing-labels/letter";
 import {
   getMailingLabelById,
@@ -31,20 +32,33 @@ async function ensureCrmContactId(
 ): Promise<string | null> {
   if (label.crmContactId) return label.crmContactId;
 
-  const creds = agentCrmGetBaseCredentials();
-  if (!creds) return null;
-
   let found: string | null = null;
-  try {
-    if (label.phone) {
-      found = (await agentCrmFindContactByPhone(label.phone, creds.locationId, creds.token))?.id ?? null;
+
+  // Rows queued before crm_contact_id existed still know their intake session, which has it.
+  if (label.source === "fe_intake" && label.sourceRef) {
+    try {
+      found = (await getFeIntakeByToken(label.sourceRef))?.crmContactId ?? null;
+    } catch (error) {
+      console.warn("[mailing-labels/letter] Intake lookup failed:", error);
     }
-    if (!found && label.email) {
-      found = (await agentCrmFindContactByEmail(label.email, creds.locationId, creds.token))?.id ?? null;
+  }
+
+  if (!found) {
+    const creds = agentCrmGetBaseCredentials();
+    if (!creds) return null;
+    try {
+      if (label.phone) {
+        found =
+          (await agentCrmFindContactByPhone(label.phone, creds.locationId, creds.token))?.id ?? null;
+      }
+      if (!found && label.email) {
+        found =
+          (await agentCrmFindContactByEmail(label.email, creds.locationId, creds.token))?.id ?? null;
+      }
+    } catch (error) {
+      console.warn("[mailing-labels/letter] CRM lookup failed:", error);
+      return null;
     }
-  } catch (error) {
-    console.warn("[mailing-labels/letter] CRM lookup failed:", error);
-    return null;
   }
 
   if (found) await setMailingLabelCrmContactId(label.id, found);
