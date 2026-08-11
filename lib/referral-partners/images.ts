@@ -11,6 +11,8 @@
  * (Cloudinary already is) — or set `unoptimized`, which the partner logo already does.
  */
 
+import { cloudinaryOgImageUrl } from "@/lib/blog-featured-image";
+
 const CLOUDINARY = "https://res.cloudinary.com/isaacdev/image/upload";
 
 /** Hero art — portrait-ish crop, sits beside the headline on desktop. PLACEHOLDER. */
@@ -25,4 +27,20 @@ export function partnerHeroImage(url: string): string {
 
 export function partnerSectionImage(url: string): string {
   return url.trim() || PARTNER_SECTION_IMAGE_PLACEHOLDER;
+}
+
+/**
+ * Social share preview (og:image), normalized to 1200×630.
+ *
+ * Falls back to the hero image so a partner who never sets one still shares with a real photo
+ * rather than nothing — the wrong aspect ratio is cropped by `c_fill,g_auto`, which beats a blank
+ * card on WhatsApp. Everything goes through Cloudinary fetch, so a partner can paste any https
+ * URL without pre-cropping it.
+ *
+ * Note: non-Cloudinary sources must be allowlisted under Cloudinary → Settings → Security →
+ * Allowed fetch domains, same caveat as the blog's OG images.
+ */
+export function partnerOgImage(ogImageUrl: string, heroImageUrl: string): string {
+  const chosen = ogImageUrl.trim() || heroImageUrl.trim() || PARTNER_HERO_IMAGE_PLACEHOLDER;
+  return cloudinaryOgImageUrl(chosen);
 }

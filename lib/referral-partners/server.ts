@@ -41,6 +41,7 @@ export function rowToPartner(row: PartnerRow): ReferralPartnerRecord {
     logoUrl: row.logoUrl ?? "",
     heroImageUrl: row.heroImageUrl ?? "",
     sectionImageUrl: row.sectionImageUrl ?? "",
+    ogImageUrl: row.ogImageUrl ?? "",
     accentColor: row.accentColor || "#0077B6",
     commissionBps: row.commissionBps ?? DEFAULT_COMMISSION_BPS,
     defaultLocale: normalizeLocale(row.defaultLocale),
@@ -143,6 +144,7 @@ export type PartnerInput = {
   logoUrl?: string;
   heroImageUrl?: string;
   sectionImageUrl?: string;
+  ogImageUrl?: string;
   accentColor?: string;
   commissionBps?: number;
   defaultLocale?: "en" | "es";
@@ -172,6 +174,7 @@ export async function createPartner(input: PartnerInput): Promise<ReferralPartne
       logoUrl: input.logoUrl || null,
       heroImageUrl: input.heroImageUrl || null,
       sectionImageUrl: input.sectionImageUrl || null,
+      ogImageUrl: input.ogImageUrl || null,
       accentColor: input.accentColor || "#0077B6",
       commissionBps: input.commissionBps ?? DEFAULT_COMMISSION_BPS,
       defaultLocale: input.defaultLocale ?? "es",
@@ -206,6 +209,7 @@ export async function updatePartner(
   if (updates.sectionImageUrl !== undefined) {
     values.sectionImageUrl = updates.sectionImageUrl || null;
   }
+  if (updates.ogImageUrl !== undefined) values.ogImageUrl = updates.ogImageUrl || null;
   if (updates.accentColor !== undefined) values.accentColor = updates.accentColor || "#0077B6";
   if (updates.commissionBps !== undefined) values.commissionBps = updates.commissionBps;
   if (updates.defaultLocale !== undefined) values.defaultLocale = updates.defaultLocale;

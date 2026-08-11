@@ -630,6 +630,12 @@ export const referralPartners = pgTable("referral_partners", {
    */
   heroImageUrl: text("hero_image_url"), // beside the hero headline
   sectionImageUrl: text("section_image_url"), // beside the "what they look at" block
+  /**
+   * Social share preview (og:image). Partners share their link on WhatsApp and Facebook, which is
+   * exactly where this decides whether anyone clicks. Any https URL works — it gets normalized to
+   * 1200×630 through Cloudinary fetch, so it does not have to be pre-cropped.
+   */
+  ogImageUrl: text("og_image_url"),
   accentColor: text("accent_color").notNull().default("#0077B6"), // hex, tints the partner page
   /**
    * Commission in basis points rather than a float — 500 = 5%. Integer math end to end means

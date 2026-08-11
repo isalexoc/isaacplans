@@ -18,7 +18,11 @@ import {
   PARTNER_DEFAULT_INTRO,
   pickCopy,
 } from "@/lib/referral-partners/content";
-import { partnerHeroImage, partnerSectionImage } from "@/lib/referral-partners/images";
+import {
+  partnerHeroImage,
+  partnerOgImage,
+  partnerSectionImage,
+} from "@/lib/referral-partners/images";
 import { buildAccentTheme } from "@/lib/referral-partners/colors";
 import { FINAL_EXPENSE_GET_COVERED_AGENT_HEADSHOT } from "@/lib/get-covered-fast/constants";
 import { routing } from "@/i18n/routing";
@@ -46,16 +50,32 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     return { title: t("title", { partner: "" }).trim(), robots: { index: false, follow: false } };
   }
 
+  const title = t("title", { partner: partner.companyName });
+  const description = t("description");
+  // This page's whole distribution is the partner pasting the link into WhatsApp and Facebook,
+  // so the share card matters more here than on a page people reach through search.
+  const ogImage = partnerOgImage(partner.ogImageUrl, partner.heroImageUrl);
+  const alt = t("imageAlt");
+
   return {
-    title: t("title", { partner: partner.companyName }),
-    description: t("description"),
+    title,
+    description,
     // Meant to be shared by the partner, not found in search — and two partner pages pitching the
     // same product would otherwise compete with our own pages for the same terms.
     robots: { index: false, follow: true },
     openGraph: {
-      title: t("title", { partner: partner.companyName }),
-      description: t("description"),
+      title,
+      description,
+      siteName: "Isaac Plans Insurance",
+      locale: safeLocale === "es" ? "es_ES" : "en_US",
       type: "website",
+      images: [{ url: ogImage, width: 1200, height: 630, alt }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [{ url: ogImage, alt }],
     },
   };
 }

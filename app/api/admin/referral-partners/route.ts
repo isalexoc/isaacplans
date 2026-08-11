@@ -88,6 +88,7 @@ export async function POST(request: NextRequest) {
       logoUrl: String(body.logoUrl ?? "").trim(),
       heroImageUrl: String(body.heroImageUrl ?? "").trim(),
       sectionImageUrl: String(body.sectionImageUrl ?? "").trim(),
+      ogImageUrl: String(body.ogImageUrl ?? "").trim(),
       accentColor: String(body.accentColor ?? "").trim() || "#0077B6",
       commissionBps,
       defaultLocale: body.defaultLocale === "en" ? "en" : "es",

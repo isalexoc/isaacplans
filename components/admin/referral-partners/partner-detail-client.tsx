@@ -12,6 +12,8 @@ import {
   UserPlus,
   X,
 } from "lucide-react";
+import { cloudinaryOgImageUrl } from "@/lib/blog-featured-image";
+import { PARTNER_HERO_IMAGE_PLACEHOLDER } from "@/lib/referral-partners/images";
 import {
   bpsToPercentLabel,
   commissionCents,
@@ -102,6 +104,7 @@ export default function PartnerDetailClient({ partner, leads, clients, siteUrl }
     logoUrl: partner.logoUrl,
     heroImageUrl: partner.heroImageUrl,
     sectionImageUrl: partner.sectionImageUrl,
+    ogImageUrl: partner.ogImageUrl,
     accentColor: partner.accentColor,
     commissionPercent: String(partner.commissionBps / 100),
     defaultLocale: partner.defaultLocale,
@@ -917,6 +920,7 @@ export default function PartnerDetailClient({ partner, leads, clients, siteUrl }
                   ["logoUrl", "Logo URL"],
                   ["heroImageUrl", "Hero image URL (blank = placeholder)"],
                   ["sectionImageUrl", "Section image URL (blank = placeholder)"],
+                  ["ogImageUrl", "Social share image URL (blank = uses hero)"],
                 ] as const
               ).map(([field, label]) => (
                 <div key={field}>
@@ -1028,6 +1032,32 @@ export default function PartnerDetailClient({ partner, leads, clients, siteUrl }
                   />
                 </div>
               </div>
+            </div>
+
+            {/* An og:image is invisible until someone shares the link, which is a bad time to
+                find out it is wrong. This renders the exact 1200×630 crop the platforms get. */}
+            <div className="mt-6">
+              <p className="mb-2 text-sm font-medium text-slate-700 dark:text-slate-200">
+                Social share preview
+              </p>
+              <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={cloudinaryOgImageUrl(
+                    settings.ogImageUrl.trim() ||
+                      settings.heroImageUrl.trim() ||
+                      PARTNER_HERO_IMAGE_PLACEHOLDER
+                  )}
+                  alt="Social share preview"
+                  className="aspect-[1200/630] w-full max-w-md bg-slate-100 object-cover dark:bg-slate-800"
+                />
+              </div>
+              <p className="mt-2 text-xs text-slate-500">
+                What WhatsApp and Facebook show when {partner.companyName} shares their link. Any
+                https image works — it is cropped to 1200×630 automatically. Blank falls back to the
+                hero image. A non-Cloudinary host must be allowlisted under Cloudinary → Settings →
+                Security → Allowed fetch domains.
+              </p>
             </div>
 
             <h3 className="mt-6 text-sm font-semibold text-slate-900 dark:text-white">
