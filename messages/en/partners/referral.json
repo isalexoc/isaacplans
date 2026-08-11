@@ -219,7 +219,9 @@
     },
     "noAccess": {
       "title": "This account is not linked to a partner",
-      "body": "You are signed in as {email}, but that address is not registered as a referral partner. If you believe this is a mistake, contact Isaac Plans and ask to have this email added to your partner profile.",
+      "body": "You are signed in as {email}, but that address is not registered as a referral partner.",
+      "wrongAccount": "Have another email? Sign out and sign back in with the address you registered with Isaac Plans. If this one is correct, contact us and we'll add it to your partner profile.",
+      "signOut": "Sign out and use another account",
       "cta": "Go to homepage"
     },
     "paused": {

@@ -4,9 +4,9 @@ import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { hasLocale } from "next-intl";
-import { Link } from "@/i18n/navigation";
 import { Users, UserCheck, TrendingUp, Wallet, HandCoins, CalendarClock } from "lucide-react";
 import PartnerLinkCopy from "@/components/referral-partners/partner-link-copy";
+import PartnerNoAccess from "@/components/referral-partners/partner-no-access";
 import { getPartnerByEmail, getPartnerDashboard } from "@/lib/referral-partners/server";
 import {
   bpsToPercentLabel,
@@ -119,19 +119,15 @@ export default async function PartnerDashboardPage({ params }: PageProps) {
   }
 
   if (!partner) {
+    // Almost always the partner signed in with a second address, so this screen shows which
+    // account they're in and offers a one-click switch rather than only explaining the problem.
     return (
-      <main className="mx-auto flex min-h-[60vh] max-w-xl flex-col items-center justify-center px-4 py-16 text-center">
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">{t("noAccess.title")}</h1>
-        <p className="mt-4 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-          {t("noAccess.body", { email: emails[0] ?? "" })}
-        </p>
-        <Link
-          href="/"
-          className="mt-6 rounded-lg bg-slate-900 px-5 py-3 text-sm font-semibold text-white dark:bg-white dark:text-slate-900"
-        >
-          {t("noAccess.cta")}
-        </Link>
-      </main>
+      <PartnerNoAccess
+        email={user.primaryEmailAddress?.emailAddress ?? emails[0] ?? ""}
+        name={[user.firstName, user.lastName].filter(Boolean).join(" ")}
+        imageUrl={user.imageUrl ?? ""}
+        redirectUrl={`/${safeLocale}/${safeLocale === "es" ? "socio" : "partner"}`}
+      />
     );
   }
 

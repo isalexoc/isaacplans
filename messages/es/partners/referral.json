@@ -219,7 +219,9 @@
     },
     "noAccess": {
       "title": "Esta cuenta no está vinculada a un socio",
-      "body": "Inició sesión como {email}, pero esa dirección no está registrada como socio de referidos. Si cree que es un error, comuníquese con Isaac Plans y pida que agreguen este correo a su perfil de socio.",
+      "body": "Inició sesión como {email}, pero esa dirección no está registrada como socio de referidos.",
+      "wrongAccount": "¿Tiene otro correo? Cierre sesión y vuelva a entrar con el correo que registró con Isaac Plans. Si ese es el correcto, escríbanos y lo agregamos a su perfil de socio.",
+      "signOut": "Cerrar sesión y usar otra cuenta",
       "cta": "Ir a la página principal"
     },
     "paused": {
