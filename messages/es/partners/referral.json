@@ -121,8 +121,12 @@
       "successTitle": "Gracias — recibimos su información",
       "successMessage": "Un agente con licencia le llamará muy pronto. Si prefiere hablar ahora mismo, llámenos directamente.",
       "successCall": "Llamar ahora",
-      "successWhatsapp": "Escribir por WhatsApp",
-      "successAnother": "Enviar otra solicitud"
+      "successWhatsapp": "WhatsApp",
+      "successAnother": "Enviar otra solicitud",
+      "successSelfEnrollTitle": "¿Prefiere inscribirse usted mismo?",
+      "successSelfEnrollBody": "Vea los planes y los precios, y complete su inscripción en línea ahora mismo. Si tiene dudas a mitad del camino, llámenos y lo acompañamos.",
+      "successSelfEnrollCta": "Inscribirme en línea",
+      "successOr": "o hable con nosotros"
     },
     "faq": {
       "label": "Preguntas frecuentes",

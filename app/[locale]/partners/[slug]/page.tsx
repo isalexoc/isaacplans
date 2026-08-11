@@ -19,6 +19,7 @@ import {
   pickCopy,
 } from "@/lib/referral-partners/content";
 import { partnerHeroImage, partnerSectionImage } from "@/lib/referral-partners/images";
+import { buildAccentTheme } from "@/lib/referral-partners/colors";
 import { FINAL_EXPENSE_GET_COVERED_AGENT_HEADSHOT } from "@/lib/get-covered-fast/constants";
 import { routing } from "@/i18n/routing";
 
@@ -85,7 +86,17 @@ export default async function PartnerLandingPage({ params }: PageProps) {
     copyLocale
   );
 
-  const accent = partner.accentColor;
+  // A partner's brand hex is picked for their own materials, which are almost always on white.
+  // Used raw, a dark navy like #1D4E89 sits at ~2.4:1 on our dark page and small accent text
+  // (the hero badge, the uppercase section labels) becomes unreadable. buildAccentTheme derives
+  // a per-mode variant that clears WCAG AA; the vars below are what the markup actually uses.
+  const theme = buildAccentTheme(partner.accentColor);
+  const accent = theme.base;
+  const accentCss = `
+[data-partner-accent]{--pa:${theme.base};--pa-text:${theme.textOnLight};--pa-ink:${theme.textOnLight};--pa-soft:${theme.textOnLight}1a}
+.dark [data-partner-accent]{--pa-text:${theme.textOnDark};--pa-soft:${theme.textOnDark}24}
+`.trim();
+
   const benefits = t.raw("benefits.items") as { title: string; body: string }[];
   const steps = t.raw("steps.items") as { title: string; body: string }[];
   const faqs = t.raw("faq.items") as { q: string; a: string }[];
@@ -99,7 +110,9 @@ export default async function PartnerLandingPage({ params }: PageProps) {
     : [];
 
   return (
-    <main className="bg-white dark:bg-slate-950">
+    <main data-partner-accent className="bg-white dark:bg-slate-950">
+      {/* Values are hex-validated in safeHex() before reaching the stylesheet. */}
+      <style dangerouslySetInnerHTML={{ __html: accentCss }} />
       {/* ── Co-branded bar: the client sees immediately who vouched for us ── */}
       <div className="border-b border-slate-200 bg-white/90 backdrop-blur dark:border-slate-800 dark:bg-slate-950/90">
         <div className="mx-auto flex max-w-6xl items-center justify-center gap-4 px-4 py-4 sm:gap-6">
@@ -123,7 +136,7 @@ export default async function PartnerLandingPage({ params }: PageProps) {
           ) : (
             <span
               className="text-base font-bold tracking-tight sm:text-lg"
-              style={{ color: accent }}
+              style={{ color: "var(--pa-text)" }}
             >
               {partner.companyName}
             </span>
@@ -140,7 +153,7 @@ export default async function PartnerLandingPage({ params }: PageProps) {
           <div>
             <span
               className="inline-flex w-fit items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-semibold sm:text-sm"
-              style={{ backgroundColor: `${accent}1a`, color: accent }}
+              style={{ backgroundColor: "var(--pa-soft)", color: "var(--pa-text)" }}
             >
               <BadgeCheck className="h-4 w-4 flex-shrink-0" />
               {t("badge", { partner: partner.companyName })}
@@ -158,7 +171,7 @@ export default async function PartnerLandingPage({ params }: PageProps) {
               <a
                 href="#request"
                 className="inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3.5 text-base font-bold text-white shadow-lg transition-all hover:brightness-110"
-                style={{ backgroundColor: accent }}
+                style={{ backgroundColor: "var(--pa)" }}
               >
                 {t("heroCta")}
                 <ArrowRight className="h-4 w-4" />
@@ -221,7 +234,7 @@ export default async function PartnerLandingPage({ params }: PageProps) {
             <div>
               <span
                 className="text-xs font-bold uppercase tracking-widest"
-                style={{ color: accent }}
+                style={{ color: "var(--pa-text)" }}
               >
                 {t("factors.label")}
               </span>
@@ -238,7 +251,7 @@ export default async function PartnerLandingPage({ params }: PageProps) {
                     key={item}
                     className="flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-200"
                   >
-                    <Check className="h-4 w-4 flex-shrink-0" style={{ color: accent }} />
+                    <Check className="h-4 w-4 flex-shrink-0" style={{ color: "var(--pa-text)" }} />
                     {item}
                   </li>
                 ))}
@@ -255,7 +268,7 @@ export default async function PartnerLandingPage({ params }: PageProps) {
             <div className="mx-auto max-w-2xl text-center">
               <span
                 className="text-xs font-bold uppercase tracking-widest"
-                style={{ color: accent }}
+                style={{ color: "var(--pa-text)" }}
               >
                 {t("situations.label")}
               </span>
@@ -296,7 +309,7 @@ export default async function PartnerLandingPage({ params }: PageProps) {
       {/* ── Benefits ── */}
       <section className="mx-auto max-w-5xl px-4 py-14 sm:py-20">
         <div className="mx-auto max-w-2xl text-center">
-          <span className="text-xs font-bold uppercase tracking-widest" style={{ color: accent }}>
+          <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "var(--pa-text)" }}>
             {t("benefits.label")}
           </span>
           <h2 className="mt-3 text-2xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-3xl">
@@ -312,9 +325,9 @@ export default async function PartnerLandingPage({ params }: PageProps) {
             >
               <div
                 className="mb-3 inline-flex h-9 w-9 items-center justify-center rounded-lg"
-                style={{ backgroundColor: `${accent}1a` }}
+                style={{ backgroundColor: "var(--pa-soft)" }}
               >
-                <Check className="h-4 w-4" style={{ color: accent }} />
+                <Check className="h-4 w-4" style={{ color: "var(--pa-text)" }} />
               </div>
               <h3 className="text-sm font-bold text-slate-900 dark:text-white">{benefit.title}</h3>
               <p className="mt-1.5 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
@@ -332,7 +345,7 @@ export default async function PartnerLandingPage({ params }: PageProps) {
       >
         <div className="mx-auto max-w-5xl px-4 py-14 sm:py-20">
           <div className="mx-auto max-w-2xl text-center">
-            <span className="text-xs font-bold uppercase tracking-widest" style={{ color: accent }}>
+            <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "var(--pa-text)" }}>
               {t("steps.label")}
             </span>
             <h2 className="mt-3 text-2xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-3xl">
@@ -348,7 +361,7 @@ export default async function PartnerLandingPage({ params }: PageProps) {
               >
                 <div
                   className="flex h-9 w-9 items-center justify-center rounded-full text-sm font-extrabold text-white"
-                  style={{ backgroundColor: accent }}
+                  style={{ backgroundColor: "var(--pa)" }}
                 >
                   {index + 1}
                 </div>
@@ -378,7 +391,7 @@ export default async function PartnerLandingPage({ params }: PageProps) {
             />
           </div>
           <div className="text-center sm:text-left">
-            <span className="text-xs font-bold uppercase tracking-widest" style={{ color: accent }}>
+            <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "var(--pa-text)" }}>
               {t("agent.label")}
             </span>
             <h3 className="mt-2 text-lg font-bold text-slate-900 dark:text-white">
@@ -393,7 +406,7 @@ export default async function PartnerLandingPage({ params }: PageProps) {
             <a
               href={CRM_PHONE_TEL}
               className="mt-3 inline-flex items-center gap-2 text-sm font-semibold"
-              style={{ color: accent }}
+              style={{ color: "var(--pa-text)" }}
             >
               <Phone className="h-4 w-4" />
               {CRM_PHONE_DISPLAY}
@@ -406,7 +419,7 @@ export default async function PartnerLandingPage({ params }: PageProps) {
       <section className="border-t border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-900/40">
         <div className="mx-auto max-w-3xl px-4 py-14 sm:py-20">
           <div className="text-center">
-            <span className="text-xs font-bold uppercase tracking-widest" style={{ color: accent }}>
+            <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "var(--pa-text)" }}>
               {t("faq.label")}
             </span>
             <h2 className="mt-3 text-2xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-3xl">
@@ -443,7 +456,8 @@ export default async function PartnerLandingPage({ params }: PageProps) {
             <a
               href="#request"
               className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-7 py-3.5 text-base font-bold shadow-lg transition-transform hover:scale-[1.02]"
-              style={{ color: accent }}
+              // This button is white in BOTH modes, so it always wants the light-mode ink.
+              style={{ color: "var(--pa-ink)" }}
             >
               {t("closing.cta")}
               <ArrowRight className="h-4 w-4" />
@@ -458,7 +472,7 @@ export default async function PartnerLandingPage({ params }: PageProps) {
       {/* ── Partnership disclosure: enrolling is optional and independent ── */}
       <section className="border-t border-slate-200 dark:border-slate-800">
         <div className="mx-auto max-w-3xl px-4 py-10 text-center">
-          <span className="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">
+          <span className="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-400">
             {t("partnership.label")}
           </span>
           <p className="mt-3 text-sm leading-relaxed text-slate-500 dark:text-slate-400">
@@ -470,7 +484,7 @@ export default async function PartnerLandingPage({ params }: PageProps) {
               target="_blank"
               rel="noopener noreferrer"
               className="mt-3 inline-block text-sm font-semibold hover:underline"
-              style={{ color: accent }}
+              style={{ color: "var(--pa-text)" }}
             >
               {partner.companyName} →
             </a>

@@ -121,8 +121,12 @@
       "successTitle": "Thank you — we received your information",
       "successMessage": "A licensed agent will call you shortly. If you would like to talk right now, call us directly.",
       "successCall": "Call now",
-      "successWhatsapp": "WhatsApp us",
-      "successAnother": "Send another request"
+      "successWhatsapp": "WhatsApp",
+      "successAnother": "Send another request",
+      "successSelfEnrollTitle": "Prefer to enroll yourself?",
+      "successSelfEnrollBody": "See plans and prices and complete your enrollment online right now. If you get stuck partway through, call us and we'll walk you through it.",
+      "successSelfEnrollCta": "Enroll myself online",
+      "successOr": "or talk to us"
     },
     "faq": {
       "label": "Common questions",

@@ -4,7 +4,8 @@ import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import PhoneInput from "react-phone-number-input";
 import "react-phone-number-input/style.css";
-import { CheckCircle2, Loader2, MessageCircle, Phone } from "lucide-react";
+import { CheckCircle2, ExternalLink, Loader2, MessageCircle, Phone, Zap } from "lucide-react";
+import { PIVOT_SELF_ENROLL_URL } from "@/lib/pivot-direct-quote";
 import { shortTermMedicalFormSchema } from "@/lib/validation/shortTermMedicalSchema";
 import { generateEventId, getFacebookCookies } from "@/lib/meta-capi";
 import { trackLead, updateAdvancedMatching } from "@/lib/facebook-pixel";
@@ -152,34 +153,81 @@ export default function PartnerLeadForm({ partnerSlug, accentColor }: Props) {
 
   if (done) {
     return (
-      <div className="rounded-2xl border-2 border-emerald-200 bg-emerald-50/70 p-6 text-center dark:border-emerald-800 dark:bg-emerald-950/30 sm:p-8">
-        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/15">
-          <CheckCircle2 className="h-8 w-8 text-emerald-600 dark:text-emerald-400" />
+      <div className="text-center">
+        {/* Confirmation. Deliberately light on green — the old all-emerald panel shouted, and the
+            real job of this screen is to offer the next step, not to celebrate. */}
+        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/10 ring-8 ring-emerald-500/5">
+          <CheckCircle2 className="h-7 w-7 text-emerald-600 dark:text-emerald-400" />
         </div>
-        <p className="text-lg font-semibold text-emerald-900 dark:text-emerald-100">
-          {t("successTitle")}
-        </p>
-        <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-emerald-800 dark:text-emerald-200">
+        <h3 className="text-lg font-bold text-slate-900 dark:text-white">{t("successTitle")}</h3>
+        <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-slate-600 dark:text-slate-300">
           {t("successMessage")}
         </p>
-        <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
+
+        {/* Self-enrollment. Highest-intent action on the screen, so it gets the accent panel:
+            someone who wants to buy right now should not have to wait for a callback. */}
+        {/* --pa-* come from the page's accent theme and are already contrast-corrected per mode;
+            the raw hex would go near-invisible on the dark card. */}
+        <div
+          className="mt-6 rounded-2xl border p-5 text-left"
+          style={{ backgroundColor: "var(--pa-soft)", borderColor: "var(--pa-soft)" }}
+        >
+          <div className="flex items-start gap-3">
+            <div
+              className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg"
+              style={{ backgroundColor: "var(--pa-soft)" }}
+            >
+              <Zap className="h-4 w-4" style={{ color: "var(--pa-text)" }} />
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm font-bold text-slate-900 dark:text-white">
+                {t("successSelfEnrollTitle")}
+              </p>
+              <p className="mt-1 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+                {t("successSelfEnrollBody")}
+              </p>
+            </div>
+          </div>
+          <a
+            href={PIVOT_SELF_ENROLL_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-bold text-white shadow-sm transition-all hover:brightness-110"
+            style={{ backgroundColor: accentColor }}
+          >
+            {t("successSelfEnrollCta")}
+            <ExternalLink className="h-4 w-4" />
+          </a>
+        </div>
+
+        {/* Divider — makes "or talk to a person" read as an alternative, not a competing CTA. */}
+        <div className="my-5 flex items-center gap-3">
+          <span className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
+          <span className="text-xs font-medium uppercase tracking-wide text-slate-400 dark:text-slate-500">
+            {t("successOr")}
+          </span>
+          <span className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
+        </div>
+
+        <div className="grid gap-3 sm:grid-cols-2">
           <a
             href={CRM_PHONE_TEL}
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 py-3 font-semibold text-white shadow-sm transition-colors hover:bg-emerald-700"
+            className="inline-flex items-center justify-center gap-2 rounded-xl border-2 border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
           >
-            <Phone className="h-4 w-4" />
-            {t("successCall")} · {CRM_PHONE_DISPLAY}
+            <Phone className="h-4 w-4 flex-shrink-0" />
+            {CRM_PHONE_DISPLAY}
           </a>
           <a
             href={WHATSAPP_CHAT_HREF}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center justify-center gap-2 rounded-xl border-2 border-emerald-300 px-5 py-3 font-semibold text-emerald-800 transition-colors hover:bg-emerald-100 dark:border-emerald-700 dark:text-emerald-200 dark:hover:bg-emerald-900/40"
+            className="inline-flex items-center justify-center gap-2 rounded-xl border-2 border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
           >
-            <MessageCircle className="h-4 w-4" />
+            <MessageCircle className="h-4 w-4 flex-shrink-0" />
             {t("successWhatsapp")}
           </a>
         </div>
+
         <button
           type="button"
           onClick={() => {
@@ -188,7 +236,7 @@ export default function PartnerLeadForm({ partnerSlug, accentColor }: Props) {
             setMarketingConsent(false);
             setDone(false);
           }}
-          className="mt-5 text-sm font-medium text-emerald-700 underline-offset-4 hover:underline dark:text-emerald-300"
+          className="mt-5 text-sm font-medium text-slate-500 underline-offset-4 hover:underline dark:text-slate-400"
         >
           {t("successAnother")}
         </button>
