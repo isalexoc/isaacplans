@@ -27,6 +27,7 @@ import { submitSceneClip, getSceneClipStatus } from "./veo";
 import { generateCategoryMusic } from "./music-generator";
 import { findReusableAsset } from "./video-asset-library";
 import { detectPresenterChromaColor } from "./chroma-detect";
+import { estimateSpokenSeconds } from "./script-narration";
 import { RenderPermanentError } from "./render/errors";
 import type { VideoStoryboard, VideoImage } from "./types";
 import type { SocialVideoJobState } from "./video-job-types";
@@ -85,6 +86,18 @@ function nextState(
 
 const fullNarration = (sb: VideoStoryboard) =>
   sb.scenes.map((s) => s.narration.trim()).filter(Boolean).join(" ");
+
+/**
+ * Length to assume for the presenter clip when HeyGen's status payload omits a duration.
+ * Estimated from the narration (which IS the user's script), NOT the 30/60s button: that
+ * button is only a target now, so falling back to it would force every such render to be
+ * exactly 30s or 60s regardless of how long the script actually runs — and this number
+ * drives the whole timeline (scene lengths, music length, total duration).
+ */
+function estimatedNarrationSeconds(sb: VideoStoryboard): number {
+  const est = estimateSpokenSeconds(fullNarration(sb));
+  return est > 0 ? Math.round(est * 10) / 10 : sb.durationSeconds;
+}
 
 // ── main entry ──────────────────────────────────────────────────────────────
 export async function processVideoJob(jobId: string): Promise<ProcessVideoJobResult> {
@@ -243,7 +256,15 @@ async function processImages(job: VideoJobRow): Promise<StepOutcome> {
     }
   }
 
-  const finalStoryboard: VideoStoryboard = { ...storyboard, scenes };
+  // Carry the studio's switches onto the rebuilt storyboard before it is persisted —
+  // `toStoryboardDoc` writes `subtitles ?? true` / `reuseAssets ?? true`, so a freshly built
+  // storyboard that omitted them would silently flip a saved "off" back to "on".
+  const finalStoryboard: VideoStoryboard = {
+    ...storyboard,
+    scenes,
+    ...(input.subtitles   !== undefined ? { subtitles:   input.subtitles }   : {}),
+    ...(input.reuseAssets !== undefined ? { reuseAssets: input.reuseAssets } : {}),
+  };
   const images: VideoImage[] = scenes.map((s) => ({
     url: s.imageUrl, concept: s.imageConcept, createdAt: new Date().toISOString(),
   }));
@@ -378,7 +399,7 @@ async function handlePresenter(job: VideoJobRow, storyboard: VideoStoryboard, st
         jobState: nextState(state, {
           step: "compose",
           presenterVideoUrl: st.url,
-          presenterDurationSec: st.durationSeconds ?? storyboard.durationSeconds,
+          presenterDurationSec: st.durationSeconds ?? estimatedNarrationSeconds(storyboard),
           ...(chroma ? { presenterChromaColor: chroma } : {}),
         }, stages, "Composing", 46),
       });
@@ -436,7 +457,7 @@ async function handleCompose(
   const presenter = presenterActive
     ? {
         url:         state.presenterVideoUrl!,
-        durationSec: state.presenterDurationSec ?? finalStoryboard.durationSeconds,
+        durationSec: state.presenterDurationSec ?? estimatedNarrationSeconds(finalStoryboard),
         chromaColor: state.presenterChromaColor,
       }
     : undefined;

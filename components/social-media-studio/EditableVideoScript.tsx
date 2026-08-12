@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, Save, CheckCircle2 } from "lucide-react";
+import { Loader2, Save, CheckCircle2, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
+import { planNarration } from "@/lib/social-media-studio/script-narration";
 
 interface Props {
   postId: string;
@@ -29,6 +30,15 @@ export function EditableVideoScript({ postId, initial }: Props) {
   const [error, setError]       = useState<string | undefined>();
 
   function dirty() { setSaved(false); }
+
+  // The Full Script is the ONLY source of truth for the video: it is spoken word for word,
+  // and the video ends when it ends. Show that length live so the script can be tuned to hit
+  // a target duration — the render follows the script, not the 30s/60s button.
+  const narration = useMemo(() => planNarration(full), [full]);
+  const spokenLabel = narration.estimatedSeconds < 60
+    ? `${Math.round(narration.estimatedSeconds)}s`
+    : `${Math.floor(narration.estimatedSeconds / 60)}m ${Math.round(narration.estimatedSeconds % 60)}s`;
+  const offTarget = narration.wordCount > 0 && Math.abs(narration.estimatedSeconds - duration) > duration * 0.25;
 
   async function save() {
     setSaving(true);
@@ -75,12 +85,39 @@ export function EditableVideoScript({ postId, initial }: Props) {
       <div className="space-y-1">
         <Label className="text-xs uppercase tracking-wide text-muted-foreground">Hook</Label>
         <Textarea value={hook} onChange={(e) => { setHook(e.target.value); dirty(); }} rows={2} className="text-sm" />
+        <p className="text-xs text-muted-foreground">
+          Reference only — the hook lines are already part of the Full Script below, so this field is
+          never spoken separately in the video.
+        </p>
       </div>
 
       <div className="space-y-1">
-        <Label className="text-xs uppercase tracking-wide text-muted-foreground">Full Script</Label>
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <Label className="text-xs uppercase tracking-wide text-muted-foreground">Full Script</Label>
+          {narration.wordCount > 0 && (
+            <span className={cn(
+              "flex items-center gap-1 text-xs",
+              offTarget ? "text-amber-600" : "text-muted-foreground"
+            )}>
+              <Clock className="h-3 w-3" />
+              {narration.wordCount} spoken words · ≈ {spokenLabel} video
+            </span>
+          )}
+        </div>
         <Textarea value={full} onChange={(e) => { setFull(e.target.value); dirty(); }} rows={10} className="text-sm font-mono" />
-        <p className="text-xs text-muted-foreground">The video narration is built from this script — edits here change the next generated video.</p>
+        <p className="text-xs text-muted-foreground">
+          <strong>This script is the video.</strong> It is spoken word for word — nothing is added,
+          removed or rewritten — and the video ends when the script ends. Timestamps like{" "}
+          <code className="text-[10px]">[0:00–0:03]</code>, beat labels like{" "}
+          <code className="text-[10px]">HOOK:</code>, bracketed directions and hashtags are stripped
+          before recording; everything else is read aloud exactly as typed.
+        </p>
+        {offTarget && (
+          <p className="text-xs text-amber-600">
+            This script runs ≈ {spokenLabel}, not {duration}s. The video will be ≈ {spokenLabel} —
+            the duration button only sets the target; the script decides the real length.
+          </p>
+        )}
       </div>
 
       <div className="space-y-1">

@@ -237,6 +237,7 @@ export const socialPostType = defineType({
         { name: "presenterAvatarType", title: "Presenter Avatar Type", type: "string", description: "avatar | talking_photo (custom photo-avatar looks use talking_photo)" },
         { name: "presenterVoiceId",    title: "Presenter Voice ID",    type: "string" },
         { name: "presenterVoiceName",  title: "Presenter Voice Name",  type: "string" },
+        { name: "subtitles",           title: "Burned-in Subtitles", type: "boolean", description: "Karaoke captions over the narration — off renders a clean frame with no text" },
         { name: "cinematic",           title: "Cinematic Motion (Veo)", type: "boolean" },
         { name: "veoTier",             title: "Veo Tier",              type: "string" },
         { name: "veoDurationSec",      title: "Veo Clip Length (s)",   type: "number" },

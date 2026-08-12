@@ -130,7 +130,8 @@ export interface VideoScript {
  * "video director" step from the existing video script + creative images.
  */
 export interface VideoScene {
-  narration: string;       // clean spoken text for this scene (no [MM:SS] markers)
+  narration: string;       // VERBATIM slice of the user's fullScript — the script is the only
+                           // source of truth for what is spoken (see script-narration.ts)
   onScreenText: string;    // short caption/headline burned over the scene
   imageConcept: string;    // photographic scene description → drives this scene's image
   imageUrl: string;        // portrait background image (Cloudinary) — filled in Phase A
@@ -154,6 +155,7 @@ export interface VideoStoryboard {
                                 // talking_photo payload shape; stock/instant avatars don't
   presenterVoiceId?: string;   // in-app picked HeyGen voice (overrides env default)
   presenterVoiceName?: string; // display label for the picked voice
+  subtitles?: boolean;         // burned-in karaoke captions; undefined/true = on, false = clean frame
   cinematic?: boolean;         // true → animated scenes use their Veo clip instead of the still
   veoTier?: "lite" | "fast" | "standard"; // Veo quality tier for cinematic motion (default lite)
   veoDurationSec?: 4 | 6 | 8;  // Veo clip length per scene (default 6)
@@ -262,6 +264,7 @@ export interface VideoImagesRequest {
   locale?: SocialLocale;         // voice/subject language; defaults to source locale
   reuseAssets?: boolean;         // check the cross-post asset library before generating each scene
   preferClipAssets?: boolean;    // when reusing, prefer a library match that already has a Veo clip
+  subtitles?: boolean;           // caption switch to stamp on the rebuilt storyboard
 }
 
 export interface VideoImagesResult {

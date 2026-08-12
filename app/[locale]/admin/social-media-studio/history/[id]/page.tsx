@@ -77,6 +77,7 @@ interface SocialPostDetail {
     presenterAvatarType?: string;
     presenterVoiceId?: string;
     presenterVoiceName?: string;
+    subtitles?: boolean;
     cinematic?: boolean;
     veoTier?: string;
     veoDurationSec?: number;
@@ -156,6 +157,7 @@ export default async function SocialPostDetailPage({
         presenterAvatarType: post.videoStoryboard.presenterAvatarType === "talking_photo" ? "talking_photo" : undefined,
         presenterVoiceId:    post.videoStoryboard.presenterVoiceId,
         presenterVoiceName:  post.videoStoryboard.presenterVoiceName,
+        subtitles:       post.videoStoryboard.subtitles ?? true,
         cinematic:       post.videoStoryboard.cinematic ?? false,
         veoTier:         (post.videoStoryboard.veoTier as "lite" | "fast" | "standard" | undefined),
         veoDurationSec:  (post.videoStoryboard.veoDurationSec === 4 || post.videoStoryboard.veoDurationSec === 8 ? post.videoStoryboard.veoDurationSec : 6),

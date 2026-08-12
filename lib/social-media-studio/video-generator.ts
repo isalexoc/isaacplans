@@ -7,6 +7,14 @@ import { generateCategoryMusic } from "./music-generator";
 import { registerImageAsset } from "./video-asset-library";
 import { HEYGEN_CHROMA_COLOR } from "./heygen-presenter";
 import { synthesizeNarration } from "./voiceover";
+import {
+  planNarration,
+  segmentNarration,
+  recommendedSceneCount,
+  detectScriptLocale,
+  distributeSceneDurations,
+  countWords,
+} from "./script-narration";
 import { shotstackProvider } from "./render/shotstack";
 import type { RenderPlan, RenderPlanScene, RenderPlanPresenter } from "./render/types";
 import type {
@@ -48,25 +56,36 @@ function elevenLabsVoiceFor(locale: SocialLocale): string {
     : process.env.ELEVENLABS_VOICE_ID_EN || DEFAULT_VOICE_EN;
 }
 
-// ─── Step 1: Storyboard (GPT "video director") ───────────────────────────────────
-// Converts the timed video script (with [MM:SS] markers + stage directions) into a
-// clean, render-ready scene list: spoken narration + a short on-screen headline per
-// scene. Mirrors the JSON-mode pattern in script-generator.ts.
+// ─── Step 1: Storyboard ──────────────────────────────────────────────────────────
+//
+// THE SCRIPT IS THE ONLY SOURCE OF TRUTH FOR WHAT IS SPOKEN.
+//
+// Narration is derived from `videoScript.fullScript` by the deterministic segmenter in
+// script-narration.ts — word for word, in order, nothing added and nothing dropped. GPT is
+// no longer allowed anywhere near the words; it only chooses the IMAGE for each segment.
+//
+// (This module used to hand the script to a GPT "video director" that WROTE the narration.
+// It paraphrased, and — fed the hook separately plus the on-screen-text ideas, and told to
+// hit a fixed scene count for a target duration — it reliably tacked an extra closing beat
+// onto the end of the video that was never in the script. That is why the rendered Short
+// said things the script did not.)
 
-const STORYBOARD_SYSTEM_PROMPT = `You are a short-form video director for an insurance brand. You turn a talking-head script into a cinematic, emotionally engaging storyboard for a vertical (9:16) Short built from AI-generated images + AI voiceover + on-screen captions.
+const VISUAL_DIRECTOR_SYSTEM_PROMPT = `You are a short-form video director for an insurance brand. You are given the FINAL, LOCKED narration of a vertical (9:16) Short, already split into numbered segments. Your ONLY job is to choose the image for each segment.
 
-DIRECT LIKE A FILMMAKER, NOT A STOCK-PHOTO SEARCH. The scenes must add up to ONE continuous visual story that carries the script's emotional arc — never a slideshow of unrelated smiling strangers.
+THE NARRATION IS NOT YOURS TO TOUCH. Do not write, rewrite, translate, shorten, extend, merge, split, reorder or comment on it. Do not return it. You return one visual per segment, nothing else.
 
-Before writing any scenes, silently decide these three things and hold them consistent the whole way through:
+DIRECT LIKE A FILMMAKER, NOT A STOCK-PHOTO SEARCH. The images must add up to ONE continuous visual story that carries the script's emotional arc — never a slideshow of unrelated smiling strangers.
+
+Before choosing any image, silently decide these three things and hold them consistent the whole way through:
 1. THE PERSON — one specific human this script is really for, who is a believable customer for THIS exact topic (e.g. a 67-year-old grandmother for final expense; a 34-year-old self-employed carpenter for ACA; a young couple with a new baby for life insurance). Fix their age, build, hair, skin tone and clothing.
-2. THE ARC — where they begin emotionally (a quiet question, an unspoken worry, an ordinary morning), what shifts in the middle, and where they land (relief, control, a protected family). Spread that arc across the scenes IN ORDER.
+2. THE ARC — where they begin emotionally (a quiet question, an unspoken worry, an ordinary morning), what shifts in the middle, and where they land (relief, control, a protected family). Spread that arc across the segments IN ORDER, matching each image to the words spoken over it.
 3. THE WORLD — one home/neighborhood, one time of day, one color palette that recurs, so the whole video reads as a single film rather than a folder of stock shots.
 
 Rules:
-- Output ONLY valid JSON: { "scenes": [ { "narration": string, "onScreenText": string, "imageConcept": string } ] }.
-- "narration" is the exact words the voiceover will SPEAK for that scene — natural spoken sentences only. NO timestamps, NO stage directions, NO brackets, NO emojis, NO hashtags.
-- "onScreenText" is a SHORT punchy caption/headline (max ~6 words) burned on screen for that scene. Title Case. No ending period.
-- "imageConcept" is a 1-2 sentence photographic description of THIS story beat — the specific moment in your story, not a generic illustration of the topic. Do NOT use the word "insurance". No text, signage or graphics in the scene.
+- Output ONLY valid JSON: { "scenes": [ { "index": number, "onScreenText": string, "imageConcept": string } ] }.
+- Return EXACTLY one entry per narration segment, in order, with "index" matching the segment number you were given.
+- "imageConcept" is a 1-2 sentence photographic description of THIS story beat — the specific moment in your story, not a generic illustration of the topic. Do NOT use the word "insurance". No text, signage or graphics in the scene. ALWAYS written in English (it prompts an image model), whatever language the narration is in.
+- "onScreenText" is a SHORT punchy caption/headline (max ~6 words) for that beat, written in the SAME LANGUAGE as the narration. Title Case. No ending period.
 - CONTINUITY: whenever your person appears, restate the SAME physical details (age, build, hair, skin tone, clothing) so every scene renders recognisably the same human in the same world.
 - SHOT VARIETY — cut like a real edit; do NOT put a face in every frame. AT MOST HALF the scenes should show a person's face. Mix in:
   - wide establishing shots (the house from the street, a kitchen in morning light, an empty porch)
@@ -77,40 +96,188 @@ Rules:
 - NEVER a crowd. Never more than 3 people in a frame, and most frames should contain zero or one person.
 - EMOTION: match the beat honestly. Early "problem" beats may be still, quiet and contemplative — that is not sadness, it is truth, and it is what makes the resolution land. Later beats warm and open up. Never a grinning stock-photo reaction, no gasping mouths, no wide-eyed shock, no theatrical surprise.
 - IMAGE SAFETY (hard rule): NEVER describe death, dying, funerals, coffins, caskets, graves, cemeteries, grief, crying, illness, disease, hospital beds, medical procedures, blood, injury or frailty — even if the narration mentions them. For sensitive topics show the life being protected, or a quiet dignified hopeful moment, instead. Quiet and contemplative is welcome; morbid or distressing is forbidden.
-- The FIRST scene must be a scroll-stopping hook — an intriguing, specific image, not a talking head.
-- Keep total narration tight so the whole video fits the target duration when spoken at a natural pace (~2.5 words/second).
-- Write narration AND onScreenText in the TARGET LANGUAGE stated in the user message — if the source script is in a different language, TRANSLATE it into the target language. imageConcept is ALWAYS in English (it prompts an image model), regardless of the target language.
+- The FIRST image must be a scroll-stopping hook — an intriguing, specific image, not a talking head.
 - Do not mention you are an AI. Do not add a disclaimer.`;
 
-function buildStoryboardUserPrompt(
+function buildVisualDirectorPrompt(
   source: SocialPostSource,
-  videoScript: VideoScript,
-  sceneCount: number,
+  segments: string[],
   voiceLanguage: SocialLocale
 ): string {
   const langName = voiceLanguage === "es" ? "Spanish (Español)" : "English";
   return [
-    `TARGET LANGUAGE: ${langName}. Write EVERY "narration" and "onScreenText" value in ${langName} — translate the script below if it is in another language. ("imageConcept" stays in English.)`,
-    `Target duration: ${videoScript.duration} seconds → produce exactly ${sceneCount} scenes.`,
+    `The narration below is FINAL and LOCKED. It is spoken in ${langName}. Choose one image per segment.`,
     `Topic: ${source.title}`,
-    source.category ? `Product / line of business: ${source.category} — cast a protagonist who is a believable real customer for THIS product.` : "",
-    source.subtitle ? `Subtitle: ${source.subtitle}` : "",
-    `Hook: ${videoScript.hookScript}`,
-    `Full script:\n${videoScript.fullScript}`,
-    videoScript.onScreenTextSuggestions.length
-      ? `On-screen text ideas: ${videoScript.onScreenTextSuggestions.join(" | ")}`
+    source.category
+      ? `Product / line of business: ${source.category} — cast a protagonist who is a believable real customer for THIS product.`
       : "",
-    `\nReturn the JSON storyboard now.`,
+    source.subtitle ? `Subtitle: ${source.subtitle}` : "",
+    "",
+    `NARRATION SEGMENTS (${segments.length}):`,
+    segments.map((s, i) => `${i + 1}. ${s}`).join("\n"),
+    "",
+    `Return exactly ${segments.length} scene objects with "index" 1…${segments.length}. JSON only.`,
   ]
     .filter(Boolean)
     .join("\n");
 }
 
-/** Deterministic fingerprint of the script content a storyboard's narration was built from. */
-export function hashScript(script: Pick<VideoScript, "duration" | "hookScript" | "fullScript">): string {
-  return createHash("sha256")
-    .update(`${script.duration}|${script.hookScript}|${script.fullScript}`)
-    .digest("hex");
+/**
+ * Fingerprint of the words the video will actually SAY. Derived from the cleaned spoken
+ * text rather than the raw script, so re-typing a timestamp or a beat label doesn't force a
+ * paid re-render, while changing a single spoken word does. Drives both "skip the rebuild"
+ * and "the saved HeyGen avatar clip still speaks the right words".
+ */
+export function hashScript(script: Pick<VideoScript, "fullScript">): string {
+  return createHash("sha256").update(planNarration(script.fullScript).spokenText).digest("hex");
+}
+
+// Varied, people-free stand-ins used when the visual director is unavailable or returns
+// short. Cycled so a fallback run still produces a watchable cut instead of ten copies of
+// the same frame.
+const FALLBACK_CONCEPTS = [
+  "a warm, lived-in family kitchen in soft morning light — two mugs on a wooden table, a folded newspaper, sunlight falling across the counter, no people in the frame",
+  "a modest suburban house seen from the street in golden late-afternoon light, no people in the frame",
+  "a set of keys and a worn leather wallet resting on a hallway table beside a small potted plant",
+  "sunlight moving across a windowsill above a kitchen sink, a single glass drying on a cloth",
+  "a framed family photograph on a bookshelf, softly out of focus behind it a living room in warm lamplight",
+  "hands resting around a warm ceramic mug on a wooden table, steam rising, no face visible",
+  "a child's crayon drawing held to a refrigerator door by two magnets, kitchen softly blurred behind",
+  "an empty front porch with two chairs and a folded blanket, early evening light, no people in the frame",
+];
+
+interface SceneVisual {
+  onScreenText: string;
+  imageConcept: string;
+}
+
+/**
+ * Ask GPT for one image concept per (already final) narration segment. Never throws — the
+ * script must be able to become a video even if the visual director is down, so failures
+ * degrade to cycled fallback concepts rather than blocking the render.
+ */
+async function directSceneVisuals(
+  source: SocialPostSource,
+  segments: string[],
+  voiceLanguage: SocialLocale
+): Promise<SceneVisual[]> {
+  const visuals: SceneVisual[] = segments.map(() => ({ onScreenText: "", imageConcept: "" }));
+
+  try {
+    const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    const completion = await client.chat.completions.create({
+      model:           process.env.OPENAI_MODEL ?? "gpt-4o",
+      response_format: { type: "json_object" },
+      messages: [
+        { role: "system", content: VISUAL_DIRECTOR_SYSTEM_PROMPT },
+        { role: "user",   content: buildVisualDirectorPrompt(source, segments, voiceLanguage) },
+      ],
+      max_tokens:  2500,
+      temperature: 0.7,
+    });
+
+    const raw = JSON.parse(completion.choices[0].message.content ?? "{}");
+    const rawScenes: unknown[] = Array.isArray(raw.scenes) ? raw.scenes : [];
+
+    rawScenes.forEach((s, order) => {
+      const o = s as Record<string, unknown>;
+      // Trust "index" when it's a sane 1-based pointer, else fall back to arrival order.
+      const parsed = Number(o.index);
+      const idx = Number.isFinite(parsed) && parsed >= 1 && parsed <= segments.length
+        ? Math.floor(parsed) - 1
+        : order;
+      if (idx < 0 || idx >= visuals.length) return;
+      visuals[idx] = {
+        onScreenText: String(o.onScreenText ?? "").trim(),
+        imageConcept: String(o.imageConcept ?? "").trim(),
+      };
+    });
+  } catch (err) {
+    console.warn(`[video-generator] visual director failed, using fallback concepts: ${(err as Error).message}`);
+  }
+
+  return visuals.map((v, i) => ({
+    onScreenText: v.onScreenText,
+    imageConcept: v.imageConcept || FALLBACK_CONCEPTS[i % FALLBACK_CONCEPTS.length],
+  }));
+}
+
+// ─── Faithful translation (only when the voice language differs from the script) ───
+
+const TRANSLATOR_SYSTEM_PROMPT = `You are a faithful subtitle translator. You translate a numbered list of narration segments and nothing else.
+
+HARD RULES:
+- Return EXACTLY as many segments as you were given, in the same order, one translation per input segment.
+- Translate meaning-for-meaning into natural, warm, spoken Latin American Spanish or natural spoken English (whichever the target language is) — never a stiff word-for-word rendering.
+- Do NOT add, remove, summarize, embellish, explain, or "improve" anything. No new sentences. No call to action that was not there. No commentary.
+- Preserve names, numbers, amounts and the word INFO exactly.
+- NEVER use the word "insurance" / "seguro" — use plan, coverage, benefits, protection / plan, cobertura, beneficios, protección.
+- Output ONLY valid JSON: { "segments": [string, ...] }.`;
+
+/** Translate segments 1:1. Returns the originals unchanged on any failure or count mismatch. */
+async function translateSegments(segments: string[], target: SocialLocale): Promise<string[]> {
+  const langName = target === "es" ? "Spanish (Latin American, spoken)" : "English (spoken)";
+  const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  const completion = await client.chat.completions.create({
+    model:           process.env.OPENAI_MODEL ?? "gpt-4o",
+    response_format: { type: "json_object" },
+    messages: [
+      { role: "system", content: TRANSLATOR_SYSTEM_PROMPT },
+      {
+        role: "user",
+        content: [
+          `TARGET LANGUAGE: ${langName}.`,
+          `Translate these ${segments.length} segments. Return exactly ${segments.length}.`,
+          segments.map((s, i) => `${i + 1}. ${s}`).join("\n"),
+        ].join("\n"),
+      },
+    ],
+    max_tokens:  2500,
+    temperature: 0.2,
+  });
+
+  const raw = JSON.parse(completion.choices[0].message.content ?? "{}");
+  const out: unknown[] = Array.isArray(raw.segments) ? raw.segments : [];
+  const cleaned = out.map((s) => String(s ?? "").trim());
+  if (cleaned.length !== segments.length || cleaned.some((s) => !s)) {
+    throw new Error(`translator returned ${cleaned.length} segments, expected ${segments.length}`);
+  }
+  return cleaned;
+}
+
+/**
+ * Speak the script exactly as written when its language already matches the selected
+ * voiceover language (the normal case). Only when they genuinely differ do we translate —
+ * segment for segment, adding nothing — so "the script is the source of truth" still holds
+ * for a Spanish voiceover on an English script. Any failure falls back to the script itself.
+ */
+async function localizeSegments(segments: string[], voiceLanguage: SocialLocale): Promise<string[]> {
+  if (segments.length === 0) return segments;
+  if (detectScriptLocale(segments.join(" "), voiceLanguage) === voiceLanguage) return segments;
+
+  try {
+    return await translateSegments(segments, voiceLanguage);
+  } catch (err) {
+    console.warn(`[video-generator] segment translation failed, speaking the script as written: ${(err as Error).message}`);
+    return segments;
+  }
+}
+
+/** Derive the final spoken segments for a script, in the requested voiceover language. */
+async function narrationSegmentsFor(
+  videoScript: VideoScript,
+  voiceLanguage: SocialLocale
+): Promise<string[]> {
+  const plan = planNarration(videoScript.fullScript);
+  if (plan.wordCount === 0) return [];
+  // Shotstack speaks the whole narration as ONE track, so a segment boundary only moves an
+  // image and may fall mid-sentence for better pacing. JSON2Video gives each segment its own
+  // voice element, where that would be an audible mid-sentence stop — so there we only split
+  // on real sentence/clause boundaries.
+  const raw = segmentNarration(plan.spokenText, recommendedSceneCount(plan.estimatedSeconds), {
+    allowMidSentence: renderProvider() !== "json2video",
+  });
+  return localizeSegments(raw, voiceLanguage);
 }
 
 export async function buildVideoStoryboard(
@@ -119,42 +286,67 @@ export async function buildVideoStoryboard(
   locale?: SocialLocale
 ): Promise<VideoStoryboard> {
   const voiceLanguage: SocialLocale = locale ?? source.locale ?? "en";
-  // One distinct portrait image per scene → guarantee at least 10 images per video.
-  const sceneCount = videoScript.duration === 60 ? 12 : 10;
 
-  const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-  const completion = await client.chat.completions.create({
-    model:           process.env.OPENAI_MODEL ?? "gpt-4o",
-    response_format: { type: "json_object" },
-    messages: [
-      { role: "system", content: STORYBOARD_SYSTEM_PROMPT },
-      { role: "user",   content: buildStoryboardUserPrompt(source, videoScript, sceneCount, voiceLanguage) },
-    ],
-    max_tokens:  2500,
-    temperature: 0.7,
-  });
+  const segments = await narrationSegmentsFor(videoScript, voiceLanguage);
+  if (segments.length === 0) {
+    throw new Error("The video script has no spoken words. Add a full script before generating a video.");
+  }
 
-  const raw = JSON.parse(completion.choices[0].message.content ?? "{}");
-  const rawScenes: unknown[] = Array.isArray(raw.scenes) ? raw.scenes : [];
-  if (rawScenes.length === 0) throw new Error("AI returned no storyboard scenes");
+  const visuals = await directSceneVisuals(source, segments, voiceLanguage);
 
-  const scenes: VideoScene[] = rawScenes.map((s) => {
-    const o = s as Record<string, unknown>;
-    return {
-      narration:    String(o.narration ?? "").trim(),
-      onScreenText: String(o.onScreenText ?? "").trim(),
-      imageConcept: String(o.imageConcept ?? "").trim(),
-      imageUrl:     "", // filled by generateVideoSceneImages (Phase A)
-    };
-  }).filter((s) => s.narration.length > 0);
-
-  if (scenes.length === 0) throw new Error("Storyboard produced no usable narration");
+  const scenes: VideoScene[] = segments.map((narration, i) => ({
+    narration,                                   // VERBATIM from the script — never rewritten
+    onScreenText: visuals[i]?.onScreenText ?? "",
+    imageConcept: visuals[i]?.imageConcept ?? FALLBACK_CONCEPTS[i % FALLBACK_CONCEPTS.length],
+    imageUrl:     "", // filled by generateVideoSceneImages (Phase A)
+  }));
 
   return {
     scenes,
     voiceLanguage,
     durationSeconds: videoScript.duration,
     category:        source.category,
+    scriptHash:      hashScript(videoScript),
+  };
+}
+
+/**
+ * Re-derive narration from the latest saved script while KEEPING the curated images, clips
+ * and settings. Deterministic and GPT-free (except an optional translation), so re-syncing
+ * before a render is instant, free, and cannot introduce words the script doesn't contain.
+ */
+export async function resyncStoryboardNarration(
+  current: VideoStoryboard,
+  videoScript: VideoScript
+): Promise<VideoStoryboard> {
+  const segments = await narrationSegmentsFor(videoScript, current.voiceLanguage);
+  if (segments.length === 0 || current.scenes.length === 0) return current;
+
+  // Only scenes that actually have a background can donate one — a longer script produces
+  // more segments than there are existing scenes, and every scene must still end up with an
+  // image or the render is rejected.
+  const withImages = current.scenes.filter((s) => s.imageUrl);
+
+  // Re-point each new segment at an existing scene's visuals (cycling if the segment count
+  // changed) so nothing already generated or hand-picked is thrown away.
+  const scenes: VideoScene[] = segments.map((narration, i) => {
+    const donor = current.scenes[i] ?? current.scenes[i % current.scenes.length];
+    const imageDonor = donor?.imageUrl
+      ? donor
+      : (withImages[i % withImages.length] ?? donor);
+    return {
+      narration,
+      onScreenText: donor?.onScreenText ?? "",
+      imageConcept: donor?.imageConcept ?? "",
+      imageUrl:     imageDonor?.imageUrl ?? "",
+      videoClipUrl: donor?.imageUrl ? donor.videoClipUrl : imageDonor?.videoClipUrl,
+    };
+  });
+
+  return {
+    ...current,
+    scenes,
+    durationSeconds: videoScript.duration,
     scriptHash:      hashScript(videoScript),
   };
 }
@@ -333,16 +525,21 @@ const PRESENTER_WIDTH_PX   = 600;  // displayed width (≈ 1067 tall at 9:16) �
 const PRESENTER_TOP_Y      = 980;  // clip top → head lands in the lower third; bottom is cropped
 const PRESENTER_EDGE_BLEED = 120;  // pull the figure toward the screen edge so it hugs the side
 
-// Distribute the presenter clip's total length across scenes, weighted by narration word
-// count so background images roughly track the spoken narration. The last scene absorbs any
-// rounding remainder so the scene durations sum exactly to the presenter length.
-function presenterSceneDurations(scenes: VideoScene[], totalSec: number): number[] {
-  const words = scenes.map((s) => Math.max(1, s.narration.trim().split(/\s+/).filter(Boolean).length));
-  const totalWords = words.reduce((a, b) => a + b, 0);
-  const durations = words.map((w) => Math.max(1, Math.round((totalSec * w) / totalWords)));
-  const drift = totalSec - durations.reduce((a, b) => a + b, 0);
-  durations[durations.length - 1] = Math.max(1, durations[durations.length - 1] + drift);
-  return durations;
+// Distribute the audio's total length across scenes, weighted by narration word count, so
+// each background image is on screen for as long as its own words take to speak — and so
+// the LAST scene ends exactly when the narration does.
+//
+// The old version rounded every scene to a whole second and clamped each with
+// `Math.max(1, …)`, which could total MORE than the audio and leave the video running on
+// after the voice had stopped. `distributeSceneDurations` works on cumulative fractions,
+// so rounding cannot accumulate and the final boundary is exactly `totalSec`.
+function sceneDurations(scenes: VideoScene[], totalSec: number): number[] {
+  return distributeSceneDurations(scenes.map((s) => countWords(s.narration)), totalSec);
+}
+
+/** Karaoke subtitles are on unless the post explicitly turned them off. */
+function subtitlesEnabled(storyboard: VideoStoryboard): boolean {
+  return storyboard.subtitles !== false;
 }
 
 function buildMovieJson(
@@ -353,15 +550,15 @@ function buildMovieJson(
   const connection   = process.env.JSON2VIDEO_ELEVENLABS_CONNECTION;
   const bgMusicUrl   = storyboard.musicUrl || musicUrlForCategory(storyboard.category);
   const usePresenter = Boolean(storyboard.presenter && presenter);
-  const sceneDurations = usePresenter
-    ? presenterSceneDurations(storyboard.scenes, presenter!.durationSec)
+  const durations = usePresenter
+    ? sceneDurations(storyboard.scenes, presenter!.durationSec)
     : [];
 
   const cinematic = Boolean(storyboard.cinematic);
 
   const scenes = storyboard.scenes.map((scene, i) => {
     // Presenter on → explicit word-weighted duration; off → -2 matches the voice-driven scene.
-    const sceneDuration = usePresenter ? sceneDurations[i] : -2;
+    const sceneDuration = usePresenter ? durations[i] : -2;
 
     // Cinematic scene → Veo clip (muted; its motion replaces Ken Burns). Otherwise the still.
     const background =
@@ -437,26 +634,28 @@ function buildMovieJson(
             "fade-out":  0.4,
           }]
         : []),
-      // Auto-transcribed karaoke captions (Shorts are watched on mute).
-      {
-        type:     "subtitles",
-        language: storyboard.voiceLanguage,
-        model:    "default",
-        settings: {
-          style:                "classic-progressive",
-          "font-family":        "Oswald",
-          "font-size":          90,
-          // Faceless: mid-bottom-center keeps captions CENTERED in the lower-third, clear of the
-          // platform's bottom UI. Presenter on: the large avatar's face sits in the vertical
-          // middle, so move captions to the top — the clear zone above the avatar's head.
-          position:             usePresenter ? "top-center" : "mid-bottom-center",
-          "word-color":         "#00B4D8",
-          "line-color":         "#FFFFFF",
-          "outline-color":      "#000000",
-          "outline-width":      4,
-          "max-words-per-line": 4,
-        },
-      },
+      // Auto-transcribed karaoke captions (Shorts are watched on mute) — optional per post.
+      ...(subtitlesEnabled(storyboard)
+        ? [{
+            type:     "subtitles",
+            language: storyboard.voiceLanguage,
+            model:    "default",
+            settings: {
+              style:                "classic-progressive",
+              "font-family":        "Oswald",
+              "font-size":          90,
+              // Faceless: mid-bottom-center keeps captions CENTERED in the lower-third, clear of the
+              // platform's bottom UI. Presenter on: the large avatar's face sits in the vertical
+              // middle, so move captions to the top — the clear zone above the avatar's head.
+              position:             usePresenter ? "top-center" : "mid-bottom-center",
+              "word-color":         "#00B4D8",
+              "line-color":         "#FFFFFF",
+              "outline-color":      "#000000",
+              "outline-width":      4,
+              "max-words-per-line": 4,
+            },
+          }]
+        : []),
       // Subtle category-matched background music bed (low volume) if configured. Loop it and
       // stretch to the movie length (loop:-1 + duration:-2) so the bed always covers the whole
       // Short — the generated/real video length (voice-driven) varies and the track may be shorter.
@@ -596,7 +795,7 @@ async function submitShotstackRender(
     ? presenter!.durationSec
     : (await synthesizeNarrationTrack(storyboard, locale, category, (a) => { narrationAudio = a; }));
 
-  const durations = presenterSceneDurations(storyboard.scenes, totalAudioSec);
+  const durations = sceneDurations(storyboard.scenes, totalAudioSec);
   let t = 0;
   storyboard.scenes.forEach((s, i) => {
     scenes.push({ ...sceneBg(s), start: t, length: durations[i] });
@@ -622,11 +821,13 @@ async function submitShotstackRender(
     width:          VIDEO_WIDTH,
     height:         VIDEO_HEIGHT,
     fps:            VIDEO_FPS,
+    // The script's spoken length IS the video's length — nothing may run past it.
+    durationSec:    totalAudioSec,
     scenes,
     narrationAudio,
     presenter:      presenterPlan,
     musicUrl:       musicUrl || musicUrlForCategory(category),
-    captions:       true,
+    captions:       subtitlesEnabled(storyboard),
   };
 
   const { jobId } = await shotstackProvider.submit(plan);

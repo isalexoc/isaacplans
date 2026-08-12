@@ -72,6 +72,8 @@ export type SocialVideoJobInput = {
   presenter?: boolean;            // render — whether to run the HeyGen phase
   reuseAssets?: boolean;          // images — check the asset library before generating each scene
   preferClipAssets?: boolean;     // images — when reusing, prefer a match that already has a Veo clip
+  subtitles?: boolean;            // images — carry the studio's caption switch onto the rebuilt
+                                  // storyboard, so a rebuild can't silently reset it back to on
   // clip
   imageUrl?: string;
   imageConcept?: string;
