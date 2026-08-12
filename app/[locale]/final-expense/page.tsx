@@ -1,6 +1,6 @@
 import HeroWithTestimonials from "@/components/hero-template";
 import FEButton from "@/components/FEButton"; // simple wrapper like HIButton (or reuse your generic CTA)
-import FinalExpenseApplyHeroButton from "@/components/final-expense-apply-hero-button";
+import LobApplyHeroButton from "@/components/lob-apply-hero-button";
 import FinalExpensePresentationButton from "@/components/FinalExpensePresentationButton";
 import CTABanner from "@/components/CTABanner-template";
 import FaqSection from "@/components/FaqSection";
@@ -11,6 +11,7 @@ import { BackHome } from "@/components/back-home";
 import ServicePageTracker from "@/components/service-page-tracker";
 import type { Metadata } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
+import { getEffectivePageMedia, getEffectiveOgImageUrl } from "@/lib/page-media/settings";
 import { getFePageLd, getFeBreadcrumbLd } from "@/lib/seo/jsonld";
 import Link from "next/link";
 import { type SanityDocument } from "next-sanity";
@@ -59,6 +60,14 @@ export async function generateMetadata(): Promise<Metadata> {
   const xDefault = withLocalePrefix("en", localizedSlug(routeKey, "en"));
   const ogLocale = ogLocaleOf(locale);
 
+  // Admin-overridable social card (lib/page-media); falls back to the message-file image.
+  const ogImageUrl = await getEffectiveOgImageUrl(
+    "final-expense",
+    "main",
+    locale,
+    cloudinaryOgImageUrl(image)
+  );
+
   return {
     title,
     description,
@@ -75,13 +84,13 @@ export async function generateMetadata(): Promise<Metadata> {
       locale: ogLocale,
       alternateLocale: ogLocale === "en_US" ? ["es_ES"] : ["en_US"],
       type: "website",
-      images: [{ url: cloudinaryOgImageUrl(image), width: 1200, height: 630, alt }],
+      images: [{ url: ogImageUrl, width: 1200, height: 630, alt }],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: [{ url: cloudinaryOgImageUrl(image), alt }],
+      images: [{ url: ogImageUrl, alt }],
     },
   };
 }
@@ -89,6 +98,9 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function FinalExpensePage() {
   const locale = await getLocale();
   const t = await getTranslations({ locale, namespace: "FEpage" });
+
+  // Admin-overridable hero — an image by default, a video once Isaac uploads one.
+  const heroMedia = await getEffectivePageMedia("final-expense", "main", "hero", locale);
 
   const fePostsResult = await sanityFetch({
     query: FE_POSTS_QUERY,
@@ -128,8 +140,9 @@ export default async function FinalExpensePage() {
         description={t("hero.description")}
         imagePublicId="final_expense_hero_fbimsc"
         imagePosition="left"
+        media={heroMedia}
         cta={<FEButton />}
-        ctaSecondary={<FinalExpenseApplyHeroButton />}
+        ctaSecondary={<LobApplyHeroButton lob="final-expense" />}
         testimonials={[
           {
             name: t("hero.testimonials.0.name"),

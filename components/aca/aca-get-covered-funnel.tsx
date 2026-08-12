@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import HeroMedia from "@/components/media/hero-media";
+import type { HeroMedia as HeroMediaValue } from "@/lib/page-media/shared";
 import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
@@ -45,10 +47,13 @@ function toE164OrUndefined(phone: string | undefined): string | undefined {
 type Phase = "contact" | "done";
 
 export default function AcaGetCoveredFunnel({
-  heroImageUrl,
+  heroMedia,
 }: {
-  /** Admin-overridable hero image (lib/ads-images/settings.ts); falls back to the built-in default. */
-  heroImageUrl?: string;
+  /**
+   * Admin-overridable hero media (lib/page-media) — a photo by default, a video once one
+   * is uploaded. Falls back to the built-in default below.
+   */
+  heroMedia?: HeroMediaValue;
 }) {
   const locale = useLocale();
   const isES = locale.startsWith("es");
@@ -296,10 +301,9 @@ export default function AcaGetCoveredFunnel({
 
       <div className="relative z-10 mx-auto flex min-h-0 max-w-6xl flex-col lg:min-h-[min(100vh,920px)] lg:flex-row lg:items-stretch">
         <div className="relative hidden overflow-hidden bg-slate-900 lg:sticky lg:block lg:top-0 lg:min-h-[min(100vh,920px)] lg:w-[46%] lg:shrink-0">
-          <Image
-            src={heroImageUrl ?? getAcaGetCoveredHeroImageUrl(locale)}
+          <HeroMedia
+            media={heroMedia ?? { type: "image", url: getAcaGetCoveredHeroImageUrl(locale) }}
             alt=""
-            fill
             priority
             sizes="(max-width: 1023px) 0px, 46vw"
             className="object-cover object-center"

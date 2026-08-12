@@ -1,0 +1,53 @@
+{
+  "hospitalIndemnityApply": {
+    "meta": {
+      "title": "Apply for Hospital Indemnity Coverage | Isaac Plans",
+      "description": "Start your hospital indemnity application online — cash paid directly to you if you're hospitalized. Secure, guided, and only a few minutes.",
+      "image": "https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_1200,h_630,c_fill,g_auto/pexels-rdne-6129237_vbgahf_1_gfwx1z",
+      "imageAlt": "Apply for hospital indemnity coverage with Isaac Plans"
+    },
+    "hero": {
+      "badge": "Hospital Indemnity",
+      "title": "Cash paid to you if you end up in the hospital",
+      "subtitle": "A hospital stay shouldn't drain your savings. Start your secure application online — it only takes a few minutes."
+    },
+    "benefitsHeading": "Why apply with Isaac Plans?",
+    "benefits": [
+      {
+        "title": "Money paid straight to you",
+        "desc": "Benefits are paid to you, not to the hospital — so you decide where the money goes."
+      },
+      {
+        "title": "Use it for anything",
+        "desc": "Cover your deductible, rent, groceries, childcare, or lost income while you recover."
+      },
+      {
+        "title": "Works alongside your health plan",
+        "desc": "It pays on top of whatever coverage you already have, including a marketplace or employer plan."
+      },
+      {
+        "title": "Bilingual, licensed support",
+        "desc": "Get help in English or Spanish from a licensed advisor at every step."
+      }
+    ],
+    "howItWorksHeading": "How to apply",
+    "steps": [
+      {
+        "title": "Open your secure application",
+        "desc": "Tap Apply now and your private application opens immediately — no account, no password. Come back on this device anytime to pick up where you left off."
+      },
+      {
+        "title": "Fill out the secure form",
+        "desc": "Answer a few guided questions about you and anyone else you want covered. Everything is encrypted and saves automatically as you go."
+      },
+      {
+        "title": "We review and reach out",
+        "desc": "Once you submit, we review your application and contact you to finalize your benefit amount and start date."
+      }
+    ],
+    "secureNote": "Your information is encrypted and never shared. This process is 100% secure.",
+    "cta": "Apply now",
+    "ctaNote": "No account or password needed — your progress saves automatically as you go.",
+    "starting": "Starting your application…"
+  }
+}

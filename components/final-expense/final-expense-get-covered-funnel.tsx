@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import HeroMedia from "@/components/media/hero-media";
+import type { HeroMedia as HeroMediaValue } from "@/lib/page-media/shared";
 import Image from "next/image";
 import Script from "next/script";
 import { useLocale, useTranslations } from "next-intl";
@@ -167,10 +169,13 @@ type AddressFieldErrorKey =
   | "email";
 
 export default function FinalExpenseGetCoveredFunnel({
-  heroImageUrl,
+  heroMedia,
 }: {
-  /** Admin-overridable hero art (desktop split panel). Falls back to the locale default. */
-  heroImageUrl?: string;
+  /**
+   * Admin-overridable hero media (lib/page-media) — a photo by default, a video once one
+   * is uploaded. Falls back to the built-in default below.
+   */
+  heroMedia?: HeroMediaValue;
 }) {
   const locale = useLocale();
   const isES = locale.startsWith("es");
@@ -899,10 +904,9 @@ export default function FinalExpenseGetCoveredFunnel({
 
       <div className="relative z-10 mx-auto flex min-h-0 max-w-6xl flex-col lg:min-h-[min(100vh,920px)] lg:flex-row lg:items-stretch">
         <div className="relative hidden overflow-hidden bg-slate-900 lg:sticky lg:block lg:top-0 lg:min-h-[min(100vh,920px)] lg:w-[46%] lg:shrink-0">
-          <Image
-            src={heroImageUrl ?? getFinalExpenseGetCoveredHeroImageUrl(locale)}
+          <HeroMedia
+            media={heroMedia ?? { type: "image", url: getFinalExpenseGetCoveredHeroImageUrl(locale) }}
             alt=""
-            fill
             priority
             sizes="(max-width: 1023px) 0px, 46vw"
             className="object-cover object-center"

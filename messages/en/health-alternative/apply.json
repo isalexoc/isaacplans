@@ -1,0 +1,53 @@
+{
+  "healthAlternativeApply": {
+    "meta": {
+      "title": "Apply for Health Coverage Without ACA | Isaac Plans",
+      "description": "Start your health coverage application online — no immigration status required, no open enrollment window, no subsidy needed. Secure and only a few minutes.",
+      "image": "https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_1200,h_630,c_fill,g_auto/tmpfs1tzoqj_1_qqzvsx",
+      "imageAlt": "Apply for health coverage without ACA with Isaac Plans"
+    },
+    "hero": {
+      "badge": "Health Coverage Alternative",
+      "title": "Real health coverage when ACA isn't an option",
+      "subtitle": "No immigration status required and no open enrollment window to wait for. Start your secure application online — it only takes a few minutes."
+    },
+    "benefitsHeading": "Why apply with Isaac Plans?",
+    "benefits": [
+      {
+        "title": "No immigration status required",
+        "desc": "These plans are available regardless of immigration status — no Social Security number requirement to get covered."
+      },
+      {
+        "title": "Enroll any time of year",
+        "desc": "There's no open enrollment period and no qualifying life event needed. Apply the day you need coverage."
+      },
+      {
+        "title": "Built for the self-employed",
+        "desc": "A practical fit for freelancers, contractors, business owners and students who don't get a subsidy or an employer plan."
+      },
+      {
+        "title": "Bilingual, licensed support",
+        "desc": "Get help in English or Spanish from a licensed advisor at every step."
+      }
+    ],
+    "howItWorksHeading": "How to apply",
+    "steps": [
+      {
+        "title": "Open your secure application",
+        "desc": "Tap Apply now and your private application opens immediately — no account, no password. Come back on this device anytime to pick up where you left off."
+      },
+      {
+        "title": "Fill out the secure form",
+        "desc": "Answer a few guided questions about you and anyone else you want covered. Everything is encrypted and saves automatically as you go."
+      },
+      {
+        "title": "We review and reach out",
+        "desc": "Once you submit, we review your application and contact you to confirm your plan and start date."
+      }
+    ],
+    "secureNote": "Your information is encrypted and never shared. This process is 100% secure.",
+    "cta": "Apply now",
+    "ctaNote": "No account or password needed — your progress saves automatically as you go.",
+    "starting": "Starting your application…"
+  }
+}

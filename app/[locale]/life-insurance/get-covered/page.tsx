@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
 import LifeInsuranceGetCoveredFunnel from "@/components/life-insurance/life-insurance-get-covered-funnel";
 import ServicePageTracker from "@/components/service-page-tracker";
-import { getEffectiveAdsImageUrl } from "@/lib/ads-images/settings";
+import { getEffectivePageMedia, getEffectiveOgImageUrl } from "@/lib/page-media/settings";
 import {
   getLifeInsuranceGetCoveredAdsBreadcrumbLd,
   getLifeInsuranceGetCoveredAdsPageLd,
@@ -33,7 +33,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const languages = languageAlternatesPrefixed(routeKey);
   const xDefault = withLocalePrefix("en", localizedSlug(routeKey, "en"));
   const ogLocale = ogLocaleOf(locale);
-  const ogImageUrl = await getEffectiveAdsImageUrl("life-insurance", "og", locale);
+  const ogImageUrl = await getEffectiveOgImageUrl("life-insurance", "ads", locale);
 
   return {
     title,
@@ -92,7 +92,7 @@ export default async function LifeInsuranceGetCoveredAdsPage() {
     tMeta("breadcrumbPage")
   );
 
-  const heroImageUrl = await getEffectiveAdsImageUrl("life-insurance", "hero", locale);
+  const heroMedia = await getEffectivePageMedia("life-insurance", "ads", "hero", locale);
 
   return (
     <div className="relative min-h-screen">
@@ -100,7 +100,7 @@ export default async function LifeInsuranceGetCoveredAdsPage() {
         serviceName="Life Insurance get covered"
         serviceCategory="life-insurance-get-covered-ads"
       />
-      <LifeInsuranceGetCoveredFunnel heroImageUrl={heroImageUrl} />
+      <LifeInsuranceGetCoveredFunnel heroMedia={heroMedia} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{

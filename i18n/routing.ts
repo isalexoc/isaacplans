@@ -39,6 +39,26 @@ export const routing = defineRouting({
       en: "/dental-vision/self-enrollment",
       es: "/dental-vision/autoinscripcion",
     },
+    "/dental-vision/apply": {
+      en: "/dental-vision/apply",
+      es: "/dental-vision/aplicar",
+    },
+    "/dental-vision/apply/start": {
+      en: "/dental-vision/apply/start",
+      es: "/dental-vision/aplicar/start",
+    },
+    "/dental-vision/intake": {
+      en: "/dental-vision/intake",
+      es: "/dental-vision/admision",
+    },
+    "/dental-vision/intake/[token]": {
+      en: "/dental-vision/intake/[token]",
+      es: "/dental-vision/admision/[token]",
+    },
+    "/dental-vision/intake/[token]/view": {
+      en: "/dental-vision/intake/[token]/view",
+      es: "/dental-vision/admision/[token]/view",
+    },
     "/hospital-indemnity": {
       en: "/hospital-indemnity",
       es: "/indemnizacion-hospitalaria",
@@ -50,6 +70,26 @@ export const routing = defineRouting({
     "/hospital-indemnity/self-enrollment": {
       en: "/hospital-indemnity/self-enrollment",
       es: "/indemnizacion-hospitalaria/autoinscripcion",
+    },
+    "/hospital-indemnity/apply": {
+      en: "/hospital-indemnity/apply",
+      es: "/indemnizacion-hospitalaria/aplicar",
+    },
+    "/hospital-indemnity/apply/start": {
+      en: "/hospital-indemnity/apply/start",
+      es: "/indemnizacion-hospitalaria/aplicar/start",
+    },
+    "/hospital-indemnity/intake": {
+      en: "/hospital-indemnity/intake",
+      es: "/indemnizacion-hospitalaria/admision",
+    },
+    "/hospital-indemnity/intake/[token]": {
+      en: "/hospital-indemnity/intake/[token]",
+      es: "/indemnizacion-hospitalaria/admision/[token]",
+    },
+    "/hospital-indemnity/intake/[token]/view": {
+      en: "/hospital-indemnity/intake/[token]/view",
+      es: "/indemnizacion-hospitalaria/admision/[token]/view",
     },
     "/aca": {
       en: "/aca",
@@ -154,6 +194,26 @@ export const routing = defineRouting({
     "/short-term-medical/calendar": {
       en: "/short-term-medical/calendar",
       es: "/cobertura-a-corto-plazo/calendario",
+    },
+    "/short-term-medical/apply": {
+      en: "/short-term-medical/apply",
+      es: "/cobertura-a-corto-plazo/aplicar",
+    },
+    "/short-term-medical/apply/start": {
+      en: "/short-term-medical/apply/start",
+      es: "/cobertura-a-corto-plazo/aplicar/start",
+    },
+    "/short-term-medical/intake": {
+      en: "/short-term-medical/intake",
+      es: "/cobertura-a-corto-plazo/admision",
+    },
+    "/short-term-medical/intake/[token]": {
+      en: "/short-term-medical/intake/[token]",
+      es: "/cobertura-a-corto-plazo/admision/[token]",
+    },
+    "/short-term-medical/intake/[token]/view": {
+      en: "/short-term-medical/intake/[token]/view",
+      es: "/cobertura-a-corto-plazo/admision/[token]/view",
     },
     "/iul": {
       en: "/iul",
@@ -271,6 +331,26 @@ export const routing = defineRouting({
       en: "/life-insurance/get-covered",
       es: "/seguro-de-vida/obtener-cobertura",
     },
+    "/life-insurance/apply": {
+      en: "/life-insurance/apply",
+      es: "/seguro-de-vida/aplicar",
+    },
+    "/life-insurance/apply/start": {
+      en: "/life-insurance/apply/start",
+      es: "/seguro-de-vida/aplicar/start",
+    },
+    "/life-insurance/intake": {
+      en: "/life-insurance/intake",
+      es: "/seguro-de-vida/admision",
+    },
+    "/life-insurance/intake/[token]": {
+      en: "/life-insurance/intake/[token]",
+      es: "/seguro-de-vida/admision/[token]",
+    },
+    "/life-insurance/intake/[token]/view": {
+      en: "/life-insurance/intake/[token]/view",
+      es: "/seguro-de-vida/admision/[token]/view",
+    },
     "/health-alternative": {
       en: "/health-alternative",
       es: "/alternativa-de-salud",
@@ -282,6 +362,26 @@ export const routing = defineRouting({
     "/health-alternative/get-covered": {
       en: "/health-alternative/get-covered",
       es: "/alternativa-de-salud/obtener-cobertura",
+    },
+    "/health-alternative/apply": {
+      en: "/health-alternative/apply",
+      es: "/alternativa-de-salud/aplicar",
+    },
+    "/health-alternative/apply/start": {
+      en: "/health-alternative/apply/start",
+      es: "/alternativa-de-salud/aplicar/start",
+    },
+    "/health-alternative/intake": {
+      en: "/health-alternative/intake",
+      es: "/alternativa-de-salud/admision",
+    },
+    "/health-alternative/intake/[token]": {
+      en: "/health-alternative/intake/[token]",
+      es: "/alternativa-de-salud/admision/[token]",
+    },
+    "/health-alternative/intake/[token]/view": {
+      en: "/health-alternative/intake/[token]/view",
+      es: "/alternativa-de-salud/admision/[token]/view",
     },
     "/faq": {
       en: "/faq",

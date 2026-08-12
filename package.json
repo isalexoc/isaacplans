@@ -18,6 +18,7 @@
     "iul:fields": "tsx scripts/create-iul-intake-fields.ts",
     "aca:fields": "tsx scripts/create-aca-intake-fields.ts",
     "fe-intake:fields": "tsx scripts/create-fe-intake-fields.ts",
+    "intake:fields": "tsx scripts/create-intake-fields.ts",
     "test:call-summary": "tsx scripts/test-call-summary.ts",
     "test:missed-call-drafts": "tsx scripts/test-missed-call-drafts.ts",
     "seed:call-dashboard": "tsx scripts/seed-call-dashboard-fixtures.ts",

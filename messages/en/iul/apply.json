@@ -36,8 +36,8 @@
     "howItWorksHeading": "How to apply",
     "steps": [
       {
-        "title": "Create your account",
-        "desc": "Sign up securely with your email or Google. It keeps your information private and lets you finish later on any device."
+        "title": "Open your secure application",
+        "desc": "Tap Apply now and your private application opens immediately — no account, no password. Come back on this device anytime to pick up where you left off."
       },
       {
         "title": "Fill out the secure form",
@@ -50,7 +50,7 @@
     ],
     "secureNote": "Your information is encrypted and never shared. This process is 100% secure.",
     "cta": "Apply now",
-    "ctaNote": "You'll sign in first to keep your application private.",
+    "ctaNote": "No account or password needed — your progress saves automatically as you go.",
     "starting": "Starting your application…"
   }
 }

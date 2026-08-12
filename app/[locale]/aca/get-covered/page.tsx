@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
 import AcaGetCoveredFunnel from "@/components/aca/aca-get-covered-funnel";
 import ServicePageTracker from "@/components/service-page-tracker";
-import { getEffectiveAdsImageUrl } from "@/lib/ads-images/settings";
+import { getEffectivePageMedia, getEffectiveOgImageUrl } from "@/lib/page-media/settings";
 import {
   getAcaGetCoveredAdsBreadcrumbLd,
   getAcaGetCoveredAdsPageLd,
@@ -33,7 +33,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const languages = languageAlternatesPrefixed(routeKey);
   const xDefault = withLocalePrefix("en", localizedSlug(routeKey, "en"));
   const ogLocale = ogLocaleOf(locale);
-  const ogImageUrl = await getEffectiveAdsImageUrl("aca", "og", locale);
+  const ogImageUrl = await getEffectiveOgImageUrl("aca", "ads", locale);
 
   return {
     title,
@@ -92,7 +92,7 @@ export default async function AcaGetCoveredAdsPage() {
     tMeta("breadcrumbPage")
   );
 
-  const heroImageUrl = await getEffectiveAdsImageUrl("aca", "hero", locale);
+  const heroMedia = await getEffectivePageMedia("aca", "ads", "hero", locale);
 
   return (
     <div className="relative min-h-screen">
@@ -100,7 +100,7 @@ export default async function AcaGetCoveredAdsPage() {
         serviceName="ACA get covered"
         serviceCategory="aca-get-covered-ads"
       />
-      <AcaGetCoveredFunnel heroImageUrl={heroImageUrl} />
+      <AcaGetCoveredFunnel heroMedia={heroMedia} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{

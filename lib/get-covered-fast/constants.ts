@@ -73,7 +73,7 @@ export function getIulGetCoveredOgImageUrl(locale: string): string {
  * Hero art for the ACA get-covered (Meta ads) funnel — desktop split column. Portrait family
  * photo, same locale for both languages (no forced crop; the browser's `object-cover` frames
  * it within the tall panel, same convention as the IUL hero). Admin-overridable — see
- * lib/ads-images/settings.ts.
+ * lib/page-media/settings.ts.
  */
 const ACA_GET_COVERED_HERO_PUBLIC_ID = "v1785773108/pexels-helenalopes-27176986_quwu4i";
 
@@ -83,7 +83,7 @@ export function getAcaGetCoveredHeroImageUrl(_locale: string): string {
 
 /**
  * OG / Twitter card (1200×630) for the ACA get-covered funnel — same source photo, smart-cropped
- * to the social card aspect ratio. Admin-overridable — see lib/ads-images/settings.ts.
+ * to the social card aspect ratio. Admin-overridable — see lib/page-media/settings.ts.
  */
 export function getAcaGetCoveredOgImageUrl(_locale: string): string {
   return `${CLOUDINARY_ISAAC}/f_auto,q_auto,w_1200,h_630,c_fill,g_auto/${ACA_GET_COVERED_HERO_PUBLIC_ID}`;
@@ -98,6 +98,19 @@ export const ACA_APPLY_HERO_IMAGE = `${CLOUDINARY_ISAAC}/f_auto,q_auto,w_1200,c_
  * swap anytime via the same public-id pattern once a dedicated apply-page photo is chosen.
  */
 export const FE_APPLY_HERO_IMAGE = `${CLOUDINARY_ISAAC}/f_auto,q_auto,w_1200,c_limit/${FINAL_EXPENSE_GET_COVERED_HERO_PUBLIC_ID_EN}`;
+
+/**
+ * Hero art for the five apply pages added alongside the shared intake engine. Each reuses its
+ * line of business's existing main-page hero photo (the public IDs passed to
+ * `components/hero-template.tsx`) so the apply page reads as the same product, rather than
+ * introducing new stock art. Same 16:9 `object-cover` slot and `c_limit` width cap as the ACA and
+ * Final Expense apply heroes above.
+ */
+export const STM_APPLY_HERO_IMAGE = `${CLOUDINARY_ISAAC}/f_auto,q_auto,w_1200,c_limit/pexels-chokniti-khongchum-1197604-3938022_bujifm`;
+export const DENTAL_VISION_APPLY_HERO_IMAGE = `${CLOUDINARY_ISAAC}/f_auto,q_auto,w_1200,c_limit/tmp48ylol1v_1_ig0hto`;
+export const HOSPITAL_INDEMNITY_APPLY_HERO_IMAGE = `${CLOUDINARY_ISAAC}/f_auto,q_auto,w_1200,c_limit/pexels-rdne-6129237_vbgahf_1_gfwx1z`;
+export const LIFE_INSURANCE_APPLY_HERO_IMAGE = `${CLOUDINARY_ISAAC}/f_auto,q_auto,w_1200,c_limit/pexels-emma-bauso-1183828-2253879_1_zd87oq`;
+export const HEALTH_ALTERNATIVE_APPLY_HERO_IMAGE = `${CLOUDINARY_ISAAC}/f_auto,q_auto,w_1200,c_limit/tmpfs1tzoqj_1_qqzvsx`;
 
 /** Agent headshot on `/final-expense/get-covered` success (square, face-cropped; displayed as rounded-rect in UI). */
 export const FINAL_EXPENSE_GET_COVERED_AGENT_HEADSHOT =
@@ -121,7 +134,7 @@ export const LIFE_INSURANCE_ENROLL_URL = "https://agents.ethoslife.com/invite/d7
 /**
  * Hero art for the Life Insurance get-covered (Meta ads) funnel — desktop split column.
  * Placeholder (reused from the /aca/apply marketing hero, not another get-covered ads funnel,
- * to avoid visual duplication) — admin-overridable via /admin/hero, see lib/ads-images/settings.ts.
+ * to avoid visual duplication) — admin-overridable via /admin/hero, see lib/page-media/settings.ts.
  */
 const LIFE_INSURANCE_GET_COVERED_HERO_PUBLIC_ID =
   "v1785777580/pexels-freestockpro-12969212_1_xck4cm";
@@ -132,7 +145,7 @@ export function getLifeInsuranceGetCoveredHeroImageUrl(_locale: string): string 
 
 /**
  * OG / Twitter card (1200×630) for the Life Insurance get-covered funnel — same source photo,
- * smart-cropped to the social card aspect ratio. Admin-overridable — see lib/ads-images/settings.ts.
+ * smart-cropped to the social card aspect ratio. Admin-overridable — see lib/page-media/settings.ts.
  */
 export function getLifeInsuranceGetCoveredOgImageUrl(_locale: string): string {
   return `${CLOUDINARY_ISAAC}/f_auto,q_auto,w_1200,h_630,c_fill,g_auto/${LIFE_INSURANCE_GET_COVERED_HERO_PUBLIC_ID}`;
@@ -142,7 +155,7 @@ export function getLifeInsuranceGetCoveredOgImageUrl(_locale: string): string {
  * Hero art for the Health Coverage Alternative get-covered (Meta ads) funnel — desktop split
  * column. Placeholder (reused from the dental/STM carrier-card photo pool, not another
  * get-covered ads funnel, to avoid visual duplication) — admin-overridable via /admin/hero, see
- * lib/ads-images/settings.ts.
+ * lib/page-media/settings.ts.
  */
 const HEALTH_ALTERNATIVE_GET_COVERED_HERO_PUBLIC_ID = "pexels-august-de-richelieu-4260639_qgzqnk";
 
@@ -153,7 +166,7 @@ export function getHealthAlternativeGetCoveredHeroImageUrl(_locale: string): str
 /**
  * OG / Twitter card (1200×630) for the Health Coverage Alternative get-covered funnel — same
  * source photo, smart-cropped to the social card aspect ratio. Admin-overridable — see
- * lib/ads-images/settings.ts.
+ * lib/page-media/settings.ts.
  */
 export function getHealthAlternativeGetCoveredOgImageUrl(_locale: string): string {
   return `${CLOUDINARY_ISAAC}/f_auto,q_auto,w_1200,h_630,c_fill,g_auto/${HEALTH_ALTERNATIVE_GET_COVERED_HERO_PUBLIC_ID}`;

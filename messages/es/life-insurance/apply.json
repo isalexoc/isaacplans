@@ -1,0 +1,53 @@
+{
+  "lifeInsuranceApply": {
+    "meta": {
+      "title": "Solicite un seguro de vida | Isaac Plans",
+      "description": "Comience su solicitud de seguro de vida en línea — proteja a quienes dependen de usted. Segura, guiada y en solo unos minutos.",
+      "image": "https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_1200,h_630,c_fill,g_auto/pexels-emma-bauso-1183828-2253879_1_zd87oq",
+      "imageAlt": "Solicite un seguro de vida con Isaac Plans"
+    },
+    "hero": {
+      "badge": "Seguro de vida",
+      "title": "Proteja a quienes dependen de usted",
+      "subtitle": "Asegure que su familia conserve su hogar y su estabilidad si algo le pasa. Comience su solicitud segura en línea — solo toma unos minutos."
+    },
+    "benefitsHeading": "¿Por qué solicitar con Isaac Plans?",
+    "benefits": [
+      {
+        "title": "Un beneficio libre de impuestos",
+        "desc": "Sus beneficiarios reciben el beneficio libre de impuestos sobre la renta y pueden usarlo para la hipoteca, la escuela o los gastos diarios."
+      },
+      {
+        "title": "Opciones sin examen médico",
+        "desc": "Muchas personas califican respondiendo solo preguntas de salud — sin análisis de laboratorio ni visita de enfermera."
+      },
+      {
+        "title": "Asegure su precio hoy",
+        "desc": "La prima se basa en su edad y salud actuales. Mientras más joven y sano solicite, menos paga para siempre."
+      },
+      {
+        "title": "Apoyo bilingüe y licenciado",
+        "desc": "Obtenga ayuda en inglés o español de un asesor licenciado en cada paso."
+      }
+    ],
+    "howItWorksHeading": "Cómo solicitar",
+    "steps": [
+      {
+        "title": "Abra su solicitud segura",
+        "desc": "Toque Solicitar ahora y su solicitud privada se abre de inmediato — sin cuenta ni contraseña. Vuelva desde este dispositivo cuando quiera para continuar donde la dejó."
+      },
+      {
+        "title": "Complete el formulario seguro",
+        "desc": "Responda algunas preguntas guiadas sobre su salud, la cobertura que desea y a quién quiere proteger. Todo está encriptado y se guarda automáticamente mientras avanza."
+      },
+      {
+        "title": "Revisamos y nos comunicamos",
+        "desc": "Una vez que envíe su solicitud, comparamos su caso entre varias aseguradoras y le presentamos sus mejores opciones."
+      }
+    ],
+    "secureNote": "Su información está encriptada y nunca se comparte. Este proceso es 100% seguro.",
+    "cta": "Solicitar ahora",
+    "ctaNote": "No necesita cuenta ni contraseña — su progreso se guarda automáticamente mientras avanza.",
+    "starting": "Iniciando su solicitud…"
+  }
+}

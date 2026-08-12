@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
 import FinalExpenseGetCoveredFunnel from "@/components/final-expense/final-expense-get-covered-funnel";
 import ServicePageTracker from "@/components/service-page-tracker";
-import { getEffectiveAdsImageUrl } from "@/lib/ads-images/settings";
+import { getEffectivePageMedia, getEffectiveOgImageUrl } from "@/lib/page-media/settings";
 import {
   getFinalExpenseGetCoveredAdsBreadcrumbLd,
   getFinalExpenseGetCoveredAdsPageLd,
@@ -33,7 +33,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const languages = languageAlternatesPrefixed(routeKey);
   const xDefault = withLocalePrefix("en", localizedSlug(routeKey, "en"));
   const ogLocale = ogLocaleOf(locale);
-  const ogImageUrl = await getEffectiveAdsImageUrl("final-expense", "og", locale);
+  const ogImageUrl = await getEffectiveOgImageUrl("final-expense", "ads", locale);
 
   return {
     title,
@@ -92,7 +92,7 @@ export default async function FinalExpenseGetCoveredAdsPage() {
     tMeta("breadcrumbPage")
   );
 
-  const heroImageUrl = await getEffectiveAdsImageUrl("final-expense", "hero", locale);
+  const heroMedia = await getEffectivePageMedia("final-expense", "ads", "hero", locale);
 
   return (
     <div className="relative min-h-screen">
@@ -100,7 +100,7 @@ export default async function FinalExpenseGetCoveredAdsPage() {
         serviceName="Final expense get covered"
         serviceCategory="final-expense-get-covered-ads"
       />
-      <FinalExpenseGetCoveredFunnel heroImageUrl={heroImageUrl} />
+      <FinalExpenseGetCoveredFunnel heroMedia={heroMedia} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{

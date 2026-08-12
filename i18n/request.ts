@@ -97,6 +97,54 @@ async function loadSplitMessages(locale: string): Promise<Record<string, any>> {
       // File doesn't exist, skip
     }
 
+    // Load Short Term Medical apply (public self-service) messages if they exist
+    try {
+      const shortTermMedicalApply = (
+        await import(`@/messages/${locale}/short-term-medical/apply.json`)
+      ).default;
+      Object.assign(splitMessages, shortTermMedicalApply);
+    } catch {
+      // File doesn't exist, skip
+    }
+
+    // Load Dental & Vision apply (public self-service) messages if they exist
+    try {
+      const dentalVisionApply = (await import(`@/messages/${locale}/dental-vision/apply.json`))
+        .default;
+      Object.assign(splitMessages, dentalVisionApply);
+    } catch {
+      // File doesn't exist, skip
+    }
+
+    // Load Hospital Indemnity apply (public self-service) messages if they exist
+    try {
+      const hospitalIndemnityApply = (
+        await import(`@/messages/${locale}/hospital-indemnity/apply.json`)
+      ).default;
+      Object.assign(splitMessages, hospitalIndemnityApply);
+    } catch {
+      // File doesn't exist, skip
+    }
+
+    // Load Life Insurance apply (public self-service) messages if they exist
+    try {
+      const lifeInsuranceApply = (await import(`@/messages/${locale}/life-insurance/apply.json`))
+        .default;
+      Object.assign(splitMessages, lifeInsuranceApply);
+    } catch {
+      // File doesn't exist, skip
+    }
+
+    // Load Health Coverage Alternative apply (public self-service) messages if they exist
+    try {
+      const healthAlternativeApply = (
+        await import(`@/messages/${locale}/health-alternative/apply.json`)
+      ).default;
+      Object.assign(splitMessages, healthAlternativeApply);
+    } catch {
+      // File doesn't exist, skip
+    }
+
     // Load Life Insurance get-covered (Meta ads funnel) messages if they exist
     try {
       const lifeInsuranceGetCovered = (

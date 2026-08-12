@@ -1,0 +1,53 @@
+{
+  "healthAlternativeApply": {
+    "meta": {
+      "title": "Solicite cobertura de salud sin ACA | Isaac Plans",
+      "description": "Comience su solicitud de cobertura de salud en línea — sin requisito de estatus migratorio, sin periodo de inscripción y sin necesitar subsidio. Segura y en solo unos minutos.",
+      "image": "https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_1200,h_630,c_fill,g_auto/tmpfs1tzoqj_1_qqzvsx",
+      "imageAlt": "Solicite cobertura de salud sin ACA con Isaac Plans"
+    },
+    "hero": {
+      "badge": "Alternativa de salud",
+      "title": "Cobertura de salud real cuando ACA no es una opción",
+      "subtitle": "Sin requisito de estatus migratorio y sin esperar un periodo de inscripción. Comience su solicitud segura en línea — solo toma unos minutos."
+    },
+    "benefitsHeading": "¿Por qué solicitar con Isaac Plans?",
+    "benefits": [
+      {
+        "title": "Sin requisito de estatus migratorio",
+        "desc": "Estos planes están disponibles sin importar su estatus migratorio — no se requiere número de Seguro Social para obtener cobertura."
+      },
+      {
+        "title": "Inscríbase en cualquier época del año",
+        "desc": "No hay periodo de inscripción abierta ni necesita un evento de vida que califique. Solicite el día que necesite cobertura."
+      },
+      {
+        "title": "Hecho para quien trabaja por su cuenta",
+        "desc": "Una opción práctica para freelancers, contratistas, dueños de negocio y estudiantes que no reciben subsidio ni plan de empleador."
+      },
+      {
+        "title": "Apoyo bilingüe y licenciado",
+        "desc": "Obtenga ayuda en inglés o español de un asesor licenciado en cada paso."
+      }
+    ],
+    "howItWorksHeading": "Cómo solicitar",
+    "steps": [
+      {
+        "title": "Abra su solicitud segura",
+        "desc": "Toque Solicitar ahora y su solicitud privada se abre de inmediato — sin cuenta ni contraseña. Vuelva desde este dispositivo cuando quiera para continuar donde la dejó."
+      },
+      {
+        "title": "Complete el formulario seguro",
+        "desc": "Responda algunas preguntas guiadas sobre usted y quienes desea cubrir. Todo está encriptado y se guarda automáticamente mientras avanza."
+      },
+      {
+        "title": "Revisamos y nos comunicamos",
+        "desc": "Una vez que envíe su solicitud, la revisamos y nos comunicamos con usted para confirmar su plan y la fecha de inicio."
+      }
+    ],
+    "secureNote": "Su información está encriptada y nunca se comparte. Este proceso es 100% seguro.",
+    "cta": "Solicitar ahora",
+    "ctaNote": "No necesita cuenta ni contraseña — su progreso se guarda automáticamente mientras avanza.",
+    "starting": "Iniciando su solicitud…"
+  }
+}

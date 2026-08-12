@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
 import IulGetCoveredFunnel from "@/components/iul/iul-get-covered-funnel";
 import ServicePageTracker from "@/components/service-page-tracker";
-import { getEffectiveAdsImageUrl } from "@/lib/ads-images/settings";
+import { getEffectivePageMedia, getEffectiveOgImageUrl } from "@/lib/page-media/settings";
 import {
   getIulGetCoveredAdsBreadcrumbLd,
   getIulGetCoveredAdsPageLd,
@@ -33,7 +33,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const languages = languageAlternatesPrefixed(routeKey);
   const xDefault = withLocalePrefix("en", localizedSlug(routeKey, "en"));
   const ogLocale = ogLocaleOf(locale);
-  const ogImageUrl = await getEffectiveAdsImageUrl("iul", "og", locale);
+  const ogImageUrl = await getEffectiveOgImageUrl("iul", "ads", locale);
 
   return {
     title,
@@ -92,7 +92,7 @@ export default async function IulGetCoveredAdsPage() {
     tMeta("breadcrumbPage")
   );
 
-  const heroImageUrl = await getEffectiveAdsImageUrl("iul", "hero", locale);
+  const heroMedia = await getEffectivePageMedia("iul", "ads", "hero", locale);
 
   return (
     <div className="relative min-h-screen">
@@ -100,7 +100,7 @@ export default async function IulGetCoveredAdsPage() {
         serviceName="IUL get covered"
         serviceCategory="iul-get-covered-ads"
       />
-      <IulGetCoveredFunnel heroImageUrl={heroImageUrl} />
+      <IulGetCoveredFunnel heroMedia={heroMedia} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{

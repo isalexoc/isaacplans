@@ -24,6 +24,11 @@ import {
   Handshake,
   Shield,
   Image as ImageIcon,
+  Timer,
+  Smile,
+  Banknote,
+  Umbrella,
+  Globe,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import {
@@ -78,34 +83,15 @@ const OPERATIONS_TOOLS: ToolCard[] = [
     icon: ScanLine,
   },
   {
-    title: "IUL Intake",
-    description: "Manage IUL application intakes and review submitted client applications.",
-    href: "/en/iul/intake",
-    icon: ClipboardList,
-  },
-  {
-    title: "ACA Intake",
-    description:
-      "Send a secure health coverage form, then review household details and uploaded documents.",
-    href: "/en/aca/intake",
-    icon: HeartPulse,
-  },
-  {
-    title: "Final Expense Intake",
-    description: "Send a secure client intake link, then review submitted final expense applications.",
-    href: "/en/final-expense/intake",
-    icon: Shield,
-  },
-  {
     title: "Agent Licenses",
     description: "Upload and manage license images, stored privately in Cloudinary.",
     href: "/en/admin/agent-licenses",
     icon: IdCard,
   },
   {
-    title: "Ads Page Images",
+    title: "Page Media",
     description:
-      "Swap the hero and OG images on the Final Expense, IUL, and ACA get-covered ads pages to A/B test what converts.",
+      "Swap the hero and social-share image on any line-of-business page — main, apply, or ads — or use a video instead of a photo.",
     href: "/en/admin/hero",
     icon: ImageIcon,
   },
@@ -115,6 +101,64 @@ const OPERATIONS_TOOLS: ToolCard[] = [
       "Manage referral partners, their co-branded landing pages, and the commissions you owe them.",
     href: "/en/admin/referral-partners",
     icon: Handshake,
+  },
+];
+
+/**
+ * One card per line of business's agent intake dashboard. Lifted out of OPERATIONS_TOOLS when the
+ * count went from three to eight — at that size they were crowding out everything else.
+ */
+const INTAKE_TOOLS: ToolCard[] = [
+  {
+    title: "ACA Intake",
+    description:
+      "Send a secure health coverage form, then review household details and uploaded documents.",
+    href: "/en/aca/intake",
+    icon: HeartPulse,
+  },
+  {
+    title: "Short Term Medical Intake",
+    description: "Send a secure short term medical application and review what comes back.",
+    href: "/en/short-term-medical/intake",
+    icon: Timer,
+  },
+  {
+    title: "Dental & Vision Intake",
+    description: "Send a secure dental and vision application and review what comes back.",
+    href: "/en/dental-vision/intake",
+    icon: Smile,
+  },
+  {
+    title: "Hospital Indemnity Intake",
+    description: "Send a secure hospital indemnity application and review what comes back.",
+    href: "/en/hospital-indemnity/intake",
+    icon: Banknote,
+  },
+  {
+    title: "IUL Intake",
+    description: "Manage IUL application intakes and review submitted client applications.",
+    href: "/en/iul/intake",
+    icon: ClipboardList,
+  },
+  {
+    title: "Life Insurance Intake",
+    description:
+      "Send a secure life application, then review health answers and named beneficiaries.",
+    href: "/en/life-insurance/intake",
+    icon: Umbrella,
+  },
+  {
+    title: "Health Alternative Intake",
+    description:
+      "Send a secure application for clients ACA can't cover — no SSN or immigration status needed.",
+    href: "/en/health-alternative/intake",
+    icon: Globe,
+  },
+  {
+    title: "Final Expense Intake",
+    description: "Send a secure client intake link, then review submitted final expense applications.",
+    href: "/en/final-expense/intake",
+    icon: Shield,
   },
 ];
 
@@ -260,6 +304,17 @@ export default async function AdminDashboardPage() {
           </h2>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {OPERATIONS_TOOLS.map((tool) => (
+              <ToolCardItem key={tool.href} tool={tool} />
+            ))}
+          </div>
+        </section>
+
+        <section>
+          <h2 className="mb-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            Client Intake
+          </h2>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {INTAKE_TOOLS.map((tool) => (
               <ToolCardItem key={tool.href} tool={tool} />
             ))}
           </div>

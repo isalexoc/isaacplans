@@ -3,6 +3,7 @@ import type { LeaveBehindQuoteData } from "@/lib/leave-behind-clients";
 import type { IntakeData } from "@/lib/iul-intake/schema";
 import type { AcaIntakeData } from "@/lib/aca-intake/schema";
 import type { FeIntakeData } from "@/lib/fe-intake/schema";
+import type { IntakeData as EngineIntakeData } from "@/lib/intake-core/types";
 import type { StructuredCallSummary } from "@/lib/call-summary-structured";
 import type {
   SocialVideoJobState,
@@ -455,6 +456,46 @@ export const feIntakeSessions = pgTable("fe_intake_sessions", {
   clientIdx:      index("fe_intake_client_idx").on(t.clientUserId),
   deviceIdx:      index("fe_intake_device_idx").on(t.clientDeviceId),
   contactIdx:     index("fe_intake_contact_idx").on(t.crmContactId),
+}));
+
+/**
+ * Client intake for every line of business added after the shared engine (Short Term Medical,
+ * Dental & Vision, Hospital Indemnity, Life Insurance, Health Coverage Alternative).
+ *
+ * One table with a `lob` discriminator rather than the five more this codebase's convention would
+ * have produced. The three tables above stayed separate because each grew its own bespoke `data`
+ * shape and dashboard; here every line is driven by `lib/intake-configs/<lob>.ts` through one
+ * engine, so the rows are structurally identical and splitting them would only multiply migrations.
+ * Every query is scoped by `lob`, so one line still can never read or overwrite another's rows.
+ */
+export const intakeSessions = pgTable("intake_sessions", {
+  id:            text("id").primaryKey(), // nanoid
+  lob:           text("lob").notNull(), // LobSlug — see lib/intake-configs/index.ts
+  token:         text("token").notNull(), // unguessable URL slug
+  ownerUserId:   text("owner_user_id").notNull(), // agent Clerk id (creator)
+  clientUserId:  text("client_user_id"), // parity with the older tables; unused by new sessions
+  // Passwordless access — see lib/intake-shared/{device,access}.ts.
+  clientDeviceId: text("client_device_id"),
+  expiresAt:     timestamp("expires_at"), // capability links shouldn't live forever
+  crmContactId:  text("crm_contact_id"), // Agent CRM (GHL) contact id
+  contactName:   text("contact_name"),
+  contactEmail:  text("contact_email"),
+  contactPhone:  text("contact_phone"),
+  status:        text("status").notNull().default("draft"), // draft|in_progress|completed
+  reopenedForClient: boolean("reopened_for_client").notNull().default(false),
+  data:          jsonb("data").notNull().$type<EngineIntakeData>().default({}),
+  locale:        text("locale").default("en"), // en|es
+  completedAt:   timestamp("completed_at"),
+  createdAt:     timestamp("created_at").defaultNow().notNull(),
+  updatedAt:     timestamp("updated_at").defaultNow().notNull(),
+}, (t) => ({
+  // Unique on token alone, not (lob, token): the token is the credential in a URL, and a
+  // collision across lines would be as bad as one within a line.
+  tokenUniqueIdx: uniqueIndex("intake_token_unique_idx").on(t.token),
+  ownerIdx:       index("intake_owner_idx").on(t.lob, t.ownerUserId, t.updatedAt),
+  deviceIdx:      index("intake_device_idx").on(t.lob, t.clientDeviceId),
+  contactIdx:     index("intake_contact_idx").on(t.lob, t.crmContactId),
+  statusIdx:      index("intake_status_idx").on(t.lob, t.status),
 }));
 
 // ─── Leads the Way (Senior Life) email → GHL sync ─────────────────────────────

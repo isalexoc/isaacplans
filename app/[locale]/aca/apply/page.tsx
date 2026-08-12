@@ -2,9 +2,9 @@
 
 import type { Metadata } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
-import Image from "next/image";
-import AcaApplyCta from "@/components/aca-apply-cta";
-import { ACA_APPLY_HERO_IMAGE } from "@/lib/get-covered-fast/constants";
+import { getEffectivePageMedia, getEffectiveOgImageUrl } from "@/lib/page-media/settings";
+import HeroMedia from "@/components/media/hero-media";
+import LobApplyCta from "@/components/lob-apply-cta";
 import {
   ShieldCheck,
   HeartPulse,
@@ -16,6 +16,10 @@ import {
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("acaApply.meta");
+  const locale = await getLocale();
+  // Admin-overridable social card (lib/page-media); falls back to the message-file image.
+  const ogImageUrl = await getEffectiveOgImageUrl("aca", "apply", locale, t("image"));
+
   return {
     title: t("title"),
     description: t("description"),
@@ -26,13 +30,13 @@ export async function generateMetadata(): Promise<Metadata> {
       description: t("description"),
       siteName: "Isaac Plans Insurance",
       type: "website",
-      images: [{ url: t("image"), width: 1200, height: 630, alt: t("imageAlt") }],
+      images: [{ url: ogImageUrl, width: 1200, height: 630, alt: t("imageAlt") }],
     },
     twitter: {
       card: "summary_large_image",
       title: t("title"),
       description: t("description"),
-      images: [{ url: t("image"), alt: t("imageAlt") }],
+      images: [{ url: ogImageUrl, alt: t("imageAlt") }],
     },
   };
 }
@@ -44,10 +48,10 @@ const BENEFIT_ICONS: LucideIcon[] = [ShieldCheck, HeartPulse, Stethoscope, Walle
 export default async function AcaApplyPage() {
   const t = await getTranslations("acaApply");
   const locale = await getLocale();
+  // Admin-overridable hero — an image by default, a video once Isaac uploads one.
+  const heroMedia = await getEffectivePageMedia("aca", "apply", "hero", locale);
   const benefits = t.raw("benefits") as Card[];
   const steps = t.raw("steps") as Card[];
-  // Localized path Clerk returns to after the sign-in/sign-up modal.
-  const startHref = locale === "es" ? "/es/aca/aplicar/start" : "/en/aca/apply/start";
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-950 dark:to-gray-950">
@@ -67,10 +71,9 @@ export default async function AcaApplyPage() {
 
         {/* Media (placeholder image until real creative is provided) */}
         <div className="relative mt-8 aspect-video w-full overflow-hidden rounded-2xl border shadow-xl shadow-black/10">
-          <Image
-            src={ACA_APPLY_HERO_IMAGE}
+          <HeroMedia
+            media={heroMedia}
             alt={t("meta.imageAlt")}
-            fill
             className="object-cover"
             sizes="(max-width: 768px) 100vw, 768px"
           />
@@ -78,7 +81,7 @@ export default async function AcaApplyPage() {
 
         {/* Primary CTA */}
         <div className="mt-8 flex flex-col items-center gap-2">
-          <AcaApplyCta label={t("cta")} startHref={startHref} />
+          <LobApplyCta lob="aca" label={t("cta")} />
           <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <Lock className="h-3.5 w-3.5" /> {t("ctaNote")}
           </p>
@@ -138,7 +141,7 @@ export default async function AcaApplyPage() {
         </div>
 
         <div className="mt-8 flex justify-center">
-          <AcaApplyCta label={t("cta")} startHref={startHref} />
+          <LobApplyCta lob="aca" label={t("cta")} />
         </div>
       </div>
     </main>

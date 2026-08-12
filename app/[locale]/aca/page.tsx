@@ -1,4 +1,5 @@
 import { getLocale, getTranslations } from "next-intl/server";
+import { getEffectivePageMedia, getEffectiveOgImageUrl } from "@/lib/page-media/settings";
 
 import HeroWithTestimonials from "@/components/hero-template";
 import AboutSection from "@/components/about-section-template";
@@ -10,7 +11,7 @@ import FaqSection from "@/components/FaqSection";
 import CTABanner from "@/components/CTABanner-template";
 import PlanEnrollCard from "@/components/SelfEnrollSection";
 import ACAButton from "@/components/ACAButton";
-import AcaApplyHeroButton from "@/components/aca-apply-hero-button";
+import LobApplyHeroButton from "@/components/lob-apply-hero-button";
 import { BackHome } from "@/components/back-home";
 import { getAcaPageLd, getAcaBreadcrumbLd } from "@/lib/seo/jsonld";
 import ServicePageTracker from "@/components/service-page-tracker";
@@ -43,6 +44,14 @@ export async function generateMetadata(): Promise<Metadata> {
   const xDefault = withLocalePrefix("en", localizedSlug(routeKey, "en")); // ✅ English page
   const ogLocale = ogLocaleOf(locale); // en_US / es_ES
 
+  // Admin-overridable social card (lib/page-media); falls back to the message-file image.
+  const ogImageUrl = await getEffectiveOgImageUrl(
+    "aca",
+    "main",
+    locale,
+    cloudinaryOgImageUrl(image)
+  );
+
   return {
     title,
     description,
@@ -59,13 +68,13 @@ export async function generateMetadata(): Promise<Metadata> {
       locale: ogLocale,
       alternateLocale: ogLocale === "en_US" ? ["es_ES"] : ["en_US"],
       type: "website",
-      images: [{ url: cloudinaryOgImageUrl(image), width: 1200, height: 630, alt }],
+      images: [{ url: ogImageUrl, width: 1200, height: 630, alt }],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: [{ url: cloudinaryOgImageUrl(image), alt }],
+      images: [{ url: ogImageUrl, alt }],
     },
     // robots omitted → defaults to index, follow
   };
@@ -75,6 +84,9 @@ export default async function AcaPage() {
   /* locale-aware messages */
   const locale = await getLocale();
   const trans = await getTranslations({ locale, namespace: "acaPage" });
+
+  // Admin-overridable hero — an image by default, a video once Isaac uploads one.
+  const heroMedia = await getEffectivePageMedia("aca", "main", "hero", locale);
   const t = trans; // plain strings
   const tm = trans.markup; // returns string with HTML markup
 
@@ -132,8 +144,9 @@ export default async function AcaPage() {
         description={t("hero.description")}
         imagePublicId="tmpfs1tzoqj_1_qqzvsx"
         imagePosition="left"
+        media={heroMedia}
         cta={<ACAButton />}
-        ctaSecondary={<AcaApplyHeroButton />}
+        ctaSecondary={<LobApplyHeroButton lob="aca" />}
         testimonials={[testimonial0]}
         happyClient={{
           title: t("hero.happyClient.title"),

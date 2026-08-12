@@ -1,0 +1,53 @@
+{
+  "lifeInsuranceApply": {
+    "meta": {
+      "title": "Apply for Life Insurance | Isaac Plans",
+      "description": "Start your life insurance application online — protect the people who depend on you. Secure, guided, and only a few minutes.",
+      "image": "https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_1200,h_630,c_fill,g_auto/pexels-emma-bauso-1183828-2253879_1_zd87oq",
+      "imageAlt": "Apply for life insurance with Isaac Plans"
+    },
+    "hero": {
+      "badge": "Life Insurance",
+      "title": "Protect the people who depend on you",
+      "subtitle": "Make sure your family keeps their home and their footing if something happens to you. Start your secure application online — it only takes a few minutes."
+    },
+    "benefitsHeading": "Why apply with Isaac Plans?",
+    "benefits": [
+      {
+        "title": "A tax-free payout for your family",
+        "desc": "Your beneficiaries receive the benefit income-tax free, and can use it for the mortgage, tuition, or everyday bills."
+      },
+      {
+        "title": "No medical exam options",
+        "desc": "Many applicants qualify for coverage with health questions only — no lab work, no nurse visit."
+      },
+      {
+        "title": "Lock in your rate now",
+        "desc": "Premiums are based on your age and health today. The younger and healthier you apply, the less you pay for good."
+      },
+      {
+        "title": "Bilingual, licensed support",
+        "desc": "Get help in English or Spanish from a licensed advisor at every step."
+      }
+    ],
+    "howItWorksHeading": "How to apply",
+    "steps": [
+      {
+        "title": "Open your secure application",
+        "desc": "Tap Apply now and your private application opens immediately — no account, no password. Come back on this device anytime to pick up where you left off."
+      },
+      {
+        "title": "Fill out the secure form",
+        "desc": "Answer a few guided questions about your health, the coverage you want, and who you'd like to protect. Everything is encrypted and saves automatically as you go."
+      },
+      {
+        "title": "We review and reach out",
+        "desc": "Once you submit, we shop your application across carriers and contact you with your best options."
+      }
+    ],
+    "secureNote": "Your information is encrypted and never shared. This process is 100% secure.",
+    "cta": "Apply now",
+    "ctaNote": "No account or password needed — your progress saves automatically as you go.",
+    "starting": "Starting your application…"
+  }
+}
