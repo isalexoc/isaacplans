@@ -209,11 +209,27 @@ function buildTimeline(plan: RenderPlan): Record<string, any> {
     { clips: sceneClips },
   ].filter((t) => t.clips.length > 0);
 
+  // Music rides on its own EXPLICITLY BOUNDED track rather than `timeline.soundtrack`.
+  // The soundtrack property carries no length, so a track longer than the narration (ours is
+  // deliberately re-fit to narration + a 3s tail buffer) can keep the render going after the
+  // voice has stopped. A clip with `length: plan.durationSec` cannot: the video ends when the
+  // script ends. A shorter track simply falls silent early, exactly as the soundtrack did.
+  const timelineEnd = plan.durationSec > 0
+    ? plan.durationSec
+    : plan.scenes.reduce((end, s) => Math.max(end, s.start + s.length), 0);
+  const musicTrack = plan.musicUrl && timelineEnd > 0
+    ? [{
+        asset:  { type: "audio", src: plan.musicUrl, volume: 0.12, effect: "fadeInFadeOut" },
+        start:  0,
+        length: round(timelineEnd),
+      }]
+    : [];
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const timeline: Record<string, any> = { background: "#000000", tracks };
-  if (plan.musicUrl) {
-    timeline.soundtrack = { src: plan.musicUrl, effect: "fadeInFadeOut", volume: 0.12 };
-  }
+  const timeline: Record<string, any> = {
+    background: "#000000",
+    tracks: musicTrack.length ? [...tracks, { clips: musicTrack }] : tracks,
+  };
   return timeline;
 }
 

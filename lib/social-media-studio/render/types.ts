@@ -34,6 +34,12 @@ export interface RenderPlan {
   width:          number;
   height:         number;
   fps:            number;
+  /**
+   * Total length of the finished video, in seconds — ALWAYS the length of the spoken
+   * narration (which is the user's script, verbatim). Providers must not let any element
+   * run past this: the video ends when the script ends.
+   */
+  durationSec:    number;
   scenes:         RenderPlanScene[];
   narrationAudio?: RenderPlanClip;  // single voiceover track (faceless) — also the caption source
   presenter?:     RenderPlanPresenter; // presenter clip (its audio + the caption source when present)

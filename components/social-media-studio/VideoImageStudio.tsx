@@ -1,12 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Loader2, Film, RotateCcw, CheckCircle2, RefreshCw, Pencil, X, Clapperboard, Video as VideoIcon, Undo2, Music } from "lucide-react";
+import { Loader2, Film, RotateCcw, CheckCircle2, RefreshCw, Pencil, X, Clapperboard, Video as VideoIcon, Undo2, Music, Captions, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { PresenterPicker, type PresenterSelection } from "./PresenterPicker";
 import { VideoJobProgress } from "./VideoJobProgress";
+import { countWords, WORDS_PER_SECOND } from "@/lib/social-media-studio/script-narration";
 import type { VideoStoryboard, SocialLocale } from "@/lib/social-media-studio/types";
 import type { SocialVideoJobView } from "@/lib/social-media-studio/video-job-types";
 
@@ -21,7 +22,7 @@ export interface VideoImageStudioProps {
   /** Phase A — start a durable image-build job; returns its jobId. */
   startImages: (
     locale: SocialLocale,
-    opts?: { reuseAssets?: boolean; preferClipAssets?: boolean },
+    opts?: { reuseAssets?: boolean; preferClipAssets?: boolean; subtitles?: boolean },
   ) => Promise<{ jobId: string }>;
   /** Regenerate one scene's image from a concept (fast, synchronous); returns the new URL. */
   regenerateImage: (concept: string, sceneIndex: number, locale: SocialLocale) => Promise<string>;
@@ -106,6 +107,10 @@ export function VideoImageStudio({
   // ones both save money by default; explicitly saved `false` sticks.
   const [reuseAssets, setReuseAssets] = useState<boolean>(initialStoryboard?.reuseAssets ?? true);
 
+  // Burned-in karaoke captions — defaults ON (undefined → true); an explicit `false` sticks.
+  const [subtitles, setSubtitles] = useState<boolean>(initialStoryboard?.subtitles ?? true);
+  const [scriptOpen, setScriptOpen] = useState(false);
+
   // Cinematic motion (Veo 3.1)
   const cinematicSupported = Boolean(startClip);
   const [cinematic, setCinematic]     = useState<boolean>(Boolean(initialStoryboard?.cinematic));
@@ -181,9 +186,14 @@ export function VideoImageStudio({
     return { ...sb, reuseAssets: r };
   }
 
-  // Apply presenter + cinematic + reuse settings onto a (possibly fresh) storyboard.
+  // Stamp the subtitles toggle onto a storyboard (so it round-trips through Sanity).
+  function withSubtitles(sb: VideoStoryboard, s: boolean = subtitles): VideoStoryboard {
+    return { ...sb, subtitles: s };
+  }
+
+  // Apply presenter + cinematic + reuse + subtitle settings onto a (possibly fresh) storyboard.
   function decorate(sb: VideoStoryboard): VideoStoryboard {
-    return withReuseAssets(withCinematic(withPresenter(sb)));
+    return withSubtitles(withReuseAssets(withCinematic(withPresenter(sb))));
   }
 
   function toggleCinematic(value: boolean) {
@@ -193,6 +203,10 @@ export function VideoImageStudio({
   function toggleReuseAssets(value: boolean) {
     setReuseAssets(value);
     if (storyboard) commitStoryboard(withReuseAssets(storyboard, value));
+  }
+  function toggleSubtitles(value: boolean) {
+    setSubtitles(value);
+    if (storyboard) commitStoryboard(withSubtitles(storyboard, value));
   }
   function changeTier(t: VeoTier) {
     setVeoTier(t);
@@ -392,7 +406,11 @@ export function VideoImageStudio({
     setMusicBusy(true);
     let jobId: string;
     try {
-      ({ jobId } = await startMusic(cur.durationSeconds));
+      // Length the narration will actually run for, not the nominal 30/60 — the render
+      // re-fits the track anyway, but starting close means fewer re-generations.
+      const spokenWords = countWords(cur.scenes.map((s) => s.narration).join(" "));
+      const target = spokenWords > 0 ? Math.ceil(spokenWords / WORDS_PER_SECOND) + 3 : cur.durationSeconds;
+      ({ jobId } = await startMusic(target));
     } catch (err) {
       if (aliveRef.current) { setMusicError(err instanceof Error ? err.message : "Could not start music."); setMusicBusy(false); }
       return;
@@ -416,7 +434,7 @@ export function VideoImageStudio({
     setBusyImages(true);
     let jobId: string;
     try {
-      ({ jobId } = await startImages(voiceLang, { reuseAssets, preferClipAssets: cinematic }));
+      ({ jobId } = await startImages(voiceLang, { reuseAssets, preferClipAssets: cinematic, subtitles }));
     } catch (err) {
       if (aliveRef.current) { setError(err instanceof Error ? err.message : "Could not start image generation."); setBusyImages(false); }
       return;
@@ -505,12 +523,19 @@ export function VideoImageStudio({
   const animatedCount = storyboard?.scenes.filter((s) => s.videoClipUrl).length ?? 0;
   const animateAllCost = (sceneCount * veoDuration * VEO_RATE[veoTier]).toFixed(2);
 
+  // Exactly what the video will say — the storyboard narration IS the saved script, verbatim.
+  // Showing it (and its spoken length) makes the "script = video" contract verifiable before
+  // paying for a render.
+  const narrationText = storyboard?.scenes.map((s) => s.narration.trim()).filter(Boolean).join(" ") ?? "";
+  const narrationWords = countWords(narrationText);
+  const narrationSeconds = narrationWords / WORDS_PER_SECOND;
+
   return (
     <div className="flex flex-col gap-4 rounded-lg border p-4">
       <div className="flex items-center gap-2">
         <Film className="h-4 w-4 text-blue-600" />
         <h3 className="font-medium text-sm">AI YouTube Short</h3>
-        <span className="text-xs text-muted-foreground">— AI portrait images + voiceover + captions + music, 9:16</span>
+        <span className="text-xs text-muted-foreground">— your script, spoken word for word, over AI portrait images + music, 9:16</span>
       </div>
 
       {!canGenerate && <p className="text-xs text-amber-600">{disabledHint ?? "Generate a video script first."}</p>}
@@ -578,6 +603,32 @@ export function VideoImageStudio({
         current={presenterSel}
         onConfirm={applyPresenterSelection}
       />
+
+      {/* Burned-in subtitles toggle */}
+      <div className="flex items-center gap-3 flex-wrap">
+        <span className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
+          <Captions className="h-3.5 w-3.5" /> Subtitles:
+        </span>
+        <button
+          type="button"
+          role="switch"
+          aria-label="Burned-in subtitles"
+          aria-checked={subtitles}
+          disabled={anyBusy}
+          onClick={() => toggleSubtitles(!subtitles)}
+          className={cn(
+            "relative inline-flex h-5 w-9 items-center rounded-full transition-colors disabled:opacity-50",
+            subtitles ? "bg-blue-600" : "bg-muted-foreground/30"
+          )}
+        >
+          <span className={cn("inline-block h-4 w-4 transform rounded-full bg-white transition-transform", subtitles ? "translate-x-4" : "translate-x-0.5")} />
+        </button>
+        <span className="text-xs text-muted-foreground">
+          {subtitles
+            ? "Karaoke captions burned over the narration (Shorts are watched on mute)"
+            : "No captions — clean frame, nothing burned over the video"}
+        </span>
+      </div>
 
       {/* Cinematic motion (Veo 3.1) toggle */}
       {cinematicSupported && (
@@ -773,6 +824,43 @@ export function VideoImageStudio({
                   Generate from this prompt
                 </Button>
               </div>
+            </div>
+          )}
+
+          {/* Narration — the saved script, verbatim. This is what the render will speak. */}
+          {narrationWords > 0 && (
+            <div className="rounded-md border bg-muted/30">
+              <button
+                type="button"
+                onClick={() => setScriptOpen((o) => !o)}
+                className="flex w-full items-center gap-2 px-3 py-2 text-left"
+              >
+                <FileText className="h-4 w-4 text-blue-600 shrink-0" />
+                <span className="text-xs font-medium text-muted-foreground">Narration (from your script)</span>
+                <span className="text-xs text-muted-foreground ml-auto">
+                  {narrationWords} words · ≈ {narrationSeconds < 60
+                    ? `${Math.round(narrationSeconds)}s`
+                    : `${Math.floor(narrationSeconds / 60)}m ${Math.round(narrationSeconds % 60)}s`} video
+                </span>
+                <span className="text-xs text-blue-600">{scriptOpen ? "Hide" : "Show"}</span>
+              </button>
+              {scriptOpen && (
+                <div className="border-t px-3 py-2 space-y-2">
+                  <p className="text-[11px] text-muted-foreground">
+                    What the last build produced. Every render re-derives this from the saved Full
+                    Script word for word — nothing is added, removed or rewritten — so if you have
+                    edited the script since, the next render will follow the new version exactly.
+                  </p>
+                  <ol className="space-y-1">
+                    {storyboard!.scenes.map((scene, i) => (
+                      <li key={i} className="text-xs flex gap-2">
+                        <span className="text-muted-foreground shrink-0 w-5 text-right">{i + 1}.</span>
+                        <span>{scene.narration}</span>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              )}
             </div>
           )}
 

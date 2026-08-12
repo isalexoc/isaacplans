@@ -1,5 +1,5 @@
 import { createClient, type SanityClient } from "next-sanity";
-import { buildVideoStoryboard, hashScript } from "./video-generator";
+import { resyncStoryboardNarration, hashScript } from "./video-generator";
 import type {
   VideoStoryboard,
   VideoScript,
@@ -40,6 +40,7 @@ export function toStoryboardDoc(sb: VideoStoryboard) {
     presenterAvatarType: sb.presenterAvatarType ?? null,
     presenterVoiceId:    sb.presenterVoiceId ?? null,
     presenterVoiceName:  sb.presenterVoiceName ?? null,
+    subtitles:           sb.subtitles ?? true,
     cinematic:           sb.cinematic ?? false,
     veoTier:             sb.veoTier ?? null,
     veoDurationSec:      sb.veoDurationSec ?? null,
@@ -96,12 +97,17 @@ export async function latestScriptHash(id: string, locale?: SocialLocale): Promi
 }
 
 /**
- * Rebuild scene narration from the latest saved script while KEEPING the curated images
- * (mapped by index, reused cyclically if the scene count changed) + cinematic clips + presenter
- * picks. Guarantees the video always speaks the user's most recently edited script — presenter
- * or faceless alike. Skips the GPT rebuild entirely when the script hasn't changed since
- * `current` was built (same `scriptHash`), and returns `current` unchanged when there's no
- * saved script or no images yet.
+ * Re-derive scene narration from the LATEST SAVED SCRIPT while keeping the curated images
+ * (mapped by index, reused cyclically if the scene count changed), cinematic clips and every
+ * render setting. This is what guarantees the rendered video always speaks the script the
+ * user last saved — presenter or faceless alike.
+ *
+ * `resyncStoryboardNarration` is deterministic (no GPT unless the voiceover language differs
+ * from the script's own language), so this is now free and instant, and — critically — it
+ * cannot introduce words the script does not contain. It used to re-run the GPT "video
+ * director", which re-paraphrased the script on every single render.
+ *
+ * Returns `current` BY REFERENCE when nothing needs to change (callers compare identity).
  */
 export async function rebuildFromLatestScript(
   id: string,
@@ -110,27 +116,10 @@ export async function rebuildFromLatestScript(
   const loaded = await loadSourceAndScript(id, current.voiceLanguage);
   if (!loaded) return current;
   if (current.scriptHash && current.scriptHash === hashScript(loaded.videoScript)) return current;
+  if (current.scenes.every((s) => !s.imageUrl)) return current;
 
-  const fresh = await buildVideoStoryboard(loaded.source, loaded.videoScript, current.voiceLanguage);
-  const images = current.scenes.map((s) => s.imageUrl).filter(Boolean);
-  if (images.length === 0) return current;
-  const clips = current.scenes.map((s) => s.videoClipUrl);
-
-  fresh.scenes = fresh.scenes.map((scene, i) => ({
-    ...scene,
-    imageUrl:     images[i] ?? images[i % images.length],
-    videoClipUrl: clips[i],
-  }));
-  fresh.musicUrl            = current.musicUrl;
-  fresh.presenter           = current.presenter;
-  fresh.presenterPlacement  = current.presenterPlacement;
-  fresh.presenterAvatarId   = current.presenterAvatarId;
-  fresh.presenterAvatarName = current.presenterAvatarName;
-  fresh.presenterVoiceId    = current.presenterVoiceId;
-  fresh.presenterVoiceName  = current.presenterVoiceName;
-  fresh.cinematic           = current.cinematic;
-  fresh.veoTier             = current.veoTier;
-  fresh.veoDurationSec      = current.veoDurationSec;
+  const fresh = await resyncStoryboardNarration(current, loaded.videoScript);
+  if (fresh === current) return current;
 
   await persistStoryboard(id, fresh);
   return fresh;
