@@ -25,11 +25,22 @@ export async function POST(request: Request) {
   }
 
   const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-  const apiKey = process.env.CLOUDINARY_API_KEY;
+  // This project names the key NEXT_PUBLIC_CLOUDINARY_API_KEY; accept both, the same way
+  // config/cloudinary.js and lib/lead-magnet-generator/image-generator.ts already do.
+  // The key is not a secret — Cloudinary requires it in the browser's upload request, which is
+  // why it is public here. Only CLOUDINARY_API_SECRET is sensitive, and it never leaves this
+  // handler: it signs the params and the signature is what goes back to the client.
+  const apiKey = process.env.CLOUDINARY_API_KEY ?? process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY;
   const apiSecret = process.env.CLOUDINARY_API_SECRET;
   if (!cloudName || !apiKey || !apiSecret) {
+    const missing = [
+      !cloudName && "NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME",
+      !apiKey && "CLOUDINARY_API_KEY (or NEXT_PUBLIC_CLOUDINARY_API_KEY)",
+      !apiSecret && "CLOUDINARY_API_SECRET",
+    ].filter(Boolean);
+    console.error("[page-media/sign] missing env:", missing.join(", "));
     return NextResponse.json(
-      { success: false, error: "Cloudinary is not configured on the server." },
+      { success: false, error: `Cloudinary is not configured on the server (missing ${missing.join(", ")}).` },
       { status: 500 }
     );
   }
