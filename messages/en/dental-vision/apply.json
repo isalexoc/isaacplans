@@ -1,0 +1,53 @@
+{
+  "dentalVisionApply": {
+    "meta": {
+      "title": "Apply for Dental & Vision Coverage | Isaac Plans",
+      "description": "Start your dental and vision insurance application online — cleanings, exams, glasses and more. Secure, guided, and only a few minutes.",
+      "image": "https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_1200,h_630,c_fill,g_auto/tmp48ylol1v_1_ig0hto",
+      "imageAlt": "Apply for dental and vision coverage with Isaac Plans"
+    },
+    "hero": {
+      "badge": "Dental & Vision",
+      "title": "Take care of your teeth and eyes for less",
+      "subtitle": "Most health plans leave dental and vision out. Start your secure application online — it only takes a few minutes."
+    },
+    "benefitsHeading": "Why apply with Isaac Plans?",
+    "benefits": [
+      {
+        "title": "Cleanings and exams covered",
+        "desc": "Preventive visits are covered from day one on most plans — often with no waiting period."
+      },
+      {
+        "title": "Keep your own dentist",
+        "desc": "Many plans let you stay with the dentist and eye doctor you already trust."
+      },
+      {
+        "title": "Affordable monthly cost",
+        "desc": "Plans start at a few dollars a month, far less than paying out of pocket for a single visit."
+      },
+      {
+        "title": "Bilingual, licensed support",
+        "desc": "Get help in English or Spanish from a licensed advisor at every step."
+      }
+    ],
+    "howItWorksHeading": "How to apply",
+    "steps": [
+      {
+        "title": "Open your secure application",
+        "desc": "Tap Apply now and your private application opens immediately — no account, no password. Come back on this device anytime to pick up where you left off."
+      },
+      {
+        "title": "Fill out the secure form",
+        "desc": "Answer a few guided questions about you and anyone else you want covered. Everything is encrypted and saves automatically as you go."
+      },
+      {
+        "title": "We review and reach out",
+        "desc": "Once you submit, we review your application and contact you to finalize your plan and start date."
+      }
+    ],
+    "secureNote": "Your information is encrypted and never shared. This process is 100% secure.",
+    "cta": "Apply now",
+    "ctaNote": "No account or password needed — your progress saves automatically as you go.",
+    "starting": "Starting your application…"
+  }
+}

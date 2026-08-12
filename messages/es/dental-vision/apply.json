@@ -1,0 +1,53 @@
+{
+  "dentalVisionApply": {
+    "meta": {
+      "title": "Solicite cobertura dental y de visión | Isaac Plans",
+      "description": "Comience su solicitud de seguro dental y de visión en línea — limpiezas, exámenes, lentes y más. Segura, guiada y en solo unos minutos.",
+      "image": "https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_1200,h_630,c_fill,g_auto/tmp48ylol1v_1_ig0hto",
+      "imageAlt": "Solicite cobertura dental y de visión con Isaac Plans"
+    },
+    "hero": {
+      "badge": "Dental y visión",
+      "title": "Cuide sus dientes y sus ojos por menos",
+      "subtitle": "La mayoría de los planes de salud dejan fuera lo dental y la visión. Comience su solicitud segura en línea — solo toma unos minutos."
+    },
+    "benefitsHeading": "¿Por qué solicitar con Isaac Plans?",
+    "benefits": [
+      {
+        "title": "Limpiezas y exámenes cubiertos",
+        "desc": "Las visitas preventivas están cubiertas desde el primer día en la mayoría de los planes — muchas veces sin periodo de espera."
+      },
+      {
+        "title": "Quédese con su dentista",
+        "desc": "Muchos planes le permiten seguir con el dentista y el oftalmólogo en los que ya confía."
+      },
+      {
+        "title": "Costo mensual accesible",
+        "desc": "Los planes comienzan desde unos pocos dólares al mes, mucho menos que pagar de su bolsillo una sola visita."
+      },
+      {
+        "title": "Apoyo bilingüe y licenciado",
+        "desc": "Obtenga ayuda en inglés o español de un asesor licenciado en cada paso."
+      }
+    ],
+    "howItWorksHeading": "Cómo solicitar",
+    "steps": [
+      {
+        "title": "Abra su solicitud segura",
+        "desc": "Toque Solicitar ahora y su solicitud privada se abre de inmediato — sin cuenta ni contraseña. Vuelva desde este dispositivo cuando quiera para continuar donde la dejó."
+      },
+      {
+        "title": "Complete el formulario seguro",
+        "desc": "Responda algunas preguntas guiadas sobre usted y quienes desea cubrir. Todo está encriptado y se guarda automáticamente mientras avanza."
+      },
+      {
+        "title": "Revisamos y nos comunicamos",
+        "desc": "Una vez que envíe su solicitud, la revisamos y nos comunicamos con usted para finalizar su plan y la fecha de inicio."
+      }
+    ],
+    "secureNote": "Su información está encriptada y nunca se comparte. Este proceso es 100% seguro.",
+    "cta": "Solicitar ahora",
+    "ctaNote": "No necesita cuenta ni contraseña — su progreso se guarda automáticamente mientras avanza.",
+    "starting": "Iniciando su solicitud…"
+  }
+}

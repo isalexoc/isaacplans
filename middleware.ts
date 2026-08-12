@@ -51,6 +51,49 @@ const isProtectedRoute = createRouteMatcher([
   '/gastos-finales/admision/:token/view',
   '/en/final-expense/intake/:token/view',
   '/es/gastos-finales/admision/:token/view',
+  // Lines of business on the shared intake engine (lib/intake-core). Same rule as the three
+  // above: the AGENT dashboard and read-only summary are matched exactly, which is precisely what
+  // leaves each client form at /<lob>/intake/<token> public for its token + device cookie.
+  '/short-term-medical/intake',
+  '/cobertura-a-corto-plazo/admision',
+  '/en/short-term-medical/intake',
+  '/es/cobertura-a-corto-plazo/admision',
+  '/short-term-medical/intake/:token/view',
+  '/cobertura-a-corto-plazo/admision/:token/view',
+  '/en/short-term-medical/intake/:token/view',
+  '/es/cobertura-a-corto-plazo/admision/:token/view',
+  '/dental-vision/intake',
+  '/dental-vision/admision',
+  '/en/dental-vision/intake',
+  '/es/dental-vision/admision',
+  '/dental-vision/intake/:token/view',
+  '/dental-vision/admision/:token/view',
+  '/en/dental-vision/intake/:token/view',
+  '/es/dental-vision/admision/:token/view',
+  '/hospital-indemnity/intake',
+  '/indemnizacion-hospitalaria/admision',
+  '/en/hospital-indemnity/intake',
+  '/es/indemnizacion-hospitalaria/admision',
+  '/hospital-indemnity/intake/:token/view',
+  '/indemnizacion-hospitalaria/admision/:token/view',
+  '/en/hospital-indemnity/intake/:token/view',
+  '/es/indemnizacion-hospitalaria/admision/:token/view',
+  '/life-insurance/intake',
+  '/seguro-de-vida/admision',
+  '/en/life-insurance/intake',
+  '/es/seguro-de-vida/admision',
+  '/life-insurance/intake/:token/view',
+  '/seguro-de-vida/admision/:token/view',
+  '/en/life-insurance/intake/:token/view',
+  '/es/seguro-de-vida/admision/:token/view',
+  '/health-alternative/intake',
+  '/alternativa-de-salud/admision',
+  '/en/health-alternative/intake',
+  '/es/alternativa-de-salud/admision',
+  '/health-alternative/intake/:token/view',
+  '/alternativa-de-salud/admision/:token/view',
+  '/en/health-alternative/intake/:token/view',
+  '/es/alternativa-de-salud/admision/:token/view',
 ]);
 // NOTE: /partner and /socio are deliberately NOT protected. The page is the partner portal: it
 // renders a public marketing landing with a sign-in button when signed out, and the dashboard
@@ -125,6 +168,7 @@ export default clerkMiddleware(async (auth, req) => {
     req.nextUrl.pathname.startsWith('/api/iul-intake') ||
     req.nextUrl.pathname.startsWith('/api/aca-intake') ||
     req.nextUrl.pathname.startsWith('/api/fe-intake') ||
+    req.nextUrl.pathname.startsWith('/api/intake') ||
     req.nextUrl.pathname.startsWith('/api/newsletter')
   ) {
     return;
@@ -219,6 +263,7 @@ export const config = {
     "/api/iul-intake/:path*",
     "/api/aca-intake/:path*",
     "/api/fe-intake/:path*",
+    "/api/intake/:path*",
     "/api/admin/:path*",
     "/api/newsletter/:path*",
     "/studio/:path*",

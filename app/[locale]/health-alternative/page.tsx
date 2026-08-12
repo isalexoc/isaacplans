@@ -1,4 +1,5 @@
 import HeroWithTestimonials from "@/components/hero-template";
+import LobApplyHeroButton from "@/components/lob-apply-hero-button";
 import HealthAlternativeButton from "@/components/HealthAlternativeButton";
 import CTABanner from "@/components/CTABanner-template";
 import FaqSection from "@/components/FaqSection";
@@ -10,6 +11,7 @@ import { BackHome } from "@/components/back-home";
 import ServicePageTracker from "@/components/service-page-tracker";
 import type { Metadata } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
+import { getEffectivePageMedia, getEffectiveOgImageUrl } from "@/lib/page-media/settings";
 import { getHealthAlternativePageLd, getHealthAlternativeBreadcrumbLd } from "@/lib/seo/jsonld";
 import { PIVOT_DIRECT_QUOTE_URL } from "@/lib/pivot-direct-quote";
 
@@ -45,6 +47,14 @@ export async function generateMetadata(): Promise<Metadata> {
   const xDefault = withLocalePrefix("en", localizedSlug(routeKey, "en"));
   const ogLocale = ogLocaleOf(locale);
 
+  // Admin-overridable social card (lib/page-media); falls back to the message-file image.
+  const ogImageUrl = await getEffectiveOgImageUrl(
+    "health-alternative",
+    "main",
+    locale,
+    cloudinaryOgImageUrl(image)
+  );
+
   return {
     title,
     description,
@@ -61,13 +71,13 @@ export async function generateMetadata(): Promise<Metadata> {
       locale: ogLocale,
       alternateLocale: ogLocale === "en_US" ? ["es_ES"] : ["en_US"],
       type: "website",
-      images: [{ url: cloudinaryOgImageUrl(image), width: 1200, height: 630, alt }],
+      images: [{ url: ogImageUrl, width: 1200, height: 630, alt }],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: [{ url: cloudinaryOgImageUrl(image), alt }],
+      images: [{ url: ogImageUrl, alt }],
     },
   };
 }
@@ -75,6 +85,9 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function HealthAlternativePage() {
   const locale = (await getLocale()) as SupportedLocale;
   const t = await getTranslations({ locale, namespace: "healthAlternativePage" });
+
+  // Admin-overridable hero — an image by default, a video once Isaac uploads one.
+  const heroMedia = await getEffectivePageMedia("health-alternative", "main", "hero", locale);
 
   const pageLd = getHealthAlternativePageLd(locale, t("hero.title"), t("hero.description"));
   const crumbLd = getHealthAlternativeBreadcrumbLd(
@@ -97,7 +110,9 @@ export default async function HealthAlternativePage() {
         description={t("hero.description")}
         imagePublicId="tmpfs1tzoqj_1_qqzvsx"
         imagePosition="left"
+        media={heroMedia}
         cta={<HealthAlternativeButton />}
+        ctaSecondary={<LobApplyHeroButton lob="health-alternative" />}
         testimonials={[
           {
             name: t("hero.testimonials.0.name"),

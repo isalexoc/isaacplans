@@ -19,7 +19,7 @@ import {
 
 /**
  * Tool settings kept in the shared `app_settings` key/value table (same mechanism as
- * lib/ads-images/settings.ts) rather than a table of their own — it's two JSON blobs read only
+ * lib/page-media/settings.ts) rather than a table of their own — it's two JSON blobs read only
  * by an admin, so a dedicated table would be overhead for nothing.
  *
  * Deliberately NOT cached: every read here happens behind admin auth, so there is no risk of

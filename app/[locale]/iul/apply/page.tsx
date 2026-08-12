@@ -2,8 +2,9 @@
 
 import type { Metadata } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
-import IulApplyVideo from "@/components/iul-apply-video";
-import IulApplyCta from "@/components/iul-apply-cta";
+import { getEffectivePageMedia, getEffectiveOgImageUrl } from "@/lib/page-media/settings";
+import HeroMedia from "@/components/media/hero-media";
+import LobApplyCta from "@/components/lob-apply-cta";
 import {
   ShieldCheck,
   TrendingUp,
@@ -15,6 +16,10 @@ import {
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("iulApply.meta");
+  const locale = await getLocale();
+  // Admin-overridable social card (lib/page-media); falls back to the message-file image.
+  const ogImageUrl = await getEffectiveOgImageUrl("iul", "apply", locale, t("image"));
+
   return {
     title: t("title"),
     description: t("description"),
@@ -25,13 +30,13 @@ export async function generateMetadata(): Promise<Metadata> {
       description: t("description"),
       siteName: "Isaac Plans Insurance",
       type: "website",
-      images: [{ url: t("image"), width: 1200, height: 630, alt: t("imageAlt") }],
+      images: [{ url: ogImageUrl, width: 1200, height: 630, alt: t("imageAlt") }],
     },
     twitter: {
       card: "summary_large_image",
       title: t("title"),
       description: t("description"),
-      images: [{ url: t("image"), alt: t("imageAlt") }],
+      images: [{ url: ogImageUrl, alt: t("imageAlt") }],
     },
   };
 }
@@ -45,13 +50,10 @@ export default async function IulApplyPage() {
   const locale = await getLocale();
   const benefits = t.raw("benefits") as Card[];
   const steps = t.raw("steps") as Card[];
-  // Localized path Clerk returns to after the sign-in/sign-up modal.
-  const startHref = locale === "es" ? "/es/iul/aplicar/start" : "/en/iul/apply/start";
-  // Placeholder image until the agent's recording is set via NEXT_PUBLIC_IUL_APPLY_VIDEO_URL.
-  const heroImage =
-    locale === "es"
-      ? "https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_1280,c_limit/v1767070515/quote_iul_es_bcqglt.png"
-      : "https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_1280,c_limit/v1767070514/quote_iul_en_cxwq4x.png";
+  // Admin-overridable hero — an image by default, a video once Isaac uploads one. This replaces
+  // the old NEXT_PUBLIC_IUL_APPLY_VIDEO_URL env var: the video is now set from /admin/hero like
+  // every other page's, and per locale rather than one URL for both.
+  const heroMedia = await getEffectivePageMedia("iul", "apply", "hero", locale);
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-950 dark:to-gray-950">
@@ -69,18 +71,19 @@ export default async function IulApplyPage() {
           </p>
         </div>
 
-        {/* Media (placeholder image until the video is set) */}
-        <div className="mt-8">
-          <IulApplyVideo
-            comingSoonLabel={t("video.comingSoon")}
-            imageUrl={heroImage}
-            imageAlt={t("meta.imageAlt")}
+        {/* Media */}
+        <div className="relative mt-8 aspect-video w-full overflow-hidden rounded-2xl border shadow-xl shadow-black/10">
+          <HeroMedia
+            media={heroMedia}
+            alt={t("meta.imageAlt")}
+            className="object-cover"
+            sizes="(max-width: 768px) 100vw, 768px"
           />
         </div>
 
         {/* Primary CTA */}
         <div className="mt-8 flex flex-col items-center gap-2">
-          <IulApplyCta label={t("cta")} startHref={startHref} />
+          <LobApplyCta lob="iul" label={t("cta")} />
           <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <Lock className="h-3.5 w-3.5" /> {t("ctaNote")}
           </p>
@@ -140,7 +143,7 @@ export default async function IulApplyPage() {
         </div>
 
         <div className="mt-8 flex justify-center">
-          <IulApplyCta label={t("cta")} startHref={startHref} />
+          <LobApplyCta lob="iul" label={t("cta")} />
         </div>
       </div>
     </main>

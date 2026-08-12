@@ -2,9 +2,92 @@
 
 ## Status
 
-In progress: **Final Expense — Self-Apply Intake + Agent Dashboard**, on branch
-`feature/final-expense-apply`. Approved plan saved at
-`C:\Users\isale\.claude\plans\i-need-you-to-synthetic-cocke.md`.
+In progress: **Apply pages, shared intake engine, and admin-editable hero media (image or
+video)** — a three-phase feature. Approved plan saved at
+`C:\Users\isale\.claude\plans\i-need-to-do-sleepy-lagoon.md`.
+
+Closes three gaps at once:
+
+1. Only 3 of 8 lines of business have an `/apply` page (ACA, IUL, Final Expense). The other five
+   — short-term-medical, dental-vision, hospital-indemnity, life-insurance, health-alternative —
+   have no apply page, no intake, and no "Ready to apply now?" CTA on their main page.
+2. The intake system is copy-pasted per line of business (~35 files each; the three existing ones
+   are 95% identical). Cloning it five more times would mean ~175 files and eight copies of every
+   future fix.
+3. Hero media is only admin-editable on the five `get-covered` ads funnels, and only as a still
+   image. Isaac is standing up a video recording studio and wants to drop a video into any main
+   or apply hero — or keep/swap the photo — from the admin dashboard.
+
+**Phase 1 — Apply pages + CTAs** (branch `feature/lob-apply-pages`): a new client-safe LOB
+registry at `lib/lob/registry.ts`; collapse the six byte-identical `*-apply-cta.tsx` /
+`*-apply-hero-button.tsx` components into two parameterized ones (16 copies avoided); five new
+`/<lob>/apply` + `/<lob>/apply/start` pages cloned from `app/[locale]/aca/apply/page.tsx`; ten
+message files registered in `i18n/request.ts`; ten `pathnames` entries (`apply` → `aplicar`);
+`ctaSecondary={<LobApplyHeroButton …/>}` on the five main LOB pages.
+
+**Phase 2 — Shared intake engine** (branch `feature/intake-engine`): `lib/intake-core/` ported
+from the ACA vertical but config-driven, plus `lib/intake-configs/<lob>.ts` ×5 (one shared
+"ancillary" field set for STM/dental/hospital/health-alternative, a separate life-insurance set
+with beneficiaries and health questions). **One** new `intake_sessions` table with a `lob`
+discriminator instead of five tables; one `app/api/intake/[lob]/**` route tree; generic
+`components/intake/*` and `hooks/use-intake-autosave.ts`; a generic
+`scripts/create-intake-fields.ts <lob>` writing IDs to a committed JSON instead of regex surgery
+on a TS file. ACA/IUL/FE are deliberately **not** migrated — they keep working untouched.
+
+**Phase 3 — "Page Media"** (branch `feature/page-media`): generalize `lib/ads-images/` →
+`lib/page-media/` over three surfaces per LOB (main / apply / ads) × hero + OG × en/es, and add
+video. No DB migration — it keeps using the generic `app_settings` table, and the `ads` surface
+keeps emitting today's exact keys so existing overrides survive. Hero media becomes
+`{type:"image"} | {type:"video", posterUrl, playback:"loop"|"click"}`, rendered by a new
+**server-component** `components/media/hero-media.tsx` using a plain `<video>` — deliberately not
+`next-cloudinary`'s video.js-based `CldVideoPlayer`, which would add a large client bundle to
+pages whose LCP costs ad money. Video uploads go browser→Cloudinary directly with a signed
+request (Vercel's 4.5 MB body cap makes proxying impossible) with an XHR progress bar.
+Also fixes two live bugs: `app/actions/ads-images.ts:11`'s hardcoded `VALID_LOBS` (so "Use
+default image" currently fails for Life Insurance and Health Alternative) and the
+one-query-per-row admin read.
+
+**All three phases are implemented and build clean** (`pnpm build`, `tsc --noEmit`), on branch
+`feature/lob-apply-pages`. Not yet committed.
+
+Verified:
+- **Phase 1** — all 16 apply routes compile; the 10 new URLs return 200 in both locales with zero
+  `MISSING_MESSAGE`; the "Ready to apply now?" button is on all 8 main pages with correctly
+  localized hrefs.
+- **Phase 2** — apply → start 307s with the device cookie set; resume-by-device returns the same
+  token instead of duplicating; autosave writes and flips status to `in_progress`; a real Agent CRM
+  contact is created lazily on the first save carrying an email/phone; SSN comes back masked
+  (`•••••6789`) and is `enc:v1:…` at rest; **echoing the mask back preserves the real value**
+  (confirmed by decrypting from Postgres). Security: a Dental token via the Life route 404s, an
+  unknown line 404s, a link opened on a second device gets `403 claimed_elsewhere`, the agent
+  dashboard is blocked signed-out, the admin API 401s. A config validator confirms complete
+  bilingual labels, correctly prefixed slugs, no cross-line collisions and resolvable `showIf`
+  targets across all 5 configs (290 fields, 218 CRM slugs).
+- **Phase 3** — a legacy `aca_get_covered_hero_url_en` row written in the old module's format is
+  read by the new one and renders on the live page (the no-migration claim, tested). Video renders
+  correctly in both modes: loop emits `autoPlay muted loop playsInline aria-hidden` +
+  `motion-reduce:hidden` with a poster sibling on `motion-reduce:block`; click emits `controls`
+  with a poster and no autoplay. The `so_0` poster and `f_auto,q_auto,w_1280` video URLs both 200
+  from Cloudinary. With no override, every page falls back to its original image.
+
+**Open items:**
+- **CRM fields are not provisioned.** `pnpm intake:fields --all` must run against production Agent
+  CRM before intake sync writes real values — 218 custom fields across the five lines (~44 each,
+  in line with ACA's existing ~60). Worth reviewing the field sets in `lib/intake-configs/` first;
+  GHL slugs are awkward to rename after creation.
+- `INTAKE_DEFAULT_OWNER_USER_ID` is set in Vercel and `.env`; the optional per-line overrides
+  (`STM_DEFAULT_OWNER_USER_ID` etc.) are unset and fall back to it, which is the intended default.
+- Migration `0031_lumpy_mentor.sql` (`intake_sessions`) is applied locally; **still needs
+  `pnpm db:migrate` on production.**
+- The intake dashboards' signed-out redirect target (`/${locale}/sign-in?…`) is not a real route —
+  an inherited quirk shared with all three original dashboards, not introduced here.
+- Apply-page hero photos reuse each line's main-page photo as a placeholder; all are now swappable
+  from `/admin/hero` without a deploy.
+
+## Prior feature
+
+Last completed: **Final Expense — Self-Apply Intake + Agent Dashboard**, merged to main from
+`feature/final-expense-apply`.
 
 Adds a third self-serve intake pipeline (alongside IUL and ACA): `/final-expense/apply` →
 Clerk sign-up → `/final-expense/apply/start` → `/final-expense/intake/[token]`, plus an agent
@@ -57,18 +140,13 @@ get-covered EN hero photo as a placeholder).
   inherited quirk copied verbatim from the ACA/IUL dashboards (which have the same latent 404 for
   a signed-out direct visit), not something introduced or fixed here; migration
   `0018_plain_sleepwalker.sql` needs `pnpm db:migrate` on production.
-- Not yet merged — on branch `feature/final-expense-apply`, awaiting review/build verification
-  and explicit go-ahead to commit.
+- Merged to main. Still-open items carried into the Phase 2 work above: GHL custom fields for FE
+  were never provisioned (`pnpm fe-intake:fields`), `FE_INTAKE_DEFAULT_OWNER_USER_ID` is unset in
+  Vercel, and the intake dashboards' signed-out redirect target (`/${locale}/sign-in?…`) is not a
+  real route in this app — a latent 404 shared by all three existing dashboards.
 
-## Prior feature
-
-Last completed: **Health Coverage Alternative line of business** (8th LOB — see History
-below), implemented on branch `feature/health-alternative-lob`, pending review/commit.
-
-## Prior feature
-
-Last completed: **Life Insurance line of business** (7th LOB — see History below), merged to main
-from `feature/life-insurance-lob`.
+Before that: **Health Coverage Alternative** (8th LOB, `feature/health-alternative-lob`) and
+**Life Insurance** (7th LOB, `feature/life-insurance-lob`) — both in History below.
 
 ## History
 

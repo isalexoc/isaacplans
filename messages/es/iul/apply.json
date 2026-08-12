@@ -36,8 +36,8 @@
     "howItWorksHeading": "Cómo solicitar",
     "steps": [
       {
-        "title": "Crea tu cuenta",
-        "desc": "Regístrate de forma segura con tu correo o Google. Mantiene tu información privada y te permite continuar más tarde desde cualquier dispositivo."
+        "title": "Abre tu solicitud segura",
+        "desc": "Toca Solicitar ahora y tu solicitud privada se abre de inmediato — sin cuenta ni contraseña. Vuelve desde este dispositivo cuando quieras para continuar donde la dejaste."
       },
       {
         "title": "Completa el formulario seguro",
@@ -50,7 +50,7 @@
     ],
     "secureNote": "Tu información está cifrada y nunca se comparte. Este proceso es 100% seguro.",
     "cta": "Solicitar ahora",
-    "ctaNote": "Primero iniciarás sesión para mantener tu solicitud privada.",
+    "ctaNote": "No necesitas cuenta ni contraseña — tu progreso se guarda automáticamente mientras avanzas.",
     "starting": "Iniciando tu solicitud…"
   }
 }

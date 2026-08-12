@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
 import HealthAlternativeGetCoveredFunnel from "@/components/health-alternative/health-alternative-get-covered-funnel";
 import ServicePageTracker from "@/components/service-page-tracker";
-import { getEffectiveAdsImageUrl } from "@/lib/ads-images/settings";
+import { getEffectivePageMedia, getEffectiveOgImageUrl } from "@/lib/page-media/settings";
 import {
   getHealthAlternativeGetCoveredAdsBreadcrumbLd,
   getHealthAlternativeGetCoveredAdsPageLd,
@@ -33,7 +33,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const languages = languageAlternatesPrefixed(routeKey);
   const xDefault = withLocalePrefix("en", localizedSlug(routeKey, "en"));
   const ogLocale = ogLocaleOf(locale);
-  const ogImageUrl = await getEffectiveAdsImageUrl("health-alternative", "og", locale);
+  const ogImageUrl = await getEffectiveOgImageUrl("health-alternative", "ads", locale);
 
   return {
     title,
@@ -92,7 +92,7 @@ export default async function HealthAlternativeGetCoveredAdsPage() {
     tMeta("breadcrumbPage")
   );
 
-  const heroImageUrl = await getEffectiveAdsImageUrl("health-alternative", "hero", locale);
+  const heroMedia = await getEffectivePageMedia("health-alternative", "ads", "hero", locale);
 
   return (
     <div className="relative min-h-screen">
@@ -100,7 +100,7 @@ export default async function HealthAlternativeGetCoveredAdsPage() {
         serviceName="Health Coverage Alternative get covered"
         serviceCategory="health-alternative-get-covered-ads"
       />
-      <HealthAlternativeGetCoveredFunnel heroImageUrl={heroImageUrl} />
+      <HealthAlternativeGetCoveredFunnel heroMedia={heroMedia} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{

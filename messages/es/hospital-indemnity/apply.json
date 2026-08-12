@@ -1,0 +1,53 @@
+{
+  "hospitalIndemnityApply": {
+    "meta": {
+      "title": "Solicite cobertura de indemnización hospitalaria | Isaac Plans",
+      "description": "Comience su solicitud de indemnización hospitalaria en línea — dinero pagado directamente a usted si es hospitalizado. Segura, guiada y en solo unos minutos.",
+      "image": "https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_1200,h_630,c_fill,g_auto/pexels-rdne-6129237_vbgahf_1_gfwx1z",
+      "imageAlt": "Solicite cobertura de indemnización hospitalaria con Isaac Plans"
+    },
+    "hero": {
+      "badge": "Indemnización hospitalaria",
+      "title": "Dinero pagado a usted si termina en el hospital",
+      "subtitle": "Una hospitalización no debería acabar con sus ahorros. Comience su solicitud segura en línea — solo toma unos minutos."
+    },
+    "benefitsHeading": "¿Por qué solicitar con Isaac Plans?",
+    "benefits": [
+      {
+        "title": "El dinero se le paga a usted",
+        "desc": "Los beneficios se pagan a usted, no al hospital — usted decide en qué usarlos."
+      },
+      {
+        "title": "Úselo para lo que necesite",
+        "desc": "Cubra su deducible, la renta, la comida, el cuidado de sus hijos o los ingresos que pierda mientras se recupera."
+      },
+      {
+        "title": "Funciona junto con su plan de salud",
+        "desc": "Paga además de la cobertura que ya tenga, incluyendo un plan del mercado o de su empleador."
+      },
+      {
+        "title": "Apoyo bilingüe y licenciado",
+        "desc": "Obtenga ayuda en inglés o español de un asesor licenciado en cada paso."
+      }
+    ],
+    "howItWorksHeading": "Cómo solicitar",
+    "steps": [
+      {
+        "title": "Abra su solicitud segura",
+        "desc": "Toque Solicitar ahora y su solicitud privada se abre de inmediato — sin cuenta ni contraseña. Vuelva desde este dispositivo cuando quiera para continuar donde la dejó."
+      },
+      {
+        "title": "Complete el formulario seguro",
+        "desc": "Responda algunas preguntas guiadas sobre usted y quienes desea cubrir. Todo está encriptado y se guarda automáticamente mientras avanza."
+      },
+      {
+        "title": "Revisamos y nos comunicamos",
+        "desc": "Una vez que envíe su solicitud, la revisamos y nos comunicamos con usted para finalizar el monto del beneficio y la fecha de inicio."
+      }
+    ],
+    "secureNote": "Su información está encriptada y nunca se comparte. Este proceso es 100% seguro.",
+    "cta": "Solicitar ahora",
+    "ctaNote": "No necesita cuenta ni contraseña — su progreso se guarda automáticamente mientras avanza.",
+    "starting": "Iniciando su solicitud…"
+  }
+}

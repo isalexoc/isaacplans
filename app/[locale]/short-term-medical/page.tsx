@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
+import { getEffectivePageMedia, getEffectiveOgImageUrl } from "@/lib/page-media/settings";
 import ShortTermMedicalButton from "@/components/ShortTermMedicalButton";
 import { ShortTermMedicalCtaProvider } from "@/components/short-term-medical-cta-context";
 import { ShortTermEnrollmentBand } from "@/components/short-term-medical-enrollment-band";
@@ -18,6 +19,7 @@ import {
   type SupportedLocale,
 } from "@/lib/seo/i18n";
 import HeroWithTestimonialsGeneric from "@/components/hero-template";
+import LobApplyHeroButton from "@/components/lob-apply-hero-button";
 import AboutSectionGeneric from "@/components/about-section-template";
 import EligibilitySection from "@/components/eligibility-section";
 import FaqSection from "@/components/FaqSection";
@@ -54,6 +56,14 @@ export async function generateMetadata(): Promise<Metadata> {
   const xDefault = withLocalePrefix("en", localizedSlug(routeKey as any, "en"));
   const ogLocale = ogLocaleOf(locale);
 
+  // Admin-overridable social card (lib/page-media); falls back to the message-file image.
+  const ogImageUrl = await getEffectiveOgImageUrl(
+    "short-term-medical",
+    "main",
+    locale,
+    cloudinaryOgImageUrl(image)
+  );
+
   return {
     title,
     description,
@@ -70,13 +80,13 @@ export async function generateMetadata(): Promise<Metadata> {
       locale: ogLocale,
       alternateLocale: ogLocale === "en_US" ? ["es_ES"] : ["en_US"],
       type: "website",
-      images: [{ url: cloudinaryOgImageUrl(image), width: 1200, height: 630, alt }],
+      images: [{ url: ogImageUrl, width: 1200, height: 630, alt }],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: [{ url: cloudinaryOgImageUrl(image), alt }],
+      images: [{ url: ogImageUrl, alt }],
     },
   };
 }
@@ -87,6 +97,9 @@ export default async function ShortTermMedicalPage() {
     locale,
     namespace: "uhone.shortterm.templateContent.uhone.shortterm",
   });
+
+  // Admin-overridable hero — an image by default, a video once Isaac uploads one.
+  const heroMedia = await getEffectivePageMedia("short-term-medical", "main", "hero", locale);
 
   const tMeta = await getTranslations({
     locale,
@@ -119,8 +132,10 @@ export default async function ShortTermMedicalPage() {
         description={tem("hero.description")}
         imagePublicId="pexels-chokniti-khongchum-1197604-3938022_bujifm" /* your Cloudinary ID */
         imagePosition="left"
+        media={heroMedia}
         /* CTA area: keep your CTA button AND the exact UHOne snippet with an accessible name */
         cta={<ShortTermMedicalButton />}
+        ctaSecondary={<LobApplyHeroButton lob="short-term-medical" />}
         testimonials={[
           {
             name: tem("hero.testimonials.0.name"),

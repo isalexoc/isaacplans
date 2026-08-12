@@ -1,5 +1,7 @@
 import { getTranslations, getLocale } from "next-intl/server";
+import { getEffectivePageMedia, getEffectiveOgImageUrl } from "@/lib/page-media/settings";
 import HeroWithTestimonials from "@/components/hero-template";
+import LobApplyHeroButton from "@/components/lob-apply-hero-button";
 import DentalButton from "@/components/DentalButton";
 import AboutSection from "@/components/about-section-template";
 import PlanEnrollCard from "@/components/SelfEnrollSection";
@@ -47,6 +49,14 @@ export async function generateMetadata(): Promise<Metadata> {
   const xDefault = withLocalePrefix("en", localizedSlug(routeKey, "en")); // ✅ English page
   const ogLocale = ogLocaleOf(locale);
 
+  // Admin-overridable social card (lib/page-media); falls back to the message-file image.
+  const ogImageUrl = await getEffectiveOgImageUrl(
+    "dental-vision",
+    "main",
+    locale,
+    cloudinaryOgImageUrl(image)
+  );
+
   return {
     title,
     description,
@@ -63,13 +73,13 @@ export async function generateMetadata(): Promise<Metadata> {
       locale: ogLocale,
       alternateLocale: ogLocale === "en_US" ? ["es_ES"] : ["en_US"],
       type: "website",
-      images: [{ url: cloudinaryOgImageUrl(image), width: 1200, height: 630, alt }],
+      images: [{ url: ogImageUrl, width: 1200, height: 630, alt }],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: [{ url: cloudinaryOgImageUrl(image), alt }],
+      images: [{ url: ogImageUrl, alt }],
     },
     // robots omitted → defaults to index, follow
   };
@@ -88,6 +98,9 @@ export default async function DentalVisionPage() {
     locale,
     namespace: "dentalVisionPage",
   });
+
+  // Admin-overridable hero — an image by default, a video once Isaac uploads one.
+  const heroMedia = await getEffectivePageMedia("dental-vision", "main", "hero", locale);
 
   /* Shortcuts */
   const t = trans;
@@ -126,7 +139,9 @@ export default async function DentalVisionPage() {
         description={t("hero.description")}
         imagePublicId="tmp48ylol1v_1_ig0hto"
         imagePosition="left"
+        media={heroMedia}
         cta={<DentalButton />}
+        ctaSecondary={<LobApplyHeroButton lob="dental-vision" />}
         testimonials={[testimonial(t, 0)]}
         happyClient={{
           title: t("hero.happyClient.title"),

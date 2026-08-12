@@ -1,0 +1,53 @@
+{
+  "shortTermMedicalApply": {
+    "meta": {
+      "title": "Apply for Short Term Medical Coverage | Isaac Plans",
+      "description": "Start your short term medical application online — coverage can begin in days, not months. Secure, guided, and only a few minutes.",
+      "image": "https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_1200,h_630,c_fill,g_auto/pexels-chokniti-khongchum-1197604-3938022_bujifm",
+      "imageAlt": "Apply for short term medical coverage with Isaac Plans"
+    },
+    "hero": {
+      "badge": "Short Term Medical",
+      "title": "Coverage that can start in days, not months",
+      "subtitle": "Bridge the gap between jobs, plans, or enrollment periods. Start your secure application online — it only takes a few minutes."
+    },
+    "benefitsHeading": "Why apply with Isaac Plans?",
+    "benefits": [
+      {
+        "title": "Coverage without the wait",
+        "desc": "You don't need an open enrollment period. Apply today and your plan can begin within days."
+      },
+      {
+        "title": "Choose how long you need it",
+        "desc": "Pick a term that matches your gap — from a single month up to the maximum your state allows."
+      },
+      {
+        "title": "Large provider networks",
+        "desc": "Most plans use nationwide PPO networks, so you can keep seeing doctors close to home."
+      },
+      {
+        "title": "Bilingual, licensed support",
+        "desc": "Get help in English or Spanish from a licensed advisor at every step."
+      }
+    ],
+    "howItWorksHeading": "How to apply",
+    "steps": [
+      {
+        "title": "Open your secure application",
+        "desc": "Tap Apply now and your private application opens immediately — no account, no password. Come back on this device anytime to pick up where you left off."
+      },
+      {
+        "title": "Fill out the secure form",
+        "desc": "Answer a few guided questions about you and anyone else you want covered. Everything is encrypted and saves automatically as you go."
+      },
+      {
+        "title": "We review and reach out",
+        "desc": "Once you submit, we review your application and contact you to confirm your start date and finalize your plan."
+      }
+    ],
+    "secureNote": "Your information is encrypted and never shared. This process is 100% secure.",
+    "cta": "Apply now",
+    "ctaNote": "No account or password needed — your progress saves automatically as you go.",
+    "starting": "Starting your application…"
+  }
+}

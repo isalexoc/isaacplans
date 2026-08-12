@@ -218,6 +218,13 @@
       "when": 1786483045389,
       "tag": "0030_uneven_rattler",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "5",
+      "when": 1786496433577,
+      "tag": "0031_lumpy_mentor",
+      "breakpoints": true
     }
   ]
 }

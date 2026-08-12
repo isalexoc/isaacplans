@@ -1,5 +1,6 @@
-import Image from "next/image";
 import clsx from "clsx";
+import HeroMedia from "@/components/media/hero-media";
+import type { HeroMedia as HeroMediaValue } from "@/lib/page-media/shared";
 
 type Testimonial = {
   name: string;
@@ -17,6 +18,12 @@ interface HeroWithTestimonialsProps {
   title: string;
   description: string;
   imagePublicId: string;
+  /**
+   * Admin-editable hero media (lib/page-media). When set it replaces the `imagePublicId` visual
+   * and may be a video. Left optional so the six `[state]` pages that share this component keep
+   * working untouched — they pass a public id and nothing else.
+   */
+  media?: HeroMediaValue;
   /** "left" = image left on desktop */
   imagePosition?: "left" | "right";
   /** Pass any JSX (button, link, etc.) */
@@ -33,6 +40,7 @@ const HeroWithTestimonialsGeneric: React.FC<HeroWithTestimonialsProps> = ({
   title,
   description,
   imagePublicId,
+  media,
   imagePosition = "right",
   cta,
   ctaSecondary,
@@ -40,6 +48,9 @@ const HeroWithTestimonialsGeneric: React.FC<HeroWithTestimonialsProps> = ({
   happyClient,
 }) => {
   const imageUrl = `https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_800,c_fill,g_auto/${imagePublicId}.webp`;
+  // Fall back to the public id when no override was passed, so nothing changes for the callers
+  // that never adopted the media system.
+  const heroMedia: HeroMediaValue = media ?? { type: "image", url: imageUrl };
   const isImageLeft = imagePosition === "left";
 
   return (
@@ -82,13 +93,11 @@ const HeroWithTestimonialsGeneric: React.FC<HeroWithTestimonialsProps> = ({
             {/* Mobile image */}
             <div className="relative mx-auto my-6 block aspect-[4/3] w-full max-w-xl sm:max-w-2xl lg:hidden">
               <div className="-z-10 absolute inset-0 rounded-2xl bg-gradient-to-br from-[hsl(var(--custom)/0.2)] to-transparent opacity-50 blur-2xl dark:from-[hsl(var(--custom)/0.14)] dark:opacity-40" />
-              <Image
-                src={imageUrl}
+              <HeroMedia
+                media={heroMedia}
                 alt={title || "Hero Visual"}
-                fill
                 className="object-contain rounded-2xl"
                 priority
-                fetchPriority="high"
               />
             </div>
             <span className="block mt-2">{title}</span>
@@ -114,13 +123,11 @@ const HeroWithTestimonialsGeneric: React.FC<HeroWithTestimonialsProps> = ({
 
           <div className="relative h-full w-full">
             <div className="absolute -inset-4 rounded-3xl bg-gradient-to-br from-[hsl(var(--custom)/0.3)] to-transparent opacity-50 blur-2xl dark:from-[hsl(var(--custom)/0.15)] dark:opacity-35" />
-            <Image
-              src={imageUrl}
+            <HeroMedia
+              media={heroMedia}
               alt={title || "Hero Visual"}
-              fill
               className="rounded-3xl border-4 border-white/50 object-contain shadow-2xl dark:border-gray-700/80"
               priority
-              fetchPriority="high"
             />
           </div>
 
