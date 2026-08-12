@@ -28,7 +28,19 @@ export type VideoPlayback = "loop" | "click";
  */
 export type HeroMedia =
   | { type: "image"; url: string }
-  | { type: "video"; url: string; posterUrl: string; playback: VideoPlayback };
+  | {
+      type: "video";
+      url: string;
+      /** Still shown before playback — the video's own first frame, or an image Isaac chose. */
+      posterUrl: string;
+      /**
+       * True when `posterUrl` is an uploaded image rather than the auto-extracted first frame.
+       * Uploading a NEW video resets this: a poster belongs to the clip it introduces, and
+       * silently keeping the previous one would leave a still that no longer matches.
+       */
+      posterCustom?: boolean;
+      playback: VideoPlayback;
+    };
 
 export const MEDIA_SURFACES: MediaSurface[] = ["main", "apply", "ads"];
 export const MEDIA_KINDS: MediaKind[] = ["hero", "og"];

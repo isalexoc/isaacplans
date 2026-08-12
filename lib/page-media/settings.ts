@@ -64,6 +64,7 @@ export function serializeMedia(media: HeroMedia): string {
     t: "video",
     url: media.url,
     poster: media.posterUrl,
+    posterCustom: media.posterCustom ? true : undefined,
     play: media.playback,
   });
 }
@@ -79,6 +80,7 @@ export function parseMedia(raw: string | null | undefined): HeroMedia | null {
         t?: string;
         url?: string;
         poster?: string;
+        posterCustom?: boolean;
         play?: string;
       };
       if (parsed.t === "video" && parsed.url && isAllowedCloudinaryUrl(parsed.url)) {
@@ -86,6 +88,7 @@ export function parseMedia(raw: string | null | undefined): HeroMedia | null {
           type: "video",
           url: parsed.url,
           posterUrl: parsed.poster && isAllowedCloudinaryUrl(parsed.poster) ? parsed.poster : "",
+          posterCustom: parsed.posterCustom === true,
           playback: parsed.play === "click" ? "click" : "loop",
         };
       }

@@ -1,6 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
-import { setPageMedia } from "@/lib/page-media/settings";
+import { getPageMediaForAdmin, setPageMedia } from "@/lib/page-media/settings";
 import {
   isAllowedCloudinaryUrl,
   isVideoUrl,
@@ -77,6 +77,8 @@ export async function POST(request: Request) {
       );
     }
     const publicId = body.publicId.trim();
+    // A brand-new clip always starts on its own auto-extracted first frame. Carrying over the
+    // previous custom poster would leave a still advertising a video that is no longer there.
     media = {
       type: "video",
       url: videoUrl(publicId),
@@ -103,13 +105,20 @@ export async function POST(request: Request) {
       }
       // Recover the public id so a pasted URL still gets a poster frame; without one the video
       // shows a black rectangle until the first frame decodes.
+      // Toggling playback re-saves the same URL, so keep whatever poster is already attached —
+      // otherwise flipping "click to play" would silently throw away a chosen poster.
+      const rows = await getPageMediaForAdmin();
+      const current = rows.find(
+        (r) => r.lob === lob && r.surface === surface && r.kind === kind && r.locale === locale
+      )?.override;
+      const keepPoster =
+        current?.type === "video" && current.url === url && current.posterCustom
+          ? { posterUrl: current.posterUrl, posterCustom: true as const }
+          : null;
       const publicId = publicIdFromUrl(url);
-      media = {
-        type: "video",
-        url,
-        posterUrl: publicId ? videoPosterUrl(publicId) : "",
-        playback,
-      };
+      media = keepPoster
+        ? { type: "video", url, ...keepPoster, playback }
+        : { type: "video", url, posterUrl: publicId ? videoPosterUrl(publicId) : "", playback };
     } else {
       media = { type: "image", url };
     }

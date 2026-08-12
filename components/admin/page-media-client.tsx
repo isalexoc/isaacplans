@@ -6,6 +6,8 @@ import {
   Film,
   Image as ImageIcon,
   Loader2,
+  Play,
+  Repeat,
   RotateCcw,
   UploadCloud,
 } from "lucide-react";
@@ -33,7 +35,6 @@ import {
   type HeroMedia,
   type LobSlug,
   type MediaKind,
-  type MediaLocale,
   type MediaSurface,
   type PageMediaRow,
   type VideoPlayback,
@@ -42,37 +43,44 @@ import {
 const ACCEPTED_IMAGE = "image/jpeg,image/png,image/webp";
 const ACCEPTED_VIDEO = "video/mp4,video/quicktime,video/webm";
 
-const LOCALE_LABEL: Record<MediaLocale, string> = { en: "English", es: "Spanish" };
+const LOCALE_LABEL = { en: "English", es: "Spanish" } as const;
 
 type Status = { type: "idle" } | { type: "ok"; msg: string } | { type: "error"; msg: string };
 
-/** Cell key — stable across renders, used for React keys and input ids. */
 const cellId = (r: PageMediaRow) => `${r.lob}-${r.surface}-${r.kind}-${r.locale}`;
+
+/**
+ * Filename at the end of a Cloudinary URL, for showing WHICH asset is in use. Without this the
+ * card can only show a picture, and one still frame looks much like another.
+ */
+function assetName(url: string): string {
+  const last = url.split("?")[0].split("/").pop() ?? "";
+  return last.replace(/\.[a-z0-9]+$/i, "") || url;
+}
 
 function MediaEditor({ row }: { row: PageMediaRow }) {
   const [media, setMedia] = useState<HeroMedia | null>(row.override);
   const [status, setStatus] = useState<Status>({ type: "idle" });
   const [busy, setBusy] = useState<"idle" | "compressing" | "uploading">("idle");
   const [progress, setProgress] = useState(0);
-  const [dragOver, setDragOver] = useState(false);
   const [urlInput, setUrlInput] = useState("");
   const [pending, startTransition] = useTransition();
 
   const imageInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
+  const posterInputRef = useRef<HTMLInputElement>(null);
 
   const working = busy !== "idle" || pending;
   const usingDefault = media === null;
-  // Only heroes accept video — a link preview can't play one.
+  const isVideo = media?.type === "video";
   const videoAllowed = row.kind === "hero";
-  const previewUrl = media
-    ? media.type === "video"
-      ? media.posterUrl || row.defaultUrl
-      : media.url
-    : row.defaultUrl;
+
+  // Ads heroes sit in a tall desktop panel; everything else is a wide slot.
+  const aspect =
+    row.kind === "og" ? "aspect-[1200/630]" : row.surface === "ads" ? "aspect-[3/4]" : "aspect-video";
 
   /** Images go through our server (transform injection + compression); videos never can. */
-  async function uploadImage(file: File) {
+  async function uploadImage(file: File, asPoster: boolean) {
     setStatus({ type: "idle" });
     setBusy("compressing");
     try {
@@ -91,12 +99,16 @@ function MediaEditor({ row }: { row: PageMediaRow }) {
       form.append("surface", row.surface);
       form.append("kind", row.kind);
       form.append("locale", row.locale);
+      if (asPoster) form.append("target", "poster");
 
       const res = await fetch("/api/admin/page-media/upload", { method: "POST", body: form });
-      const data: { success: boolean; url?: string; error?: string } = await res.json();
-      if (data.success && data.url) {
-        setMedia({ type: "image", url: data.url });
-        setStatus({ type: "ok", msg: "Uploaded. The live page now uses this image." });
+      const data: { success: boolean; media?: HeroMedia; error?: string } = await res.json();
+      if (data.success && data.media) {
+        setMedia(data.media);
+        setStatus({
+          type: "ok",
+          msg: asPoster ? "Poster updated. It shows before the video plays." : "Uploaded. The live page now uses this image.",
+        });
       } else {
         setStatus({ type: "error", msg: data.error ?? "Upload failed." });
       }
@@ -163,7 +175,7 @@ function MediaEditor({ row }: { row: PageMediaRow }) {
           kind: row.kind,
           locale: row.locale,
           publicId,
-          playback: media?.type === "video" ? media.playback : "loop",
+          playback: isVideo ? (media as Extract<HeroMedia, { type: "video" }>).playback : "loop",
         }),
       });
       const saved = await saveRes.json();
@@ -195,7 +207,7 @@ function MediaEditor({ row }: { row: PageMediaRow }) {
           kind: row.kind,
           locale: row.locale,
           url: urlInput.trim(),
-          playback: media?.type === "video" ? media.playback : "loop",
+          playback: isVideo ? (media as Extract<HeroMedia, { type: "video" }>).playback : "loop",
         }),
       });
       const data = await res.json();
@@ -213,8 +225,8 @@ function MediaEditor({ row }: { row: PageMediaRow }) {
 
   function setPlayback(playback: VideoPlayback) {
     if (media?.type !== "video") return;
-    const next = { ...media, playback };
-    setMedia(next);
+    const optimistic = { ...media, playback };
+    setMedia(optimistic);
     setStatus({ type: "idle" });
     startTransition(async () => {
       const res = await fetch("/api/admin/page-media/save", {
@@ -225,16 +237,20 @@ function MediaEditor({ row }: { row: PageMediaRow }) {
           surface: row.surface,
           kind: row.kind,
           locale: row.locale,
-          url: next.url,
+          url: optimistic.url,
           playback,
         }),
       });
       const data = await res.json();
-      setStatus(
-        data.success
-          ? { type: "ok", msg: playback === "loop" ? "Now loops silently in the background." : "Now shows a play button." }
-          : { type: "error", msg: data.error ?? "Could not save." }
-      );
+      if (data.success) {
+        setMedia(data.media as HeroMedia);
+        setStatus({
+          type: "ok",
+          msg: playback === "loop" ? "Now loops silently in the background." : "Now shows a play button.",
+        });
+      } else {
+        setStatus({ type: "error", msg: data.error ?? "Could not save." });
+      }
     });
   }
 
@@ -251,24 +267,34 @@ function MediaEditor({ row }: { row: PageMediaRow }) {
     });
   }
 
-  // Ads heroes sit in a tall desktop panel; everything else is a wide slot.
-  const aspect =
-    row.kind === "og" ? "aspect-[1200/630]" : row.surface === "ads" ? "aspect-[3/4]" : "aspect-video";
+  const summary = usingDefault
+    ? "Built-in default"
+    : isVideo
+      ? `Video — ${(media as Extract<HeroMedia, { type: "video" }>).playback === "loop" ? "background loop" : "click to play"}`
+      : "Custom image";
 
   return (
     <Card>
       <CardHeader className="pb-3">
-        <CardTitle className="text-sm">{LOCALE_LABEL[row.locale]}</CardTitle>
-        <CardDescription>
-          {media
-            ? media.type === "video"
-              ? `A custom video is active (${media.playback === "loop" ? "background loop" : "click to play"}).`
-              : "A custom image is currently active."
-            : "Currently showing the built-in default."}
-        </CardDescription>
+        <div className="flex items-center justify-between gap-2">
+          <CardTitle className="text-sm">{LOCALE_LABEL[row.locale]}</CardTitle>
+          <span
+            className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium ${
+              usingDefault
+                ? "bg-muted text-muted-foreground"
+                : isVideo
+                  ? "bg-purple-100 text-purple-700 dark:bg-purple-950 dark:text-purple-300"
+                  : "bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300"
+            }`}
+          >
+            {isVideo ? <Film className="h-3 w-3" /> : <ImageIcon className="h-3 w-3" />}
+            {summary}
+          </span>
+        </div>
+        <CardDescription>{KIND_LABELS[row.kind]}</CardDescription>
       </CardHeader>
 
-      <CardContent className="space-y-3">
+      <CardContent className="space-y-4">
         <input
           ref={imageInputRef}
           type="file"
@@ -277,7 +303,19 @@ function MediaEditor({ row }: { row: PageMediaRow }) {
           disabled={working}
           onChange={(e) => {
             const f = e.target.files?.[0];
-            if (f) void uploadImage(f);
+            if (f) void uploadImage(f, false);
+            e.target.value = "";
+          }}
+        />
+        <input
+          ref={posterInputRef}
+          type="file"
+          accept={ACCEPTED_IMAGE}
+          className="hidden"
+          disabled={working}
+          onChange={(e) => {
+            const f = e.target.files?.[0];
+            if (f) void uploadImage(f, true);
             e.target.value = "";
           }}
         />
@@ -294,114 +332,143 @@ function MediaEditor({ row }: { row: PageMediaRow }) {
           }}
         />
 
-        <button
-          type="button"
-          onClick={() => imageInputRef.current?.click()}
-          onDragOver={(e) => {
-            e.preventDefault();
-            if (!working) setDragOver(true);
-          }}
-          onDragLeave={() => setDragOver(false)}
-          onDrop={(e) => {
-            e.preventDefault();
-            setDragOver(false);
-            const f = e.dataTransfer.files?.[0];
-            if (!f || working) return;
-            if (f.type.startsWith("video/") && videoAllowed) void uploadVideo(f);
-            else void uploadImage(f);
-          }}
-          disabled={working}
-          className={`group relative ${aspect} w-full max-w-[280px] overflow-hidden rounded-lg border-2 bg-muted text-left transition-colors disabled:cursor-wait ${
-            dragOver ? "border-primary" : "border-dashed border-muted-foreground/30 hover:border-primary/60"
-          }`}
-        >
-          {/* Plain img — the preview may be any Cloudinary URL, including a video poster frame. */}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={previewUrl} alt="Preview" className="h-full w-full object-cover object-center" />
-          <span className="absolute left-1 top-1 inline-flex items-center gap-1 rounded bg-black/70 px-1.5 py-0.5 text-[10px] font-medium text-white">
-            {media?.type === "video" ? <Film className="h-3 w-3" /> : null}
-            {usingDefault ? "Default" : media?.type === "video" ? "Video" : "Custom"}
-          </span>
-          <div
-            className={`absolute inset-0 flex flex-col items-center justify-center gap-1.5 bg-black/60 text-white opacity-0 transition-opacity group-hover:opacity-100 ${
-              dragOver || working ? "opacity-100" : ""
-            }`}
-          >
-            {working ? (
-              <>
+        {/* ── What the live page is showing right now ── */}
+        <section>
+          <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+            On the live page
+          </p>
+          <div className={`relative ${aspect} w-full max-w-[300px] overflow-hidden rounded-lg border bg-muted`}>
+            {isVideo ? (
+              // The real video, playable right here — the only way to be sure which clip is live.
+              <video
+                key={(media as Extract<HeroMedia, { type: "video" }>).url}
+                src={(media as Extract<HeroMedia, { type: "video" }>).url}
+                poster={(media as Extract<HeroMedia, { type: "video" }>).posterUrl || undefined}
+                controls
+                muted
+                playsInline
+                preload="metadata"
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={usingDefault ? row.defaultUrl : (media as Extract<HeroMedia, { type: "image" }>).url}
+                alt="Current"
+                className="h-full w-full object-cover object-center"
+              />
+            )}
+            {working && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 bg-black/60 text-white">
                 <Loader2 className="h-6 w-6 animate-spin" />
                 <span className="text-xs font-medium">
-                  {busy === "compressing"
-                    ? "Preparing…"
-                    : progress > 0
-                      ? `Uploading ${progress}%`
-                      : "Uploading…"}
+                  {busy === "compressing" ? "Preparing…" : progress > 0 ? `Uploading ${progress}%` : "Saving…"}
                 </span>
-              </>
-            ) : (
-              <>
-                <UploadCloud className="h-6 w-6" />
-                <span className="text-xs font-medium">Click or drag to replace</span>
-              </>
+              </div>
             )}
           </div>
-        </button>
+          <p className="mt-1 break-all font-mono text-[10px] text-muted-foreground">
+            {assetName(
+              usingDefault
+                ? row.defaultUrl
+                : isVideo
+                  ? (media as Extract<HeroMedia, { type: "video" }>).url
+                  : (media as Extract<HeroMedia, { type: "image" }>).url
+            )}
+          </p>
+        </section>
 
+        {/* ── The still shown before a video plays ── */}
+        {isVideo && (
+          <section className="rounded-md border bg-muted/40 p-3">
+            <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+              Poster image
+              <span className="ml-1.5 font-normal normal-case tracking-normal">
+                {(media as Extract<HeroMedia, { type: "video" }>).posterCustom
+                  ? "· your upload"
+                  : "· auto, first frame of the video"}
+              </span>
+            </p>
+            <div className="flex items-start gap-3">
+              <div className={`relative ${aspect} w-24 shrink-0 overflow-hidden rounded border bg-background`}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={(media as Extract<HeroMedia, { type: "video" }>).posterUrl || row.defaultUrl}
+                  alt="Poster"
+                  className="h-full w-full object-cover object-center"
+                />
+              </div>
+              <div className="min-w-0 space-y-1.5">
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  disabled={working}
+                  onClick={() => posterInputRef.current?.click()}
+                >
+                  <ImageIcon className="mr-1.5 h-4 w-4" /> Upload poster
+                </Button>
+                <p className="break-all font-mono text-[10px] text-muted-foreground">
+                  {assetName((media as Extract<HeroMedia, { type: "video" }>).posterUrl)}
+                </p>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* ── Playback mode ── */}
+        {isVideo && (
+          <section className="rounded-md border bg-muted/40 p-3">
+            <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+              How it plays
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                type="button"
+                size="sm"
+                variant={(media as Extract<HeroMedia, { type: "video" }>).playback === "loop" ? "default" : "outline"}
+                disabled={working}
+                onClick={() => setPlayback("loop")}
+              >
+                <Repeat className="mr-1.5 h-4 w-4" /> Background loop
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant={(media as Extract<HeroMedia, { type: "video" }>).playback === "click" ? "default" : "outline"}
+                disabled={working}
+                onClick={() => setPlayback("click")}
+              >
+                <Play className="mr-1.5 h-4 w-4" /> Click to play
+              </Button>
+            </div>
+            <p className="mt-1.5 text-[11px] text-muted-foreground">
+              {(media as Extract<HeroMedia, { type: "video" }>).playback === "loop"
+                ? "Plays automatically, silent, on repeat — behaves like the photo it replaced. The poster is only a fallback here."
+                : "Shows the poster with an animated play button; plays with sound when clicked. Best for talking-head videos."}
+            </p>
+          </section>
+        )}
+
+        {/* ── Actions ── */}
         <div className="flex flex-wrap gap-2">
           <Button type="button" size="sm" variant="outline" disabled={working} onClick={() => imageInputRef.current?.click()}>
-            <ImageIcon className="mr-1.5 h-4 w-4" /> Upload image
+            <UploadCloud className="mr-1.5 h-4 w-4" /> {isVideo ? "Replace with image" : "Upload image"}
           </Button>
           {videoAllowed && (
             <Button type="button" size="sm" variant="outline" disabled={working} onClick={() => videoInputRef.current?.click()}>
-              <Film className="mr-1.5 h-4 w-4" /> Upload video
+              <Film className="mr-1.5 h-4 w-4" /> {isVideo ? "Replace video" : "Upload video"}
             </Button>
           )}
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            onClick={resetToDefault}
-            disabled={working || usingDefault}
-          >
+          <Button type="button" size="sm" variant="outline" onClick={resetToDefault} disabled={working || usingDefault}>
             {pending ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <RotateCcw className="mr-1.5 h-4 w-4" />}
             Use default
           </Button>
         </div>
 
-        {media?.type === "video" && (
-          <div className="rounded-md border bg-muted/40 p-2.5">
-            <p className="mb-1.5 text-xs font-medium">How should it play?</p>
-            <div className="flex flex-wrap gap-2">
-              <Button
-                type="button"
-                size="sm"
-                variant={media.playback === "loop" ? "default" : "outline"}
-                disabled={working}
-                onClick={() => setPlayback("loop")}
-              >
-                Background loop
-              </Button>
-              <Button
-                type="button"
-                size="sm"
-                variant={media.playback === "click" ? "default" : "outline"}
-                disabled={working}
-                onClick={() => setPlayback("click")}
-              >
-                Click to play
-              </Button>
-            </div>
-            <p className="mt-1.5 text-[11px] text-muted-foreground">
-              {media.playback === "loop"
-                ? "Plays automatically, silent, on repeat — behaves like the photo it replaced."
-                : "Shows the first frame with a play button; plays with sound when clicked. Best for talking-head videos."}
-            </p>
-          </div>
-        )}
-
         <p className="text-xs text-muted-foreground">
           {videoAllowed
-            ? "JPEG, PNG or WebP for images; MP4, MOV or WebM for video. Large photos are compressed automatically."
+            ? "JPEG, PNG or WebP for images; MP4, MOV or WebM for video. Uploading a new video resets the poster to its first frame."
             : "JPEG, PNG or WebP. Standard social card size is 1200×630."}
         </p>
 
@@ -479,6 +546,13 @@ export default function PageMediaClient({ settings }: { settings: PageMediaRow[]
     return map;
   }, [settings]);
 
+  /** Lines that have at least one override, so the tabs show where something is customized. */
+  const customized = useMemo(() => {
+    const set = new Set<LobSlug>();
+    for (const row of settings) if (row.override) set.add(row.lob);
+    return set;
+  }, [settings]);
+
   return (
     <div className="mx-auto max-w-5xl px-4 py-8">
       <div className="mb-6 flex items-center gap-3">
@@ -497,8 +571,11 @@ export default function PageMediaClient({ settings }: { settings: PageMediaRow[]
       <Tabs defaultValue={LOB_SLUGS[0]}>
         <TabsList className="flex-wrap">
           {LOB_SLUGS.map((lob) => (
-            <TabsTrigger key={lob} value={lob}>
+            <TabsTrigger key={lob} value={lob} className="gap-1.5">
               {LOBS[lob].label}
+              {customized.has(lob) && (
+                <span className="inline-block h-1.5 w-1.5 rounded-full bg-primary" title="Has custom media" />
+              )}
             </TabsTrigger>
           ))}
         </TabsList>
@@ -510,11 +587,17 @@ export default function PageMediaClient({ settings }: { settings: PageMediaRow[]
             <TabsContent key={lob} value={lob} className="mt-6">
               <Tabs defaultValue={surfaces[0]}>
                 <TabsList>
-                  {surfaces.map((surface) => (
-                    <TabsTrigger key={surface} value={surface}>
-                      {SURFACE_LABELS[surface]}
-                    </TabsTrigger>
-                  ))}
+                  {surfaces.map((surface) => {
+                    const hasCustom = rows.some((r) => r.surface === surface && r.override);
+                    return (
+                      <TabsTrigger key={surface} value={surface} className="gap-1.5">
+                        {SURFACE_LABELS[surface]}
+                        {hasCustom && (
+                          <span className="inline-block h-1.5 w-1.5 rounded-full bg-primary" title="Has custom media" />
+                        )}
+                      </TabsTrigger>
+                    );
+                  })}
                 </TabsList>
                 {surfaces.map((surface) => (
                   <TabsContent key={surface} value={surface} className="mt-6">

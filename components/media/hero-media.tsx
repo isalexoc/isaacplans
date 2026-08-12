@@ -1,4 +1,5 @@
 import Image from "next/image";
+import HeroVideoPlayer from "@/components/media/hero-video-player";
 import type { HeroMedia as HeroMediaValue } from "@/lib/page-media/shared";
 
 /**
@@ -47,15 +48,14 @@ export default function HeroMedia({
 
   if (media.playback === "click") {
     return (
-      <video
-        className={videoBase}
-        poster={media.posterUrl || undefined}
-        controls
-        playsInline
-        preload="metadata"
-      >
-        <source src={media.url} type="video/mp4" />
-      </video>
+      <HeroVideoPlayer
+        src={media.url}
+        posterUrl={media.posterUrl}
+        alt={alt}
+        className={className}
+        sizes={sizes}
+        priority={priority}
+      />
     );
   }
 

@@ -1,10 +1,11 @@
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import cloudinary from "@/config/cloudinary";
-import { setPageMedia } from "@/lib/page-media/settings";
+import { getPageMediaForAdmin, setPageMedia } from "@/lib/page-media/settings";
 import {
   HERO_IMAGE_TRANSFORM,
   OG_IMAGE_TRANSFORM,
+  POSTER_IMAGE_TRANSFORM,
   withTransform,
 } from "@/lib/page-media/cloudinary-urls";
 import { LOB_SLUGS, MEDIA_KINDS, MEDIA_LOCALES, MEDIA_SURFACES } from "@/lib/page-media/shared";
@@ -44,6 +45,8 @@ export async function POST(request: Request) {
   const surface = String(formData.get("surface") ?? "") as MediaSurface;
   const kind = String(formData.get("kind") ?? "") as MediaKind;
   const locale = String(formData.get("locale") ?? "") as MediaLocale;
+  // "poster" means: keep the video that is already set, just replace the still shown before play.
+  const asPoster = String(formData.get("target") ?? "") === "poster";
 
   if (!(file instanceof File)) {
     return NextResponse.json({ success: false, error: "No file provided" }, { status: 400 });
@@ -96,18 +99,40 @@ export async function POST(request: Request) {
       stream.end(buffer);
     });
 
-    const url = withTransform(
-      uploadResult.secure_url,
-      kind === "hero" ? HERO_IMAGE_TRANSFORM : OG_IMAGE_TRANSFORM,
-      "image"
-    );
+    const transform = asPoster
+      ? POSTER_IMAGE_TRANSFORM
+      : kind === "hero"
+        ? HERO_IMAGE_TRANSFORM
+        : OG_IMAGE_TRANSFORM;
+    const url = withTransform(uploadResult.secure_url, transform, "image");
+
+    if (asPoster) {
+      // Attach to the existing video rather than replacing it. If there is no video set, there is
+      // nothing for a poster to introduce — say so instead of silently discarding the upload.
+      const rows = await getPageMediaForAdmin();
+      const current = rows.find(
+        (r) => r.lob === lob && r.surface === surface && r.kind === kind && r.locale === locale
+      )?.override;
+      if (current?.type !== "video") {
+        return NextResponse.json(
+          { success: false, error: "Upload a video first — a poster is the still shown before it plays." },
+          { status: 400 }
+        );
+      }
+      const media = { ...current, posterUrl: url, posterCustom: true } as const;
+      const savedPoster = await setPageMedia(lob, surface, kind, locale, media);
+      if (!savedPoster.ok) {
+        return NextResponse.json({ success: false, error: savedPoster.error }, { status: 500 });
+      }
+      return NextResponse.json({ success: true, url, media });
+    }
 
     const saved = await setPageMedia(lob, surface, kind, locale, { type: "image", url });
     if (!saved.ok) {
       return NextResponse.json({ success: false, error: saved.error }, { status: 500 });
     }
 
-    return NextResponse.json({ success: true, url });
+    return NextResponse.json({ success: true, url, media: { type: "image", url } });
   } catch (error) {
     console.error("[page-media/upload]", error);
     return NextResponse.json({ success: false, error: "Failed to upload image" }, { status: 500 });

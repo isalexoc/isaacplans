@@ -13,17 +13,28 @@ const CLOUD = "https://res.cloudinary.com/isaacdev";
 
 /** Hero: cap the width, let `f_auto,q_auto` pick format and compression. No forced crop — the
  *  page's own `object-cover` frames it, so one upload works in both the tall ads panel and the
- *  16:9 apply slot. */
+ *  16:9 apply slot. `c_limit` never upscales a smaller original. */
 export const HERO_IMAGE_TRANSFORM = "f_auto,q_auto,w_1600,c_limit";
+
+/** An uploaded poster is just a hero-sized still, so it takes the same treatment. */
+export const POSTER_IMAGE_TRANSFORM = HERO_IMAGE_TRANSFORM;
 
 /** Social card: smart-cropped to the ratio Facebook and iMessage expect. */
 export const OG_IMAGE_TRANSFORM = "f_auto,q_auto,w_1200,h_630,c_fill,g_auto";
 
-/** Video: width-capped, auto codec/quality. */
-export const HERO_VIDEO_TRANSFORM = "f_auto,q_auto,w_1280";
+/**
+ * Video: `f_auto` picks the container, `vc_auto` the codec (so modern browsers get VP9/AV1 and
+ * older ones still get H.264), `q_auto` the bitrate, and `c_limit` never upscales a phone-shot
+ * clip to 1280 and pay for pixels that were never there.
+ */
+export const HERO_VIDEO_TRANSFORM = "f_auto,q_auto,vc_auto,w_1280,c_limit";
 
-/** Poster frame pulled from the first frame of the video (`so_0` = start offset zero). */
-export const VIDEO_POSTER_TRANSFORM = "so_0,f_jpg,q_auto,w_1280";
+/**
+ * Auto poster: the video's own first frame (`so_0` = start offset zero). `f_auto` rather than a
+ * hardcoded `f_jpg` so browsers that accept WebP/AVIF get the smaller one — this image is fetched
+ * raw by the `poster` attribute, outside next/image, so the format choice is ours to make.
+ */
+export const VIDEO_POSTER_TRANSFORM = "so_0,f_auto,q_auto,w_1600,c_limit";
 
 /** Inject a transform into a `secure_url` Cloudinary handed back at upload time. */
 export function withTransform(secureUrl: string, transform: string, resource: "image" | "video") {
