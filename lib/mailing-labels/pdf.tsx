@@ -2,7 +2,8 @@ import "server-only";
 import { renderToBuffer, Document, Page, View, Text, Image, Font } from "@react-pdf/renderer";
 import type { DocumentProps } from "@react-pdf/renderer";
 import type { ReactElement } from "react";
-import { formatAddressBlock, resolveTagline, senderNameLines, uspsLine } from "./format";
+import { formatAddressBlock, resolveTagline } from "./format";
+import { shippingLayout } from "./layout";
 import { fitFontSize } from "./metrics";
 import {
   clampStartOffset,
@@ -286,10 +287,8 @@ function ShippingLabelBody({
   logo: Buffer | null;
 }) {
   const scale = SHIPPING_TYPE_SCALE[preset.id as keyof typeof SHIPPING_TYPE_SCALE];
-  const from = formatAddressBlock(sender);
-  const to = formatAddressBlock(record);
-  const fromNames = senderNameLines(sender);
-  const fromPhone = uspsLine(sender.phone);
+  const layout = shippingLayout({ record, sender, preset, hasLogo: Boolean(logo) });
+  const { from, to, fromLines, toAddressLines } = layout;
 
   return (
     <View
@@ -302,34 +301,24 @@ function ShippingLabelBody({
         backgroundColor: "#FFFFFF",
       }}
     >
-      <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-        <View style={{ flexGrow: 1, paddingRight: 8 }}>
-          <Text
-            style={{
-              fontSize: scale.fromLabelSize,
-              fontWeight: "bold",
-              letterSpacing: 1,
-              color: SENIOR_LIFE.muted,
-              marginBottom: scale.lineGap,
-            }}
-          >
-            FROM:
-          </Text>
-          {fromNames.map((line) => (
-            <Text key={line} style={{ fontSize: scale.fromSize, lineHeight: 1.3 }}>
+      {/*
+        No "FROM:" / "TO:" wording anywhere in here — the Label 228 tag this gets pasted onto
+        already prints both. See ShippingTypeScale in ./theme.ts.
+      */}
+      <View style={{ flexDirection: "row", alignItems: "center" }}>
+        <View style={{ flexShrink: 1 }}>
+          {fromLines.map((line, i) => (
+            <Text key={i} style={{ fontSize: from.size, lineHeight: 1.3 }}>
               {line}
             </Text>
           ))}
-          <Text style={{ fontSize: scale.fromSize, lineHeight: 1.3 }}>{from.line1}</Text>
-          {from.line2 ? (
-            <Text style={{ fontSize: scale.fromSize, lineHeight: 1.3 }}>{from.line2}</Text>
-          ) : null}
-          <Text style={{ fontSize: scale.fromSize, lineHeight: 1.3 }}>{from.cityStateZip}</Text>
-          {fromPhone ? (
-            <Text style={{ fontSize: scale.fromSize, lineHeight: 1.3 }}>{fromPhone}</Text>
-          ) : null}
         </View>
-        {logo ? <LogoImage data={logo} height={scale.logoHeight} /> : null}
+        {/* Beside the return address, not flushed to the far edge: the tag has no room to spare. */}
+        {logo ? (
+          <View style={{ marginLeft: scale.logoGap, flexShrink: 0 }}>
+            <LogoImage data={logo} height={scale.logoHeight} />
+          </View>
+        ) : null}
       </View>
 
       <View
@@ -343,31 +332,18 @@ function ShippingLabelBody({
       <View style={{ paddingLeft: scale.toIndent, paddingTop: scale.toTopGap }}>
         <Text
           style={{
-            fontSize: scale.toLabelSize,
-            fontWeight: "bold",
-            letterSpacing: 1,
-            color: SENIOR_LIFE.muted,
-            marginBottom: scale.lineGap + 2,
-          }}
-        >
-          TO:
-        </Text>
-        <Text
-          style={{
-            fontSize: scale.toNameSize,
+            fontSize: to.nameSize,
             fontWeight: "bold",
             marginBottom: scale.lineGap,
           }}
         >
           {to.nameLine}
         </Text>
-        <Text style={{ fontSize: scale.toAddressSize, lineHeight: 1.35 }}>{to.line1}</Text>
-        {to.line2 ? (
-          <Text style={{ fontSize: scale.toAddressSize, lineHeight: 1.35 }}>{to.line2}</Text>
-        ) : null}
-        <Text style={{ fontSize: scale.toAddressSize, lineHeight: 1.35 }}>
-          {to.cityStateZip}
-        </Text>
+        {toAddressLines.map((line, i) => (
+          <Text key={i} style={{ fontSize: to.addressSize, lineHeight: 1.35 }}>
+            {line}
+          </Text>
+        ))}
       </View>
     </View>
   );

@@ -1,7 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { formatAddressBlock, resolveTagline, senderNameLines, uspsLine } from "@/lib/mailing-labels/format";
+import { formatAddressBlock, resolveTagline } from "@/lib/mailing-labels/format";
+import { shippingLayout } from "@/lib/mailing-labels/layout";
 import { fitFontSize } from "@/lib/mailing-labels/metrics";
 import {
   isStickerPreset,
@@ -12,6 +13,7 @@ import {
   EYEBROW_TEXT,
   LABEL_TYPE_SCALE,
   SENIOR_LIFE,
+  SENIOR_LIFE_LOGO_ASPECT,
   SENIOR_LIFE_LOGO_PRINT,
   SHIPPING_TYPE_SCALE,
 } from "@/lib/mailing-labels/theme";
@@ -36,6 +38,9 @@ const PX_PER_PT = 96 / PT_PER_INCH;
 function pt(value: number): number {
   return value * PX_PER_PT;
 }
+
+/** Intrinsic size hint for next/image. Height is what the layout actually constrains. */
+const LOGO_INTRINSIC = { height: 675, width: Math.round(675 * SENIOR_LIFE_LOGO_ASPECT) };
 
 export function LabelPreview({
   record,
@@ -140,8 +145,8 @@ function StickerPreviewBody({
             <Image
               src={SENIOR_LIFE_LOGO_PRINT}
               alt="Senior Life"
-              width={600}
-              height={170}
+              width={LOGO_INTRINSIC.width}
+              height={LOGO_INTRINSIC.height}
               unoptimized
               style={{ height: pt(scale.logoHeight), width: "auto", objectFit: "contain" }}
             />
@@ -237,10 +242,12 @@ function ShippingPreviewBody({
   options: LabelSheetOptions;
 }) {
   const scale = SHIPPING_TYPE_SCALE[preset.id as keyof typeof SHIPPING_TYPE_SCALE];
-  const from = formatAddressBlock(sender);
-  const to = formatAddressBlock(record);
-  const fromNames = senderNameLines(sender);
-  const fromPhone = uspsLine(sender.phone);
+  const { fromLines, from, to, toAddressLines } = shippingLayout({
+    record,
+    sender,
+    preset,
+    hasLogo: options.showLogo,
+  });
 
   return (
     <div
@@ -251,41 +258,29 @@ function ShippingPreviewBody({
         color: SENIOR_LIFE.ink,
       }}
     >
-      <div className="flex justify-between">
-        <div className="flex-grow" style={{ paddingRight: pt(8) }}>
-          <div
-            style={{
-              fontSize: pt(scale.fromLabelSize),
-              fontWeight: 700,
-              letterSpacing: pt(1),
-              color: SENIOR_LIFE.muted,
-              marginBottom: pt(scale.lineGap),
-            }}
-          >
-            FROM:
-          </div>
-          {fromNames.map((line) => (
-            <div key={line} style={{ fontSize: pt(scale.fromSize), lineHeight: 1.3 }}>
+      {/* Neither "FROM:" nor "TO:" is printed — the Label 228 tag this is pasted onto has both. */}
+      <div className="flex items-center">
+        <div className="shrink">
+          {fromLines.map((line, i) => (
+            <div key={i} style={{ fontSize: pt(from.size), lineHeight: 1.3 }}>
               {line}
             </div>
           ))}
-          <div style={{ fontSize: pt(scale.fromSize), lineHeight: 1.3 }}>{from.line1}</div>
-          {from.line2 ? (
-            <div style={{ fontSize: pt(scale.fromSize), lineHeight: 1.3 }}>{from.line2}</div>
-          ) : null}
-          <div style={{ fontSize: pt(scale.fromSize), lineHeight: 1.3 }}>{from.cityStateZip}</div>
-          {fromPhone ? (
-            <div style={{ fontSize: pt(scale.fromSize), lineHeight: 1.3 }}>{fromPhone}</div>
-          ) : null}
         </div>
         {options.showLogo ? (
           <Image
             src={SENIOR_LIFE_LOGO_PRINT}
             alt="Senior Life"
-            width={600}
-            height={170}
+            width={LOGO_INTRINSIC.width}
+            height={LOGO_INTRINSIC.height}
             unoptimized
-            style={{ height: pt(scale.logoHeight), width: "auto", objectFit: "contain" }}
+            className="shrink-0"
+            style={{
+              height: pt(scale.logoHeight),
+              width: "auto",
+              marginLeft: pt(scale.logoGap),
+              objectFit: "contain",
+            }}
           />
         ) : null}
       </div>
@@ -300,31 +295,18 @@ function ShippingPreviewBody({
       <div style={{ paddingLeft: pt(scale.toIndent), paddingTop: pt(scale.toTopGap) }}>
         <div
           style={{
-            fontSize: pt(scale.toLabelSize),
-            fontWeight: 700,
-            letterSpacing: pt(1),
-            color: SENIOR_LIFE.muted,
-            marginBottom: pt(scale.lineGap + 2),
-          }}
-        >
-          TO:
-        </div>
-        <div
-          style={{
-            fontSize: pt(scale.toNameSize),
+            fontSize: pt(to.nameSize),
             fontWeight: 700,
             marginBottom: pt(scale.lineGap),
           }}
         >
           {to.nameLine}
         </div>
-        <div style={{ fontSize: pt(scale.toAddressSize), lineHeight: 1.35 }}>{to.line1}</div>
-        {to.line2 ? (
-          <div style={{ fontSize: pt(scale.toAddressSize), lineHeight: 1.35 }}>{to.line2}</div>
-        ) : null}
-        <div style={{ fontSize: pt(scale.toAddressSize), lineHeight: 1.35 }}>
-          {to.cityStateZip}
-        </div>
+        {toAddressLines.map((line, i) => (
+          <div key={i} style={{ fontSize: pt(to.addressSize), lineHeight: 1.35 }}>
+            {line}
+          </div>
+        ))}
       </div>
     </div>
   );

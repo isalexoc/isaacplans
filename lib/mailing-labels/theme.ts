@@ -26,6 +26,13 @@ export const SENIOR_LIFE_LOGO_PRINT =
   "https://res.cloudinary.com/isaacdev/image/upload/w_1200,f_png/v1773060314/Full-Logo-Gold.144f1298_iluidv.png";
 
 /**
+ * Width ÷ height of that asset (it delivers 1200 × 675). Both renderers constrain the logo by
+ * height, so this is how the layout math in ./layout.ts knows how much horizontal room it will
+ * actually take beside the return address.
+ */
+export const SENIOR_LIFE_LOGO_ASPECT = 1200 / 675;
+
+/**
  * Isaac's agent credential card, printed beside the signature on the letter. Seeing a face and a
  * credential does more for a senior's trust than anything the text can say.
  *
@@ -117,15 +124,30 @@ export const LABEL_TYPE_SCALE: Record<StickerVariant, LabelTypeScale> = {
   },
 };
 
+/**
+ * Type scale for the Priority Mail label.
+ *
+ * This label is not mailed on its own — it is printed, trimmed, and pasted into the white area of
+ * a real USPS Label 228 tag, which already has "FROM:" and "TO:" printed on it. So this layout
+ * prints neither word, and the type stays small enough that both blocks fit inside that white
+ * area. The TO block is only a little larger than the FROM block (it's the delivery address, so it
+ * should lead), never the poster-sized name the first version printed.
+ */
 export type ShippingTypeScale = {
   pad: number;
   logoHeight: number;
-  fromLabelSize: number;
+  /** Space between the FROM block and the logo sitting beside it. */
+  logoGap: number;
   fromSize: number;
-  toLabelSize: number;
+  fromSizeMin: number;
   toNameSize: number;
   toAddressSize: number;
-  /** How far the TO block is inset from the left edge — USPS convention, and it reads clearly. */
+  toSizeMin: number;
+  /**
+   * How far the TO block is inset from the left edge. Mirrors Label 228 itself, where the printed
+   * "TO:" sits further right than "FROM:" — the inset is what lets the pasted block line up
+   * beside the tag's own wording instead of covering it.
+   */
   toIndent: number;
   toTopGap: number;
   lineGap: number;
@@ -134,26 +156,28 @@ export type ShippingTypeScale = {
 export const SHIPPING_TYPE_SCALE: Record<"usps_4x6" | "usps_half_5126", ShippingTypeScale> = {
   usps_4x6: {
     pad: 18,
-    logoHeight: 26,
-    fromLabelSize: 7.5,
-    fromSize: 9.5,
-    toLabelSize: 9,
-    toNameSize: 19,
-    toAddressSize: 17,
-    toIndent: 44,
-    toTopGap: 38,
+    logoHeight: 20,
+    logoGap: 10,
+    fromSize: 10,
+    fromSizeMin: 8,
+    toNameSize: 13,
+    toAddressSize: 12,
+    toSizeMin: 9.5,
+    toIndent: 34,
+    toTopGap: 32,
     lineGap: 3,
   },
   usps_half_5126: {
     pad: 30,
-    logoHeight: 36,
-    fromLabelSize: 8.5,
-    fromSize: 11,
-    toLabelSize: 11,
-    toNameSize: 25,
-    toAddressSize: 21,
-    toIndent: 84,
-    toTopGap: 52,
+    logoHeight: 26,
+    logoGap: 14,
+    fromSize: 11.5,
+    fromSizeMin: 9,
+    toNameSize: 15,
+    toAddressSize: 13.5,
+    toSizeMin: 10.5,
+    toIndent: 64,
+    toTopGap: 44,
     lineGap: 4,
   },
 };
