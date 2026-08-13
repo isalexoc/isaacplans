@@ -34,9 +34,12 @@ import type {
 import { LabelPreview } from "./label-preview";
 
 /**
- * Priority Mail mode: a full FROM/TO label, one recipient per page. Separate from the everyday
- * Avery sticker because it's used occasionally (shipped packages) and has different rules — the
- * sender block is mandatory and there's no tagline or decoration competing with the addresses.
+ * Priority Mail mode: return address over delivery address, one recipient per page. Separate from
+ * the everyday Avery sticker because it's used occasionally (shipped packages) and has different
+ * rules — the sender block is mandatory and there's no tagline or decoration competing.
+ *
+ * The output is printed, trimmed, and pasted into the white area of a real USPS Label 228 tag, so
+ * it deliberately prints neither "FROM:" nor "TO:" — the tag already has both.
  */
 
 export function PriorityMailPanel({
@@ -154,8 +157,13 @@ export function PriorityMailPanel({
                 </Label>
               </div>
               <p className="text-xs text-muted-foreground">
-                Off by default so nothing competes with the address blocks — carriers and scanners
-                read a clean label best.
+                Prints beside the return address. Off by default so nothing competes with the
+                address blocks — carriers and scanners read a clean label best.
+              </p>
+
+              <p className="rounded-md bg-muted/60 p-3 text-xs text-muted-foreground">
+                No &ldquo;FROM:&rdquo; or &ldquo;TO:&rdquo; is printed — the USPS Label 228 tag you
+                paste this onto already has both.
               </p>
 
               <div className="space-y-2 rounded-md border p-3 text-sm">
