@@ -48,6 +48,7 @@ const FALLBACK_SETTINGS: MailingLabelSettings = {
     shippingPreset: DEFAULT_SHIPPING_PRESET,
     showLogo: true,
     showAgentContact: true,
+    showWhatsapp: true,
     taglines: { ...DEFAULT_TAGLINES },
   },
 };
@@ -311,6 +312,7 @@ export function MailingLabelsClient({ agent }: { agent: LabelAgentContact | null
           <PriorityMailPanel
             labels={activeLabels}
             settings={settings}
+            agent={agent}
             onPrint={(ids, preset, options) => handlePrint(ids, preset, options, false)}
             onGoToSettings={() => setTab("settings")}
             busy={busy}

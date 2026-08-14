@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { Loader2, Printer, RotateCcw, Trash2, Archive, Search } from "lucide-react";
+import { WhatsAppMark } from "@/components/icons/whatsapp-mark";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -88,6 +89,7 @@ export function LabelQueuePanel({
   const [startOffset, setStartOffset] = useState(0);
   const [showLogo, setShowLogo] = useState(settings.defaults.showLogo);
   const [showAgentContact, setShowAgentContact] = useState(settings.defaults.showAgentContact);
+  const [showWhatsapp, setShowWhatsapp] = useState(settings.defaults.showWhatsapp);
   const [taglineEn, setTaglineEn] = useState(settings.defaults.taglines.en);
   const [taglineEs, setTaglineEs] = useState(settings.defaults.taglines.es);
 
@@ -99,9 +101,10 @@ export function LabelQueuePanel({
       startOffset,
       showLogo,
       showAgentContact,
+      showWhatsapp,
       taglines: { en: taglineEn, es: taglineEs },
     }),
-    [startOffset, showLogo, showAgentContact, taglineEn, taglineEs]
+    [startOffset, showLogo, showAgentContact, showWhatsapp, taglineEn, taglineEs]
   );
 
   const selectedIds = useMemo(
@@ -211,6 +214,20 @@ export function LabelQueuePanel({
                     <Label htmlFor="ml-agent" className="font-normal">
                       My name &amp; phone
                       {agent ? "" : " (add them in the Leave-Behind profile first)"}
+                    </Label>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Switch
+                      id="ml-whatsapp"
+                      checked={showWhatsapp}
+                      onCheckedChange={setShowWhatsapp}
+                    />
+                    <Label htmlFor="ml-whatsapp" className="flex items-center gap-1.5 font-normal">
+                      <WhatsAppMark size={15} />
+                      My WhatsApp number
+                      {agent?.whatsapp ? (
+                        <span className="text-muted-foreground">— {agent.whatsapp}</span>
+                      ) : null}
                     </Label>
                   </div>
                   <div className="grid gap-3 sm:grid-cols-2">

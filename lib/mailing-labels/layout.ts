@@ -14,12 +14,19 @@
 import { formatAddressBlock, senderNameLines, uspsLine } from "./format";
 import { fitFontSize } from "./metrics";
 import type { ShippingPreset } from "./presets";
-import { SENIOR_LIFE_LOGO_ASPECT, SHIPPING_TYPE_SCALE } from "./theme";
+import {
+  SENIOR_LIFE_LOGO_ASPECT,
+  SHIPPING_TYPE_SCALE,
+  WHATSAPP_MARK_GAP,
+  whatsappMarkSize,
+} from "./theme";
 import type { MailingLabelRecord, SenderAddress } from "./types";
 
 export type ShippingLayout = {
   /** Return address, already uppercased and in print order. */
   fromLines: string[];
+  /** Printed under the return address beside the WhatsApp mark; "" when it's switched off. */
+  whatsapp: string;
   from: { size: number };
   to: { nameLine: string; nameSize: number; addressSize: number };
   /** Street, optional unit, and CITY ST ZIP — the optional line is dropped, not left empty. */
@@ -31,11 +38,13 @@ export function shippingLayout({
   sender,
   preset,
   hasLogo,
+  whatsapp = "",
 }: {
   record: MailingLabelRecord;
   sender: SenderAddress;
   preset: ShippingPreset;
   hasLogo: boolean;
+  whatsapp?: string;
 }): ShippingLayout {
   const scale = SHIPPING_TYPE_SCALE[preset.id as keyof typeof SHIPPING_TYPE_SCALE];
   const from = formatAddressBlock(sender);
@@ -59,9 +68,22 @@ export function shippingLayout({
   const fromWidth = contentWidth - logoWidth;
   const toWidth = contentWidth - scale.toIndent;
 
+  // The WhatsApp row gives up the mark's width, so it is measured against a narrower column than
+  // the address lines above it — otherwise it is the one line that overflows.
+  const fromSize = Math.min(
+    fitFontSize(fromLines, fromWidth, scale.fromSize, scale.fromSizeMin),
+    fitFontSize(
+      [whatsapp],
+      fromWidth - whatsappMarkSize(scale.fromSize) - WHATSAPP_MARK_GAP,
+      scale.fromSize,
+      scale.fromSizeMin
+    )
+  );
+
   return {
     fromLines,
-    from: { size: fitFontSize(fromLines, fromWidth, scale.fromSize, scale.fromSizeMin) },
+    whatsapp,
+    from: { size: fromSize },
     to: {
       nameLine: to.nameLine,
       nameSize: fitFontSize([to.nameLine], toWidth, scale.toNameSize, scale.toSizeMin, {

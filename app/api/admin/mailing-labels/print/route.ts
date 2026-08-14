@@ -85,16 +85,22 @@ export async function POST(request: NextRequest) {
         typeof requested.showAgentContact === "boolean"
           ? requested.showAgentContact
           : settings.defaults.showAgentContact,
+      showWhatsapp:
+        typeof requested.showWhatsapp === "boolean"
+          ? requested.showWhatsapp
+          : settings.defaults.showWhatsapp,
       taglines: {
         en: requested.taglines?.en?.trim() || settings.defaults.taglines.en || DEFAULT_TAGLINES.en,
         es: requested.taglines?.es?.trim() || settings.defaults.taglines.es || DEFAULT_TAGLINES.es,
       },
     };
 
-    // Settings override first, then the shared leave-behind profile.
-    const agent: LabelAgentContact | null = options.showAgentContact
-      ? await resolveMailingLabelAgent(userId)
-      : null;
+    // Settings override first, then the shared leave-behind profile. Also needed when only the
+    // WhatsApp toggle is on — Priority Mail prints that number without the name-and-phone block.
+    const agent: LabelAgentContact | null =
+      options.showAgentContact || options.showWhatsapp
+        ? await resolveMailingLabelAgent(userId)
+        : null;
 
     const pdf = await renderLabels({
       labels,

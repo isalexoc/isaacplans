@@ -107,6 +107,8 @@ export type LabelSheetOptions = {
   startOffset: number;
   showLogo: boolean;
   showAgentContact: boolean;
+  /** WhatsApp number beside the brand mark. Separate toggle: it's a different number. */
+  showWhatsapp: boolean;
   /** Handling line, chosen per label by the label's own `language`. */
   taglines: { en: string; es: string };
 };
@@ -115,20 +117,31 @@ export type LabelSheetOptions = {
 export type LabelAgentContact = {
   name: string;
   phone: string;
+  /** Reached on WhatsApp, not the voice line — always its own number, never a copy of `phone`. */
+  whatsapp: string;
 };
 
 /**
  * How the agent signs labels and letters. Blank fields fall back to the shared leave-behind
  * profile — this exists so the printed name can differ from the legal one on the profile
  * (e.g. "Isaac Orraiz" rather than "Isaac Orraiz Corrales").
+ *
+ * WhatsApp is the exception: the leave-behind profile has no such field, so it falls back to the
+ * site's published WhatsApp number instead (see ./agent.ts).
  */
 export type LabelAgentOverride = {
   name: string;
   phone: string;
+  whatsapp: string;
   email: string;
 };
 
-export const EMPTY_AGENT_OVERRIDE: LabelAgentOverride = { name: "", phone: "", email: "" };
+export const EMPTY_AGENT_OVERRIDE: LabelAgentOverride = {
+  name: "",
+  phone: "",
+  whatsapp: "",
+  email: "",
+};
 
 export type MailingLabelSettings = {
   sender: SenderAddress;
@@ -138,6 +151,7 @@ export type MailingLabelSettings = {
     shippingPreset: string;
     showLogo: boolean;
     showAgentContact: boolean;
+    showWhatsapp: boolean;
     taglines: { en: string; es: string };
   };
 };

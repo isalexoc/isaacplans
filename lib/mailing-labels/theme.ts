@@ -186,3 +186,15 @@ export const EYEBROW_TEXT: Record<"en" | "es", string> = {
   en: "PREPARED FOR",
   es: "PREPARADO PARA",
 };
+
+/**
+ * How big the WhatsApp mark sits next to a number set at `fontSize`. Slightly over the type size
+ * so the round bubble reads as level with the digits rather than sunk below them — a square glyph
+ * matched to cap height always looks small.
+ */
+export function whatsappMarkSize(fontSize: number): number {
+  return Math.round(fontSize * 1.15 * 2) / 2;
+}
+
+/** Breathing room between the mark and the number. */
+export const WHATSAPP_MARK_GAP = 3;
