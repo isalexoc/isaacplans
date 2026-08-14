@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { AlertTriangle, Loader2, Printer } from "lucide-react";
+import { WhatsAppMark } from "@/components/icons/whatsapp-mark";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -27,6 +28,7 @@ import {
   type LabelPresetId,
 } from "@/lib/mailing-labels/presets";
 import type {
+  LabelAgentContact,
   LabelSheetOptions,
   MailingLabelRecord,
   MailingLabelSettings,
@@ -45,6 +47,7 @@ import { LabelPreview } from "./label-preview";
 export function PriorityMailPanel({
   labels,
   settings,
+  agent,
   onPrint,
   onGoToSettings,
   busy,
@@ -52,6 +55,7 @@ export function PriorityMailPanel({
 }: {
   labels: MailingLabelRecord[];
   settings: MailingLabelSettings;
+  agent: LabelAgentContact | null;
   onPrint: (ids: string[], preset: LabelPresetId, options: LabelSheetOptions) => Promise<void>;
   onGoToSettings: () => void;
   busy: boolean;
@@ -61,6 +65,7 @@ export function PriorityMailPanel({
     settings.defaults.shippingPreset as LabelPresetId
   );
   const [showLogo, setShowLogo] = useState(false);
+  const [showWhatsapp, setShowWhatsapp] = useState(settings.defaults.showWhatsapp);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [query, setQuery] = useState("");
 
@@ -73,9 +78,10 @@ export function PriorityMailPanel({
       startOffset: 0,
       showLogo,
       showAgentContact: false,
+      showWhatsapp,
       taglines: settings.defaults.taglines,
     }),
-    [showLogo, settings.defaults.taglines]
+    [showLogo, showWhatsapp, settings.defaults.taglines]
   );
 
   const visible = useMemo(() => {
@@ -161,6 +167,28 @@ export function PriorityMailPanel({
                 address blocks — carriers and scanners read a clean label best.
               </p>
 
+              <div className="flex items-center gap-3">
+                <Switch
+                  id="ml-ship-whatsapp"
+                  checked={showWhatsapp}
+                  onCheckedChange={setShowWhatsapp}
+                />
+                <Label
+                  htmlFor="ml-ship-whatsapp"
+                  className="flex items-center gap-1.5 font-normal"
+                >
+                  <WhatsAppMark size={15} />
+                  My WhatsApp number
+                  {agent?.whatsapp ? (
+                    <span className="text-muted-foreground">— {agent.whatsapp}</span>
+                  ) : null}
+                </Label>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Added under the return address, so whoever opens the package can message you
+                back. Change the number in Settings.
+              </p>
+
               <p className="rounded-md bg-muted/60 p-3 text-xs text-muted-foreground">
                 No &ldquo;FROM:&rdquo; or &ldquo;TO:&rdquo; is printed — the USPS Label 228 tag you
                 paste this onto already has both.
@@ -202,7 +230,7 @@ export function PriorityMailPanel({
                   record={previewRecord}
                   preset={preset}
                   options={options}
-                  agent={null}
+                  agent={agent}
                   sender={settings.sender}
                   previewScale={presetId === "usps_half_5126" ? 0.42 : 0.62}
                 />

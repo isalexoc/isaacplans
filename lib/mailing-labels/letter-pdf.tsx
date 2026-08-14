@@ -4,7 +4,7 @@ import type { DocumentProps } from "@react-pdf/renderer";
 import type { ReactElement } from "react";
 import { formatAddressBlock } from "./format";
 import { letterClosing, letterDate, type LetterAgentInfo } from "./letter";
-import { loadSeniorLifeLogo } from "./pdf";
+import { loadSeniorLifeLogo, WhatsAppLine } from "./pdf";
 import {
   AGENT_CREDENTIAL_ASPECT,
   AGENT_CREDENTIAL_IMAGE,
@@ -163,8 +163,12 @@ function LetterPage({
                 {agent.phone}
               </Text>
             ) : null}
+            {/* A second, different line — many readers would far rather message than call. */}
+            {agent.whatsapp ? (
+              <WhatsAppLine number={agent.whatsapp} fontSize={12.5} marginTop={3} />
+            ) : null}
             {agent.email ? (
-              <Text style={{ fontSize: 11, color: SENIOR_LIFE.muted, marginTop: 2 }}>
+              <Text style={{ fontSize: 11, color: SENIOR_LIFE.muted, marginTop: 3 }}>
                 {agent.email}
               </Text>
             ) : null}
@@ -183,8 +187,12 @@ function LetterPage({
         </View>
       </View>
 
-      {/* Phone repeated at the foot: the whole point of the letter is that they pick up and call. */}
-      {agent.phone ? (
+      {/*
+        Repeated at the foot: the whole point of the letter is that they get in touch. Both ways
+        of reaching Isaac sit here, because which one a reader is comfortable with varies a lot —
+        some will never dial a number but will happily send a message.
+      */}
+      {agent.phone || agent.whatsapp ? (
         <View
           style={{
             paddingHorizontal: MARGIN_X,
@@ -193,13 +201,26 @@ function LetterPage({
             borderTopColor: SENIOR_LIFE.gold,
             paddingTop: 12,
             marginHorizontal: MARGIN_X - 20,
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "center",
           }}
         >
-          <Text style={{ fontSize: 11.5, color: SENIOR_LIFE.blue, textAlign: "center" }}>
-            {record.language === "es"
-              ? `Llámeme cuando guste — ${agent.phone}`
-              : `Call me anytime — ${agent.phone}`}
-          </Text>
+          {agent.phone ? (
+            <Text style={{ fontSize: 11.5, color: SENIOR_LIFE.blue }}>
+              {record.language === "es"
+                ? `Llámeme cuando guste — ${agent.phone}`
+                : `Call me anytime — ${agent.phone}`}
+            </Text>
+          ) : null}
+          {agent.phone && agent.whatsapp ? (
+            <Text style={{ fontSize: 11.5, color: SENIOR_LIFE.muted, marginHorizontal: 9 }}>
+              ·
+            </Text>
+          ) : null}
+          {agent.whatsapp ? (
+            <WhatsAppLine number={agent.whatsapp} fontSize={11.5} color={SENIOR_LIFE.blue} />
+          ) : null}
         </View>
       ) : null}
     </Page>

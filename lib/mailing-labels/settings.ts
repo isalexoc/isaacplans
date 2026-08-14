@@ -38,6 +38,7 @@ export const DEFAULT_MAILING_LABEL_SETTINGS: MailingLabelSettings = {
     shippingPreset: DEFAULT_SHIPPING_PRESET,
     showLogo: true,
     showAgentContact: true,
+    showWhatsapp: true,
     taglines: { ...DEFAULT_TAGLINES },
   },
 };
@@ -69,6 +70,7 @@ export function normalizeAgentOverride(value: unknown): LabelAgentOverride {
   return {
     name: str(raw.name),
     phone: str(raw.phone),
+    whatsapp: str(raw.whatsapp),
     email: str(raw.email).toLowerCase(),
   };
 }
@@ -92,6 +94,7 @@ function normalizeDefaults(value: unknown): MailingLabelSettings["defaults"] {
         : fallback.shippingPreset,
     showLogo: bool(raw.showLogo, fallback.showLogo),
     showAgentContact: bool(raw.showAgentContact, fallback.showAgentContact),
+    showWhatsapp: bool(raw.showWhatsapp, fallback.showWhatsapp),
     taglines: {
       en: str(taglines.en) || fallback.taglines.en,
       es: str(taglines.es) || fallback.taglines.es,

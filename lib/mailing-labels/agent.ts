@@ -18,6 +18,13 @@ import type { LabelAgentContact } from "./types";
 
 export type ResolvedLabelAgent = LabelAgentContact & { email?: string };
 
+/**
+ * Isaac's published WhatsApp number, the same one the site footer links to. It is a *different*
+ * line from the phone on the leave-behind profile, and that profile has nowhere to record it —
+ * hence the constant. Settings → "WhatsApp to print" overrides it.
+ */
+const SITE_WHATSAPP = "5406813507";
+
 export async function resolveMailingLabelAgent(
   userId: string
 ): Promise<ResolvedLabelAgent | null> {
@@ -32,11 +39,13 @@ export async function resolveMailingLabelAgent(
   if (!name) return null; // Nothing to sign with — the caller turns this into a clear message.
 
   const phoneSource = override.phone.trim() || profile?.phone || "";
+  const whatsappSource = override.whatsapp.trim() || SITE_WHATSAPP;
   const emailSource = override.email.trim() || profile?.email || "";
 
   return {
     name,
     phone: phoneSource ? formatLeaveBehindPhoneForImage(phoneSource) : "",
+    whatsapp: formatLeaveBehindPhoneForImage(whatsappSource),
     email: emailSource ? formatLeaveBehindEmailForImage(emailSource) : undefined,
   };
 }

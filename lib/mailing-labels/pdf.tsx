@@ -1,7 +1,22 @@
 import "server-only";
-import { renderToBuffer, Document, Page, View, Text, Image, Font } from "@react-pdf/renderer";
+import {
+  renderToBuffer,
+  Document,
+  Page,
+  View,
+  Text,
+  Image,
+  Font,
+  Svg,
+  Path,
+} from "@react-pdf/renderer";
 import type { DocumentProps } from "@react-pdf/renderer";
 import type { ReactElement } from "react";
+import {
+  WHATSAPP_GLYPH_PATH,
+  WHATSAPP_GLYPH_VIEWBOX,
+  WHATSAPP_GREEN,
+} from "@/lib/whatsapp-mark";
 import { formatAddressBlock, resolveTagline } from "./format";
 import { shippingLayout } from "./layout";
 import { fitFontSize } from "./metrics";
@@ -19,6 +34,8 @@ import {
   SENIOR_LIFE,
   SENIOR_LIFE_LOGO_PRINT,
   SHIPPING_TYPE_SCALE,
+  WHATSAPP_MARK_GAP,
+  whatsappMarkSize,
 } from "./theme";
 import type {
   LabelAgentContact,
@@ -74,6 +91,34 @@ function LogoImage({ data, height }: { data: Buffer; height: number }) {
   return <Image src={{ data, format: "png" }} style={{ height, objectFit: "contain" }} />;
 }
 
+/**
+ * WhatsApp number with its brand mark. Drawn as a vector path rather than a fetched image: it
+ * prints around 9 pt tall, where a raster badge would smear, and it costs no network round trip.
+ *
+ * Exported because the letter (./letter-pdf.tsx) signs off with the same pairing.
+ */
+export function WhatsAppLine({
+  number,
+  fontSize,
+  color = SENIOR_LIFE.ink,
+  marginTop = 0,
+}: {
+  number: string;
+  fontSize: number;
+  color?: string;
+  marginTop?: number;
+}) {
+  const mark = whatsappMarkSize(fontSize);
+  return (
+    <View style={{ flexDirection: "row", alignItems: "center", marginTop }}>
+      <Svg viewBox={WHATSAPP_GLYPH_VIEWBOX} style={{ width: mark, height: mark }}>
+        <Path d={WHATSAPP_GLYPH_PATH} fill={WHATSAPP_GREEN} />
+      </Svg>
+      <Text style={{ fontSize, color, marginLeft: WHATSAPP_MARK_GAP }}>{number}</Text>
+    </View>
+  );
+}
+
 // ─── Avery sticker sheet ──────────────────────────────────────────────────────
 
 function StickerLabel({
@@ -101,7 +146,8 @@ function StickerLabel({
     branding && options.showAgentContact && agent
       ? [agent.name, agent.phone].filter(Boolean).join("  ·  ")
       : "";
-  const showFooter = Boolean(tagline || agentLine) && scale.footerSize > 0;
+  const whatsapp = branding && options.showWhatsapp ? (agent?.whatsapp ?? "") : "";
+  const showFooter = Boolean(tagline || agentLine || whatsapp) && scale.footerSize > 0;
 
   // Fit the type to this particular address instead of sizing every label for the worst case.
   const textWidth = preset.labelWidth - scale.padX * 2;
@@ -117,7 +163,16 @@ function StickerLabel({
     scale.addressSize,
     scale.addressSizeMin
   );
-  const footerSize = fitFontSize([tagline, agentLine], textWidth, scale.footerSize, 6.5);
+  // The WhatsApp row loses the mark's width to the number, so it measures against less room.
+  const footerSize = Math.min(
+    fitFontSize([tagline, agentLine], textWidth, scale.footerSize, 6.5),
+    fitFontSize(
+      [whatsapp],
+      textWidth - whatsappMarkSize(scale.footerSize) - WHATSAPP_MARK_GAP,
+      scale.footerSize,
+      6.5
+    )
+  );
 
   return (
     <View style={{ width: "100%", height: "100%", fontFamily: FONT, color: SENIOR_LIFE.ink }}>
@@ -206,6 +261,14 @@ function StickerLabel({
               {agentLine}
             </Text>
           ) : null}
+          {whatsapp ? (
+            <WhatsAppLine
+              number={whatsapp}
+              fontSize={footerSize}
+              color={SENIOR_LIFE.blue}
+              marginTop={tagline || agentLine ? 1.5 : 0}
+            />
+          ) : null}
         </View>
       ) : null}
     </View>
@@ -280,14 +343,22 @@ function ShippingLabelBody({
   sender,
   preset,
   logo,
+  whatsapp,
 }: {
   record: MailingLabelRecord;
   sender: SenderAddress;
   preset: ShippingPreset;
   logo: Buffer | null;
+  whatsapp: string;
 }) {
   const scale = SHIPPING_TYPE_SCALE[preset.id as keyof typeof SHIPPING_TYPE_SCALE];
-  const layout = shippingLayout({ record, sender, preset, hasLogo: Boolean(logo) });
+  const layout = shippingLayout({
+    record,
+    sender,
+    preset,
+    hasLogo: Boolean(logo),
+    whatsapp,
+  });
   const { from, to, fromLines, toAddressLines } = layout;
 
   return (
@@ -312,6 +383,9 @@ function ShippingLabelBody({
               {line}
             </Text>
           ))}
+          {layout.whatsapp ? (
+            <WhatsAppLine number={layout.whatsapp} fontSize={from.size} marginTop={1.5} />
+          ) : null}
         </View>
         {/* Beside the return address, not flushed to the far edge: the tag has no room to spare. */}
         {logo ? (
@@ -354,12 +428,14 @@ type ShippingParams = {
   preset: ShippingPreset;
   sender: SenderAddress;
   showLogo: boolean;
+  /** Already resolved and formatted by the caller; "" prints no WhatsApp row. */
+  whatsapp: string;
 };
 
 function buildShippingDocument(
   params: ShippingParams & { logo: Buffer | null }
 ): ReactElement<DocumentProps> {
-  const { labels, preset, sender, logo } = params;
+  const { labels, preset, sender, logo, whatsapp } = params;
   const perPage = preset.perPage;
   const pageCount = Math.max(1, Math.ceil(labels.length / perPage));
 
@@ -394,6 +470,7 @@ function buildShippingDocument(
                   sender={sender}
                   preset={preset}
                   logo={logo}
+                  whatsapp={whatsapp}
                 />
               </View>
             ))}
@@ -430,5 +507,6 @@ export async function renderLabels(params: RenderLabelsParams): Promise<Buffer> 
     preset,
     sender,
     showLogo: options.showLogo,
+    whatsapp: options.showWhatsapp ? (agent?.whatsapp ?? "") : "",
   });
 }

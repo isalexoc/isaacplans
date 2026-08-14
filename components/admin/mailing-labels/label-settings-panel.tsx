@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { AlertTriangle, Check, Loader2 } from "lucide-react";
+import { WhatsAppMark } from "@/components/icons/whatsapp-mark";
 import IntakeAddressInput, { type ResolvedAddress } from "@/components/shared/intake-address-input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -227,7 +228,7 @@ export function LabelSettingsPanel({
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid gap-4 sm:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="ml-agent-name">Name to print</Label>
               <Input
@@ -245,6 +246,22 @@ export function LabelSettingsPanel({
                 onChange={(e) => setAgent((p) => ({ ...p, phone: e.target.value }))}
                 placeholder="(540) 426-1804"
               />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="ml-agent-whatsapp" className="flex items-center gap-1.5">
+                <WhatsAppMark size={15} />
+                WhatsApp to print
+              </Label>
+              <Input
+                id="ml-agent-whatsapp"
+                value={agent.whatsapp}
+                onChange={(e) => setAgent((p) => ({ ...p, whatsapp: e.target.value }))}
+                placeholder="(540) 681-3507"
+              />
+              <p className="text-xs text-muted-foreground">
+                Your WhatsApp line, which is not the same number as the phone above. Blank uses
+                your published one, (540) 681-3507.
+              </p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="ml-agent-email">Email on letters</Label>
@@ -345,6 +362,17 @@ export function LabelSettingsPanel({
             />
             <Label htmlFor="ml-def-agent" className="font-normal">
               Show my name &amp; phone by default
+            </Label>
+          </div>
+          <div className="flex items-center gap-3">
+            <Switch
+              id="ml-def-whatsapp"
+              checked={defaults.showWhatsapp}
+              onCheckedChange={(v) => setDefaults((p) => ({ ...p, showWhatsapp: v }))}
+            />
+            <Label htmlFor="ml-def-whatsapp" className="flex items-center gap-1.5 font-normal">
+              <WhatsAppMark size={15} />
+              Show my WhatsApp number by default
             </Label>
           </div>
         </CardContent>

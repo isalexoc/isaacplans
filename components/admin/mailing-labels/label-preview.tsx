@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { WhatsAppMark } from "@/components/icons/whatsapp-mark";
 import { formatAddressBlock, resolveTagline } from "@/lib/mailing-labels/format";
 import { shippingLayout } from "@/lib/mailing-labels/layout";
 import { fitFontSize } from "@/lib/mailing-labels/metrics";
@@ -16,6 +17,8 @@ import {
   SENIOR_LIFE_LOGO_ASPECT,
   SENIOR_LIFE_LOGO_PRINT,
   SHIPPING_TYPE_SCALE,
+  WHATSAPP_MARK_GAP,
+  whatsappMarkSize,
 } from "@/lib/mailing-labels/theme";
 import type {
   LabelAgentContact,
@@ -41,6 +44,28 @@ function pt(value: number): number {
 
 /** Intrinsic size hint for next/image. Height is what the layout actually constrains. */
 const LOGO_INTRINSIC = { height: 675, width: Math.round(675 * SENIOR_LIFE_LOGO_ASPECT) };
+
+/** Mirrors WhatsAppLine in lib/mailing-labels/pdf.tsx — same glyph, same spacing, same sizing. */
+function PreviewWhatsAppLine({
+  number,
+  fontSize,
+  color,
+  marginTop = 0,
+}: {
+  number: string;
+  fontSize: number;
+  color: string;
+  marginTop?: number;
+}) {
+  return (
+    <div className="flex items-center" style={{ marginTop: pt(marginTop) }}>
+      <WhatsAppMark size={pt(whatsappMarkSize(fontSize))} />
+      <span style={{ fontSize: pt(fontSize), color, marginLeft: pt(WHATSAPP_MARK_GAP) }}>
+        {number}
+      </span>
+    </div>
+  );
+}
 
 export function LabelPreview({
   record,
@@ -84,7 +109,13 @@ export function LabelPreview({
             agent={agent}
           />
         ) : (
-          <ShippingPreviewBody record={record} preset={preset} sender={sender} options={options} />
+          <ShippingPreviewBody
+            record={record}
+            preset={preset}
+            sender={sender}
+            options={options}
+            agent={agent}
+          />
         )}
       </div>
     </div>
@@ -113,7 +144,8 @@ function StickerPreviewBody({
     branding && options.showAgentContact && agent
       ? [agent.name, agent.phone].filter(Boolean).join("  ·  ")
       : "";
-  const showFooter = Boolean(tagline || agentLine) && scale.footerSize > 0;
+  const whatsapp = branding && options.showWhatsapp ? (agent?.whatsapp ?? "") : "";
+  const showFooter = Boolean(tagline || agentLine || whatsapp) && scale.footerSize > 0;
 
   // Same auto-fit the PDF applies, so the preview shows the size that will actually print.
   const textWidth = preset.labelWidth - scale.padX * 2;
@@ -124,7 +156,15 @@ function StickerPreviewBody({
     bold: true,
   });
   const addressSize = fitFontSize(addressLines, textWidth, scale.addressSize, scale.addressSizeMin);
-  const footerSize = fitFontSize([tagline, agentLine], textWidth, scale.footerSize, 6.5);
+  const footerSize = Math.min(
+    fitFontSize([tagline, agentLine], textWidth, scale.footerSize, 6.5),
+    fitFontSize(
+      [whatsapp],
+      textWidth - whatsappMarkSize(scale.footerSize) - WHATSAPP_MARK_GAP,
+      scale.footerSize,
+      6.5
+    )
+  );
 
   return (
     <div
@@ -224,6 +264,14 @@ function StickerPreviewBody({
               {agentLine}
             </div>
           ) : null}
+          {whatsapp ? (
+            <PreviewWhatsAppLine
+              number={whatsapp}
+              fontSize={footerSize}
+              color={SENIOR_LIFE.blue}
+              marginTop={tagline || agentLine ? 1.5 : 0}
+            />
+          ) : null}
         </div>
       ) : null}
     </div>
@@ -235,18 +283,21 @@ function ShippingPreviewBody({
   preset,
   sender,
   options,
+  agent,
 }: {
   record: MailingLabelRecord;
   preset: Extract<LabelPreset, { kind: "shipping" }>;
   sender: SenderAddress;
   options: LabelSheetOptions;
+  agent: LabelAgentContact | null;
 }) {
   const scale = SHIPPING_TYPE_SCALE[preset.id as keyof typeof SHIPPING_TYPE_SCALE];
-  const { fromLines, from, to, toAddressLines } = shippingLayout({
+  const { fromLines, whatsapp, from, to, toAddressLines } = shippingLayout({
     record,
     sender,
     preset,
     hasLogo: options.showLogo,
+    whatsapp: options.showWhatsapp ? (agent?.whatsapp ?? "") : "",
   });
 
   return (
@@ -266,6 +317,14 @@ function ShippingPreviewBody({
               {line}
             </div>
           ))}
+          {whatsapp ? (
+            <PreviewWhatsAppLine
+              number={whatsapp}
+              fontSize={from.size}
+              color={SENIOR_LIFE.ink}
+              marginTop={1.5}
+            />
+          ) : null}
         </div>
         {options.showLogo ? (
           <Image
