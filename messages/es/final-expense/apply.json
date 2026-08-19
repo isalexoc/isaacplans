@@ -12,6 +12,14 @@
       "subtitle": "Inicie su solicitud segura en línea. Solo toma unos minutos y su progreso se guarda automáticamente.",
       "videoLabel": "Reproducir el video: Isaac explica el plan de beneficios para adultos mayores regulado por el estado"
     },
+    "share": {
+      "button": "Compartir",
+      "opening": "Abriendo…",
+      "copied": "¡Enlace copiado!",
+      "copyPrompt": "Copie este enlace para compartirlo:",
+      "title": "Plan de beneficios para adultos mayores | Isaac Plans",
+      "text": "Vea el video y solicite en minutos. Asesoría sin costo y en español."
+    },
     "benefitsHeading": "¿Por qué solicitar con Isaac Plans?",
     "benefits": [
       {

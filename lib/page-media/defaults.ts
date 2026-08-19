@@ -35,7 +35,7 @@ import {
   LIFE_INSURANCE_APPLY_HERO_IMAGE,
   HEALTH_ALTERNATIVE_APPLY_HERO_IMAGE,
 } from "@/lib/get-covered-fast/constants";
-import { videoPosterUrl, videoUrl } from "./cloudinary-urls";
+import { posterImageUrl, videoPosterUrl, videoUrl } from "./cloudinary-urls";
 import { mediaLocaleOf, type HeroMedia, type LobSlug, type MediaKind, type MediaSurface, type VideoPlayback } from "./shared";
 
 /** Exactly the URL `components/hero-template.tsx` builds from a public id. */
@@ -73,13 +73,19 @@ const APPLY_HERO: Record<LobSlug, string> = {
  * `lob|surface|locale` — the same three axes an override is keyed on, so a cell has at most one
  * entry. An override saved in /admin/hero still wins; this is only what the page falls back to.
  */
-const DEFAULT_HERO_VIDEO: Record<string, { publicId: string; playback: VideoPlayback }> = {
+const DEFAULT_HERO_VIDEO: Record<
+  string,
+  { publicId: string; posterPublicId?: string; playback: VideoPlayback }
+> = {
   // Isaac on camera explaining the state-regulated senior benefit plan, in Spanish (~11 min).
   // `click` and never `loop`: it is a talking head that only makes sense with sound, and a muted
   // background loop would stream 40 MB to every visitor to say nothing.
   "final-expense|apply|es": {
     publicId:
       "v1787093932/plan-de-beneficios-senior-regulado-por-el-estado-funeral-y-entierro_epaonq",
+    // The designed "Plan Senior Regulado" thumbnail, not the clip's own first frame. Already 16:9,
+    // so the hero's `object-cover` crops nothing.
+    posterPublicId: "v1787102207/25ce72a4-863b-4824-ac16-8aac859a6882_yd2svv.png",
     playback: "click",
   },
 };
@@ -139,8 +145,12 @@ export function defaultMedia(
       return {
         type: "video",
         url: videoUrl(video.publicId),
-        // Auto first frame — the same still the admin tool would derive from an upload.
-        posterUrl: videoPosterUrl(video.publicId),
+        // A registered still if the clip has one, otherwise its own first frame — the same still
+        // the admin tool would derive from an upload.
+        posterUrl: video.posterPublicId
+          ? posterImageUrl(video.posterPublicId)
+          : videoPosterUrl(video.publicId),
+        posterCustom: Boolean(video.posterPublicId),
         playback: video.playback,
       };
     }
