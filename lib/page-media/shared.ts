@@ -42,6 +42,11 @@ export type HeroMedia =
       playback: VideoPlayback;
     };
 
+/** Normalize any locale (e.g. "es-US") to the two we key media on. */
+export function mediaLocaleOf(locale: string): MediaLocale {
+  return locale?.toLowerCase().startsWith("es") ? "es" : "en";
+}
+
 export const MEDIA_SURFACES: MediaSurface[] = ["main", "apply", "ads"];
 export const MEDIA_KINDS: MediaKind[] = ["hero", "og"];
 export const MEDIA_LOCALES: MediaLocale[] = ["en", "es"];
@@ -94,8 +99,9 @@ export type PageMediaRow = {
   locale: MediaLocale;
   /** The admin's saved override, or null when the page is on its built-in default. */
   override: HeroMedia | null;
-  /** What the page shows with no override — always an image. */
-  defaultUrl: string;
+  /** What the page shows with no override — a still on nearly every cell, a video on the few
+   *  that ship one (see `DEFAULT_HERO_VIDEO` in defaults.ts). */
+  defaultMedia: HeroMedia;
 };
 
 export { LOBS, LOB_SLUGS, type LobSlug };

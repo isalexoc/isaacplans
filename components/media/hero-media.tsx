@@ -25,6 +25,7 @@ import type { HeroMedia as HeroMediaValue } from "@/lib/page-media/shared";
 export default function HeroMedia({
   media,
   alt,
+  playLabel,
   className = "object-cover",
   sizes,
   priority,
@@ -32,6 +33,8 @@ export default function HeroMedia({
   media: HeroMediaValue;
   /** Describe the image for screen readers. Decorative background loops are hidden instead. */
   alt: string;
+  /** Localized name for a click-to-play video's play button; ignored for images and loops. */
+  playLabel?: string;
   /** Object-fit / rounding classes for the visual itself. */
   className?: string;
   /** `next/image` sizes hint — ignored for video. */
@@ -52,6 +55,7 @@ export default function HeroMedia({
         src={media.url}
         posterUrl={media.posterUrl}
         alt={alt}
+        playLabel={playLabel}
         className={className}
         sizes={sizes}
         priority={priority}

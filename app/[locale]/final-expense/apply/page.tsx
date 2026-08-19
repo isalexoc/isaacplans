@@ -3,6 +3,7 @@
 import type { Metadata } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
 import { getEffectivePageMedia, getEffectiveOgImageUrl } from "@/lib/page-media/settings";
+import { localizedSlug, ogLocaleOf, withLocalePrefix, type SupportedLocale } from "@/lib/seo/i18n";
 import HeroMedia from "@/components/media/hero-media";
 import LobApplyCta from "@/components/lob-apply-cta";
 import {
@@ -20,6 +21,12 @@ export async function generateMetadata(): Promise<Metadata> {
   // Admin-overridable social card (lib/page-media); falls back to the message-file image.
   const ogImageUrl = await getEffectiveOgImageUrl("final-expense", "apply", locale, t("image"));
 
+  // This page is shared far more than it is browsed to — Isaac sends the link over WhatsApp and
+  // SMS — so the preview carries the same fields the main LOB pages set.
+  const loc = locale as SupportedLocale;
+  const canonical = withLocalePrefix(loc, localizedSlug("/final-expense/apply", loc));
+  const ogLocale = ogLocaleOf(loc);
+
   return {
     title: t("title"),
     description: t("description"),
@@ -28,7 +35,10 @@ export async function generateMetadata(): Promise<Metadata> {
     openGraph: {
       title: t("title"),
       description: t("description"),
+      url: canonical, // resolved absolute via metadataBase in the root layout
       siteName: "Isaac Plans Insurance",
+      locale: ogLocale,
+      alternateLocale: ogLocale === "en_US" ? ["es_ES"] : ["en_US"],
       type: "website",
       images: [{ url: ogImageUrl, width: 1200, height: 630, alt: t("imageAlt") }],
     },
@@ -69,11 +79,13 @@ export default async function FinalExpenseApplyPage() {
           </p>
         </div>
 
-        {/* Media (placeholder image until real creative is provided) */}
+        {/* Media — a photo in English, Isaac's Spanish walkthrough video in Spanish; either one
+            swappable from /admin/hero without a deploy. */}
         <div className="relative mt-8 aspect-video w-full overflow-hidden rounded-2xl border shadow-xl shadow-black/10">
           <HeroMedia
             media={heroMedia}
             alt={t("meta.imageAlt")}
+            playLabel={t("hero.videoLabel")}
             className="object-cover"
             sizes="(max-width: 768px) 100vw, 768px"
           />

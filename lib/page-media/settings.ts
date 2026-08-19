@@ -3,8 +3,8 @@ import { unstable_cache, revalidateTag } from "next/cache";
 import { eq, inArray } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { appSettings } from "@/lib/db/schema";
-import { LOBS, LOB_SLUGS, surfacesFor, type HeroMedia, type LobSlug, type MediaKind, type MediaLocale, type MediaSurface, type PageMediaRow, type VideoPlayback } from "./shared";
-import { defaultMediaUrl } from "./defaults";
+import { LOBS, LOB_SLUGS, mediaLocaleOf, surfacesFor, type HeroMedia, type LobSlug, type MediaKind, type MediaLocale, type MediaSurface, type PageMediaRow, type VideoPlayback } from "./shared";
+import { defaultMedia } from "./defaults";
 import { isAllowedCloudinaryUrl, isVideoUrl } from "./cloudinary-urls";
 
 /**
@@ -50,11 +50,6 @@ export function settingKey(
   // Legacy shape for the ads funnels — this is what makes existing overrides survive.
   if (surface === "ads") return `${prefix}_get_covered_${kind}_url_${locale}`;
   return `pagemedia_${prefix}_${surface}_${kind}_${locale}`;
-}
-
-/** Normalize any locale (e.g. "es-US") to the two we key on. */
-export function mediaLocaleOf(locale: string): MediaLocale {
-  return locale?.toLowerCase().startsWith("es") ? "es" : "en";
 }
 
 /** Serialize an override for storage. A plain image stays a bare URL, for backward compatibility. */
@@ -147,8 +142,10 @@ export async function getEffectivePageMedia(
   // Facebook as a link preview it cannot play.
   if (override && !(kind === "og" && override.type === "video")) return override;
 
-  const url = defaultMediaUrl(lob, surface, kind, locale) || opts.fallbackUrl || "";
-  return { type: "image", url };
+  const fallback = defaultMedia(lob, surface, kind, locale);
+  // The cells with no registered default (main/apply social cards) come back with an empty URL —
+  // those are the ones the caller supplies from its message key.
+  return fallback.url ? fallback : { type: "image", url: opts.fallbackUrl || "" };
 }
 
 /** Convenience for `generateMetadata`, which only ever wants a URL string. */
@@ -181,7 +178,7 @@ export async function getPageMediaForAdmin(): Promise<PageMediaRow[]> {
             surface,
             kind,
             locale,
-            defaultUrl: defaultMediaUrl(lob, surface, kind, locale),
+            defaultMedia: defaultMedia(lob, surface, kind, locale),
           });
           keys.push(settingKey(lob, surface, kind, locale));
         }
@@ -258,5 +255,5 @@ export async function setPageMedia(
   }
 }
 
-export { LOBS, LOB_SLUGS, surfacesFor };
+export { LOBS, LOB_SLUGS, mediaLocaleOf, surfacesFor };
 export type { HeroMedia, LobSlug, MediaKind, MediaLocale, MediaSurface, PageMediaRow, VideoPlayback };

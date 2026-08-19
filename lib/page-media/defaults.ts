@@ -3,7 +3,8 @@
  *
  * These URLs are reproduced exactly as the pages built them before this system existed, so
  * switching a page over to `getEffectivePageMedia` changes nothing visually until Isaac uploads
- * something. Three sources are consolidated here:
+ * something — with the deliberate exceptions listed in `DEFAULT_HERO_VIDEO`, which ship a video as
+ * a page's built-in hero. Three sources are consolidated here:
  *
  *  - main heroes: the `imagePublicId` each page passes to `components/hero-template.tsx`, which
  *    built `…/f_auto,q_auto,w_800,c_fill,g_auto/<id>.webp` internally;
@@ -34,7 +35,8 @@ import {
   LIFE_INSURANCE_APPLY_HERO_IMAGE,
   HEALTH_ALTERNATIVE_APPLY_HERO_IMAGE,
 } from "@/lib/get-covered-fast/constants";
-import type { LobSlug, MediaKind, MediaSurface } from "./shared";
+import { videoPosterUrl, videoUrl } from "./cloudinary-urls";
+import { mediaLocaleOf, type HeroMedia, type LobSlug, type MediaKind, type MediaSurface, type VideoPlayback } from "./shared";
 
 /** Exactly the URL `components/hero-template.tsx` builds from a public id. */
 function heroTemplateUrl(publicId: string): string {
@@ -64,6 +66,22 @@ const APPLY_HERO: Record<LobSlug, string> = {
   "life-insurance": LIFE_INSURANCE_APPLY_HERO_IMAGE,
   "health-alternative": HEALTH_ALTERNATIVE_APPLY_HERO_IMAGE,
   "final-expense": FE_APPLY_HERO_IMAGE,
+};
+
+/**
+ * The few hero cells whose built-in media is a VIDEO rather than a still, keyed
+ * `lob|surface|locale` — the same three axes an override is keyed on, so a cell has at most one
+ * entry. An override saved in /admin/hero still wins; this is only what the page falls back to.
+ */
+const DEFAULT_HERO_VIDEO: Record<string, { publicId: string; playback: VideoPlayback }> = {
+  // Isaac on camera explaining the state-regulated senior benefit plan, in Spanish (~11 min).
+  // `click` and never `loop`: it is a talking head that only makes sense with sound, and a muted
+  // background loop would stream 40 MB to every visitor to say nothing.
+  "final-expense|apply|es": {
+    publicId:
+      "v1787093932/plan-de-beneficios-senior-regulado-por-el-estado-funeral-y-entierro_epaonq",
+    playback: "click",
+  },
 };
 
 type Getter = (locale: string) => string;
@@ -103,4 +121,29 @@ export function defaultMediaUrl(
     return surface === "main" ? heroTemplateUrl(MAIN_HERO_PUBLIC_ID[lob]) : APPLY_HERO[lob];
   }
   return "";
+}
+
+/**
+ * The built-in media for one cell, in the shape a page (and the admin tool) actually renders.
+ * Everything is a still except the cells registered in `DEFAULT_HERO_VIDEO`.
+ */
+export function defaultMedia(
+  lob: LobSlug,
+  surface: MediaSurface,
+  kind: MediaKind,
+  locale: string
+): HeroMedia {
+  if (kind === "hero") {
+    const video = DEFAULT_HERO_VIDEO[`${lob}|${surface}|${mediaLocaleOf(locale)}`];
+    if (video) {
+      return {
+        type: "video",
+        url: videoUrl(video.publicId),
+        // Auto first frame — the same still the admin tool would derive from an upload.
+        posterUrl: videoPosterUrl(video.publicId),
+        playback: video.playback,
+      };
+    }
+  }
+  return { type: "image", url: defaultMediaUrl(lob, surface, kind, locale) };
 }

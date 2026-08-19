@@ -23,6 +23,7 @@ export default function HeroVideoPlayer({
   src,
   posterUrl,
   alt,
+  playLabel,
   className = "object-cover",
   sizes,
   priority,
@@ -30,6 +31,8 @@ export default function HeroVideoPlayer({
   src: string;
   posterUrl: string;
   alt: string;
+  /** Localized accessible name for the play button. Pass one on a non-English page. */
+  playLabel?: string;
   className?: string;
   sizes?: string;
   priority?: boolean;
@@ -62,7 +65,7 @@ export default function HeroVideoPlayer({
         <button
           type="button"
           onClick={start}
-          aria-label={alt ? `Play video: ${alt}` : "Play video"}
+          aria-label={playLabel || (alt ? `Play video: ${alt}` : "Play video")}
           className="group absolute inset-0 h-full w-full cursor-pointer focus:outline-none focus-visible:ring-4 focus-visible:ring-white/70"
         >
           {posterUrl && (

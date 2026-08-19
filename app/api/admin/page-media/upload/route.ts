@@ -110,9 +110,12 @@ export async function POST(request: Request) {
       // Attach to the existing video rather than replacing it. If there is no video set, there is
       // nothing for a poster to introduce — say so instead of silently discarding the upload.
       const rows = await getPageMediaForAdmin();
-      const current = rows.find(
+      const row = rows.find(
         (r) => r.lob === lob && r.surface === surface && r.kind === kind && r.locale === locale
-      )?.override;
+      );
+      // A page whose built-in default is already a video counts as having one — replacing its
+      // poster is exactly the edit this is for, and it just becomes the cell's first override.
+      const current = row?.override ?? row?.defaultMedia;
       if (current?.type !== "video") {
         return NextResponse.json(
           { success: false, error: "Upload a video first — a poster is the still shown before it plays." },
