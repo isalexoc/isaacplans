@@ -6,6 +6,7 @@ import { getEffectivePageMedia, getEffectiveOgImageUrl } from "@/lib/page-media/
 import { localizedSlug, ogLocaleOf, withLocalePrefix, type SupportedLocale } from "@/lib/seo/i18n";
 import HeroMedia from "@/components/media/hero-media";
 import LobApplyCta from "@/components/lob-apply-cta";
+import SharePageButton from "@/components/share-page-button";
 import {
   ShieldCheck,
   HeartHandshake,
@@ -91,12 +92,24 @@ export default async function FinalExpenseApplyPage() {
           />
         </div>
 
-        {/* Primary CTA */}
+        {/* Primary CTA, with "send this to someone" right under it — these links travel by
+            WhatsApp far more than they are browsed to. */}
         <div className="mt-8 flex flex-col items-center gap-2">
           <LobApplyCta lob="final-expense" label={t("cta")} />
           <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <Lock className="h-3.5 w-3.5" /> {t("ctaNote")}
           </p>
+          <SharePageButton
+            title={t("share.title")}
+            text={t("share.text")}
+            labels={{
+              button: t("share.button"),
+              opening: t("share.opening"),
+              copied: t("share.copied"),
+              copyPrompt: t("share.copyPrompt"),
+            }}
+            className="mt-2"
+          />
         </div>
 
         {/* Benefits */}

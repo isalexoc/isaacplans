@@ -46,6 +46,15 @@ export function videoUrl(publicId: string): string {
 }
 
 /**
+ * Delivery URL for a still someone picked as a video's poster, rather than the auto first frame.
+ * Takes the public id WITH its extension, exactly as it appears in the Cloudinary URL — `f_auto`
+ * still serves WebP/AVIF where the browser accepts it, whatever the original format was.
+ */
+export function posterImageUrl(publicIdWithExtension: string): string {
+  return `${CLOUD}/image/upload/${POSTER_IMAGE_TRANSFORM}/${publicIdWithExtension}`;
+}
+
+/**
  * Still frame for a video, used as the `poster` and as the reduced-motion fallback. Lives on
  * `res.cloudinary.com/isaacdev/**`, which next.config.mjs already allows, so `next/image` can
  * render it without a config change.

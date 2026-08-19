@@ -12,6 +12,14 @@
       "subtitle": "Start your secure application online. It only takes a few minutes and your progress saves automatically.",
       "videoLabel": "Play the video: Isaac explains the state-regulated senior benefit plan"
     },
+    "share": {
+      "button": "Share",
+      "opening": "Opening…",
+      "copied": "Link copied!",
+      "copyPrompt": "Copy this link to share it:",
+      "title": "Final expense coverage for seniors | Isaac Plans",
+      "text": "Apply online in minutes — free licensed guidance in English or Spanish."
+    },
     "benefitsHeading": "Why apply with Isaac Plans?",
     "benefits": [
       {
