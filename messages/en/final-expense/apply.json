@@ -1,15 +1,16 @@
 {
   "finalExpenseApply": {
     "meta": {
-      "title": "Apply for Final Expense Coverage | Isaac Plans",
-      "description": "Start your final expense life insurance application online — secure, guided, and only a few minutes.",
-      "image": "https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_1200,h_630,c_fill,g_center/pexels-gustavo-fring-4894565_seqt6k.jpg",
-      "imageAlt": "Apply for final expense coverage with Isaac Plans"
+      "title": "Protect your family from funeral and burial costs | Isaac Plans",
+      "description": "Start your final expense application online — it only takes a few minutes. Free licensed guidance in English or Spanish, and coverage even without a Social Security number.",
+      "image": "https://res.cloudinary.com/isaacdev/image/upload/c_fill,w_620,h_630,g_auto/c_pad,w_1200,h_630,g_east,b_rgb:062B45/l_isaacplanslogo_tkraak,w_72,g_north_west,x_60,y_48/l_text:Montserrat_25_bold:FINAL%20EXPENSE,co_rgb:5FD0E8,g_north_west,x_62,y_162/l_text:Montserrat_56_bold:Protect%20your%20family,co_white,c_fit,w_470,g_north_west,x_60,y_205/l_text:Montserrat_29:Final%20expense%20coverage%20for%20seniors,co_rgb:C9E6F2,c_fit,w_470,g_north_west,x_62,y_360/l_text:Montserrat_24:Free%20guidance%20%C2%B7%20No%20SSN%20needed,co_rgb:8FB6CC,c_fit,w_470,g_north_west,x_62,y_470/l_text:Montserrat_26_bold:Apply%20online%20in%20minutes,co_rgb:9FE0F0,c_fit,w_470,g_south_west,x_62,y_62/q_auto/pexels-gustavo-fring-4894565_seqt6k.jpg",
+      "imageAlt": "Final expense coverage for seniors with Isaac Plans"
     },
     "hero": {
       "badge": "Final Expense",
       "title": "Protect your family from funeral and burial costs",
-      "subtitle": "Start your secure application online. It only takes a few minutes and your progress saves automatically."
+      "subtitle": "Start your secure application online. It only takes a few minutes and your progress saves automatically.",
+      "videoLabel": "Play the video: Isaac explains the state-regulated senior benefit plan"
     },
     "benefitsHeading": "Why apply with Isaac Plans?",
     "benefits": [

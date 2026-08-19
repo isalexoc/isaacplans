@@ -59,7 +59,7 @@ function assetName(url: string): string {
 }
 
 function MediaEditor({ row }: { row: PageMediaRow }) {
-  const [media, setMedia] = useState<HeroMedia | null>(row.override);
+  const [override, setOverride] = useState<HeroMedia | null>(row.override);
   const [status, setStatus] = useState<Status>({ type: "idle" });
   const [busy, setBusy] = useState<"idle" | "compressing" | "uploading">("idle");
   const [progress, setProgress] = useState(0);
@@ -71,8 +71,13 @@ function MediaEditor({ row }: { row: PageMediaRow }) {
   const posterInputRef = useRef<HTMLInputElement>(null);
 
   const working = busy !== "idle" || pending;
-  const usingDefault = media === null;
-  const isVideo = media?.type === "video";
+  const usingDefault = override === null;
+  /** What the live page renders for this cell: the override if there is one, else the built-in
+   *  default — which is itself a video on the pages that ship one. */
+  const media: HeroMedia = override ?? row.defaultMedia;
+  const isVideo = media.type === "video";
+  /** Still to fall back to when a video has no poster of its own. */
+  const defaultStill = row.defaultMedia.type === "video" ? row.defaultMedia.posterUrl : row.defaultMedia.url;
   const videoAllowed = row.kind === "hero";
 
   // Ads heroes sit in a tall desktop panel; everything else is a wide slot.
@@ -104,7 +109,7 @@ function MediaEditor({ row }: { row: PageMediaRow }) {
       const res = await fetch("/api/admin/page-media/upload", { method: "POST", body: form });
       const data: { success: boolean; media?: HeroMedia; error?: string } = await res.json();
       if (data.success && data.media) {
-        setMedia(data.media);
+        setOverride(data.media);
         setStatus({
           type: "ok",
           msg: asPoster ? "Poster updated. It shows before the video plays." : "Uploaded. The live page now uses this image.",
@@ -180,7 +185,7 @@ function MediaEditor({ row }: { row: PageMediaRow }) {
       });
       const saved = await saveRes.json();
       if (saved.success) {
-        setMedia(saved.media as HeroMedia);
+        setOverride(saved.media as HeroMedia);
         setStatus({ type: "ok", msg: "Video uploaded. The live page now plays it." });
       } else {
         setStatus({ type: "error", msg: saved.error ?? "Could not save the video." });
@@ -212,7 +217,7 @@ function MediaEditor({ row }: { row: PageMediaRow }) {
       });
       const data = await res.json();
       if (data.success) {
-        setMedia(data.media as HeroMedia);
+        setOverride(data.media as HeroMedia);
         setUrlInput("");
         setStatus({ type: "ok", msg: "Saved. The live page now uses this." });
       } else {
@@ -224,9 +229,9 @@ function MediaEditor({ row }: { row: PageMediaRow }) {
   }
 
   function setPlayback(playback: VideoPlayback) {
-    if (media?.type !== "video") return;
+    if (media.type !== "video") return;
     const optimistic = { ...media, playback };
-    setMedia(optimistic);
+    setOverride(optimistic);
     setStatus({ type: "idle" });
     startTransition(async () => {
       const res = await fetch("/api/admin/page-media/save", {
@@ -243,7 +248,7 @@ function MediaEditor({ row }: { row: PageMediaRow }) {
       });
       const data = await res.json();
       if (data.success) {
-        setMedia(data.media as HeroMedia);
+        setOverride(data.media as HeroMedia);
         setStatus({
           type: "ok",
           msg: playback === "loop" ? "Now loops silently in the background." : "Now shows a play button.",
@@ -259,7 +264,7 @@ function MediaEditor({ row }: { row: PageMediaRow }) {
     startTransition(async () => {
       const res = await resetPageMediaAction(row.lob, row.surface, row.kind, row.locale);
       if (res.ok) {
-        setMedia(null);
+        setOverride(null);
         setStatus({ type: "ok", msg: "Cleared. The live page is back to the built-in default." });
       } else {
         setStatus({ type: "error", msg: res.error ?? "Could not save." });
@@ -268,7 +273,9 @@ function MediaEditor({ row }: { row: PageMediaRow }) {
   }
 
   const summary = usingDefault
-    ? "Built-in default"
+    ? isVideo
+      ? "Built-in video"
+      : "Built-in default"
     : isVideo
       ? `Video — ${(media as Extract<HeroMedia, { type: "video" }>).playback === "loop" ? "background loop" : "click to play"}`
       : "Custom image";
@@ -353,7 +360,7 @@ function MediaEditor({ row }: { row: PageMediaRow }) {
             ) : (
               // eslint-disable-next-line @next/next/no-img-element
               <img
-                src={usingDefault ? row.defaultUrl : (media as Extract<HeroMedia, { type: "image" }>).url}
+                src={(media as Extract<HeroMedia, { type: "image" }>).url}
                 alt="Current"
                 className="h-full w-full object-cover object-center"
               />
@@ -368,13 +375,7 @@ function MediaEditor({ row }: { row: PageMediaRow }) {
             )}
           </div>
           <p className="mt-1 break-all font-mono text-[10px] text-muted-foreground">
-            {assetName(
-              usingDefault
-                ? row.defaultUrl
-                : isVideo
-                  ? (media as Extract<HeroMedia, { type: "video" }>).url
-                  : (media as Extract<HeroMedia, { type: "image" }>).url
-            )}
+            {assetName(media.url)}
           </p>
         </section>
 
@@ -393,7 +394,7 @@ function MediaEditor({ row }: { row: PageMediaRow }) {
               <div className={`relative ${aspect} w-24 shrink-0 overflow-hidden rounded border bg-background`}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={(media as Extract<HeroMedia, { type: "video" }>).posterUrl || row.defaultUrl}
+                  src={(media as Extract<HeroMedia, { type: "video" }>).posterUrl || defaultStill}
                   alt="Poster"
                   className="h-full w-full object-cover object-center"
                 />

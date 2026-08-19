@@ -1,15 +1,16 @@
 {
   "finalExpenseApply": {
     "meta": {
-      "title": "Solicite Cobertura de Gastos Finales | Isaac Plans",
-      "description": "Inicie su solicitud de seguro de gastos finales en línea — segura, guiada y en solo minutos.",
-      "image": "https://res.cloudinary.com/isaacdev/image/upload/f_auto,q_auto,w_1200,h_630,c_fill,g_center/pexels-gustavo-fring-4894565_seqt6k.jpg",
-      "imageAlt": "Solicite cobertura de gastos finales con Isaac Plans"
+      "title": "Proteja a su familia de los costos de funeral | Isaac Plans",
+      "description": "Vea el video donde Isaac le explica el plan de beneficios para adultos mayores, y solicite en línea en minutos. Asesoría sin costo, en español, incluso sin número de seguro social.",
+      "image": "https://res.cloudinary.com/isaacdev/video/upload/so_0,c_fill,w_620,h_630,g_auto/c_pad,w_1200,h_630,g_east,b_rgb:062B45/l_isaacplanslogo_tkraak,w_72,g_north_west,x_60,y_48/l_text:Montserrat_25_bold:GASTOS%20FINALES,co_rgb:5FD0E8,g_north_west,x_62,y_162/l_text:Montserrat_56_bold:Proteja%20a%20su%20familia,co_white,c_fit,w_470,g_north_west,x_60,y_205/l_text:Montserrat_29:Plan%20de%20beneficios%20para%20adultos%20mayores,co_rgb:C9E6F2,c_fit,w_470,g_north_west,x_62,y_360/l_text:Montserrat_24:Sin%20costo%20%C2%B7%20Sin%20SSN%20%C2%B7%20En%20espa%C3%B1ol,co_rgb:8FB6CC,c_fit,w_470,g_north_west,x_62,y_470/l_text:Montserrat_26_bold:%E2%96%B6%20Vea%20el%20video%20y%20solicite%20en%20minutos,co_rgb:9FE0F0,c_fit,w_470,g_south_west,x_62,y_62/q_auto/v1787093932/plan-de-beneficios-senior-regulado-por-el-estado-funeral-y-entierro_epaonq.jpg",
+      "imageAlt": "Isaac explica el plan de beneficios de gastos finales para adultos mayores"
     },
     "hero": {
       "badge": "Gastos Finales",
       "title": "Proteja a su familia de los costos de funeral y entierro",
-      "subtitle": "Inicie su solicitud segura en línea. Solo toma unos minutos y su progreso se guarda automáticamente."
+      "subtitle": "Inicie su solicitud segura en línea. Solo toma unos minutos y su progreso se guarda automáticamente.",
+      "videoLabel": "Reproducir el video: Isaac explica el plan de beneficios para adultos mayores regulado por el estado"
     },
     "benefitsHeading": "¿Por qué solicitar con Isaac Plans?",
     "benefits": [
