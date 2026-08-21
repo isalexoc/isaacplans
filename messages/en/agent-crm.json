@@ -2,19 +2,20 @@
   "agentCrm": {
     "metadata": {
       "title": "The CRM I Run My Insurance Business On | Isaac Plans",
-      "description": "One login for your leads, follow-up, texts, calendar, and funnels. Watch the walkthrough, then get a free 1-on-1 setup call when you start through my link.",
+      "description": "Try it free for 14 days. One login for your leads, follow-up, texts, calendar, and funnels — plus a free 1-on-1 setup call when you start through my link.",
       "imageAlt": "Agent CRM for insurance agents, recommended by Isaac Orraiz"
     },
     "hero": {
       "badge": "For insurance agents",
       "title": "The CRM I run my entire insurance business on",
-      "subtitle": "Leads, follow-up, texts, calls, calendars, funnels, and pipelines — one login, mostly on autopilot. Watch the walkthrough, then open your account and I'll set it up with you personally.",
-      "cta": "Start with Agent CRM",
+      "subtitle": "Leads, follow-up, texts, calls, calendars, funnels, and pipelines — one login, mostly on autopilot. Everyone starts with 14 days free, so you can run your own leads through it before you pay a dollar.",
+      "cta": "Start my 14-day free trial",
       "ctaSecondary": "Watch the walkthrough",
-      "bonusNote": "Free 1-on-1 setup call + my private agent group when you start through my link",
+      "bonusNote": "14 days free — plus a 1-on-1 setup call and my private agent group when you start through my link",
       "trust": [
+        "14 days free",
+        "Cancel any time",
         "Same price through my link",
-        "Set up with you, not for you",
         "English & Spanish"
       ]
     },
@@ -26,6 +27,27 @@
       "placeholderTitle": "Walkthrough coming soon",
       "placeholderBody": "I'm recording it now. In the meantime, the button below takes you straight to Agent CRM.",
       "caption": "No slides. Just the account."
+    },
+    "trial": {
+      "label": "No risk",
+      "title": "Try the whole thing free for 14 days",
+      "subtitle": "Every account starts with a 14-day free trial. Not a demo account, not a limited sandbox — the real thing, with your own leads in it.",
+      "items": [
+        {
+          "title": "Full access from day one",
+          "body": "Pipelines, automations, the calendar, the funnels, the mobile app. You're evaluating what you'd actually be paying for, not a stripped-down preview of it."
+        },
+        {
+          "title": "Cancel before day 14 and that's it",
+          "body": "If it isn't for you, you cancel and walk away. No contract to get out of, no phone call to sit through."
+        },
+        {
+          "title": "Use your setup call inside the trial",
+          "body": "This is the part most agents miss. Book the call in your first few days and you spend the trial judging a system that's already built for your business — not an empty account you never got around to configuring."
+        }
+      ],
+      "note": "Most people who quit a CRM quit because they never finished setting it up. That's exactly what the setup call is for, and why it belongs inside the trial rather than after it.",
+      "cta": "Start my 14-day free trial"
     },
     "problem": {
       "label": "Sound familiar?",
@@ -120,7 +142,7 @@
         }
       ],
       "note": "It costs you nothing extra — the price is identical either way. Agent CRM pays me a referral commission, and that is exactly why I can afford to spend that time on you.",
-      "cta": "Start with Agent CRM"
+      "cta": "Start my free trial"
     },
     "steps": {
       "label": "How to start",
@@ -131,12 +153,12 @@
           "body": "See what the system actually does before you spend a dollar on it."
         },
         {
-          "title": "Open your account",
-          "body": "Use the button on this page so the referral is credited — that credit is what unlocks your setup call."
+          "title": "Start your free trial",
+          "body": "Use the button on this page so the referral is credited — that credit is what unlocks your setup call. The 14 days start here."
         },
         {
           "title": "Send me your confirmation",
-          "body": "Text or email me that you're in, and we'll put your setup call on the calendar the same week."
+          "body": "Text or email me that you're in, and we'll book your setup call inside the trial window so you're judging a system that actually works."
         }
       ]
     },
@@ -176,6 +198,14 @@
           "answer": "Yes, and you can run both while you migrate. Bring it up on the setup call and we'll map out what moves first so nothing falls through the cracks."
         },
         {
+          "question": "Do I have to pay anything to try it?",
+          "answer": "No. Every account starts with a 14-day free trial, so you can work your own leads through the system before you pay for it. Cancel before the trial ends and you aren't charged."
+        },
+        {
+          "question": "What happens at the end of the 14 days?",
+          "answer": "If you keep it, your plan simply begins. If it isn't for you, cancel before the trial is up and that's the end of it — there's no contract and nothing to negotiate your way out of."
+        },
+        {
           "question": "How do I claim the setup call and the group?",
           "answer": "Open your account through the button on this page, then send me your confirmation. Or use the form below and I'll reach out to you."
         }
@@ -201,9 +231,9 @@
     },
     "finalCta": {
       "title": "Stop running your business out of your phone's notes app",
-      "subtitle": "Open your account through the button, send me the confirmation, and we'll have your pipeline, your calendar, and your first follow-up campaign live this week.",
-      "cta": "Start with Agent CRM",
-      "note": "Same price through my link — plus the setup call and the agent group."
+      "subtitle": "Start the 14-day trial through the button, send me the confirmation, and we'll have your pipeline, your calendar, and your first follow-up campaign live inside the free window.",
+      "cta": "Start my 14-day free trial",
+      "note": "14 days free · Cancel any time · Same price through my link, plus the setup call and the agent group."
     },
     "disclosure": "Affiliate disclosure: I am an Agent CRM affiliate. If you open an account through a link on this page, Agent CRM pays me a commission at no additional cost to you. I recommend it because I use it every day to run my own agency, not because of the commission."
   }
