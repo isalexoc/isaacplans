@@ -10,23 +10,24 @@
       "title": "The CRM I run my entire insurance business on",
       "subtitle": "Leads, follow-up, texts, calls, calendars, funnels, and pipelines — one login, mostly on autopilot. Everyone starts with 14 days free, so you can run your own leads through it before you pay a dollar.",
       "cta": "Start my 14-day free trial",
-      "ctaSecondary": "Watch the walkthrough",
+      "ctaSecondary": "See what you get",
       "bonusNote": "14 days free — plus a 1-on-1 setup call and my private agent group when you start through my link",
       "trust": [
         "14 days free",
-        "Cancel any time",
-        "Same price through my link",
-        "English & Spanish"
+        "$97/month after that",
+        "Same price either way",
+        "Cancel any time"
       ]
     },
     "video": {
-      "label": "The walkthrough",
-      "title": "See it before you buy it",
-      "subtitle": "A tour of the exact system I use every day — the pipeline, the follow-up that runs without me, and the part that books appointments while I'm on another call.",
+      "label": "A look inside",
+      "title": "This is what you're actually getting",
+      "subtitle": "Pipelines, conversations, the calendar, and the automations that run your follow-up — the whole back office under one login, instead of five subscriptions that don't talk to each other.",
       "playLabel": "Play the Agent CRM walkthrough",
       "placeholderTitle": "Walkthrough coming soon",
       "placeholderBody": "I'm recording it now. In the meantime, the button below takes you straight to Agent CRM.",
-      "caption": "No slides. Just the account."
+      "caption": "Full video walkthrough coming shortly.",
+      "imageAlt": "The Agent CRM dashboard — pipeline, conversations, calendar, and automations"
     },
     "trial": {
       "label": "No risk",
@@ -39,7 +40,7 @@
         },
         {
           "title": "Cancel before day 14 and that's it",
-          "body": "If it isn't for you, you cancel and walk away. No contract to get out of, no phone call to sit through."
+          "body": "If it isn't for you, you cancel and walk away. No contract to get out of, no phone call to sit through. If you stay, it's $97 a month."
         },
         {
           "title": "Use your setup call inside the trial",
@@ -141,7 +142,7 @@
           "body": "Ongoing access to me and to other agents running the same system. Ask the question, see what's already working for someone else, and don't lose a week being stuck."
         }
       ],
-      "note": "It costs you nothing extra — the price is identical either way. Agent CRM pays me a referral commission, and that is exactly why I can afford to spend that time on you.",
+      "note": "It costs you nothing extra. Agent CRM is $97 a month whether you sign up through my link or go straight to their site and do it yourself — the price is identical. The difference is that through my link, Agent CRM pays me a referral commission, which is exactly why I can afford to sit down and build your account with you.",
       "cta": "Start my free trial"
     },
     "steps": {
@@ -183,7 +184,7 @@
         },
         {
           "question": "Does it cost more through your link?",
-          "answer": "No. The price is exactly the same. Agent CRM pays me a referral commission at no additional cost to you, and that commission is what pays for the time I spend setting you up."
+          "answer": "No — it's $97 a month either way. Sign up through my link or go straight to Agent CRM yourself and you pay exactly the same. Agent CRM pays me a referral commission at no additional cost to you, and that commission is what pays for the time I spend setting you up. Going direct just means you pay the same $97 and get none of that."
         },
         {
           "question": "I'm brand new. Is it too early for a CRM?",
@@ -233,7 +234,7 @@
       "title": "Stop running your business out of your phone's notes app",
       "subtitle": "Start the 14-day trial through the button, send me the confirmation, and we'll have your pipeline, your calendar, and your first follow-up campaign live inside the free window.",
       "cta": "Start my 14-day free trial",
-      "note": "14 days free · Cancel any time · Same price through my link, plus the setup call and the agent group."
+      "note": "14 days free, then $97/month · Same price either way · Plus the setup call and the agent group."
     },
     "disclosure": "Affiliate disclosure: I am an Agent CRM affiliate. If you open an account through a link on this page, Agent CRM pays me a commission at no additional cost to you. I recommend it because I use it every day to run my own agency, not because of the commission."
   }

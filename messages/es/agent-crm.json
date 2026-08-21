@@ -14,9 +14,9 @@
       "bonusNote": "14 días gratis — más una llamada de configuración uno a uno y mi grupo privado de agentes al abrir tu cuenta con mi enlace",
       "trust": [
         "14 días gratis",
-        "Cancela cuando quieras",
-        "Mismo precio con mi enlace",
-        "Español e inglés"
+        "$97 al mes después",
+        "Mismo precio por donde entres",
+        "Cancela cuando quieras"
       ]
     },
     "video": {
@@ -26,7 +26,8 @@
       "playLabel": "Reproducir el recorrido de Agent CRM",
       "placeholderTitle": "El recorrido viene en camino",
       "placeholderBody": "Lo estoy grabando ahora mismo. Mientras tanto, el botón de abajo te lleva directo a Agent CRM.",
-      "caption": "Sin diapositivas. Solo la cuenta."
+      "caption": "8 minutos. Sin diapositivas, solo la cuenta.",
+      "imageAlt": "El panel de Agent CRM — pipeline, conversaciones, calendario y automatizaciones"
     },
     "trial": {
       "label": "Sin riesgo",
@@ -39,7 +40,7 @@
         },
         {
           "title": "Cancela antes del día 14 y ya",
-          "body": "Si no es para ti, cancelas y listo. No hay contrato del que salirte ni llamada que aguantar."
+          "body": "Si no es para ti, cancelas y listo. No hay contrato del que salirte ni llamada que aguantar. Si te quedas, son $97 al mes."
         },
         {
           "title": "Usa tu llamada de configuración dentro de la prueba",
@@ -141,7 +142,7 @@
           "body": "Acceso continuo a mí y a otros agentes que usan el mismo sistema. Haz la pregunta, mira lo que ya le está funcionando a alguien más y no pierdas una semana atorado."
         }
       ],
-      "note": "No te cuesta nada extra: el precio es idéntico de cualquier forma. Agent CRM me paga una comisión por la referencia, y por eso justamente puedo darte ese tiempo.",
+      "note": "No te cuesta nada extra. Agent CRM cuesta $97 al mes, entres por mi enlace o vayas directamente a su página y lo hagas por tu cuenta — el precio es idéntico. La diferencia es que por mi enlace Agent CRM me paga una comisión por la referencia, y por eso justamente puedo sentarme a armar tu cuenta contigo.",
       "cta": "Comenzar mi prueba gratis"
     },
     "steps": {
@@ -183,7 +184,7 @@
         },
         {
           "question": "¿Cuesta más si entro con tu enlace?",
-          "answer": "No. El precio es exactamente el mismo. Agent CRM me paga una comisión por la referencia sin ningún costo adicional para ti, y esa comisión es la que paga el tiempo que invierto en configurarte."
+          "answer": "No — son $97 al mes de cualquier forma. Entres por mi enlace o vayas directo a Agent CRM por tu cuenta, pagas exactamente lo mismo. Agent CRM me paga una comisión por la referencia sin ningún costo adicional para ti, y esa comisión es la que paga el tiempo que invierto en configurarte. Ir por tu cuenta solo significa que pagas los mismos $97 y no recibes nada de eso."
         },
         {
           "question": "Soy nuevo. ¿Es muy pronto para un CRM?",
@@ -233,7 +234,7 @@
       "title": "Deja de manejar tu negocio desde las notas del celular",
       "subtitle": "Empieza la prueba de 14 días con el botón, mándame la confirmación y dejamos tu pipeline, tu calendario y tu primera campaña de seguimiento funcionando dentro de la ventana gratis.",
       "cta": "Comenzar mi prueba gratis de 14 días",
-      "note": "14 días gratis · Cancela cuando quieras · Mismo precio con mi enlace, más la llamada de configuración y el grupo de agentes."
+      "note": "14 días gratis, luego $97 al mes · Mismo precio por donde entres · Más la llamada de configuración y el grupo de agentes."
     },
     "disclosure": "Aviso de afiliación: soy afiliado de Agent CRM. Si abres una cuenta con un enlace de esta página, Agent CRM me paga una comisión sin ningún costo adicional para ti. Lo recomiendo porque lo uso todos los días para manejar mi propia agencia, no por la comisión."
   }

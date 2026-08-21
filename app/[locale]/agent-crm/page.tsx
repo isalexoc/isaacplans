@@ -30,7 +30,7 @@ import AgentCrmWalkthrough from "@/components/agent-crm/agent-crm-video";
 import {
   AGENT_CRM_ISAAC_PHOTO,
   agentCrmOgImage,
-  agentCrmVideo,
+  agentCrmMedia,
 } from "@/lib/agent-crm-affiliate";
 import { routing } from "@/i18n/routing";
 
@@ -122,7 +122,7 @@ export default async function AgentCrmPage({ params }: PageProps) {
   const steps = t.raw("steps.items") as Item[];
   const faqs = t.raw("faq.items") as Faq[];
 
-  const video = agentCrmVideo(safeLocale === "es" ? "es" : "en");
+  const media = agentCrmMedia(safeLocale === "es" ? "es" : "en");
 
   /* Built inline rather than added as a fifth near-identical `get*FaqLd` helper in lib/seo. */
   const faqLd = {
@@ -218,8 +218,9 @@ export default async function AgentCrmPage({ params }: PageProps) {
 
           <div className="mt-9">
             <AgentCrmWalkthrough
-              video={video}
+              media={media}
               playLabel={t("video.playLabel")}
+              imageAlt={t("video.imageAlt")}
               placeholderTitle={t("video.placeholderTitle")}
               placeholderBody={t("video.placeholderBody")}
             />
