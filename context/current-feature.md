@@ -32,8 +32,23 @@ capture. Full site header and footer stay on for credibility.
 - FAQPage JSON-LD, per-language `og:image` / canonical / hreflang, and the FTC affiliate
   disclosure on the page itself.
 
-**Pending from Isaac:** the EN/ES walkthrough videos and the EN/ES OG share cards. Until then the
-video slot shows the "coming soon" frame and the OG card falls back to the site default.
+- **Free trial** (branch `feature/agent-crm-free-trial`): every account gets 14 days free, which
+  is the page's strongest lever, so it leads rather than hiding in the FAQ. All five CTAs read
+  "Start my 14-day free trial", the `og:description` opens with it in both languages, and a
+  dedicated emerald "No risk" band sits directly after the walkthrough — an agent who just watched
+  the video has exactly one question left, and it is what this costs to find out. Emerald rather
+  than brand blue so it reads as a separate promise from the "why through my link" card below it.
+  The third card is the one that matters commercially: book the setup call *inside* the trial, so
+  the fortnight is spent judging a configured system instead of an empty account.
+  Copy deliberately never claims "no credit card required" — that was not established, and it is
+  the one trial claim that damages trust if wrong. Everything written is true either way.
+
+**Pending from Isaac:** the EN/ES walkthrough videos, and whether the trial requires a card at
+signup (if it does not, saying so is worth another lift). Until the clips land the video slot
+shows the "coming soon" frame.
+
+**Known issue:** the EN/ES OG share cards Isaac supplied read "Agency CRM"; the product is "Agent
+CRM". Flagged, not yet resolved — they are live on `main`.
 
 ---
 

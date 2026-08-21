@@ -2,19 +2,20 @@
   "agentCrm": {
     "metadata": {
       "title": "El CRM con el que manejo mi negocio de seguros | Isaac Plans",
-      "description": "Un solo acceso para tus prospectos, tu seguimiento, tus mensajes, tu calendario y tus embudos. Mira el recorrido y recibe una llamada de configuración gratis, uno a uno, al abrir tu cuenta con mi enlace.",
+      "description": "Pruébalo gratis 14 días. Un solo acceso para tus prospectos, tu seguimiento, tus mensajes, tu calendario y tus embudos — más una llamada de configuración uno a uno, gratis, al abrir tu cuenta con mi enlace.",
       "imageAlt": "Agent CRM para agentes de seguros, recomendado por Isaac Orraiz"
     },
     "hero": {
       "badge": "Para agentes de seguros",
       "title": "El CRM con el que manejo todo mi negocio de seguros",
-      "subtitle": "Prospectos, seguimiento, mensajes, llamadas, calendarios, embudos y pipelines — un solo acceso, casi todo en automático. Mira el recorrido, abre tu cuenta y yo te la configuro contigo, uno a uno.",
-      "cta": "Comenzar con Agent CRM",
+      "subtitle": "Prospectos, seguimiento, mensajes, llamadas, calendarios, embudos y pipelines — un solo acceso, casi todo en automático. Todos empiezan con 14 días gratis, así que puedes pasar tus propios prospectos por el sistema antes de pagar un dólar.",
+      "cta": "Comenzar mi prueba gratis de 14 días",
       "ctaSecondary": "Ver el recorrido",
-      "bonusNote": "Llamada de configuración gratis, uno a uno, y mi grupo privado de agentes al abrir tu cuenta con mi enlace",
+      "bonusNote": "14 días gratis — más una llamada de configuración uno a uno y mi grupo privado de agentes al abrir tu cuenta con mi enlace",
       "trust": [
+        "14 días gratis",
+        "Cancela cuando quieras",
         "Mismo precio con mi enlace",
-        "Lo configuramos contigo, no por ti",
         "Español e inglés"
       ]
     },
@@ -26,6 +27,27 @@
       "placeholderTitle": "El recorrido viene en camino",
       "placeholderBody": "Lo estoy grabando ahora mismo. Mientras tanto, el botón de abajo te lleva directo a Agent CRM.",
       "caption": "Sin diapositivas. Solo la cuenta."
+    },
+    "trial": {
+      "label": "Sin riesgo",
+      "title": "Prueba todo el sistema gratis por 14 días",
+      "subtitle": "Cada cuenta empieza con 14 días de prueba gratis. No es una cuenta de demostración ni una versión limitada — es el sistema completo, con tus propios prospectos adentro.",
+      "items": [
+        {
+          "title": "Acceso completo desde el primer día",
+          "body": "Pipelines, automatizaciones, el calendario, los embudos, la app del celular. Estás evaluando exactamente lo que pagarías, no una versión recortada."
+        },
+        {
+          "title": "Cancela antes del día 14 y ya",
+          "body": "Si no es para ti, cancelas y listo. No hay contrato del que salirte ni llamada que aguantar."
+        },
+        {
+          "title": "Usa tu llamada de configuración dentro de la prueba",
+          "body": "Aquí es donde se equivocan casi todos. Agenda la llamada en los primeros días y pasas la prueba evaluando un sistema ya armado para tu negocio — no una cuenta vacía que nunca terminaste de configurar."
+        }
+      ],
+      "note": "La mayoría de los que abandonan un CRM lo abandonan porque nunca terminaron de configurarlo. Para eso es exactamente la llamada, y por eso va dentro de la prueba y no después.",
+      "cta": "Comenzar mi prueba gratis de 14 días"
     },
     "problem": {
       "label": "¿Te suena conocido?",
@@ -120,7 +142,7 @@
         }
       ],
       "note": "No te cuesta nada extra: el precio es idéntico de cualquier forma. Agent CRM me paga una comisión por la referencia, y por eso justamente puedo darte ese tiempo.",
-      "cta": "Comenzar con Agent CRM"
+      "cta": "Comenzar mi prueba gratis"
     },
     "steps": {
       "label": "Cómo empezar",
@@ -131,12 +153,12 @@
           "body": "Ve lo que el sistema realmente hace antes de gastar un dólar en él."
         },
         {
-          "title": "Abre tu cuenta",
-          "body": "Usa el botón de esta página para que la referencia quede acreditada — ese crédito es lo que activa tu llamada de configuración."
+          "title": "Empieza tu prueba gratis",
+          "body": "Usa el botón de esta página para que la referencia quede acreditada — ese crédito es lo que activa tu llamada de configuración. Los 14 días empiezan aquí."
         },
         {
           "title": "Mándame tu confirmación",
-          "body": "Escríbeme por mensaje o correo que ya entraste, y ponemos tu llamada en el calendario esa misma semana."
+          "body": "Escríbeme por mensaje o correo que ya entraste, y agendamos tu llamada dentro de la prueba para que evalúes un sistema que de verdad funciona."
         }
       ]
     },
@@ -176,6 +198,14 @@
           "answer": "Sí, y puedes correr los dos mientras migras. Sácalo en la llamada de configuración y trazamos qué se mueve primero para que no se pierda nada en el camino."
         },
         {
+          "question": "¿Tengo que pagar algo para probarlo?",
+          "answer": "No. Cada cuenta empieza con 14 días de prueba gratis, así que puedes pasar tus propios prospectos por el sistema antes de pagarlo. Si cancelas antes de que termine la prueba, no se te cobra."
+        },
+        {
+          "question": "¿Qué pasa al final de los 14 días?",
+          "answer": "Si te quedas, tu plan simplemente comienza. Si no es para ti, cancelas antes de que termine la prueba y ahí queda — no hay contrato ni nada que negociar para salirte."
+        },
+        {
           "question": "¿Cómo reclamo la llamada y el grupo?",
           "answer": "Abre tu cuenta con el botón de esta página y mándame tu confirmación. O usa el formulario de abajo y yo te contacto."
         }
@@ -201,9 +231,9 @@
     },
     "finalCta": {
       "title": "Deja de manejar tu negocio desde las notas del celular",
-      "subtitle": "Abre tu cuenta con el botón, mándame la confirmación y esta misma semana dejamos tu pipeline, tu calendario y tu primera campaña de seguimiento funcionando.",
-      "cta": "Comenzar con Agent CRM",
-      "note": "Mismo precio con mi enlace — más la llamada de configuración y el grupo de agentes."
+      "subtitle": "Empieza la prueba de 14 días con el botón, mándame la confirmación y dejamos tu pipeline, tu calendario y tu primera campaña de seguimiento funcionando dentro de la ventana gratis.",
+      "cta": "Comenzar mi prueba gratis de 14 días",
+      "note": "14 días gratis · Cancela cuando quieras · Mismo precio con mi enlace, más la llamada de configuración y el grupo de agentes."
     },
     "disclosure": "Aviso de afiliación: soy afiliado de Agent CRM. Si abres una cuenta con un enlace de esta página, Agent CRM me paga una comisión sin ningún costo adicional para ti. Lo recomiendo porque lo uso todos los días para manejar mi propia agencia, no por la comisión."
   }

@@ -5,6 +5,7 @@ import { getTranslations } from "next-intl/server";
 import {
   BarChart3,
   CalendarCheck,
+  CalendarClock,
   Check,
   Clock,
   HelpCircle,
@@ -13,9 +14,11 @@ import {
   MessageSquare,
   PhoneCall,
   Quote,
+  ShieldCheck,
   Smartphone,
   Sparkles,
   Star,
+  Unlock,
   Users,
   Wallet,
   Zap,
@@ -53,6 +56,9 @@ const FEATURE_ICONS: LucideIcon[] = [
 
 /** Positional icons for `agentCrm.bonus.items`. */
 const BONUS_ICONS: LucideIcon[] = [PhoneCall, Users];
+
+/** Positional icons for `agentCrm.trial.items`. */
+const TRIAL_ICONS: LucideIcon[] = [Unlock, ShieldCheck, CalendarClock];
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { locale } = await params;
@@ -111,6 +117,7 @@ export default async function AgentCrmPage({ params }: PageProps) {
   const problems = t.raw("problem.items") as Item[];
   const features = t.raw("features.items") as Item[];
   const replaces = t.raw("replaces.items") as string[];
+  const trials = t.raw("trial.items") as Item[];
   const bonuses = t.raw("bonus.items") as Item[];
   const steps = t.raw("steps.items") as Item[];
   const faqs = t.raw("faq.items") as Faq[];
@@ -224,6 +231,63 @@ export default async function AgentCrmPage({ params }: PageProps) {
 
           <div className="mt-8 flex justify-center">
             <AgentCrmCta label={t("hero.cta")} placement="under_video" />
+          </div>
+        </div>
+      </section>
+
+      {/* ──────────────────── The free trial (risk reversal) ────────────────────
+          Sits directly after the walkthrough on purpose: an agent who just watched the video and
+          is interested has exactly one question left — what does it cost me to find out? Answering
+          it here, before the pitch continues, is worth more than answering it in the FAQ.
+
+          Emerald rather than the brand blue so it reads as a separate promise from the "why
+          through my link" card further down, instead of blurring into one offer. */}
+      <section className="bg-emerald-50 py-14 dark:bg-emerald-950/20 sm:py-20">
+        <div className="mx-auto max-w-5xl px-4">
+          <div className="text-center">
+            <span className="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-4 py-1.5 text-xs font-bold uppercase tracking-wide text-white sm:text-sm">
+              <Sparkles className="h-4 w-4 flex-shrink-0" />
+              {t("trial.label")}
+            </span>
+            <h2 className="mt-5 text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-3xl lg:text-4xl">
+              {t("trial.title")}
+            </h2>
+            <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-slate-700 dark:text-slate-300">
+              {t("trial.subtitle")}
+            </p>
+          </div>
+
+          <div className="mt-10 grid gap-5 sm:grid-cols-3">
+            {trials.map((item, i) => {
+              const Icon = TRIAL_ICONS[i] ?? Check;
+              return (
+                <div
+                  key={item.title}
+                  className="rounded-2xl border border-emerald-200 bg-white p-6 shadow-sm dark:border-emerald-900/60 dark:bg-slate-900"
+                >
+                  <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-900/40">
+                    <Icon
+                      className="h-5 w-5 text-emerald-600 dark:text-emerald-400"
+                      aria-hidden
+                    />
+                  </span>
+                  <h3 className="mt-4 text-base font-bold text-slate-900 dark:text-white">
+                    {item.title}
+                  </h3>
+                  <p className="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+                    {item.body}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+
+          <p className="mx-auto mt-8 max-w-2xl text-center text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+            {t("trial.note")}
+          </p>
+
+          <div className="mt-7 flex justify-center">
+            <AgentCrmCta label={t("trial.cta")} placement="trial" />
           </div>
         </div>
       </section>
