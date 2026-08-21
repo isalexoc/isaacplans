@@ -23,6 +23,8 @@ import { BlogNewsletter } from "@/components/blog-newsletter";
 import BlogPostTracker from "@/components/blog-post-tracker";
 import { BlogModalOverride } from "@/components/blog-modal-override";
 import { cloudinaryFetchedFeaturedHeroUrl, cloudinaryOgImageUrl, cloudinaryFetchedImageUrl } from "@/lib/blog-featured-image";
+import { parseBlogVideoUrl, blogVideoPosterSize } from "@/lib/blog-featured-video";
+import BlogFeaturedVideo from "@/components/blog-featured-video";
 import { getLicensedStateCount } from "@/lib/licensed-states";
 import { BlogScrollFloatingCTA } from "@/components/blog-scroll-floating-cta";
 import { client } from "@/sanity/lib/client";
@@ -49,6 +51,7 @@ const POST_QUERY = `*[_type == "post" && slug.current == $slug && locale == $loc
   updatedAt,
   image,
   ogImage,
+  featuredVideo,
   body,
   locale,
   category,
@@ -87,6 +90,7 @@ const FIND_RELATED_QUERY = `*[
   updatedAt,
   image,
   ogImage,
+  featuredVideo,
   body,
   locale,
   category,
@@ -334,6 +338,19 @@ export default async function BlogPostPage({
   const featuredImageUrl = sanityFeaturedSrc
     ? cloudinaryFetchedFeaturedHeroUrl(sanityFeaturedSrc) ?? sanityFeaturedSrc
     : null;
+
+  /**
+   * A featured video, when the editor set one, plays in the slot the featured image would occupy
+   * — but only on the post page itself. Listings, search results, `og:image`, and the newsletter
+   * all keep using the image, which is also the video's poster, cropped to the player's shape.
+   */
+  const featuredVideo = parseBlogVideoUrl(post.featuredVideo);
+  const featuredAlt: string = post.ogImage?.alt || post.image?.alt || post.title;
+  const videoPosterUrl = (() => {
+    if (!featuredVideo || !sanityFeaturedSrc) return null;
+    const { width, height } = blogVideoPosterSize(featuredVideo.orientation);
+    return cloudinaryFetchedImageUrl(sanityFeaturedSrc, width, height) ?? sanityFeaturedSrc;
+  })();
 
   // Determine if there's a related post in another language
   const relatedPost = post.relatedPost;
@@ -678,17 +695,22 @@ export default async function BlogPostPage({
       />
       </header>
 
-      {/* Featured image: Cloudinary fetch crop-fills 16:9 (`c_fill,g_auto`; no padded gutters) */}
-      {featuredImageUrl && (
+      {/* Featured video when the post has one, otherwise the featured image. Either way the
+          still goes through a Cloudinary fetch that crop-fills the shape (`c_fill,g_auto`;
+          no padded gutters). */}
+      {featuredVideo ? (
+        <BlogFeaturedVideo
+          video={featuredVideo}
+          posterUrl={videoPosterUrl}
+          alt={featuredAlt}
+          locale={locale}
+        />
+      ) : featuredImageUrl ? (
         <figure className="mb-8 w-full overflow-hidden rounded-xl shadow-lg ring-1 ring-black/5 dark:ring-white/10">
           <div className="relative aspect-video w-full">
             <Image
               src={featuredImageUrl}
-              alt={
-                post.ogImage?.alt ||
-                post.image?.alt ||
-                post.title
-              }
+              alt={featuredAlt}
               fill
               className="object-cover object-center"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) min(90vw, 896px), 896px"
@@ -696,7 +718,7 @@ export default async function BlogPostPage({
             />
           </div>
         </figure>
-      )}
+      ) : null}
 
       {/* Content - First Half */}
       <div className="max-w-none">

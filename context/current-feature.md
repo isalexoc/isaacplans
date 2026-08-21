@@ -37,6 +37,47 @@ video slot shows the "coming soon" frame and the OG card falls back to the site 
 
 ---
 
+In progress: **Blog featured video** (branch `feature/blog-featured-video`) — a blog post can now
+carry a video URL alongside its featured image. The image stays the canonical artwork everywhere
+it already is (listings, search, `og:image`, newsletter, JSON-LD); the video only replaces it in
+the hero slot of the post page itself, with the image serving as its poster frame.
+
+- **Studio**: new collapsible `featuredVideo` object on `post` — a **Video URL** (YouTube, Vimeo,
+  or a direct `.mp4`/`.webm`/`.mov`, Cloudinary included; https only, validated against the same
+  parser the page renders with) and an **Orientation** radio (landscape 16:9 / vertical 9:16 /
+  square 1:1). Nothing is uploaded to Sanity — the clips already live on YouTube or in Cloudinary.
+- **`lib/blog-featured-video.ts`**: dependency-free URL parser shared by the schema and the page,
+  so validation and rendering can't drift. Unparseable URL → null → the page falls back to the
+  plain image, so a bad link can degrade the hero but never blank it.
+- **`components/blog-featured-video.tsx`**: click-to-play facade over the poster. The embed only
+  mounts on click, so a video post costs the same on first paint as an image post instead of
+  pulling ~800 KB of YouTube JS into the LCP path for readers who never press play.
+
+Verified:
+- **Parser** — 42 cases through a throwaway harness: every YouTube shape (`watch?v=`, `youtu.be`,
+  `/shorts/`, `/embed/`, `/live/`, `m.`, `-nocookie`, extra params), Vimeo including the unlisted
+  hash in both its path and `?h=` forms, and Cloudinary video URLs that carry no file extension
+  once a transformation is applied. Correctly rejects `http:` (mixed content), `javascript:`,
+  channel pages, Cloudinary *image* URLs, and empty input. `isSupportedBlogVideoUrl` agrees with
+  `parseBlogVideoUrl` on every case, so the Studio cannot accept a link the page would drop.
+- **The LCP claim holds** — with a video set, the initial HTML carries **0 `<iframe>` tags** and
+  **0 bytes of YouTube JS**; the embed URL appears only as a serialized prop in the RSC payload.
+- **Both orientations render** — landscape full-width 16:9, vertical constrained to 420px and
+  centered, posters cropped to 1600×900 and 720×1280 to match each player's shape.
+- **No regression** on existing posts: the diff rewrote the featured-image branch, and a post
+  without a video still renders its hero image identically.
+- Fixed while verifying: `start()` carried a comment copied from `components/media/
+  hero-video-player.tsx` claiming the `<video>` is already mounted. It is not — here the element
+  sits behind `started`, so autoplay depended on React committing before the frame callback
+  rather than being guaranteed. The element now carries `autoPlay`, with the `play()` call kept as
+  a caught fallback.
+
+**Not yet exercised end to end:** no post has `featuredVideo` set, so a real clip has never played
+on a live page. The video path was verified by injecting a URL locally and reverting. Pasting a
+video link into any post in the Studio is the remaining check.
+
+---
+
 In progress: **Apply pages, shared intake engine, and admin-editable hero media (image or
 video)** — a three-phase feature. Approved plan saved at
 `C:\Users\isale\.claude\plans\i-need-to-do-sleepy-lagoon.md`.
