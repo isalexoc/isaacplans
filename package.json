@@ -20,7 +20,7 @@
     "fe-intake:fields": "tsx scripts/create-fe-intake-fields.ts",
     "intake:fields": "tsx scripts/create-intake-fields.ts",
     "test:call-summary": "tsx scripts/test-call-summary.ts",
-    "warm:media": "tsx scripts/warm-cloudinary-media.ts",
+    "warm:media": "tsx --conditions=react-server scripts/warm-cloudinary-media.ts",
     "test:missed-call-drafts": "tsx scripts/test-missed-call-drafts.ts",
     "seed:call-dashboard": "tsx scripts/seed-call-dashboard-fixtures.ts",
     "postinstall": "node node_modules/ffmpeg-static/install.js"
