@@ -5,7 +5,7 @@ import { db } from "@/lib/db";
 import { appSettings } from "@/lib/db/schema";
 import { LOBS, LOB_SLUGS, mediaLocaleOf, surfacesFor, type HeroMedia, type LobSlug, type MediaKind, type MediaLocale, type MediaSurface, type PageMediaRow, type VideoPlayback } from "./shared";
 import { defaultMedia } from "./defaults";
-import { isAllowedCloudinaryUrl, isVideoUrl } from "./cloudinary-urls";
+import { isAllowedCloudinaryUrl, isVideoUrl, withPinnedVideoTransform } from "./cloudinary-urls";
 
 /**
  * Admin-editable hero + social-share media for every line-of-business page.
@@ -81,7 +81,10 @@ export function parseMedia(raw: string | null | undefined): HeroMedia | null {
       if (parsed.t === "video" && parsed.url && isAllowedCloudinaryUrl(parsed.url)) {
         return {
           type: "video",
-          url: parsed.url,
+          // Normalised on read: the stored URL carries whatever transform was current when it was
+          // uploaded, and a video must be on the one pinned format so only a single derived asset
+          // ever exists. See `withPinnedVideoTransform`.
+          url: withPinnedVideoTransform(parsed.url),
           posterUrl: parsed.poster && isAllowedCloudinaryUrl(parsed.poster) ? parsed.poster : "",
           posterCustom: parsed.posterCustom === true,
           playback: parsed.play === "click" ? "click" : "loop",

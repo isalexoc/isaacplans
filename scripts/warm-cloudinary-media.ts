@@ -1,21 +1,39 @@
 /**
- * Force Cloudinary to generate every derived asset the /agent-crm page delivers, so no visitor is
- * ever the one who pays for a transcode.
+ * Force Cloudinary to generate every derived asset the site delivers, so no visitor is ever the
+ * one who pays for a transcode.
  *
  *   pnpm warm:media
+ *
+ * (The npm script passes `--conditions=react-server`. `lib/page-media/settings.ts` imports
+ * `server-only`, whose default entrypoint throws outside a server component; that package ships an
+ * empty module under the `react-server` condition, so asking Node to resolve with it lets a plain
+ * script reuse the real settings code instead of a second, driftable copy of it.)
  *
  * ─── Why this exists ───
  *
  * Cloudinary stores the original on upload, but a URL carrying a transformation
- * (`w_1600,c_limit,f_mp4,...`) describes a file that does not exist until somebody asks for it.
- * The first request triggers the transcode and waits for it. For the Spanish walkthrough — a
- * 493.9 MB master — that is minutes, and the person paying it is whoever pressed play first.
+ * (`f_mp4,vc_h264,w_1280,...`) describes a file that does not exist until somebody asks for it.
+ * The first request triggers the transcode and waits for it. For the Spanish Final Expense hero —
+ * eleven minutes — or the /agent-crm walkthrough — a 493.9 MB master — that is minutes of a
+ * visitor watching a spinner above the fold.
  *
  * Requesting each URL once moves that cost here. Cloudinary then stores the derived asset and
  * serves it from its CDN to everyone afterwards.
  *
- * Run this after changing a transformation string, swapping a video, or uploading new artwork.
- * Re-running is free once the assets are warm — it simply confirms each one responds immediately.
+ * Run this after uploading a hero video in /admin/hero, swapping a clip, or changing a
+ * transformation string. Re-running is cheap once assets are warm — it just confirms each one
+ * answers immediately.
+ *
+ * ─── What it covers ───
+ *
+ *  - /agent-crm: the walkthrough, posters, stills and share cards.
+ *  - Every page-media hero cell: the built-in defaults AND the overrides saved in /admin/hero,
+ *    read straight from the database so an uploaded video is warmed without anyone maintaining a
+ *    second list. Needs DATABASE_URL; without it the page-media half is skipped with a warning
+ *    rather than failing the run.
+ *
+ * Only videos and their posters are worth waiting on. Plain images derive in milliseconds, but
+ * they are requested too — it costs nothing and confirms the URL is actually valid.
  *
  * ─── What "ready" means ───
  *
@@ -25,6 +43,7 @@
  */
 import "dotenv/config";
 import { agentCrmMediaUrls } from "../lib/agent-crm-affiliate";
+import { getPageMediaForAdmin } from "../lib/page-media/settings";
 
 /** A warm asset answers well within this; a cold one is transcoding and will blow through it. */
 const CHUNK_TIMEOUT_MS = 60_000;
@@ -86,9 +105,51 @@ async function warm(label: string, url: string): Promise<boolean> {
   return false;
 }
 
+/**
+ * Every hero cell's live media — the override when one is saved, otherwise the built-in default.
+ * Deduplicated, because the same still backs several cells and warming it eight times is waste.
+ */
+async function pageMediaAssets(): Promise<{ label: string; url: string }[]> {
+  let rows;
+  try {
+    rows = await getPageMediaForAdmin();
+  } catch (error) {
+    process.stdout.write(
+      `\n⚠ Skipping page-media heroes — could not read settings ` +
+        `(${error instanceof Error ? error.message : String(error)}).\n` +
+        `  Set DATABASE_URL to warm admin-uploaded hero videos too.\n`
+    );
+    return [];
+  }
+
+  const seen = new Set<string>();
+  const out: { label: string; url: string }[] = [];
+
+  for (const row of rows) {
+    // What the page actually renders today, which is the only thing worth warming.
+    const media = row.override ?? row.defaultMedia;
+    const where = `${row.lob}/${row.surface}/${row.kind}/${row.locale}`;
+    const source = row.override ? "override" : "default";
+
+    const push = (label: string, url: string | undefined) => {
+      if (!url || seen.has(url)) return;
+      seen.add(url);
+      out.push({ label, url });
+    };
+
+    if (media.type === "video") {
+      push(`${where} video (${source})`, media.url);
+      push(`${where} poster (${source})`, media.posterUrl);
+    } else {
+      push(`${where} image (${source})`, media.url);
+    }
+  }
+  return out;
+}
+
 async function main(): Promise<void> {
-  const assets = agentCrmMediaUrls();
-  process.stdout.write(`Warming ${assets.length} Cloudinary assets for /agent-crm\n`);
+  const assets = [...agentCrmMediaUrls(), ...(await pageMediaAssets())];
+  process.stdout.write(`Warming ${assets.length} Cloudinary assets\n`);
 
   const failed: string[] = [];
   for (const { label, url } of assets) {
@@ -99,16 +160,17 @@ async function main(): Promise<void> {
   process.stdout.write("\n" + "─".repeat(60) + "\n");
   if (failed.length === 0) {
     process.stdout.write(`All ${assets.length} assets are generated and served from CDN.\n`);
-    return;
+    // Explicit exit: the Neon client holds the event loop open otherwise.
+    process.exit(0);
   }
   process.stdout.write(`${failed.length} asset(s) not confirmed: ${failed.join(", ")}\n`);
   process.stdout.write(
     "A large video can legitimately still be transcoding — re-run this in a few minutes.\n"
   );
-  process.exitCode = 1;
+  process.exit(1);
 }
 
 main().catch((error) => {
   console.error("warm:media failed:", error);
-  process.exitCode = 1;
+  process.exit(1);
 });

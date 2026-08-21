@@ -2,6 +2,36 @@
 
 ## Status
 
+In progress: **Pinned hero video format, site-wide** (branch `feature/hero-video-pin-format`) —
+the same Cloudinary cold-start fix applied to `/agent-crm`, now applied to every hero video on the
+site, starting from the Spanish Final Expense apply hero Isaac asked about.
+
+`lib/page-media/cloudinary-urls.ts` `HERO_VIDEO_TRANSFORM` was
+`f_auto,q_auto,vc_auto,w_1280,c_limit` — chosen so modern browsers got VP9/AV1 and older ones
+H.264. Sound for a short clip, wrong for a hero: Cloudinary derives a separate asset per browser
+family and transcodes each on the first request for it. Measured on the 11-minute FE apply hero:
+Chrome got `webm; vp9` at 30.4 MB (etag `bff9e3ec`), Safari on iPhone `mp4; hvc1` at 37.7 MB (etag
+`5ad46c02`). Two files, two cold starts, above the fold. Now `f_mp4,vc_h264,q_auto:good,w_1280,c_limit`.
+
+**The part that nearly got missed:** an override saved in /admin/hero stores the FULL delivery URL
+with that day's transform baked in, so changing the constant fixes the built-in defaults and
+silently skips every video Isaac actually uploaded — exactly the ones most likely to be cold. The
+`final-expense/main/hero/es` override was still on `f_auto,q_auto,w_1280`. `parseMedia` now runs
+stored video URLs through `withPinnedVideoTransform`, so old and new overrides normalise on read
+with no data migration. Its segment detector is an allow-list of Cloudinary parameter prefixes,
+not a "letters then underscore" test, because the naive version eats a folder called `my_videos`
+and turns a working URL into a 404 — covered by a case in the throwaway check.
+
+Verified after warming: both FE videos return an identical ETag, byte count and content-type to
+Chrome, iPhone and Android, every request under 0.12 s.
+
+`pnpm warm:media` now covers page-media too — it reads every hero cell's live media (override when
+set, default otherwise) straight from the database, so an admin upload is warmed without anyone
+maintaining a second list. It runs with `--conditions=react-server` so a plain script can import
+the real `settings.ts` (which pulls in `server-only`) instead of a driftable copy of it. Current
+run: 36 assets, all generated and CDN-served.
+
+
 In progress: **Agent CRM affiliate page** (branch `feature/agent-crm-affiliate`) — a shareable
 page at `/agent-crm` (same slug in both languages) that Isaac sends to other insurance agents to
 promote his Agent CRM affiliate link, `https://www.agent-crm.com/?fpr=isaacplans`.
