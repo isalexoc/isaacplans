@@ -26,39 +26,87 @@ export const AGENT_CRM_AFFILIATE_LEAD_SOURCE = "agent_crm_affiliate";
 /** CRM tag applied to those contacts, so recruits never mix into a client workflow. */
 export const AGENT_CRM_AFFILIATE_LEAD_TAG = "agent-crm-affiliate";
 
-/* ────────────────────────── Creative (placeholders) ────────────────────────── */
+/* ────────────────────────── Creative ────────────────────────── */
+
+const CLOUDINARY_IMAGE = "https://res.cloudinary.com/isaacdev/image/upload";
+const CLOUDINARY_VIDEO = "https://res.cloudinary.com/isaacdev/video/upload";
 
 /**
- * The walkthrough video, per language.
- *
- * `url` is null until the real clips are recorded — the player renders a designed "coming soon"
- * frame instead of a play button that does nothing. Drop a YouTube link or a Cloudinary/direct
- * `.mp4` in and the same slot becomes a click-to-play player with no other change.
- *
- * `posterUrl` is the still shown before play; null falls back to a brand gradient. It goes through
- * `next/image`, so it must be on a host listed in next.config.mjs `remotePatterns` — today that's
- * Cloudinary or Sanity. A YouTube thumbnail (`i.ytimg.com`) would need that host added first, so
- * uploading the frame to Cloudinary is the cheaper path.
+ * Cloudinary public ids for the two designed cards. They do double duty: `og:image` for shares,
+ * and on-page artwork in the hero-media slot (the Spanish video's poster, the English still).
+ * Kept as bare ids so each use can pick its own transformation chain.
  */
-export type AgentCrmVideo = {
-  url: string | null;
+const CARD_EN = "v1787281762/a7ba13a3-0bfd-44ee-8bd7-68f572e7b53d_sqn19f.png";
+const CARD_ES = "v1787281763/0341ac60-8dce-4d30-b358-78b7238cee4c_m9kcwm.png";
+
+/**
+ * On-page artwork sizing. The slot is capped by a `max-w-5xl` column, so it never renders wider
+ * than ~1024 CSS px; 1600 keeps it crisp on a 2× display without shipping the 1.5 MB master.
+ * `c_limit` never upscales, so a smaller replacement card degrades gracefully.
+ */
+const HERO_IMAGE_TRANSFORM = "w_1600,c_limit,f_auto,q_auto";
+
+/**
+ * Delivery chain for the walkthrough. Measured against the real master, not assumed:
+ *
+ * | variant                       | dimensions | size     |
+ * | ----------------------------- | ---------- | -------- |
+ * | original                      | 1994×1080  | 493.9 MB |
+ * | `w_1280,q_auto`               | 1280×692   |  32.1 MB |
+ * | `w_1600,q_auto`  ← chosen     | 1600×866   |  40.7 MB |
+ * | `w_1280,q_auto:eco`           | 1280×692   |  27.3 MB |
+ *
+ * 1600 over the cheaper 1280 because this is a screen recording of a CRM: the whole point is
+ * reading the pipeline and the automation steps, and downscaling a 1994 px capture to 1280
+ * softens exactly the small UI text somebody pressed play to look at. The extra 8.6 MB buys back
+ * that legibility and costs nothing to the visitors who never press play — the player is a
+ * click-to-play facade, so the file is not fetched until it is asked for, and it then streams
+ * progressively rather than downloading up front.
+ */
+const VIDEO_TRANSFORM = "w_1600,c_limit,f_auto,q_auto";
+
+/**
+ * What fills the slot under "the walkthrough" heading, per language.
+ *
+ * Exactly one of `videoUrl` / `imageUrl` is expected to be set. A video renders a click-to-play
+ * player; an image renders a plain still, for a language whose clip has not been recorded yet.
+ * With neither, the slot falls back to a designed "coming soon" frame rather than a play button
+ * that does nothing.
+ *
+ * Everything here goes through `next/image` or a native `<video>`, so any replacement must sit on
+ * a host listed in next.config.mjs `remotePatterns` — today Cloudinary or Sanity. A YouTube
+ * thumbnail (`i.ytimg.com`) would need that host added first, so uploading the frame to
+ * Cloudinary is the cheaper path.
+ */
+export type AgentCrmHeroMedia = {
+  /** YouTube, Vimeo, or a direct/Cloudinary video file. Null when there is no clip yet. */
+  videoUrl: string | null;
+  /** Still shown before play. Null falls back to a brand gradient behind the play button. */
   posterUrl: string | null;
+  /** Static artwork used INSTEAD of a player while `videoUrl` is null. */
+  imageUrl: string | null;
 };
 
-/** PLACEHOLDER — replace `url` with the English walkthrough once it is recorded. */
-export const AGENT_CRM_VIDEO_EN: AgentCrmVideo = {
-  url: null,
+/**
+ * English has no walkthrough recorded yet, so the slot shows the English card as a still. The
+ * section's English copy is written for a picture rather than a tour — see `messages/en`; when the
+ * clip lands, set `videoUrl` here and put the walkthrough wording back.
+ */
+export const AGENT_CRM_MEDIA_EN: AgentCrmHeroMedia = {
+  videoUrl: null,
   posterUrl: null,
+  imageUrl: `${CLOUDINARY_IMAGE}/${HERO_IMAGE_TRANSFORM}/${CARD_EN}`,
 };
 
-/** PLACEHOLDER — replace `url` with the Spanish walkthrough once it is recorded. */
-export const AGENT_CRM_VIDEO_ES: AgentCrmVideo = {
-  url: null,
-  posterUrl: null,
+/** Spanish walkthrough, 8m 06s. Poster is the Spanish card, so the slot is branded before play. */
+export const AGENT_CRM_MEDIA_ES: AgentCrmHeroMedia = {
+  videoUrl: `${CLOUDINARY_VIDEO}/${VIDEO_TRANSFORM}/v1787320960/El_CRM_con_el_que_manejo_mi_negocio_de_segur_2026-08-21_09-40-14_lrej6b.mp4`,
+  posterUrl: `${CLOUDINARY_IMAGE}/${HERO_IMAGE_TRANSFORM}/${CARD_ES}`,
+  imageUrl: null,
 };
 
-export function agentCrmVideo(locale: "en" | "es"): AgentCrmVideo {
-  return locale === "es" ? AGENT_CRM_VIDEO_ES : AGENT_CRM_VIDEO_EN;
+export function agentCrmMedia(locale: "en" | "es"): AgentCrmHeroMedia {
+  return locale === "es" ? AGENT_CRM_MEDIA_ES : AGENT_CRM_MEDIA_EN;
 }
 
 /**
@@ -80,9 +128,9 @@ export function agentCrmVideo(locale: "en" | "es"): AgentCrmVideo {
  */
 const OG_TRANSFORM = "w_1200,c_limit,f_auto,q_auto";
 
-export const AGENT_CRM_OG_IMAGE_EN = `https://res.cloudinary.com/isaacdev/image/upload/${OG_TRANSFORM}/v1787281762/a7ba13a3-0bfd-44ee-8bd7-68f572e7b53d_sqn19f.png`;
+export const AGENT_CRM_OG_IMAGE_EN = `${CLOUDINARY_IMAGE}/${OG_TRANSFORM}/${CARD_EN}`;
 
-export const AGENT_CRM_OG_IMAGE_ES = `https://res.cloudinary.com/isaacdev/image/upload/${OG_TRANSFORM}/v1787281763/0341ac60-8dce-4d30-b358-78b7238cee4c_m9kcwm.png`;
+export const AGENT_CRM_OG_IMAGE_ES = `${CLOUDINARY_IMAGE}/${OG_TRANSFORM}/${CARD_ES}`;
 
 export function agentCrmOgImage(locale: "en" | "es"): string {
   return locale === "es" ? AGENT_CRM_OG_IMAGE_ES : AGENT_CRM_OG_IMAGE_EN;

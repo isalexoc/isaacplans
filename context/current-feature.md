@@ -43,9 +43,36 @@ capture. Full site header and footer stay on for credibility.
   Copy deliberately never claims "no credit card required" — that was not established, and it is
   the one trial claim that damages trust if wrong. Everything written is true either way.
 
-**Pending from Isaac:** the EN/ES walkthrough videos, and whether the trial requires a card at
-signup (if it does not, saying so is worth another lift). Until the clips land the video slot
-shows the "coming soon" frame.
+- **Spanish walkthrough + price** (branch `feature/agent-crm-video-and-price`): the hero-media slot
+  now holds either a video or a still, per language, via `AgentCrmHeroMedia` in
+  `lib/agent-crm-affiliate.ts`.
+  - **ES** plays the real 8m 06s walkthrough. The master is a 493.9 MB screen capture at
+    1994×1080, so it is delivered as `w_1600,c_limit,f_auto,q_auto` → 40.7 MB, a 92% cut.
+    Measured, not guessed: `w_1280` gives 32.1 MB and `q_auto:eco` 27.3 MB, both rejected because
+    this is a recording of a CRM and downscaling a 1994 px capture softens exactly the small UI
+    text somebody pressed play to read. Verified in a real browser — zero video elements before
+    the click, then playing at `readyState 4`, `seekable` across the full 486.5 s immediately
+    (faststart MP4, so viewers can scrub without downloading it) and buffering ~44 s ahead rather
+    than pulling 40 MB up front. Poster is the Spanish card, so the slot is branded before play,
+    and the caption states the runtime, which lifts play rate.
+  - **EN** has no clip yet, so the slot renders the English card as a plain still with **no play
+    button** — a dead play control is worse than no control. Its section copy was rewritten to
+    match: "See it before you buy it / a tour of the exact system" would be a broken promise over
+    a static image, so English reads "A look inside / This is what you're actually getting", and
+    the hero's secondary button says "See what you get" rather than "Watch the walkthrough".
+    When the English clip lands, set `videoUrl` in `AGENT_CRM_MEDIA_EN` and put that wording back.
+  - **$97** appears in four places — trust row, the trial card ("if you stay, it's $97 a month"),
+    the bonus note, and the "does it cost more through your link" FAQ. Naming the price inside the
+    trial block matters: a free trial with an unstated price after it reads as a catch. The
+    framing throughout is that the price is identical either way, so going direct means paying the
+    same $97 and getting none of the setup call.
+  - Same `autoPlay` correction as the blog player: the `<video>` sits behind `started`, so
+    playback had depended on React committing before the frame callback rather than on the
+    browser. ES uses a native file, so this is the path that actually runs.
+
+**Pending from Isaac:** the English walkthrough clip; whether the trial requires a card at signup
+(if it does not, saying so is worth another lift); and confirmation that $97 is monthly — it is
+written as "$97/month", which is the natural reading, but it is a price on a public page.
 
 **Known issue:** the EN/ES OG share cards Isaac supplied read "Agency CRM"; the product is "Agent
 CRM". Flagged, not yet resolved — they are live on `main`.
