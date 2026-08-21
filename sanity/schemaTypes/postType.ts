@@ -1,4 +1,5 @@
 import {defineField, defineType} from 'sanity'
+import {isSupportedBlogVideoUrl} from '@/lib/blog-featured-video'
 
 export const postType = defineType({
   name: 'post',
@@ -122,7 +123,7 @@ export const postType = defineType({
       description: 'Estimated reading time - will be auto-calculated if left empty',
     }),
     
-    // ========== IMAGES ==========
+    // ========== IMAGES & VIDEO ==========
     {
       name: 'image',
       type: 'image',
@@ -138,6 +139,48 @@ export const postType = defineType({
           title: 'Alt Text',
           description: 'Describe the image for SEO and accessibility',
           validation: (rule: any) => rule.required(),
+        },
+      ],
+    },
+    {
+      name: 'featuredVideo',
+      type: 'object',
+      title: 'Featured Video (Optional)',
+      description:
+        'Paste a video link and the post page plays it in the spot where the featured image normally sits. The featured image is still used everywhere else — blog listings, search results, social sharing, and the newsletter — and becomes the poster frame for the video.',
+      options: { collapsible: true, collapsed: true },
+      fields: [
+        {
+          name: 'url',
+          type: 'url',
+          title: 'Video URL',
+          description:
+            'YouTube, Vimeo, or a direct video file (.mp4, .webm, .mov — Cloudinary included). Nothing is uploaded to the Studio; the video keeps living where it already is.',
+          placeholder: 'https://www.youtube.com/watch?v=...',
+          validation: (rule: any) =>
+            rule
+              .uri({ scheme: ['https'] })
+              .custom((value: string | undefined) =>
+                !value || isSupportedBlogVideoUrl(value)
+                  ? true
+                  : 'Not a video link this site knows how to play. Use a YouTube, Vimeo, or direct .mp4/.webm/.mov URL (https only).'
+              ),
+        },
+        {
+          name: 'orientation',
+          type: 'string',
+          title: 'Orientation',
+          description:
+            'Vertical is for Reels/Shorts-style clips — it renders narrower and centered so it does not push the article off the screen.',
+          options: {
+            list: [
+              { title: 'Landscape (16:9)', value: 'landscape' },
+              { title: 'Vertical (9:16)', value: 'vertical' },
+              { title: 'Square (1:1)', value: 'square' },
+            ],
+            layout: 'radio',
+          },
+          initialValue: 'landscape',
         },
       ],
     },
