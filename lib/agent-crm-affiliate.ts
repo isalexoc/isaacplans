@@ -53,7 +53,7 @@ const HERO_IMAGE_TRANSFORM = "w_1600,c_limit,f_auto,q_auto";
  * | ----------------------------- | ---------- | -------- |
  * | original                      | 1994×1080  | 493.9 MB |
  * | `w_1280,q_auto`               | 1280×692   |  32.1 MB |
- * | `w_1600,q_auto`  ← chosen     | 1600×866   |  40.7 MB |
+ * | `w_1600,q_auto`  ← width kept | 1600×866   |  40.7 MB |
  * | `w_1280,q_auto:eco`           | 1280×692   |  27.3 MB |
  *
  * 1600 over the cheaper 1280 because this is a screen recording of a CRM: the whole point is
@@ -62,8 +62,38 @@ const HERO_IMAGE_TRANSFORM = "w_1600,c_limit,f_auto,q_auto";
  * that legibility and costs nothing to the visitors who never press play — the player is a
  * click-to-play facade, so the file is not fetched until it is asked for, and it then streams
  * progressively rather than downloading up front.
+ *
+ * ─── Why the format is PINNED rather than `f_auto` ───
+ *
+ * `f_auto` looks like free bandwidth and is a trap for a long video. Cloudinary derives a separate
+ * asset per browser family, and each one is transcoded on the FIRST request that asks for it —
+ * from a 493.9 MB master, which is minutes of waiting. Measured on this exact video:
+ *
+ * | client                       | delivered         | size                               |
+ * | ---------------------------- | ----------------- | ---------------------------------- |
+ * | Chrome / Firefox / Android   | `video/webm; vp9` | 31.5 MB                            |
+ * | Safari on iPhone             | `video/mp4; hvc1` | 38.7 MB                            |
+ * | any client sending Save-Data | `video/mp4; avc1` | was still transcoding when probed  |
+ *
+ * Three separate files, three separate cold starts — and the third was caught mid-transcode.
+ * Warming the page in Chrome would do nothing for the first visitor on an iPhone: they would be
+ * the one paying for the HEVC transcode, on a landing page, having just pressed play.
+ *
+ * So the transformation names one format explicitly. H.264 in MP4 is the universally supported
+ * combination — every iPhone, Android, Safari, Chrome, Firefox and smart TV plays it — so exactly
+ * ONE derived asset exists, one warm-up covers every visitor on earth, and no device is left that
+ * can trigger a fresh transcode. Quality is pinned to `q_auto:good` rather than plain `q_auto` for
+ * the same reason: `q_auto` is what branched on the Save-Data header above and quietly produced a
+ * fourth variant.
+ *
+ * The cost is real and accepted: Chrome downloads H.264 instead of the ~9 MB smaller VP9. That is
+ * the right trade for a page whose whole job is that the video plays instantly for whoever just
+ * pressed play. Bandwidth is cheap; a prospect watching a spinner is not.
+ *
+ * After changing this string, or the video behind it, run `pnpm warm:media` — until that finishes,
+ * the first visitor pays for the transcode.
  */
-const VIDEO_TRANSFORM = "w_1600,c_limit,f_auto,q_auto";
+const VIDEO_TRANSFORM = "w_1600,c_limit,f_mp4,vc_h264,q_auto:good";
 
 /**
  * What fills the slot under "the walkthrough" heading, per language.
@@ -107,6 +137,30 @@ export const AGENT_CRM_MEDIA_ES: AgentCrmHeroMedia = {
 
 export function agentCrmMedia(locale: "en" | "es"): AgentCrmHeroMedia {
   return locale === "es" ? AGENT_CRM_MEDIA_ES : AGENT_CRM_MEDIA_EN;
+}
+
+/**
+ * Every remote asset this page delivers, so `pnpm warm:media` can request each one and force
+ * Cloudinary to generate the derived file before a visitor ever asks for it.
+ *
+ * Derived from the same constants the page renders from, deliberately: a hand-maintained list of
+ * URLs to warm is a list that goes stale the first time somebody edits a transformation, and a
+ * stale warm list fails silently — everything looks warmed while the URL actually in production
+ * is still cold.
+ */
+export function agentCrmMediaUrls(): { label: string; url: string }[] {
+  const out: { label: string; url: string }[] = [];
+  for (const [locale, media] of [
+    ["en", AGENT_CRM_MEDIA_EN],
+    ["es", AGENT_CRM_MEDIA_ES],
+  ] as const) {
+    if (media.videoUrl) out.push({ label: `${locale} video`, url: media.videoUrl });
+    if (media.posterUrl) out.push({ label: `${locale} poster`, url: media.posterUrl });
+    if (media.imageUrl) out.push({ label: `${locale} still`, url: media.imageUrl });
+  }
+  out.push({ label: "en og card", url: AGENT_CRM_OG_IMAGE_EN });
+  out.push({ label: "es og card", url: AGENT_CRM_OG_IMAGE_ES });
+  return out;
 }
 
 /**

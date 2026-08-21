@@ -76,6 +76,7 @@ async function trySendMetaLeadCapiLead(
     iulLeadGenData?: OptLeadBlob;
     lifeInsuranceData?: OptLeadBlob;
     healthAlternativeData?: OptLeadBlob;
+    agentCrmData?: OptLeadBlob;
   }
 ): Promise<boolean> {
   const pixelId = process.env.NEXT_PUBLIC_FACEBOOK_PIXEL_ID;
@@ -99,6 +100,7 @@ async function trySendMetaLeadCapiLead(
     iulLeadGenData,
     lifeInsuranceData,
     healthAlternativeData,
+    agentCrmData,
   } = opts;
 
   const feSource =
@@ -216,7 +218,9 @@ async function trySendMetaLeadCapiLead(
                               ? "Life Insurance Lead"
                               : healthAlternativeData
                                 ? "Health Coverage Alternative Lead"
-                                : "IUL Lead Generation Campaign";
+                                : agentCrmData
+                                  ? "Agent CRM Affiliate Lead"
+                                  : "IUL Lead Generation Campaign";
 
     const customData: Record<string, unknown> = {
       content_name: contentName,
@@ -305,7 +309,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { firstName, lastName, email, phone, iulLeadGenData, shortTermMedicalData, contactPageData, acaData, dentalVisionData, hospitalIndemnityData, finalExpenseData, getCoveredFastData, lifeInsuranceData, healthAlternativeData, meta } = body;
+    const { firstName, lastName, email, phone, iulLeadGenData, shortTermMedicalData, contactPageData, acaData, dentalVisionData, hospitalIndemnityData, finalExpenseData, getCoveredFastData, lifeInsuranceData, healthAlternativeData, agentCrmData, meta } = body;
 
     // [Workflow Debug] Log incoming lead type - helps trace why IUL workflow may be assigned
     console.log("[create-contact] Incoming request lead type:", {
@@ -680,6 +684,39 @@ export async function POST(request: NextRequest) {
         '',
         `Submitted: ${submittedAt}`,
       ].join('\n');
+    } else if (agentCrmData) {
+      const languageDisplay = agentCrmData.language === 'es' ? 'Spanish (Español)' :
+                              agentCrmData.language === 'en' ? 'English' : agentCrmData.language || 'Not provided';
+      const submittedAt = new Date().toLocaleString() + ' ' + (Intl.DateTimeFormat().resolvedOptions().timeZone || '');
+      const smsConsent = agentCrmData.smsConsent === true ? 'Yes' : 'No';
+      const marketingConsent = agentCrmData.marketingConsent === true ? 'Yes' : 'No';
+      // The free-text question is the whole reason this form exists rather than a bare opt-in, so
+      // it goes in the note Isaac actually reads before calling back.
+      const question = typeof agentCrmData.message === 'string' ? agentCrmData.message.trim() : '';
+      const questionLines = question
+        ? ['', 'Their question:', ...question.split(/\r?\n/).map((l: string) => `  ${l}`)]
+        : [];
+      leadDetailsText = [
+        'Agent CRM Affiliate Lead',
+        '========================',
+        '',
+        'This is a FELLOW AGENT asking about Agent CRM — not an insurance client.',
+        '',
+        'Contact:',
+        `  Name: ${firstName} ${lastName}`,
+        `  Email: ${email || 'Not provided'}`,
+        `  Phone: ${phone}`,
+        ...questionLines,
+        '',
+        'Lead Details:',
+        `  Source: ${agentCrmData.source || 'agent_crm_affiliate'}`,
+        `  Language: ${languageDisplay}`,
+        `  SMS Consent: ${smsConsent}`,
+        `  Marketing Consent: ${marketingConsent}`,
+        `  Source URL: ${meta?.eventSourceUrl || 'Not provided'}`,
+        '',
+        `Submitted: ${submittedAt}`,
+      ].join('\n');
     } else if (getCoveredFastData) {
       const languageDisplay = getCoveredFastData.language === 'es' ? 'Spanish (Español)' :
                               getCoveredFastData.language === 'en' ? 'English' : getCoveredFastData.language || 'Not provided';
@@ -731,7 +768,8 @@ export async function POST(request: NextRequest) {
         getCoveredFastData ||
         iulLeadGenData ||
         lifeInsuranceData ||
-        healthAlternativeData;
+        healthAlternativeData ||
+        agentCrmData;
       const gd = guideMetaSource as
         | { guideName?: string; guideId?: string }
         | undefined;
@@ -849,6 +887,17 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Build tags for Agent CRM affiliate leads. These are OTHER AGENTS, not clients, so the
+    // readable tag says so plainly — the one thing that must never happen is a recruit landing in
+    // a client nurture sequence because somebody scanned the list too quickly. The slug tag
+    // (agent_crm_affiliate) is what GHL workflow filters and smart lists match on.
+    const agentCrmTags: string[] = [];
+    if (agentCrmData) {
+      agentCrmTags.push('Agent CRM Affiliate Lead');
+      agentCrmTags.push(agentCrmData.language === 'es' ? 'Spanish' : 'English');
+      agentCrmTags.push('agent_crm_affiliate');
+    }
+
     // Lowercase locale tag for every line of business (coexists with the capitalized tags above) —
     // one consistent language convention site-wide, matching the IUL apply/intake flow.
     const localeTags: string[] = [];
@@ -862,7 +911,8 @@ export async function POST(request: NextRequest) {
       finalExpenseData?.language ||
       getCoveredFastData?.language ||
       lifeInsuranceData?.language ||
-      healthAlternativeData?.language;
+      healthAlternativeData?.language ||
+      agentCrmData?.language;
     if (typeof leadLanguage === 'string' && leadLanguage.trim()) {
       localeTags.push(leadLanguage.toLowerCase().startsWith('es') ? 'spanish' : 'english');
     }
@@ -884,7 +934,9 @@ export async function POST(request: NextRequest) {
                   ? "life_insurance"
                   : healthAlternativeData
                     ? "health_alternative"
-                    : getCoveredFastData
+                    : agentCrmData
+                      ? "agent_crm_affiliate"
+                      : getCoveredFastData
                       ? "get_covered_fast"
                       : iulLeadGenData
                         ? "iul_lead_gen"
@@ -908,6 +960,10 @@ export async function POST(request: NextRequest) {
       contactPayload.customFields = customFieldsArray;
     }
     
+    // Add tags for Agent CRM affiliate leads
+    if (agentCrmTags.length > 0) {
+      contactPayload.tags = [...(contactPayload.tags || []), ...agentCrmTags];
+    }
     // Add tags for STM leads
     if (stmTags.length > 0) {
       contactPayload.tags = stmTags;
@@ -1093,6 +1149,7 @@ export async function POST(request: NextRequest) {
             ...getCoveredFastTags,
             ...lifeInsuranceTags,
             ...healthAlternativeTags,
+            ...agentCrmTags,
             ...localeTags,
           ];
 
@@ -1287,6 +1344,7 @@ export async function POST(request: NextRequest) {
                 iulLeadGenData,
                 lifeInsuranceData,
                 healthAlternativeData,
+                agentCrmData,
               });
               return NextResponse.json({
                 success: true,
@@ -1420,7 +1478,8 @@ export async function POST(request: NextRequest) {
       !finalExpenseData &&
       !getCoveredFastData &&
       !lifeInsuranceData &&
-      !healthAlternativeData
+      !healthAlternativeData &&
+      !agentCrmData
     );
     console.log("[create-contact] Notification workflow:", {
       workflowId: notificationWorkflowId ?? "not configured",
@@ -1435,7 +1494,9 @@ export async function POST(request: NextRequest) {
               ? "Final Expense lead — tagged fe_get_covered_funnel (no notification workflow)"
               : lifeInsuranceData
                 ? "Life Insurance lead — use AGENT_CRM_WORKFLOW_LIFE_INSURANCE only"
-                : healthAlternativeData
+                : agentCrmData
+                  ? "Agent CRM affiliate lead — use AGENT_CRM_WORKFLOW_AGENT_CRM_AFFILIATE only"
+                  : healthAlternativeData
                   ? "Health Coverage Alternative lead — use AGENT_CRM_WORKFLOW_HEALTH_ALTERNATIVE only"
                   : shortTermMedicalData || contactPageData || acaData || dentalVisionData || hospitalIndemnityData
                     ? "specialty page lead - skipped"
@@ -1718,6 +1779,37 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Agent CRM affiliate leads — fellow agents asking about the CRM, never insurance clients.
+    //
+    // Falls back to the generic notification workflow when no dedicated one is configured. Every
+    // other lead type simply does nothing without its env var, which is fine for them because
+    // they are covered by tags and by Isaac watching those pipelines. A recruit arriving with no
+    // automation at all would be silent, and a silent lead is a lost one — so an unconfigured
+    // AGENT_CRM_WORKFLOW_AGENT_CRM_AFFILIATE degrades to "at least tell Isaac" rather than to
+    // nothing. Set the dedicated workflow and the fallback stops being used.
+    const agentCrmWorkflowId =
+      process.env.AGENT_CRM_WORKFLOW_AGENT_CRM_AFFILIATE || notificationWorkflowId;
+    const agentCrmLanguage = agentCrmData?.language === "es" ? "es" : "en";
+    const willAddAgentCrm = !!(agentCrmData && contactId && agentCrmWorkflowId);
+
+    console.log("[create-contact] Agent CRM affiliate workflow decision:", {
+      hasAgentCrmData: !!agentCrmData,
+      agentCrmLanguage,
+      workflowId: agentCrmWorkflowId ?? "not configured",
+      usingNotificationFallback:
+        !!agentCrmData && !process.env.AGENT_CRM_WORKFLOW_AGENT_CRM_AFFILIATE && !!notificationWorkflowId,
+      willAddAgentCrm,
+      reason: !agentCrmData
+        ? "not an Agent CRM affiliate lead"
+        : !agentCrmWorkflowId
+          ? "neither AGENT_CRM_WORKFLOW_AGENT_CRM_AFFILIATE nor AGENT_CRM_WORKFLOW_NOTIFICATION set"
+          : "Agent CRM affiliate lead — adding to workflow",
+    });
+
+    if (willAddAgentCrm) {
+      await addContactToWorkflow(agentCrmWorkflowId!, `Agent CRM Affiliate (${agentCrmLanguage})`);
+    }
+
     // Final Expense leads: fe_get_covered_funnel tag only (no AGENT_CRM_WORKFLOW_FINALE enrollment)
 
     // Meta CAPI Lead — newly created row; FE get-covered duplicate-merge path sends CAPI in duplicate branch helper
@@ -1738,6 +1830,7 @@ export async function POST(request: NextRequest) {
       iulLeadGenData,
       lifeInsuranceData,
       healthAlternativeData,
+      agentCrmData,
     });
 
     // Success!
