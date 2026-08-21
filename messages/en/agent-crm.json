@@ -1,0 +1,210 @@
+{
+  "agentCrm": {
+    "metadata": {
+      "title": "The CRM I Run My Insurance Business On | Isaac Plans",
+      "description": "One login for your leads, follow-up, texts, calendar, and funnels. Watch the walkthrough, then get a free 1-on-1 setup call when you start through my link.",
+      "imageAlt": "Agent CRM for insurance agents, recommended by Isaac Orraiz"
+    },
+    "hero": {
+      "badge": "For insurance agents",
+      "title": "The CRM I run my entire insurance business on",
+      "subtitle": "Leads, follow-up, texts, calls, calendars, funnels, and pipelines — one login, mostly on autopilot. Watch the walkthrough, then open your account and I'll set it up with you personally.",
+      "cta": "Start with Agent CRM",
+      "ctaSecondary": "Watch the walkthrough",
+      "bonusNote": "Free 1-on-1 setup call + my private agent group when you start through my link",
+      "trust": [
+        "Same price through my link",
+        "Set up with you, not for you",
+        "English & Spanish"
+      ]
+    },
+    "video": {
+      "label": "The walkthrough",
+      "title": "See it before you buy it",
+      "subtitle": "A tour of the exact system I use every day — the pipeline, the follow-up that runs without me, and the part that books appointments while I'm on another call.",
+      "playLabel": "Play the Agent CRM walkthrough",
+      "placeholderTitle": "Walkthrough coming soon",
+      "placeholderBody": "I'm recording it now. In the meantime, the button below takes you straight to Agent CRM.",
+      "caption": "No slides. Just the account."
+    },
+    "problem": {
+      "label": "Sound familiar?",
+      "title": "The problem was never the leads",
+      "subtitle": "It's what happens to them after they come in.",
+      "items": [
+        {
+          "title": "Your leads live in three places",
+          "body": "Facebook messages, your phone's notes app, and a spreadsheet you stopped updating in March."
+        },
+        {
+          "title": "The follow-up never happens",
+          "body": "You meant to call back on day three. It's day thirty, and they already bought from the agent who did."
+        },
+        {
+          "title": "You're paying for five tools",
+          "body": "One for texting, one for the calendar, one for the funnel, one for email, one for forms. None of them talk to each other."
+        },
+        {
+          "title": "You can't tell what's working",
+          "body": "You know you wrote business last month. You don't know which ad, post, or referral actually produced it."
+        }
+      ]
+    },
+    "features": {
+      "label": "What you get",
+      "title": "Everything under one login",
+      "subtitle": "This isn't a lead vendor or a dialer. It's the whole back office — the place your leads land, get worked, and turn into appointments.",
+      "items": [
+        {
+          "title": "Every lead in one pipeline",
+          "body": "Drag a contact from New to Quoted to Submitted. One board tells you what's actually in play this week."
+        },
+        {
+          "title": "Follow-up that runs itself",
+          "body": "Text, email, and voicemail sequences you build once. They fire on day 1, day 3, and day 30 whether you remember or not."
+        },
+        {
+          "title": "One inbox for everything",
+          "body": "Texts, emails, Facebook and Instagram messages, and WhatsApp land in the same thread as the rest of that person's history."
+        },
+        {
+          "title": "A calendar people can book",
+          "body": "Send a link, they pick a time, it lands on your calendar with the reminders that cut your no-shows."
+        },
+        {
+          "title": "Funnels, forms, and websites",
+          "body": "Build the quote page, the lead form, and the thank-you page inside the same tool that stores the lead."
+        },
+        {
+          "title": "Reviews and reputation",
+          "body": "Ask for the Google review right after the policy is issued — the one moment they actually want to leave you one."
+        },
+        {
+          "title": "Reporting you'll actually read",
+          "body": "Where leads came from, what they cost, and which source turned into issued business instead of noise."
+        },
+        {
+          "title": "It runs from your phone",
+          "body": "Reply between appointments, from the car, from the kitchen table. The mobile app is the same system, not a stripped-down version."
+        }
+      ]
+    },
+    "replaces": {
+      "label": "Do the math",
+      "title": "Count what you're paying for right now",
+      "body": "Most agents I talk to are subscribed to four or five of these separately. Agent CRM does all of it under one login.",
+      "items": [
+        "A CRM",
+        "A funnel and website builder",
+        "An email marketing platform",
+        "A texting service",
+        "An appointment scheduler",
+        "A form and survey builder",
+        "A review-request tool",
+        "A pipeline board"
+      ],
+      "footnote": "Fewer subscriptions is the small win. The big one is that they finally talk to each other."
+    },
+    "bonus": {
+      "label": "Why through my link",
+      "title": "You don't just get the software. You get me.",
+      "subtitle": "Anyone can send you a link. Here is what's different about this one.",
+      "items": [
+        {
+          "title": "A free 1-on-1 setup call",
+          "body": "We get on a screen share and I build it with you — your pipeline, your calendar, and your first follow-up campaign. Not a recorded course. Not a help article. Me and you, inside your account."
+        },
+        {
+          "title": "My private agent group",
+          "body": "Ongoing access to me and to other agents running the same system. Ask the question, see what's already working for someone else, and don't lose a week being stuck."
+        }
+      ],
+      "note": "It costs you nothing extra — the price is identical either way. Agent CRM pays me a referral commission, and that is exactly why I can afford to spend that time on you.",
+      "cta": "Start with Agent CRM"
+    },
+    "steps": {
+      "label": "How to start",
+      "title": "Three steps, about ten minutes",
+      "items": [
+        {
+          "title": "Watch the walkthrough",
+          "body": "See what the system actually does before you spend a dollar on it."
+        },
+        {
+          "title": "Open your account",
+          "body": "Use the button on this page so the referral is credited — that credit is what unlocks your setup call."
+        },
+        {
+          "title": "Send me your confirmation",
+          "body": "Text or email me that you're in, and we'll put your setup call on the calendar the same week."
+        }
+      ]
+    },
+    "isaac": {
+      "label": "Who's telling you this",
+      "name": "Isaac Orraiz",
+      "role": "Licensed insurance agent · Isaac Plans Insurance",
+      "quote": "I'm not a software guy. I'm a producing agent who got tired of losing people in a spreadsheet. I run ACA, final expense, IUL, dental, and supplemental business through this one account, in English and Spanish — and on our call I'll show you exactly how it's wired.",
+      "photoAlt": "Isaac Orraiz, licensed insurance agent"
+    },
+    "faq": {
+      "label": "Straight answers",
+      "title": "Questions agents ask me",
+      "items": [
+        {
+          "question": "What exactly is Agent CRM?",
+          "answer": "An all-in-one platform where an agent keeps leads, follow-up, calendars, funnels, conversations, and reporting under one login — instead of five separate subscriptions that don't talk to each other."
+        },
+        {
+          "question": "Do I need to be technical?",
+          "answer": "No. That's the entire point of the setup call. I build the first version with you, and you learn the system by watching your own account get built."
+        },
+        {
+          "question": "Does it cost more through your link?",
+          "answer": "No. The price is exactly the same. Agent CRM pays me a referral commission at no additional cost to you, and that commission is what pays for the time I spend setting you up."
+        },
+        {
+          "question": "I'm brand new. Is it too early for a CRM?",
+          "answer": "It's the cheapest possible time. Building the habit of one place for every lead costs you nothing when you have thirty contacts, and it's a nightmare to untangle when you have three thousand."
+        },
+        {
+          "question": "What lines of business does it work for?",
+          "answer": "Any of them. I run ACA, final expense, IUL, dental and vision, hospital indemnity, and short-term medical through the same account."
+        },
+        {
+          "question": "I already use another CRM. Can I switch?",
+          "answer": "Yes, and you can run both while you migrate. Bring it up on the setup call and we'll map out what moves first so nothing falls through the cracks."
+        },
+        {
+          "question": "How do I claim the setup call and the group?",
+          "answer": "Open your account through the button on this page, then send me your confirmation. Or use the form below and I'll reach out to you."
+        }
+      ]
+    },
+    "form": {
+      "label": "Not ready today?",
+      "title": "Ask me anything first",
+      "subtitle": "Send me your question and I'll answer it personally. No pitch and no automated sequence — I'd rather you start when it actually makes sense for you.",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "email": "Email",
+      "phone": "Phone",
+      "message": "Your question",
+      "messageOptional": "optional",
+      "messagePlaceholder": "What are you using now? What's the part you're stuck on?",
+      "submit": "Send it to Isaac",
+      "submitting": "Sending…",
+      "successTitle": "Got it.",
+      "successBody": "Your question is in front of me. I'll get back to you personally — usually the same day.",
+      "consent": "By sending this you agree that I can reply by text or email. No spam, and you can tell me to stop at any time.",
+      "error": "Something went wrong. Try again, or email me at isaac@isaacplans.com."
+    },
+    "finalCta": {
+      "title": "Stop running your business out of your phone's notes app",
+      "subtitle": "Open your account through the button, send me the confirmation, and we'll have your pipeline, your calendar, and your first follow-up campaign live this week.",
+      "cta": "Start with Agent CRM",
+      "note": "Same price through my link — plus the setup call and the agent group."
+    },
+    "disclosure": "Affiliate disclosure: I am an Agent CRM affiliate. If you open an account through a link on this page, Agent CRM pays me a commission at no additional cost to you. I recommend it because I use it every day to run my own agency, not because of the commission."
+  }
+}

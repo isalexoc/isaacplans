@@ -2,6 +2,41 @@
 
 ## Status
 
+In progress: **Agent CRM affiliate page** (branch `feature/agent-crm-affiliate`) — a shareable
+page at `/agent-crm` (same slug in both languages) that Isaac sends to other insurance agents to
+promote his Agent CRM affiliate link, `https://www.agent-crm.com/?fpr=isaacplans`.
+
+Aimed at producers, not clients, so it deliberately looks nothing like the site's lead funnels:
+dark hero, no quote form above the fold, and the primary action is an outbound link rather than a
+capture. Full site header and footer stay on for credibility.
+
+- **`lib/agent-crm-affiliate.ts`** — the affiliate URL, the per-language walkthrough video, the
+  per-language OG card, and a small standalone YouTube/Vimeo/direct-file URL parser. Every piece
+  of creative that lands later is a one-line constant here rather than a literal in the page.
+  The affiliate URL is used **verbatim, with nothing appended**: `fpr` is the FirstPromoter
+  referral parameter, no per-button UTM would ever surface in that dashboard, and the one link
+  that pays must not carry avoidable risk.
+- **`components/agent-crm/agent-crm-cta.tsx`** — every "Start with Agent CRM" button. Analytics
+  fire without intercepting the click, so a blocked or slow pixel can never eat the referral.
+  `placement` (hero / under_video / bonus / final) rides on the event, not the URL.
+- **`components/agent-crm/agent-crm-video.tsx`** — three states: a designed "coming soon" frame
+  while `url` is null (not a dead play button), a click-to-play facade once a URL is set, then the
+  real player. Same reasoning as the blog hero: an iframe on load would drop several hundred KB of
+  third-party JS into the LCP path for visitors who never press play.
+- **`components/agent-crm/agent-crm-lead-form.tsx`** + **`app/actions/agent-crm-affiliate.ts`** —
+  the quieter "ask me anything first" capture below the FAQ, for the agent who reads everything
+  and still isn't buying software today. Writes its own contact with source `agent_crm_affiliate`
+  and tag `agent-crm-affiliate`, deliberately **not** through `/api/create-contact`: that route
+  fires the consumer workflows, and an agent asking about a CRM must never land in a
+  "thanks for your health insurance inquiry" sequence.
+- FAQPage JSON-LD, per-language `og:image` / canonical / hreflang, and the FTC affiliate
+  disclosure on the page itself.
+
+**Pending from Isaac:** the EN/ES walkthrough videos and the EN/ES OG share cards. Until then the
+video slot shows the "coming soon" frame and the OG card falls back to the site default.
+
+---
+
 In progress: **Apply pages, shared intake engine, and admin-editable hero media (image or
 video)** — a three-phase feature. Approved plan saved at
 `C:\Users\isale\.claude\plans\i-need-to-do-sleepy-lagoon.md`.

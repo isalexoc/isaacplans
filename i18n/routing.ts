@@ -461,6 +461,12 @@ export const routing = defineRouting({
       en: "/partner",
       es: "/socio",
     },
+    // Agent CRM affiliate page. Same slug in both languages on purpose: it's a product name, and
+    // one address Isaac can say out loud on a call works better than two he has to keep straight.
+    "/agent-crm": {
+      en: "/agent-crm",
+      es: "/agent-crm",
+    },
   },
 });
 

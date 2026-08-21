@@ -42,6 +42,9 @@ const PAGES: Page[] = [
   { href: "/faq", changeFrequency: "monthly", priority: 0.7 },
   { href: "/testimonials", changeFrequency: "monthly", priority: 0.7 },
   { href: "/glossary", changeFrequency: "monthly", priority: 0.7 },
+  // Aimed at other agents rather than clients, so it sits below the consumer pages — but it is
+  // worth indexing: agents searching for a CRM are exactly who it converts.
+  { href: "/agent-crm", changeFrequency: "monthly", priority: 0.6 },
 
   // ACA
   { href: "/aca", changeFrequency: "monthly", priority: 0.8 },

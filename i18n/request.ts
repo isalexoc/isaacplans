@@ -165,6 +165,14 @@ async function loadSplitMessages(locale: string): Promise<Record<string, any>> {
       // File doesn't exist, skip
     }
 
+    // Agent CRM affiliate page (aimed at other agents, not at clients)
+    try {
+      const agentCrm = (await import(`@/messages/${locale}/agent-crm.json`)).default;
+      Object.assign(splitMessages, agentCrm);
+    } catch {
+      // File doesn't exist, skip
+    }
+
     // Referral partner landing pages + partner dashboard
     try {
       const partnersReferral = (await import(`@/messages/${locale}/partners/referral.json`))
