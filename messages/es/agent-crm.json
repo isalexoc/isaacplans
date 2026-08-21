@@ -1,0 +1,210 @@
+{
+  "agentCrm": {
+    "metadata": {
+      "title": "El CRM con el que manejo mi negocio de seguros | Isaac Plans",
+      "description": "Un solo acceso para tus prospectos, tu seguimiento, tus mensajes, tu calendario y tus embudos. Mira el recorrido y recibe una llamada de configuración gratis, uno a uno, al abrir tu cuenta con mi enlace.",
+      "imageAlt": "Agent CRM para agentes de seguros, recomendado por Isaac Orraiz"
+    },
+    "hero": {
+      "badge": "Para agentes de seguros",
+      "title": "El CRM con el que manejo todo mi negocio de seguros",
+      "subtitle": "Prospectos, seguimiento, mensajes, llamadas, calendarios, embudos y pipelines — un solo acceso, casi todo en automático. Mira el recorrido, abre tu cuenta y yo te la configuro contigo, uno a uno.",
+      "cta": "Comenzar con Agent CRM",
+      "ctaSecondary": "Ver el recorrido",
+      "bonusNote": "Llamada de configuración gratis, uno a uno, y mi grupo privado de agentes al abrir tu cuenta con mi enlace",
+      "trust": [
+        "Mismo precio con mi enlace",
+        "Lo configuramos contigo, no por ti",
+        "Español e inglés"
+      ]
+    },
+    "video": {
+      "label": "El recorrido",
+      "title": "Míralo antes de comprarlo",
+      "subtitle": "Un recorrido por el mismo sistema que uso todos los días: el pipeline, el seguimiento que corre sin mí y la parte que agenda citas mientras estoy en otra llamada.",
+      "playLabel": "Reproducir el recorrido de Agent CRM",
+      "placeholderTitle": "El recorrido viene en camino",
+      "placeholderBody": "Lo estoy grabando ahora mismo. Mientras tanto, el botón de abajo te lleva directo a Agent CRM.",
+      "caption": "Sin diapositivas. Solo la cuenta."
+    },
+    "problem": {
+      "label": "¿Te suena conocido?",
+      "title": "El problema nunca fueron los prospectos",
+      "subtitle": "Es lo que pasa con ellos después de que entran.",
+      "items": [
+        {
+          "title": "Tus prospectos están en tres lugares",
+          "body": "Mensajes de Facebook, las notas del celular y una hoja de cálculo que dejaste de actualizar en marzo."
+        },
+        {
+          "title": "El seguimiento nunca pasa",
+          "body": "Ibas a devolver la llamada al tercer día. Ya es el día treinta, y le compraron al agente que sí llamó."
+        },
+        {
+          "title": "Estás pagando cinco herramientas",
+          "body": "Una para mensajes, otra para el calendario, otra para el embudo, otra para correos, otra para formularios. Y ninguna se habla con la otra."
+        },
+        {
+          "title": "No sabes qué está funcionando",
+          "body": "Sabes que escribiste negocio el mes pasado. No sabes cuál anuncio, publicación o referido lo produjo."
+        }
+      ]
+    },
+    "features": {
+      "label": "Lo que recibes",
+      "title": "Todo con un solo acceso",
+      "subtitle": "Esto no es un vendedor de leads ni un marcador. Es toda la oficina: el lugar donde tus prospectos caen, se trabajan y se convierten en citas.",
+      "items": [
+        {
+          "title": "Cada prospecto en un pipeline",
+          "body": "Arrastra un contacto de Nuevo a Cotizado a Enviado. Un solo tablero te dice qué está realmente en juego esta semana."
+        },
+        {
+          "title": "Seguimiento que corre solo",
+          "body": "Secuencias de mensajes, correos y buzón de voz que armas una vez. Salen el día 1, el día 3 y el día 30, te acuerdes o no."
+        },
+        {
+          "title": "Una sola bandeja para todo",
+          "body": "Mensajes de texto, correos, Facebook, Instagram y WhatsApp caen en la misma conversación, junto al resto del historial de esa persona."
+        },
+        {
+          "title": "Un calendario donde te agendan",
+          "body": "Mandas el enlace, escogen la hora y cae en tu calendario con los recordatorios que bajan las citas perdidas."
+        },
+        {
+          "title": "Embudos, formularios y sitios web",
+          "body": "Arma la página de cotización, el formulario y la página de gracias dentro de la misma herramienta que guarda el prospecto."
+        },
+        {
+          "title": "Reseñas y reputación",
+          "body": "Pide la reseña de Google justo cuando emiten la póliza, que es el único momento en que de verdad quieren dejártela."
+        },
+        {
+          "title": "Reportes que sí vas a leer",
+          "body": "De dónde vinieron los prospectos, cuánto costaron y cuál fuente se convirtió en negocio emitido y no en ruido."
+        },
+        {
+          "title": "Funciona desde tu celular",
+          "body": "Contesta entre citas, desde el carro, desde la mesa de la cocina. La app es el mismo sistema, no una versión recortada."
+        }
+      ]
+    },
+    "replaces": {
+      "label": "Saca la cuenta",
+      "title": "Cuenta lo que estás pagando ahora mismo",
+      "body": "La mayoría de los agentes con los que hablo pagan cuatro o cinco de estas por separado. Agent CRM hace todo eso con un solo acceso.",
+      "items": [
+        "Un CRM",
+        "Un constructor de embudos y sitios web",
+        "Una plataforma de correos",
+        "Un servicio de mensajes de texto",
+        "Un sistema de citas",
+        "Un constructor de formularios y encuestas",
+        "Una herramienta para pedir reseñas",
+        "Un tablero de pipeline"
+      ],
+      "footnote": "Pagar menos suscripciones es la ganancia chica. La grande es que por fin se hablan entre ellas."
+    },
+    "bonus": {
+      "label": "Por qué con mi enlace",
+      "title": "No solo recibes el software. Me recibes a mí.",
+      "subtitle": "Cualquiera te puede mandar un enlace. Esto es lo que hace diferente a este.",
+      "items": [
+        {
+          "title": "Una llamada uno a uno, gratis",
+          "body": "Nos conectamos por pantalla compartida y lo armo contigo: tu pipeline, tu calendario y tu primera campaña de seguimiento. No es un curso grabado ni un artículo de ayuda. Somos tú y yo, dentro de tu cuenta."
+        },
+        {
+          "title": "Mi grupo privado de agentes",
+          "body": "Acceso continuo a mí y a otros agentes que usan el mismo sistema. Haz la pregunta, mira lo que ya le está funcionando a alguien más y no pierdas una semana atorado."
+        }
+      ],
+      "note": "No te cuesta nada extra: el precio es idéntico de cualquier forma. Agent CRM me paga una comisión por la referencia, y por eso justamente puedo darte ese tiempo.",
+      "cta": "Comenzar con Agent CRM"
+    },
+    "steps": {
+      "label": "Cómo empezar",
+      "title": "Tres pasos, unos diez minutos",
+      "items": [
+        {
+          "title": "Mira el recorrido",
+          "body": "Ve lo que el sistema realmente hace antes de gastar un dólar en él."
+        },
+        {
+          "title": "Abre tu cuenta",
+          "body": "Usa el botón de esta página para que la referencia quede acreditada — ese crédito es lo que activa tu llamada de configuración."
+        },
+        {
+          "title": "Mándame tu confirmación",
+          "body": "Escríbeme por mensaje o correo que ya entraste, y ponemos tu llamada en el calendario esa misma semana."
+        }
+      ]
+    },
+    "isaac": {
+      "label": "Quién te lo está diciendo",
+      "name": "Isaac Orraiz",
+      "role": "Agente de seguros licenciado · Isaac Plans Insurance",
+      "quote": "No soy programador. Soy un agente que produce y que se cansó de perder gente en una hoja de cálculo. Manejo ACA, gastos finales, IUL, dental y suplementarios desde esta misma cuenta, en inglés y en español — y en nuestra llamada te muestro exactamente cómo está armada.",
+      "photoAlt": "Isaac Orraiz, agente de seguros licenciado"
+    },
+    "faq": {
+      "label": "Respuestas directas",
+      "title": "Lo que me preguntan los agentes",
+      "items": [
+        {
+          "question": "¿Qué es exactamente Agent CRM?",
+          "answer": "Una plataforma todo en uno donde un agente mantiene sus prospectos, su seguimiento, sus calendarios, sus embudos, sus conversaciones y sus reportes con un solo acceso — en lugar de cinco suscripciones separadas que no se hablan entre sí."
+        },
+        {
+          "question": "¿Tengo que ser técnico?",
+          "answer": "No. Para eso es exactamente la llamada de configuración. Yo armo la primera versión contigo, y aprendes el sistema viendo cómo se construye tu propia cuenta."
+        },
+        {
+          "question": "¿Cuesta más si entro con tu enlace?",
+          "answer": "No. El precio es exactamente el mismo. Agent CRM me paga una comisión por la referencia sin ningún costo adicional para ti, y esa comisión es la que paga el tiempo que invierto en configurarte."
+        },
+        {
+          "question": "Soy nuevo. ¿Es muy pronto para un CRM?",
+          "answer": "Es el momento más barato posible. Agarrar el hábito de tener un solo lugar para cada prospecto no te cuesta nada cuando tienes treinta contactos, y es una pesadilla de desenredar cuando tienes tres mil."
+        },
+        {
+          "question": "¿Para qué líneas de negocio sirve?",
+          "answer": "Para cualquiera. Manejo ACA, gastos finales, IUL, dental y visión, indemnización hospitalaria y médico de corto plazo desde la misma cuenta."
+        },
+        {
+          "question": "Ya uso otro CRM. ¿Puedo cambiarme?",
+          "answer": "Sí, y puedes correr los dos mientras migras. Sácalo en la llamada de configuración y trazamos qué se mueve primero para que no se pierda nada en el camino."
+        },
+        {
+          "question": "¿Cómo reclamo la llamada y el grupo?",
+          "answer": "Abre tu cuenta con el botón de esta página y mándame tu confirmación. O usa el formulario de abajo y yo te contacto."
+        }
+      ]
+    },
+    "form": {
+      "label": "¿Aún no estás listo?",
+      "title": "Pregúntame lo que sea primero",
+      "subtitle": "Mándame tu pregunta y te la contesto personalmente. Sin discurso de venta y sin secuencia automática — prefiero que empieces cuando de verdad te haga sentido.",
+      "firstName": "Nombre",
+      "lastName": "Apellido",
+      "email": "Correo electrónico",
+      "phone": "Teléfono",
+      "message": "Tu pregunta",
+      "messageOptional": "opcional",
+      "messagePlaceholder": "¿Qué usas ahora? ¿En qué parte estás atorado?",
+      "submit": "Enviárselo a Isaac",
+      "submitting": "Enviando…",
+      "successTitle": "Listo, ya lo tengo.",
+      "successBody": "Tu pregunta está frente a mí. Te contesto personalmente, casi siempre el mismo día.",
+      "consent": "Al enviar esto aceptas que te pueda responder por mensaje de texto o correo. Nada de spam, y me puedes decir que pare cuando quieras.",
+      "error": "Algo salió mal. Intenta de nuevo o escríbeme a isaac@isaacplans.com."
+    },
+    "finalCta": {
+      "title": "Deja de manejar tu negocio desde las notas del celular",
+      "subtitle": "Abre tu cuenta con el botón, mándame la confirmación y esta misma semana dejamos tu pipeline, tu calendario y tu primera campaña de seguimiento funcionando.",
+      "cta": "Comenzar con Agent CRM",
+      "note": "Mismo precio con mi enlace — más la llamada de configuración y el grupo de agentes."
+    },
+    "disclosure": "Aviso de afiliación: soy afiliado de Agent CRM. Si abres una cuenta con un enlace de esta página, Agent CRM me paga una comisión sin ningún costo adicional para ti. Lo recomiendo porque lo uso todos los días para manejar mi propia agencia, no por la comisión."
+  }
+}
