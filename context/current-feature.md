@@ -70,9 +70,41 @@ capture. Full site header and footer stay on for credibility.
     playback had depended on React committing before the frame callback rather than on the
     browser. ES uses a native file, so this is the path that actually runs.
 
+- **Standard form + guaranteed video availability** (branch `feature/agent-crm-standard-form`):
+  - The capture form was rebuilt on the site's shared lead-form pattern rather than its own
+    bespoke one: `PhoneInput` normalising to E.164, the SMS and marketing consent checkboxes
+    (which the first version lacked — that is the TCPA opt-in record), localized privacy/terms
+    links, and the same field/error styling as `health-alternative-lead-form`.
+  - It now posts through `/api/create-contact` like every other form, added there as a
+    first-class `agentCrmData` lead type: `lead_source_details`, consent capture, locale tags,
+    duplicate-safe creation, and the tags applied on the duplicate-merge path too. Tagged
+    `agent_crm_affiliate` + "Agent CRM Affiliate Lead", and its note opens by stating the contact
+    is a fellow agent, not a client — that is what keeps a recruit out of an insurance sequence.
+    Excluded from the generic notification workflow like every other specialty lead, but with a
+    deliberate difference: `AGENT_CRM_WORKFLOW_AGENT_CRM_AFFILIATE` **falls back** to the
+    notification workflow when unset, because a recruit with no automation at all is a silent
+    lead. Meta CAPI stays off for it by construction — the helper only fires when the client
+    passes a pixel `eventId`, and non-ads forms don't, so agent recruits can't skew the
+    insurance-Lead optimisation.
+  - **Video format is now pinned, and this matters.** `f_auto` was deriving a separate asset per
+    browser family — measured: VP9 WebM for Chrome/Firefox/Android (31.5 MB), HEVC MP4 for Safari
+    on iPhone (38.7 MB), and an H.264 MP4 for Save-Data clients that was caught mid-transcode.
+    Each is generated on the first request that asks for it, from a 493.9 MB master. Warming the
+    page in Chrome would have done nothing for the first iPhone visitor. Pinned to
+    `f_mp4,vc_h264,q_auto:good` so exactly one derived asset exists; verified identical ETag,
+    size and content-type across Chrome, Firefox, Safari (iPhone/Mac), Android, Samsung
+    Internet, Save-Data and iOS 12, every one answering in under 0.3 s from CDN.
+  - `pnpm warm:media` (`scripts/warm-cloudinary-media.ts`) generates every derived asset ahead of
+    visitors and reports size and response time. Its URL list is derived from the same constants
+    the page renders from, so it cannot go stale against production. Run it after changing a
+    transformation or swapping a video. Images still use `f_auto` and can derive a webp variant on
+    first request — harmless at 0.1–0.2 MB, unlike a 40 MB video.
+
 **Pending from Isaac:** the English walkthrough clip; whether the trial requires a card at signup
-(if it does not, saying so is worth another lift); and confirmation that $97 is monthly — it is
-written as "$97/month", which is the natural reading, but it is a price on a public page.
+(if it does not, saying so is worth another lift); confirmation that $97 is monthly — it is
+written as "$97/month", which is the natural reading, but it is a price on a public page; and
+whether to create a dedicated GHL workflow for `AGENT_CRM_WORKFLOW_AGENT_CRM_AFFILIATE` (until
+then recruits ride the notification workflow).
 
 **Known issue:** the EN/ES OG share cards Isaac supplied read "Agency CRM"; the product is "Agent
 CRM". Flagged, not yet resolved — they are live on `main`.
