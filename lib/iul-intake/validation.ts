@@ -28,6 +28,22 @@ export function isValidSsn(v: string): boolean {
   return digits(v).length === 9;
 }
 
+/**
+ * ABA routing number: nine digits with the standard weighted checksum.
+ *
+ * Ported from `lib/fe-intake/validation.ts` — IUL was the only line of business without it, which
+ * meant a typo in the number the premium drafts from reached the CRM unchallenged. The checksum
+ * catches the common failure (a transposed pair) that a length check alone lets through.
+ */
+export function isValidRouting(v: string): boolean {
+  const d = digits(v);
+  if (d.length !== 9) return false;
+  const n = d.split("").map(Number);
+  const sum =
+    3 * (n[0] + n[3] + n[6]) + 7 * (n[1] + n[4] + n[7]) + 1 * (n[2] + n[5] + n[8]);
+  return sum % 10 === 0;
+}
+
 export function isValidPercent(v: string): boolean {
   const n = Number((v ?? "").trim());
   return Number.isFinite(n) && n >= 0 && n <= 100;
@@ -68,7 +84,7 @@ export function isValidDob(v: string): boolean {
   return y >= now.getFullYear() - 120;
 }
 
-export type FieldErrorKey = "email" | "phone" | "zip" | "ssn" | "age" | "dob";
+export type FieldErrorKey = "email" | "phone" | "zip" | "ssn" | "age" | "dob" | "routing";
 
 const AGE_KEYS = new Set(["fatherAge", "motherAge", "fatherAgeAtDeath", "motherAgeAtDeath"]);
 
@@ -92,6 +108,10 @@ export function fieldFormatError(field: IntakeField, value: string): FieldErrorK
     default:
       break;
   }
+
+  // By key, not by type: `routingNumber` is a plain `text` field that happens to hold digits, and
+  // the same 9-digit shape as an SSN means length alone cannot tell them apart.
+  if (field.key === "routingNumber") return isValidRouting(v) ? null : "routing";
 
   if (field.digitsOnly && field.maxLength === 5) return isValidZip(v) ? null : "zip";
   if (AGE_KEYS.has(field.key)) return isValidAge(v) ? null : "age";

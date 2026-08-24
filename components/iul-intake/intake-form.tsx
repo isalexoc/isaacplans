@@ -3,9 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocale } from "next-intl";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Loader2,
   Check,
@@ -42,6 +40,23 @@ import { isMaskedValue } from "@/lib/intake-shared/masking";
 import { useIulIntakeAutosave } from "@/hooks/use-iul-intake-autosave";
 import IntakeBreadcrumb from "@/components/iul-intake/intake-breadcrumb";
 import IntakeAddressInput, { type ResolvedAddress } from "@/components/shared/intake-address-input";
+import {
+  FIELD_INPUT,
+  FIELD_SELECT,
+  FIELD_TEXTAREA,
+  FIELD_LABEL,
+  INVALID_INPUT,
+  SMALL_INPUT,
+  SMALL_LABEL,
+  SELECT_INPUT,
+  OUTLINE_BTN,
+  GRADIENT_BTN,
+  CARD,
+  ChoiceCard,
+  CountedDigitsField,
+  type CountedDigitsLabels,
+} from "@/components/intake-ui";
+import { formatSsn } from "@/lib/intake-shared/format";
 import {
   visibleSections,
   MAX_BENEFICIARIES,
@@ -158,6 +173,8 @@ function errorMessageFor(key: FieldErrorKey, locale: IntakeLocale): string {
       return tr(UI.errZip, locale);
     case "ssn":
       return tr(UI.errSsn, locale);
+    case "routing":
+      return tr(UI.errRouting, locale);
     case "age":
       return tr(UI.errAge, locale);
     case "dob":
@@ -195,9 +212,12 @@ export default function IntakeForm({ token }: { token: string }) {
   const [missing, setMissing] = useState<Set<string>>(new Set());
   const [errors, setErrors] = useState<Record<string, FieldErrorKey>>({});
   const [completeError, setCompleteError] = useState<string | null>(null);
-  // Sensitive fields (SSN/ITIN, driver's license #, routing/account #, beneficiary SSN) show
-  // their value by default so users can see what they type; owners can still toggle Hide.
-  const [reveal, setReveal] = useState(true);
+  // Sensitive fields (SSN/ITIN, driver's license #, routing/account #, beneficiary SSN) start
+  // OBSCURED. The agent usually fills this form with the client watching a screen share, so a
+  // readable SSN sitting on screen is the default that had to change; Reveal is one click, and
+  // the digit counter still reports progress while the value is hidden. Matches client-view.tsx,
+  // which already defaulted to hidden.
+  const [reveal, setReveal] = useState(false);
   const cardRef = useRef<HTMLDivElement | null>(null);
   const reduceMotion = useReducedMotion();
 
@@ -492,7 +512,7 @@ export default function IntakeForm({ token }: { token: string }) {
 
       <div
         ref={cardRef}
-        className="scroll-mt-4 overflow-hidden rounded-2xl border bg-white shadow-md shadow-black/5 dark:bg-gray-950"
+        className={`scroll-mt-4 overflow-hidden shadow-md shadow-black/5 ${CARD}`}
       >
         <div className="h-1.5 w-full bg-gradient-to-r from-brand to-accent" />
         <div className="p-5 sm:p-6">
@@ -606,29 +626,28 @@ export default function IntakeForm({ token }: { token: string }) {
       )}
 
       <div className="mt-6 flex items-center justify-between gap-3">
-        <Button
-          variant="ghost"
-          size="lg"
+        <button
+          type="button"
           disabled={step === 0}
           onClick={() => setStep((s) => Math.max(0, s - 1))}
-          className="text-muted-foreground"
+          className={`${OUTLINE_BTN} w-auto px-6 disabled:opacity-40`}
         >
           {tr(UI.back, locale)}
-        </Button>
+        </button>
         {step < sections.length - 1 ? (
-          <Button
-            size="lg"
+          <button
+            type="button"
             onClick={handleNext}
-            className="flex-1 gap-2 bg-gradient-to-r from-brand to-accent text-white shadow-md shadow-brand/30 transition active:scale-[0.98] hover:opacity-95 sm:flex-none sm:min-w-44"
+            className={`${GRADIENT_BTN} flex-1 active:scale-[0.98] sm:flex-none sm:min-w-44`}
           >
             {tr(UI.next, locale)} <ArrowRight className="h-4 w-4" />
-          </Button>
+          </button>
         ) : (
-          <Button
-            size="lg"
+          <button
+            type="button"
             onClick={handleFinish}
             disabled={completing}
-            className="flex-1 gap-2 bg-gradient-to-r from-brand to-accent text-white shadow-md shadow-brand/30 transition active:scale-[0.98] hover:opacity-95 sm:flex-none"
+            className={`${GRADIENT_BTN} flex-1 active:scale-[0.98] sm:flex-none`}
           >
             {completing ? (
               <>
@@ -639,7 +658,7 @@ export default function IntakeForm({ token }: { token: string }) {
                 <Send className="h-4 w-4" /> {tr(isOwner ? UI.finish : UI.submitApplication, locale)}
               </>
             )}
-          </Button>
+          </button>
         )}
       </div>
 
@@ -658,12 +677,12 @@ export default function IntakeForm({ token }: { token: string }) {
                 onClick={() => setStep(i)}
                 title={sectionTitle(s, locale)}
                 aria-current={isCurrent ? "step" : undefined}
-                className={`relative flex h-9 w-9 items-center justify-center rounded-full border text-xs transition ${
+                className={`relative flex h-11 w-11 items-center justify-center rounded-full border-2 text-sm transition ${
                   isCurrent
                     ? "border-brand bg-brand text-white shadow-sm"
                     : done
                       ? "border-green-500 bg-green-50 text-green-600 dark:bg-green-950"
-                      : "border-input bg-background text-muted-foreground hover:border-brand hover:text-brand"
+                      : "border-gray-200 bg-background text-muted-foreground hover:border-brand hover:text-brand dark:border-gray-800"
                 }`}
               >
                 <Icon className="h-4 w-4" />
@@ -718,52 +737,41 @@ function SaveIndicator({ status, locale }: { status: string; locale: IntakeLocal
   );
 }
 
-/* Shared select styling (native selects are best on mobile). */
-const selectCls =
-  "flex h-12 w-full rounded-md border border-input bg-background px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 sm:h-11 sm:text-sm";
-const inputBase = "h-12 text-base focus-visible:ring-brand sm:h-11 sm:text-sm";
+/** Options long enough that two of them side by side would wrap mid-word. */
+const STACK_OPTION_CHARS = 14;
 
-/** Two-option questions (Yes/No, Sex, etc.) as tappable radio cards — left unselected by default. */
+/**
+ * Multiple-choice questions as tappable cards.
+ *
+ * Was a native `<input type="radio">` inside a bordered label; now the shared `ChoiceCard`, so the
+ * agent's screen matches the Final Expense wizard. No icons: IUL's options come from a field
+ * config ("Single / Married / Divorced / Widowed", "Living / Deceased") and picking a glyph for
+ * each would be decoration standing in for meaning.
+ */
 function RadioOptions({
-  id,
   options,
   value,
   locale,
-  invalid,
   onChange,
 }: {
-  id: string;
   options: IntakeOption[];
   value: string;
   locale: IntakeLocale;
-  invalid?: boolean;
   onChange: (v: string) => void;
 }) {
+  const labels = options.map((opt) => optionLabel(opt, locale));
+  const stacked = labels.some((l) => l.length > STACK_OPTION_CHARS);
+
   return (
-    <div role="radiogroup" className="grid grid-cols-2 gap-2">
-      {options.map((opt) => {
-        const selected = value === opt.value;
-        return (
-          <label
-            key={opt.value}
-            className={`flex min-h-[3rem] cursor-pointer items-center justify-center gap-2 rounded-md border px-3 py-2.5 text-center text-base leading-tight transition sm:min-h-[2.75rem] sm:text-sm ${
-              selected
-                ? "border-brand bg-brand/5 font-medium text-brand ring-1 ring-brand"
-                : `${invalid ? "border-red-500" : "border-input"} text-foreground hover:border-brand`
-            }`}
-          >
-            <input
-              type="radio"
-              name={id}
-              value={opt.value}
-              checked={selected}
-              onChange={() => onChange(opt.value)}
-              className="h-4 w-4 shrink-0 accent-brand"
-            />
-            {optionLabel(opt, locale)}
-          </label>
-        );
-      })}
+    <div role="radiogroup" className={`grid gap-2.5 ${stacked ? "grid-cols-1" : "sm:grid-cols-2"}`}>
+      {options.map((opt, i) => (
+        <ChoiceCard
+          key={opt.value}
+          selected={value === opt.value}
+          label={labels[i]}
+          onClick={() => onChange(opt.value)}
+        />
+      ))}
     </div>
   );
 }
@@ -798,7 +806,18 @@ function FieldInput({
   const help = fieldHelp(field, locale);
   const placeholder = fieldPlaceholder(field, locale);
   const showInvalid = invalid || !!errorKey;
-  const invalidCls = showInvalid ? "border-red-500 focus-visible:ring-red-500" : "";
+  const invalidCls = showInvalid ? INVALID_INPUT : "";
+  const inputCls = `${FIELD_INPUT} ${invalidCls}`;
+
+  /** Sensitive digits stay obscured unless the agent asks — a client is often watching this screen. */
+  const secret = Boolean(field.sensitive) && !reveal;
+
+  /** The counter copy for any fixed-length digit field. */
+  const digitLabels: CountedDigitsLabels = {
+    looksGood: tr(UI.looksGood, locale),
+    remaining: tr(UI.digitsRemaining, locale),
+    masked: tr(UI.valueOnFile, locale),
+  };
 
   function handleDigits(raw: string) {
     let v = raw.replace(/\D/g, "");
@@ -808,16 +827,16 @@ function FieldInput({
 
   return (
     <div>
-      <div className="mb-1 flex items-center justify-between">
-        <Label htmlFor={id} className={showInvalid ? "text-red-600" : ""}>
+      <div className="mb-1.5 flex items-center justify-between gap-3">
+        <label htmlFor={id} className={`${FIELD_LABEL} mb-0`}>
           {label}
           {field.required && <span className="ml-0.5 text-red-500">*</span>}
-        </Label>
+        </label>
         {field.sensitive && isOwner && (
           <button
             type="button"
             onClick={onToggleReveal}
-            className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
+            className="flex shrink-0 items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
           >
             {reveal ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
             {reveal ? tr(UI.hide, locale) : tr(UI.reveal, locale)}
@@ -827,13 +846,11 @@ function FieldInput({
 
       {field.type === "select" ? (
         field.options && field.options.length === 2 ? (
-          // Two-option questions (Yes/No, Sex, etc.) render as tappable radio buttons.
+          // Two-option questions (Yes/No, Sex, etc.) render as tappable cards.
           <RadioOptions
-            id={id}
             options={field.options.filter((opt) => isOwner || !opt.ownerOnly)}
             value={value}
             locale={locale}
-            invalid={showInvalid}
             onChange={onChange}
           />
         ) : (
@@ -841,7 +858,7 @@ function FieldInput({
             id={id}
             value={value}
             onChange={(e) => onChange(e.target.value)}
-            className={`${selectCls} ${invalidCls}`}
+            className={`${FIELD_SELECT} ${invalidCls}`}
           >
             <option value="">{tr(UI.choose, locale)}</option>
             {field.options
@@ -858,7 +875,7 @@ function FieldInput({
           id={id}
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className={`${selectCls} ${invalidCls}`}
+          className={`${FIELD_SELECT} ${invalidCls}`}
         >
           <option value="">{tr(UI.choose, locale)}</option>
           {countriesFor(locale).map((c) => (
@@ -883,32 +900,85 @@ function FieldInput({
           invalid={showInvalid}
           locale={locale}
           fullAddress={field.fullAddress}
+          className={inputCls}
+          fontSize="1.125rem"
         />
       ) : field.type === "money" ? (
         <CurrencyInput id={id} value={value} onChange={onChange} invalid={showInvalid} />
       ) : field.type === "textarea" ? (
-        <Textarea
+        <textarea
           id={id}
           value={value}
           placeholder={placeholder}
           onChange={(e) => onChange(e.target.value)}
-          className={`${inputBase} ${invalidCls}`}
+          className={`${FIELD_TEXTAREA} ${invalidCls}`}
         />
       ) : field.type === "tel" ? (
-        <Input
+        <CountedDigitsField
           id={id}
-          type="tel"
-          inputMode="tel"
-          value={formatUsPhone(value)}
+          value={value}
+          onChange={onChange}
+          onBlur={onBlur}
+          format={formatUsPhone}
+          digitsNeeded={10}
+          labels={digitLabels}
           placeholder={placeholder}
-          onChange={(e) => onChange(formatUsPhone(e.target.value))}
-          onBlur={(e) => onBlur(e.target.value)}
-          className={`${inputBase} ${invalidCls}`}
+          inputMode="tel"
+          autoComplete="tel"
+          invalid={showInvalid}
+          className={inputCls}
         />
-      ) : field.type === "ssn" || field.type === "number" || field.digitsOnly ? (
-        <Input
+      ) : /* Fixed-length digit fields get the live counter: it says how many digits are left
+            instead of silently refusing to validate. This is also what finally gives IUL the
+            123-45-6789 grouping every other line of business already had. */
+      field.type === "ssn" ? (
+        <CountedDigitsField
           id={id}
-          type={field.sensitive && !reveal ? "password" : "text"}
+          value={value}
+          onChange={onChange}
+          onBlur={onBlur}
+          format={formatSsn}
+          digitsNeeded={9}
+          labels={digitLabels}
+          placeholder="123-45-6789"
+          autoComplete="off"
+          secret={secret}
+          invalid={showInvalid}
+          className={inputCls}
+        />
+      ) : field.digitsOnly && field.maxLength === 9 ? (
+        <CountedDigitsField
+          id={id}
+          value={value}
+          onChange={onChange}
+          onBlur={onBlur}
+          format={(raw) => raw.replace(/\D/g, "").slice(0, 9)}
+          digitsNeeded={9}
+          labels={digitLabels}
+          placeholder={placeholder}
+          autoComplete="off"
+          secret={secret}
+          invalid={showInvalid}
+          className={inputCls}
+        />
+      ) : field.digitsOnly && field.maxLength === 5 ? (
+        <CountedDigitsField
+          id={id}
+          value={value}
+          onChange={onChange}
+          onBlur={onBlur}
+          format={(raw) => raw.replace(/\D/g, "").slice(0, 5)}
+          digitsNeeded={5}
+          labels={digitLabels}
+          placeholder={placeholder}
+          autoComplete="postal-code"
+          invalid={showInvalid}
+          className={inputCls}
+        />
+      ) : field.type === "number" || field.digitsOnly ? (
+        <input
+          id={id}
+          type={secret ? "password" : "text"}
           onFocus={() => {
             // The server sends a mask for stored sensitive values; clear it before the
             // digits-only handler strips the bullets and leaves a stub behind.
@@ -918,15 +988,15 @@ function FieldInput({
           autoComplete={field.sensitive ? "off" : undefined}
           value={value}
           placeholder={placeholder}
-          maxLength={field.type === "ssn" ? 9 : field.maxLength}
+          maxLength={field.maxLength}
           onChange={(e) => handleDigits(e.target.value)}
           onBlur={(e) => onBlur(e.target.value)}
-          className={`${inputBase} ${invalidCls}`}
+          className={inputCls}
         />
       ) : (
-        <Input
+        <input
           id={id}
-          type={field.sensitive && !reveal ? "password" : field.type === "email" ? "email" : "text"}
+          type={secret ? "password" : field.type === "email" ? "email" : "text"}
           onFocus={() => {
             if (field.sensitive && isMaskedValue(value)) onChange("");
           }}
@@ -937,16 +1007,17 @@ function FieldInput({
           maxLength={field.maxLength}
           onChange={(e) => onChange(e.target.value)}
           onBlur={(e) => onBlur(e.target.value)}
-          className={`${inputBase} ${invalidCls}`}
+          className={inputCls}
         />
       )}
 
       {errorKey ? (
-        <p className="mt-1 flex items-center gap-1 text-xs text-red-600">
-          <AlertCircle className="h-3.5 w-3.5" /> {errorMessageFor(errorKey, locale)}
+        // Amber, not red: a half-typed phone number is an unfinished thought, not a breakage.
+        <p className="mt-2 flex items-start gap-1.5 text-sm font-medium text-amber-700 dark:text-amber-500">
+          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" /> {errorMessageFor(errorKey, locale)}
         </p>
       ) : (
-        help && <p className="mt-1 text-xs text-muted-foreground">{help}</p>
+        help && <p className="mt-1.5 text-sm text-muted-foreground">{help}</p>
       )}
     </div>
   );
@@ -1009,10 +1080,10 @@ function WeightInput({
 }) {
   const [metric, setMetric] = useState(false);
   const [kg, setKg] = useState("");
-  const invalidCls = invalid ? "border-red-500 focus-visible:ring-red-500" : "";
+  const invalidCls = invalid ? INVALID_INPUT : "";
   return (
     <div>
-      <Input
+      <input
         id={id}
         type="text"
         inputMode="numeric"
@@ -1020,9 +1091,13 @@ function WeightInput({
         maxLength={maxLength}
         onChange={(e) => onChange(e.target.value.replace(/\D/g, "").slice(0, maxLength))}
         onBlur={(e) => onBlur(e.target.value)}
-        className={`${inputBase} ${invalidCls}`}
+        className={`${FIELD_INPUT} ${invalidCls}`}
       />
-      <button type="button" onClick={() => setMetric((m) => !m)} className="mt-1 text-xs text-blue-600 hover:underline">
+      <button
+        type="button"
+        onClick={() => setMetric((m) => !m)}
+        className="mt-1.5 text-sm font-medium text-brand underline"
+      >
         {tr(UI.preferKg, locale)}
       </button>
       {metric && (
@@ -1082,7 +1157,7 @@ function DobParts({
 
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 100 }, (_, i) => String(currentYear - i));
-  const cls = `${selectCls} ${invalid ? "border-red-500" : ""}`;
+  const cls = `${SELECT_INPUT} ${invalid ? INVALID_INPUT : ""}`;
 
   function set(next: { month?: string; day?: string; year?: string }) {
     const merged = { ...parts, ...next };
@@ -1135,7 +1210,7 @@ function HeightSelect({
   locale: IntakeLocale;
 }) {
   const { feet, inches } = parseHeight(value);
-  const cls = `${selectCls} ${invalid ? "border-red-500" : ""}`;
+  const cls = `${SELECT_INPUT} ${invalid ? INVALID_INPUT : ""}`;
   const [metric, setMetric] = useState(false);
   const [cm, setCm] = useState("");
   return (
@@ -1158,7 +1233,11 @@ function HeightSelect({
           ))}
         </select>
       </div>
-      <button type="button" onClick={() => setMetric((m) => !m)} className="mt-1 text-xs text-blue-600 hover:underline">
+      <button
+        type="button"
+        onClick={() => setMetric((m) => !m)}
+        className="mt-1.5 text-sm font-medium text-brand underline"
+      >
         {tr(UI.preferCm, locale)}
       </button>
       {metric && (
@@ -1223,7 +1302,7 @@ function BeneficiariesEditor({
     <div className={`space-y-4 ${invalid ? "rounded-md border border-red-500 p-3" : ""}`}>
       {list.map((b, idx) => {
         return (
-          <div key={idx} className="rounded-md border p-3">
+          <div key={idx} className="rounded-2xl border-2 border-gray-200 p-4 dark:border-gray-800">
             <div className="mb-2 flex items-center justify-between">
               <span className="text-sm font-medium">
                 {tr(UI.beneficiary, locale)} {idx + 1}
@@ -1242,7 +1321,7 @@ function BeneficiariesEditor({
                 <select
                   value={b.relationship}
                   onChange={(e) => update(idx, { relationship: e.target.value })}
-                  className={selectCls}
+                  className={SMALL_INPUT}
                 >
                   <option value="">{tr(UI.choose, locale)}</option>
                   {BENEFICIARY_RELATIONSHIPS.map((opt) => (
@@ -1323,14 +1402,14 @@ function LabeledInput({
 }) {
   return (
     <div>
-      <Label className="text-xs">{label}</Label>
-      <Input
+      <label className={SMALL_LABEL}>{label}</label>
+      <input
         type={type}
         inputMode={inputMode}
         value={value}
         onFocus={onFocus}
         onChange={(e) => onChange(e.target.value)}
-        className={inputBase}
+        className={SMALL_INPUT}
       />
     </div>
   );
@@ -1391,7 +1470,7 @@ function FileUploader({
       {files.length > 0 && (
         <ul className="mb-2 space-y-1">
           {files.map((f) => (
-            <li key={f.url} className="flex items-center justify-between gap-2 rounded-md border px-3 py-2 text-sm">
+            <li key={f.url} className="flex items-center justify-between gap-2 rounded-xl border-2 border-gray-200 px-3 py-2 text-sm dark:border-gray-800">
               <a href={f.url} target="_blank" rel="noopener noreferrer" className="flex min-w-0 items-center gap-2 text-blue-600 hover:underline">
                 <FileText className="h-4 w-4 shrink-0" />
                 <span className="truncate">{f.name}</span>

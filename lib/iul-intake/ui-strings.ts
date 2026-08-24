@@ -201,6 +201,18 @@ export const UI = {
   errPhone: { en: "Enter a valid 10-digit phone number.", es: "Ingrese un número de teléfono válido de 10 dígitos." } as Dict,
   errZip: { en: "Enter a valid 5-digit zip code.", es: "Ingrese un código postal válido de 5 dígitos." } as Dict,
   errSsn: { en: "Enter a valid 9-digit number.", es: "Ingrese un número válido de 9 dígitos." } as Dict,
+  errRouting: {
+    en: "Enter a valid 9-digit routing number.",
+    es: "Ingrese un número de ruta válido de 9 dígitos.",
+  } as Dict,
+
+  /* Live counter under a fixed-length digit field — same wording as the Final Expense wizard. */
+  digitsRemaining: { en: "{n} more digit(s) to go", es: "Faltan {n} dígito(s)" } as Dict,
+  looksGood: { en: "Looks good", es: "Se ve bien" } as Dict,
+  valueOnFile: {
+    en: "Already saved — tap to replace it.",
+    es: "Ya está guardado — toque para reemplazarlo.",
+  } as Dict,
   errPercent: { en: "Enter a percentage between 0 and 100.", es: "Ingrese un porcentaje entre 0 y 100." } as Dict,
   errDob: { en: "Enter a valid date of birth.", es: "Ingrese una fecha de nacimiento válida." } as Dict,
   errAge: { en: "Enter a valid age.", es: "Ingrese una edad válida." } as Dict,

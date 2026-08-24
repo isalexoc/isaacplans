@@ -50,6 +50,17 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import IntakeAddressInput, { type ResolvedAddress } from "@/components/shared/intake-address-input";
+import {
+  BIG_INPUT,
+  SMALL_INPUT,
+  SELECT_INPUT,
+  SMALL_LABEL,
+  PRIMARY_BTN,
+  OUTLINE_BTN,
+  ChoiceCard,
+  CountedDigitsField,
+  type CountedDigitsLabels,
+} from "@/components/intake-ui";
 import { MONTHS, buildDobIso, splitDobIso, formatUsPhone, formatSsn } from "@/lib/intake-shared/format";
 import { fetchFeIntake, completeFeIntake, searchMedications, saveFeIntakeBanking } from "@/lib/fe-intake-api";
 import { useFeIntakeAutosave } from "@/hooks/use-fe-intake-autosave";
@@ -271,59 +282,17 @@ function iconForOption(fieldKey: string, value: string): LucideIcon {
 }
 
 // ─── Shared styling ────────────────────────────────────────────────────────────
+// The constants and ChoiceCard/CountedDigitsField that used to live here now sit in
+// `components/intake-ui`, unchanged, so the IUL stepper can wear the same clothes. The class
+// strings are byte-identical to what was here, so nothing about this form's rendering moved.
 
-const BIG_INPUT =
-  "w-full rounded-2xl border-2 border-gray-200 bg-white px-5 py-4 text-lg text-gray-900 placeholder:text-gray-400 focus:border-brand focus:outline-none dark:border-gray-800 dark:bg-gray-900 dark:text-gray-100";
-
-const SMALL_INPUT =
-  "w-full rounded-xl border-2 border-gray-200 bg-white px-4 py-2.5 text-base text-gray-900 placeholder:text-gray-400 focus:border-brand focus:outline-none dark:border-gray-800 dark:bg-gray-900 dark:text-gray-100";
-
-/** Narrower padding than BIG_INPUT so 2–3 selects fit side by side on a phone. */
-const SELECT_INPUT =
-  "w-full rounded-2xl border-2 border-gray-200 bg-white px-3 py-4 text-center text-base font-medium text-gray-900 focus:border-brand focus:outline-none dark:border-gray-800 dark:bg-gray-900 dark:text-gray-100";
-
-const SMALL_LABEL = "mb-1 block text-xs font-medium text-muted-foreground";
-
-function ChoiceCard({
-  selected,
-  icon: Icon,
-  label,
-  onClick,
-}: {
-  selected: boolean;
-  icon: LucideIcon;
-  label: string;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      role="radio"
-      aria-checked={selected}
-      onClick={onClick}
-      className={`flex w-full items-center gap-4 rounded-2xl border-2 p-4 text-left transition ${
-        selected
-          ? "border-brand bg-brand/5"
-          : "border-gray-200 hover:border-gray-300 dark:border-gray-800 dark:hover:border-gray-700"
-      }`}
-    >
-      <span
-        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${
-          selected ? "bg-brand text-white" : "bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400"
-        }`}
-      >
-        <Icon className="h-5 w-5" />
-      </span>
-      <span className="flex-1 font-medium text-gray-900 dark:text-gray-100">{label}</span>
-      <span
-        className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 ${
-          selected ? "border-brand bg-brand" : "border-gray-300 dark:border-gray-700"
-        }`}
-      >
-        {selected && <Check className="h-4 w-4 text-white" />}
-      </span>
-    </button>
-  );
+/** The two lines every CountedDigitsField needs, in the caller's language. */
+function countedLabels(locale: FeLocale, masked?: string): CountedDigitsLabels {
+  return {
+    looksGood: tr(UI.looksGood, locale),
+    remaining: tr(UI.digitsRemaining, locale),
+    masked,
+  };
 }
 
 function DrugSearchInput({
@@ -510,66 +479,6 @@ function DobInput({ value, onChange, locale }: { value: string; onChange: (v: st
  * isn't accepted yet. Without this, a mistyped SSN just leaves Next greyed out with no
  * explanation — the client can't tell whether the form is broken or they did something wrong.
  */
-function CountedDigitsField({
-  value,
-  onChange,
-  locale,
-  format,
-  digitsNeeded,
-  placeholder,
-  inputMode = "numeric",
-  autoComplete,
-  /** Masked values come from the server for sensitive fields; typing replaces them. */
-  maskedNote,
-}: {
-  value: string;
-  onChange: (v: string) => void;
-  locale: FeLocale;
-  format: (raw: string) => string;
-  digitsNeeded: number;
-  placeholder?: string;
-  inputMode?: "numeric" | "tel";
-  autoComplete?: string;
-  maskedNote?: string;
-}) {
-  const masked = isMaskedValue(value);
-  const digitCount = value.replace(/\D/g, "").length;
-  const complete = !masked && digitCount === digitsNeeded;
-  const remaining = digitsNeeded - digitCount;
-
-  return (
-    <div>
-      <div className="relative">
-        <input
-          autoFocus
-          type="text"
-          inputMode={inputMode}
-          autoComplete={autoComplete}
-          value={masked ? value : format(value)}
-          onFocus={() => {
-            // A stored sensitive value shows as a mask; focusing to edit starts it fresh.
-            if (masked) onChange("");
-          }}
-          onChange={(e) => onChange(format(e.target.value))}
-          placeholder={placeholder}
-          aria-invalid={!masked && digitCount > 0 && !complete}
-          className={`${BIG_INPUT} pr-12 tracking-wide ${complete ? "border-green-500" : ""}`}
-        />
-        {(complete || masked) && (
-          <CheckCircle2 className="absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 text-green-600" />
-        )}
-      </div>
-      <p className={`mt-2 text-xs ${complete || masked ? "text-green-600" : "text-muted-foreground"}`}>
-        {masked
-          ? maskedNote ?? tr(UI.looksGood, locale)
-          : complete
-            ? tr(UI.looksGood, locale)
-            : tr(UI.digitsRemaining, locale).replace("{n}", String(Math.max(0, remaining)))}
-      </p>
-    </div>
-  );
-}
-
 const HEIGHT_RE = /^(\d+)'(\d+)"?$/;
 
 /** Feet/inches selects — same local-state reasoning as {@link DobInput}. */
@@ -1078,6 +987,10 @@ function FieldScreen({
               onResolve={onAddressResolve}
               placeholder={fieldPlaceholder(field, locale)}
               locale={locale}
+              // Without these the Google box renders as a 40px/14px shadcn control directly above
+              // 58px/18px siblings — the one screen in this form that looked borrowed.
+              className={BIG_INPUT}
+              fontSize="1.125rem"
             />
             {field.addressTargets && (
               <div className="grid grid-cols-2 gap-3">
@@ -1139,7 +1052,8 @@ function FieldScreen({
           <CountedDigitsField
             value={value}
             onChange={onChange}
-            locale={locale}
+            autoFocus
+            labels={countedLabels(locale)}
             format={formatUsPhone}
             digitsNeeded={10}
             placeholder="(555) 123-4567"
@@ -1150,7 +1064,8 @@ function FieldScreen({
           <CountedDigitsField
             value={value}
             onChange={onChange}
-            locale={locale}
+            autoFocus
+            labels={countedLabels(locale)}
             format={(raw) => raw.replace(/\D/g, "").slice(0, field.maxLength ?? 5)}
             digitsNeeded={field.maxLength ?? 5}
             placeholder={fieldPlaceholder(field, locale)}
@@ -1160,11 +1075,11 @@ function FieldScreen({
           <CountedDigitsField
             value={value}
             onChange={onChange}
-            locale={locale}
+            autoFocus
+            labels={countedLabels(locale, tr(UI.ssnOnFile, locale))}
             format={formatSsn}
             digitsNeeded={9}
             placeholder="123-45-6789"
-            maskedNote={tr(UI.ssnOnFile, locale)}
           />
         ) : (
           <input
@@ -1232,11 +1147,6 @@ function addRowLabel(count: number, locale: FeLocale): string {
   return tr(UI.addAnotherBeneficiary, locale);
 }
 
-const PRIMARY_BTN =
-  "flex w-full items-center justify-center gap-2 rounded-2xl bg-gray-900 px-6 py-4 text-base font-semibold text-white transition hover:bg-gray-800 dark:bg-white dark:text-gray-900";
-
-const OUTLINE_BTN =
-  "flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-gray-300 px-6 py-4 text-base font-semibold text-gray-900 transition hover:bg-gray-50 dark:border-gray-700 dark:text-gray-100 dark:hover:bg-gray-900";
 
 /**
  * Intro screen for a roster repeater. Explains what a beneficiary is and that two are the
