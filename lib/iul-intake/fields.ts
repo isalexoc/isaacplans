@@ -473,6 +473,34 @@ export function fieldByKey(key: string): IntakeField | undefined {
   return undefined;
 }
 
+/**
+ * The only keys a secure capture link may write.
+ *
+ * These are the four values a client is most likely to refuse to say out loud on a call. Bank
+ * name is deliberately absent — it is not sensitive, the agent already has it from the
+ * conversation, and every key on this list is one more thing an unauthenticated endpoint can
+ * touch.
+ *
+ * Single source of truth: the client page renders from it, the write endpoint enforces it, and
+ * each issued link freezes a copy so a later edit here cannot widen a link already in someone's
+ * text messages.
+ */
+export const SECURE_CAPTURE_FIELD_KEYS = [
+  "ssn",
+  "routingNumber",
+  "accountNumber",
+  "accountType",
+] as const;
+
+export type SecureCaptureFieldKey = (typeof SECURE_CAPTURE_FIELD_KEYS)[number];
+
+/** The field definitions behind those keys, so the client page gets labels and types for free. */
+export function secureCaptureFields(): IntakeField[] {
+  return SECURE_CAPTURE_FIELD_KEYS.map((k) => fieldByKey(k)).filter(
+    (f): f is IntakeField => Boolean(f)
+  );
+}
+
 /** True when a field's showIf condition is satisfied by the current data. */
 export function isFieldVisible(field: IntakeField, data: Record<string, unknown>): boolean {
   if (!field.showIf) return true;

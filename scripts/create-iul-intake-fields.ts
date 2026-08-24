@@ -124,6 +124,15 @@ function buildSpecs(): FieldSpec[] {
     reused: false,
   });
 
+  // Meta field: the one-shot link a client uses to type their own SSN and bank details. Separate
+  // from the share link above so a workflow can text exactly one of them without ambiguity.
+  specs.push({
+    slug: "iul_secure_capture_link",
+    name: `${FIELD_PREFIX}Secure Capture Link`,
+    dataType: "TEXT",
+    reused: false,
+  });
+
   return specs;
 }
 

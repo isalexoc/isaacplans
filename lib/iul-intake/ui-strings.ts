@@ -213,6 +213,87 @@ export const UI = {
     en: "Already saved — tap to replace it.",
     es: "Ya está guardado — toque para reemplazarlo.",
   } as Dict,
+
+  /* ── Secure capture: the page the CLIENT opens on their own phone ── */
+  captureTitle: {
+    en: "Send your details securely",
+    es: "Envíe sus datos de forma segura",
+  } as Dict,
+  captureTitleNamed: {
+    en: "{name}, send your details securely",
+    es: "{name}, envíe sus datos de forma segura",
+  } as Dict,
+  captureIntro: {
+    en: "Your agent needs these to finish your application. Type them here instead of reading them out loud.",
+    es: "Su agente los necesita para terminar su solicitud. Escríbalos aquí en lugar de decirlos en voz alta.",
+  } as Dict,
+  captureSecureNote: {
+    en: "Encrypted and sent straight to your agent",
+    es: "Cifrado y enviado directamente a su agente",
+  } as Dict,
+  captureSsnLabel: {
+    en: "Social Security number or ITIN",
+    es: "Número de seguro social o ITIN",
+  } as Dict,
+  captureRoutingLabel: { en: "Routing number", es: "Número de ruta" } as Dict,
+  captureRoutingHelp: {
+    en: "The 9 digits at the bottom-left of a check.",
+    es: "Los 9 dígitos en la parte inferior izquierda de un cheque.",
+  } as Dict,
+  captureAccountLabel: { en: "Account number", es: "Número de cuenta" } as Dict,
+  captureAccountTypeLabel: { en: "Account type", es: "Tipo de cuenta" } as Dict,
+  captureSend: { en: "Send securely", es: "Enviar de forma segura" } as Dict,
+  captureSending: { en: "Sending…", es: "Enviando…" } as Dict,
+  captureSubmitError: {
+    en: "We could not send that. Please check the numbers and try again.",
+    es: "No pudimos enviarlo. Revise los números e intente de nuevo.",
+  } as Dict,
+  captureDoneTitle: { en: "Sent. Thank you.", es: "Enviado. Gracias." } as Dict,
+  captureDoneBody: {
+    en: "Your agent has what they need. You can close this page — nothing else is required from you.",
+    es: "Su agente ya tiene lo que necesita. Puede cerrar esta página — no se requiere nada más de usted.",
+  } as Dict,
+  captureFooter: {
+    en: "This link works once and only for your application.",
+    es: "Este enlace funciona una sola vez y solo para su solicitud.",
+  } as Dict,
+
+  /* ── Secure capture: the panel the AGENT sees inside the form ── */
+  capturePanelTitle: {
+    en: "Client would rather not say it out loud?",
+    es: "¿El cliente prefiere no decirlo en voz alta?",
+  } as Dict,
+  capturePanelBody: {
+    en: "Send them a private link and they can type their SSN and bank details on their own phone. You will see the last 4 digits appear here.",
+    es: "Envíele un enlace privado y podrá escribir su SSN y datos bancarios en su propio teléfono. Aquí verá aparecer los últimos 4 dígitos.",
+  } as Dict,
+  captureCreate: { en: "Create secure link", es: "Crear enlace seguro" } as Dict,
+  captureCreating: { en: "Creating…", es: "Creando…" } as Dict,
+  captureWaiting: {
+    en: "Waiting for the client…",
+    es: "Esperando al cliente…",
+  } as Dict,
+  captureOpened: {
+    en: "They opened it — filling it in now.",
+    es: "Ya lo abrió — lo está llenando.",
+  } as Dict,
+  captureReceived: {
+    en: "Received — SSN and bank details are in.",
+    es: "Recibido — el SSN y los datos bancarios ya están.",
+  } as Dict,
+  captureReplaced: {
+    en: "This replaced the value you had entered.",
+    es: "Esto reemplazó el valor que usted había ingresado.",
+  } as Dict,
+  captureCancel: { en: "Cancel link", es: "Cancelar enlace" } as Dict,
+  captureFieldWaiting: {
+    en: "Waiting for the client to send this.",
+    es: "Esperando a que el cliente envíe esto.",
+  } as Dict,
+  captureError: {
+    en: "Something went wrong with the link. Try again.",
+    es: "Algo salió mal con el enlace. Intente de nuevo.",
+  } as Dict,
   errPercent: { en: "Enter a percentage between 0 and 100.", es: "Ingrese un porcentaje entre 0 y 100." } as Dict,
   errDob: { en: "Enter a valid date of birth.", es: "Ingrese una fecha de nacimiento válida." } as Dict,
   errAge: { en: "Enter a valid age.", es: "Ingrese una edad válida." } as Dict,

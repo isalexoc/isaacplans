@@ -211,6 +211,12 @@ export default clerkMiddleware(async (auth, req) => {
     /^(?:\/(?:en|es))?\/(?:final-expense\/intake|gastos-finales\/admision)\/[^/]+$/i.test(
       pathname
     );
+
+  // The IUL secure-capture page asks a client for their Social Security number on their phone.
+  // The full marketing footer — newsletter signup, service links — sitting under that request
+  // reads badly and buries the one button that matters, so it renders bare like the intake forms.
+  const isIulSecureCapture =
+    /^(?:\/(?:en|es))?\/iul\/(?:secure|seguro)\/[^/]+$/i.test(pathname);
   if (
     pathname.includes("/get-health-coverage-fast") ||
     pathname.includes("/cobertura-salud-rapida") ||
@@ -225,7 +231,8 @@ export default clerkMiddleware(async (auth, req) => {
     pathname.includes("/health-alternative/get-covered") ||
     pathname.includes("/alternativa-de-salud/obtener-cobertura") ||
     isAcaIntakeForm ||
-    isFeIntakeForm
+    isFeIntakeForm ||
+    isIulSecureCapture
   ) {
     response.headers.set("x-is-ads-landing", "1");
   }
@@ -243,7 +250,8 @@ export default clerkMiddleware(async (auth, req) => {
     pathname.includes("/health-alternative/get-covered") ||
     pathname.includes("/alternativa-de-salud/obtener-cobertura") ||
     isAcaIntakeForm ||
-    isFeIntakeForm
+    isFeIntakeForm ||
+    isIulSecureCapture
   ) {
     response.headers.set("x-ads-landing-variant", "iul-bare");
   }

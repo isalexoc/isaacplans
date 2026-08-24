@@ -57,8 +57,11 @@ import {
   type CountedDigitsLabels,
 } from "@/components/intake-ui";
 import { formatSsn } from "@/lib/intake-shared/format";
+import SecureCapturePanel from "@/components/iul-intake/secure-capture-panel";
+import { useIulSecureCapture } from "@/hooks/use-iul-secure-capture";
 import {
   visibleSections,
+  SECURE_CAPTURE_FIELD_KEYS,
   MAX_BENEFICIARIES,
   BENEFICIARY_RELATIONSHIPS,
   emptyBeneficiary,
@@ -221,6 +224,17 @@ export default function IntakeForm({ token }: { token: string }) {
   const cardRef = useRef<HTMLDivElement | null>(null);
   const reduceMotion = useReducedMotion();
 
+  /**
+   * Which field the agent is typing in right now.
+   *
+   * A captured value must never replace text under a live cursor — that is the one thing that
+   * would make this feature feel haunted rather than helpful. Whatever is focused is skipped and
+   * picked up on blur.
+   */
+  const focusedKeyRef = useRef<string | null>(null);
+  /** True once a client submission overwrote something the agent had already typed. */
+  const [captureReplaced, setCaptureReplaced] = useState(false);
+
   useEffect(() => {
     let active = true;
     (async () => {
@@ -249,6 +263,39 @@ export default function IntakeForm({ token }: { token: string }) {
   const sections = useMemo(() => visibleSections(!!isOwner), [isOwner]);
   // A client who has submitted can't edit until an admin re-opens the form.
   const lockedForClient = !isOwner && completed && !session?.reopenedForClient;
+
+  /**
+   * Secure capture: the agent's live view of what the client is typing on their own phone.
+   *
+   * The values arriving here are MASKED (`•••••6789`), and that is the mechanism, not a display
+   * choice. Once these sit in `data`, every subsequent autosave sends a mask, and the server's
+   * `mergePreservedIulSensitive` turns that into a no-op — so the agent's form structurally
+   * cannot overwrite what the client just sent. See the API route for the rest of the story.
+   */
+  const secureCapture = useIulSecureCapture({
+    token,
+    enabled: Boolean(isOwner) && !completed,
+    onValues: (values) => {
+      setData((prev) => {
+        let changed = false;
+        const next = { ...prev };
+        for (const key of SECURE_CAPTURE_FIELD_KEYS) {
+          const incoming = values[key];
+          if (typeof incoming !== "string" || !incoming) continue;
+          // Never yank a value out from under a live cursor; blur re-runs this.
+          if (focusedKeyRef.current === key) continue;
+          const current = typeof prev[key] === "string" ? (prev[key] as string) : "";
+          if (current === incoming) continue;
+          // A real value being displaced means the agent had typed something. Say so, rather than
+          // letting an SSN quietly change while they look at another field.
+          if (current && !isMaskedValue(current)) setCaptureReplaced(true);
+          next[key] = incoming;
+          changed = true;
+        }
+        return changed ? next : prev;
+      });
+    },
+  });
 
   // Clients pay by bank draft only — lock the value so it always syncs.
   useEffect(() => {
@@ -535,6 +582,21 @@ export default function IntakeForm({ token }: { token: string }) {
               transition={{ duration: 0.22, ease: "easeOut" }}
               className="mt-4 space-y-5"
             >
+          {/* Offered, never imposed: most calls never touch this. It sits at the top of the
+              payment step because that is where the four fields it covers now live. */}
+          {isOwner && !completed && current.key === "payment" && (
+            <SecureCapturePanel
+              locale={locale}
+              capture={secureCapture.capture}
+              url={secureCapture.url}
+              busy={secureCapture.busy}
+              error={secureCapture.error}
+              replacedExisting={captureReplaced}
+              onCreate={secureCapture.create}
+              onCancel={secureCapture.cancel}
+              onSend={secureCapture.send}
+            />
+          )}
           {current.fields.map((field) => {
             if (!isFieldVisible(field, data)) return null;
             if (field.ownerOnly && !isOwner) return null;
@@ -593,6 +655,13 @@ export default function IntakeForm({ token }: { token: string }) {
                 reveal={reveal}
                 isOwner={!!isOwner}
                 onToggleReveal={() => setReveal((r) => !r)}
+                onFocusChange={(focused) => {
+                  focusedKeyRef.current = focused ? field.key : null;
+                }}
+                waitingForClient={
+                  secureCapture.capture?.status === "pending" &&
+                  (SECURE_CAPTURE_FIELD_KEYS as readonly string[]).includes(field.key)
+                }
               />
             );
           })}
@@ -788,6 +857,8 @@ function FieldInput({
   reveal,
   isOwner,
   onToggleReveal,
+  onFocusChange,
+  waitingForClient = false,
 }: {
   field: IntakeField;
   locale: IntakeLocale;
@@ -800,6 +871,10 @@ function FieldInput({
   reveal: boolean;
   isOwner: boolean;
   onToggleReveal: () => void;
+  /** Reported up so a live capture never overwrites the field under the agent's cursor. */
+  onFocusChange?: (focused: boolean) => void;
+  /** A secure capture link is out and this is one of the fields it will fill. */
+  waitingForClient?: boolean;
 }) {
   const id = `f-${field.key}`;
   const label = fieldLabel(field, locale);
@@ -826,7 +901,10 @@ function FieldInput({
   }
 
   return (
-    <div>
+    <div
+      onFocusCapture={() => onFocusChange?.(true)}
+      onBlurCapture={() => onFocusChange?.(false)}
+    >
       <div className="mb-1.5 flex items-center justify-between gap-3">
         <label htmlFor={id} className={`${FIELD_LABEL} mb-0`}>
           {label}
@@ -1015,6 +1093,13 @@ function FieldInput({
         // Amber, not red: a half-typed phone number is an unfinished thought, not a breakage.
         <p className="mt-2 flex items-start gap-1.5 text-sm font-medium text-amber-700 dark:text-amber-500">
           <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" /> {errorMessageFor(errorKey, locale)}
+        </p>
+      ) : waitingForClient ? (
+        // The field stays editable on purpose — if the client goes quiet mid-call, the agent
+        // takes over by typing, without having to cancel anything first.
+        <p className="mt-1.5 flex items-start gap-1.5 text-sm text-brand">
+          <Loader2 className="mt-0.5 h-3.5 w-3.5 shrink-0 animate-spin" />
+          {tr(UI.captureFieldWaiting, locale)}
         </p>
       ) : (
         help && <p className="mt-1.5 text-sm text-muted-foreground">{help}</p>

@@ -15,6 +15,8 @@ import {
 import { sanitizeIntakeData, type IntakeData } from "@/lib/iul-intake/schema";
 import { ensureIulDeviceId } from "@/lib/iul-intake/device";
 import { maskIulSensitiveForClient, mergePreservedIulSensitive } from "@/lib/iul-intake/masking";
+import { SECURE_CAPTURE_FIELD_KEYS } from "@/lib/iul-intake/fields";
+import { CAPTURE_GRACE_MS } from "@/lib/iul-intake/secure-capture";
 import {
   encryptIntakeData,
   decryptIntakeData,
@@ -111,6 +113,27 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     // must not overwrite what's stored.
     const stored = decryptIntakeData((row.data ?? {}) as IntakeData);
     const merged = mergePreservedIulSensitive(clean, stored);
+
+    /**
+     * Grace window after a secure capture lands.
+     *
+     * Once the agent's next poll arrives their form holds masks, and `mergePreservedIulSensitive`
+     * above already makes those writes no-ops. The exposure is the few seconds before that poll:
+     * if the agent was mid-way through typing an SSN when the client submitted theirs, that
+     * half-typed value is neither masked nor empty, so it would win and quietly replace the real
+     * one. For a short window after a capture, the stored values are forced back.
+     *
+     * `sensitiveCapturedAt` lives on this row precisely so this costs no extra query on a path
+     * that runs about once a second per open form.
+     */
+    const capturedAt = row.sensitiveCapturedAt?.getTime() ?? 0;
+    if (access.role === "owner" && capturedAt && Date.now() - capturedAt < CAPTURE_GRACE_MS) {
+      for (const key of SECURE_CAPTURE_FIELD_KEYS) {
+        const previous = stored[key];
+        if (typeof previous === "string" && previous !== "") merged[key] = previous;
+      }
+    }
+
     const encrypted = encryptIntakeData(merged);
     const nextStatus = row.status === "completed" ? "completed" : "in_progress";
 

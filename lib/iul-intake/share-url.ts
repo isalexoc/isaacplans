@@ -14,3 +14,18 @@ export function buildIntakeShareUrl(token: string, locale: string, origin?: stri
   const base = (origin ?? SITE_URL).replace(/\/+$/, "");
   return `${base}/${loc}/${slug}/${token}`;
 }
+
+/**
+ * The secure-capture link — a different page and a different credential from the intake link
+ * above. Mirrors i18n/routing.ts: en `/iul/secure/[captureToken]`, es `/iul/seguro/[captureToken]`.
+ */
+export function buildSecureCaptureUrl(
+  captureToken: string,
+  locale: string,
+  origin?: string
+): string {
+  const loc = locale === "es" ? "es" : "en";
+  const slug = loc === "es" ? "iul/seguro" : "iul/secure";
+  const base = (origin ?? SITE_URL).replace(/\/+$/, "");
+  return `${base}/${loc}/${slug}/${captureToken}`;
+}
