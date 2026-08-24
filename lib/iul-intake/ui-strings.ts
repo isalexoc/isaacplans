@@ -294,6 +294,41 @@ export const UI = {
     en: "Something went wrong with the link. Try again.",
     es: "Algo salió mal con el enlace. Intente de nuevo.",
   } as Dict,
+
+  /* ── Routing-number lookup ── */
+  routingLookupOpen: {
+    en: "Look up the routing number",
+    es: "Buscar el número de ruta",
+  } as Dict,
+  routingLookupTitle: {
+    en: "Find the routing number",
+    es: "Buscar el número de ruta",
+  } as Dict,
+  routingLookupBank: { en: "Bank name", es: "Nombre del banco" } as Dict,
+  /**
+   * Not just "State". The ACH routing number follows the state where the account was OPENED, not
+   * where the client lives now — somebody who moved from California keeps the California number,
+   * and a label saying "State" gets the wrong answer nearly every time.
+   */
+  routingLookupState: {
+    en: "State where the account was opened",
+    es: "Estado donde abrió la cuenta",
+  } as Dict,
+  routingLookupCity: { en: "City (optional)", es: "Ciudad (opcional)" } as Dict,
+  routingLookupSearch: { en: "Find routing number", es: "Buscar número de ruta" } as Dict,
+  routingLookupSearching: { en: "Searching…", es: "Buscando…" } as Dict,
+  routingLookupNone: {
+    en: "No match. Ask the client to read it from a check or their banking app.",
+    es: "Sin resultados. Pídale al cliente que lo lea de un cheque o de su app bancaria.",
+  } as Dict,
+  routingLookupConfirm: {
+    en: "Read it to the client and confirm before selecting:",
+    es: "Léaselo al cliente y confirme antes de seleccionar:",
+  } as Dict,
+  routingLookupAchNote: {
+    en: "ACH number — the one used for premium drafts, not wire transfers.",
+    es: "Número ACH — el que se usa para cobrar la prima, no para transferencias bancarias.",
+  } as Dict,
   errPercent: { en: "Enter a percentage between 0 and 100.", es: "Ingrese un porcentaje entre 0 y 100." } as Dict,
   errDob: { en: "Enter a valid date of birth.", es: "Ingrese una fecha de nacimiento válida." } as Dict,
   errAge: { en: "Enter a valid age.", es: "Ingrese una edad válida." } as Dict,

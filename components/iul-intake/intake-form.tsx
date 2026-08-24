@@ -58,6 +58,7 @@ import {
 } from "@/components/intake-ui";
 import { formatSsn } from "@/lib/intake-shared/format";
 import SecureCapturePanel from "@/components/iul-intake/secure-capture-panel";
+import RoutingLookupPanel from "@/components/iul-intake/routing-lookup-panel";
 import { useIulSecureCapture } from "@/hooks/use-iul-secure-capture";
 import {
   visibleSections,
@@ -658,6 +659,20 @@ export default function IntakeForm({ token }: { token: string }) {
                 onFocusChange={(focused) => {
                   focusedKeyRef.current = focused ? field.key : null;
                 }}
+                belowField={
+                  isOwner && field.key === "routingNumber" ? (
+                    <RoutingLookupPanel
+                      locale={locale}
+                      bankName={typeof data.bankName === "string" ? data.bankName : ""}
+                      onPick={(m) => {
+                        setField("routingNumber", m.routingNumber);
+                        // Fill the bank name only when it is still blank — never overwrite what
+                        // the agent already heard from the client.
+                        if (!data.bankName) setField("bankName", m.bankName);
+                      }}
+                    />
+                  ) : null
+                }
                 waitingForClient={
                   secureCapture.capture?.status === "pending" &&
                   (SECURE_CAPTURE_FIELD_KEYS as readonly string[]).includes(field.key)
@@ -859,6 +874,7 @@ function FieldInput({
   onToggleReveal,
   onFocusChange,
   waitingForClient = false,
+  belowField,
 }: {
   field: IntakeField;
   locale: IntakeLocale;
@@ -875,6 +891,8 @@ function FieldInput({
   onFocusChange?: (focused: boolean) => void;
   /** A secure capture link is out and this is one of the fields it will fill. */
   waitingForClient?: boolean;
+  /** Extra controls rendered under the field — today, the routing-number lookup. */
+  belowField?: React.ReactNode;
 }) {
   const id = `f-${field.key}`;
   const label = fieldLabel(field, locale);
@@ -1104,6 +1122,8 @@ function FieldInput({
       ) : (
         help && <p className="mt-1.5 text-sm text-muted-foreground">{help}</p>
       )}
+
+      {belowField}
     </div>
   );
 }
