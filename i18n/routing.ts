@@ -251,6 +251,13 @@ export const routing = defineRouting({
       en: "/iul/intake/[token]/view",
       es: "/iul/admision/[token]/view",
     },
+    // The secure-capture page: a client types their own SSN and bank details here. Public by
+    // design — the capture token is the credential — which is why middleware must keep matching
+    // the IUL agent routes at exact paths and never add a wildcard under /iul.
+    "/iul/secure/[captureToken]": {
+      en: "/iul/secure/[captureToken]",
+      es: "/iul/seguro/[captureToken]",
+    },
     "/iul/referrals": {
       en: "/iul/referrals",
       es: "/iul/referidos",

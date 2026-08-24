@@ -381,6 +381,15 @@ export const iulIntakeSessions = pgTable("iul_intake_sessions", {
   data:          jsonb("data").notNull().$type<IntakeData>().default({}),
   locale:        text("locale").default("en"), // en|es
   completedAt:   timestamp("completed_at"),
+  /**
+   * When a client last submitted SSN/bank details through a secure capture link.
+   *
+   * Lives on the session rather than on `iulSecureCaptures` so the autosave hot path can read it
+   * for free — `getIntakeByToken` already selects this row, and the PATCH handler needs it on
+   * every save to know whether it is inside the grace window that stops a half-typed agent value
+   * from overwriting what the client just sent.
+   */
+  sensitiveCapturedAt: timestamp("sensitive_captured_at"),
   createdAt:     timestamp("created_at").defaultNow().notNull(),
   updatedAt:     timestamp("updated_at").defaultNow().notNull(),
 }, (t) => ({
@@ -389,6 +398,52 @@ export const iulIntakeSessions = pgTable("iul_intake_sessions", {
   clientIdx:      index("iul_intake_client_idx").on(t.clientUserId),
   deviceIdx:      index("iul_intake_device_idx").on(t.clientDeviceId),
   contactIdx:     index("iul_intake_contact_idx").on(t.crmContactId),
+}));
+
+/**
+ * One-shot links that let a client type their own SSN and bank details on their own phone.
+ *
+ * Exists because some clients will read those numbers out loud on a call and some will not, and
+ * the second group used to be a dead end. The agent generates a link, sends it through the CRM,
+ * and watches the last four digits appear on their screen as the client fills it in.
+ *
+ * **Separate table, not a column on the session, for two independent reasons.** The capture link
+ * must be a different credential from the intake link — reusing the session token would hand the
+ * client's phone read/write access to the whole application. And `iulIntakeSessions.data` is
+ * rewritten wholesale on every ~1s autosave, so capture state living there would race the
+ * agent's own typing, which is the exact bug this feature exists to avoid.
+ *
+ * **No `data` column** — captured values go straight into the session, encrypted. One system of
+ * record; a second encrypted copy of an SSN is a second thing to protect and forget to purge.
+ *
+ * **No `expiresAt`** — validity is `status = 'pending'` AND the parent session not being
+ * completed. That is "valid until the application is finished" expressed structurally rather
+ * than as a date somebody has to keep renewing.
+ */
+export const iulSecureCaptures = pgTable("iul_secure_captures", {
+  id:           text("id").primaryKey(), // nanoid
+  /** Its own credential — longer than the intake token because this one gets texted. */
+  token:        text("token").notNull(),
+  /**
+   * `iulIntakeSessions.id`, deliberately not the session token: `resetIntakeLink` rotates that
+   * token, and keying on it would orphan every live capture the moment an agent reset a link.
+   */
+  sessionId:    text("session_id").notNull(),
+  ownerUserId:  text("owner_user_id").notNull(),
+  status:       text("status").notNull().default("pending"), // pending|submitted|cancelled
+  /**
+   * The field keys this link may write, snapshotted when it was issued. Frozen on purpose — a
+   * later code change must not retroactively widen what an already-sent link can do.
+   */
+  fieldKeys:    jsonb("field_keys").notNull().$type<string[]>().default([]),
+  openedAt:     timestamp("opened_at"),
+  submittedAt:  timestamp("submitted_at"),
+  cancelledAt:  timestamp("cancelled_at"),
+  createdAt:    timestamp("created_at").defaultNow().notNull(),
+  updatedAt:    timestamp("updated_at").defaultNow().notNull(),
+}, (t) => ({
+  tokenUniqueIdx: uniqueIndex("iul_capture_token_unique_idx").on(t.token),
+  sessionIdx:     index("iul_capture_session_idx").on(t.sessionId, t.status),
 }));
 
 /**

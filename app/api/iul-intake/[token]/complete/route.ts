@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { cancelPendingCaptures } from "@/lib/iul-intake/secure-capture";
 import { auth } from "@clerk/nextjs/server";
 import {
   getIntakeByToken,
@@ -108,6 +109,15 @@ export async function POST(_request: NextRequest, context: RouteContext) {
     const updated = await markIntakeCompleted(token, dataToStore);
     if (!updated) {
       return NextResponse.json({ success: false, error: "Not found" }, { status: 404 });
+    }
+
+    // A finished application must not leave a live write credential in someone's text messages.
+    // Best effort: the application IS complete, and failing the request over cleanup would be
+    // the wrong trade.
+    try {
+      await cancelPendingCaptures(updated.id);
+    } catch (captureError) {
+      console.warn("[iul-intake/complete] capture cleanup failed:", captureError);
     }
 
     return NextResponse.json({

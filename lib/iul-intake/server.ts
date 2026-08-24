@@ -26,7 +26,7 @@ import {
   type AgentCrmCustomFieldValue,
   type AgentCrmNativeFields,
 } from "@/lib/agent-crm-contacts";
-import { buildIntakeShareUrl } from "./share-url";
+import { buildIntakeShareUrl, buildSecureCaptureUrl } from "./share-url";
 import {
   resolveIntakeAccess,
   isIntakeExpired,
@@ -37,6 +37,9 @@ import {
 
 /** Tag added to the contact when the agent sends the link — triggers the GHL workflow. */
 export const IUL_INTAKE_LINK_SENT_TAG = "iul_intake_link_sent";
+
+/** Tag that fires the GHL workflow which texts the client their SECURE CAPTURE link. */
+export const IUL_SECURE_CAPTURE_SENT_TAG = "iul_secure_capture_sent";
 
 /** Contact tag that marks a Spanish-speaking client → the saved link uses the /es locale. */
 export const IUL_SPANISH_TAG = "spanish";
@@ -422,6 +425,45 @@ export async function syncIntakeLinkToCrm(
     );
   } catch (e) {
     console.warn("[iul-intake] Link sync failed:", e);
+    return false;
+  }
+}
+
+/**
+ * Same idea as `syncIntakeLinkToCrm`, for the secure capture link.
+ *
+ * A separate CRM field and a separate tag on purpose: the two links go to the same person but
+ * mean very different things, and a workflow that texts "finish your application" must not fire
+ * when the agent asked for a Social Security number.
+ */
+export async function syncSecureCaptureLinkToCrm(
+  row: IntakeSessionRow,
+  captureToken: string
+): Promise<boolean> {
+  if (!row.crmContactId) return false;
+  const fieldId = ghlFieldIds.iul_secure_capture_link;
+  if (!fieldId) return false;
+  const creds = agentCrmGetBaseCredentials();
+  if (!creds) return false;
+  try {
+    const tags = await agentCrmGetContactTags(row.crmContactId, creds.token);
+    const locale =
+      tags === null
+        ? row.locale === "es"
+          ? "es"
+          : "en"
+        : tags.some((t) => t.trim().toLowerCase() === IUL_SPANISH_TAG)
+          ? "es"
+          : "en";
+    const url = buildSecureCaptureUrl(captureToken, locale);
+    return await agentCrmUpdateContact(
+      row.crmContactId,
+      { customFields: [{ id: fieldId, field_value: url }] },
+      creds.token,
+      "[IUL_INTAKE]"
+    );
+  } catch (e) {
+    console.warn("[iul-intake] Secure capture link sync failed:", e);
     return false;
   }
 }

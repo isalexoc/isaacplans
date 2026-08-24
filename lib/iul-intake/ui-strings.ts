@@ -201,6 +201,134 @@ export const UI = {
   errPhone: { en: "Enter a valid 10-digit phone number.", es: "Ingrese un número de teléfono válido de 10 dígitos." } as Dict,
   errZip: { en: "Enter a valid 5-digit zip code.", es: "Ingrese un código postal válido de 5 dígitos." } as Dict,
   errSsn: { en: "Enter a valid 9-digit number.", es: "Ingrese un número válido de 9 dígitos." } as Dict,
+  errRouting: {
+    en: "Enter a valid 9-digit routing number.",
+    es: "Ingrese un número de ruta válido de 9 dígitos.",
+  } as Dict,
+
+  /* Live counter under a fixed-length digit field — same wording as the Final Expense wizard. */
+  digitsRemaining: { en: "{n} more digit(s) to go", es: "Faltan {n} dígito(s)" } as Dict,
+  looksGood: { en: "Looks good", es: "Se ve bien" } as Dict,
+  valueOnFile: {
+    en: "Already saved — tap to replace it.",
+    es: "Ya está guardado — toque para reemplazarlo.",
+  } as Dict,
+
+  /* ── Secure capture: the page the CLIENT opens on their own phone ── */
+  captureTitle: {
+    en: "Send your details securely",
+    es: "Envíe sus datos de forma segura",
+  } as Dict,
+  captureTitleNamed: {
+    en: "{name}, send your details securely",
+    es: "{name}, envíe sus datos de forma segura",
+  } as Dict,
+  captureIntro: {
+    en: "Your agent needs these to finish your application. Type them here instead of reading them out loud.",
+    es: "Su agente los necesita para terminar su solicitud. Escríbalos aquí en lugar de decirlos en voz alta.",
+  } as Dict,
+  captureSecureNote: {
+    en: "Encrypted and sent straight to your agent",
+    es: "Cifrado y enviado directamente a su agente",
+  } as Dict,
+  captureSsnLabel: {
+    en: "Social Security number or ITIN",
+    es: "Número de seguro social o ITIN",
+  } as Dict,
+  captureRoutingLabel: { en: "Routing number", es: "Número de ruta" } as Dict,
+  captureRoutingHelp: {
+    en: "The 9 digits at the bottom-left of a check.",
+    es: "Los 9 dígitos en la parte inferior izquierda de un cheque.",
+  } as Dict,
+  captureAccountLabel: { en: "Account number", es: "Número de cuenta" } as Dict,
+  captureAccountTypeLabel: { en: "Account type", es: "Tipo de cuenta" } as Dict,
+  captureSend: { en: "Send securely", es: "Enviar de forma segura" } as Dict,
+  captureSending: { en: "Sending…", es: "Enviando…" } as Dict,
+  captureSubmitError: {
+    en: "We could not send that. Please check the numbers and try again.",
+    es: "No pudimos enviarlo. Revise los números e intente de nuevo.",
+  } as Dict,
+  captureDoneTitle: { en: "Sent. Thank you.", es: "Enviado. Gracias." } as Dict,
+  captureDoneBody: {
+    en: "Your agent has what they need. You can close this page — nothing else is required from you.",
+    es: "Su agente ya tiene lo que necesita. Puede cerrar esta página — no se requiere nada más de usted.",
+  } as Dict,
+  captureFooter: {
+    en: "This link works once and only for your application.",
+    es: "Este enlace funciona una sola vez y solo para su solicitud.",
+  } as Dict,
+
+  /* ── Secure capture: the panel the AGENT sees inside the form ── */
+  capturePanelTitle: {
+    en: "Client would rather not say it out loud?",
+    es: "¿El cliente prefiere no decirlo en voz alta?",
+  } as Dict,
+  capturePanelBody: {
+    en: "Send them a private link and they can type their SSN and bank details on their own phone. You will see the last 4 digits appear here.",
+    es: "Envíele un enlace privado y podrá escribir su SSN y datos bancarios en su propio teléfono. Aquí verá aparecer los últimos 4 dígitos.",
+  } as Dict,
+  captureCreate: { en: "Create secure link", es: "Crear enlace seguro" } as Dict,
+  captureCreating: { en: "Creating…", es: "Creando…" } as Dict,
+  captureWaiting: {
+    en: "Waiting for the client…",
+    es: "Esperando al cliente…",
+  } as Dict,
+  captureOpened: {
+    en: "They opened it — filling it in now.",
+    es: "Ya lo abrió — lo está llenando.",
+  } as Dict,
+  captureReceived: {
+    en: "Received — SSN and bank details are in.",
+    es: "Recibido — el SSN y los datos bancarios ya están.",
+  } as Dict,
+  captureReplaced: {
+    en: "This replaced the value you had entered.",
+    es: "Esto reemplazó el valor que usted había ingresado.",
+  } as Dict,
+  captureCancel: { en: "Cancel link", es: "Cancelar enlace" } as Dict,
+  captureFieldWaiting: {
+    en: "Waiting for the client to send this.",
+    es: "Esperando a que el cliente envíe esto.",
+  } as Dict,
+  captureError: {
+    en: "Something went wrong with the link. Try again.",
+    es: "Algo salió mal con el enlace. Intente de nuevo.",
+  } as Dict,
+
+  /* ── Routing-number lookup ── */
+  routingLookupOpen: {
+    en: "Look up the routing number",
+    es: "Buscar el número de ruta",
+  } as Dict,
+  routingLookupTitle: {
+    en: "Find the routing number",
+    es: "Buscar el número de ruta",
+  } as Dict,
+  routingLookupBank: { en: "Bank name", es: "Nombre del banco" } as Dict,
+  /**
+   * Not just "State". The ACH routing number follows the state where the account was OPENED, not
+   * where the client lives now — somebody who moved from California keeps the California number,
+   * and a label saying "State" gets the wrong answer nearly every time.
+   */
+  routingLookupState: {
+    en: "State where the account was opened",
+    es: "Estado donde abrió la cuenta",
+  } as Dict,
+  routingLookupCity: { en: "City (optional)", es: "Ciudad (opcional)" } as Dict,
+  routingLookupSearch: { en: "Find routing number", es: "Buscar número de ruta" } as Dict,
+  routingLookupSearching: { en: "Searching…", es: "Buscando…" } as Dict,
+  routingLookupNone: {
+    en: "No match. Ask the client to read it from a check or their banking app.",
+    es: "Sin resultados. Pídale al cliente que lo lea de un cheque o de su app bancaria.",
+  } as Dict,
+  routingLookupConfirm: {
+    en: "Read it to the client and confirm before selecting:",
+    es: "Léaselo al cliente y confirme antes de seleccionar:",
+  } as Dict,
+  routingLookupAchNote: {
+    en: "ACH number — the one used for premium drafts, not wire transfers.",
+    es: "Número ACH — el que se usa para cobrar la prima, no para transferencias bancarias.",
+  } as Dict,
   errPercent: { en: "Enter a percentage between 0 and 100.", es: "Ingrese un porcentaje entre 0 y 100." } as Dict,
   errDob: { en: "Enter a valid date of birth.", es: "Ingrese una fecha de nacimiento válida." } as Dict,
   errAge: { en: "Enter a valid age.", es: "Ingrese una edad válida." } as Dict,

@@ -2,6 +2,51 @@
 
 ## Status
 
+In progress: **IUL intake — Final Expense look, SSN moved, secure capture link, routing lookup**
+(branch `feature/iul-intake-restyle-secure-capture`). Isaac fills this form while the client
+watches over a video call, which is the premise behind all four changes.
+
+- **The look.** The visual language that made the Final Expense wizard readable — 2px borders,
+  generous radii, 18px values, brand-coloured focus, tappable choice cards — moved out of that
+  1652-line component into `components/intake-ui` and both forms import it. The six class strings
+  are byte-identical to what was there (verified against `git HEAD` by comparing the extracted
+  values), so FE renders unchanged. IUL keeps its **step structure** — this is a restyle, not FE's
+  one-question-per-screen flow — and uses a middle-density `FIELD_INPUT`, because at FE's exact
+  `px-5 py-4 text-lg` the 18-field personal step runs ~2500px and the agent scrolls *more*.
+- **SSN moved** from step 1 (eighth question a client ever sees) to the top of the last step,
+  retitled "Payment & sensitive info". No migration — same jsonb key; validation, CRM mapping and
+  encryption all derive their key lists from the section list.
+- **Secure capture link** (`iul_secure_captures`, migration `0032`): the agent issues a one-shot
+  link, the client types SSN + routing + account + type on their own phone, and the agent's screen
+  fills with the last 4 digits within ~3s. See the commit body for the full concurrency story; the
+  short version is that the poll hands the agent **masks**, which makes every later autosave a
+  no-op through the existing merge, plus a 15s server grace window and a focus guard.
+- **Routing-number lookup** (`API_NINJAS_KEY`): bank name + the state the account was **opened**
+  in → candidate ACH numbers, which Isaac reads back for the client to confirm. Suggests, never
+  auto-fills — a wrong routing number is a failed draft and a lapsed policy.
+
+Bugs fixed in the blast radius: `routingNumber` had no `maxLength` and no validator (the only line
+of business without one — now capped at 9 with an ABA checksum, verified against real bank
+numbers); the SSN rendered as raw `123456789` (now `123-45-6789` with a live digit counter); and
+sensitive fields defaulted to **visible**, which is the wrong default when a client is watching the
+screen share.
+
+**Applied already:** `pnpm db:migrate` (migration 0032) and `pnpm iul:fields` (created the CRM
+field `IUL Intake - Secure Capture Link`, id `gxdgRe5RV1nCFyb6YxUe`).
+
+**Pending from Isaac:**
+1. A **GHL workflow** keyed on the tag `iul_secure_capture_sent` that texts
+   `{{contact.iul_secure_capture_link}}`. Until it exists, "copy link" works and "send by text"
+   returns a clear error. There is no direct SMS API in this repo — GHL does the sending.
+2. **`API_NINJAS_KEY`** in `.env` (premium tier). Without it the routing-lookup panel does not
+   render and the form behaves exactly as before.
+3. Manual verification of the **agent-side** capture panel, live poll and grace window — they
+   require a Clerk admin session, so they could not be exercised headlessly. The client-side half
+   was verified end to end against the real database.
+
+---
+
+
 In progress: **Pinned hero video format, site-wide** (branch `feature/hero-video-pin-format`) —
 the same Cloudinary cold-start fix applied to `/agent-crm`, now applied to every hero video on the
 site, starting from the Spanish Final Expense apply hero Isaac asked about.

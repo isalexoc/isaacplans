@@ -78,7 +78,8 @@ export type GhlFieldSlug =
   | "attachment_bank_doc"
   | "attachment_other"
   // Meta — the always-current client share link (written by the app, used by a GHL workflow)
-  | "iul_intake_link";
+  | "iul_intake_link"
+  | "iul_secure_capture_link";
 
 /** GHL custom-field folder that groups all IUL intake fields. Set by the provisioning script. */
 export const iulDataFolderId = "JyCoYyStV4DiWx1U0pnv";
@@ -150,4 +151,6 @@ export const ghlFieldIds: Record<GhlFieldSlug, string> = {
   attachment_bank_doc: "yL1gTKK1bjlYgt8m0m7d",
   attachment_other: "bCCuqnsUGsTZ0FzqZarD",
   iul_intake_link: "HcQaJMoFZFK5ehZmZ0Fz",
+  // Provisioned by `pnpm iul:fields` — empty until that runs, which the send route checks for.
+  iul_secure_capture_link: "gxdgRe5RV1nCFyb6YxUe",
 };

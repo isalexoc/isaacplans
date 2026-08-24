@@ -71,6 +71,8 @@ export default function IntakeAddressInput({
   invalid,
   locale,
   fullAddress,
+  className,
+  fontSize,
 }: {
   id: string;
   value: string;
@@ -81,6 +83,19 @@ export default function IntakeAddressInput({
   locale: "en" | "es";
   /** Display the whole formatted address in the input after selection (not just the street). */
   fullAddress?: boolean;
+  /**
+   * Replaces the default wrapper geometry, so a form with its own visual language can make this
+   * match its other fields. Omit it and every existing caller keeps today's shadcn sizing.
+   */
+  className?: string;
+  /**
+   * Font size for the Google element itself, e.g. "1.125rem".
+   *
+   * Needed separately from `className` because `PlaceAutocompleteElement` is a web component with
+   * its own shadow DOM — a Tailwind `text-lg` on the wrapper does not cascade into it, so the
+   * inner input would keep rendering at the browser default while its neighbours grew.
+   */
+  fontSize?: string;
 }) {
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -92,10 +107,12 @@ export default function IntakeAddressInput({
   const onResolveRef = useRef(onResolve);
   const valueRef = useRef(value);
   const fullAddressRef = useRef(fullAddress);
+  const fontSizeRef = useRef(fontSize);
   onChangeRef.current = onChange;
   onResolveRef.current = onResolve;
   valueRef.current = value;
   fullAddressRef.current = fullAddress;
+  fontSizeRef.current = fontSize;
 
   // `importLibrary` is the real readiness signal (the <Script> onLoad can fire too early).
   useEffect(() => {
@@ -164,6 +181,9 @@ export default function IntakeAddressInput({
       el.style.boxSizing = "border-box";
       el.style.border = "none";
       el.style.backgroundColor = "transparent";
+      // Shadow DOM: a wrapper class cannot reach the inner input, so set this inline or the
+      // address box stays browser-default while every field around it is larger.
+      if (fontSizeRef.current) el.style.fontSize = fontSizeRef.current;
 
       const onSelect = (event: Event) => {
         inspectGmpSelectEvent(event);
@@ -229,7 +249,13 @@ export default function IntakeAddressInput({
         value={value}
         placeholder={placeholder}
         onChange={(e) => onChange(e.target.value)}
-        className={invalid ? "border-red-500 focus-visible:ring-red-500" : ""}
+        className={
+          className
+            ? className
+            : invalid
+              ? "border-red-500 focus-visible:ring-red-500"
+              : ""
+        }
       />
     );
   }
@@ -246,9 +272,13 @@ export default function IntakeAddressInput({
       )}
       <div
         ref={containerRef}
-        className={`flex h-10 w-full items-center rounded-md border bg-background px-3 text-sm focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 ${
-          invalid ? "border-red-500 focus-within:ring-red-500" : "border-input"
-        }`}
+        className={
+          className
+            ? `flex w-full items-center ${className}`
+            : `flex h-10 w-full items-center rounded-md border bg-background px-3 text-sm focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 ${
+                invalid ? "border-red-500 focus-within:ring-red-500" : "border-input"
+              }`
+        }
       />
     </>
   );

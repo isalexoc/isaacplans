@@ -151,7 +151,10 @@ export const INTAKE_SECTIONS: IntakeSection[] = [
           { value: "ITIN", labelEn: "Individual Taxpayer ID (ITIN)", labelEs: "ITIN" },
         ],
       },
-      { key: "ssn", labelEn: "SSN / ITIN", labelEs: "Número de seguro social o ITIN", type: "ssn", required: true, sensitive: true, digitsOnly: true, maxLength: 9, crm: custom("ssn") },
+      // `ssn` deliberately does NOT live here — it moved to the `payment` section at the end of
+      // the form. Asking a client for their Social Security number as the eighth question they
+      // ever see is the wrong moment; by the last step they have already invested in the process.
+      // The `idType` question above stays put because it is harmless and it sets up the label.
       { key: "yearsInUsa", labelEn: "Years residing in the USA", labelEs: "Años residiendo en EE. UU.", type: "number", required: true, maxLength: 3, crm: custom("years_in_usa") },
       { key: "birthCountry", labelEn: "Birth country", labelEs: "País de nacimiento", type: "country", required: true, crm: custom("birth_country") },
       { key: "birthCityState", labelEn: "Birth city and state", labelEs: "Ciudad y estado de nacimiento", type: "text", required: true, crm: custom("birth_city_state") },
@@ -339,11 +342,28 @@ export const INTAKE_SECTIONS: IntakeSection[] = [
   },
   {
     key: "payment",
-    titleEn: "Banking & payment",
-    titleEs: "Banco y pago",
-    descriptionEn: "Sensitive banking details — stored encrypted.",
-    descriptionEs: "Datos bancarios sensibles — almacenados cifrados.",
+    titleEn: "Payment & sensitive info",
+    titleEs: "Pago e información sensible",
+    descriptionEn: "Sensitive details — stored encrypted.",
+    descriptionEs: "Datos sensibles — almacenados cifrados.",
     fields: [
+      // First in the section, and last in the form. Sitting next to the bank details means the
+      // four values a client may prefer to type themselves are contiguous, so the secure-capture
+      // panel covers all of them from a single place at the top of this step.
+      {
+        key: "ssn",
+        labelEn: "SSN / ITIN",
+        labelEs: "Número de seguro social o ITIN",
+        // Nine steps on from the `idType` question, "SSN / ITIN" alone has lost its context.
+        helpEn: "The SSN or ITIN you selected earlier.",
+        helpEs: "El SSN o ITIN que seleccionó antes.",
+        type: "ssn",
+        required: true,
+        sensitive: true,
+        digitsOnly: true,
+        maxLength: 9,
+        crm: custom("ssn"),
+      },
       {
         key: "payorSameAs", labelEn: "Who is the policy payor?", labelEs: "¿Quién es el pagador de la póliza?", type: "select", required: true, crm: custom("payor_same_as"),
         options: [
@@ -360,7 +380,10 @@ export const INTAKE_SECTIONS: IntakeSection[] = [
           { value: "Other", labelEn: "Other", labelEs: "Otro", ownerOnly: true },
         ],
       },
-      { key: "routingNumber", labelEn: "Routing number", labelEs: "Número de ruta", type: "text", required: true, sensitive: true, digitsOnly: true, crm: custom("routing_number") },
+      // `maxLength: 9` is load bearing twice over: it is what makes this render as a counted
+      // digit field, and it is the only thing stopping a 30-digit routing number reaching the CRM
+      // through the client capture link. Every other line of business already capped it.
+      { key: "routingNumber", labelEn: "Routing number", labelEs: "Número de ruta", type: "text", required: true, sensitive: true, digitsOnly: true, maxLength: 9, crm: custom("routing_number") },
       { key: "accountNumber", labelEn: "Account number", labelEs: "Número de cuenta", type: "text", required: true, sensitive: true, digitsOnly: true, maxLength: 17, crm: custom("account_number") },
       {
         key: "accountType", labelEn: "Account type", labelEs: "Tipo de cuenta", type: "select", required: true, crm: custom("account_type"),
@@ -448,6 +471,34 @@ export function fieldByKey(key: string): IntakeField | undefined {
     if (f) return f;
   }
   return undefined;
+}
+
+/**
+ * The only keys a secure capture link may write.
+ *
+ * These are the four values a client is most likely to refuse to say out loud on a call. Bank
+ * name is deliberately absent — it is not sensitive, the agent already has it from the
+ * conversation, and every key on this list is one more thing an unauthenticated endpoint can
+ * touch.
+ *
+ * Single source of truth: the client page renders from it, the write endpoint enforces it, and
+ * each issued link freezes a copy so a later edit here cannot widen a link already in someone's
+ * text messages.
+ */
+export const SECURE_CAPTURE_FIELD_KEYS = [
+  "ssn",
+  "routingNumber",
+  "accountNumber",
+  "accountType",
+] as const;
+
+export type SecureCaptureFieldKey = (typeof SECURE_CAPTURE_FIELD_KEYS)[number];
+
+/** The field definitions behind those keys, so the client page gets labels and types for free. */
+export function secureCaptureFields(): IntakeField[] {
+  return SECURE_CAPTURE_FIELD_KEYS.map((k) => fieldByKey(k)).filter(
+    (f): f is IntakeField => Boolean(f)
+  );
 }
 
 /** True when a field's showIf condition is satisfied by the current data. */
