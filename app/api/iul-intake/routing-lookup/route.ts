@@ -52,8 +52,14 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const results = await searchRoutingNumbers({ bankName, state, city });
-    return NextResponse.json({ success: true, configured: true, results });
+    const search = await searchRoutingNumbers({ bankName, state, city });
+    // `available: false` means the key is missing or not entitled to the search endpoint. Report
+    // it as unconfigured so the panel hides rather than offering a search that can never return.
+    return NextResponse.json({
+      success: true,
+      configured: search.available,
+      results: search.results,
+    });
   } catch (error) {
     console.error("[iul-intake/routing-lookup] GET", error);
     return NextResponse.json({ success: false, error: "Lookup failed" }, { status: 500 });

@@ -63,25 +63,41 @@ type RawResult = {
 const str = (v: unknown): string => (typeof v === "string" ? v.trim() : "");
 
 /**
+ * Set once the provider tells us this key is not entitled to the search endpoint.
+ *
+ * Distinguishing "not entitled" from "no matches" matters for what the agent sees: a search box
+ * that is present but silently returns nothing every single time looks broken, whereas a hidden
+ * panel is simply a feature that is not switched on. `/v1/routingnumbersearch` is premium-only,
+ * and a free key gets a 400 rather than an empty list.
+ */
+let providerUnavailable = false;
+
+export type RoutingSearchResult =
+  /** The lookup ran. An empty array means the provider genuinely knows of no match. */
+  | { available: true; results: RoutingMatch[] }
+  /** The lookup could not run at all — no key, or the key is not entitled. */
+  | { available: false; results: [] };
+
+/**
  * Search by bank name plus the state the account was opened in. Optional city narrows the big
  * banks, which can register several numbers within one state.
  *
- * Returns `[]` on any failure — a missing key, a rate limit, a provider outage. The caller shows
- * the manual field either way, so a lookup that quietly finds nothing is a far better failure
- * than an error banner in the middle of a sales call.
+ * Never throws. A rate limit or a transient outage reports `available: true` with no results —
+ * the agent types the number by hand, which is what they would have done anyway. Only a missing
+ * or unentitled key reports `available: false`, which hides the panel entirely.
  */
 export async function searchRoutingNumbers(params: {
   bankName: string;
   state: string;
   city?: string;
-}): Promise<RoutingMatch[]> {
+}): Promise<RoutingSearchResult> {
   const key = process.env.API_NINJAS_KEY?.trim();
-  if (!key) return [];
+  if (!key || providerUnavailable) return { available: false, results: [] };
 
   const bankName = params.bankName.trim();
   const state = params.state.trim().toUpperCase();
   const city = params.city?.trim() ?? "";
-  if (!bankName || state.length !== 2) return [];
+  if (!bankName || state.length !== 2) return { available: true, results: [] };
 
   const query = new URLSearchParams({ bank_name: bankName, state });
   if (city) query.set("city", city);
@@ -93,8 +109,17 @@ export async function searchRoutingNumbers(params: {
       signal: AbortSignal.timeout(8000),
     });
     if (!res.ok) {
+      const body = await res.text().catch(() => "");
+      // "This endpoint is reserved for premium subscribers only." — a plan problem, not a data
+      // problem. Latch it so we stop asking and the panel stops advertising a search that cannot
+      // run, until the process restarts with an upgraded key.
+      if (res.status === 400 && /premium/i.test(body)) {
+        providerUnavailable = true;
+        console.warn("[routing-lookup] API_NINJAS_KEY is not on a premium plan — search disabled.");
+        return { available: false, results: [] };
+      }
       console.warn("[routing-lookup] provider returned", res.status);
-      return [];
+      return { available: true, results: [] };
     }
     const json = (await res.json()) as unknown;
     const rows: RawResult[] = Array.isArray(json) ? (json as RawResult[]) : [];
@@ -119,9 +144,9 @@ export async function searchRoutingNumbers(params: {
       });
       if (out.length >= MAX_RESULTS) break;
     }
-    return out;
+    return { available: true, results: out };
   } catch (error) {
     console.warn("[routing-lookup] failed:", error instanceof Error ? error.message : error);
-    return [];
+    return { available: true, results: [] };
   }
 }
