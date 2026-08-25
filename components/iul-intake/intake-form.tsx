@@ -59,6 +59,7 @@ import {
 import { formatSsn } from "@/lib/intake-shared/format";
 import SecureCapturePanel from "@/components/iul-intake/secure-capture-panel";
 import RoutingLookupPanel from "@/components/iul-intake/routing-lookup-panel";
+import BankNameHint from "@/components/iul-intake/bank-name-hint";
 import { useIulSecureCapture } from "@/hooks/use-iul-secure-capture";
 import {
   visibleSections,
@@ -661,16 +662,25 @@ export default function IntakeForm({ token }: { token: string }) {
                 }}
                 belowField={
                   isOwner && field.key === "routingNumber" ? (
-                    <RoutingLookupPanel
-                      locale={locale}
-                      bankName={typeof data.bankName === "string" ? data.bankName : ""}
-                      onPick={(m) => {
-                        setField("routingNumber", m.routingNumber);
-                        // Fill the bank name only when it is still blank — never overwrite what
-                        // the agent already heard from the client.
-                        if (!data.bankName) setField("bankName", m.bankName);
-                      }}
-                    />
+                    <>
+                      <BankNameHint
+                        routingNumber={
+                          typeof data.routingNumber === "string" ? data.routingNumber : ""
+                        }
+                        endpoint="/api/iul-intake/routing-lookup"
+                        label={tr(UI.bankNameHint, locale)}
+                      />
+                      <RoutingLookupPanel
+                        locale={locale}
+                        bankName={typeof data.bankName === "string" ? data.bankName : ""}
+                        onPick={(m) => {
+                          setField("routingNumber", m.routingNumber);
+                          // Fill the bank name only when it is still blank — never overwrite what
+                          // the agent already heard from the client.
+                          if (!data.bankName) setField("bankName", m.bankName);
+                        }}
+                      />
+                    </>
                   ) : null
                 }
                 waitingForClient={
