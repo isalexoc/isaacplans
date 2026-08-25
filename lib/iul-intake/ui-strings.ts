@@ -224,12 +224,12 @@ export const UI = {
     es: "{name}, envíe sus datos de forma segura",
   } as Dict,
   captureIntro: {
-    en: "Your agent needs these to finish your application. Type them here instead of reading them out loud.",
-    es: "Su agente los necesita para terminar su solicitud. Escríbalos aquí en lugar de decirlos en voz alta.",
+    en: "We are finalizing your application and we need this information. This is your secure link.",
+    es: "Estamos finalizando su solicitud y necesitamos esta información. Este es su enlace seguro.",
   } as Dict,
   captureSecureNote: {
-    en: "Encrypted and sent straight to your agent",
-    es: "Cifrado y enviado directamente a su agente",
+    en: "Secure and encrypted",
+    es: "Seguro y cifrado",
   } as Dict,
   captureSsnLabel: {
     en: "Social Security number or ITIN",
@@ -250,8 +250,8 @@ export const UI = {
   } as Dict,
   captureDoneTitle: { en: "Sent. Thank you.", es: "Enviado. Gracias." } as Dict,
   captureDoneBody: {
-    en: "Your agent has what they need. You can close this page — nothing else is required from you.",
-    es: "Su agente ya tiene lo que necesita. Puede cerrar esta página — no se requiere nada más de usted.",
+    en: "We have everything we need. You can close this page — nothing else is required from you.",
+    es: "Ya tenemos todo lo que necesitamos. Puede cerrar esta página — no se requiere nada más de usted.",
   } as Dict,
   captureFooter: {
     en: "This link works once and only for your application.",
@@ -325,6 +325,7 @@ export const UI = {
     en: "Read it to the client and confirm before selecting:",
     es: "Léaselo al cliente y confirme antes de seleccionar:",
   } as Dict,
+  bankNameHint: { en: "Bank on this number", es: "Banco de este número" } as Dict,
   routingLookupAchNote: {
     en: "ACH number — the one used for premium drafts, not wire transfers.",
     es: "Número ACH — el que se usa para cobrar la prima, no para transferencias bancarias.",

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { getIsAdmin } from "@/lib/auth/admin";
 import { searchRoutingNumbers, isRoutingLookupConfigured } from "@/lib/iul-intake/routing-lookup";
+import { lookupBankByRouting } from "@/lib/iul-intake/bank-lookup";
 
 /**
  * GET /api/iul-intake/routing-lookup?bankName=&state=&city= — admin only.
@@ -20,12 +21,26 @@ export async function GET(request: NextRequest) {
     if (!(await getIsAdmin())) {
       return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 });
     }
+    const { searchParams } = new URL(request.url);
+
+    /**
+     * Reverse mode: a routing number in, the bank's name out.
+     *
+     * Handled before the `configured` check on purpose — this half runs on a free provider with no
+     * key, so the agent gets the same "is this the right bank?" confirmation the client's page
+     * gets even when the paid search is not set up.
+     */
+    const reverse = searchParams.get("routingNumber");
+    if (reverse) {
+      const bank = await lookupBankByRouting(reverse);
+      return NextResponse.json({ success: true, bank });
+    }
+
     if (!isRoutingLookupConfigured()) {
       // Not an error: the panel simply does not render, and the agent types the number.
       return NextResponse.json({ success: true, configured: false, results: [] });
     }
 
-    const { searchParams } = new URL(request.url);
     const bankName = searchParams.get("bankName") ?? "";
     const state = searchParams.get("state") ?? "";
     const city = searchParams.get("city") ?? "";

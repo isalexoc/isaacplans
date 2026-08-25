@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useLocale } from "next-intl";
 import { Loader2, ShieldCheck, CheckCircle2, AlertCircle, Lock } from "lucide-react";
 import {
   BIG_INPUT,
@@ -9,7 +10,8 @@ import {
   CountedDigitsField,
 } from "@/components/intake-ui";
 import { formatSsn } from "@/lib/intake-shared/format";
-import { UI, tr, type IntakeLocale } from "@/lib/iul-intake/ui-strings";
+import BankNameHint from "@/components/iul-intake/bank-name-hint";
+import { UI, tr, pickLocale, type IntakeLocale } from "@/lib/iul-intake/ui-strings";
 
 /**
  * The page a client opens on their own phone to type their SSN and bank details.
@@ -26,7 +28,7 @@ import { UI, tr, type IntakeLocale } from "@/lib/iul-intake/ui-strings";
  *    database is a liability with no upside.
  */
 
-type Boot = { locale: IntakeLocale; firstName: string };
+type Boot = { firstName: string };
 type Phase = "loading" | "ready" | "saving" | "done" | "dead";
 
 export default function SecureCaptureForm({ captureToken }: { captureToken: string }) {
@@ -41,7 +43,15 @@ export default function SecureCaptureForm({ captureToken }: { captureToken: stri
   const [account, setAccount] = useState("");
   const [accountType, setAccountType] = useState("");
 
-  const locale: IntakeLocale = boot?.locale ?? "en";
+  /**
+   * The URL decides the language, not the stored session.
+   *
+   * This page is reached at /en/iul/secure/… or /es/iul/seguro/…, and that path IS the promise
+   * made to whoever was sent the link. Reading the language off the session row instead meant a
+   * Spanish link rendered in English whenever the session was created before the client's
+   * language was known — which is most of the time, since the session is started first.
+   */
+  const locale: IntakeLocale = pickLocale(useLocale());
 
   useEffect(() => {
     let active = true;
@@ -57,7 +67,7 @@ export default function SecureCaptureForm({ captureToken }: { captureToken: stri
           setPhase("dead");
           return;
         }
-        setBoot({ locale: json.locale === "es" ? "es" : "en", firstName: json.firstName ?? "" });
+        setBoot({ firstName: json.firstName ?? "" });
         setPhase("ready");
       } catch {
         if (active) {
@@ -204,6 +214,11 @@ export default function SecureCaptureForm({ captureToken }: { captureToken: stri
             autoComplete="off"
             disabled={saving}
             invalid={Boolean(errors.routingNumber)}
+          />
+          <BankNameHint
+            routingNumber={routing}
+            endpoint={`/api/iul-intake/secure-capture/${captureToken}/bank-name`}
+            label={tr(UI.bankNameHint, locale)}
           />
           <p className="mt-1 text-sm text-muted-foreground">{tr(UI.captureRoutingHelp, locale)}</p>
         </div>
