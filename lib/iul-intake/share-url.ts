@@ -29,3 +29,21 @@ export function buildSecureCaptureUrl(
   const base = (origin ?? SITE_URL).replace(/\/+$/, "");
   return `${base}/${loc}/${slug}/${captureToken}`;
 }
+
+/**
+ * The document-upload link — a third page and a third credential.
+ *
+ * Separate from the secure-capture link on purpose: that one is single use and closes on submit,
+ * this one stays open for as many documents as the client needs to send. Mirrors i18n/routing.ts:
+ * en `/iul/documents/[captureToken]`, es `/iul/documentos/[captureToken]`.
+ */
+export function buildDocumentCaptureUrl(
+  captureToken: string,
+  locale: string,
+  origin?: string
+): string {
+  const loc = locale === "es" ? "es" : "en";
+  const slug = loc === "es" ? "iul/documentos" : "iul/documents";
+  const base = (origin ?? SITE_URL).replace(/\/+$/, "");
+  return `${base}/${loc}/${slug}/${captureToken}`;
+}

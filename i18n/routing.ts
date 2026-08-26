@@ -258,6 +258,10 @@ export const routing = defineRouting({
       en: "/iul/secure/[captureToken]",
       es: "/iul/seguro/[captureToken]",
     },
+    "/iul/documents/[captureToken]": {
+      en: "/iul/documents/[captureToken]",
+      es: "/iul/documentos/[captureToken]",
+    },
     "/iul/referrals": {
       en: "/iul/referrals",
       es: "/iul/referidos",

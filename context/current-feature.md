@@ -2,6 +2,71 @@
 
 ## Status
 
+Completed: **Secure document upload link** (branch `feature/iul-document-capture`, merged to
+`main`, migration `0033` applied). The same idea as the SSN/bank capture link, for the Documents step: the agent issues a
+link, the client photographs a licence, a green card or whatever was asked for, and it lands on the
+CRM contact beside the documents the agent uploaded themselves.
+
+**A sibling table, not a `kind` column on `iul_secure_captures`.** The lifecycles are opposites.
+That link is single use — the first submit closes it, which is right for four numbers typed once.
+This one stays open until it is revoked or the application completes, because the agent rarely
+knows upfront whether they need a licence, a green card, both sides of one card, or a page the
+client forgot. Sharing a table would have put an `if (kind === …)` inside the single-use check that
+protects an SSN link, which is the last place in this feature that should grow a branch.
+
+**Two destinations, and they are not redundant.** Cloudinary with `authenticated` delivery — the
+same footing as the agent's licence images — is what the app can render from without handing anyone
+a URL that works on its own; verified that an unsigned URL is refused and only a signed one
+resolves. Then the same bytes go to the contact's `attachment_other` field through the identical
+helper the agent's own Documents step uses, because Isaac submits applications out of the CRM and a
+document only in our database is one he has to remember to go and find.
+
+**The reason Cloudinary is in the path at all:** a client photographing a green card on an iPhone
+produces HEIC, which plenty of software will not open, and "they sent it and I cannot read it" is
+the same dead end as not sending it. Cloudinary converts it to JPEG on the way through.
+
+**The bug that conversion nearly caused:** Cloudinary classifies a **PDF as an image**, so a
+blanket `f_jpg` would have silently flattened a multi-page PDF into a picture of page one — losing
+pages of a document somebody needs. Conversion is narrowed to an allow-list of formats that
+actually need it (HEIC/HEIF/AVIF/TIFF); everything else passes through byte-for-byte. Covered by a
+test that would fail if anyone widens it.
+
+Client page: two buttons, no form. "Take a photo" carries `capture="environment"` so the camera
+opens directly rather than asking Camera-or-Files; "Choose a file" carries **no `accept`** at all,
+because any allow-list shows a client a file they cannot select. Uploads run **one at a time** —
+a client who picks four photos should not watch a bar and then learn the fourth failed. The page
+never lists what is already on file: a forwarded link that reads back someone's identity documents
+is a worse leak than the upload it was protecting.
+
+Any file type, minus a short list of executable extensions. Nothing a client photographs is on that
+list, and an endpoint that stores any executable a stranger sends is an invitation however
+unguessable the token.
+
+Verified end to end against the real database and Cloudinary: **20/20** — authenticated storage,
+unsigned URLs refused, PDF not flattened, filenames made safe without becoming useless, link
+lifecycle, revoke, completed-application closes it, a new link revoking the previous one,
+executables and empty files rejected. Throwaway sessions and Cloudinary assets cleaned up.
+
+**Not verified: the CRM upload leg.** Exercising it means creating a real contact in the production
+CRM, which is not something a test should leave behind. The call itself is the same one the
+existing Documents step already uses in production.
+
+**Local build gate not met, merged on Isaac's explicit call.** `pnpm build` compiles successfully
+and then dies in the lint/typecheck phase with `Fatal process out of memory: Zone` — five attempts
+across 3/4/6 GB heaps, cold and warm cache. The cause is the machine, not the code: ~1.3 GB free of
+7.9 GB, with Chrome, Edge and VS Code holding most of it. Asking V8 for a heap the OS cannot back
+turns the clean OOM into an access violation, which is what made this look like a code fault at
+first. `tsc --noEmit` passes on the final state and compilation succeeds; **ESLint is the one gate
+never proven** — there is no standalone `eslint` binary in the project and `next lint --file` drops
+into an interactive setup prompt. Watch the Vercel deploy, which builds with far more memory.
+
+**Pending from Isaac:** `pnpm iul:fields` to create the "Document Capture Link" field (until then
+copy-link works and send-by-text returns a clear error), and a GHL workflow on the tag
+`iul_document_capture_sent`. Its own field and tag deliberately — both links can be live at once,
+and a workflow texting "the link" would have no way to know which one it meant.
+
+---
+
 Completed: **Secure link gets its own unbranded preview card** (branch `feature/secure-link-og`,
 merged to `main`).
 Isaac wanted the capture link to unfurl with his own artwork, deliberately as a utility page — no

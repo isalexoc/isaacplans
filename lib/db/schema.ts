@@ -447,6 +447,48 @@ export const iulSecureCaptures = pgTable("iul_secure_captures", {
 }));
 
 /**
+ * Links that let a client photograph or upload their own documents from their phone.
+ *
+ * A sibling of `iulSecureCaptures` rather than a `kind` column on it, and the difference in
+ * lifecycle is the whole reason. That table's link is **single use**: the first successful submit
+ * closes it, which is exactly right for four numbers typed once. A document link is the opposite —
+ * the agent does not know upfront whether they need a driver's licence, a green card, both sides of
+ * one card, or a page the client forgot — so this one **stays open until it is revoked or the
+ * application completes**, and accepts as many files as the client sends across as many visits as
+ * they need.
+ *
+ * Threading two lifecycles through one table would mean an `if (kind === …)` inside the single-use
+ * check that protects an SSN link, which is the last place in this feature that should grow a
+ * branch.
+ *
+ * **No file contents and no URLs here.** Uploads land in the intake session's existing
+ * `attachmentOther` list, the same place a document dropped into the agent's own Documents step
+ * goes, so there is one list of a client's documents rather than two that have to be reconciled.
+ * This table holds only the state machine: who issued the link, whether it is live, and enough
+ * counters for the agent's panel to say "3 documents received".
+ */
+export const iulDocumentCaptures = pgTable("iul_document_captures", {
+  id:           text("id").primaryKey(), // nanoid
+  /** Its own credential, as long as the secure-capture token: this one gets texted too. */
+  token:        text("token").notNull(),
+  /** `iulIntakeSessions.id`, not the session token, which `resetIntakeLink` rotates. */
+  sessionId:    text("session_id").notNull(),
+  ownerUserId:  text("owner_user_id").notNull(),
+  /** pending|cancelled. There is deliberately no "submitted": the link stays open. */
+  status:       text("status").notNull().default("pending"),
+  /** How many files have arrived, so the panel can report progress without reading the session. */
+  uploadCount:  integer("upload_count").notNull().default(0),
+  openedAt:     timestamp("opened_at"),
+  lastUploadAt: timestamp("last_upload_at"),
+  cancelledAt:  timestamp("cancelled_at"),
+  createdAt:    timestamp("created_at").defaultNow().notNull(),
+  updatedAt:    timestamp("updated_at").defaultNow().notNull(),
+}, (t) => ({
+  tokenUniqueIdx: uniqueIndex("iul_doc_capture_token_unique_idx").on(t.token),
+  sessionIdx:     index("iul_doc_capture_session_idx").on(t.sessionId, t.status),
+}));
+
+/**
  * ACA client intake: resumable, autosaving data-collection sessions.
  * Same shape as `iulIntakeSessions` but a separate table — the ACA `data` payload is
  * household-shaped (a `householdMembers` array with per-member documents) and the two

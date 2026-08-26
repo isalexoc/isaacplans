@@ -312,6 +312,81 @@ export const UI = {
     es: "Solicitando:",
   } as Dict,
   captureCreate: { en: "Create secure link", es: "Crear enlace seguro" } as Dict,
+
+  // ─── Document upload link ───
+  //
+  // Its own strings rather than reusing the secure-capture ones, because the promise is different:
+  // that link asks for four numbers once, this one says "send whatever we need, whenever you can".
+  // Copy that says "one time only" on a link the client is meant to come back to would stop them
+  // sending the second page of something.
+  docPanelTitle: {
+    en: "Need documents from the client?",
+    es: "¿Necesita documentos del cliente?",
+  } as Dict,
+  docPanelBody: {
+    en: "Send a private upload link. They can photograph a licence, a green card, anything you need — straight from their phone. The link stays open until you close it.",
+    es: "Envíe un enlace privado de carga. Puede fotografiar una licencia, una green card, lo que necesite — directo desde su teléfono. El enlace queda abierto hasta que usted lo cierre.",
+  } as Dict,
+  docCreate: { en: "Create upload link", es: "Crear enlace de carga" } as Dict,
+  docCreating: { en: "Creating…", es: "Creando…" } as Dict,
+  docWaiting: {
+    en: "Waiting for documents…",
+    es: "Esperando documentos…",
+  } as Dict,
+  docOpened: {
+    en: "Client opened the link…",
+    es: "El cliente abrió el enlace…",
+  } as Dict,
+  /** `{n}` is replaced with the count. */
+  docReceivedCount: {
+    en: "{n} document(s) received — they are on the contact and in Documents below.",
+    es: "{n} documento(s) recibido(s) — están en el contacto y en Documentos abajo.",
+  } as Dict,
+  docRevoke: { en: "Close this link", es: "Cerrar este enlace" } as Dict,
+
+  // Client-facing page
+  docClientTitle: {
+    en: "Send your documents",
+    es: "Envíe sus documentos",
+  } as Dict,
+  docClientTitleNamed: {
+    en: "{name}, send your documents",
+    es: "{name}, envíe sus documentos",
+  } as Dict,
+  docClientIntro: {
+    en: "We are finalizing your application and we need a copy of your documents. This is your secure link.",
+    es: "Estamos finalizando su solicitud y necesitamos una copia de sus documentos. Este es su enlace seguro.",
+  } as Dict,
+  /**
+   * Says what is acceptable without naming a document.
+   *
+   * Isaac does not always know which one he needs — sometimes a licence, sometimes a green card —
+   * and a page demanding "your driver's licence" makes a client who only has a passport stop.
+   */
+  docClientHelp: {
+    en: "A photo is fine. Send anything we asked for — an ID, a licence, a residency card. You can send more than one.",
+    es: "Una foto está bien. Envíe lo que le pedimos — una identificación, una licencia, una tarjeta de residencia. Puede enviar más de uno.",
+  } as Dict,
+  docTakePhoto: { en: "Take a photo", es: "Tomar una foto" } as Dict,
+  docChooseFile: { en: "Choose a file", es: "Elegir un archivo" } as Dict,
+  docUploading: { en: "Sending…", es: "Enviando…" } as Dict,
+  docSentHeading: { en: "Sent", es: "Enviados" } as Dict,
+  docSendAnother: {
+    en: "You can send another if you need to.",
+    es: "Puede enviar otro si lo necesita.",
+  } as Dict,
+  docTooLarge: {
+    en: "That file is too large (max 15 MB). Try a photo instead of a scan.",
+    es: "Ese archivo es muy grande (máximo 15 MB). Pruebe con una foto en vez de un escaneo.",
+  } as Dict,
+  docUploadError: {
+    en: "That did not go through. Please try again.",
+    es: "No se pudo enviar. Inténtelo de nuevo.",
+  } as Dict,
+  docClientFooter: {
+    en: "Sent securely and encrypted. Only your agent can see these.",
+    es: "Enviado de forma segura y cifrada. Solo su agente puede verlos.",
+  } as Dict,
   captureCreating: { en: "Creating…", es: "Creando…" } as Dict,
   captureWaiting: {
     en: "Waiting for the client…",
