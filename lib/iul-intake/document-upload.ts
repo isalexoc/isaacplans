@@ -31,6 +31,11 @@
 import "server-only";
 import { nanoid } from "nanoid";
 import cloudinary from "@/config/cloudinary";
+import { agentCrmUploadCustomFieldFile } from "@/lib/agent-crm-contacts";
+import type { FileRef } from "./fields";
+
+// Re-exported so server callers have one import for the whole document story.
+export { canPreview } from "./document-preview";
 
 /** Matches the agent's own upload route, and comfortably above a phone photo or a scanned PDF. */
 export const MAX_DOCUMENT_BYTES = 15 * 1024 * 1024;
@@ -165,4 +170,135 @@ export function safeDocumentName(raw: string, fallbackExt: string): string {
   if (cleaned && /\.[A-Za-z0-9]{1,8}$/.test(cleaned)) return cleaned;
   if (cleaned) return `${cleaned}.${fallbackExt || "bin"}`;
   return `document-${nanoid(6)}.${fallbackExt || "bin"}`;
+}
+
+/**
+ * A signed, short-lived thumbnail URL. Minted per request — never stored, never sent to a client
+ * page, and only ever produced for an id the caller has already been shown to own.
+ */
+export function signedThumbnailUrl(cloudinaryId: string, size = 320): string {
+  return cloudinary.url(cloudinaryId, {
+    resource_type: "image",
+    type: "authenticated",
+    sign_url: true,
+    secure: true,
+    format: "jpg",
+    transformation: [
+      // `pg_1` takes page one of a PDF; harmless on a single-image asset.
+      { page: 1, width: size, height: size, crop: "fill", gravity: "auto", quality: "auto:good" },
+    ],
+  });
+}
+
+/**
+ * The one path every intake file takes, whoever uploaded it.
+ *
+ * Both the agent's own uploader and the client's upload link call this, which is the point: before
+ * it existed the two routes stored different things, so a document's preview depended on who had
+ * attached it. Cloudinary first, CRM second — if the CRM push fails the caller can retry and the
+ * spare Cloudinary copy is harmless, whereas the reverse leaves a file on the contact that our own
+ * records know nothing about.
+ *
+ * Returns the merged list to store, or null if the CRM refused the upload.
+ */
+export async function ingestIntakeFile(params: {
+  bytes: Buffer;
+  filename: string;
+  contentType: string;
+  sessionId: string;
+  contactId: string;
+  locationId: string;
+  fieldId: string;
+  crmToken: string;
+  /** What is already on this field, so Cloudinary metadata survives the merge below. */
+  existing: FileRef[];
+}): Promise<FileRef[] | null> {
+  const stored = await storeDocumentInCloudinary({
+    bytes: params.bytes,
+    sessionId: params.sessionId,
+  });
+  const deliverable = await deliverableFor({
+    stored,
+    original: params.bytes,
+    filename: params.filename,
+    contentType: params.contentType,
+  });
+
+  const fieldFiles = await agentCrmUploadCustomFieldFile(
+    new Blob([new Uint8Array(deliverable.bytes)], { type: deliverable.contentType }),
+    deliverable.filename,
+    params.contactId,
+    params.locationId,
+    params.fieldId,
+    params.crmToken,
+    "[IUL_INTAKE]"
+  );
+  if (!fieldFiles) return null;
+
+  return mergeCloudinaryMetadata({
+    authoritative: fieldFiles,
+    existing: params.existing,
+    justAdded: {
+      cloudinaryId: stored.cloudinaryId,
+      resourceType: stored.resourceType,
+      format: stored.format,
+    },
+    fallbackName: deliverable.filename,
+  });
+}
+
+/**
+ * Reconcile the CRM's authoritative file list with the Cloudinary metadata we hold locally.
+ *
+ * The CRM is the authority on *which files exist* — it echoes back the whole field after every
+ * upload, which is what makes several documents accumulate correctly. But it knows nothing about
+ * Cloudinary, so naively storing its list would erase the `cloudinaryId` of every file already
+ * attached and silently kill their thumbnails on the next upload. Existing entries are therefore
+ * matched back by URL, and the newly uploaded id is attached to whichever entry is new.
+ */
+export function mergeCloudinaryMetadata(params: {
+  authoritative: { url: string; name: string }[];
+  existing: FileRef[];
+  justAdded?: { cloudinaryId: string; resourceType: string; format: string };
+  fallbackName?: string;
+}): FileRef[] {
+  const known = new Map(params.existing.map((f) => [f.url, f]));
+
+  const merged: FileRef[] = params.authoritative.map((f) => {
+    const prior = known.get(f.url);
+    return prior
+      ? { ...prior, url: f.url, name: f.name || prior.name }
+      : { url: f.url, name: f.name };
+  });
+
+  if (params.justAdded) {
+    // The new file is the entry the previous list did not have. If the CRM returned nothing new
+    // (a name collision, or a list it chose not to grow), fall back to the last entry rather than
+    // dropping the metadata — a wrong thumbnail is recoverable, a lost asset reference is not.
+    const fresh = merged.filter((f) => !known.has(f.url));
+    const target = fresh.length > 0 ? fresh[fresh.length - 1] : merged[merged.length - 1];
+    if (target) {
+      target.cloudinaryId = params.justAdded.cloudinaryId;
+      target.resourceType = params.justAdded.resourceType;
+      target.format = params.justAdded.format;
+      if (!target.name && params.fallbackName) target.name = params.fallbackName;
+    }
+  }
+
+  return merged;
+}
+
+/** Best-effort removal of the Cloudinary copy when a file is detached from the intake. */
+export async function destroyStoredDocument(ref: FileRef): Promise<void> {
+  if (!ref.cloudinaryId) return;
+  try {
+    await cloudinary.uploader.destroy(ref.cloudinaryId, {
+      type: "authenticated",
+      resource_type: ref.resourceType || "image",
+    });
+  } catch (error) {
+    // Never block a delete on this. The CRM copy is the one the agent sees; an orphaned
+    // Cloudinary asset is waste, not a correctness problem.
+    console.warn("[iul-document-upload] could not destroy", ref.cloudinaryId, error);
+  }
 }
