@@ -2,9 +2,22 @@
 
 import { useState } from "react";
 import { Loader2, Lock, Copy, Check, Send, CheckCircle2, AlertCircle } from "lucide-react";
-import { OUTLINE_BTN } from "@/components/intake-ui";
+import { OUTLINE_BTN, ChoiceCard } from "@/components/intake-ui";
 import { UI, tr, type IntakeLocale } from "@/lib/iul-intake/ui-strings";
+import type { CaptureScope } from "@/lib/iul-intake/fields";
 import type { CaptureState } from "@/hooks/use-iul-secure-capture";
+
+/** Label for each scope, and the order they are offered in. "Both" first: it is the common case. */
+const SCOPE_LABELS: { scope: CaptureScope; dict: (typeof UI)["captureScopeBoth"] }[] = [
+  { scope: "both", dict: UI.captureScopeBoth },
+  { scope: "ssn", dict: UI.captureScopeSsn },
+  { scope: "bank", dict: UI.captureScopeBank },
+];
+
+function scopeLabel(scope: CaptureScope, locale: IntakeLocale): string {
+  const found = SCOPE_LABELS.find((s) => s.scope === scope) ?? SCOPE_LABELS[0];
+  return tr(found.dict, locale);
+}
 
 /**
  * The agent's control for the secure capture link, shown at the top of the payment step.
@@ -12,6 +25,10 @@ import type { CaptureState } from "@/hooks/use-iul-secure-capture";
  * Deliberately an offer, not a default. Most calls never touch it — the client reads their numbers
  * out and Isaac types them. It exists for the ones who won't, which used to be where the
  * conversation stopped.
+ *
+ * The scope picker exists because the agent frequently already holds half of this: a client who
+ * read their bank details off a cheque but went quiet at the SSN should be sent one box, not four.
+ * Asking someone to retype a number the agent already has correct is how it becomes wrong.
  */
 export default function SecureCapturePanel({
   locale,
@@ -31,12 +48,14 @@ export default function SecureCapturePanel({
   error: string | null;
   /** True when the client's submission overwrote something the agent had already typed. */
   replacedExisting: boolean;
-  onCreate: () => void;
+  onCreate: (scope: CaptureScope) => void;
   onCancel: () => void;
   onSend: () => Promise<boolean>;
 }) {
   const [copied, setCopied] = useState(false);
   const [sent, setSent] = useState(false);
+  /** Both is the common case, so it is preselected and the picker costs a glance, not a decision. */
+  const [scope, setScope] = useState<CaptureScope>("both");
 
   async function copy() {
     if (!url) return;
@@ -83,6 +102,12 @@ export default function SecureCapturePanel({
             <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-brand" />
           </span>
           {capture.openedAt ? tr(UI.captureOpened, locale) : tr(UI.captureWaiting, locale)}
+        </p>
+
+        {/* The live link's own scope, not the picker's — a link already in someone's text messages
+            asks for what it asked for, whatever the picker happens to be showing now. */}
+        <p className="mt-1 text-sm text-muted-foreground">
+          {tr(UI.captureAskingFor, locale)} {scopeLabel(capture.scope, locale)}
         </p>
 
         <div className="mt-3 flex flex-col gap-2 sm:flex-row">
@@ -141,9 +166,28 @@ export default function SecureCapturePanel({
       <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
         {tr(UI.capturePanelBody, locale)}
       </p>
+
+      <fieldset className="mt-3">
+        <legend className="mb-1.5 text-sm font-semibold text-gray-900 dark:text-gray-100">
+          {tr(UI.captureScopeLegend, locale)}
+        </legend>
+        {/* A radiogroup, not checkboxes: "neither" is not a link worth sending. */}
+        <div role="radiogroup" className="grid gap-2 sm:grid-cols-3">
+          {SCOPE_LABELS.map(({ scope: value, dict }) => (
+            <ChoiceCard
+              key={value}
+              selected={scope === value}
+              label={tr(dict, locale)}
+              onClick={() => setScope(value)}
+              disabled={busy}
+            />
+          ))}
+        </div>
+      </fieldset>
+
       <button
         type="button"
-        onClick={onCreate}
+        onClick={() => onCreate(scope)}
         disabled={busy}
         className={`${OUTLINE_BTN} mt-3 w-auto px-4 py-2 text-sm`}
       >

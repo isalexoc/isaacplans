@@ -494,6 +494,54 @@ export const SECURE_CAPTURE_FIELD_KEYS = [
 
 export type SecureCaptureFieldKey = (typeof SECURE_CAPTURE_FIELD_KEYS)[number];
 
+/**
+ * What a given link is allowed to ask for.
+ *
+ * Isaac often already has half of this. A client who read their bank details off a cheque without
+ * hesitating but went quiet at the SSN should not be sent a form demanding both again — retyping
+ * numbers the agent already holds is where a correct value gets turned into a wrong one.
+ *
+ * **Three named scopes rather than two independent checkboxes.** Two checkboxes have four states
+ * and one of them means "ask the client for nothing", which is a link that wastes a phone call.
+ * The set of things worth asking for is genuinely three, so it is modelled as three.
+ *
+ * The bank scope keeps `accountType` with the account number deliberately: a routing and account
+ * number without knowing whether it is checking or savings is not a draftable instruction.
+ */
+export const CAPTURE_SCOPES = {
+  both: ["ssn", "routingNumber", "accountNumber", "accountType"],
+  ssn: ["ssn"],
+  bank: ["routingNumber", "accountNumber", "accountType"],
+} as const satisfies Record<string, readonly SecureCaptureFieldKey[]>;
+
+export type CaptureScope = keyof typeof CAPTURE_SCOPES;
+
+export const CAPTURE_SCOPE_VALUES = Object.keys(CAPTURE_SCOPES) as CaptureScope[];
+
+export function isCaptureScope(v: unknown): v is CaptureScope {
+  return typeof v === "string" && v in CAPTURE_SCOPES;
+}
+
+export function captureScopeKeys(scope: CaptureScope): readonly SecureCaptureFieldKey[] {
+  return CAPTURE_SCOPES[scope];
+}
+
+/**
+ * Recover the scope from a link's frozen `fieldKeys`, for display only.
+ *
+ * The stored snapshot is the authority on what a link may write — never this. It exists so the
+ * agent's panel can say "waiting on: Social Security number" for a link issued minutes ago, and so
+ * links created before scopes existed (which hold all four keys) still read as "both".
+ */
+export function scopeFromFieldKeys(keys: readonly string[]): CaptureScope {
+  const set = new Set(keys);
+  const has = (s: CaptureScope) =>
+    CAPTURE_SCOPES[s].length === set.size && CAPTURE_SCOPES[s].every((k) => set.has(k));
+  if (has("ssn")) return "ssn";
+  if (has("bank")) return "bank";
+  return "both";
+}
+
 /** The field definitions behind those keys, so the client page gets labels and types for free. */
 export function secureCaptureFields(): IntakeField[] {
   return SECURE_CAPTURE_FIELD_KEYS.map((k) => fieldByKey(k)).filter(
