@@ -5,7 +5,30 @@ import { Loader2, Search, Landmark } from "lucide-react";
 import { SMALL_INPUT, SMALL_LABEL, OUTLINE_BTN, ChoiceCard } from "@/components/intake-ui";
 import { UI, tr, type IntakeLocale } from "@/lib/iul-intake/ui-strings";
 
-type Match = { routingNumber: string; bankName: string; city: string; state: string };
+type Confidence = "curated" | "single" | "candidates";
+type Match = {
+  routingNumber: string;
+  bankName: string;
+  city: string;
+  state: string;
+  confidence: Confidence;
+};
+
+/**
+ * One line telling the agent how far to trust the list, keyed by the first result's confidence.
+ *
+ * Every result in a response shares one confidence, so the first is representative. An unrecognised
+ * value falls back to "confirm with the client" rather than throwing: the cautious label is never
+ * wrong to show, and a lookup panel that crashes mid-application is much worse than one that
+ * over-asks.
+ */
+const SURE = {
+  curated: UI.routingLookupSureCurated,
+  single: UI.routingLookupSureSingle,
+  candidates: UI.routingLookupSureCandidates,
+} as const;
+
+const sureLabel = (c: Confidence) => SURE[c] ?? UI.routingLookupSureCandidates;
 
 /**
  * Find a bank's ACH routing number so the agent can read it back and have the client confirm it.
@@ -15,7 +38,9 @@ type Match = { routingNumber: string; bankName: string; city: string; state: str
  * this feature is the client saying "yes, that's it" out loud; a silent auto-fill removes the only
  * verification step it has.
  *
- * Renders nothing when the lookup is not configured, so the form behaves exactly as before.
+ * The panel is always available now that the directory ships with the app. It used to hide itself
+ * when the provider key was not entitled to the search endpoint, which meant the feature silently
+ * did not exist in production — the failure mode that removing the provider was meant to end.
  */
 export default function RoutingLookupPanel({
   locale,
@@ -33,9 +58,6 @@ export default function RoutingLookupPanel({
   const [city, setCity] = useState("");
   const [busy, setBusy] = useState(false);
   const [results, setResults] = useState<Match[] | null>(null);
-  const [unconfigured, setUnconfigured] = useState(false);
-
-  if (unconfigured) return null;
 
   async function run() {
     setBusy(true);
@@ -47,10 +69,6 @@ export default function RoutingLookupPanel({
         credentials: "same-origin",
       });
       const json = await res.json().catch(() => ({}));
-      if (json?.configured === false) {
-        setUnconfigured(true);
-        return;
-      }
       setResults(Array.isArray(json?.results) ? json.results : []);
     } catch {
       setResults([]);
@@ -129,6 +147,7 @@ export default function RoutingLookupPanel({
       {results !== null && results.length > 0 && (
         <div className="mt-3 space-y-2">
           <p className="text-sm text-muted-foreground">{tr(UI.routingLookupConfirm, locale)}</p>
+          <p className="text-xs font-medium text-brand">{tr(sureLabel(results[0].confidence), locale)}</p>
           <div role="radiogroup" className="space-y-2">
             {results.map((m) => (
               <ChoiceCard

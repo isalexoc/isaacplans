@@ -325,6 +325,26 @@ export const UI = {
     en: "Read it to the client and confirm before selecting:",
     es: "Léaselo al cliente y confirme antes de seleccionar:",
   } as Dict,
+  /**
+   * How sure the lookup is, in words the agent can say out loud.
+   *
+   * The distinction is worth the extra strings. "This bank uses one number nationwide" is a
+   * sentence that ends the question; "several banks match" tells the agent to keep asking. A
+   * single unlabelled list would make both look equally certain, and the confident-sounding wrong
+   * answer is exactly what fails a draft.
+   */
+  routingLookupSureCurated: {
+    en: "Verified number for this bank and state.",
+    es: "Número verificado para este banco y estado.",
+  } as Dict,
+  routingLookupSureSingle: {
+    en: "This bank uses one routing number nationwide.",
+    es: "Este banco usa un solo número de ruta en todo el país.",
+  } as Dict,
+  routingLookupSureCandidates: {
+    en: "More than one number is possible — have the client confirm which is theirs.",
+    es: "Hay más de un número posible — que el cliente confirme cuál es el suyo.",
+  } as Dict,
   bankNameHint: { en: "Bank on this number", es: "Banco de este número" } as Dict,
   routingLookupAchNote: {
     en: "ACH number — the one used for premium drafts, not wire transfers.",
