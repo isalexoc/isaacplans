@@ -2,6 +2,54 @@
 
 ## Status
 
+Completed: **Secure capture links ask for only what is missing** (branch
+`feature/scoped-secure-capture`, merged to `main`). Isaac often already holds half of this — the client read their
+bank details off a cheque but went quiet at the SSN, or the reverse. Sending a form that demands
+both again means asking someone to retype a number the agent already has correct, which is exactly
+how a correct value becomes a wrong one.
+
+Three named scopes — **both / SSN only / bank details only** — chosen over Isaac's suggested pair
+of checkboxes because two checkboxes have four states and one of them means "ask the client for
+nothing", which is a link that wastes a phone call. The set of useful requests is genuinely three,
+so it is modelled as three, as a `ChoiceCard` radiogroup that costs a glance rather than a decision.
+
+**No migration.** `iul_secure_captures.field_keys` already existed as a per-link frozen snapshot of
+what a link may write — added so a later code change could not widen a link already sitting in
+someone's text messages. Scoping is just letting the agent choose what goes into it, which means
+the narrowing is enforced by the same mechanism that was already the security boundary: an SSN-only
+link physically cannot write an account number.
+
+Where the work actually was, none of it in the picker:
+
+- **`validate()` in the client PATCH route required all four fields**, so a scoped link would have
+  been unsubmittable. It now validates only the keys in the frozen snapshot — plus an explicit
+  guard rejecting an empty snapshot, because "validate whatever turns up" would let a link close
+  having collected nothing at all.
+- **The agent's poll masked all four fields regardless of scope.** With a bank-only link out, the
+  agent typing the SSN themselves would watch it turn into dots and get told "the client replaced
+  what you typed" — which never happened. Masking is now scoped to the live link's keys. Sessions
+  that never had a link keep the old behaviour, so nothing unrelated shifts.
+- **The CRM note hardcoded "SSN and bank details" and listed all four fields.** A note claiming an
+  SSN arrived on a bank-only link is worse than no note: the agent stops chasing the thing still
+  missing. It now names what actually landed.
+- The client page renders only the fields asked for, and the intro says which — a client promised
+  one question and shown four is the reason they hesitated in the first place.
+
+Verified end to end against the real database and a running server: **19/19 checks** — scope
+round-trips, snapshot contents, the GET the phone renders from, scoped submissions accepted,
+out-of-scope keys silently dropped rather than stored, incomplete submissions still rejected, and
+single-use still closing the link. Screenshots confirm all three scopes render correctly. Throwaway
+sessions cleaned up.
+
+One test expectation was wrong rather than the code: `isValidSsn` is a length check by design,
+since the field also accepts ITINs, so `111111111` is accepted. Left as is — tightening it risks
+rejecting a legitimate ITIN.
+
+Still unverified: the **agent-side panel**, which needs a Clerk admin session and cannot be
+exercised headlessly — the same gap as the original secure-capture work.
+
+---
+
 Completed: **Routing lookup runs on free Fed data, no provider** (branch
 `feature/local-ach-directory`, merged to `main`). Isaac asked why the lookup needed a paid API
 when Google answers "what is the Bank of America routing number for Texas" for free. Investigating

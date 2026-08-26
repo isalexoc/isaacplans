@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import type { CaptureScope } from "@/lib/iul-intake/fields";
 
 /**
  * Watches a secure capture link and reports the masked values as the client fills them in.
@@ -24,6 +25,8 @@ export type CaptureState = {
   createdAt: string;
   openedAt: string | null;
   submittedAt: string | null;
+  /** What this link asks for. Display only — the server enforces its own frozen snapshot. */
+  scope: CaptureScope;
 };
 
 const POLL_MS = 3000;
@@ -119,13 +122,15 @@ export function useIulSecureCapture({
     };
   }, [enabled, capture?.status, read]);
 
-  const create = useCallback(async () => {
+  const create = useCallback(async (scope: CaptureScope = "both") => {
     setBusy(true);
     setError(null);
     try {
       const res = await fetch(`/api/iul-intake/${token}/secure-capture`, {
         method: "POST",
         credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ scope }),
       });
       const json = await res.json().catch(() => ({}));
       if (!res.ok || !json?.success) throw new Error(json?.error ?? "failed");

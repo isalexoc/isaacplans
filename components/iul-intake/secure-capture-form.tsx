@@ -20,6 +20,12 @@ import { UI, tr, pickLocale, type IntakeLocale } from "@/lib/iul-intake/ui-strin
  * Final Expense one-thing-at-a-time geometry (`BIG_INPUT`, 18px values). Somebody is doing this
  * standing up, on a phone, while an agent waits on the line.
  *
+ * It renders only the fields the link actually asks for. The agent often already has half of
+ * this — a client who read their bank details off a cheque but went quiet at the SSN gets a page
+ * with one box on it, not four. What is shown comes from the link's frozen `fieldKeys`, the same
+ * snapshot the write endpoint enforces, so the page can never offer a field that would be
+ * rejected on submit.
+ *
  * Two deliberate omissions:
  *
  *  - It never shows what is already on file, not even masked. A "we have •••6789" confirmation
@@ -28,7 +34,7 @@ import { UI, tr, pickLocale, type IntakeLocale } from "@/lib/iul-intake/ui-strin
  *    database is a liability with no upside.
  */
 
-type Boot = { firstName: string };
+type Boot = { firstName: string; fieldKeys: string[] };
 type Phase = "loading" | "ready" | "saving" | "done" | "dead";
 
 export default function SecureCaptureForm({ captureToken }: { captureToken: string }) {
@@ -67,7 +73,14 @@ export default function SecureCaptureForm({ captureToken }: { captureToken: stri
           setPhase("dead");
           return;
         }
-        setBoot({ firstName: json.firstName ?? "" });
+        setBoot({
+          firstName: json.firstName ?? "",
+          // Default to all four if the server said nothing, matching how links behaved before
+          // scopes existed. The write endpoint is the real gate either way.
+          fieldKeys: Array.isArray(json.fieldKeys) && json.fieldKeys.length
+            ? json.fieldKeys
+            : ["ssn", "routingNumber", "accountNumber", "accountType"],
+        });
         setPhase("ready");
       } catch {
         if (active) {
@@ -86,11 +99,16 @@ export default function SecureCaptureForm({ captureToken }: { captureToken: stri
     remaining: tr(UI.digitsRemaining, locale),
   };
 
+  const asks = (key: string) => boot?.fieldKeys.includes(key) ?? false;
+  const wantsSsn = asks("ssn");
+  const wantsBank = asks("routingNumber") || asks("accountNumber") || asks("accountType");
+
+  /** Only what this link asked for has to be filled in — see the scope note above. */
   const complete =
-    ssn.replace(/\D/g, "").length === 9 &&
-    routing.replace(/\D/g, "").length === 9 &&
-    account.replace(/\D/g, "").length >= 4 &&
-    Boolean(accountType);
+    (!asks("ssn") || ssn.replace(/\D/g, "").length === 9) &&
+    (!asks("routingNumber") || routing.replace(/\D/g, "").length === 9) &&
+    (!asks("accountNumber") || account.replace(/\D/g, "").length >= 4) &&
+    (!asks("accountType") || Boolean(accountType));
 
   async function submit() {
     setPhase("saving");
@@ -101,12 +119,14 @@ export default function SecureCaptureForm({ captureToken }: { captureToken: stri
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         credentials: "same-origin",
+        // Send only what was asked for. The endpoint discards anything outside the snapshot
+        // anyway; not sending it keeps an SSN off the wire entirely on a bank-only link.
         body: JSON.stringify({
           data: {
-            ssn: ssn.replace(/\D/g, ""),
-            routingNumber: routing.replace(/\D/g, ""),
-            accountNumber: account.replace(/\D/g, ""),
-            accountType,
+            ...(asks("ssn") ? { ssn: ssn.replace(/\D/g, "") } : {}),
+            ...(asks("routingNumber") ? { routingNumber: routing.replace(/\D/g, "") } : {}),
+            ...(asks("accountNumber") ? { accountNumber: account.replace(/\D/g, "") } : {}),
+            ...(asks("accountType") ? { accountType } : {}),
           },
         }),
       });
@@ -173,7 +193,14 @@ export default function SecureCaptureForm({ captureToken }: { captureToken: stri
             : tr(UI.captureTitle, locale)}
         </h1>
         <p className="mt-2 text-base leading-relaxed text-muted-foreground">
-          {tr(UI.captureIntro, locale)}
+          {tr(
+            wantsSsn && !wantsBank
+              ? UI.captureIntroSsn
+              : wantsBank && !wantsSsn
+                ? UI.captureIntroBank
+                : UI.captureIntro,
+            locale
+          )}
         </p>
         <p className="mt-3 flex items-center justify-center gap-1.5 text-sm font-medium text-green-700 dark:text-green-500">
           <ShieldCheck className="h-4 w-4" /> {tr(UI.captureSecureNote, locale)}
@@ -181,83 +208,93 @@ export default function SecureCaptureForm({ captureToken }: { captureToken: stri
       </div>
 
       <div className="space-y-6">
-        <div>
-          <label htmlFor="cap-ssn" className="mb-1.5 block text-base font-semibold">
-            {tr(UI.captureSsnLabel, locale)}
-          </label>
-          <CountedDigitsField
-            id="cap-ssn"
-            value={ssn}
-            onChange={setSsn}
-            format={formatSsn}
-            digitsNeeded={9}
-            labels={digitLabels}
-            placeholder="123-45-6789"
-            autoComplete="off"
-            disabled={saving}
-            invalid={Boolean(errors.ssn)}
-          />
-        </div>
-
-        <div>
-          <label htmlFor="cap-routing" className="mb-1.5 block text-base font-semibold">
-            {tr(UI.captureRoutingLabel, locale)}
-          </label>
-          <CountedDigitsField
-            id="cap-routing"
-            value={routing}
-            onChange={setRouting}
-            format={(raw) => raw.replace(/\D/g, "").slice(0, 9)}
-            digitsNeeded={9}
-            labels={digitLabels}
-            placeholder="021000021"
-            autoComplete="off"
-            disabled={saving}
-            invalid={Boolean(errors.routingNumber)}
-          />
-          <BankNameHint
-            routingNumber={routing}
-            endpoint={`/api/iul-intake/secure-capture/${captureToken}/bank-name`}
-            label={tr(UI.bankNameHint, locale)}
-          />
-          <p className="mt-1 text-sm text-muted-foreground">{tr(UI.captureRoutingHelp, locale)}</p>
-        </div>
-
-        <div>
-          <label htmlFor="cap-account" className="mb-1.5 block text-base font-semibold">
-            {tr(UI.captureAccountLabel, locale)}
-          </label>
-          <input
-            id="cap-account"
-            type="text"
-            inputMode="numeric"
-            autoComplete="off"
-            disabled={saving}
-            value={account}
-            onChange={(e) => setAccount(e.target.value.replace(/\D/g, "").slice(0, 17))}
-            className={`${BIG_INPUT} ${errors.accountNumber ? "border-amber-400" : ""}`}
-          />
-        </div>
-
-        <div>
-          <span className="mb-1.5 block text-base font-semibold">
-            {tr(UI.captureAccountTypeLabel, locale)}
-          </span>
-          <div role="radiogroup" className="grid grid-cols-2 gap-2.5">
-            <ChoiceCard
-              selected={accountType === "Checking"}
-              label={locale === "es" ? "Corriente" : "Checking"}
-              onClick={() => setAccountType("Checking")}
+        {asks("ssn") && (
+          <div>
+            <label htmlFor="cap-ssn" className="mb-1.5 block text-base font-semibold">
+              {tr(UI.captureSsnLabel, locale)}
+            </label>
+            <CountedDigitsField
+              id="cap-ssn"
+              value={ssn}
+              onChange={setSsn}
+              format={formatSsn}
+              digitsNeeded={9}
+              labels={digitLabels}
+              placeholder="123-45-6789"
+              autoComplete="off"
               disabled={saving}
-            />
-            <ChoiceCard
-              selected={accountType === "Savings"}
-              label={locale === "es" ? "Ahorros" : "Savings"}
-              onClick={() => setAccountType("Savings")}
-              disabled={saving}
+              invalid={Boolean(errors.ssn)}
             />
           </div>
-        </div>
+        )}
+
+        {asks("routingNumber") && (
+          <div>
+            <label htmlFor="cap-routing" className="mb-1.5 block text-base font-semibold">
+              {tr(UI.captureRoutingLabel, locale)}
+            </label>
+            <CountedDigitsField
+              id="cap-routing"
+              value={routing}
+              onChange={setRouting}
+              format={(raw) => raw.replace(/\D/g, "").slice(0, 9)}
+              digitsNeeded={9}
+              labels={digitLabels}
+              placeholder="021000021"
+              autoComplete="off"
+              disabled={saving}
+              invalid={Boolean(errors.routingNumber)}
+            />
+            <BankNameHint
+              routingNumber={routing}
+              endpoint={`/api/iul-intake/secure-capture/${captureToken}/bank-name`}
+              label={tr(UI.bankNameHint, locale)}
+            />
+            <p className="mt-1 text-sm text-muted-foreground">
+              {tr(UI.captureRoutingHelp, locale)}
+            </p>
+          </div>
+        )}
+
+        {asks("accountNumber") && (
+          <div>
+            <label htmlFor="cap-account" className="mb-1.5 block text-base font-semibold">
+              {tr(UI.captureAccountLabel, locale)}
+            </label>
+            <input
+              id="cap-account"
+              type="text"
+              inputMode="numeric"
+              autoComplete="off"
+              disabled={saving}
+              value={account}
+              onChange={(e) => setAccount(e.target.value.replace(/\D/g, "").slice(0, 17))}
+              className={`${BIG_INPUT} ${errors.accountNumber ? "border-amber-400" : ""}`}
+            />
+          </div>
+        )}
+
+        {asks("accountType") && (
+          <div>
+            <span className="mb-1.5 block text-base font-semibold">
+              {tr(UI.captureAccountTypeLabel, locale)}
+            </span>
+            <div role="radiogroup" className="grid grid-cols-2 gap-2.5">
+              <ChoiceCard
+                selected={accountType === "Checking"}
+                label={locale === "es" ? "Corriente" : "Checking"}
+                onClick={() => setAccountType("Checking")}
+                disabled={saving}
+              />
+              <ChoiceCard
+                selected={accountType === "Savings"}
+                label={locale === "es" ? "Ahorros" : "Savings"}
+                onClick={() => setAccountType("Savings")}
+                disabled={saving}
+              />
+            </div>
+          </div>
+        )}
 
         {formError && (
           <p className="flex items-start gap-2 text-sm font-medium text-amber-700 dark:text-amber-500">

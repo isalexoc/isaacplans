@@ -227,6 +227,22 @@ export const UI = {
     en: "We are finalizing your application and we need this information. This is your secure link.",
     es: "Estamos finalizando su solicitud y necesitamos esta información. Este es su enlace seguro.",
   } as Dict,
+  /**
+   * Same sentence, narrowed to what this particular link asks for.
+   *
+   * A client sent a bank-only link and told "we need this information" beside a single SSN box
+   * wonders what happened to the rest, and a client who was promised one question and shown four
+   * is the reason they hesitated in the first place. Saying exactly what is being asked for is
+   * the whole reassurance this page trades on.
+   */
+  captureIntroSsn: {
+    en: "We are finalizing your application and we just need your Social Security number. This is your secure link.",
+    es: "Estamos finalizando su solicitud y solo necesitamos su número de seguro social. Este es su enlace seguro.",
+  } as Dict,
+  captureIntroBank: {
+    en: "We are finalizing your application and we just need your bank details. This is your secure link.",
+    es: "Estamos finalizando su solicitud y solo necesitamos sus datos bancarios. Este es su enlace seguro.",
+  } as Dict,
   captureSecureNote: {
     en: "Secure and encrypted",
     es: "Seguro y cifrado",
@@ -264,8 +280,36 @@ export const UI = {
     es: "¿El cliente prefiere no decirlo en voz alta?",
   } as Dict,
   capturePanelBody: {
-    en: "Send them a private link and they can type their SSN and bank details on their own phone. You will see the last 4 digits appear here.",
-    es: "Envíele un enlace privado y podrá escribir su SSN y datos bancarios en su propio teléfono. Aquí verá aparecer los últimos 4 dígitos.",
+    en: "Send them a private link and they can type their details on their own phone. You will see the last 4 digits appear here.",
+    es: "Envíele un enlace privado y podrá escribir sus datos en su propio teléfono. Aquí verá aparecer los últimos 4 dígitos.",
+  } as Dict,
+  /**
+   * The scope picker.
+   *
+   * Three named choices rather than two checkboxes: the agent frequently already holds half of
+   * this, and asking a client to retype a number the agent has correct is how it becomes wrong.
+   * Two checkboxes would also allow "ask for nothing", which is a link that wastes a call.
+   */
+  captureScopeLegend: {
+    en: "What do you need from the client?",
+    es: "¿Qué necesita del cliente?",
+  } as Dict,
+  captureScopeBoth: {
+    en: "SSN and bank details",
+    es: "SSN y datos bancarios",
+  } as Dict,
+  captureScopeSsn: {
+    en: "SSN only",
+    es: "Solo el SSN",
+  } as Dict,
+  captureScopeBank: {
+    en: "Bank details only",
+    es: "Solo los datos bancarios",
+  } as Dict,
+  /** Shown on a live link so the agent knows what the one already sent is waiting on. */
+  captureAskingFor: {
+    en: "Asking for:",
+    es: "Solicitando:",
   } as Dict,
   captureCreate: { en: "Create secure link", es: "Crear enlace seguro" } as Dict,
   captureCreating: { en: "Creating…", es: "Creando…" } as Dict,

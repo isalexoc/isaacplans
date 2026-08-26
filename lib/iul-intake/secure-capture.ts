@@ -19,7 +19,7 @@ import { and, desc, eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { db } from "@/lib/db";
 import { iulIntakeSessions, iulSecureCaptures } from "@/lib/db/schema";
-import { SECURE_CAPTURE_FIELD_KEYS } from "./fields";
+import { captureScopeKeys, scopeFromFieldKeys, type CaptureScope } from "./fields";
 
 export type SecureCaptureStatus = "pending" | "submitted" | "cancelled";
 
@@ -35,6 +35,14 @@ export type SecureCaptureView = {
   createdAt: string;
   openedAt: string | null;
   submittedAt: string | null;
+  /**
+   * What this link asks for, derived from the frozen snapshot rather than stored twice.
+   *
+   * Display only. The agent's panel needs it to say what a link already in someone's text messages
+   * is waiting on; the write endpoint always reads `fieldKeys` itself, so a wrong value here could
+   * never widen what the link can do.
+   */
+  scope: CaptureScope;
 };
 
 export function toSecureCaptureView(row: SecureCaptureRow): SecureCaptureView {
@@ -44,6 +52,7 @@ export function toSecureCaptureView(row: SecureCaptureRow): SecureCaptureView {
     createdAt: row.createdAt.toISOString(),
     openedAt: row.openedAt?.toISOString() ?? null,
     submittedAt: row.submittedAt?.toISOString() ?? null,
+    scope: scopeFromFieldKeys(row.fieldKeys ?? []),
   };
 }
 
@@ -101,6 +110,8 @@ export async function getLatestCapture(sessionId: string): Promise<SecureCapture
 export async function createCapture(params: {
   sessionId: string;
   ownerUserId: string;
+  /** Which of the sensitive values to ask for. Defaults to all of them. */
+  scope?: CaptureScope;
 }): Promise<SecureCaptureRow> {
   await cancelPendingCaptures(params.sessionId);
 
@@ -112,8 +123,10 @@ export async function createCapture(params: {
       sessionId: params.sessionId,
       ownerUserId: params.ownerUserId,
       status: "pending",
-      // Snapshot, not a live read of the constant — see the schema comment.
-      fieldKeys: [...SECURE_CAPTURE_FIELD_KEYS],
+      // Snapshot, not a live read of the constant — see the schema comment. Narrowing it to the
+      // chosen scope is also what makes a scoped link safe rather than merely tidy: a link that
+      // only asks for an SSN also physically cannot write a bank account number.
+      fieldKeys: [...captureScopeKeys(params.scope ?? "both")],
     })
     .returning();
   return row;

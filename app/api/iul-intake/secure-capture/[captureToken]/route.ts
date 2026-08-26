@@ -79,8 +79,13 @@ async function loadUsableCapture(captureToken: string) {
 }
 
 /**
- * GET — what the phone needs to render the page: the language, and a first name so the client can
- * see the link is genuinely theirs. Nothing else. No values, no session token, no contact id.
+ * GET — what the phone needs to render the page: the language, a first name so the client can see
+ * the link is genuinely theirs, and which fields this link asks for. Nothing else. No values, no
+ * session token, no contact id.
+ *
+ * `fieldKeys` is the link's frozen snapshot, so the page renders exactly what the write endpoint
+ * will accept. Sending the live constant instead would show a client an SSN box on a bank-only
+ * link and then reject it on submit.
  */
 export async function GET(_request: NextRequest, context: RouteContext) {
   try {
@@ -101,6 +106,7 @@ export async function GET(_request: NextRequest, context: RouteContext) {
       success: true,
       locale: session!.locale === "es" ? "es" : "en",
       firstName,
+      fieldKeys: capture!.fieldKeys ?? [],
     });
   } catch (error) {
     console.error("[iul-intake/secure-capture/:captureToken] GET", error);
@@ -108,22 +114,36 @@ export async function GET(_request: NextRequest, context: RouteContext) {
   }
 }
 
-/** Server-side format checks. The client page validates too, but that is a courtesy, not a gate. */
-function validate(patch: IntakeData): Record<string, string> {
+/**
+ * Server-side format checks. The client page validates too, but that is a courtesy, not a gate.
+ *
+ * Only the keys this link asks for are required. A bank-only link that demanded an SSN would be
+ * unsubmittable, and — worse — the obvious fix of "validate whatever turns up" would let a link
+ * through having collected nothing at all.
+ */
+function validate(patch: IntakeData, allowed: Set<string>): Record<string, string> {
   const errors: Record<string, string> = {};
   const str = (v: unknown) => (typeof v === "string" ? v.trim() : "");
 
-  const ssn = str(patch.ssn);
-  if (!ssn || !isValidSsn(ssn)) errors.ssn = "invalid";
+  if (allowed.has("ssn")) {
+    const ssn = str(patch.ssn);
+    if (!ssn || !isValidSsn(ssn)) errors.ssn = "invalid";
+  }
 
-  const routing = str(patch.routingNumber);
-  if (!routing || !isValidRouting(routing)) errors.routingNumber = "invalid";
+  if (allowed.has("routingNumber")) {
+    const routing = str(patch.routingNumber);
+    if (!routing || !isValidRouting(routing)) errors.routingNumber = "invalid";
+  }
 
-  const account = str(patch.accountNumber).replace(/\D/g, "");
-  if (account.length < 4 || account.length > 17) errors.accountNumber = "invalid";
+  if (allowed.has("accountNumber")) {
+    const account = str(patch.accountNumber).replace(/\D/g, "");
+    if (account.length < 4 || account.length > 17) errors.accountNumber = "invalid";
+  }
 
-  const type = str(patch.accountType);
-  if (type !== "Checking" && type !== "Savings") errors.accountType = "invalid";
+  if (allowed.has("accountType")) {
+    const type = str(patch.accountType);
+    if (type !== "Checking" && type !== "Savings") errors.accountType = "invalid";
+  }
 
   return errors;
 }
@@ -156,7 +176,13 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
       patch[key] = value;
     }
 
-    const errors = validate(patch);
+    // A link whose snapshot is somehow empty must not be submittable: with nothing required,
+    // every check below would pass and the link would close having collected nothing.
+    if (allowed.size === 0) {
+      return NextResponse.json({ success: false, error: "Invalid submission." }, { status: 400 });
+    }
+
+    const errors = validate(patch, allowed);
     if (Object.keys(errors).length > 0) {
       return NextResponse.json({ success: false, errors }, { status: 400 });
     }
@@ -190,14 +216,29 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     const creds = agentCrmGetBaseCredentials();
     if (creds && updated.crmContactId) {
       try {
+        // Name what actually arrived. A note claiming an SSN was received on a bank-only link
+        // is worse than no note — the agent stops chasing the one thing still missing.
+        const FIELD_LABELS: Record<string, string> = {
+          ssn: "SSN",
+          routingNumber: "Routing Number",
+          accountNumber: "Account Number",
+          accountType: "Account Type",
+        };
+        const received = [...allowed].map((k) => FIELD_LABELS[k] ?? k);
+        const summary = allowed.has("ssn")
+          ? allowed.size > 1
+            ? "their SSN and bank details"
+            : "their SSN"
+          : "their bank details";
+
         await createContactNote({
           contactId: updated.crmContactId,
           token: creds.token,
           title: "IUL — Secure Details Received",
           body:
-            `The client submitted their SSN and bank details from their own device on ` +
+            `The client submitted ${summary} from their own device on ` +
             `${new Date().toLocaleString()}. The values are on this contact's IUL fields ` +
-            `(SSN, Routing Number, Account Number, Account Type). Nothing was read aloud on the call.`,
+            `(${received.join(", ")}). Nothing was read aloud on the call.`,
         });
       } catch (noteError) {
         console.warn("[iul-secure-capture] note failed:", noteError);
