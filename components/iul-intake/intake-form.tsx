@@ -63,6 +63,7 @@ import RoutingLookupPanel from "@/components/iul-intake/routing-lookup-panel";
 import BankNameHint from "@/components/iul-intake/bank-name-hint";
 import { useIulSecureCapture } from "@/hooks/use-iul-secure-capture";
 import { useIulDocumentCapture } from "@/hooks/use-iul-document-capture";
+import { canPreview } from "@/lib/iul-intake/document-preview";
 import {
   visibleSections,
   allFileFields,
@@ -1635,24 +1636,64 @@ function FileUploader({
       <Label className="mb-0.5 block">{label}</Label>
       {help && <p className="mb-1 text-xs font-medium text-blue-600">{help}</p>}
       {files.length > 0 && (
-        <ul className="mb-2 space-y-1">
-          {files.map((f) => (
-            <li key={f.url} className="flex items-center justify-between gap-2 rounded-xl border-2 border-gray-200 px-3 py-2 text-sm dark:border-gray-800">
-              <a href={f.url} target="_blank" rel="noopener noreferrer" className="flex min-w-0 items-center gap-2 text-blue-600 hover:underline">
-                <FileText className="h-4 w-4 shrink-0" />
-                <span className="truncate">{f.name}</span>
-              </a>
-              <button type="button" onClick={() => handleRemove(f.url)} className="text-muted-foreground hover:text-red-600">
-                <X className="h-4 w-4" />
-              </button>
-            </li>
-          ))}
+        <ul className="mb-2 space-y-2">
+          {files.map((f) => {
+            /**
+             * A thumbnail when Cloudinary can render one, an icon otherwise.
+             *
+             * `canPreview` is false for anything attached before previews existed, and for formats
+             * with no still image to show (a .docx, a .zip). Those are not failures — the file is
+             * there and the link opens it — so they get an icon rather than a broken frame.
+             */
+            const preview = canPreview(f)
+              ? `/api/iul-intake/${token}/files/preview?id=${encodeURIComponent(f.cloudinaryId!)}`
+              : null;
+            return (
+              <li
+                key={f.url || f.name}
+                className="flex items-center justify-between gap-3 rounded-xl border-2 border-gray-200 p-2 text-sm dark:border-gray-800"
+              >
+                <a
+                  href={f.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex min-w-0 flex-1 items-center gap-3 text-blue-600 hover:underline"
+                >
+                  {preview ? (
+                    // eslint-disable-next-line @next/next/no-img-element -- signed, short-lived
+                    // Cloudinary URL behind a redirect; next/image would need a loader and would
+                    // cache a client's identity document on our own CDN.
+                    <img
+                      src={preview}
+                      alt={f.name}
+                      loading="lazy"
+                      className="h-14 w-14 shrink-0 rounded-lg border border-gray-200 object-cover dark:border-gray-700"
+                    />
+                  ) : (
+                    <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg border border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-900">
+                      <FileText className="h-5 w-5 text-muted-foreground" />
+                    </span>
+                  )}
+                  <span className="truncate">{f.name}</span>
+                </a>
+                <button
+                  type="button"
+                  onClick={() => handleRemove(f.url)}
+                  className="shrink-0 text-muted-foreground hover:text-red-600"
+                  aria-label={`Remove ${f.name}`}
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </li>
+            );
+          })}
         </ul>
       )}
       <input
         id={inputId}
         type="file"
-        accept="image/*,application/pdf"
+        /* No `accept`: the agent may need a Word file, a scan or something none of us predicted,
+           and any allow-list here shows a file the picker will not let them select. */
         multiple
         className="hidden"
         onChange={(e) => {

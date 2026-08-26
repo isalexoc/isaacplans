@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createContactNote } from "@/lib/agent-crm-call-summary";
-import {
-  agentCrmGetBaseCredentials,
-  agentCrmUploadCustomFieldFile,
-} from "@/lib/agent-crm-contacts";
+import { agentCrmGetBaseCredentials } from "@/lib/agent-crm-contacts";
 import { decryptIntakeData, encryptIntakeData } from "@/lib/crypto/field-encryption";
 import { ghlFieldIds } from "@/lib/iul-intake/ghl-field-ids";
 import type { FileRef } from "@/lib/iul-intake/fields";
@@ -16,8 +13,7 @@ import {
 } from "@/lib/iul-intake/document-capture";
 import { getIntakeById } from "@/lib/iul-intake/secure-capture";
 import {
-  storeDocumentInCloudinary,
-  deliverableFor,
+  ingestIntakeFile,
   safeDocumentName,
   MAX_DOCUMENT_BYTES,
 } from "@/lib/iul-intake/document-upload";
@@ -190,45 +186,29 @@ export async function POST(request: NextRequest, context: RouteContext) {
 
     const original = Buffer.from(await file.arrayBuffer());
     const filename = safeDocumentName(file.name, ext);
+    const existing: FileRef[] = Array.isArray(decrypted[TARGET_FIELD_KEY])
+      ? (decrypted[TARGET_FIELD_KEY] as FileRef[])
+      : [];
 
-    const stored = await storeDocumentInCloudinary({
+    // The same pipeline the agent's own uploader uses, so a document is stored and previewable
+    // identically whoever attached it.
+    const next = await ingestIntakeFile({
       bytes: original,
-      sessionId: session!.id,
-    });
-    const deliverable = await deliverableFor({
-      stored,
-      original,
       filename,
       contentType: file.type || "application/octet-stream",
-    });
-
-    // The dedicated upload endpoint, not a contact update: GHL silently ignores field_value URLs
-    // on a FILE_UPLOAD field, so the bytes have to go through this call.
-    const fieldFiles = await agentCrmUploadCustomFieldFile(
-      new Blob([new Uint8Array(deliverable.bytes)], { type: deliverable.contentType }),
-      deliverable.filename,
+      sessionId: session!.id,
       contactId,
-      creds.locationId,
+      locationId: creds.locationId,
       fieldId,
-      creds.token,
-      "[IUL_INTAKE]"
-    );
-    if (!fieldFiles) {
+      crmToken: creds.token,
+      existing,
+    });
+    if (!next) {
       return NextResponse.json(
         { success: false, error: "That did not go through. Please try again." },
         { status: 502 }
       );
     }
-
-    // Prefer the authoritative list GHL echoes back so the agent's Documents step matches the
-    // contact exactly; fall back to appending when it returns none.
-    const existing: FileRef[] = Array.isArray(decrypted[TARGET_FIELD_KEY])
-      ? (decrypted[TARGET_FIELD_KEY] as FileRef[])
-      : [];
-    const next: FileRef[] =
-      fieldFiles.length > 0
-        ? fieldFiles.map((f) => ({ url: f.url, name: f.name }))
-        : [...existing, { url: "", name: deliverable.filename }];
 
     decrypted[TARGET_FIELD_KEY] = next;
     await updateIntakeData(
@@ -260,7 +240,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
     }
 
     // The name back, so the client sees their own file listed. Nothing about the application.
-    return NextResponse.json({ success: true, name: deliverable.filename });
+    return NextResponse.json({ success: true, name: filename });
   } catch (error) {
     console.error("[iul-intake/document-capture/:captureToken] POST", error);
     return NextResponse.json({ success: false, error: "Failed to upload" }, { status: 500 });

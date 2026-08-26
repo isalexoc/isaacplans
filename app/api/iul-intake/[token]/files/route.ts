@@ -18,9 +18,13 @@ import type { IntakeData } from "@/lib/iul-intake/schema";
 import { encryptIntakeData, decryptIntakeData } from "@/lib/crypto/field-encryption";
 import {
   agentCrmGetBaseCredentials,
-  agentCrmUploadCustomFieldFile,
   agentCrmSetFileField,
 } from "@/lib/agent-crm-contacts";
+import {
+  ingestIntakeFile,
+  destroyStoredDocument,
+  safeDocumentName,
+} from "@/lib/iul-intake/document-upload";
 
 type RouteContext = { params: Promise<{ token: string }> };
 
@@ -122,27 +126,25 @@ export async function POST(request: NextRequest, context: RouteContext) {
       );
     }
 
-    // Attach the file to the contact's FILE_UPLOAD custom field via the dedicated endpoint.
-    // (Setting field_value URLs on the contact update is silently ignored by GHL.)
-    const fieldFiles = await agentCrmUploadCustomFieldFile(
-      file,
-      file.name || "upload",
-      row.crmContactId,
-      creds.locationId,
+    // The same pipeline the client's upload link uses: Cloudinary for a previewable copy, then
+    // the CRM's dedicated upload endpoint for the copy the agent actually opens. Before this was
+    // shared, a document's preview depended on who had attached it.
+    const decryptedNow = decryptIntakeData((row.data ?? {}) as IntakeData);
+    const ext = (/\.([A-Za-z0-9]{1,8})$/.exec(file.name ?? "")?.[1] ?? "").toLowerCase();
+    const next = await ingestIntakeFile({
+      bytes: Buffer.from(await file.arrayBuffer()),
+      filename: safeDocumentName(file.name, ext),
+      contentType: file.type || "application/octet-stream",
+      sessionId: row.id,
+      contactId: row.crmContactId,
+      locationId: creds.locationId,
       fieldId,
-      creds.token,
-      "[IUL_INTAKE]"
-    );
-    if (!fieldFiles) {
+      crmToken: creds.token,
+      existing: currentFiles(decryptedNow, fieldKey),
+    });
+    if (!next) {
       return NextResponse.json({ success: false, error: "Upload failed" }, { status: 502 });
     }
-
-    // Prefer the authoritative list GHL echoes back; fall back to appending if it returns none.
-    const decryptedNow = decryptIntakeData((row.data ?? {}) as IntakeData);
-    const next: FileRef[] =
-      fieldFiles.length > 0
-        ? fieldFiles.map((f) => ({ url: f.url, name: f.name }))
-        : [...currentFiles(decryptedNow, fieldKey), { url: "", name: file.name || "file" }];
     const decrypted = await persistFiles(row, fieldKey, next);
 
     return NextResponse.json({
@@ -183,8 +185,15 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
     }
 
     const decryptedNow = decryptIntakeData((row.data ?? {}) as IntakeData);
-    const next = currentFiles(decryptedNow, fieldKey).filter((f) => f.url !== url);
+    const before = currentFiles(decryptedNow, fieldKey);
+    const next = before.filter((f) => f.url !== url);
     const decrypted = await persistAndClearCrm(row, fieldKey, next);
+
+    // Drop the Cloudinary copy too. Removing a file from the form and leaving its second copy
+    // sitting in cloud storage is exactly the orphan this metadata was added to prevent.
+    for (const removed of before.filter((f) => f.url === url)) {
+      await destroyStoredDocument(removed);
+    }
 
     return NextResponse.json({
       success: true,

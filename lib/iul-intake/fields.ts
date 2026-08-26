@@ -44,11 +44,30 @@ export type IntakeFieldType =
   | "beneficiaries"
   | "file";
 
-/** A file stored in the CRM media library and referenced on a FILE_UPLOAD custom field. */
+/**
+ * A file attached to the intake, stored in two places and described by one record.
+ *
+ * `url` is the CRM-hosted copy — that is the one the agent opens and the one GHL renders on the
+ * contact. The Cloudinary fields describe the second copy, which exists because Cloudinary can
+ * render a thumbnail of an arbitrary file and the CRM cannot.
+ *
+ * The Cloudinary fields are optional for a reason that will not go away: files attached before
+ * previews existed have no `cloudinaryId`, and any UI that reads these must fall back to an icon
+ * rather than assuming a thumbnail is available.
+ */
 export type FileRef = {
   url: string;
   name: string;
   fileId?: string;
+  /**
+   * Cloudinary public id, `authenticated` delivery. Never rendered directly — a signed URL is
+   * minted per request by the preview route, which also checks the id belongs to this session.
+   */
+  cloudinaryId?: string;
+  /** Cloudinary resource type ("image" | "video" | "raw"), needed to sign a URL for it. */
+  resourceType?: string;
+  /** Lowercase Cloudinary format ("jpg", "pdf", …) — tells the UI whether a thumbnail is possible. */
+  format?: string;
 };
 
 export type IntakeOption = {

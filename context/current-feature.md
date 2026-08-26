@@ -2,6 +2,55 @@
 
 ## Status
 
+Completed: **Document previews, and one upload path for every file** (branch
+`feature/document-previews`, merged to `main`). Isaac asked that every uploaded document reach the
+CRM, appear on the admin form however many there are, and show a preview where possible, without
+restricting file types.
+
+**A flaw in the previous session's work, found while doing this.** The document link uploaded each
+file to Cloudinary and then **never stored the resulting `public_id`**. Every document a client sent
+created an asset that was unreachable and unpurgeable, and it made previews impossible. `FileRef`
+now carries `cloudinaryId`, `resourceType` and `format`, and deleting a file destroys the Cloudinary
+copy too.
+
+**One pipeline, both paths.** The agent's own uploader and the client's link now call the same
+`ingestIntakeFile`: Cloudinary for a previewable copy, then the CRM's dedicated upload endpoint for
+the copy the agent opens. Before this they stored different things, so whether a document had a
+thumbnail depended on who had attached it.
+
+**The bug that had to be designed around, because it fails silently.** The CRM is authoritative
+about *which* files exist — it echoes the whole field back after every upload, which is exactly what
+makes several documents accumulate correctly — but it knows nothing about Cloudinary. Storing its
+list naively would erase the `cloudinaryId` of every file already attached and kill their thumbnails
+on the *next* upload, with no error anywhere. `mergeCloudinaryMetadata` matches existing entries
+back by URL; 17 tests cover it, including three uploads in a row, deletion, and files predating
+previews.
+
+**Previews.** Images and PDFs get a real thumbnail (`pg_1` for page one of a PDF — note the contrast
+with the conversion allow-list, which deliberately excludes PDFs: a thumbnail of page one belongs in
+a list, replacing the stored document with page one would destroy it). Anything Cloudinary cannot
+draw falls back to an icon rather than a broken frame, as do files attached before today.
+
+**The preview route is the security-sensitive piece.** Documents use `authenticated` delivery, so
+something must sign a URL — and signing whatever id it is handed would make it an oracle for every
+asset in the Cloudinary account, including the agent's licence images. The requested id must appear
+on *this session's own* file list. Proven: the same authorized caller gets 302 for their own
+document and **404 for an id they do not own**.
+
+**No file-type restriction anywhere.** The agent's uploader carried
+`accept="image/*,application/pdf"`; removed. The server enforces size and a short executable
+blocklist, nothing else.
+
+Verified: 17/17 merge, 6/6 preview signing, 3/3 authorization. **Full `pnpm build` green** — which
+also retroactively clears the ESLint gate that was unproven when `feature/iul-document-capture` was
+merged.
+
+**Still unverified: the live CRM upload**, which would mean creating a real contact in the
+production CRM and deleting it again. The call itself is unchanged from the one the Documents step
+has used in production all along. One real upload settles it.
+
+---
+
 Completed: **Secure document upload link** (branch `feature/iul-document-capture`, merged to
 `main`, migration `0033` applied). The same idea as the SSN/bank capture link, for the Documents step: the agent issues a
 link, the client photographs a licence, a green card or whatever was asked for, and it lands on the
