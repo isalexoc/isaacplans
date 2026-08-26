@@ -1,16 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { getIsAdmin } from "@/lib/auth/admin";
-import { searchRoutingNumbers, isRoutingLookupConfigured } from "@/lib/iul-intake/routing-lookup";
-import { lookupBankByRouting } from "@/lib/iul-intake/bank-lookup";
+import { searchRoutingNumbers, lookupBankByRouting } from "@/lib/iul-intake/ach-directory";
 
 /**
- * GET /api/iul-intake/routing-lookup?bankName=&state=&city= — admin only.
+ * GET /api/iul-intake/routing-lookup — admin only. Two modes:
+ *   ?routingNumber=021000021        → name the bank behind a number
+ *   ?bankName=Chase&state=FL[&city] → candidate ACH numbers for that bank in that state
  *
- * Deliberately NOT reachable from the client capture link. The client already knows their own
- * bank, and exposing a metered third-party API to an unauthenticated token is free rate-limit
- * abuse waiting to happen. It also keeps `API_NINJAS_KEY` server-side, which is the whole reason
- * this route exists instead of the component calling the provider directly.
+ * There is no longer a "configured" state to report. The directory is compiled into the
+ * deployment, so the search either matches or it does not — it can never be switched off by a
+ * missing key, and the panel no longer has to hide itself. That removed a whole failure mode:
+ * the previous provider's search endpoint was premium-only, so a free key made the feature
+ * silently vanish in production while looking fine in the code.
+ *
+ * Still behind the admin check even though the data is public and local. This answers questions
+ * about a client's banking mid-application; it belongs to the agent's session, and keeping the
+ * gate means the route cannot quietly become a public bank-directory API for anyone who finds it.
  */
 export async function GET(request: NextRequest) {
   try {
@@ -23,22 +29,11 @@ export async function GET(request: NextRequest) {
     }
     const { searchParams } = new URL(request.url);
 
-    /**
-     * Reverse mode: a routing number in, the bank's name out.
-     *
-     * Handled before the `configured` check on purpose — this half runs on a free provider with no
-     * key, so the agent gets the same "is this the right bank?" confirmation the client's page
-     * gets even when the paid search is not set up.
-     */
+    // Reverse mode: a routing number in, the bank's name out — the same confirmation the
+    // client's own page gets, so the agent can read it back and have them agree.
     const reverse = searchParams.get("routingNumber");
     if (reverse) {
-      const bank = await lookupBankByRouting(reverse);
-      return NextResponse.json({ success: true, bank });
-    }
-
-    if (!isRoutingLookupConfigured()) {
-      // Not an error: the panel simply does not render, and the agent types the number.
-      return NextResponse.json({ success: true, configured: false, results: [] });
+      return NextResponse.json({ success: true, bank: lookupBankByRouting(reverse) });
     }
 
     const bankName = searchParams.get("bankName") ?? "";
@@ -52,13 +47,9 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const search = await searchRoutingNumbers({ bankName, state, city });
-    // `available: false` means the key is missing or not entitled to the search endpoint. Report
-    // it as unconfigured so the panel hides rather than offering a search that can never return.
     return NextResponse.json({
       success: true,
-      configured: search.available,
-      results: search.results,
+      results: searchRoutingNumbers({ bankName, state, city }),
     });
   } catch (error) {
     console.error("[iul-intake/routing-lookup] GET", error);

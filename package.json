@@ -16,6 +16,8 @@
     "add:agent-licenses": "tsx scripts/add-agent-licenses-to-sanity.ts",
     "privatize:licenses": "tsx scripts/privatize-license-images.ts",
     "iul:fields": "tsx scripts/create-iul-intake-fields.ts",
+    "build:ach-directory": "tsx scripts/build-ach-directory.ts",
+    "check:ach-directory": "tsx scripts/check-ach-directory.ts",
     "aca:fields": "tsx scripts/create-aca-intake-fields.ts",
     "fe-intake:fields": "tsx scripts/create-fe-intake-fields.ts",
     "intake:fields": "tsx scripts/create-intake-fields.ts",

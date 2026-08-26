@@ -2,6 +2,59 @@
 
 ## Status
 
+Completed: **Routing lookup runs on free Fed data, no provider** (branch
+`feature/local-ach-directory`, merged to `main`). Isaac asked why the lookup needed a paid API
+when Google answers "what is the Bank of America routing number for Texas" for free. Investigating
+it changed the decision, so the answer is worth keeping.
+
+**Paying would not have fixed his example.** The Fed's directory carries a state for every
+institution, but it is the bank's *administrative* address. Measured against the real file: 103 of
+Bank of America's 106 routing numbers say Virginia, 83 of Wells Fargo's 86 say Minnesota, all 70 of
+Capital One's say Virginia, all 44 of U.S. Bank's say Minnesota. Searching that data for
+"Bank of America" + "Texas" returns nothing useful — and every paid routing-search API is built on
+the same file. Google answers because sites assemble those tables from each bank's own
+customer-service pages, which is a different source entirely.
+
+**And the key was never premium anyway.** `API_NINJAS_KEY` was on the free tier, the search
+endpoint is premium-only, so `providerUnavailable` latched on the first call and the panel hid
+itself. The feature did not exist in production while looking present in the code — the failure
+mode that removing the provider was meant to end. `API_NINJAS_KEY` is now unused and can come out
+of `.env` and Vercel.
+
+What replaced it:
+
+- **`lib/iul-intake/data/ach-directory.generated.ts`** — the FedACH participant directory, 16,592
+  institutions, embedded as gzip+base64 (187 KB gzipped, 250 KB of source). Embedded rather than
+  read from disk on purpose: a data file has to be named in `outputFileTracingIncludes` for every
+  route that reads it, and a route added later that forgets the entry breaks in production only.
+  Regenerate with `pnpm build:ach-directory`; 1,606 retired numbers (merged banks carrying a
+  replacement number) are dropped so a dead number can never be suggested.
+  Vintage is 2018-12-04 — the last public release, since the Fed moved the bulk file behind FedLine.
+- **`lib/iul-intake/data/bank-state-routing.ts`** — 250 hand-verified numbers across 26 big banks,
+  the part the Fed file structurally cannot answer. Two gates, both of which rejected real published
+  numbers rather than being decoration: the ABA checksum caught `081000033` (published as Bank of
+  America Missouri, simply wrong) and directory presence caught `064103707` (published as U.S. Bank
+  North Carolina, absent from the Fed entirely). A third caught `122000496`, added by hand as
+  Comerica Arizona and actually MUFG Union Bank. `pnpm check:ach-directory` re-runs all of it.
+- **`lib/iul-intake/ach-directory.ts`** — replaces both `routing-lookup.ts` (paid search) and
+  `bank-lookup.ts` (free reverse lookup); both files are gone, and with them the last third party
+  that saw any part of a client's bank details. 51 ms to inflate and index on cold start, ~1 ms per
+  search after.
+
+**The 84% that makes free data good enough:** 8,842 of 10,520 institution names register exactly one
+routing number, so for regional banks and credit unions the state is irrelevant and the answer is
+confident whatever state the client names. Verified end to end — Randolph Brooks TX, Suncoast FL,
+Langley VA, Security Service TX all resolve to a single correct number, and Bank of America Texas
+now returns `111000025`, which is both Isaac's original example and a number the old free reverse
+provider could not find at all.
+
+Results are labelled `curated` / `single` / `candidates`, because "this is the number" and "one of
+these three is the number" are different things to say out loud to a client. Nothing is ever
+auto-filled: the client confirms against their own cheque or app, which is the only verification
+step the feature has.
+
+---
+
 In progress: **IUL intake — Final Expense look, SSN moved, secure capture link, routing lookup**
 (branch `feature/iul-intake-restyle-secure-capture`). Isaac fills this form while the client
 watches over a video call, which is the premise behind all four changes.
