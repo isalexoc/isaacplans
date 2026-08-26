@@ -79,7 +79,8 @@ export type GhlFieldSlug =
   | "attachment_other"
   // Meta — the always-current client share link (written by the app, used by a GHL workflow)
   | "iul_intake_link"
-  | "iul_secure_capture_link";
+  | "iul_secure_capture_link"
+  | "iul_document_capture_link";
 
 /** GHL custom-field folder that groups all IUL intake fields. Set by the provisioning script. */
 export const iulDataFolderId = "JyCoYyStV4DiWx1U0pnv";
@@ -153,4 +154,9 @@ export const ghlFieldIds: Record<GhlFieldSlug, string> = {
   iul_intake_link: "HcQaJMoFZFK5ehZmZ0Fz",
   // Provisioned by `pnpm iul:fields` — empty until that runs, which the send route checks for.
   iul_secure_capture_link: "gxdgRe5RV1nCFyb6YxUe",
+  /**
+   * Filled in by `pnpm iul:fields`. Empty until that runs, and every caller checks it — an empty
+   * id makes "send by text" report a clear error instead of writing the link nowhere.
+   */
+  iul_document_capture_link: "mXK3mDWhRAKvPGTW2dtC",
 };

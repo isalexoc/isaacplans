@@ -26,7 +26,7 @@ import {
   type AgentCrmCustomFieldValue,
   type AgentCrmNativeFields,
 } from "@/lib/agent-crm-contacts";
-import { buildIntakeShareUrl, buildSecureCaptureUrl } from "./share-url";
+import { buildIntakeShareUrl, buildSecureCaptureUrl, buildDocumentCaptureUrl } from "./share-url";
 import {
   resolveIntakeAccess,
   isIntakeExpired,
@@ -40,6 +40,9 @@ export const IUL_INTAKE_LINK_SENT_TAG = "iul_intake_link_sent";
 
 /** Tag that fires the GHL workflow which texts the client their SECURE CAPTURE link. */
 export const IUL_SECURE_CAPTURE_SENT_TAG = "iul_secure_capture_sent";
+
+/** Its own trigger tag: a workflow texting the document link must not fire on the SSN link. */
+export const IUL_DOCUMENT_CAPTURE_SENT_TAG = "iul_document_capture_sent";
 
 /** Contact tag that marks a Spanish-speaking client → the saved link uses the /es locale. */
 export const IUL_SPANISH_TAG = "spanish";
@@ -464,6 +467,49 @@ export async function syncSecureCaptureLinkToCrm(
     );
   } catch (e) {
     console.warn("[iul-intake] Secure capture link sync failed:", e);
+    return false;
+  }
+}
+
+/**
+ * Write the live document-upload link to the contact, in the client's own language.
+ *
+ * Same shape as the secure-capture sync above and for the same reason: there is no direct SMS API
+ * in this codebase, so the link goes onto a custom field and a GHL workflow does the sending.
+ * Language comes from the contact's tags rather than the session row, because the session is
+ * usually created before anyone knows which language the client prefers.
+ *
+ * Returns false rather than throwing when the CRM field has not been provisioned yet, which is
+ * what lets "send by text" report a clear error instead of silently writing nowhere.
+ */
+export async function syncDocumentCaptureLinkToCrm(
+  row: IntakeSessionRow,
+  captureToken: string
+): Promise<boolean> {
+  if (!row.crmContactId) return false;
+  const fieldId = ghlFieldIds.iul_document_capture_link;
+  if (!fieldId) return false;
+  const creds = agentCrmGetBaseCredentials();
+  if (!creds) return false;
+  try {
+    const tags = await agentCrmGetContactTags(row.crmContactId, creds.token);
+    const locale =
+      tags === null
+        ? row.locale === "es"
+          ? "es"
+          : "en"
+        : tags.some((t) => t.trim().toLowerCase() === IUL_SPANISH_TAG)
+          ? "es"
+          : "en";
+    const url = buildDocumentCaptureUrl(captureToken, locale);
+    return await agentCrmUpdateContact(
+      row.crmContactId,
+      { customFields: [{ id: fieldId, field_value: url }] },
+      creds.token,
+      "[IUL_INTAKE]"
+    );
+  } catch (e) {
+    console.warn("[iul-intake] Document capture link sync failed:", e);
     return false;
   }
 }

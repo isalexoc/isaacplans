@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocale } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -58,11 +58,14 @@ import {
 } from "@/components/intake-ui";
 import { formatSsn } from "@/lib/intake-shared/format";
 import SecureCapturePanel from "@/components/iul-intake/secure-capture-panel";
+import DocumentCapturePanel from "@/components/iul-intake/document-capture-panel";
 import RoutingLookupPanel from "@/components/iul-intake/routing-lookup-panel";
 import BankNameHint from "@/components/iul-intake/bank-name-hint";
 import { useIulSecureCapture } from "@/hooks/use-iul-secure-capture";
+import { useIulDocumentCapture } from "@/hooks/use-iul-document-capture";
 import {
   visibleSections,
+  allFileFields,
   SECURE_CAPTURE_FIELD_KEYS,
   MAX_BENEFICIARIES,
   BENEFICIARY_RELATIONSHIPS,
@@ -297,6 +300,40 @@ export default function IntakeForm({ token }: { token: string }) {
         return changed ? next : prev;
       });
     },
+  });
+
+  /**
+   * Pull in documents the client just sent from their phone.
+   *
+   * Only the FILE fields are copied across. Re-applying the whole session would overwrite whatever
+   * the agent is typing at that moment — the same hazard the secure-capture masks are designed
+   * around — and a document arriving is never a reason to touch a text field.
+   */
+  const refreshUploadedFiles = useCallback(async () => {
+    try {
+      const s = await fetchIntake(token);
+      const incoming = (s.data ?? {}) as Record<string, unknown>;
+      setData((prev) => {
+        const next = { ...prev };
+        let changed = false;
+        for (const field of allFileFields()) {
+          const value = incoming[field.key];
+          if (!Array.isArray(value)) continue;
+          if (JSON.stringify(value) === JSON.stringify(prev[field.key])) continue;
+          next[field.key] = value;
+          changed = true;
+        }
+        return changed ? next : prev;
+      });
+    } catch {
+      /* the next poll tries again; a missed refresh is cosmetic, the files are already stored */
+    }
+  }, [token]);
+
+  const documentCapture = useIulDocumentCapture({
+    token,
+    enabled: Boolean(isOwner) && !completed,
+    onArrival: refreshUploadedFiles,
   });
 
   // Clients pay by bank draft only — lock the value so it always syncs.
@@ -584,6 +621,21 @@ export default function IntakeForm({ token }: { token: string }) {
               transition={{ duration: 0.22, ease: "easeOut" }}
               className="mt-4 space-y-5"
             >
+          {/* Same offer for documents, at the top of the step where they belong. Unlike the
+              secure-capture link this one stays open, so it keeps rendering while files arrive. */}
+          {isOwner && !completed && current.key === "attachments" && (
+            <DocumentCapturePanel
+              locale={locale}
+              capture={documentCapture.capture}
+              url={documentCapture.url}
+              busy={documentCapture.busy}
+              error={documentCapture.error}
+              onCreate={documentCapture.create}
+              onCancel={documentCapture.cancel}
+              onSend={documentCapture.send}
+            />
+          )}
+
           {/* Offered, never imposed: most calls never touch this. It sits at the top of the
               payment step because that is where the four fields it covers now live. */}
           {isOwner && !completed && current.key === "payment" && (

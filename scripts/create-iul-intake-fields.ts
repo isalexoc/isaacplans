@@ -133,6 +133,17 @@ function buildSpecs(): FieldSpec[] {
     reused: false,
   });
 
+  // Meta field: the link a client uses to send their own documents. A third field rather than
+  // reusing the one above, because both links can be live at once — the client is typing their
+  // SSN on one and photographing a green card on the other — and a workflow that texts "the
+  // link" has to know which one it means.
+  specs.push({
+    slug: "iul_document_capture_link",
+    name: `${FIELD_PREFIX}Document Capture Link`,
+    dataType: "TEXT",
+    reused: false,
+  });
+
   return specs;
 }
 
