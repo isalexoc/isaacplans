@@ -2,6 +2,52 @@
 
 ## Status
 
+Completed: **Secure link gets its own unbranded preview card** (branch `feature/secure-link-og`,
+merged to `main`).
+Isaac wanted the capture link to unfurl with his own artwork, deliberately as a utility page — no
+branding, no product, no mention of insurance.
+
+**The page previously had no Open Graph on purpose**, with a comment arguing a preview card would
+put "send us your SSN" into a chat thread anyone could read. That reasoning was sound but the
+conclusion did not hold: a page with no OG tags still unfurls, because WhatsApp and iMessage fall
+back to `<title>` and the meta description — and the old title was
+"Send Your Details Securely | Isaac Plans Insurance" with a description naming both the SSN and the
+bank details. So the choice was never "card or no card", only what the card would say. The new copy
+is strictly less revealing than what was already shipping.
+
+Now: **"Secure Information" / "A private, encrypted link to send your information safely."** and the
+Spanish equivalent, with Isaac's per-language artwork. No `siteName` (its only job is branding), and
+no `og:url` or canonical — both would echo the tokenised URL into the page body and every preview
+cache, and a canonical is meaningless when each link is unique. `noindex` and `no-referrer` stay.
+
+**The Cloudinary transform is pinned to JPEG**, not `f_auto`. Measured on these exact images: a
+modern `Accept` header gets a 50 KB WebP, a crawler sending a wildcard gets a 72 KB JPEG — two
+derived assets, two cold-start transcodes, and a blank card on any crawler that advertises WebP but
+cannot render it in a preview. `f_jpg,q_auto:good,w_1200,h_630,c_fill` gives every recipient the
+same 72 KB file. Same reasoning as `HERO_VIDEO_TRANSFORM`. Size matters independently: the sources
+are 1.5 MB PNGs and WhatsApp demotes a link to a small thumbnail above roughly 600 KB. The
+1731×909 originals are within a rounding error of the 1.91:1 card ratio, so nothing is cropped.
+Both derived images are warmed and serving from CDN in under 0.22 s.
+
+Two things verified rather than assumed:
+
+- **A preview fetch does not mark the link opened.** `openedAt` is stamped by the client page's own
+  call to the capture API, which only runs in a browser, so a crawler rendering no JavaScript never
+  reaches it. Checked against the real database: HTML fetched, `og:image` present, `openedAt` still
+  null. This matters because the agent's panel reads "opened" as "the client is looking at it now".
+- **Clerk does not intercept crawlers in production.** In dev, a crawler `User-Agent` plus
+  `Accept: text/html` gets a 307 to a Clerk handshake (`__clerk_hs_reason=dev-browser-missing`),
+  which would break the preview entirely. That reason is development-instance-only; confirmed
+  against live production, where the same crawler request to a public page returns 200 with OG tags
+  intact.
+
+Noted, not changed: `OG_IMAGE_TRANSFORM` in `lib/page-media/cloudinary-urls.ts` still uses `f_auto`
+and has the same crawler problem. It is only read by the admin page-media upload route, which bakes
+the transform into the stored URL at upload time — so changing the constant would not fix images
+already uploaded, exactly the trap the hero-video work hit.
+
+---
+
 Completed: **Secure capture links ask for only what is missing** (branch
 `feature/scoped-secure-capture`, merged to `main`). Isaac often already holds half of this — the client read their
 bank details off a cheque but went quiet at the SSN, or the reverse. Sending a form that demands
