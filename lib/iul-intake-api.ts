@@ -189,3 +189,42 @@ export async function completeIntake(
   }
   return { success: true };
 }
+
+/**
+ * Mint an instant meeting link for an intake and hand it to the CRM in one press.
+ *
+ * The dashboard's shortcut for the common case. The full two-option control lives in the intake
+ * form's panel; putting both there and here would make an already-crowded row unreadable.
+ *
+ * Returns the link so the caller can copy it — a send that reaches the CRM is not proof the client
+ * saw it, and the agent usually wants the URL to hand over on the call anyway.
+ */
+export async function startInstantMeeting(
+  intakeToken: string
+): Promise<{ id: string; url: string; sent: boolean }> {
+  const created = await parseJson<{ success: boolean; meeting: { id: string; url: string } }>(
+    await fetch("/api/crankwheel/meetings", {
+      method: "POST",
+      credentials: "same-origin",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ kind: "now", intakeToken }),
+    })
+  );
+
+  // The send is reported, not assumed. Until the `meeting_link` CRM field is provisioned it fails,
+  // and an agent who believes a text went out when it did not is worse off than one who knows to
+  // paste the link themselves.
+  let sent = false;
+  try {
+    const res = await fetch(`/api/crankwheel/meetings/${created.meeting.id}/send`, {
+      method: "POST",
+      credentials: "same-origin",
+    });
+    const json = await res.json().catch(() => ({}));
+    sent = Boolean(res.ok && json?.success);
+  } catch {
+    sent = false;
+  }
+
+  return { ...created.meeting, sent };
+}

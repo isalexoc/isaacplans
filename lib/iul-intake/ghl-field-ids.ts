@@ -80,7 +80,11 @@ export type GhlFieldSlug =
   // Meta — the always-current client share link (written by the app, used by a GHL workflow)
   | "iul_intake_link"
   | "iul_secure_capture_link"
-  | "iul_document_capture_link";
+  | "iul_document_capture_link"
+  // Not IUL-specific: a CrankWheel meeting can be started for any contact, from the standalone
+  // launcher as well as from an intake. It lives here because this file is, in practice, the
+  // project's single registry of GHL custom-field ids.
+  | "meeting_link";
 
 /** GHL custom-field folder that groups all IUL intake fields. Set by the provisioning script. */
 export const iulDataFolderId = "JyCoYyStV4DiWx1U0pnv";
@@ -159,4 +163,6 @@ export const ghlFieldIds: Record<GhlFieldSlug, string> = {
    * id makes "send by text" report a clear error instead of writing the link nowhere.
    */
   iul_document_capture_link: "mXK3mDWhRAKvPGTW2dtC",
+  /** Provisioned by `pnpm iul:fields`. Empty until then; the send route reports that clearly. */
+  meeting_link: "u3VarzOq7hU7RyBTXRDD",
 };

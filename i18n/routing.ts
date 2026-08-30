@@ -450,6 +450,10 @@ export const routing = defineRouting({
       en: "/admin",
       es: "/admin",
     },
+    "/admin/meet": {
+      en: "/admin/meet",
+      es: "/admin/meet",
+    },
     "/admin/blog-generator": {
       en: "/admin/blog-generator",
       es: "/admin/blog-generator",

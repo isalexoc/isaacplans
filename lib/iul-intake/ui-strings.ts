@@ -69,6 +69,16 @@ export const UI = {
   edit: { en: "Edit", es: "Editar" } as Dict,
   view: { en: "View", es: "Ver" } as Dict,
   copyLink: { en: "Copy link", es: "Copiar enlace" } as Dict,
+  meetNow: { en: "Meet", es: "Reunirse" } as Dict,
+  meetStarted: { en: "Link sent + copied", es: "Enlace enviado y copiado" } as Dict,
+  meetNowHint: {
+    en: "Create an instant screen-share link, text it, and copy it",
+    es: "Crear un enlace instantáneo de pantalla, enviarlo y copiarlo",
+  } as Dict,
+  meetNotTexted: {
+    en: "Link created and copied, but the text could not be sent. Run `pnpm iul:fields`, then set up the GHL workflow.",
+    es: "Enlace creado y copiado, pero no se pudo enviar el mensaje. Ejecute `pnpm iul:fields` y configure el flujo en GHL.",
+  } as Dict,
   linkCopied: { en: "Link copied!", es: "¡Enlace copiado!" } as Dict,
   resetLink: { en: "Reset link", es: "Restablecer enlace" } as Dict,
   deleteForm: { en: "Delete", es: "Eliminar" } as Dict,

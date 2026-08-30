@@ -4,6 +4,8 @@ import { getDuePosts, processScheduledPost } from "@/lib/social-publishing/sched
 import { reconcileLeadJobs } from "@/lib/leads-the-way/process";
 import { getStaleJobs } from "@/lib/social-media-studio/video-job-store";
 import { enqueueVideoJobTick } from "@/lib/social-media-studio/video-job-queue";
+import { listMeetingsAwaitingNote } from "@/lib/crankwheel/meetings";
+import { postMeetingNote } from "@/lib/crankwheel/note-job";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -11,6 +13,14 @@ export const maxDuration = 800;
 
 /** Stop draining after this many Kixie jobs per run (keeps the invocation bounded). */
 const MAX_KIXIE_DRAIN = 25;
+
+/**
+ * How far back to look for meetings still owed a CRM note.
+ *
+ * Bounded because the CrankWheel usage API is queried over the same span: a meeting older than
+ * this can no longer be matched to a session, so retrying it would be a query that never succeeds.
+ */
+const MEETING_NOTE_LOOKBACK_DAYS = 3;
 
 /**
  * Daily safety-net reconcile (vercel.json: 0 7 * * *).
@@ -57,6 +67,17 @@ export async function GET(req: NextRequest) {
     if (messageId) videoJobsRequeued++;
   }
 
+  // ── CrankWheel: post notes for meetings whose create_hook never fired, and for scheduled
+  //    links, which have no hook to fire in the first place ──
+  const meetingsAwaiting = await listMeetingsAwaitingNote(
+    new Date(Date.now() - MEETING_NOTE_LOOKBACK_DAYS * 24 * 60 * 60 * 1000)
+  );
+  let meetingNotesPosted = 0;
+  for (const meeting of meetingsAwaiting) {
+    const r = await postMeetingNote(meeting);
+    if (r.posted) meetingNotesPosted++;
+  }
+
   return NextResponse.json({
     ok: true,
     kixieProcessed,
@@ -68,5 +89,7 @@ export async function GET(req: NextRequest) {
     leadsRepublished: leads.republished,
     videoJobsStale: staleVideoJobs.length,
     videoJobsRequeued,
+    meetingsAwaitingNote: meetingsAwaiting.length,
+    meetingNotesPosted,
   });
 }
