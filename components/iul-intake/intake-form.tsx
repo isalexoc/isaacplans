@@ -59,10 +59,12 @@ import {
 import { formatSsn } from "@/lib/intake-shared/format";
 import SecureCapturePanel from "@/components/iul-intake/secure-capture-panel";
 import DocumentCapturePanel from "@/components/iul-intake/document-capture-panel";
+import MeetingPanel from "@/components/crankwheel/meeting-panel";
 import RoutingLookupPanel from "@/components/iul-intake/routing-lookup-panel";
 import BankNameHint from "@/components/iul-intake/bank-name-hint";
 import { useIulSecureCapture } from "@/hooks/use-iul-secure-capture";
 import { useIulDocumentCapture } from "@/hooks/use-iul-document-capture";
+import { useCrankwheelMeeting } from "@/hooks/use-crankwheel-meeting";
 import { canPreview } from "@/lib/iul-intake/document-preview";
 import {
   visibleSections,
@@ -337,6 +339,16 @@ export default function IntakeForm({ token }: { token: string }) {
     onArrival: refreshUploadedFiles,
   });
 
+  /**
+   * The meeting link, for putting the client in front of the agent's screen mid-conversation.
+   *
+   * Not tied to a step, unlike the capture panels below it: a screen share can start at any point,
+   * and most often does before the form is opened at all.
+   */
+  const meeting = useCrankwheelMeeting({
+    target: { intakeToken: token },
+  });
+
   // Clients pay by bank draft only — lock the value so it always syncs.
   useEffect(() => {
     if (loadState !== "ready" || isOwner) return;
@@ -590,6 +602,21 @@ export default function IntakeForm({ token }: { token: string }) {
           />
         </div>
       </div>
+
+      {isOwner && !completed && (
+        <MeetingPanel
+          locale={locale}
+          compact
+          meeting={meeting.meeting}
+          busy={meeting.busy}
+          error={meeting.error}
+          canSend={Boolean(session?.crmContactId)}
+          onCreate={meeting.create}
+          onRevoke={meeting.revoke}
+          onSend={meeting.send}
+          onReset={meeting.reset}
+        />
+      )}
 
       {completed && isOwner && (
         <div className="mb-4 flex items-center gap-2 rounded-xl border border-green-200 bg-green-50 p-3 text-sm text-green-800 dark:border-green-900 dark:bg-green-950 dark:text-green-300">

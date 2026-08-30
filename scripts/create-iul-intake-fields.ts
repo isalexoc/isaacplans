@@ -144,6 +144,16 @@ function buildSpecs(): FieldSpec[] {
     reused: false,
   });
 
+  // Meta field: the CrankWheel meeting link. A fourth field rather than reusing any of the three
+  // above, because a client can be holding a meeting link and a document link at the same time and
+  // a workflow that texts "the link" has to know which one it means.
+  specs.push({
+    slug: "meeting_link",
+    name: `${FIELD_PREFIX}Meeting Link`,
+    dataType: "TEXT",
+    reused: false,
+  });
+
   return specs;
 }
 

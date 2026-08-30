@@ -489,6 +489,67 @@ export const iulDocumentCaptures = pgTable("iul_document_captures", {
 }));
 
 /**
+ * CrankWheel meeting links minted from inside this app.
+ *
+ * Exists because CrankWheel's own in-page CRM button does not render on LeadConnector custom
+ * domains, so the agent cannot start a screen share from a contact page. Pressing a button here
+ * instead sidesteps the whole problem: the domain is ours.
+ *
+ * **Not a column on `iul_intake_sessions`.** A meeting can be started for any CRM contact, with or
+ * without an intake — that is the point of the standalone launcher — so `sessionId` is nullable and
+ * `crmContactId` is the anchor that is always present.
+ *
+ * **`hookSecret` is a credential, not an id.** CrankWheel calls `create_hook` / `viewer_hook` as
+ * plain unauthenticated GETs with no signature, so the unguessable secret in the path is the only
+ * thing standing between the callback and the open internet. The blast radius of a forged hit is
+ * deliberately tiny: it can stamp two timestamps and nothing else.
+ *
+ * **`cwSessionId` is uniquely indexed** because the post-meeting note matches a CrankWheel session
+ * to a row by presenter and time. Uniqueness is what stops two meetings from both claiming the same
+ * session and posting the same note to two different contacts.
+ */
+export const crankwheelMeetings = pgTable("crankwheel_meetings", {
+  id:            text("id").primaryKey(), // nanoid
+  /** "now" = noauth link, joins with no handshake. "scheduled" = durable link, agent admits. */
+  kind:          text("kind").notNull(),
+  /** `iul_intake_sessions.id`, not its token, which `resetIntakeLink` rotates. Null from the launcher. */
+  sessionId:     text("session_id"),
+  crmContactId:  text("crm_contact_id"),
+  ownerUserId:   text("owner_user_id").notNull(), // agent Clerk id
+  // Snapshot so the launcher can list past meetings without re-reading the CRM.
+  contactName:   text("contact_name"),
+  contactEmail:  text("contact_email"),
+  contactPhone:  text("contact_phone"),
+  locale:        text("locale").default("en"), // en|es — sets the viewer page language via hl=
+  /** The viewer URL, with `hl` already rewritten to the client's language. */
+  url:           text("url").notNull(),
+  /** The `c=` parameter, needed to revoke the link. */
+  uid:           text("uid"),
+  hookSecret:    text("hook_secret").notNull(),
+  /** active | superseded | revoked | ended */
+  status:        text("status").notNull().default("active"),
+  /** When a "now" link stops skipping the handshake. Null for scheduled links, which do not expire. */
+  expiresAt:     timestamp("expires_at"),
+  /** Stamped by create_hook — the agent actually started sharing. */
+  sessionStartedAt: timestamp("session_started_at"),
+  /** Stamped by viewer_hook — the client actually turned up. */
+  viewerJoinedAt:   timestamp("viewer_joined_at"),
+  sentAt:        timestamp("sent_at"),
+  cwSessionId:   integer("cw_session_id"),
+  durationSeconds: integer("duration_seconds"),
+  /** Set once the CRM note lands, which is what makes the note job idempotent. */
+  notePostedAt:  timestamp("note_posted_at"),
+  createdAt:     timestamp("created_at").defaultNow().notNull(),
+  updatedAt:     timestamp("updated_at").defaultNow().notNull(),
+}, (t) => ({
+  hookSecretUniqueIdx: uniqueIndex("crankwheel_hook_secret_unique_idx").on(t.hookSecret),
+  cwSessionUniqueIdx:  uniqueIndex("crankwheel_cw_session_unique_idx").on(t.cwSessionId),
+  sessionIdx:          index("crankwheel_session_idx").on(t.sessionId, t.status),
+  contactIdx:          index("crankwheel_contact_idx").on(t.crmContactId, t.createdAt),
+  ownerIdx:            index("crankwheel_owner_idx").on(t.ownerUserId, t.createdAt),
+}));
+
+/**
  * ACA client intake: resumable, autosaving data-collection sessions.
  * Same shape as `iulIntakeSessions` but a separate table — the ACA `data` payload is
  * household-shaped (a `householdMembers` array with per-member documents) and the two

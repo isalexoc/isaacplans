@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Search, UserPlus, Copy, Check, Pencil, Eye, ChevronDown, RotateCcw, Unlock, Lock, Send, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
+import { Loader2, Search, UserPlus, Copy, Check, Pencil, Eye, ChevronDown, RotateCcw, Unlock, Lock, Send, Trash2, ChevronLeft, ChevronRight, MonitorPlay } from "lucide-react";
 import {
   listIntakes,
   createIntake,
@@ -16,6 +16,7 @@ import {
   reopenIntake,
   sendIntakeLink,
   deleteIntake,
+  startInstantMeeting,
   type CrmContactMatch,
   type IntakePagination,
 } from "@/lib/iul-intake-api";
@@ -61,6 +62,8 @@ export default function IntakeDashboard() {
   const [reopeningId, setReopeningId] = useState<string | null>(null);
   const [sendingId, setSendingId] = useState<string | null>(null);
   const [sentId, setSentId] = useState<string | null>(null);
+  const [meetingId, setMeetingId] = useState<string | null>(null);
+  const [metId, setMetId] = useState<string | null>(null);
 
   const statusLabel = useCallback(
     (s: IntakeStatus) =>
@@ -189,6 +192,35 @@ export default function IntakeDashboard() {
       setError(e instanceof Error ? e.message : "Error");
     } finally {
       setSendingId(null);
+    }
+  }
+
+  /**
+   * One press: mint an instant link, text it, and put it on the clipboard.
+   *
+   * The clipboard copy is not a nicety — it is the fallback for when the CRM send fails (most
+   * often because the `meeting_link` field has not been provisioned yet), so the agent always
+   * leaves this button holding a usable link.
+   */
+  async function handleMeet(s: IntakeSummary) {
+    setMeetingId(s.id);
+    setError(null);
+    try {
+      const meeting = await startInstantMeeting(s.token);
+      try {
+        await navigator.clipboard.writeText(meeting.url);
+      } catch {
+        /* clipboard blocked — the link is still in the CRM and in the intake form's panel */
+      }
+      setMetId(s.id);
+      setTimeout(() => setMetId((id) => (id === s.id ? null : id)), 4000);
+      if (!meeting.sent) {
+        setError(tr(UI.meetNotTexted, locale));
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Error");
+    } finally {
+      setMeetingId(null);
     }
   }
 
@@ -443,6 +475,23 @@ export default function IntakeDashboard() {
                           {tr(UI.copyLink, locale)}
                         </>
                       )}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="text-brand hover:text-brand"
+                      disabled={meetingId === s.id}
+                      onClick={() => handleMeet(s)}
+                      title={tr(UI.meetNowHint, locale)}
+                    >
+                      {meetingId === s.id ? (
+                        <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+                      ) : metId === s.id ? (
+                        <Check className="mr-1 h-4 w-4 text-green-600" />
+                      ) : (
+                        <MonitorPlay className="mr-1 h-4 w-4" />
+                      )}
+                      {metId === s.id ? tr(UI.meetStarted, locale) : tr(UI.meetNow, locale)}
                     </Button>
                     {s.crmContactId && (
                       <Button

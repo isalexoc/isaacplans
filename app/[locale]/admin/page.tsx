@@ -29,6 +29,7 @@ import {
   Banknote,
   Umbrella,
   Globe,
+  MonitorPlay,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import {
@@ -163,6 +164,13 @@ const INTAKE_TOOLS: ToolCard[] = [
 ];
 
 const CALL_CENTER_TOOLS: ToolCard[] = [
+  {
+    title: "Start a Meeting",
+    description:
+      "Share your screen with any CRM contact. Replaces the CrankWheel button that LeadConnector hides.",
+    href: "/en/admin/meet",
+    icon: MonitorPlay,
+  },
   {
     title: "Callback Priority",
     description: "Contacts with an open follow-up loop, sorted by soonest promised callback.",

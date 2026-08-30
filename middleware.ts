@@ -169,6 +169,7 @@ export default clerkMiddleware(async (auth, req) => {
     req.nextUrl.pathname.startsWith('/api/aca-intake') ||
     req.nextUrl.pathname.startsWith('/api/fe-intake') ||
     req.nextUrl.pathname.startsWith('/api/intake') ||
+    req.nextUrl.pathname.startsWith('/api/crankwheel') ||
     req.nextUrl.pathname.startsWith('/api/newsletter')
   ) {
     return;
@@ -272,6 +273,10 @@ export const config = {
     "/api/aca-intake/:path*",
     "/api/fe-intake/:path*",
     "/api/intake/:path*",
+    // Only the admin-facing meeting routes need Clerk context. The CrankWheel callback at
+    // /api/crankwheel/hook/* is deliberately left out: it is an unauthenticated GET from
+    // CrankWheel's servers, and its unguessable path secret is what authorizes it.
+    "/api/crankwheel/meetings/:path*",
     "/api/admin/:path*",
     "/api/newsletter/:path*",
     "/studio/:path*",

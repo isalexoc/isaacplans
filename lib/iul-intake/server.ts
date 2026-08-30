@@ -392,6 +392,28 @@ export function clientCanEdit(row: IntakeSessionRow): boolean {
 }
 
 /**
+ * Which language to write a client-facing link in.
+ *
+ * The contact's `spanish` tag wins over the session's stored locale, because a session is usually
+ * created before anyone knows what the client speaks. A CRM read that fails falls back rather than
+ * throwing — the wrong language on a link beats no link at all.
+ */
+export async function resolveCrmContactLocale(
+  crmContactId: string,
+  fallbackLocale: string | null | undefined,
+  token: string
+): Promise<"en" | "es"> {
+  const fallback: "en" | "es" = fallbackLocale === "es" ? "es" : "en";
+  try {
+    const tags = await agentCrmGetContactTags(crmContactId, token);
+    if (tags === null) return fallback;
+    return tags.some((t) => t.trim().toLowerCase() === IUL_SPANISH_TAG) ? "es" : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+/**
  * Write the session's current share link to the CRM `iul_intake_link` custom field so a GHL
  * workflow can text/email it. The link locale follows the contact's Spanish tag (tag present
  * → /es, else /en) so the client gets the right language; pass `localeOverride` to skip the
@@ -407,18 +429,8 @@ export async function syncIntakeLinkToCrm(
   const creds = agentCrmGetBaseCredentials();
   if (!creds) return false;
   try {
-    let locale: "en" | "es";
-    if (localeOverride) {
-      locale = localeOverride;
-    } else {
-      const tags = await agentCrmGetContactTags(row.crmContactId, creds.token);
-      if (tags === null) {
-        // Couldn't read tags — fall back to the session's stored locale.
-        locale = row.locale === "es" ? "es" : "en";
-      } else {
-        locale = tags.some((t) => t.trim().toLowerCase() === IUL_SPANISH_TAG) ? "es" : "en";
-      }
-    }
+    const locale =
+      localeOverride ?? (await resolveCrmContactLocale(row.crmContactId, row.locale, creds.token));
     const url = buildIntakeShareUrl(row.token, locale);
     return await agentCrmUpdateContact(
       row.crmContactId,
@@ -449,15 +461,7 @@ export async function syncSecureCaptureLinkToCrm(
   const creds = agentCrmGetBaseCredentials();
   if (!creds) return false;
   try {
-    const tags = await agentCrmGetContactTags(row.crmContactId, creds.token);
-    const locale =
-      tags === null
-        ? row.locale === "es"
-          ? "es"
-          : "en"
-        : tags.some((t) => t.trim().toLowerCase() === IUL_SPANISH_TAG)
-          ? "es"
-          : "en";
+    const locale = await resolveCrmContactLocale(row.crmContactId, row.locale, creds.token);
     const url = buildSecureCaptureUrl(captureToken, locale);
     return await agentCrmUpdateContact(
       row.crmContactId,
@@ -492,15 +496,7 @@ export async function syncDocumentCaptureLinkToCrm(
   const creds = agentCrmGetBaseCredentials();
   if (!creds) return false;
   try {
-    const tags = await agentCrmGetContactTags(row.crmContactId, creds.token);
-    const locale =
-      tags === null
-        ? row.locale === "es"
-          ? "es"
-          : "en"
-        : tags.some((t) => t.trim().toLowerCase() === IUL_SPANISH_TAG)
-          ? "es"
-          : "en";
+    const locale = await resolveCrmContactLocale(row.crmContactId, row.locale, creds.token);
     const url = buildDocumentCaptureUrl(captureToken, locale);
     return await agentCrmUpdateContact(
       row.crmContactId,

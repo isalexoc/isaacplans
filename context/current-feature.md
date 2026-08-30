@@ -2,6 +2,49 @@
 
 ## Status
 
+In progress: **CrankWheel meetings, launched from the app** (branch `feature/crankwheel-meetings`,
+migration `0034` applied). CrankWheel's in-page CRM button does not render on LeadConnector custom
+domains, so Isaac could only start a screen share from the browser extension while sitting on a
+contact page. This moves that button into our app, where the domain is ours and the problem does
+not exist.
+
+**Two link types, because there are two different moments.** `make_noauth_link` is "meet now": the
+client taps the text and is in, with no number to read back. `schedule_meeting` is a durable link
+safe to send days ahead, where the handshake is the point rather than the friction. Both are minted
+from the same panel, which the IUL intake form and the standalone `/admin/meet` launcher share.
+
+**The hazard that shaped the design.** A noauth link binds to the *first session joined with it*,
+and the account has one presenter. Mint a link for client A, then mint one for B and start sharing,
+and A clicking their still-live link lands in **B's session** with no handshake. `truncate_older_links`
+is the documented fix and is passed unconditionally, never as an option — the consequence, that only
+one instant link is live at a time account-wide, is stated in the panel rather than left to be
+discovered.
+
+**No polling of CrankWheel and no new cron.** `create_hook` / `viewer_hook` are HTTPS URLs
+CrankWheel GETs when the session starts and when the client joins, so the "client joined" badge is
+event-driven. They are unauthenticated GETs with no signature, so the 32-char secret in the path is
+the whole credential — the blast radius is deliberately two timestamps and nothing else, and an
+unknown secret answers 200 rather than 404 so it cannot be used as an oracle. The post-meeting CRM
+note is a QStash job fired from `create_hook`, with the existing daily reconcile as the backstop for
+scheduled links (which have no hook) and hooks that never arrived.
+
+**A surprise worth recording:** this account's links come back as `hl=es` by default, so rewriting
+the viewer language matters for *English* clients too, not only Spanish ones.
+
+Verified: 27/27 offline tests (URL parsing, session matching, note formatting in both languages);
+`make_noauth_link` and `schedule_meeting` both minted and deleted against the live account; the hook
+receiver stamps both timestamps against the real database and is idempotent on replay; signed-out
+callers get 401 on the API and the admin page behaves exactly like its peers. **Full `pnpm build`
+green.**
+
+**Not yet verified, and it needs Isaac:** an actual meeting — link on a second device, sharing
+started from the extension, badge flipping to "client joined". Hooks need a public https origin, so
+this cannot happen on localhost. Also outstanding: `pnpm iul:fields` to provision the `meeting_link`
+CRM field, and the two GHL workflows (`meeting_now_sent`, `meeting_scheduled_sent`). Until those
+exist, "send by text" reports a clear error and the copy-link path is the working one.
+
+---
+
 Completed: **Document previews, and one upload path for every file** (branch
 `feature/document-previews`, merged to `main`). Isaac asked that every uploaded document reach the
 CRM, appear on the admin form however many there are, and show a preview where possible, without
