@@ -6,6 +6,12 @@ import type { FeIntakeData } from "@/lib/fe-intake/schema";
 import type { IntakeData as EngineIntakeData } from "@/lib/intake-core/types";
 import type { StructuredCallSummary } from "@/lib/call-summary-structured";
 import type {
+  CallAnalysis,
+  CallMetrics,
+  SpeakerMap,
+  Turn,
+} from "@/lib/call-study/types";
+import type {
   SocialVideoJobState,
   SocialVideoJobInput,
   SocialVideoImagesResult,
@@ -547,6 +553,90 @@ export const crankwheelMeetings = pgTable("crankwheel_meetings", {
   sessionIdx:          index("crankwheel_session_idx").on(t.sessionId, t.status),
   contactIdx:          index("crankwheel_contact_idx").on(t.crmContactId, t.createdAt),
   ownerIdx:            index("crankwheel_owner_idx").on(t.ownerUserId, t.createdAt),
+}));
+
+/**
+ * Recorded sales calls uploaded to be studied and mined for script material.
+ *
+ * The artifact this table exists to produce is a **readable dialogue** — "Will: ... / Dennis: ..." —
+ * not a subtitle file. Everything about the shape follows from that.
+ *
+ * **`turns`, not the raw word stream.** ElevenLabs returns one object per word; a two-hour call is
+ * roughly 20,000 of them and several megabytes of JSON. Merged into speaker turns the same content
+ * is a fraction of the size and still carries the timings every metric needs, so the word stream is
+ * converted on arrival and never stored.
+ *
+ * **`speakerMap` kept apart from `turns`.** Renaming a speaker rewrites a two-entry object instead
+ * of every line of the transcript: instant, and structurally incapable of corrupting the dialogue.
+ *
+ * **`elevenRequestId` is uniquely indexed** because it is the only thing the inbound webhook has to
+ * find this row by.
+ */
+export const callStudyRecordings = pgTable("call_study_recordings", {
+  id:              text("id").primaryKey(), // nanoid
+  ownerUserId:     text("owner_user_id").notNull(), // agent Clerk id
+  title:           text("title").notNull(),
+  sourceFilename:  text("source_filename"),
+  /** Cloudinary id of the uploaded original; audio and video both land as resource_type "video". */
+  cloudinaryPublicId: text("cloudinary_public_id"),
+  /** The audio-only delivery URL handed to Scribe — an .mp3 even when the upload was an mp4. */
+  audioUrl:        text("audio_url"),
+  durationSeconds: integer("duration_seconds"),
+  sizeBytes:       integer("size_bytes"),
+  languageCode:    text("language_code"),
+  /** ElevenLabs request/transcription id. The webhook's only way back to this row. */
+  elevenRequestId: text("eleven_request_id"),
+  /** uploaded | transcribing | transcribed | analyzing | ready | failed */
+  status:          text("status").notNull().default("uploaded"),
+  errorMessage:    text("error_message"),
+  speakerMap:      jsonb("speaker_map").$type<SpeakerMap | null>(),
+  turns:           jsonb("turns").$type<Turn[] | null>(),
+  metrics:         jsonb("metrics").$type<CallMetrics | null>(),
+  analysis:        jsonb("analysis").$type<CallAnalysis | null>(),
+  /** sold | not_sold | follow_up | unknown — set by the agent after listening. */
+  outcome:         text("outcome").notNull().default("unknown"),
+  lineOfBusiness:  text("line_of_business"),
+  transcribedAt:   timestamp("transcribed_at"),
+  analyzedAt:      timestamp("analyzed_at"),
+  createdAt:       timestamp("created_at").defaultNow().notNull(),
+  updatedAt:       timestamp("updated_at").defaultNow().notNull(),
+}, (t) => ({
+  requestUniqueIdx: uniqueIndex("call_study_request_unique_idx").on(t.elevenRequestId),
+  ownerIdx:         index("call_study_owner_idx").on(t.ownerUserId, t.createdAt),
+  statusIdx:        index("call_study_status_idx").on(t.status, t.createdAt),
+}));
+
+/**
+ * Quotable lines pulled out of analysed calls — the cross-call library.
+ *
+ * This is the table that actually serves the goal. One call's analysis is interesting; twenty
+ * calls' worth of tagged rebuttals filtered down to "price objections on IUL calls that closed" is
+ * how a script gets written.
+ *
+ * **Outcome and line of business are deliberately NOT copied here.** They live on the recording and
+ * are set after the fact, when the agent has listened and knows how it went — a denormalised copy
+ * would quietly go stale the moment a call was re-tagged. The library joins instead, which at this
+ * row count costs nothing.
+ */
+export const callStudySnippets = pgTable("call_study_snippets", {
+  id:            text("id").primaryKey(), // nanoid
+  recordingId:   text("recording_id").notNull(),
+  ownerUserId:   text("owner_user_id").notNull(),
+  /** opening | discovery | rapport | presentation | objection | rebuttal | price | trial_close | close | story */
+  category:      text("category").notNull(),
+  /** For objections and rebuttals: price, spouse, trust, timing, already_covered… */
+  objectionType: text("objection_type"),
+  speakerName:   text("speaker_name"),
+  /** agent | client | other */
+  speakerRole:   text("speaker_role"),
+  /** Verbatim. A paraphrase would be useless as script material. */
+  quote:         text("quote").notNull(),
+  why:           text("why"),
+  startSec:      integer("start_sec"),
+  createdAt:     timestamp("created_at").defaultNow().notNull(),
+}, (t) => ({
+  recordingIdx: index("call_snippet_recording_idx").on(t.recordingId),
+  ownerIdx:     index("call_snippet_owner_idx").on(t.ownerUserId, t.category),
 }));
 
 /**

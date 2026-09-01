@@ -2,6 +2,54 @@
 
 ## Status
 
+In progress: **Call Study — recorded calls as readable dialogue** (branch `feature/call-study`,
+migration `0035` applied). Isaac studies recorded IUL and life calls to build a better sales script.
+What he needs from each file is a conversation he can read line by line — "Will: … / Dennis: …" —
+not a subtitle file with timestamps.
+
+**The engine is ElevenLabs Scribe, not the Kixie Whisper pipeline, and that removes most of the
+work.** `lib/whisper-transcribe-long.ts` splits audio with ffmpeg only because Whisper caps at 25MB,
+and Whisper cannot separate speakers at all — which is the entire point here. Scribe takes files up
+to 10 hours / 5GB in one call, diarizes natively, and runs async via webhook. No chunking, no
+function timeout, no ffmpeg. It also reads the audio from a URL, so recordings never pass through
+Vercel (which caps request bodies at 4.5MB anyway — hence the signed browser→Cloudinary upload
+lifted from `components/admin/page-media-client.tsx`).
+
+**The finding that justified probing the API before writing code.** Passing the `pii` entity
+*category* for redaction also redacts `name` and `name_given` — verified live, it turns "Hi, this is
+Will" into "Hi, this is {NAME_0}" and destroys the one thing the feature exists to produce. The
+redaction list is therefore narrow and explicit. `money` and `age` are deliberately absent too: a
+premium figure and a client's age are the substance of a life call, not incidental PII.
+
+**`speaker_id` comes back as the literal strings `agent` and `customer`** when `detect_speaker_roles`
+is on — undocumented, and it means the transcript reads sensibly before any naming pass runs. GPT
+then proposes real names from the introductions, and a rename control fixes what it misses. Renaming
+rewrites a two-entry `speakerMap`, never the turns, so a correction is instant on an hour-long call.
+
+**The snippet library is the part that serves the actual goal.** One call's analysis is interesting;
+twenty calls' rebuttals filtered to "price objections on IUL calls that closed" is how a script gets
+written. Quotes are required verbatim — a paraphrase cannot be said out loud on the next call.
+
+Verified: 71/71 offline tests (turn grouping incl. interruptions and stray attributions, rendering,
+metrics, windowing, redaction policy, and 16 webhook-signature cases). Live against the real API:
+diarization, role detection, and redaction — SSN and card masked, names intact. Full webhook path
+against the real database: bad signature 401, stale timestamp 401, valid 200 with 5 turns stored,
+duplicate delivery a no-op, GPT correctly naming Will and Dennis. Analysis on a real transcript:
+price objection caught with both sides verbatim, 3/3 quotes verbatim. **Full `pnpm build` green.**
+
+**Not yet verified, and it needs Isaac:** a real multi-hour call end to end, which needs the webhook
+registered in the ElevenLabs dashboard (Developers → Webhooks → "Transcription completed" →
+`/api/webhooks/elevenlabs/transcript`, HMAC) and `ELEVENLABS_WEBHOOK_SECRET` set locally and in
+Vercel. It is deliberately left blank rather than holding a placeholder: an empty secret fails
+loudly, a wrong one would 401 every delivery and only surface a day later via the reconcile.
+
+**Cost:** Scribe is ~$0.22/hour of audio. The ElevenLabs allowance is ~65k credits/month at roughly
+330 credits/minute — on the order of three hours of audio, shared with the video studio's voiceover
+and music. `payg` bills overage rather than stopping. Worth watching the counter after the first
+few real calls.
+
+---
+
 In progress: **CrankWheel meetings, launched from the app** (branch `feature/crankwheel-meetings`,
 migration `0034` applied). CrankWheel's in-page CRM button does not render on LeadConnector custom
 domains, so Isaac could only start a screen share from the browser extension while sitting on a
