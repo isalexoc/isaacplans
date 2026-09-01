@@ -30,6 +30,7 @@ import {
   Umbrella,
   Globe,
   MonitorPlay,
+  AudioLines,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import {
@@ -176,6 +177,13 @@ const CALL_CENTER_TOOLS: ToolCard[] = [
     description: "Contacts with an open follow-up loop, sorted by soonest promised callback.",
     href: "/en/admin/call-dashboard",
     icon: PhoneCall,
+  },
+  {
+    title: "Call Study",
+    description:
+      "Turn a recorded call into a readable dialogue with the speakers named, then mine it for script material.",
+    href: "/en/admin/call-study",
+    icon: AudioLines,
   },
   {
     title: "Call Metrics",
