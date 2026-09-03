@@ -2,6 +2,77 @@
 
 ## Status
 
+Done: **Script editor formatting tools** (branch `feature/script-editor-tools`, merged). Isaac writes
+sales scripts in Studio and reads them at `/presentations` during live client calls. He asked for a
+highlighter and "other options to format the text in a better way" — the toolbar only ever offered
+Sanity's stock word-processor defaults because all 26 rich-text fields on `presentationScript` were
+the bare `{type: 'block'}`.
+
+**The vocabulary is now one shared definition**, `sanity/schemaTypes/scriptPortableText.tsx`, used by
+every field via `scriptBlockArray()`. `presentationScriptType.ts` went from 804 lines of copy-pasted
+array definitions to ~150; a tool added there now appears in all 26 fields at once. Note that
+`defineField()` cannot type these array fields (TS2345, and `of: [...] as any` does not help) — the
+same limitation already worked around in `iulPresentation/helpers.ts` — so the helpers return plain
+object literals.
+
+**Sanity REPLACES the default styles/decorators/annotations rather than merging them** (plain `||`
+fallbacks at `@sanity/schema@4.18.0` Rule.js:421,431,444-446). Everything existing content uses is
+therefore re-declared explicitly: `strong`, `em`, `underline`, `normal`, `h1`-`h4`, both list types,
+and the `link` annotation. Dropping one would not just hide a button — the editor auto-strips
+orphaned marks the moment a document is edited, so the formatting would be permanently gone.
+
+**New tools:** three highlighters named by meaning rather than colour (Emphasize / Good news /
+Careful — Isaac's choice over a single yellow marker), a "Fill in the blank" mark for values
+substituted live, and four block styles: Say word for word, Ask then stop talking, Client says /
+objection, Agent note — do not read. Removed `code` and `strike-through` after confirming zero uses.
+Kept `underline` — a census found 62 of them.
+
+**The census had to be re-run.** The first query defaulted to the published perspective and missed a
+draft; `perspective=raw` gives the true picture — 3 documents, 1518 blocks, `strong` x687,
+`underline` x62, `em` x55, and exactly 2 blockquotes (the same block in a published doc and its
+draft).
+
+**That blockquote is why "Client says" got its own style value instead of reusing the built-in.** Its
+text is "(Slow down here. Pause often. Let them answer.)" — an agent stage direction. Repurposing
+`blockquote` would have put a rose "CLIENT SAYS" badge on it in the Final Expense Product
+Presentation section, i.e. attributed Isaac's own pacing note to the client, on a page read aloud
+during calls. `clientSays` is a new value; `blockquote` stays neutral and no content changed meaning.
+
+**Three silent drops on the reading view were fixed at the same time**, all pre-existing: 62
+underlines rendered unstyled (the renderer only mapped strong/em/link), level-2 sub-bullets rendered
+identically to top-level ones (`list-inside` with no per-level indent), and the `prose prose-sm`
+classes on the wrappers are inert because `@tailwindcss/typography` is not installed — so there was
+no fallback catching any of it. Body text went from ~12px to ~15-16px; `unknownMark` and
+`unknownBlockStyle` fallbacks now catch anything unmapped. The component map moved to module scope
+behind a `useMemo` keyed on language, so PortableText's own memo works again.
+
+**Studio-specific gotchas worth remembering:** the style dropdown renders custom style components
+with *only* `children` (`sanity/lib/index.mjs:30423`, `jsx(CustomComponent, {children: title})`), so
+label pills must be guarded on `props.block` or the menu shows tall coloured boxes with doubled
+labels. `DEFAULT_DECORATORS`/`DEFAULT_ANNOTATIONS` are not exported by `sanity@4.18.0` despite the
+docs, and the `component` property only exists via a `declare module` inside `sanity`, so definition
+types must be imported from `sanity`, never `@sanity/types`.
+
+Verified: `tsc --noEmit` clean, `Schema.compile()` clean with every existing mark and style still
+declared, full `pnpm build` green. `components/portable-text-components.tsx` was left untouched — it
+serves the blog, whose schema still uses Sanity's defaults.
+
+**Not verified, and it needs Isaac:** the toolbar and the reading view in a real browser. Restart
+`pnpm dev` (a soft refresh is not enough — the mounted Studio memoizes its compiled schema) and hard
+reload `/studio`.
+
+**Known, deliberately not fixed here:** `accent` in `tailwind.config.ts:28` is a flat hex string
+shadowing the shadcn accent token, so `hover:text-accent-foreground` compiles to nothing and
+dark-mode hover on ghost buttons is white-on-cyan at ~2.4:1. Pre-existing and site-wide; fixing it
+means sweeping every `bg-accent`/`text-accent` use.
+
+**Worth doing next:** the AI script generator (`lib/script-generator/`) only ever emits
+`normal`/`h1`-`h4`/`bullet`/`strong`, so generated scripts arrive nearly unformatted and the new
+tools only apply to hand-edits. Its list regex `/^[-*]\s+(.+)$/` also never matches "1. ", so
+numbered call steps collapse into one run-on paragraph.
+
+---
+
 In progress: **Call Study — recorded calls as readable dialogue** (branch `feature/call-study`,
 migration `0035` applied). Isaac studies recorded IUL and life calls to build a better sales script.
 What he needs from each file is a conversation he can read line by line — "Will: … / Dennis: …" —
