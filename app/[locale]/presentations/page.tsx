@@ -10,6 +10,8 @@ import { BlogUserAuth } from "@/components/blog-user-auth";
 import PresentationsDashboard from "@/components/presentations-dashboard";
 import { sanityFetch } from "@/sanity/lib/live";
 import { PRESENTATION_SCRIPT_QUERY } from "@/lib/sanity/queries/presentationScripts";
+import { OBJECTIONS_QUERY } from "@/lib/sanity/queries/objections";
+import type { Objection } from "@/lib/objections/types";
 
 // In production, next-sanity's sanityFetch caches query results indefinitely
 // (revalidate: false) and only invalidates via the sync-tags of the documents a
@@ -94,8 +96,19 @@ export default async function PresentationsPage() {
     return [lob, result.data || null] as const;
   });
 
-  const scriptResults = await Promise.all(scriptPromises);
+  // One objection query for every product, not one per tab: the library is shared, so a per-LOB
+  // fetch would send each universal objection's answer blocks down the wire six times over.
+  const objectionsPromise = sanityFetch({
+    query: OBJECTIONS_QUERY,
+    tags: ['presentation-scripts', 'objections'],
+  });
+
+  const [scriptResults, objectionsResult] = await Promise.all([
+    Promise.all(scriptPromises),
+    objectionsPromise,
+  ]);
   const scripts = Object.fromEntries(scriptResults);
+  const objections = (objectionsResult.data ?? []) as Objection[];
 
   return (
     <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 md:py-8 max-w-7xl">
@@ -114,7 +127,7 @@ export default async function PresentationsPage() {
       </div>
 
       {/* Presentations Dashboard */}
-      <PresentationsDashboard scripts={scripts} />
+      <PresentationsDashboard scripts={scripts} objections={objections} />
     </div>
   );
 }
