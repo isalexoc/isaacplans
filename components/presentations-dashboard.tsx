@@ -25,6 +25,7 @@ import { isTypingTarget } from "@/lib/objections/search";
 import type { ScriptLang } from "@/components/presentation-scripts/script-portable-text";
 import LiveListenControl from "@/components/objections/live-listen-control";
 import LiveObjectionDock from "@/components/objections/live-objection-dock";
+import LiveListenPanel from "@/components/objections/live-listen-panel";
 import { useLiveObjectionListener } from "@/hooks/use-live-objection-listener";
 
 interface LineOfBusiness {
@@ -222,13 +223,20 @@ export default function PresentationsDashboard({
             </div>
 
             {liveListenEnabled && (
-              <LiveListenControl
-                language={language}
-                status={live.status}
-                error={live.error}
-                onArm={live.arm}
-                onStop={live.stop}
-              />
+              <div className="flex flex-col items-stretch sm:items-end">
+                <LiveListenControl
+                  language={language}
+                  status={live.status}
+                  error={live.error}
+                  onArm={live.arm}
+                  onStop={live.stop}
+                />
+                <LiveListenPanel
+                  language={language}
+                  status={live.status}
+                  diagnostics={live.diagnostics}
+                />
+              </div>
             )}
           </div>
         </div>

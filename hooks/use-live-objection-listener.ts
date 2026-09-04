@@ -48,6 +48,27 @@ const RECONNECT_DELAYS_MS = [1_000, 2_000, 4_000];
 
 export type ListenStatus = "idle" | "starting" | "listening" | "error";
 
+/**
+ * What the listener is hearing, for the "Show what it's hearing" panel.
+ *
+ * Deliberately not part of the normal reading experience — a live transcript beside a script is a
+ * distraction mid-call. It exists because without it the feature is a black box: when no card
+ * appears there is no way to tell whether the tab is silent, the words are wrong, or the phrasing
+ * simply is not in any objection's triggers. Still nothing persisted; this dies with the session.
+ */
+export type ListenDiagnostics = {
+  /** Most recent transcript text from the vendor, partial or committed. */
+  heard: string;
+  /** Committed segments so far — proves audio is not just arriving but being finalised. */
+  committed: number;
+  /** Best-scoring objection for the current window, even when it was below the firing bar. */
+  nearest: { title: string; score: number } | null;
+  /** Objections currently in scope. Zero means nothing can ever match. */
+  candidates: number;
+  /** Last message the vendor sent that was not a transcript. */
+  lastEvent: string | null;
+};
+
 export interface LiveSuggestion {
   objectionId: string;
   /** Distinct per fire, so a re-suggestion restarts the exit timer cleanly. */
@@ -85,6 +106,13 @@ export function useLiveObjectionListener({
   enabled,
 }: UseLiveObjectionListenerArgs) {
   const [status, setStatus] = useState<ListenStatus>("idle");
+  const [diagnostics, setDiagnostics] = useState<ListenDiagnostics>({
+    heard: "",
+    committed: 0,
+    nearest: null,
+    candidates: 0,
+    lastEvent: null,
+  });
   const [error, setError] = useState<string | null>(null);
   const [startedAt, setStartedAt] = useState<number | null>(null);
   const [suggestion, setSuggestion] = useState<LiveSuggestion | null>(null);
@@ -181,7 +209,27 @@ export function useLiveObjectionListener({
 
     const { objections: objs, lob: activeLob, language: lang } = matchCtxRef.current;
     const snapshot = win.snapshot();
-    const candidate = scoreWindow(buildLiveIndex(objs, activeLob, lang), snapshot.tokens);
+    const index = buildLiveIndex(objs, activeLob, lang);
+    const candidate = scoreWindow(index, snapshot.tokens);
+
+    // Reported whether or not anything fires: a near-miss with a real score is the difference
+    // between "it never heard you" and "your triggers do not cover that phrasing".
+    setDiagnostics((d) => ({
+      ...d,
+      heard: text,
+      committed: snapshot.committedCount,
+      candidates: index.triggers.length,
+      nearest: candidate
+        ? {
+            title:
+              objs.find((o) => o._id === candidate.objectionId)?.[
+                lang === "en" ? "titleEn" : "titleEs"
+              ] ?? candidate.objectionId,
+            score: candidate.score,
+          }
+        : null,
+    }));
+
     const fired = gateRef.current.accept(candidate, snapshot.committedCount, Date.now());
     if (!fired) return;
 
@@ -232,6 +280,7 @@ export function useLiveObjectionListener({
 
       switch (data.message_type) {
         case "session_started":
+          setDiagnostics((d) => ({ ...d, lastEvent: "connected" }));
           return;
         case "partial_transcript":
           if (data.text) handleTranscript(data.text, false);
@@ -247,7 +296,13 @@ export function useLiveObjectionListener({
           // session_time_limit_exceeded, insufficient_audio_activity — arrives as a message
           // carrying `error`, and the server closes the socket immediately afterwards. Logged
           // rather than surfaced: onclose decides whether to reconnect or give up.
-          if (data.error) console.error("[live-objections]", data.message_type, data.error);
+          if (data.error) {
+            console.error("[live-objections]", data.message_type, data.error);
+            setDiagnostics((d) => ({
+              ...d,
+              lastEvent: `${data.message_type ?? "error"}: ${data.error}`,
+            }));
+          }
       }
     };
 
@@ -450,11 +505,12 @@ export function useLiveObjectionListener({
       error,
       startedAt,
       suggestion,
+      diagnostics,
       isListening: status === "listening",
       arm,
       stop,
       dismissSuggestion,
     }),
-    [status, error, startedAt, suggestion, arm, stop, dismissSuggestion]
+    [status, error, startedAt, suggestion, diagnostics, arm, stop, dismissSuggestion]
   );
 }
