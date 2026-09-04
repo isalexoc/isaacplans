@@ -7,6 +7,11 @@ const config: Config = {
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
+    // lib/ holds shared class maps (e.g. lib/objections/types.ts's badge colours). Without this
+    // path Tailwind never sees them and silently drops the classes: light mode still worked only
+    // because those shades happened to be used under components/, while every dark: variant was
+    // purged, so the objection badges rendered with no background at all in dark mode.
+    "./lib/**/*.{js,ts,jsx,tsx,mdx}",
     // "*. …" removed – avoids scanning node_modules
   ],
   theme: {
