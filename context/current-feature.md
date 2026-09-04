@@ -62,6 +62,18 @@ the live API, matcher measured against production content.
 
 ---
 
+**PDF gains an objection appendix** (follow-up, branch `feature/pdf-objection-appendix`). The
+Complete Script is still the body, but every objection that applies to the product now prints after
+it, so the printed sheet is the whole mid-call toolkit. `objectionsFor()` uses `appliesToLob()` in
+plain JS rather than a GROQ filter — in GROQ `count(undefinedField) == 0` is false, so a "no
+products ticked" universal objection would silently vanish. The download button's gate widened from
+"has a Complete Script" to "has a script OR objections".
+
+Verified against production content: Final Expense EN 9 -> 15 pages (12 objections), ES 12 -> 22
+(14), IUL ES 21 pages (12). IUL EN prints 0 objections and that is CORRECT, not a bug — all 12 IUL
+objections are Spanish-only, with an empty `titleEn` and zero `answerEn` blocks, so `visibleIn()`
+rightly excludes them.
+
 **PDF export narrowed to the Complete Script only** (follow-up, branch
 `feature/pdf-complete-script-only`). Isaac only wants the "Complete Script (All-in-One)" on paper —
 the per-section script and the objection cards are for reading on screen, where they are searchable

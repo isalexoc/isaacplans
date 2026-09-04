@@ -8,38 +8,39 @@ import { downloadScriptPdf } from "@/lib/presentation-scripts/api";
 import type { ScriptLang } from "@/components/presentation-scripts/script-portable-text";
 
 /**
- * Downloads the "Complete Script (All-in-One)" for the product currently on screen.
+ * Downloads the "Complete Script (All-in-One)" for the product currently on screen, followed by
+ * every objection that applies to it.
  *
- * One button, one output. The per-section script and the objection cards are for reading on
- * screen, where they are searchable and collapsible; on paper the all-in-one is the thing an agent
- * wants in front of them. Language follows the dashboard's own EN/ES toggle rather than adding a
- * second language control — the toggle is a few inches away.
+ * One button, one output. The per-section script stays on screen only, where it is searchable and
+ * collapsible; on paper the all-in-one plus the objection appendix is what an agent wants in front
+ * of them. Language follows the dashboard's own EN/ES toggle rather than adding a second language
+ * control — the toggle is a few inches away.
  */
 
 const COPY = {
   en: {
     download: "Download PDF",
     building: "Building PDF…",
-    empty: "No Complete Script published for this product yet.",
+    empty: "Nothing published to print for this product yet.",
   },
   es: {
     download: "Descargar PDF",
     building: "Creando PDF…",
-    empty: "Todavía no hay Guión Completo publicado para este producto.",
+    empty: "Todavía no hay nada publicado para imprimir de este producto.",
   },
 } as const;
 
 export interface DownloadScriptButtonProps {
   lineOfBusiness: ObjectionLob;
   language: ScriptLang;
-  /** No Complete Script in this language: the button would only ever produce an empty file. */
-  hasCompleteScript?: boolean;
+  /** Nothing to print in this language - no Complete Script and no objections. */
+  hasContent?: boolean;
 }
 
 export default function DownloadScriptButton({
   lineOfBusiness,
   language,
-  hasCompleteScript = false,
+  hasContent = false,
 }: DownloadScriptButtonProps) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -58,7 +59,7 @@ export default function DownloadScriptButton({
     }
   };
 
-  if (!hasCompleteScript) return null;
+  if (!hasContent) return null;
 
   return (
     <div className="flex flex-col items-stretch gap-1 sm:items-end">

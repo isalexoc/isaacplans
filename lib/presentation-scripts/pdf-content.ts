@@ -2,10 +2,18 @@ import "server-only";
 import { client } from "@/sanity/lib/client";
 import { urlFor } from "@/sanity/lib/image";
 import { PRESENTATION_SCRIPT_QUERY } from "@/lib/sanity/queries/presentationScripts";
-import type { ObjectionLob } from "@/lib/objections/types";
+import { OBJECTIONS_QUERY } from "@/lib/sanity/queries/objections";
+import {
+  OBJECTION_TYPE_LABELS,
+  appliesToLob,
+  isObjectionType,
+  visibleIn,
+  type Objection,
+  type ObjectionLob,
+} from "@/lib/objections/types";
 import type { ScriptLanguage } from "./format";
 import type { ScriptBlock, ScriptImageAsset, ScriptImages } from "./pdf-blocks";
-import type { ScriptPdfPayload } from "./pdf";
+import type { ScriptPdfObjection, ScriptPdfPayload } from "./pdf";
 import { IMAGE_PIXEL_WIDTH } from "./pdf-theme";
 
 /**
@@ -112,13 +120,33 @@ export async function loadScriptImages(
 
 export type ScriptPdfSource = {
   script: SanityScript | null;
+  objections: Objection[];
 };
 
 export async function fetchScriptPdfSource(lob: ObjectionLob): Promise<ScriptPdfSource> {
-  const script = await client.fetch<SanityScript | null>(PRESENTATION_SCRIPT_QUERY, {
-    lineOfBusiness: lob,
-  });
-  return { script: script ?? null };
+  const [script, objections] = await Promise.all([
+    client.fetch<SanityScript | null>(PRESENTATION_SCRIPT_QUERY, { lineOfBusiness: lob }),
+    client.fetch<Objection[]>(OBJECTIONS_QUERY),
+  ]);
+  return { script: script ?? null, objections: objections ?? [] };
+}
+
+function objectionsFor(
+  objections: Objection[],
+  lob: ObjectionLob,
+  language: ScriptLanguage
+): ScriptPdfObjection[] {
+  return objections
+    .filter((o) => appliesToLob(o, lob) && visibleIn(o, language))
+    .map((o) => ({
+      id: o._id,
+      title: (language === "en" ? o.titleEn : o.titleEs) ?? "",
+      typeLabel: isObjectionType(o.objectionType)
+        ? OBJECTION_TYPE_LABELS[o.objectionType][language]
+        : "",
+      triggers: ((language === "en" ? o.triggersEn : o.triggersEs) ?? []).filter(Boolean),
+      answer: blocksOf(language === "en" ? o.answerEn : o.answerEs),
+    }));
 }
 
 export function buildScriptPdfPayload(
@@ -135,6 +163,10 @@ export function buildScriptPdfPayload(
     complete: blocksOf(
       language === "en" ? script?.completeScript?.contentEn : script?.completeScript?.contentEs
     ),
+    // Every objection for this product, universal ones included, in the same order the reading
+    // view shows them. appliesToLob() rather than a GROQ filter on purpose: in GROQ
+    // `count(undefinedField) == 0` is false, so "no products ticked" would silently drop them.
+    objections: objectionsFor(source.objections, lob, language),
   };
 }
 
@@ -142,10 +174,15 @@ export function buildScriptPdfPayload(
 export function blocksToPrint(
   payloads: ScriptPdfPayload[]
 ): Array<ScriptBlock[] | undefined> {
-  return payloads.map((payload) => payload.complete);
+  const out: Array<ScriptBlock[] | undefined> = [];
+  for (const payload of payloads) {
+    out.push(payload.complete);
+    for (const objection of payload.objections) out.push(objection.answer);
+  }
+  return out;
 }
 
 /** Nothing to print: the button should have been disabled, but the route checks anyway. */
 export function isEmptyPayload(payload: ScriptPdfPayload): boolean {
-  return !payload.complete;
+  return !payload.complete && payload.objections.length === 0;
 }
