@@ -12,6 +12,7 @@ import { sanityFetch } from "@/sanity/lib/live";
 import { PRESENTATION_SCRIPT_QUERY } from "@/lib/sanity/queries/presentationScripts";
 import { OBJECTIONS_QUERY } from "@/lib/sanity/queries/objections";
 import type { Objection } from "@/lib/objections/types";
+import { isLiveObjectionsConfigured } from "@/lib/live-objections/config";
 
 // In production, next-sanity's sanityFetch caches query results indefinitely
 // (revalidate: false) and only invalidates via the sync-tags of the documents a
@@ -127,7 +128,11 @@ export default async function PresentationsPage() {
       </div>
 
       {/* Presentations Dashboard */}
-      <PresentationsDashboard scripts={scripts} objections={objections} />
+      <PresentationsDashboard
+        scripts={scripts}
+        objections={objections}
+        liveListenEnabled={isLiveObjectionsConfigured()}
+      />
     </div>
   );
 }

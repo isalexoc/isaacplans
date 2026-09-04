@@ -2,6 +2,66 @@
 
 ## Status
 
+Done: **Live objection listener** (branch `feature/live-objection-listener`, merged). Phase 2 of the
+objection work: while Isaac is on a call, the client's speech is transcribed live and a matching
+objection card is suggested on screen. Clicking it opens the existing answer dialog.
+
+**Why browser capture rather than the phone system.** Kixie's entire documented API is nine
+metadata-only webhooks; GHL has no mid-call voice webhook and its number lives in GoHighLevel's own
+Twilio subaccount. Neither can hand us live audio. Isaac talks through a headset with calls in
+Chrome, so `getDisplayMedia({audio:true})` on the softphone TAB captures the client directly.
+
+**ONE stream, not two.** The tab's audio output is what the softphone PLAYS — i.e. the remote party
+— so tab capture IS the client, with perfect separation and no diarization. Isaac's mic contributes
+nothing (every seeded trigger is a thing the client says) and dropping it halves the bill, removes
+the getUserMedia permission, and deletes the echo cross-contamination risk class rather than
+mitigating it.
+
+**The wire protocol was verified by running it, and the design's version was wrong.** Synthesised an
+objection with ElevenLabs TTS, decoded to PCM16, and streamed it through the real socket. First
+attempt: every frame rejected with `input_error: "Could not parse the protocol message."` The field
+is **`audio_base_64`**, not `audio_chunk`, and the query param is **`language_code`**, not
+`language`. Corrected, the socket returned the sentence verbatim. Also confirmed live: `POST
+/v1/single-use-token/realtime_scribe` returns `{token}` (15-minute TTL, consumed on use), so the
+browser connects directly and never sees `ELEVENLABS_API_KEY` — which is the only shape that works,
+since Vercel serverless cannot hold a long-lived inbound socket.
+
+**No resampler.** `audio_format` is an enum covering pcm_8000 through pcm_48000 and every chunk
+carries its own `sample_rate`, so when the AudioContext comes back at 48 kHz we declare pcm_48000
+and send it. That deleted ~120 lines of hand-rolled windowed-sinc DSP from the design.
+
+**Matcher accuracy, measured against the real 29-objection library:** 10/12 objections detected
+(83%), 5/5 pieces of ordinary call chatter correctly ignored, 0 false positives — better than the
+50-65% the design predicted. The two misses are corpus gaps, not algorithm failures ("discuss THIS
+with my daughter" breaks contiguity against the seeded "discuss with my daughter"; "I never called
+anybody" is not among the didnt-request-this phrasings). Both are fixed by editing triggers in
+Sanity with no deploy, which is exactly why the algorithm stays dumb — the corpus is the tuning
+surface.
+
+**Nothing is persisted.** No Neon, no Sanity, no localStorage, and no API route ever receives
+transcript text, so nothing can land in a Vercel log either. Transcript lives in a ref and dies on
+stop or unmount. This does NOT remove the consent obligation — wiretap statutes cover interception,
+not storage — but it means there is no archive.
+
+**Cost: $0.39 per live call-hour**, billed per audio minute. Silence is streamed to hold the socket
+open, so an open socket bills wall-clock: the Stop button, the 60-minute hard cap
+(`LIVE_OBJECTIONS_MAX_SESSION_MINUTES`) and the silence watchdog are load-bearing, not decoration.
+
+Verified: `tsc --noEmit` clean, full `pnpm build` green, token endpoint and socket exercised against
+the live API, matcher measured against production content.
+
+**Not verified, and it needs Isaac:**
+- Whether Kixie PowerCall and the GHL softphone render call audio in a Chrome TAB or a detached
+  popup WINDOW. A window share carries no audio at all — this is the one thing that could make the
+  feature unusable, and it cannot be tested from here.
+- The consent wording, which he says aloud. It is `DISCLOSURE` in
+  `components/objections/live-listen-control.tsx`, EN and ES.
+- `LIVE_OBJECTIONS_ENABLED=true` must be set in Vercel; it is already set in local `.env`.
+- Zero-retention / no-training and accepted Scribe terms in the ElevenLabs account. Unaccepted terms
+  fail at the SOCKET with `unaccepted_terms`, not at the token mint, so it looks like a bug.
+
+---
+
 **PDF export narrowed to the Complete Script only** (follow-up, branch
 `feature/pdf-complete-script-only`). Isaac only wants the "Complete Script (All-in-One)" on paper —
 the per-section script and the objection cards are for reading on screen, where they are searchable
