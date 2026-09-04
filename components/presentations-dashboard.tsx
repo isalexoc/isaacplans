@@ -23,6 +23,9 @@ import { appliesToLob, visibleIn, type Objection, type ObjectionLob } from "@/li
 import DownloadScriptButton from "@/components/presentation-scripts/download-script-button";
 import { isTypingTarget } from "@/lib/objections/search";
 import type { ScriptLang } from "@/components/presentation-scripts/script-portable-text";
+import LiveListenControl from "@/components/objections/live-listen-control";
+import LiveObjectionDock from "@/components/objections/live-objection-dock";
+import { useLiveObjectionListener } from "@/hooks/use-live-objection-listener";
 
 interface LineOfBusiness {
   id: ObjectionLob;
@@ -88,11 +91,14 @@ interface PresentationsDashboardProps {
   scripts?: Record<string, PresentationScript | null>;
   /** Flat, unbucketed: a universal objection would otherwise cross the wire once per product. */
   objections?: Objection[];
+  /** Server-resolved from the env flag, so no NEXT_PUBLIC_ variable is needed. */
+  liveListenEnabled?: boolean;
 }
 
 export default function PresentationsDashboard({
   scripts = {},
   objections = [],
+  liveListenEnabled = false,
 }: PresentationsDashboardProps) {
   const locale = useLocale();
   const [activeTab, setActiveTab] = useState("iul");
@@ -121,6 +127,21 @@ export default function PresentationsDashboard({
   const openObjection = useMemo(
     () => objections.find((o) => o._id === openObjectionId) ?? null,
     [objections, openObjectionId]
+  );
+
+  const live = useLiveObjectionListener({
+    objections,
+    lob: activeTab,
+    language,
+    enabled: liveListenEnabled,
+  });
+
+  const liveObjection = useMemo(
+    () =>
+      live.suggestion
+        ? (objections.find((o) => o._id === live.suggestion?.objectionId) ?? null)
+        : null,
+    [objections, live.suggestion]
   );
 
   const handleVisibleChange = useCallback((ids: string[]) => {
@@ -199,6 +220,16 @@ export default function PresentationsDashboard({
                 Español
               </Button>
             </div>
+
+            {liveListenEnabled && (
+              <LiveListenControl
+                language={language}
+                status={live.status}
+                error={live.error}
+                onArm={live.arm}
+                onStop={live.stop}
+              />
+            )}
           </div>
         </div>
       </div>
@@ -333,6 +364,26 @@ export default function PresentationsDashboard({
             ? { index: openIndex + 1, total: visibleIdsRef.current.length }
             : undefined
         }
+      />
+
+      <LiveObjectionDock
+        listening={live.isListening}
+        startedAt={live.startedAt}
+        objection={liveObjection}
+        suggestionKey={live.suggestion?.key ?? null}
+        language={language}
+        // The whole point of the feature: a suggestion feeds the EXISTING openObjectionId state,
+        // so the answer comes from the EXISTING ObjectionAnswerDialog and closing it lands him
+        // back on the script, scrolled and expanded exactly where the client interrupted. The
+        // palette is closed first for the same reason as the Ctrl+K handler — never stack two
+        // focus traps.
+        onOpen={(id) => {
+          setPaletteOpen(false);
+          live.dismissSuggestion();
+          setOpenObjectionId(id);
+        }}
+        onDismiss={live.dismissSuggestion}
+        onStop={live.stop}
       />
     </div>
   );
