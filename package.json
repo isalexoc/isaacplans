@@ -23,6 +23,7 @@
     "intake:fields": "tsx scripts/create-intake-fields.ts",
     "test:call-study": "tsx scripts/test-call-study.ts",
     "migrate:objections": "tsx scripts/migrate-objections-to-library.ts",
+    "seed:iul-triggers": "tsx scripts/seed-iul-objection-triggers.ts",
     "test:call-summary": "tsx scripts/test-call-summary.ts",
     "test:crankwheel": "tsx scripts/test-crankwheel.ts",
     "warm:media": "tsx --conditions=react-server scripts/warm-cloudinary-media.ts",
