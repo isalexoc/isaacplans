@@ -308,7 +308,10 @@ export default function PresentationsDashboard({
                     <DownloadScriptButton
                       lineOfBusiness={lob.id}
                       language={language}
-                      hasCompleteScript={Array.isArray(complete) && complete.length > 0}
+                      hasContent={
+                        (Array.isArray(complete) && complete.length > 0) ||
+                        lobObjections.length > 0
+                      }
                     />
                   </div>
                 </div>

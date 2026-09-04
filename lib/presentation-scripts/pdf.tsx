@@ -60,6 +60,14 @@ Font.registerHyphenationCallback((word) => [word]);
 
 /* -- Payload ---------------------------------------------------------------- */
 
+export type ScriptPdfObjection = {
+  id: string;
+  title: string;
+  typeLabel: string;
+  triggers: string[];
+  answer?: ScriptBlock[];
+};
+
 /** One language's worth of printable content. "both" renders two of these into one file. */
 export type ScriptPdfPayload = {
   lob: ObjectionLob;
@@ -67,8 +75,10 @@ export type ScriptPdfPayload = {
   /** The Sanity document title, e.g. "Final Expense - Complete Script". Optional. */
   title?: string;
   updatedAt?: string;
-  /** The "Complete Script (All-in-One)" field. The only thing this document prints. */
+  /** The "Complete Script (All-in-One)" field — the body of the document. */
   complete?: ScriptBlock[];
+  /** Every objection that applies to this product, printed as an appendix after the script. */
+  objections: ScriptPdfObjection[];
 };
 
 /* -- Chrome ----------------------------------------------------------------- */
@@ -320,6 +330,81 @@ function Masthead({ payload }: { payload: ScriptPdfPayload }) {
 
 
 
+function SectionHeading({ title }: { title: string }) {
+  return (
+    <View break {...bookmarkProps(title)} style={{ marginBottom: 10 }}>
+      <Text style={{ fontSize: TYPE.h1, fontWeight: "bold", color: PDF_COLOR.ink }}>{title}</Text>
+      <View style={{ height: 2.5, width: 54, backgroundColor: ACCENT, marginTop: 6 }} />
+    </View>
+  );
+}
+
+function ObjectionCard({
+  objection,
+  language,
+  images,
+}: {
+  objection: ScriptPdfObjection;
+  language: ScriptLanguage;
+  images: ScriptImages;
+}) {
+  const ui = UI[language];
+  return (
+    <View
+      // Deliberately wrappable: an answer can be long, and a card that refuses to break would be
+      // pushed whole onto the next page, leaving half a sheet empty in a binder.
+      minPresenceAhead={72}
+      style={{
+        marginBottom: 14,
+        paddingTop: 9,
+        paddingBottom: 9,
+        paddingLeft: 11,
+        paddingRight: 11,
+        borderWidth: 0.75,
+        borderColor: OBJECTION_CARD.border,
+        borderStyle: "solid",
+        borderRadius: 5,
+        backgroundColor: OBJECTION_CARD.bg,
+      }}
+    >
+      <Text
+        style={{
+          fontSize: TYPE.h3,
+          fontWeight: "bold",
+          color: OBJECTION_CARD.quote,
+          marginBottom: 3,
+        }}
+      >
+        {`“${winAnsiSafe(objection.title)}”`}
+      </Text>
+      <Text
+        style={{
+          fontSize: TYPE.micro,
+          letterSpacing: 0.7,
+          fontWeight: "bold",
+          color: PDF_COLOR.muted,
+          marginBottom: objection.triggers.length > 0 ? 3 : 6,
+        }}
+      >
+        {winAnsiSafe(objection.typeLabel).toUpperCase()}
+      </Text>
+      {objection.triggers.length > 0 ? (
+        <Text
+          style={{
+            fontSize: TYPE.small,
+            fontStyle: "italic",
+            color: PDF_COLOR.muted,
+            marginBottom: 6,
+          }}
+        >
+          {`${ui.alsoHeard}: ${winAnsiSafe(objection.triggers.join(" - "))}`}
+        </Text>
+      ) : null}
+      <ScriptBlocks blocks={objection.answer} language={language} images={images} />
+    </View>
+  );
+}
+
 const PAGE_STYLE: Style = {
   backgroundColor: PDF_COLOR.page,
   fontFamily: FONT,
@@ -356,6 +441,23 @@ function ScriptPage({
         exact tree at 1.5 GB RSS and climbing.
       */}
       <ScriptBlocks blocks={payload.complete} language={payload.language} images={images} />
+
+      {payload.objections.length > 0 ? (
+        <>
+          <SectionHeading title={ui.objections} />
+          <Text style={{ fontSize: TYPE.small, color: PDF_COLOR.muted, marginBottom: 12 }}>
+            {ui.objectionsNote}
+          </Text>
+          {payload.objections.map((objection) => (
+            <ObjectionCard
+              key={objection.id}
+              objection={objection}
+              language={payload.language}
+              images={images}
+            />
+          ))}
+        </>
+      ) : null}
     </Page>
   );
 }
