@@ -2,6 +2,19 @@
 
 ## Status
 
+**PDF export narrowed to the Complete Script only** (follow-up, branch
+`feature/pdf-complete-script-only`). Isaac only wants the "Complete Script (All-in-One)" on paper —
+the per-section script and the objection cards are for reading on screen, where they are searchable
+and collapsible. The variant concept is removed rather than left as dead branches: the section
+renderer, tips panels, objection cards and the masthead contents list are gone from `pdf.tsx`, the
+route no longer queries objections at all, and the split button is now a single Download PDF whose
+language follows the dashboard toggle. Final Expense EN went 21 pages -> 9, ES 38 -> 12.
+
+Note: IUL's English `completeScript.contentEn` is a single block containing the literal character
+"s" — the same placeholder junk as its objections — so that button produces a near-blank page until
+it is written. No length threshold was added to hide it; masking the real state of the content is
+worse than showing it.
+
 Done: **Script polish — dark mode, image sizing, PDF export** (branch `feature/script-polish`,
 merged). Three fixes plus one new feature on `/presentations`.
 

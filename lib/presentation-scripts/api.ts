@@ -7,7 +7,6 @@ import type { ObjectionLob } from "@/lib/objections/types";
 import {
   presentationScriptFilename,
   type ScriptPdfLanguage,
-  type ScriptPdfVariant,
 } from "./format";
 
 const ENDPOINT = "/api/admin/presentation-scripts/pdf";
@@ -15,7 +14,6 @@ const ENDPOINT = "/api/admin/presentation-scripts/pdf";
 export type DownloadScriptPdfParams = {
   lineOfBusiness: ObjectionLob;
   language: ScriptPdfLanguage;
-  variant: ScriptPdfVariant;
 };
 
 /**
@@ -54,7 +52,7 @@ export async function downloadScriptPdf(params: DownloadScriptPdfParams): Promis
 }
 
 export function scriptPdfFilename(params: DownloadScriptPdfParams): string {
-  return presentationScriptFilename(params.lineOfBusiness, params.language, params.variant);
+  return presentationScriptFilename(params.lineOfBusiness, params.language);
 }
 
 function filenameFrom(res: Response): string | null {
