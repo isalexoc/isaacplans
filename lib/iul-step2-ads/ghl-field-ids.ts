@@ -22,10 +22,10 @@ export type IulStep2FieldSlug =
 export const iulStep2FolderId = "FYCxx4vnSJranT6mRexW";
 
 export const iulStep2FieldIds: Record<IulStep2FieldSlug, string> = {
-  iul_s2_age: "GIpcP8tU5CkwCzYEmiYW",
-  iul_s2_retirement_timeline: "kUZ9SrTguwqfrhzqKyxe",
-  iul_s2_monthly_savings: "tkq8cFrClxt2dznqU4FL",
-  iul_s2_investments: "ZlxwKgVRniTctsgRDBHL",
+  iul_s2_age: "",
+  iul_s2_retirement_timeline: "",
+  iul_s2_monthly_savings: "",
+  iul_s2_investments: "",
 };
 
 /** Optional per-field env overrides (set in .env to skip the live lookup / script). */
