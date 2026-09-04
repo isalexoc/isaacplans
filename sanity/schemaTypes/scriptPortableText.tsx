@@ -286,7 +286,34 @@ const scriptBlockMember = {
 
 const scriptImageMember = {
   type: 'image' as const,
+  // Hotspot is deliberately OFF: these are screenshots and rate charts, never
+  // art-directed crops. The renderer uses fit('max'), so the whole image is
+  // always shown and a hotspot would have nothing to do.
   fields: [
+    {
+      name: 'size',
+      type: 'string',
+      title: 'How big should this be?',
+      description:
+        'Pick by what the image is. Whatever you choose, the agent can still click it to open it full screen.',
+      options: {
+        list: [
+          {title: 'Small — a carrier logo, badge or icon', value: 'small'},
+          {title: 'Standard — a photo, or a chart with a few big numbers', value: 'standard'},
+          {title: 'Wide — a form, a screenshot, a plan comparison', value: 'wide'},
+          {
+            title: 'Full width — dense tables, rate charts, underwriting grids',
+            value: 'full',
+          },
+        ],
+        // Radio, not a dropdown. All four outcomes stay visible in the form, so
+        // the fix for an unreadable chart is discoverable without opening a menu.
+        layout: 'radio',
+      },
+      // New images match what images with no value set already render as, so the
+      // whole document set behaves the same way: wide unless told otherwise.
+      initialValue: 'wide',
+    },
     {
       name: 'alt',
       type: 'string',

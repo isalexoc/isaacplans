@@ -19,12 +19,13 @@ import PresentationScriptsContent from "@/components/presentation-scripts-conten
 import ObjectionLibraryPanel from "@/components/objections/objection-library-panel";
 import ObjectionAnswerDialog from "@/components/objections/objection-answer-dialog";
 import ObjectionCommandPalette from "@/components/objections/objection-command-palette";
-import { appliesToLob, visibleIn, type Objection } from "@/lib/objections/types";
+import { appliesToLob, visibleIn, type Objection, type ObjectionLob } from "@/lib/objections/types";
+import DownloadScriptButton from "@/components/presentation-scripts/download-script-button";
 import { isTypingTarget } from "@/lib/objections/search";
 import type { ScriptLang } from "@/components/presentation-scripts/script-portable-text";
 
 interface LineOfBusiness {
-  id: string;
+  id: ObjectionLob;
   name: string;
   icon: React.ComponentType<{ className?: string }>;
   description: string;
@@ -74,6 +75,7 @@ interface PresentationScript {
   title?: string;
   description?: string;
   lineOfBusiness: string;
+  completeScript?: { contentEn?: any; contentEs?: any };
   openingIntroduction?: any;
   discoveryQuestions?: any;
   productPresentation?: any;
@@ -243,6 +245,10 @@ export default function PresentationsDashboard({
         {/* Tab Content */}
         {linesOfBusiness.map((lob) => {
           const Icon = lob.icon;
+          const script = scripts[lob.id] || null;
+          const lobObjections = forLob(lob.id, language);
+          const complete =
+            language === "en" ? script?.completeScript?.contentEn : script?.completeScript?.contentEs;
           return (
             <TabsContent
               key={lob.id}
@@ -251,13 +257,31 @@ export default function PresentationsDashboard({
             >
               {/* Tab Header */}
               <div className="bg-gradient-to-r from-primary/5 to-primary/10 rounded-lg p-4 md:p-6 border border-primary/20">
-                <div className="flex items-start gap-3 md:gap-4">
-                  <div className="p-2 md:p-3 bg-primary/10 rounded-lg flex-shrink-0">
-                    <Icon className="h-5 w-5 md:h-6 md:w-6 text-primary" />
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+                  <div className="flex items-start gap-3 md:gap-4 min-w-0">
+                    <div className="p-2 md:p-3 bg-primary/10 rounded-lg flex-shrink-0">
+                      <Icon className="h-5 w-5 md:h-6 md:w-6 text-primary" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-lg md:text-2xl font-bold mb-1 md:mb-2 leading-tight">{lob.name}</h3>
+                      <p className="text-muted-foreground text-sm md:text-base">{lob.description}</p>
+                    </div>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-lg md:text-2xl font-bold mb-1 md:mb-2 leading-tight">{lob.name}</h3>
-                    <p className="text-muted-foreground text-sm md:text-base">{lob.description}</p>
+
+                  {/*
+                    The export lives with the product, not in the page header: "download my Final
+                    Expense script" is a thing you do while looking at Final Expense, and the button
+                    sitting beside the product name is what makes it obvious which one you get.
+                  */}
+                  <div className="flex-shrink-0">
+                    <DownloadScriptButton
+                      lineOfBusiness={lob.id}
+                      productName={lob.name}
+                      language={language}
+                      objectionCount={lobObjections.length}
+                      hasCompleteScript={Array.isArray(complete) && complete.length > 0}
+                      hasAnything={Boolean(script) || lobObjections.length > 0}
+                    />
                   </div>
                 </div>
               </div>
