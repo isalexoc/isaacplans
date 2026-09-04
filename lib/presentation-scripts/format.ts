@@ -15,46 +15,12 @@ export type ScriptPdfLanguage = ScriptLanguage | "both";
 export const SCRIPT_PDF_LANGUAGES = ["en", "es", "both"] as const;
 
 /**
- * What lands in the file.
- *   full       - every section with its tips, then the objection appendix (the default)
- *   script     - the six sections only
- *   objections - the objection cards only, for the binder tab an agent flips to mid-call
- *   complete   - the "Complete Script (All-in-One)" field on its own
- */
-export const SCRIPT_PDF_VARIANTS = ["full", "script", "objections", "complete"] as const;
-export type ScriptPdfVariant = (typeof SCRIPT_PDF_VARIANTS)[number];
-
-export type ScriptSectionKey =
-  | "openingIntroduction"
-  | "discoveryQuestions"
-  | "productPresentation"
-  | "objectionHandling"
-  | "closingTechniques"
-  | "psychologySalesTips";
-
-/**
- * The sections, in the order they are shown on screen.
+ * The export is deliberately ONE thing: the "Complete Script (All-in-One)" field.
  *
- * Kept identical to `sectionConfig` in components/presentation-scripts-content.tsx — a printed
- * script whose order differs from the screen is worse than no printed script at all. If that list
- * moves, move this one with it.
+ * The per-section script and the objection cards are for reading on screen, where they are
+ * searchable and collapsible. On paper the all-in-one is what an agent actually wants in front of
+ * them, and printing everything produced a 21-page document that duplicated itself.
  */
-export const SCRIPT_SECTIONS: ReadonlyArray<{
-  key: ScriptSectionKey;
-  en: string;
-  es: string;
-}> = [
-  { key: "openingIntroduction", en: "Opening & Introduction", es: "Apertura e Introducción" },
-  {
-    key: "discoveryQuestions",
-    en: "Discovery Questions & Qualification",
-    es: "Preguntas de Descubrimiento y Calificación",
-  },
-  { key: "productPresentation", en: "Product Presentation", es: "Presentación del Producto" },
-  { key: "objectionHandling", en: "Objection Handling", es: "Manejo de Objeciones" },
-  { key: "closingTechniques", en: "Closing — Three Options", es: "Cierre — Tres Opciones" },
-  { key: "psychologySalesTips", en: "Psychology & Sales Tips", es: "Psicología y Consejos de Ventas" },
-];
 
 /** Product names for the masthead, in both languages. */
 export const LOB_TITLE: Record<ObjectionLob, { en: string; es: string }> = {
@@ -86,19 +52,13 @@ export function isScriptPdfLanguage(value: unknown): value is ScriptPdfLanguage 
   return value === "en" || value === "es" || value === "both";
 }
 
-export function isScriptPdfVariant(value: unknown): value is ScriptPdfVariant {
-  return (
-    typeof value === "string" && (SCRIPT_PDF_VARIANTS as readonly string[]).includes(value)
-  );
-}
-
 export const LANGUAGE_LABEL: Record<ScriptLanguage, string> = {
   en: "English",
   es: "Español",
 };
 
 /**
- * e.g. `final-expense-script-en-2026-09-04.pdf`.
+ * e.g. `final-expense-complete-script-en-2026-09-04.pdf`.
  *
  * Dated on purpose: scripts change, and the sheet already sitting on the desk should be
  * distinguishable from the one just downloaded. It also means a second download never silently
@@ -107,17 +67,10 @@ export const LANGUAGE_LABEL: Record<ScriptLanguage, string> = {
 export function presentationScriptFilename(
   lob: ObjectionLob,
   language: ScriptPdfLanguage,
-  variant: ScriptPdfVariant,
   date: Date = new Date()
 ): string {
-  const kind =
-    variant === "objections"
-      ? "objections"
-      : variant === "complete"
-        ? "complete-script"
-        : "script";
   const lang = language === "both" ? "en-es" : language;
-  return `${LOB_SLUG[lob]}-${kind}-${lang}-${date.toISOString().slice(0, 10)}.pdf`;
+  return `${LOB_SLUG[lob]}-complete-script-${lang}-${date.toISOString().slice(0, 10)}.pdf`;
 }
 
 /**

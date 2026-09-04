@@ -16,7 +16,6 @@ import {
   LANGUAGE_LABEL,
   LOB_TITLE,
   type ScriptLanguage,
-  type ScriptPdfVariant,
   winAnsiSafe,
 } from "./format";
 import { ScriptBlocks, hasBlocks, type ScriptBlock, type ScriptImages } from "./pdf-blocks";
@@ -61,21 +60,6 @@ Font.registerHyphenationCallback((word) => [word]);
 
 /* -- Payload ---------------------------------------------------------------- */
 
-export type ScriptPdfSection = {
-  key: string;
-  title: string;
-  content?: ScriptBlock[];
-  tips?: ScriptBlock[];
-};
-
-export type ScriptPdfObjection = {
-  id: string;
-  title: string;
-  typeLabel: string;
-  triggers: string[];
-  answer?: ScriptBlock[];
-};
-
 /** One language's worth of printable content. "both" renders two of these into one file. */
 export type ScriptPdfPayload = {
   lob: ObjectionLob;
@@ -83,8 +67,7 @@ export type ScriptPdfPayload = {
   /** The Sanity document title, e.g. "Final Expense - Complete Script". Optional. */
   title?: string;
   updatedAt?: string;
-  sections: ScriptPdfSection[];
-  objections: ScriptPdfObjection[];
+  /** The "Complete Script (All-in-One)" field. The only thing this document prints. */
   complete?: ScriptBlock[];
 };
 
@@ -220,46 +203,16 @@ function bookmarkProps(title: string): Record<string, unknown> {
   return { bookmark: { title: winAnsiSafe(title), fit: false, expanded: false } };
 }
 
-/**
- * Every section starts on a fresh sheet. The masthead owns page 1, so there is no "first section"
- * exception - and a section that begins three lines from the bottom of the previous page is worse
- * than a half-empty sheet when the thing is sitting in a binder.
- */
-function SectionHeading({ title }: { title: string }) {
-  return (
-    <View break {...bookmarkProps(title)} style={{ marginBottom: 10 }}>
-      <Text style={{ fontSize: TYPE.h1, fontWeight: "bold", color: PDF_COLOR.ink }}>{title}</Text>
-      <View style={{ height: 2.5, width: 54, backgroundColor: ACCENT, marginTop: 6 }} />
-    </View>
-  );
-}
 
 /* -- The masthead / legend page --------------------------------------------- */
 
 const LEGEND_TONES = ["verbatim", "askPause", "agentNote", "clientSays"] as const;
 
-function Masthead({
-  payload,
-  sectionTitles,
-  objectionCount,
-  showComplete,
-}: {
-  payload: ScriptPdfPayload;
-  /** Only the sections this variant actually prints. */
-  sectionTitles: string[];
-  objectionCount: number;
-  showComplete: boolean;
-}) {
+function Masthead({ payload }: { payload: ScriptPdfPayload }) {
   const ui = UI[payload.language];
   const product = LOB_TITLE[payload.lob][payload.language];
   const updated = formatDate(payload.updatedAt, payload.language);
   const printed = formatDate(new Date().toISOString(), payload.language);
-
-  const inside: string[] = [
-    ...sectionTitles,
-    ...(objectionCount > 0 ? [`${ui.objections} (${objectionCount})`] : []),
-    ...(showComplete ? [ui.complete] : []),
-  ];
 
   return (
     <View>
@@ -289,32 +242,6 @@ function Masthead({
           .join("   -   ")}
       </Text>
 
-      {inside.length > 0 ? (
-        <View style={{ marginTop: 26 }}>
-          <Text
-            style={{
-              fontSize: TYPE.pill,
-              letterSpacing: 1.2,
-              fontWeight: "bold",
-              color: PDF_COLOR.muted,
-              marginBottom: 7,
-            }}
-          >
-            {ui.inside.toUpperCase()}
-          </Text>
-          {inside.map((line, index) => (
-            <View
-              key={line}
-              style={{ flexDirection: "row", marginBottom: 3, alignItems: "flex-start" }}
-            >
-              <Text style={{ width: 20, fontSize: TYPE.body, color: BRAND, fontWeight: "bold" }}>
-                {index + 1}.
-              </Text>
-              <Text style={{ fontSize: TYPE.body, color: PDF_COLOR.body }}>{line}</Text>
-            </View>
-          ))}
-        </View>
-      ) : null}
 
       {/*
         The key. On screen the callouts are told apart by colour; on paper - and especially on the
@@ -391,112 +318,7 @@ function Masthead({
 
 /* -- Body ------------------------------------------------------------------- */
 
-function TipsPanel({
-  tips,
-  language,
-  images,
-}: {
-  tips: ScriptBlock[];
-  language: ScriptLanguage;
-  images: ScriptImages;
-}) {
-  return (
-    <View
-      minPresenceAhead={50}
-      style={{
-        marginTop: 12,
-        paddingTop: 8,
-        paddingBottom: 8,
-        paddingLeft: 11,
-        paddingRight: 11,
-        backgroundColor: TIPS.bg,
-        borderWidth: 0.75,
-        borderColor: TIPS.border,
-        borderStyle: "solid",
-        borderRadius: 5,
-      }}
-    >
-      <Text
-        style={{
-          fontSize: TYPE.pill,
-          fontWeight: "bold",
-          letterSpacing: 1,
-          color: TIPS.pill,
-          marginBottom: 4,
-        }}
-      >
-        {UI[language].tips}
-      </Text>
-      <ScriptBlocks blocks={tips} language={language} images={images} />
-    </View>
-  );
-}
 
-function ObjectionCard({
-  objection,
-  language,
-  images,
-}: {
-  objection: ScriptPdfObjection;
-  language: ScriptLanguage;
-  images: ScriptImages;
-}) {
-  const ui = UI[language];
-  return (
-    <View
-      // Deliberately wrappable: an answer can be long, and a card that refuses to break would be
-      // pushed whole onto the next page, leaving half a sheet empty in a binder.
-      minPresenceAhead={72}
-      style={{
-        marginBottom: 14,
-        paddingTop: 9,
-        paddingBottom: 9,
-        paddingLeft: 11,
-        paddingRight: 11,
-        borderWidth: 0.75,
-        borderColor: OBJECTION_CARD.border,
-        borderStyle: "solid",
-        borderRadius: 5,
-        backgroundColor: OBJECTION_CARD.bg,
-      }}
-    >
-      <Text
-        style={{
-          fontSize: TYPE.h3,
-          fontWeight: "bold",
-          color: OBJECTION_CARD.quote,
-          marginBottom: 3,
-        }}
-      >
-        {`“${winAnsiSafe(objection.title)}”`}
-      </Text>
-      <Text
-        style={{
-          fontSize: TYPE.micro,
-          letterSpacing: 0.7,
-          fontWeight: "bold",
-          color: PDF_COLOR.muted,
-          marginBottom: objection.triggers.length > 0 ? 3 : 6,
-        }}
-      >
-        {winAnsiSafe(objection.typeLabel).toUpperCase()}
-      </Text>
-      {objection.triggers.length > 0 ? (
-        <Text
-          style={{
-            fontSize: TYPE.small,
-            fontStyle: "italic",
-            color: PDF_COLOR.muted,
-            marginBottom: 6,
-          }}
-        >
-          {`${ui.alsoHeard}: ${winAnsiSafe(objection.triggers.join(" - "))}`}
-        </Text>
-      ) : null}
-      <ScriptBlocks blocks={objection.answer} language={language} images={images} />
-    </View>
-  );
-}
 
 const PAGE_STYLE: Style = {
   backgroundColor: PDF_COLOR.page,
@@ -510,77 +332,30 @@ const PAGE_STYLE: Style = {
 
 function ScriptPage({
   payload,
-  variant,
   images,
 }: {
   payload: ScriptPdfPayload;
-  variant: ScriptPdfVariant;
   images: ScriptImages;
 }) {
   const ui = UI[payload.language];
   const product = LOB_TITLE[payload.lob][payload.language];
-  const headerLabel = `${product} - ${ui.script} - ${LANGUAGE_LABEL[payload.language]}`;
-
-  const showSections = variant === "full" || variant === "script";
-  const showObjections = variant === "full" || variant === "objections";
-  const showComplete = variant === "complete";
-
-  const sections = showSections
-    ? payload.sections.filter((s) => hasBlocks(s.content) || hasBlocks(s.tips))
-    : [];
-  const objections = showObjections ? payload.objections : [];
+  const headerLabel = `${product} - ${ui.complete} - ${LANGUAGE_LABEL[payload.language]}`;
 
   return (
     <Page size={[PAGE.width, PAGE.height]} style={PAGE_STYLE} wrap>
       <RunningHeader label={winAnsiSafe(headerLabel)} />
       <RunningFooter note={ui.footer} />
 
-      <Masthead
-        payload={payload}
-        sectionTitles={sections.map((s) => s.title)}
-        objectionCount={objections.length}
-        showComplete={showComplete && hasBlocks(payload.complete)}
-      />
+      <Masthead payload={payload} />
 
       {/*
-        Fragments, not wrapper <View>s. In @react-pdf 4.5.1 a node carrying `break` has to be a
-        direct child of the <Page>: nested one level deeper inside a View that itself overflows the
-        page, the paginator drops the overflowing content, and with a `fixed` header or footer also
-        on the page it never terminates at all. Verified against this exact tree.
+        A Fragment, not a wrapper <View>. In @react-pdf 4.5.1 content that overflows the page has
+        to be a direct child of the <Page>: nested one level deeper inside a View, the paginator
+        drops the overflow, and with a `fixed` header or footer also on the page it never
+        terminates at all - a synchronous loop no timeout can interrupt. Verified against this
+        exact tree at 1.5 GB RSS and climbing.
       */}
-      {sections.map((section) => (
-        <Fragment key={section.key}>
-          <SectionHeading title={section.title} />
-          <ScriptBlocks blocks={section.content} language={payload.language} images={images} />
-          {hasBlocks(section.tips) ? (
-            <TipsPanel tips={section.tips} language={payload.language} images={images} />
-          ) : null}
-        </Fragment>
-      ))}
-
-      {objections.length > 0 ? (
-        <>
-          <SectionHeading title={ui.objections} />
-          <Text style={{ fontSize: TYPE.small, color: PDF_COLOR.muted, marginBottom: 12 }}>
-            {ui.objectionsNote}
-          </Text>
-          {objections.map((objection) => (
-            <ObjectionCard
-              key={objection.id}
-              objection={objection}
-              language={payload.language}
-              images={images}
-            />
-          ))}
-        </>
-      ) : null}
-
-      {showComplete && hasBlocks(payload.complete) ? (
-        <>
-          <SectionHeading title={ui.complete} />
-          <ScriptBlocks blocks={payload.complete} language={payload.language} images={images} />
-        </>
-      ) : null}
+      <ScriptBlocks blocks={payload.complete} language={payload.language} images={images} />
     </Page>
   );
 }
@@ -590,12 +365,11 @@ function ScriptPage({
 export type RenderScriptPdfParams = {
   /** One entry per language. Two entries produce the EN document followed by the ES document. */
   payloads: ScriptPdfPayload[];
-  variant: ScriptPdfVariant;
   images: ScriptImages;
 };
 
 export async function renderScriptPdf(params: RenderScriptPdfParams): Promise<Buffer> {
-  const { payloads, variant, images } = params;
+  const { payloads, images } = params;
   const lead = payloads[0];
   const title = lead
     ? `${LOB_TITLE[lead.lob].en} - Sales Script`
@@ -607,7 +381,6 @@ export async function renderScriptPdf(params: RenderScriptPdfParams): Promise<Bu
         <ScriptPage
           key={`${payload.lob}-${payload.language}`}
           payload={payload}
-          variant={variant}
           images={images}
         />
       ))}

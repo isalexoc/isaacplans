@@ -3,7 +3,6 @@ import { auth } from "@clerk/nextjs/server";
 import {
   isScriptLob,
   isScriptPdfLanguage,
-  isScriptPdfVariant,
   presentationScriptFilename,
   type ScriptLanguage,
 } from "@/lib/presentation-scripts/format";
@@ -41,7 +40,6 @@ export async function POST(request: NextRequest) {
     }
 
     const language = isScriptPdfLanguage(body?.language) ? body.language : "en";
-    const variant = isScriptPdfVariant(body?.variant) ? body.variant : "full";
 
     // One Sanity read serves both languages of a bilingual export.
     const source = await fetchScriptPdfSource(lob);
@@ -49,22 +47,22 @@ export async function POST(request: NextRequest) {
     const languages: ScriptLanguage[] = language === "both" ? ["en", "es"] : [language];
     const payloads = languages
       .map((lang) => buildScriptPdfPayload(source, lob, lang))
-      .filter((payload) => !isEmptyPayload(payload, variant));
+      .filter((payload) => !isEmptyPayload(payload));
 
     if (payloads.length === 0) {
       return NextResponse.json(
         {
           success: false,
           error:
-            "There is nothing published to print for that product yet. Add the script in Sanity Studio first.",
+            "There is no Complete Script (All-in-One) published for that product yet. Add it in Sanity Studio first.",
         },
         { status: 404 }
       );
     }
 
-    const images = await loadScriptImages(blocksToPrint(payloads, variant));
-    const pdf = await renderScriptPdf({ payloads, variant, images });
-    const filename = presentationScriptFilename(lob, language, variant);
+    const images = await loadScriptImages(blocksToPrint(payloads));
+    const pdf = await renderScriptPdf({ payloads, images });
+    const filename = presentationScriptFilename(lob, language);
 
     return new NextResponse(new Uint8Array(pdf), {
       status: 200,

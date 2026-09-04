@@ -276,11 +276,8 @@ export default function PresentationsDashboard({
                   <div className="flex-shrink-0">
                     <DownloadScriptButton
                       lineOfBusiness={lob.id}
-                      productName={lob.name}
                       language={language}
-                      objectionCount={lobObjections.length}
                       hasCompleteScript={Array.isArray(complete) && complete.length > 0}
-                      hasAnything={Boolean(script) || lobObjections.length > 0}
                     />
                   </div>
                 </div>
