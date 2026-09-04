@@ -2,6 +2,74 @@
 
 ## Status
 
+Done: **Objection Library — cards + instant search** (branch `feature/objection-library`, merged).
+Objections lived inside one long rich-text blob in `objectionHandling`, rendered in a
+one-at-a-time accordion — so reaching them mid-call closed whatever Isaac was reading, and finding
+the right rebuttal meant scrolling a wall of text while a client waited.
+
+**Objections are now their own document type, shared across products.** `sanity/schemaTypes/
+objectionType.ts` holds title / type / triggers / answer per language, plus a `linesOfBusiness`
+checkbox list where **empty means every product**. "I can't afford it" is written once. Answers
+reuse `scriptBlockArray`, so a rebuttal gets the same toolbar as the scripts.
+
+**The reading view puts the cards above the accordion and opens answers in a Dialog.** Not inside
+the accordion, because that accordion is one-section-at-a-time and closing the section he was
+reading is the actual problem. The overlay means the page keeps its scroll position and its open
+section — close it and he is exactly where he was. Ctrl+K (or `/`) opens a cmdk palette that
+searches titles and triggers; `preventDefault()` on Ctrl+K is mandatory or Chrome takes focus to
+the address bar, and the palette closes any open answer first so two focus traps never fight.
+
+**`count(undefinedField) == 0` is FALSE in GROQ** — Sanity stores an empty array as undefined.
+Verified against the live dataset: `{"undef": null, "eqZero": false, "guarded": true}`. Every
+product filter in `sanity/structure.ts` therefore leads with `!defined(linesOfBusiness) ||`, or
+every "all products" objection silently vanishes from all six panes. The reading view sidesteps it
+by bucketing in plain JS (`appliesToLob`).
+
+**Search strips diacritics, and that is not polish.** The live Spanish content has "cotización",
+"información", "opción"; nobody reaches for the accent key mid-call. The palette runs
+`shouldFilter={false}` and uses the same `matchesObjection()` as the grid — cmdk's own scorer is
+not diacritic-insensitive, so it would disagree with the grid about what exists.
+
+**17 objections migrated** from the Final Expense script: 9 bilingual, 3 EN-only, 5 ES-only. EN and
+ES were written independently and do not line up (12 vs 13, each with objections the other lacks),
+so `scripts/migrate-objections-to-library.ts` parses only the answer blocks and takes titles, types
+and triggers from a hand-written pairing table. Spanish #1 is deliberately used twice — its heading
+enumerates both "just shopping" and "mail me something". Answer blocks are copied verbatim, so the
+`strong` "Response A (…)" labels and the numbered list under "I want to think about it" survive.
+**Join every child when reading a heading, never `children[0]`** — 5 of 13 Spanish headings hide
+their text behind a `"\n\n"` first child and one splits across five children.
+
+**Two bugs fixed on the way through.** The language toggle was per-tab state, so choosing Spanish
+in Final Expense and clicking IUL silently dropped back to English; it now lives on the dashboard.
+And the migration's own idempotency report was wrong — `_createdAt === _updatedAt` is true for a
+freshly seeded row too, so a re-run claimed to create all 17 again (it had not; `createIfNotExists`
+is safe and the dataset held exactly 17 with no duplicates). It now queries existing ids first.
+
+**IUL deliberately keeps the old free-text section**: its `objectionHandling.contentEn` is the
+single character "s", so there was nothing to migrate. `hideObjectionHandling` is computed per
+product *and per language*, so a product with English cards but no Spanish ones falls back to the
+old blob in Spanish automatically. Nothing was deleted from the schema, the query or the data.
+
+Verified: `tsc --noEmit` clean, full `pnpm build` green, migration idempotent on re-run
+(`0 written, 17 left alone`), and `OBJECTIONS_QUERY` against production returns 17 — 12 visible in
+English, 14 in Spanish.
+
+**Not verified, and it needs Isaac:** the cards, the dialog and Ctrl+K in a real browser.
+
+**Live-call objection detection was researched and deliberately deferred.** Kixie's documented API
+is nine metadata-only webhooks — no audio, no transcript stream; its "real-time transcription" is
+an in-product dashboard with no integration surface, and Listen/Whisper/Barge has no API. GHL has
+no mid-call voice webhook and its transcription endpoint is keyed to a post-call `messageId`; the
+number lives in GoHighLevel's own Twilio subaccount, so there are no credentials to attach a stream
+with. The viable path needs no telephony change at all: Isaac uses a headset with calls in Chrome,
+so `getUserMedia` (his mic) plus `getDisplayMedia({audio:true})` on the call tab gives two separate
+streams — perfect speaker separation, no diarization needed — fed to ElevenLabs Scribe v2 Realtime
+(~150 ms, ~$0.39/hr; `ELEVENLABS_API_KEY` is already set). Gates are a per-session click, Chrome
+tab-audio only (not window sharing), and all-party consent law in 11-15 states. The `triggersEn` /
+`triggersEs` fields exist now as the seed corpus for that matching.
+
+---
+
 Done: **Script editor formatting tools** (branch `feature/script-editor-tools`, merged). Isaac writes
 sales scripts in Studio and reads them at `/presentations` during live client calls. He asked for a
 highlighter and "other options to format the text in a better way" — the toolbar only ever offered
