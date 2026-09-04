@@ -2,6 +2,56 @@
 
 ## Status
 
+Done: **Script polish — dark mode, image sizing, PDF export** (branch `feature/script-polish`,
+merged). Three fixes plus one new feature on `/presentations`.
+
+**The dark-mode highlight bug was not a colour problem.** `@portabletext/toolkit` sorts a span's
+marks by occurrence count and then by `knownDecorators.indexOf()` — the list is
+`["strong","em","code","underline","strike-through"]` (dist/index.js:28), so a CUSTOM decorator
+returns -1 and sorts BEFORE `strong`. `buildMarksTree` then makes the highlight the OUTER node and
+`<strong class="text-foreground">` its child, and a direct colour on the child beats the parent's
+inherited one: near-white text on an amber highlight. Every broken highlight in the screenshots was
+on bold text. Fixed by letting `strong`/`em` inherit colour rather than setting it — which also
+stops a bold word inside `agentNote` or `blockquote` from jumping to full foreground. Every block
+style sets a colour on its own wrapper, so nothing is left unstyled; a future block style added
+WITHOUT one would leave bold text at the browser default.
+
+**The objection badges were a Tailwind purge**, fixed separately in `d7d8997`: `content` did not
+include `./lib`, so all sixteen dark-mode classes from `lib/objections/types.ts` were never
+generated. Light mode worked only because those shades appear elsewhere under `components/`. The
+dark treatment was then rebuilt properly — `bg-<hue>-950` was 1.14:1 against the card, effectively
+invisible, so chips are now a translucent 500/20 fill + 400/50 inset ring + 200 text. Three hues
+moved (sky→blue, teal→cyan, indigo→fuchsia) taking minimum hue separation across the eight
+categories from 14° to 28°; safe to do now precisely because the dark badges had never rendered.
+
+**Images.** The renderer hardcoded `width(500)` and a fabricated `width={500} height={600}` box, so
+a dense underwriting grid was unreadable and every image reserved the wrong space while loading. A
+`size` field (small / standard / wide / full, labelled by what the image IS, radio layout) now
+drives both a CSS cap and what is requested from Sanity's CDN at 2x. Real dimensions are parsed from
+the asset id, which works without dereferencing `asset` — the GROQ queries project block arrays raw.
+Images with no value set render as `wide`, deliberately not the old 500px. Click-to-enlarge opens a
+lightbox with fit/actual-size toggle.
+
+**PDF export** follows the repo's `@react-pdf/renderer` precedent (`lib/mailing-labels/`), NOT
+html2canvas or jsPDF.html() — those rasterise. `lib/presentation-scripts/` holds the theme, the
+Portable Text→PDF converter, the document, and server-side content gathering; the route mirrors
+`app/api/admin/mailing-labels/print/route.ts` exactly. Verified against live data: Final Expense EN
+21 pages / ES 38, IUL EN 7 / ES 10, objections-only 7, ~2s each, real Helvetica in four weights and
+PDF bookmarks.
+
+> **Do not wrap the section list in `pdf.tsx` back in a `<View>`.** It reintroduces a SYNCHRONOUS
+> runaway loop in @react-pdf's pagination — not a slow render, an event-loop block that a timeout
+> cannot catch. Reproduced at 1.5 GB RSS and climbing. On Vercel that is an OOM'd lambda, not a 504.
+> The Fragment structure and the comment above it are load-bearing.
+
+Verified: `tsc --noEmit` clean, full `pnpm build` green, six PDF variants generated from production
+Sanity data.
+
+**Not verified, and it needs Isaac:** how a rendered PDF page actually looks (no PDF rasteriser on
+this machine — structure is confirmed, visual layout is not), and the dark-mode result in a browser.
+
+---
+
 Done: **Objection Library — cards + instant search** (branch `feature/objection-library`, merged).
 Objections lived inside one long rich-text blob in `objectionHandling`, rendered in a
 one-at-a-time accordion — so reaching them mid-call closed whatever Isaac was reading, and finding

@@ -1,9 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import { PortableText } from "@portabletext/react";
 import type { PortableTextComponents } from "@portabletext/react";
-import { urlFor } from "@/sanity/lib/image";
+import ScriptImage from "./script-image";
 
 export { PortableText };
 
@@ -51,29 +50,9 @@ export function buildScriptComponents(
 
   return {
     types: {
-      image: ({ value }: any) => {
-        if (!value?.asset) return null;
-        const imageUrl = urlFor(value).width(500).fit('max').url();
-        return (
-          <div className="my-4 flex justify-center">
-            <div className="w-full" style={{ maxWidth: '500px' }}>
-              <Image
-                src={imageUrl}
-                alt={value.alt || "Presentation script image"}
-                width={500}
-                height={600}
-                className="rounded-lg w-full h-auto shadow-md"
-                style={{ objectFit: 'contain', maxWidth: '500px', height: 'auto' }}
-              />
-              {value.caption && (
-                <p className="text-xs text-muted-foreground text-center mt-2 italic">
-                  {value.caption}
-                </p>
-              )}
-            </div>
-          </div>
-        );
-      },
+      // A module-level component, not an inline arrow: it owns useState for the
+      // lightbox, and hooks need a stable component identity across renders.
+      image: ({ value }: any) => <ScriptImage value={value} language={language} />,
     },
     block: {
       // --- Sales-script styles ---
@@ -186,40 +165,64 @@ export function buildScriptComponents(
       ),
     },
     marks: {
+      // No colour class here on purpose. @portabletext/toolkit sorts a span's marks by
+      // occurrence count and then by knownDecorators.indexOf(); a custom decorator returns -1,
+      // so `highlight` sorts BEFORE `strong` and buildMarksTree makes it the OUTER node. A
+      // `text-foreground` on this element is a direct declaration on a descendant of the
+      // highlight, which beats the highlight's inherited colour — near-white on amber-300 in
+      // dark mode. Inheriting instead also keeps a bold word inside agentNote / blockquote at
+      // that block's deliberately quiet colour.
       strong: ({ children }: any) => (
-        <strong className="font-bold text-foreground">{children}</strong>
+        <strong className="font-bold">{children}</strong>
       ),
       em: ({ children }: any) => (
-        <em className="italic text-foreground">{children}</em>
+        <em className="italic">{children}</em>
       ),
-      // 57 existing underlines rendered unstyled before this entry existed.
+      // 57 existing underlines rendered unstyled before this entry existed. The dark decoration
+      // colour was the one place in this file that never switched brand blue for its dark
+      // counterpart — #0077B6 is a dark blue line on a near-black page.
       underline: ({ children }: any) => (
-        <span className="underline underline-offset-2 decoration-2 decoration-[#0077B6]/60">
+        <span className="underline underline-offset-2 decoration-2 decoration-[#0077B6]/60 dark:decoration-[#00B4D8]/80">
           {children}
         </span>
       ),
 
       // --- Highlighters. box-decoration-clone keeps the padding and rounding
       // on every line when a highlighted phrase wraps. ---
+      //
+      // Three deliberate choices:
+      //  * `[&_*]:!text-inherit` forces every nested mark to take the highlight's own colour.
+      //    Belt-and-braces on top of the strong/em fix above, and the only thing that catches a
+      //    `link` inside a highlight (blue-400 on amber-300 is ~2.2:1).
+      //  * No alpha. `/90` composited the fill with whatever box it sat in, so one highlighter
+      //    rendered as three different colours in verbatim / askPause / clientSays.
+      //  * A light-mode-only inset ring. bg-rose-200 on bg-rose-50 is a 1.31:1 fill step, so a
+      //    rose highlight inside the rose clientSays box had almost no boundary. In dark the fill
+      //    is already 8-12:1 against its ground, where a darker ring would read as a seam.
       highlight: ({ children }: any) => (
-        <mark className="box-decoration-clone rounded-[3px] bg-amber-200/90 px-1 py-[1px] text-slate-900 dark:bg-amber-300/90 dark:text-slate-900">
+        <mark className="box-decoration-clone rounded-[3px] px-1 py-[1px] ring-1 ring-inset [&_*]:!text-inherit bg-amber-200 text-amber-950 ring-amber-500/40 dark:bg-amber-300 dark:text-amber-950 dark:ring-transparent">
           {children}
         </mark>
       ),
       highlightGood: ({ children }: any) => (
-        <mark className="box-decoration-clone rounded-[3px] bg-emerald-200/90 px-1 py-[1px] text-emerald-950 dark:bg-emerald-300/90 dark:text-emerald-950">
+        <mark className="box-decoration-clone rounded-[3px] px-1 py-[1px] ring-1 ring-inset [&_*]:!text-inherit bg-emerald-200 text-emerald-950 ring-emerald-600/40 dark:bg-emerald-300 dark:text-emerald-950 dark:ring-transparent">
           {children}
         </mark>
       ),
       highlightCareful: ({ children }: any) => (
-        <mark className="box-decoration-clone rounded-[3px] bg-rose-200/90 px-1 py-[1px] text-rose-950 dark:bg-rose-300/90 dark:text-rose-950">
+        <mark className="box-decoration-clone rounded-[3px] px-1 py-[1px] ring-1 ring-inset [&_*]:!text-inherit bg-rose-200 text-rose-950 ring-rose-500/40 dark:bg-rose-300 dark:text-rose-950 dark:ring-transparent">
           {children}
         </mark>
       ),
 
-      // Substitute-live placeholders: client name, state, premium.
+      // Substitute-live placeholders: client name, state, premium. The light text darkens from
+      // #0077B6 (4.24:1 on its own 10% tint — below AA for semibold small text) to #005A8A
+      // (6.47:1). The dashed border stays brand blue so that is still what you see. Dark is
+      // already 10.6:1 and is unchanged. No text-inherit guard here: the tint is light enough
+      // that a nested link stays legible, and forcing inherit would flatten a nested highlight
+      // ("fill" sorts before "highlight", so fill is the OUTER node).
       fill: ({ children }: any) => (
-        <span className="box-decoration-clone rounded border border-dashed border-[#0077B6] bg-[#0077B6]/10 px-1 font-semibold text-[#0077B6] dark:border-[#00B4D8] dark:bg-[#00B4D8]/15 dark:text-[#7FDCF0]">
+        <span className="box-decoration-clone rounded border border-dashed border-[#0077B6] bg-[#0077B6]/10 px-1 font-semibold text-[#005A8A] dark:border-[#00B4D8] dark:bg-[#00B4D8]/15 dark:text-[#7FDCF0]">
           {children}
         </span>
       ),

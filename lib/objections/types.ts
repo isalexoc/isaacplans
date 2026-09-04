@@ -45,26 +45,34 @@ export const OBJECTION_TYPE_LABELS: Record<ObjectionType, { en: string; es: stri
 
 /** Light + dark pairs, shaped like the badges in components/admin/call-study/snippet-library.tsx. */
 export const OBJECTION_TYPE_BADGE: Record<ObjectionType, string> = {
-  price: "bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-200",
-  spouse: "bg-violet-100 text-violet-900 dark:bg-violet-950 dark:text-violet-200",
-  trust: "bg-rose-100 text-rose-900 dark:bg-rose-950 dark:text-rose-200",
-  timing: "bg-sky-100 text-sky-900 dark:bg-sky-950 dark:text-sky-200",
-  already_covered: "bg-emerald-100 text-emerald-900 dark:bg-emerald-950 dark:text-emerald-200",
-  health: "bg-teal-100 text-teal-900 dark:bg-teal-950 dark:text-teal-200",
-  thinking_about_it: "bg-indigo-100 text-indigo-900 dark:bg-indigo-950 dark:text-indigo-200",
-  other: "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300",
+  price:
+    "ring-1 ring-inset bg-amber-100 text-amber-900 ring-amber-500/25 dark:bg-amber-500/20 dark:text-amber-200 dark:ring-amber-400/50",
+  spouse:
+    "ring-1 ring-inset bg-violet-100 text-violet-900 ring-violet-500/25 dark:bg-violet-500/20 dark:text-violet-200 dark:ring-violet-400/50",
+  trust:
+    "ring-1 ring-inset bg-rose-100 text-rose-900 ring-rose-500/25 dark:bg-rose-500/20 dark:text-rose-200 dark:ring-rose-400/50",
+  timing:
+    "ring-1 ring-inset bg-blue-100 text-blue-900 ring-blue-500/25 dark:bg-blue-500/20 dark:text-blue-200 dark:ring-blue-400/50",
+  already_covered:
+    "ring-1 ring-inset bg-emerald-100 text-emerald-900 ring-emerald-500/25 dark:bg-emerald-500/20 dark:text-emerald-200 dark:ring-emerald-400/50",
+  health:
+    "ring-1 ring-inset bg-cyan-100 text-cyan-900 ring-cyan-500/25 dark:bg-cyan-500/20 dark:text-cyan-200 dark:ring-cyan-400/50",
+  thinking_about_it:
+    "ring-1 ring-inset bg-fuchsia-100 text-fuchsia-900 ring-fuchsia-500/25 dark:bg-fuchsia-500/20 dark:text-fuchsia-200 dark:ring-fuchsia-400/50",
+  other:
+    "ring-1 ring-inset bg-slate-100 text-slate-700 ring-slate-500/25 dark:bg-slate-500/20 dark:text-slate-200 dark:ring-slate-400/50",
 };
 
 /** Solid dots for the command palette rows, where a full badge would be noise. */
 export const OBJECTION_TYPE_DOT: Record<ObjectionType, string> = {
-  price: "bg-amber-500",
-  spouse: "bg-violet-500",
-  trust: "bg-rose-500",
-  timing: "bg-sky-500",
-  already_covered: "bg-emerald-500",
-  health: "bg-teal-500",
-  thinking_about_it: "bg-indigo-500",
-  other: "bg-slate-400",
+  price: "bg-amber-600 dark:bg-amber-400",
+  spouse: "bg-violet-600 dark:bg-violet-400",
+  trust: "bg-rose-600 dark:bg-rose-400",
+  timing: "bg-blue-600 dark:bg-blue-400",
+  already_covered: "bg-emerald-600 dark:bg-emerald-400",
+  health: "bg-cyan-600 dark:bg-cyan-400",
+  thinking_about_it: "bg-fuchsia-600 dark:bg-fuchsia-400",
+  other: "bg-slate-500 dark:bg-slate-400",
 };
 
 /**
