@@ -586,6 +586,15 @@ export const callStudyRecordings = pgTable("call_study_recordings", {
   languageCode:    text("language_code"),
   /** ElevenLabs request/transcription id. The webhook's only way back to this row. */
   elevenRequestId: text("eleven_request_id"),
+  /**
+   * The OTHER id ElevenLabs returns, and the only one `GET /speech-to-text/transcripts/{id}` accepts.
+   *
+   * The async ack carries both — a 32-hex `request_id` (which is what the webhook body echoes, so
+   * it is what the inbound lookup must key on) and a 20-character `transcription_id`. They are not
+   * interchangeable: fetching by the request id returns 404, which silently made the reconcile
+   * backstop incapable of recovering anything at all.
+   */
+  elevenTranscriptionId: text("eleven_transcription_id"),
   /** uploaded | transcribing | transcribed | analyzing | ready | failed */
   status:          text("status").notNull().default("uploaded"),
   errorMessage:    text("error_message"),

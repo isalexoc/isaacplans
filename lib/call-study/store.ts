@@ -134,10 +134,20 @@ export async function listRecordings(ownerUserId: string, limit = 50): Promise<R
     .limit(limit);
 }
 
-export async function markTranscribing(id: string, requestId: string): Promise<void> {
+export async function markTranscribing(
+  id: string,
+  requestId: string,
+  transcriptionId?: string | null
+): Promise<void> {
   await db
     .update(callStudyRecordings)
-    .set({ status: "transcribing", elevenRequestId: requestId, errorMessage: null, updatedAt: new Date() })
+    .set({
+      status: "transcribing",
+      elevenRequestId: requestId,
+      elevenTranscriptionId: transcriptionId ?? null,
+      errorMessage: null,
+      updatedAt: new Date(),
+    })
     .where(eq(callStudyRecordings.id, id));
 }
 

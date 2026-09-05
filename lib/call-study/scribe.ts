@@ -50,7 +50,13 @@ export type StartTranscriptionInput = {
  */
 export async function startTranscription(
   input: StartTranscriptionInput
-): Promise<ScribeResult<{ requestId: string; transcript: ScribeTranscript | null }>> {
+): Promise<
+  ScribeResult<{
+    requestId: string;
+    transcriptionId: string | null;
+    transcript: ScribeTranscript | null;
+  }>
+> {
   const config = input.config ?? getCallStudyConfig();
   if (!config.apiKey) return fail("ELEVENLABS_API_KEY is not set.");
   if (!input.sourceUrl) return fail("No audio URL to transcribe.");
@@ -92,7 +98,16 @@ export async function startTranscription(
     return fail("ElevenLabs returned a response that was not JSON.");
   }
 
+  /**
+   * BOTH ids, because they are not interchangeable and each is the only one that works in its
+   * own place. The webhook body echoes `request_id`, so that is what the inbound lookup keys on.
+   * `GET /speech-to-text/transcripts/{id}` accepts ONLY `transcription_id` and answers 404 for
+   * the other — which is what quietly stopped the reconcile backstop from ever recovering a
+   * call. Verified against the live API: the ack carries
+   * `{ request_id: "59296e04...", transcription_id: "TJGolCb3A5hdZ9vFx8Jy" }`.
+   */
   const requestId = body?.request_id || body?.transcription_id;
+  const transcriptionId = body?.transcription_id ?? null;
   if (!requestId) {
     return fail("ElevenLabs accepted the audio but returned no request id to track it by.");
   }
@@ -101,7 +116,11 @@ export async function startTranscription(
     ok: true,
     // Synchronous calls come back with the transcript attached; async ones do not, and it arrives
     // at the webhook instead.
-    data: { requestId, transcript: input.webhook ? null : (body as ScribeTranscript) },
+    data: {
+      requestId,
+      transcriptionId,
+      transcript: input.webhook ? null : (body as ScribeTranscript),
+    },
   };
 }
 

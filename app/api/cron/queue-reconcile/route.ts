@@ -9,12 +9,11 @@ import { postMeetingNote } from "@/lib/crankwheel/note-job";
 import {
   listStuckTranscriptions,
   listUnanalysedTranscripts,
-  saveTranscript,
   setStatus,
 } from "@/lib/call-study/store";
 import { runAnalysis } from "@/lib/call-study/run-analysis";
 import { fetchTranscript } from "@/lib/call-study/scribe";
-import { computeMetrics, defaultSpeakerMap, wordsToTurns } from "@/lib/call-study/dialogue";
+import { ingestTranscript } from "@/lib/call-study/ingest";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -107,29 +106,34 @@ export async function GET(req: NextRequest) {
   );
   let transcriptsRecovered = 0;
   for (const row of stuck) {
-    if (!row.elevenRequestId) continue;
-    const fetched = await fetchTranscript(row.elevenRequestId);
+    // The TRANSCRIPTION id, not the request id. Fetching by the request id answers 404 for every
+    // call ever made, which is what silently stopped this backstop from recovering anything.
+    if (!row.elevenTranscriptionId) {
+      await setStatus(
+        row.id,
+        "failed",
+        "This call was started before transcripts could be collected by id, and its delivery never arrived. Please upload it again."
+      );
+      continue;
+    }
+    const fetched = await fetchTranscript(row.elevenTranscriptionId);
     if (!fetched.ok) {
       // Say what happened on the row itself. An agent seeing "still transcribing" three days later
       // has no way to tell a slow call from a lost one.
       await setStatus(row.id, "failed", `Transcription did not arrive. ${fetched.error}`);
       continue;
     }
-    const turns = wordsToTurns(fetched.data.words);
-    if (turns.length === 0) {
+    const result = await ingestTranscript({
+      recordingId: row.id,
+      transcript: fetched.data,
+      fallbackDurationSeconds: row.durationSeconds,
+      requestOrigin: req.nextUrl.origin,
+    });
+    if (!result.landed && result.reason === "empty transcript") {
       await setStatus(row.id, "failed", "The transcription came back empty.");
       continue;
     }
-    const recovered = await saveTranscript(row.id, {
-      turns,
-      speakerMap: defaultSpeakerMap(turns),
-      metrics: computeMetrics(turns),
-      languageCode: fetched.data.language_code ?? null,
-      durationSeconds: fetched.data.audio_duration_secs
-        ? Math.round(fetched.data.audio_duration_secs)
-        : row.durationSeconds,
-    });
-    if (recovered) transcriptsRecovered++;
+    if (result.landed) transcriptsRecovered++;
   }
 
   // -- Call Study: analyse transcripts the queue never got to --

@@ -1,0 +1,1 @@
+ALTER TABLE "call_study_recordings" ADD COLUMN "eleven_transcription_id" text;
