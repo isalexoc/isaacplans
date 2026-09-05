@@ -4,6 +4,7 @@ import { getIsAdmin } from "@/lib/auth/admin";
 import { cloudinaryAudioUrl } from "@/lib/call-study/cloudinary";
 import { getCallStudyConfig, isCallStudyConfigured } from "@/lib/call-study/config";
 import { startTranscription } from "@/lib/call-study/scribe";
+import { publishJob } from "@/lib/qstash/client";
 import {
   createRecording,
   listRecordings,
@@ -111,7 +112,23 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: started.error }, { status: 502 });
     }
 
-    await markTranscribing(recording.id, started.data.requestId);
+    await markTranscribing(recording.id, started.data.requestId, started.data.transcriptionId);
+
+    /**
+     * Start asking for the transcript, rather than only waiting to be handed one.
+     *
+     * The webhook carries the whole transcript in its body, and for a two-hour call that is
+     * ~3.8 MB - at Vercel's request-body limit, so the delivery comes back 413 and the account
+     * does not retry. Short calls deliver fine, which is why this only bites the long ones.
+     * The poll is the path that always works; the two race, and saveTranscript is guarded so
+     * whichever loses is a no-op.
+     */
+    await publishJob({
+      path: "/api/queue/call-study-fetch",
+      body: { recordingId: recording.id, attempt: 0 },
+      delaySeconds: 120,
+      requestOrigin: request.nextUrl.origin,
+    });
 
     return NextResponse.json({
       success: true,

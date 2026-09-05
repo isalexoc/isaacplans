@@ -2,6 +2,45 @@
 
 ## Status
 
+Done: **Long calls could never finish transcribing** (branch `fix/call-study-long-calls`, migration
+`0036`). A 113-minute call sat on "transcribing" forever. It was two independent bugs, and each one
+alone would have been survivable.
+
+**1. The id we stored was the wrong one, so the backstop had never worked.** The async ack returns
+BOTH `request_id` (32 hex) and `transcription_id` (20 chars) — verified live:
+`{ request_id: "59296e04…", transcription_id: "TJGolCb3A5hdZ9vFx8Jy" }`. `startTranscription` did
+`request_id || transcription_id`, so the request id always won. The webhook body echoes the request
+id, so inbound lookup worked and everything looked fine — but
+`GET /speech-to-text/transcripts/{id}` accepts ONLY the transcription id and answers 404 for the
+other. Checked against the two calls that had previously *succeeded*: both 404. The daily reconcile
+has therefore never recovered a single call since the feature shipped. Both ids are now stored.
+
+**2. The webhook payload is too big for Vercel.** ElevenLabs sends the entire transcript in the POST
+body — 3.84 MB of word objects for this call — which is at Vercel's serverless request-body limit,
+so it came back **413** before the handler ran. The account has `retry_enabled: false`, so one
+rejection loses it permanently. Confirmed from the account: `most_recent_failure_error_code: 413` at
+17:13:08Z, matching the stuck row to the second. Short calls deliver fine, which is exactly why this
+looked like a working feature — the two calls that succeeded were 55 and 88 minutes.
+
+**The fix is to ask rather than only wait.** A QStash job published when transcription starts polls
+`GET /transcripts/{transcription_id}` on a widening backoff (2, 5, 10, 20, 35, 55 min cumulative).
+The webhook stays as the fast path for calls small enough to deliver; the two race and
+`saveTranscript` is already guarded on the row being `transcribing`, so whichever loses is a no-op.
+Event-driven, so nothing runs and Neon is untouched unless a transcription is actually in flight.
+
+All three arrival paths — webhook, poll, reconcile — now go through one `ingestTranscript`. They
+used not to: the reconcile skipped the speaker-naming pass, so a call recovered that way came back
+labelled "Agent"/"Client" while the same call by webhook came back "Will"/"Dennis".
+
+**Both stuck calls were recovered** from ElevenLabs (797 and 793 turns, Spanish, 113 min) — they are
+the same call uploaded twice, so one is a duplicate and can be deleted.
+
+**`QSTASH_ENABLED` must be `true` in Vercel or the poll never publishes.** It is `false` in local
+`.env`, with all credentials present. Without it a long call now waits for the daily reconcile
+instead of hanging forever — degraded rather than broken, which is what the id fix bought.
+
+---
+
 In progress: **Call Study — the transcript as something you can actually read** (branch
 `feature/call-study-reader`, no migration). The transcription was already right; what came back was
 one monochrome `<pre>` of `Name: text`. Isaac asked for speakers he can tell apart at a glance, the

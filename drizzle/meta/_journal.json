@@ -253,6 +253,13 @@
       "when": 1788295279535,
       "tag": "0035_loving_master_chief",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "5",
+      "when": 1788631747680,
+      "tag": "0036_tough_invisible_woman",
+      "breakpoints": true
     }
   ]
 }

@@ -1,14 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCallStudyConfig } from "@/lib/call-study/config";
 import { verifyElevenLabsSignature } from "@/lib/call-study/webhook-signature";
-import { computeMetrics, defaultSpeakerMap, wordsToTurns } from "@/lib/call-study/dialogue";
-import { proposeSpeakerNames } from "@/lib/call-study/naming";
-import {
-  getRecordingByRequestId,
-  saveTranscript,
-  updateSpeakerMap,
-} from "@/lib/call-study/store";
-import { publishJob } from "@/lib/qstash/client";
+import { getRecordingByRequestId } from "@/lib/call-study/store";
+import { ingestTranscript } from "@/lib/call-study/ingest";
 import type { ScribeTranscript } from "@/lib/call-study/types";
 
 /**
@@ -75,58 +69,16 @@ export async function POST(request: NextRequest) {
     // for a recording we deleted would just repeat forever.
     if (!recording) return NextResponse.json({ ok: true, ignored: "unknown recording" });
 
-    const turns = wordsToTurns(transcript?.words);
-    if (turns.length === 0) {
-      return NextResponse.json({ ok: true, ignored: "empty transcript" });
-    }
-
-    const seeded = defaultSpeakerMap(turns);
-    const landed = await saveTranscript(recording.id, {
-      turns,
-      speakerMap: seeded,
-      metrics: computeMetrics(turns),
-      languageCode: transcript?.language_code ?? null,
-      durationSeconds: transcript?.audio_duration_secs
-        ? Math.round(transcript.audio_duration_secs)
-        : recording.durationSeconds,
-    });
-
-    // A duplicate delivery finds the row already out of `transcribing` and writes nothing. Stopping
-    // here also avoids paying for a second naming call on a transcript that already has names.
-    if (!landed) return NextResponse.json({ ok: true, duplicate: true });
-
-    // Best-effort, and deliberately after the transcript is already durable: if naming fails the
-    // agent still has a complete dialogue labelled Agent/Client.
-    try {
-      const named = await proposeSpeakerNames(turns, seeded);
-      await updateSpeakerMap(recording.id, named);
-    } catch (error) {
-      console.warn("[CALL_STUDY] Speaker naming failed:", error);
-    }
-
-    /**
-     * Hand the analysis to the queue so the call arrives already organised.
-     *
-     * Queued rather than run here: this route is capped at 120 seconds and analysing a long call is
-     * several model calls, so doing it inline would make ElevenLabs time out and redeliver. Queued
-     * rather than fire-and-forget because a dropped request on a serverless platform leaves the row
-     * looking finished but unanalysed with nothing to retry it.
-     *
-     * Published AFTER naming, so the analysis sees real names rather than "Agent"/"Client".
-     *
-     * With QStash off this is a no-op returning null, and the Analyse button remains the way in —
-     * the daily reconcile also picks up anything that never got analysed.
-     */
-    const queued = await publishJob({
-      path: "/api/queue/call-study-analyze",
-      body: { recordingId: recording.id },
+    const result = await ingestTranscript({
+      recordingId: recording.id,
+      transcript,
+      fallbackDurationSeconds: recording.durationSeconds,
       requestOrigin: request.nextUrl.origin,
     });
-    if (!queued) {
-      console.warn("[CALL_STUDY] Analysis not queued for", recording.id, "- QStash unavailable");
-    }
 
-    return NextResponse.json({ ok: true, turns: turns.length, queued: Boolean(queued) });
+    // A duplicate delivery, or one the poll already beat to it, finds the row out of
+    // `transcribing` and writes nothing. Both are successes as far as ElevenLabs is concerned.
+    return NextResponse.json({ ok: true, stored: result.landed, turns: result.turns });
   } catch (error) {
     // A 500 makes ElevenLabs retry, which is what we want for a transient database failure.
     console.error("[CALL_STUDY] Webhook handling failed:", error);
