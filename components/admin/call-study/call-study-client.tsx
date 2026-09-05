@@ -5,6 +5,7 @@ import { AlertCircle, ChevronLeft, FileAudio, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCallStudy, useRecordingDetail } from "@/hooks/use-call-study";
 import type { CallStudyStatus } from "@/lib/call-study/types";
+import type { Objection } from "@/lib/objections/types";
 import CallUploader from "./call-uploader";
 import SnippetLibrary from "./snippet-library";
 import TranscriptView from "./transcript-view";
@@ -27,7 +28,13 @@ const STATUS_CLASS: Record<CallStudyStatus, string> = {
   failed: "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300",
 };
 
-export default function CallStudyClient() {
+export default function CallStudyClient({
+  libraryObjections,
+}: {
+  /** Fetched once on the server page and passed down, so a detected objection can open its
+   *  saved rebuttal without a second round trip. */
+  libraryObjections: Objection[];
+}) {
   const { recordings, loading, error, reload } = useCallStudy();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [tab, setTab] = useState<"calls" | "library">("calls");
@@ -48,6 +55,7 @@ export default function CallStudyClient() {
         ) : recording ? (
           <TranscriptView
             recording={recording}
+            libraryObjections={libraryObjections}
             onChanged={(next) => {
               setRecording(next);
               void reload();

@@ -1,14 +1,21 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Check, Copy, Download, Loader2, Sparkles, Trash2 } from "lucide-react";
+import { Check, Copy, Download, FileText, Loader2, Sparkles, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { renderDialogue, speakerLabel } from "@/lib/call-study/dialogue";
-import { LINES_OF_BUSINESS, type CallOutcome, type SpeakerMap } from "@/lib/call-study/types";
+import {
+  LINES_OF_BUSINESS,
+  type CallOutcome,
+  type SpeakerMap,
+  type SpeakerRole,
+} from "@/lib/call-study/types";
 import type { RecordingDetail } from "@/lib/call-study/store";
+import type { Objection } from "@/lib/objections/types";
 import AnalysisPanel from "./analysis-panel";
+import DialogueReader from "./dialogue-reader";
 
 const OUTCOME_LABELS: Record<CallOutcome, string> = {
   sold: "Sold",
@@ -43,10 +50,13 @@ function formatDuration(seconds: number | null): string {
  */
 export default function TranscriptView({
   recording,
+  libraryObjections,
   onChanged,
   onDeleted,
 }: {
   recording: RecordingDetail;
+  /** The Sanity objection library, so a detected objection can open its saved rebuttal. */
+  libraryObjections: Objection[];
   onChanged: (next: RecordingDetail) => void;
   onDeleted: () => void;
 }) {
@@ -215,18 +225,41 @@ export default function TranscriptView({
               <Label htmlFor={`spk-${id}`} className="text-xs text-muted-foreground">
                 {id}
               </Label>
-              <Input
-                id={`spk-${id}`}
-                className="w-40"
-                value={speakerMap[id]?.name ?? ""}
-                placeholder={speakerLabel(id, null)}
-                onChange={(e) =>
-                  setSpeakerMap((m) => ({
-                    ...m,
-                    [id]: { name: e.target.value, role: m[id]?.role ?? "other" },
-                  }))
-                }
-              />
+              <div className="flex gap-1">
+                <Input
+                  id={`spk-${id}`}
+                  className="w-32"
+                  value={speakerMap[id]?.name ?? ""}
+                  placeholder={speakerLabel(id, null)}
+                  onChange={(e) =>
+                    setSpeakerMap((m) => ({
+                      ...m,
+                      [id]: { name: e.target.value, role: m[id]?.role ?? "other" },
+                    }))
+                  }
+                />
+                {/* Role is not cosmetic: it picks the colour of every line this person speaks and
+                    decides whose words get scanned for objections. Scribe and the naming pass get
+                    it right most of the time, and this is the way to fix it when they do not. */}
+                <select
+                  aria-label={`Role for ${speakerLabel(id, speakerMap)}`}
+                  value={speakerMap[id]?.role ?? "other"}
+                  onChange={(e) =>
+                    setSpeakerMap((m) => ({
+                      ...m,
+                      [id]: {
+                        name: m[id]?.name ?? speakerLabel(id, null),
+                        role: e.target.value as SpeakerRole,
+                      },
+                    }))
+                  }
+                  className="h-10 rounded-md border border-input bg-background px-2 text-sm"
+                >
+                  <option value="agent">Agent</option>
+                  <option value="client">Client</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
             </div>
           ))}
           <Button size="sm" variant="secondary" disabled={savingNames} onClick={saveNames}>
@@ -236,31 +269,53 @@ export default function TranscriptView({
         </div>
       </div>
 
-      {/* The dialogue */}
-      <div className="rounded-lg border bg-white dark:bg-gray-950">
-        <div className="flex flex-wrap items-center justify-between gap-2 border-b p-3">
-          <p className="text-sm font-semibold">Transcript</p>
-          <div className="flex gap-2">
-            <Button size="sm" variant="outline" onClick={copy}>
-              {copied ? <Check className="mr-1 h-4 w-4 text-green-600" /> : <Copy className="mr-1 h-4 w-4" />}
-              {copied ? "Copied" : "Copy"}
-            </Button>
-            <Button size="sm" variant="outline" onClick={download}>
-              <Download className="mr-1 h-4 w-4" /> .txt
-            </Button>
-            <Button size="sm" disabled={analyzing} onClick={analyze}>
-              {analyzing ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Sparkles className="mr-1 h-4 w-4" />}
-              {recording.analysis ? "Re-analyse" : "Analyse"}
-            </Button>
-            <Button size="sm" variant="ghost" className="text-red-600 hover:text-red-700" onClick={remove}>
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </div>
+      {/* Actions on the transcript */}
+      <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border bg-white p-3 dark:bg-gray-950">
+        <p className="text-sm font-semibold">Transcript</p>
+        <div className="flex flex-wrap gap-2">
+          <Button size="sm" variant="outline" onClick={copy}>
+            {copied ? <Check className="mr-1 h-4 w-4 text-green-600" /> : <Copy className="mr-1 h-4 w-4" />}
+            {copied ? "Copied" : "Copy"}
+          </Button>
+          <Button size="sm" variant="outline" onClick={download}>
+            <Download className="mr-1 h-4 w-4" /> .txt
+          </Button>
+          {/* A plain link, not a fetch: the browser opens the PDF in its own viewer, where print
+              and save already work. Building a blob here would only reimplement that badly. */}
+          <Button size="sm" variant="outline" asChild>
+            <a
+              href={`/api/admin/call-study/recordings/${recording.id}/pdf`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <FileText className="mr-1 h-4 w-4" /> PDF
+            </a>
+          </Button>
+          <Button size="sm" disabled={analyzing} onClick={analyze}>
+            {analyzing ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Sparkles className="mr-1 h-4 w-4" />}
+            {recording.analysis ? "Re-analyse" : "Analyse"}
+          </Button>
+          <Button size="sm" variant="ghost" className="text-red-600 hover:text-red-700" onClick={remove}>
+            <Trash2 className="h-4 w-4" />
+          </Button>
         </div>
-        <pre className="max-h-[32rem] overflow-auto whitespace-pre-wrap p-4 font-mono text-sm leading-relaxed">
-          {dialogue}
-        </pre>
       </div>
+
+      {/* The dialogue itself */}
+      <DialogueReader
+        turns={recording.turns}
+        speakerMap={speakerMap}
+        analysis={recording.analysis}
+        audioUrl={recording.audioUrl}
+        languageCode={recording.languageCode}
+        libraryObjections={libraryObjections}
+      />
+
+      {!recording.analysis && (
+        <p className="rounded-lg border border-dashed p-3 text-sm text-muted-foreground">
+          Analyse this call to break it into stages and highlight the objections.
+        </p>
+      )}
 
       {error && <p className="text-sm text-red-600">{error}</p>}
 

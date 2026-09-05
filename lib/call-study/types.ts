@@ -98,11 +98,21 @@ export type CallOutcome = "sold" | "not_sold" | "follow_up" | "unknown";
  * answer is a script fragment on its own.
  */
 
+/**
+ * The stages of a call, in the order they normally happen.
+ *
+ * A superset of the original six. `rapport` and `trial_close` exist because the hello-and-
+ * break-the-ice stretch and the moment of asking for the business are distinct pieces of script
+ * work, and folding them into `opening` and `close` made the segmentation too coarse to study.
+ * Widening is backward compatible: analyses stored before this used only the original six.
+ */
 export type CallPhaseName =
   | "opening"
+  | "rapport"
   | "discovery"
   | "presentation"
   | "objection"
+  | "trial_close"
   | "close"
   | "wrap";
 
@@ -113,6 +123,12 @@ export type CallPhase = {
   endTurn: number;
   note?: string;
 };
+
+/** An explicit blocker, or the softer resistance that is easy to miss and easier to lose. */
+export type ObjectionStrength = "hard" | "soft";
+
+/** Which detector found it. `both` means the model and the trigger library agreed. */
+export type ObjectionSource = "ai" | "library" | "both";
 
 export type CallObjection = {
   /** Short label, e.g. "too expensive". */
@@ -125,6 +141,21 @@ export type CallObjection = {
   agentResponse: string;
   /** Whether the objection appeared to be resolved. Null when the call gives no signal. */
   resolved: boolean | null;
+
+  /* Everything below is OPTIONAL and absent on analyses stored before the reading view landed.
+   * `analysis` is a jsonb column, so widening this type needs no migration — but every renderer
+   * must cope with an older row that has none of it. */
+
+  /** Index into the turn array of the line where the CLIENT raised it. Absent = cannot anchor. */
+  turnIndex?: number;
+  /** Character range of the matched phrase within that turn's text, for the highlight. */
+  quoteRange?: { start: number; end: number };
+  strength?: ObjectionStrength;
+  source?: ObjectionSource;
+  /** Sanity `_id` of the matching objection card, so the saved rebuttal is one click away. */
+  libraryObjectionId?: string | null;
+  /** The trigger phrase that fired, kept for tuning the corpus. Never shown as content. */
+  matchedTrigger?: string | null;
 };
 
 /** The categories the snippet library is organised by. */

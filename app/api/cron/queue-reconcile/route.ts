@@ -6,7 +6,13 @@ import { getStaleJobs } from "@/lib/social-media-studio/video-job-store";
 import { enqueueVideoJobTick } from "@/lib/social-media-studio/video-job-queue";
 import { listMeetingsAwaitingNote } from "@/lib/crankwheel/meetings";
 import { postMeetingNote } from "@/lib/crankwheel/note-job";
-import { listStuckTranscriptions, saveTranscript, setStatus } from "@/lib/call-study/store";
+import {
+  listStuckTranscriptions,
+  listUnanalysedTranscripts,
+  saveTranscript,
+  setStatus,
+} from "@/lib/call-study/store";
+import { runAnalysis } from "@/lib/call-study/run-analysis";
 import { fetchTranscript } from "@/lib/call-study/scribe";
 import { computeMetrics, defaultSpeakerMap, wordsToTurns } from "@/lib/call-study/dialogue";
 
@@ -32,6 +38,12 @@ const MEETING_NOTE_LOOKBACK_DAYS = 3;
  * mean paying for the same transcription twice.
  */
 const TRANSCRIPTION_STUCK_MINUTES = 90;
+
+/** How long a finished transcript may sit unanalysed before this picks it up. */
+const UNANALYSED_MINUTES = 60;
+
+/** Each is several model calls, so the daily run works through a few rather than a backlog. */
+const MAX_ANALYSES_PER_RUN = 3;
 
 /**
  * Daily safety-net reconcile (vercel.json: 0 7 * * *).
@@ -120,6 +132,20 @@ export async function GET(req: NextRequest) {
     if (recovered) transcriptsRecovered++;
   }
 
+  // -- Call Study: analyse transcripts the queue never got to --
+  // Normally the transcript webhook queues this immediately. This is the backstop for QStash
+  // being off or a publish that failed, so a call cannot sit fully transcribed and permanently
+  // unstaged with nothing to say so.
+  const unanalysed = await listUnanalysedTranscripts(
+    new Date(Date.now() - UNANALYSED_MINUTES * 60 * 1000),
+    MAX_ANALYSES_PER_RUN
+  );
+  let callsAnalysed = 0;
+  for (const row of unanalysed) {
+    const analysis = await runAnalysis(row.id);
+    if (analysis.ok) callsAnalysed++;
+  }
+
   return NextResponse.json({
     ok: true,
     kixieProcessed,
@@ -135,5 +161,7 @@ export async function GET(req: NextRequest) {
     meetingNotesPosted,
     transcriptionsStuck: stuck.length,
     transcriptsRecovered,
+    callsAwaitingAnalysis: unanalysed.length,
+    callsAnalysed,
   });
 }

@@ -1,16 +1,16 @@
 "use client";
 
 import { CheckCircle2, HelpCircle, MessageSquareWarning, Target, ThumbsUp, XCircle } from "lucide-react";
+import { stageStyle } from "@/lib/call-study/reading-theme";
 import type { CallAnalysis } from "@/lib/call-study/types";
 
-const PHASE_LABELS: Record<string, string> = {
-  opening: "Opening",
-  discovery: "Discovery",
-  presentation: "Presentation",
-  objection: "Objections",
-  close: "Close",
-  wrap: "Wrap-up",
-};
+/**
+ * Labels come from the shared stage theme rather than a second list here.
+ *
+ * Two copies drift: this one still said six phases after `rapport` and `trial_close` were added,
+ * which would have printed the raw enum value on screen.
+ */
+const phaseLabel = (phase: string): string => stageStyle(phase).label;
 
 function Section({
   title,
@@ -71,7 +71,7 @@ export default function AnalysisPanel({ analysis }: { analysis: CallAnalysis }) 
                 className="rounded-full border bg-muted/40 px-3 py-1 text-xs"
                 title={p.note ?? undefined}
               >
-                {PHASE_LABELS[p.phase] ?? p.phase}
+                {phaseLabel(p.phase)}
                 <span className="ml-1 text-muted-foreground">
                   turns {p.startTurn}–{p.endTurn}
                 </span>

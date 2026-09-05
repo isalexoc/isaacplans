@@ -119,6 +119,46 @@ export function renderDialogue(
 }
 
 /**
+ * Render the dialogue with turn numbers, so a language model can point back into it.
+ *
+ * `offset` is the window's absolute start index, which keeps numbering continuous when a long call
+ * is analysed in several windows — without it each window would restart at zero and a phase in the
+ * third window would claim to begin at turn 0.
+ *
+ * **One line per turn BY CONSTRUCTION, never by splitting rendered text on newlines.** These
+ * numbers are the only thing tying a model's answer back to the transcript: they decide which lines
+ * a stage covers, where an objection is highlighted, and where the audio jumps to. Numbering the
+ * result of `renderDialogue(...).split("\n")` meant one newline inside a single turn's text shifted
+ * every number after it by one — permanently, inside a stored analysis — and it silently depended
+ * on `blankLineBetweenTurns` staying off, since turning it on would have doubled every line count.
+ * Neither failure is visible by eye.
+ */
+export function numberedDialogue(
+  turns: readonly Turn[],
+  speakerMap: SpeakerMap | null,
+  offset = 0
+): string {
+  return turns
+    .map(
+      (turn, i) =>
+        `[${offset + i}] ${speakerLabel(turn.speaker, speakerMap)}: ${flattenToOneLine(turn.text)}`
+    )
+    .join("\n");
+}
+
+/**
+ * Collapse any line break inside a turn to a space.
+ *
+ * `wordsToTurns` joins words with single spaces, so this is a no-op on anything it produces — but
+ * `turns` is a jsonb column read back without revalidation, and audio-event text is vendor prose
+ * rather than a single token. Deliberately narrower than a general whitespace collapse: quotes are
+ * required verbatim, so nothing but the line-breaking characters is touched.
+ */
+function flattenToOneLine(text: string): string {
+  return text.split("\n").join(" ").split("\r").join(" ");
+}
+
+/**
  * Talk-time ratio, word counts and longest monologue.
  *
  * Computed from the timestamps rather than asked of a language model: these are arithmetic, and a
@@ -182,36 +222,62 @@ export function defaultSpeakerMap(turns: readonly Turn[]): SpeakerMap {
   return map;
 }
 
+/** A window of turns, plus where it begins in the original array. */
+export type TurnWindow = {
+  turns: Turn[];
+  /** Absolute index of `turns[0]` in the array that was split. */
+  startIndex: number;
+};
+
 /**
- * Split turns into windows small enough to analyse in one model call.
+ * Split turns into windows small enough to analyse in one model call, keeping absolute positions.
  *
  * A two-hour call fits in context comfortably; a ten-hour one does not. Windows are measured in
  * characters of rendered dialogue and overlap by a couple of turns so an exchange that straddles a
  * boundary is not cut in half — an objection and its rebuttal landing in different windows is
  * exactly the thing that would be missed.
+ *
+ * **`startIndex` is why this function exists.** Because each window after the first REPEATS the
+ * previous window's last `overlapTurns` turns, a caller that numbers windows by accumulating
+ * `window.length` counts those turns twice and drifts +overlapTurns per boundary — which silently
+ * points every phase boundary and every snippet in windows 2..n at the wrong line. Carrying the
+ * true start index makes that class of bug unrepresentable rather than merely fixed.
  */
+export function windowTurnsWithIndex(
+  turns: readonly Turn[],
+  maxChars: number,
+  overlapTurns = 2
+): TurnWindow[] {
+  if (turns.length === 0) return [];
+
+  const windows: TurnWindow[] = [];
+  let current: Turn[] = [];
+  let startIndex = 0;
+  let size = 0;
+
+  turns.forEach((turn, index) => {
+    const cost = turn.text.length + 24; // rough allowance for the speaker label
+    if (current.length > 0 && size + cost > maxChars) {
+      windows.push({ turns: current, startIndex });
+      const carried = current.slice(-overlapTurns);
+      // The carried turns end at `index - 1`, so the new window starts that many turns earlier.
+      startIndex = index - carried.length;
+      current = carried;
+      size = current.reduce((n, t) => n + t.text.length + 24, 0);
+    }
+    current.push(turn);
+    size += cost;
+  });
+
+  if (current.length > 0) windows.push({ turns: current, startIndex });
+  return windows;
+}
+
+/** Just the turns. Kept as the simple shape for callers that do not need absolute positions. */
 export function windowTurns(
   turns: readonly Turn[],
   maxChars: number,
   overlapTurns = 2
 ): Turn[][] {
-  if (turns.length === 0) return [];
-
-  const windows: Turn[][] = [];
-  let current: Turn[] = [];
-  let size = 0;
-
-  for (const turn of turns) {
-    const cost = turn.text.length + 24; // rough allowance for the speaker label
-    if (current.length > 0 && size + cost > maxChars) {
-      windows.push(current);
-      current = current.slice(-overlapTurns);
-      size = current.reduce((n, t) => n + t.text.length + 24, 0);
-    }
-    current.push(turn);
-    size += cost;
-  }
-
-  if (current.length > 0) windows.push(current);
-  return windows;
+  return windowTurnsWithIndex(turns, maxChars, overlapTurns).map((w) => w.turns);
 }
