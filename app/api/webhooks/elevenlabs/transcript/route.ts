@@ -8,6 +8,7 @@ import {
   saveTranscript,
   updateSpeakerMap,
 } from "@/lib/call-study/store";
+import { publishJob } from "@/lib/qstash/client";
 import type { ScribeTranscript } from "@/lib/call-study/types";
 
 /**
@@ -103,7 +104,29 @@ export async function POST(request: NextRequest) {
       console.warn("[CALL_STUDY] Speaker naming failed:", error);
     }
 
-    return NextResponse.json({ ok: true, turns: turns.length });
+    /**
+     * Hand the analysis to the queue so the call arrives already organised.
+     *
+     * Queued rather than run here: this route is capped at 120 seconds and analysing a long call is
+     * several model calls, so doing it inline would make ElevenLabs time out and redeliver. Queued
+     * rather than fire-and-forget because a dropped request on a serverless platform leaves the row
+     * looking finished but unanalysed with nothing to retry it.
+     *
+     * Published AFTER naming, so the analysis sees real names rather than "Agent"/"Client".
+     *
+     * With QStash off this is a no-op returning null, and the Analyse button remains the way in —
+     * the daily reconcile also picks up anything that never got analysed.
+     */
+    const queued = await publishJob({
+      path: "/api/queue/call-study-analyze",
+      body: { recordingId: recording.id },
+      requestOrigin: request.nextUrl.origin,
+    });
+    if (!queued) {
+      console.warn("[CALL_STUDY] Analysis not queued for", recording.id, "- QStash unavailable");
+    }
+
+    return NextResponse.json({ ok: true, turns: turns.length, queued: Boolean(queued) });
   } catch (error) {
     // A 500 makes ElevenLabs retry, which is what we want for a transient database failure.
     console.error("[CALL_STUDY] Webhook handling failed:", error);

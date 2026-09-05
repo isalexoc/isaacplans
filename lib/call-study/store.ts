@@ -5,7 +5,7 @@
  */
 
 import "server-only";
-import { and, desc, eq, inArray, lt, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, isNull, lt, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { db } from "@/lib/db";
 import { callStudyRecordings, callStudySnippets } from "@/lib/db/schema";
@@ -337,6 +337,32 @@ export async function listStuckTranscriptions(olderThan: Date, limit = 25): Prom
       )
     )
     .orderBy(desc(callStudyRecordings.updatedAt))
+    .limit(limit);
+}
+
+/**
+ * Transcripts that finished but were never analysed — the daily reconcile's other work list.
+ *
+ * The analysis is normally queued the moment the transcript lands. This catches the cases where
+ * that could not happen: QStash disabled or unconfigured, a publish that failed, or a delivery
+ * QStash gave up on. Without it those calls sit there fully transcribed and permanently unstaged,
+ * with no signal that anything is missing.
+ *
+ * Deliberately keyed on `analyzedAt is null` rather than on status: a failed analysis puts the row
+ * back to "transcribed" with an error message, and that row genuinely should be retried tomorrow.
+ */
+export async function listUnanalysedTranscripts(olderThan: Date, limit = 10): Promise<RecordingRow[]> {
+  return db
+    .select()
+    .from(callStudyRecordings)
+    .where(
+      and(
+        eq(callStudyRecordings.status, "transcribed"),
+        lt(callStudyRecordings.transcribedAt, olderThan),
+        isNull(callStudyRecordings.analyzedAt)
+      )
+    )
+    .orderBy(desc(callStudyRecordings.transcribedAt))
     .limit(limit);
 }
 

@@ -2,6 +2,78 @@
 
 ## Status
 
+In progress: **Call Study — the transcript as something you can actually read** (branch
+`feature/call-study-reader`, no migration). The transcription was already right; what came back was
+one monochrome `<pre>` of `Name: text`. Isaac asked for speakers he can tell apart at a glance, the
+call broken into the parts of the script he was working, occasional time points rather than a
+timestamp per line, every objection highlighted however small, and a PDF of the finished thing.
+
+**The rule everything else is built around: the words never change.** Highlights are wrappers, not
+rewrites. `splitByHighlights` cuts a turn into runs and a test asserts the runs rejoin into the
+original string character for character — on every turn of the real Scribe fixture. Copy and the
+`.txt` download still go through the untouched `renderDialogue`.
+
+**Two silent bugs found by reading the code, both of which this feature would have made visible.**
+`analyzeCall` numbered its windows with `offset += window.length` while `windowTurns` starts each
+window with the previous one's last two turns — so on any call long enough to need a second window,
+every phase boundary and every snippet drifted **+2 per seam**, and `clampIndex` piled the overflow
+onto the final turn instead of erroring. `windowTurnsWithIndex` now carries each window's true start
+and `windowTurns` is a one-line wrapper over it, so the existing five assertions were untouched.
+Separately, `numberedDialogue` numbered `renderDialogue(...).split("\n")`, so one newline inside a
+single turn would have shifted every number after it — permanently, inside a stored analysis. It is
+now built one line per turn by construction and lives in `dialogue.ts` where it can be tested.
+
+**The stage segmentation paints SHORTEST SPAN LAST, and the first implementation was wrong.** The
+model reliably returns one broad stage with precise pockets inside it — `presentation` over turns
+10-60 containing an `objection` at 32-36. An earlier-start-wins walk read as reasonable and silently
+swallowed every pocket: verified, a nested objection came back as a single `presentation [0-69]`.
+The objection stretch is the most valuable thing on the page. Painting longest-first (so the
+narrower claim keeps its turns) fixes it, and is also order-independent, which latest-arrival-wins
+would not be — the same call re-analysed with a different window size would otherwise segment
+differently. Gaps carry the previous stage forward; a gap before the first stage carries it back.
+No usable phases returns NOTHING rather than inventing an "opening".
+
+**`lib/objections/live-match.ts` is not touched, and the offline scanner does not reuse its
+tokeniser.** Its doc comment at :50-51 and its tests-in-comments at :377 both claim
+`normalizeSpokenText("I can't afford it.")` yields `"i cant afford it"`. **It does not** — verified
+by running it, the apostrophe becomes a SPACE and you get `["i","can","t","afford","it"]`. That
+leaves triggers compiled with a bare `t`, `s` or `m` as a content token, which live is masked by the
+recency floor, the 12s cooldown and fire-once, and offline — where all three are gone — fires on
+"I don't need to decide right now". The scanner folds apostrophes AWAY instead, so "can't" and
+"cant" are one word on both sides and the whole class cannot occur. Measured against the five real
+false-positive sentences: all five clean, all four genuine objections still detected.
+
+**A weak library match cannot stand on its own.** Against the live corpus the trigger "i don't want
+it" reduces to the content pair `[dont, want]` and fired on *"My daughter mostly, I don't want her
+stuck with a bill"* — a buying signal, labelled "I'm not interested". No matcher can separate those
+two uses of the same words, so the split is by role: a weak match on a turn the model ALSO called an
+objection still attaches the library link (the model judged the meaning; only the rebuttal was
+missing), while a weak match alone does not put a new row on the page. After that rule: 5/6 genuine
+objections found standalone, **0 false positives** on six pieces of ordinary call chatter.
+
+**Analysis now runs itself.** The transcript webhook publishes a QStash job rather than analysing
+inline — that route is capped at 120s and a long call is several model calls, so doing it there
+would make ElevenLabs time out and redeliver. Published after the naming pass so the analysis sees
+real names. With QStash off it is a no-op and the button still works; the daily reconcile picks up
+anything left unanalysed for an hour.
+
+Verified: **190/190 offline tests** (up from 71), `tsc --noEmit` clean, **full `pnpm build` green**,
+the objection scanner measured against the real 30-objection Sanity corpus, and the PDF rendered at
+two sizes — 40 turns → 5 pages in 0.5s, 600 turns → 29 pages in 5s, with no pagination runaway. The
+reader itself was screenshotted in light and dark against a synthetic call; dark mode caught the
+transcript text having no explicit colour token of its own, which is now set rather than inherited.
+
+**Not verified, and it needs Isaac:** the page signed in with a real recording (it is behind Clerk +
+an admin check, so it can only be screenshotted through a throwaway route, which was deleted), how
+the PDF actually looks on paper (no PDF rasteriser on this machine — structure is confirmed, visual
+layout is not), and audio playback, which needs a real Cloudinary recording.
+
+**Two corpus gaps worth ten minutes in Sanity, no deploy needed:** "I already have coverage through
+my job" matches no trigger on any objection, and "i don't want it" is loose enough to be worth
+lengthening to something like "i don't want it right now".
+
+---
+
 Done: **Live objection listener** (branch `feature/live-objection-listener`, merged). Phase 2 of the
 objection work: while Isaac is on a call, the client's speech is transcribed live and a matching
 objection card is suggested on screen. Clicking it opens the existing answer dialog.
