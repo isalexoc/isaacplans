@@ -30,7 +30,8 @@
     "warm:media": "tsx --conditions=react-server scripts/warm-cloudinary-media.ts",
     "test:missed-call-drafts": "tsx scripts/test-missed-call-drafts.ts",
     "seed:call-dashboard": "tsx scripts/seed-call-dashboard-fixtures.ts",
-    "postinstall": "node node_modules/ffmpeg-static/install.js"
+    "postinstall": "node node_modules/ffmpeg-static/install.js",
+    "check:objections": "tsx scripts/check-objections.ts"
   },
   "dependencies": {
     "@clerk/localizations": "^3.28.5",

@@ -27,8 +27,23 @@ import { appliesToLob, visibleIn, type Objection } from "./types";
 
 /** ~10-12s of speech: one whole objection utterance, and nothing from the paragraph before it. */
 export const WINDOW_TOKENS = 24;
-/** A match must END in the newer half, so old text cannot fire late once a cooldown lapses. */
-export const RECENCY_TOKENS = 12;
+/**
+ * How late in the window a match may end, so stale text cannot fire once a cooldown lapses.
+ *
+ * **Widened from 12 to 20 after watching it lose real objections on live Spanish calls.** People do
+ * not stop talking after they object — "déjame pensarlo y después yo te llamo para darte una
+ * respuesta porque ahorita no estoy seguro" is one breath, and at 12 the objection had scrolled out
+ * of the recent half before the sentence finished, so nothing fired at all. Measured: the phrase
+ * survived 8 trailing words and was dropped at 14.
+ *
+ * 20 of 24 is still a guard, not a removal — the window is only ~10-12 seconds of speech, so
+ * everything in it is recent by construction, and the first four tokens remain excluded. The reason
+ * it can be this permissive is that `ObjectionFireGate` already refuses to show the same objection
+ * twice in a session, so the case this defends against is narrow: a DIFFERENT objection, suppressed
+ * by a cooldown, firing a few seconds later than it should. That is a card arriving late, which is
+ * better than the objection never arriving at all.
+ */
+export const RECENCY_TOKENS = 20;
 /** Filler tokens tolerated inside an ordered match: "can't REALLY EVEN afford". */
 export const MAX_FILLER_TOKENS = 3;
 export const FIRE_THRESHOLD = 0.7;
@@ -265,6 +280,65 @@ export function scoreWindow(index: LiveTriggerIndex, tokens: string[]): LiveMatc
       endToken: ordered.end,
       matchedTokens: trigger.content.length,
     });
+  }
+
+  return best;
+}
+
+/** How close the heard words came to a trigger, whether or not anything fired. */
+export interface NearestMatch {
+  objectionId: string;
+  trigger: string;
+  /** Share of the trigger's content words present, in order. 0-1. Not a firing score. */
+  coverage: number;
+  /** The words that did line up, for showing which half of a phrase was heard. */
+  matched: string[];
+  /** The words that did not — the ones to consider adding to the corpus. */
+  missing: string[];
+}
+
+/**
+ * The closest trigger to what was heard, IGNORING the fire threshold and the recency floor.
+ *
+ * Diagnostics only, and deliberately separate from `scoreWindow` so it cannot influence what fires.
+ * It exists because the live panel's "closest match" line used to be fed from `scoreWindow`, which
+ * has already discarded everything below the bar — so a genuine near-miss reported as "nothing
+ * resembled that", which is the opposite of the truth and precisely when the agent needs to know.
+ *
+ * Coverage rather than the firing tiers: "you said 3 of the 4 words in 'hablar con mi esposo
+ * primero', missing 'esposo'" tells you what to write in Sanity. A score of 0.4 does not.
+ */
+export function nearestCandidate(index: LiveTriggerIndex, tokens: string[]): NearestMatch | null {
+  if (tokens.length === 0) return null;
+  let best: NearestMatch | null = null;
+
+  for (const trigger of index.triggers) {
+    const needle = trigger.content.length > 0 ? trigger.content : trigger.tokens;
+    if (needle.length === 0) continue;
+
+    // Longest in-order run of the trigger's words present anywhere in the window.
+    let matchedCount = 0;
+    let cursor = 0;
+    const matched: string[] = [];
+    for (const token of tokens) {
+      if (cursor < needle.length && token === needle[cursor]) {
+        matched.push(needle[cursor]);
+        cursor += 1;
+        matchedCount += 1;
+      }
+    }
+
+    const coverage = matchedCount / needle.length;
+    if (coverage === 0) continue;
+    if (best && coverage <= best.coverage) continue;
+
+    best = {
+      objectionId: trigger.objectionId,
+      trigger: trigger.raw,
+      coverage,
+      matched,
+      missing: needle.filter((word) => !matched.includes(word)),
+    };
   }
 
   return best;

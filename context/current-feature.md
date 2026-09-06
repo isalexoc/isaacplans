@@ -2,6 +2,50 @@
 
 ## Status
 
+Done: **Live objection listener was only firing one objection in Spanish** (branch
+`fix/live-objection-coverage`). On real IUL calls in Spanish, "no tengo tiempo" fired and almost
+nothing else did. Measured with the new `pnpm check:objections`: **IUL/es fires 1 of 32 phrasings.
+Final Expense/es fires 18 of the same 32.**
+
+**The cause is scoping, not matching.** Every objection is pinned to exactly one product —
+`linesOfBusiness` is never empty, so nothing is universal. All the classic objections (quiero
+pensarlo, hablar con mi esposa, ya tengo seguro, no me interesa, llámame luego, no llamé,
+información personal, solo comparando, mándeme por correo) live on **finalExpense only**. IUL's
+fourteen are IUL-specific scenarios written as long ALL-CAPS talking points. So on the IUL tab the
+matcher has 109 triggers that describe situations rather than the sentences clients actually say,
+and the one that overlaps is "no tengo tiempo" — exactly the one that worked.
+
+**Price is missing in Spanish everywhere.** `"I can't afford it / I'm on a fixed income"` and
+`"Can you give me a better price?"` have no Spanish title, no Spanish answer and zero Spanish
+triggers, so `visibleIn(o, "es")` excludes them entirely. Price is the most common objection in
+this business and it cannot fire in Spanish on any product.
+
+**Two code fixes, both measured:**
+
+- **The recency guard was eating objections mid-sentence.** A match had to end within the last 12
+  of 24 tokens, but nobody objects in four words and then stops talking. "Déjame pensarlo y después
+  yo te llamo para darte una respuesta porque ahorita no estoy seguro" carries **100% of the
+  trigger's words** and fired nothing. Widened to 20. Verified: identical results on every short
+  phrase, and the rambling case recovered (20/35 → 21/35 on Final Expense). It stays a guard rather
+  than a removal, and it is safe to be this permissive because `ObjectionFireGate` already refuses
+  to show the same objection twice per session.
+- **The "closest match" line could never show a near-miss.** It was fed from `scoreWindow`, which
+  has already discarded everything below the firing bar — so a genuine near-miss displayed as
+  "ninguna objeción se pareció aún", the opposite of the truth and precisely when it is worth
+  reading. It now uses a separate `nearestCandidate` that ignores the threshold and the recency
+  floor, and reports **coverage plus the words that did not match** — which is the wording to add
+  in Studio.
+
+**New: `pnpm check:objections`** runs the real matcher over the live corpus so coverage can be
+audited without making a call. `--lob iul --lang es` for one product, `--phrase "..."` to test a
+single sentence. It also runs ordinary chatter through as a false-positive check.
+
+**The remaining fix is content, not code, and needs no deploy:** clear `linesOfBusiness` on the
+universal Final Expense objections so they apply everywhere. That alone should take IUL/es from
+1/32 to roughly 18/32.
+
+---
+
 Done: **Long calls could never finish transcribing** (branch `fix/call-study-long-calls`, migration
 `0036`). A 113-minute call sat on "transcribing" forever. It was two independent bugs, and each one
 alone would have been survivable.

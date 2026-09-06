@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   buildLiveIndex,
+  nearestCandidate,
   scoreWindow,
   LiveTranscriptWindow,
   ObjectionFireGate,
@@ -61,8 +62,15 @@ export type ListenDiagnostics = {
   heard: string;
   /** Committed segments so far — proves audio is not just arriving but being finalised. */
   committed: number;
-  /** Best-scoring objection for the current window, even when it was below the firing bar. */
-  nearest: { title: string; score: number } | null;
+  /**
+   * How close the heard words came to a trigger, whether or not anything fired.
+   *
+   * Computed by `nearestCandidate`, NOT by `scoreWindow`. It used to come from the latter, which
+   * has already thrown away everything below the firing bar - so a real near-miss displayed as
+   * "nothing resembled that", which is the opposite of the truth and exactly when this line is
+   * worth reading. `missing` names the words to add to the trigger in Studio.
+   */
+  nearest: { title: string; coverage: number; trigger: string; missing: string[] } | null;
   /** Objections currently in scope. Zero means nothing can ever match. */
   candidates: number;
   /** Last message the vendor sent that was not a transcript. */
@@ -211,6 +219,8 @@ export function useLiveObjectionListener({
     const snapshot = win.snapshot();
     const index = buildLiveIndex(objs, activeLob, lang);
     const candidate = scoreWindow(index, snapshot.tokens);
+    // Independent of what fires, so a phrase that missed still reports how close it came.
+    const near = nearestCandidate(index, snapshot.tokens);
 
     // Reported whether or not anything fires: a near-miss with a real score is the difference
     // between "it never heard you" and "your triggers do not cover that phrasing".
@@ -219,13 +229,15 @@ export function useLiveObjectionListener({
       heard: text,
       committed: snapshot.committedCount,
       candidates: index.triggers.length,
-      nearest: candidate
+      nearest: near
         ? {
             title:
-              objs.find((o) => o._id === candidate.objectionId)?.[
+              objs.find((o) => o._id === near.objectionId)?.[
                 lang === "en" ? "titleEn" : "titleEs"
-              ] ?? candidate.objectionId,
-            score: candidate.score,
+              ] ?? near.objectionId,
+            coverage: near.coverage,
+            trigger: near.trigger,
+            missing: near.missing,
           }
         : null,
     }));
