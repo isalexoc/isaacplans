@@ -31,6 +31,7 @@ const COPY = {
     candidates: "objections in scope",
     noCandidates: "none — this product has no objections with trigger phrases in this language",
     nearest: "Closest match",
+    missing: "Words not in any trigger:",
     noNearest: "no objection resembled that yet",
     connection: "Connection",
     fires: "A card appears when a phrase matches closely enough. If you see the right words here but no card, add that wording to the objection's triggers in Studio.",
@@ -44,6 +45,7 @@ const COPY = {
     candidates: "objeciones en alcance",
     noCandidates: "ninguna — este producto no tiene objeciones con frases en este idioma",
     nearest: "Coincidencia más cercana",
+    missing: "Palabras que no están en ningún disparador:",
     noNearest: "ninguna objeción se pareció aún",
     connection: "Conexión",
     fires: "Aparece una tarjeta cuando una frase coincide lo suficiente. Si ves las palabras correctas aquí pero no aparece tarjeta, agrega esa frase a los disparadores de la objeción en Studio.",
@@ -94,8 +96,15 @@ export default function LiveListenPanel({ language, status, diagnostics }: LiveL
               <span className="text-foreground">
                 {nearest.title}{" "}
                 <span className="font-mono tabular-nums text-muted-foreground">
-                  {nearest.score.toFixed(2)}
+                  {Math.round(nearest.coverage * 100)}%
                 </span>
+                {/* The words that did NOT line up are the whole point: they are what to add to
+                    this objection's triggers in Studio so the same sentence fires next time. */}
+                {nearest.missing.length > 0 && (
+                  <span className="block text-amber-700 dark:text-amber-400">
+                    {t.missing} {nearest.missing.join(", ")}
+                  </span>
+                )}
               </span>
             ) : (
               <span className="text-muted-foreground">{t.noNearest}</span>
