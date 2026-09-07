@@ -23,13 +23,24 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   const body: VideoRenderRequest = await req.json();
   const storyboard = body.storyboard;
 
-  if (!storyboard?.scenes?.length) {
+  // A presenter ad needs the recording and nothing else: a take with no cutaways at all still
+  // renders as him with captions and music, which is a real deliverable rather than an error.
+  // A faceless video has nothing to show without its scenes, so it keeps the hard requirement.
+  if (!storyboard?.aRoll && !storyboard?.scenes?.length) {
     return NextResponse.json(
       { success: false, error: "A storyboard with scenes is required. Generate the video images first." },
       { status: 400 },
     );
   }
-  if (storyboard.scenes.some((s) => !s.imageUrl)) {
+  if (storyboard.aRoll && !storyboard.aRoll.publicId) {
+    return NextResponse.json(
+      { success: false, error: "This ad has no usable recording. Upload your take again." },
+      { status: 400 },
+    );
+  }
+  // On a presenter ad a shot without an image is simply dropped from the cut — that stretch is
+  // his face — so only a faceless render has to insist on every scene having one.
+  if (!storyboard.aRoll && storyboard.scenes.some((s) => !s.imageUrl)) {
     return NextResponse.json(
       { success: false, error: "Every scene needs an image. Re-run the image step." },
       { status: 400 },

@@ -98,6 +98,19 @@ export function HistoryVideoGenerator({
         if (!data.success) return [];
         return (data.data.jobs ?? []) as SocialVideoJobView[];
       }}
+      startAroll={async (payload) => {
+        const data = await postJson(`${base}/aroll`, { ...payload, category: sourceCategory });
+        return { jobId: data.jobId as string };
+      }}
+      saveAroll={async (patch) => {
+        const res = await fetch(`${base}/aroll`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(patch),
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error ?? "Could not save");
+      }}
     />
   );
 }

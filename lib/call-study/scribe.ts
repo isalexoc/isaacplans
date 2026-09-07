@@ -36,6 +36,17 @@ export type StartTranscriptionInput = {
   languageCode?: string;
   /** Async delivery. Required for anything long — a two-hour file will not answer in one request. */
   webhook?: boolean;
+  /**
+   * Separate the speakers. On by default because a call has two of them; a single-speaker
+   * recording (a piece to camera, say) gets nothing from the diarizer but its mistakes.
+   */
+  diarize?: boolean;
+  /**
+   * Redact SSNs, card numbers and the rest of REDACTED_ENTITY_TYPES. On by default, and it must
+   * stay that way for calls — see the note above about what this parameter controls. A caller
+   * may only turn it off for audio that is not a client conversation.
+   */
+  redactEntities?: boolean;
   config?: CallStudyConfig;
 };
 
@@ -61,16 +72,21 @@ export async function startTranscription(
   if (!config.apiKey) return fail("ELEVENLABS_API_KEY is not set.");
   if (!input.sourceUrl) return fail("No audio URL to transcribe.");
 
+  const diarize = input.diarize ?? true;
+  const redact = input.redactEntities ?? true;
   const entities = REDACTED_ENTITY_TYPES.join(",");
+
   const form = new FormData();
   form.append("model_id", config.model);
   form.append("source_url", input.sourceUrl);
-  form.append("diarize", "true");
+  form.append("diarize", String(diarize));
   // Labels every word "agent" or "customer" instead of "speaker_0" — the difference between a
   // transcript that reads like a conversation on arrival and one that needs interpreting.
-  form.append("detect_speaker_roles", "true");
-  form.append("entity_detection", entities);
-  form.append("entity_redaction", entities);
+  if (diarize) form.append("detect_speaker_roles", "true");
+  if (redact) {
+    form.append("entity_detection", entities);
+    form.append("entity_redaction", entities);
+  }
   if (input.numSpeakers) form.append("num_speakers", String(input.numSpeakers));
   if (input.languageCode) form.append("language_code", input.languageCode);
   if (input.webhook) form.append("webhook", "true");

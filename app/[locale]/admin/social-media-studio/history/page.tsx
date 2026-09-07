@@ -61,12 +61,20 @@ export default async function SocialHistoryPage() {
           <h1 className="text-2xl font-bold text-foreground">Content History</h1>
           <p className="text-muted-foreground text-sm">{posts.length} packages generated</p>
         </div>
-        <a
-          href="/en/admin/social-media-studio"
-          className="inline-flex items-center gap-1 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-        >
-          + Generate New Post
-        </a>
+        <div className="flex items-center gap-2">
+          <a
+            href="/en/admin/social-media-studio/presenter"
+            className="inline-flex items-center gap-1 rounded-md border border-blue-600 px-4 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/40"
+          >
+            + Presenter Ad
+          </a>
+          <a
+            href="/en/admin/social-media-studio"
+            className="inline-flex items-center gap-1 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+          >
+            + Generate New Post
+          </a>
+        </div>
       </div>
 
       <div className="space-y-3">

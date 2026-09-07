@@ -11,7 +11,7 @@ import type { VeoTier } from "./veo";
  */
 
 /** Which pipeline action this job runs. */
-export type SocialVideoJobKind = "images" | "clip" | "render" | "music";
+export type SocialVideoJobKind = "images" | "clip" | "render" | "music" | "aroll";
 
 /** Lifecycle status (mirrors the call-summary / social-publish tables). */
 export type SocialVideoJobStatus =
@@ -24,6 +24,10 @@ export type SocialVideoJobStatus =
 /** Coarse stage within a job (drives the UI stage checklist). */
 export type SocialVideoJobStep =
   | "queued"
+  // aroll (a recorded take: ingest it, hear it, then plan the story around it)
+  | "ingest"
+  | "transcribe"
+  | "direct"
   // images
   | "storyboard"
   | "images"
@@ -63,6 +67,11 @@ export type SocialVideoJobState = {
   durationSeconds?: number;
   lastError?: string;
   scriptSynced?: boolean; // render already re-synced its narration to the latest saved script (once per job)
+
+  // ── A-roll ──────────────────────────────────────────────────────────────────
+  arollReady?: boolean;      // the take is hosted and its derivations have been kicked off
+  transcriptDone?: boolean;  // never pay ElevenLabs twice for the same take
+  castImageUrl?: string;     // the cast reference, carried between ticks of the images job
 };
 
 /** Self-contained inputs the worker needs (so it never depends on client state). */
@@ -81,6 +90,20 @@ export type SocialVideoJobInput = {
   clipDurationSec?: 4 | 6 | 8;
   // music
   durationSeconds?: number;
+
+  // ── aroll ───────────────────────────────────────────────────────────────────
+  /** The uploaded take, as Cloudinary reported it — the job needs no other source of truth. */
+  aRollUpload?: {
+    publicId:    string;
+    videoUrl:    string;
+    durationSec: number;
+    width?:      number;
+    height?:     number;
+  };
+  brief?:            string;   // optional steer: what he wants this ad to do
+  forceCrop?:        boolean;  // crop to 9:16 in Cloudinary even for a portrait source
+  /** Typed by hand when transcription failed, or to correct a misheard word. */
+  manualTranscript?: string;
 };
 
 /** `resultData` shape for the `images` job (lets a re-entry skip already-built scenes). */

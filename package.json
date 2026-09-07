@@ -17,6 +17,7 @@
     "privatize:licenses": "tsx scripts/privatize-license-images.ts",
     "iul:fields": "tsx scripts/create-iul-intake-fields.ts",
     "iul:step2-fields": "tsx scripts/create-iul-step2-fields.ts",
+    "test:aroll": "tsx scripts/test-aroll-plan.ts",
     "build:ach-directory": "tsx scripts/build-ach-directory.ts",
     "check:ach-directory": "tsx scripts/check-ach-directory.ts",
     "aca:fields": "tsx scripts/create-aca-intake-fields.ts",

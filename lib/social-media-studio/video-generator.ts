@@ -15,8 +15,15 @@ import {
   distributeSceneDurations,
   countWords,
 } from "./script-narration";
+import { VISUAL_DIRECTOR_SYSTEM_PROMPT } from "./prompts";
 import { shotstackProvider } from "./render/shotstack";
-import type { RenderPlan, RenderPlanScene, RenderPlanPresenter } from "./render/types";
+import { CTA_HOLD_SEC, arollAudioUrl, arollDeliveryUrl } from "./aroll";
+import type {
+  RenderPlan,
+  RenderPlanScene,
+  RenderPlanPresenter,
+  RenderPlanTextCard,
+} from "./render/types";
 import type {
   SocialPostSource,
   VideoScript,
@@ -70,35 +77,6 @@ function elevenLabsVoiceFor(locale: SocialLocale): string {
 // onto the end of the video that was never in the script. That is why the rendered Short
 // said things the script did not.)
 
-const VISUAL_DIRECTOR_SYSTEM_PROMPT = `You are a short-form video director for an insurance brand. You are given the FINAL, LOCKED narration of a vertical (9:16) Short, already split into numbered segments. Your ONLY job is to choose the image for each segment.
-
-THE NARRATION IS NOT YOURS TO TOUCH. Do not write, rewrite, translate, shorten, extend, merge, split, reorder or comment on it. Do not return it. You return one visual per segment, nothing else.
-
-DIRECT LIKE A FILMMAKER, NOT A STOCK-PHOTO SEARCH. The images must add up to ONE continuous visual story that carries the script's emotional arc — never a slideshow of unrelated smiling strangers.
-
-Before choosing any image, silently decide these three things and hold them consistent the whole way through:
-1. THE PERSON — one specific human this script is really for, who is a believable customer for THIS exact topic (e.g. a 67-year-old grandmother for final expense; a 34-year-old self-employed carpenter for ACA; a young couple with a new baby for life insurance). Fix their age, build, hair, skin tone and clothing.
-2. THE ARC — where they begin emotionally (a quiet question, an unspoken worry, an ordinary morning), what shifts in the middle, and where they land (relief, control, a protected family). Spread that arc across the segments IN ORDER, matching each image to the words spoken over it.
-3. THE WORLD — one home/neighborhood, one time of day, one color palette that recurs, so the whole video reads as a single film rather than a folder of stock shots.
-
-Rules:
-- Output ONLY valid JSON: { "scenes": [ { "index": number, "onScreenText": string, "imageConcept": string } ] }.
-- Return EXACTLY one entry per narration segment, in order, with "index" matching the segment number you were given.
-- "imageConcept" is a 1-2 sentence photographic description of THIS story beat — the specific moment in your story, not a generic illustration of the topic. Do NOT use the word "insurance". No text, signage or graphics in the scene. ALWAYS written in English (it prompts an image model), whatever language the narration is in.
-- "onScreenText" is a SHORT punchy caption/headline (max ~6 words) for that beat, written in the SAME LANGUAGE as the narration. Title Case. No ending period.
-- CONTINUITY: whenever your person appears, restate the SAME physical details (age, build, hair, skin tone, clothing) so every scene renders recognisably the same human in the same world.
-- SHOT VARIETY — cut like a real edit; do NOT put a face in every frame. AT MOST HALF the scenes should show a person's face. Mix in:
-  - wide establishing shots (the house from the street, a kitchen in morning light, an empty porch)
-  - close detail shots with NO people at all (two mugs on a table, keys by the door, a handwritten note, a child's drawing on the fridge, folded laundry, a framed photo on a shelf, sun moving across a windowsill)
-  - hands only (hands around a warm mug, one hand resting on another, a pen over paper)
-  - from behind or over the shoulder, the person looking out at something
-  - the person alone in a quiet, unguarded moment
-- NEVER a crowd. Never more than 3 people in a frame, and most frames should contain zero or one person.
-- EMOTION: match the beat honestly. Early "problem" beats may be still, quiet and contemplative — that is not sadness, it is truth, and it is what makes the resolution land. Later beats warm and open up. Never a grinning stock-photo reaction, no gasping mouths, no wide-eyed shock, no theatrical surprise.
-- IMAGE SAFETY (hard rule): NEVER describe death, dying, funerals, coffins, caskets, graves, cemeteries, grief, crying, illness, disease, hospital beds, medical procedures, blood, injury or frailty — even if the narration mentions them. For sensitive topics show the life being protected, or a quiet dignified hopeful moment, instead. Quiet and contemplative is welcome; morbid or distressing is forbidden.
-- The FIRST image must be a scroll-stopping hook — an intriguing, specific image, not a talking head.
-- Do not mention you are an AI. Do not add a disclaimer.`;
-
 function buildVisualDirectorPrompt(
   source: SocialPostSource,
   segments: string[],
@@ -135,7 +113,7 @@ export function hashScript(script: Pick<VideoScript, "fullScript">): string {
 // Varied, people-free stand-ins used when the visual director is unavailable or returns
 // short. Cycled so a fallback run still produces a watchable cut instead of ten copies of
 // the same frame.
-const FALLBACK_CONCEPTS = [
+export const FALLBACK_CONCEPTS = [
   "a warm, lived-in family kitchen in soft morning light — two mugs on a wooden table, a folded newspaper, sunlight falling across the counter, no people in the frame",
   "a modest suburban house seen from the street in golden late-afternoon light, no people in the frame",
   "a set of keys and a worn leather wallet resting on a hallway table beside a small potted plant",
@@ -354,7 +332,7 @@ export async function resyncStoryboardNarration(
 // ─── Step 1b: Generate one portrait image per scene (Phase A) ─────────────────────
 
 // Portrait, full-frame cinematic prompt — NO card-overlay composition rules, NO text.
-function buildVideoImagePrompt(concept: string, locale?: string): string {
+export function buildVideoImagePrompt(concept: string, locale?: string): string {
   const mood = pickVariationMood();
   const demographic = getDemographicHint(locale);
   return [
@@ -376,7 +354,7 @@ function buildVideoImagePrompt(concept: string, locale?: string): string {
 // A guaranteed-safe fallback used when a concept is rejected by moderation. Deliberately
 // people-free: figures are what trip the safety filters, and an empty lived-in interior still
 // fits the documentary storytelling look far better than a grinning stock family did.
-const SAFE_FALLBACK_CONCEPT =
+export const SAFE_FALLBACK_CONCEPT =
   "a warm, lived-in family kitchen in soft morning light — two mugs on a wooden table, a folded newspaper, sunlight falling across the counter, no people in the frame";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -865,12 +843,131 @@ async function getShotstackStatus(
   return { status: "done", videoUrl: upload.secure_url };
 }
 
+// ─── A-roll render: Isaac on camera, the AI story cut around him ───────────────────
+
+/**
+ * Trimmed off the end of the timeline.
+ *
+ * Nothing may outrun the decode of the take's final frames — a timeline that ends on the exact
+ * last frame can render a black tail or drop the last word of the CTA. Costing a twentieth of a
+ * second is cheaper than either.
+ */
+const AROLL_TAIL_EPSILON_SEC = 0.05;
+
+/** How long the opening headline holds, when there is room for it before the first cutaway. */
+const HOOK_CARD_MAX_SEC = 4;
+
+/**
+ * Build the render plan for a presenter-on-camera ad.
+ *
+ * The shape is inverted from the faceless path. There, the narration is synthesised and the
+ * scenes are stretched to fill it. Here the recording already exists, it is the audio, and it
+ * decides the length — so the scenes are cutaways placed at the seconds the director chose, and
+ * nothing is derived from word counts at all.
+ */
+async function submitArollRender(storyboard: VideoStoryboard): Promise<{ projectId: string }> {
+  const aRoll = storyboard.aRoll;
+  if (!aRoll) throw new Error("submitArollRender called without a recorded take");
+
+  const category = storyboard.category ?? "general";
+  const cinematic = Boolean(storyboard.cinematic);
+  const durationSec = Math.max(0, round3(aRoll.durationSec - AROLL_TAIL_EPSILON_SEC));
+
+  // Only beats that actually have something to show. A beat whose image generation failed is
+  // simply left out, and that stretch of the ad is his face — which is a perfectly good shot.
+  const scenes: RenderPlanScene[] = storyboard.scenes
+    .map((scene) => {
+      const start = clampSec(scene.startSec ?? 0, 0, durationSec);
+      const length = Math.min(scene.lengthSec ?? 0, durationSec - start);
+      const clip = cinematic && scene.videoClipUrl;
+      return {
+        backgroundUrl: clip ? scene.videoClipUrl! : scene.imageUrl,
+        isVideo:       Boolean(clip),
+        start,
+        length,
+        transition:    true,
+      };
+    })
+    .filter((s) => s.backgroundUrl && s.length >= 0.6);
+
+  const musicUrl = await musicUrlFittingDuration(storyboard, durationSec, category);
+
+  return {
+    projectId: (
+      await shotstackProvider.submit({
+        width:       VIDEO_WIDTH,
+        height:      VIDEO_HEIGHT,
+        fps:         VIDEO_FPS,
+        durationSec,
+        scenes,
+        aRoll: {
+          src:      arollDeliveryUrl(aRoll.publicId, { width: aRoll.width, height: aRoll.height }),
+          audioSrc: aRoll.audioUrl || arollAudioUrl(aRoll.publicId),
+          start:    0,
+          length:   durationSec,
+        },
+        textCards:   buildArollTextCards(storyboard, scenes, durationSec),
+        musicUrl:    musicUrl || musicUrlForCategory(category),
+        // A recorded voice sits differently in a mix than TTS does — it has more low end and less
+        // even level — so the bed goes lower than the faceless default to stay out of its way.
+        musicVolume: 0.08,
+        captions:    subtitlesEnabled(storyboard),
+      })
+    ).jobId,
+  };
+}
+
+/**
+ * The burned-in cards: the opening headline, a kicker over each cutaway, and the closing CTA.
+ *
+ * The hook only holds until the first cutaway takes the frame, and the CTA sits inside the
+ * closing window the director is required to leave on his face — so neither can ever land on top
+ * of a story shot it was not written for.
+ */
+function buildArollTextCards(
+  storyboard: VideoStoryboard,
+  scenes: RenderPlanScene[],
+  durationSec: number
+): RenderPlanTextCard[] {
+  const cards: RenderPlanTextCard[] = [];
+
+  const hook = storyboard.hookText?.trim();
+  if (hook) {
+    const firstCutaway = scenes.length ? scenes[0].start : durationSec;
+    const length = Math.min(HOOK_CARD_MAX_SEC, firstCutaway, durationSec);
+    if (length > 0.8) cards.push({ text: hook, start: 0, length, style: "hook", placement: "top" });
+  }
+
+  storyboard.scenes.forEach((scene) => {
+    const text = scene.onScreenText?.trim();
+    if (!text || scene.startSec === undefined || !scene.lengthSec) return;
+    const start = clampSec(scene.startSec + 0.2, 0, durationSec);
+    const length = Math.min(Math.max(1.2, scene.lengthSec - 0.4), durationSec - start);
+    if (length > 0.8) cards.push({ text, start, length, style: "kicker", placement: "top" });
+  });
+
+  const cta = storyboard.ctaText?.trim();
+  if (cta) {
+    const start = Math.max(0, durationSec - CTA_HOLD_SEC);
+    cards.push({ text: cta, start, length: durationSec - start, style: "cta", placement: "middle" });
+  }
+
+  return cards;
+}
+
+const clampSec = (n: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, round3(n)));
+const round3 = (n: number) => Math.round(n * 1000) / 1000;
+
 // ─── Public render API (provider-switched; default Shotstack) ──────────────────────
 
 export async function submitVideoRender(
   storyboard: VideoStoryboard,
   presenter?: { url: string; durationSec: number; chromaColor?: string }
 ): Promise<{ projectId: string }> {
+  // A recorded take takes precedence over every other mode: there is no narration to synthesise
+  // and no avatar to render, and the legacy JSON2Video path has no way to express this edit.
+  if (storyboard.aRoll) return submitArollRender(storyboard);
+
   return renderProvider() === "json2video"
     ? submitJson2VideoRender(storyboard, presenter)
     : submitShotstackRender(storyboard, presenter);

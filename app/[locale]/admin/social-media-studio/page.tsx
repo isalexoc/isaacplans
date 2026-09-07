@@ -43,6 +43,7 @@ import {
   PLATFORM_LABELS,
   PLATFORM_COPY_LIMITS,
   ALL_PLATFORMS,
+  CATEGORY_OPTIONS,
 } from "@/lib/social-media-studio/types";
 import { PublishToSocialSection } from "@/components/social-publishing/PublishToSocialSection";
 import { VideoGenerator } from "@/components/social-media-studio/VideoGenerator";
@@ -72,19 +73,6 @@ interface StudioState {
 }
 
 // ─── Constants ────────────────────────────────────────────────────────────────
-
-const CATEGORY_OPTIONS = [
-  { value: "aca",                       label: "ACA / Health Plans" },
-  { value: "temporary-health-insurance", label: "Short-Term Health Plans" },
-  { value: "dental-vision",             label: "Dental & Vision Plans" },
-  { value: "hospital-indemnity",        label: "Hospital Benefits" },
-  { value: "iul",                       label: "IUL / Wealth Building" },
-  { value: "final-expense",             label: "Final Expense Plans" },
-  { value: "cancer-plans",              label: "Cancer Protection Plans" },
-  { value: "heart-stroke",              label: "Heart & Stroke Plans" },
-  { value: "general",                   label: "Financial Protection" },
-  { value: "tips-guides",               label: "Planning Tips & Guides" },
-] as const;
 
 const STEPS: { key: StudioStep; label: string }[] = [
   { key: "source", label: "Source" },

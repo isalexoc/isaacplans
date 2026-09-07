@@ -10,7 +10,7 @@ export type SocialPlatform =
 
 export type SocialLocale = "en" | "es";
 
-export type SourceType = "blog_post" | "lead_magnet" | "direct_topic";
+export type SourceType = "blog_post" | "lead_magnet" | "direct_topic" | "presenter_video";
 
 export type SocialPostStatus = "draft" | "published" | "archived";
 
@@ -44,6 +44,20 @@ export const ALL_PLATFORMS: SocialPlatform[] = [
 ];
 
 export const ALL_LOCALES: SocialLocale[] = ["en", "es"];
+
+/** The lines of business a post can be about. Drives music choice, image casting and folders. */
+export const CATEGORY_OPTIONS = [
+  { value: "aca",                       label: "ACA / Health Plans" },
+  { value: "temporary-health-insurance", label: "Short-Term Health Plans" },
+  { value: "dental-vision",             label: "Dental & Vision Plans" },
+  { value: "hospital-indemnity",        label: "Hospital Benefits" },
+  { value: "iul",                       label: "IUL / Wealth Building" },
+  { value: "final-expense",             label: "Final Expense Plans" },
+  { value: "cancer-plans",              label: "Cancer Protection Plans" },
+  { value: "heart-stroke",              label: "Heart & Stroke Plans" },
+  { value: "general",                   label: "Financial Protection" },
+  { value: "tips-guides",               label: "Planning Tips & Guides" },
+] as const;
 
 // ─── Source Content ───────────────────────────────────────────────────────────
 
@@ -125,6 +139,34 @@ export interface VideoScript {
 
 // ─── Generated Video (faceless assembly: images + voiceover + captions) ───────
 
+// ─── A-roll (Isaac on camera) ─────────────────────────────────────────────────
+
+/** One sentence of the recorded clip, with the seconds it occupies. */
+export interface ArollSegment {
+  text:  string;
+  start: number;
+  end:   number;
+}
+
+/**
+ * The recorded presenter clip — Isaac himself, not an avatar.
+ *
+ * Its presence on a storyboard is what switches the whole pipeline into A-roll mode: there is no
+ * TTS, no HeyGen phase, the scenes become sparse cutaways instead of a slideshow, and the video
+ * is exactly as long as this clip.
+ */
+export interface ArollSource {
+  videoUrl:    string;       // Cloudinary original (playback in the studio)
+  publicId:    string;       // Cloudinary public id → audio rendition + 9:16 crop
+  audioUrl:    string;       // ac_mp3 rendition — master speech track AND the caption source
+  durationSec: number;       // from Cloudinary's own upload response, so it is the real length
+  width?:      number;
+  height?:     number;       // width > height → delivered through arollDeliveryUrl()
+  language:    SocialLocale; // detected by Scribe off the audio, not asked for
+  transcript:  string;       // everything he said, verbatim
+  segments:    ArollSegment[]; // sentence-level, for the studio's transcript view
+}
+
 /**
  * A single scene in the auto-generated YouTube Short. Produced by the GPT
  * "video director" step from the existing video script + creative images.
@@ -136,6 +178,20 @@ export interface VideoScene {
   imageConcept: string;    // photographic scene description → drives this scene's image
   imageUrl: string;        // portrait background image (Cloudinary) — filled in Phase A
   videoClipUrl?: string;   // optional Veo cinematic clip (Cloudinary) — used when cinematic on
+
+  // ── A-roll mode only (see ArollSource) ──────────────────────────────────────
+  // In every other mode a scene is one slide of a contiguous slideshow, and its length is
+  // derived from how long its narration takes to say. In A-roll mode a scene is a CUTAWAY over
+  // a recording that is already playing, so it carries its own absolute window instead.
+  role?:      "broll";
+  startSec?:  number;      // seconds from the start of the video
+  lengthSec?: number;      // how long the cutaway holds
+  /**
+   * Does the story's recurring character appear in this shot? Cast shots are generated against
+   * the cast reference image so the same person carries through; detail and establishing shots
+   * (hands, keys, a windowsill) have no face to match and are better off without one.
+   */
+  includesCast?: boolean;
 }
 
 /**
@@ -164,6 +220,15 @@ export interface VideoStoryboard {
                                 // "script changed" (force a fresh avatar render instead of reusing one)
   reuseAssets?: boolean;       // true (default) → check the cross-post asset library for a similar
                                 // image/clip before generating a fresh one (see video-asset-library.ts)
+
+  // ── A-roll mode ─────────────────────────────────────────────────────────────
+  aRoll?:        ArollSource;  // set → Isaac is the presenter and the scenes are cutaways over him
+  castImageUrl?:    string;    // the reference shot every later cast beat is generated against,
+                                // so the same person recurs across the story
+  castDescription?: string;    // that person in words — age, build, hair, clothing
+  castWorld?:       string;    // one home, one time of day, one palette
+  hookText?:     string;       // top-third headline card over the opening seconds
+  ctaText?:      string;       // closing call-to-action card
 }
 
 /**
