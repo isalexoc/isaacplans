@@ -7,7 +7,6 @@ export type IulGetCoveredFieldId =
   | "email"
   | "phone"
   | "retirement_timeline"
-  | "investments"
   | "monthly_savings"
   | "age"
   | "state";

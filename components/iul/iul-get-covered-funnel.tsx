@@ -24,7 +24,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   Command,
@@ -83,18 +82,18 @@ const SAVINGS_LABELS: Record<string, string> = {
   "500-1000": "$500 - $1,000",
   "more-1000": "More than $1,000",
 };
-const INVESTMENT_OPTIONS = [
-  { key: "401k", value: "401(k)" },
-  { key: "ira", value: "IRA" },
-  { key: "cashSavings", value: "Cash Savings" },
-  { key: "activeTrading", value: "Active Trading" },
-  { key: "selfDirected", value: "Self Directed Brokerage Account" },
-  { key: "none", value: "No current investments" },
-] as const;
-
-const QUIZ_STEPS = ["age", "state", "savings", "retirement", "investments"] as const;
+/**
+ * Quiz order. `email` is deliberately LAST: Step 1 asks only for name + phone to cut
+ * friction, so the email is the final ask once the lead is already invested in the flow.
+ */
+const QUIZ_STEPS = ["age", "state", "savings", "retirement", "email"] as const;
 type QuizStep = (typeof QUIZ_STEPS)[number];
 type Phase = "contact" | "quiz" | "done";
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+/** Step 1 collects first name, last name, and phone only — email moved to the last quiz step. */
+const iulStep1ContactSchema = shortTermMedicalFormSchema.omit({ email: true });
 
 export default function IulGetCoveredFunnel({
   heroMedia,
@@ -127,7 +126,6 @@ export default function IulGetCoveredFunnel({
   const [retirementTimeline, setRetirementTimeline] = useState("");
   const [retirementOther, setRetirementOther] = useState("");
   const [monthlySavings, setMonthlySavings] = useState("");
-  const [investments, setInvestments] = useState<string[]>([]);
   const [age, setAge] = useState("");
   const [stateVal, setStateVal] = useState("");
   const [stateOpen, setStateOpen] = useState(false);
@@ -292,10 +290,9 @@ export default function IulGetCoveredFunnel({
     setFieldErrors({});
     trackIulGetCoveredSubmitAttempt({ phase: "contact", locale });
 
-    const parsed = shortTermMedicalFormSchema.safeParse({
+    const parsed = iulStep1ContactSchema.safeParse({
       firstName,
       lastName,
-      email,
       phone,
     });
 
@@ -325,7 +322,6 @@ export default function IulGetCoveredFunnel({
 
       const capFirst = capitalizeName(parsed.data.firstName.trim());
       const capLast = capitalizeName(parsed.data.lastName.trim());
-      const emailNorm = parsed.data.email.trim().toLowerCase();
       const phoneDigits = phoneE164.replace(/\D/g, "");
       const phonePayload =
         phoneDigits.length === 11 && phoneDigits.startsWith("1")
@@ -338,7 +334,8 @@ export default function IulGetCoveredFunnel({
         body: JSON.stringify({
           firstName: capFirst,
           lastName: capLast,
-          email: emailNorm,
+          // No email yet — it is the last quiz question and is appended to this contact by
+          // /api/contact-append-iul. The CRM contact is keyed on phone.
           phone: phonePayload,
           iulLeadGenData: {
             language: isES ? "es" : "en",
@@ -385,8 +382,9 @@ export default function IulGetCoveredFunnel({
 
       setContactId(id);
 
+      // No `em` yet (phone-only Step 1). It is merged in on the last quiz step once the
+      // lead gives their email, which lifts Meta match quality for the same Lead event.
       const userData = {
-        em: emailNorm,
         fn: capFirst.toLowerCase(),
         ln: capLast.toLowerCase(),
         ph: phoneDigits.replace(/^1/, ""),
@@ -433,8 +431,12 @@ export default function IulGetCoveredFunnel({
    * already exists (created in Step 1), so this only enriches it.
    */
   const saveStep2Partial = (partial: Record<string, unknown>) => {
-    if (!contactId || !email.trim()) return;
     const phoneE164 = parsePhoneNumber(phone, "US")?.number;
+    // Phone is the identifier now (Step 1 is phone-only); the endpoint authenticates on it.
+    if (!contactId || !phoneE164) return;
+    // Only send the email once it is a valid address — it is the last question, so every
+    // earlier partial save goes out without one.
+    const emailNorm = email.trim().toLowerCase();
     try {
       void fetch("/api/contact-append-iul", {
         method: "POST",
@@ -442,8 +444,8 @@ export default function IulGetCoveredFunnel({
         keepalive: true,
         body: JSON.stringify({
           contactId,
-          email: email.trim().toLowerCase(),
           phone: phoneE164,
+          ...(EMAIL_REGEX.test(emailNorm) ? { email: emailNorm } : {}),
           ...partial,
         }),
       }).catch(() => {});
@@ -465,8 +467,12 @@ export default function IulGetCoveredFunnel({
           : null;
       case "retirement":
         return retirementValue ? { retirementTimeline: retirementValue } : null;
-      case "investments":
-        return investments.length ? { investments } : null;
+      case "email": {
+        // The email itself rides along on every save (see saveStep2Partial), so this step
+        // only needs to trigger one — an empty object would be dropped by the null check.
+        const emailNorm = email.trim().toLowerCase();
+        return EMAIL_REGEX.test(emailNorm) ? { email: emailNorm } : null;
+      }
       default:
         return null;
     }
@@ -500,8 +506,8 @@ export default function IulGetCoveredFunnel({
           : !!retirementTimeline;
       case "savings":
         return !!monthlySavings;
-      case "investments":
-        return investments.length > 0;
+      case "email":
+        return EMAIL_REGEX.test(email.trim());
       case "age":
         return ageValid;
       case "state":
@@ -519,32 +525,32 @@ export default function IulGetCoveredFunnel({
       goNextQuiz();
       return;
     }
-    if (quizStep === "investments") setQuizError(t("quiz.investmentsError"));
+    if (quizStep === "email") setQuizError(tForm("invalidEmail"));
     else if (quizStep === "age") setQuizError(t("quiz.ageError"));
+    else if (quizStep === "state") setQuizError(t("quiz.stateError"));
     else setQuizError(t("quiz.selectError"));
-  };
-
-  const handleInvestmentToggle = (value: string) => {
-    setQuizError(null);
-    setInvestments((prev) =>
-      prev.includes(value) ? prev.filter((i) => i !== value) : [...prev, value]
-    );
-    trackFieldStartedOnce("investments", "quiz");
   };
 
   const handleQuizSubmit = () => {
     setSubmitError(null);
-    if (!investments.length) {
-      setQuizError(t("quiz.investmentsError"));
+    const emailNorm = email.trim().toLowerCase();
+    if (!EMAIL_REGEX.test(emailNorm)) {
+      setQuizError(tForm("invalidEmail"));
       return;
     }
-    if (!contactId || !email.trim()) {
+    if (!contactId) {
       setSubmitError(t("quiz.sessionError"));
       return;
     }
     if (quizSubmitInFlightRef.current) return;
     quizSubmitInFlightRef.current = true;
     trackIulGetCoveredSubmitAttempt({ phase: "quiz", locale });
+
+    // Store the email for Meta advanced matching now that we finally have it. This does NOT
+    // retroactively improve the Lead already sent in Step 1 (updateAdvancedMatching only
+    // persists to localStorage and is applied on the next pixel init) — it improves matching
+    // on the pages this lead visits afterwards, e.g. the booking calendar.
+    void updateAdvancedMatching({ em: emailNorm });
 
     // Final save: full snapshot + lead_source_details. Background (keepalive) — go to done now.
     saveStep2Partial({
@@ -554,7 +560,6 @@ export default function IulGetCoveredFunnel({
         ? SAVINGS_LABELS[monthlySavings] || monthlySavings
         : undefined,
       retirementTimeline: retirementValue || undefined,
-      investments,
       final: true,
     });
 
@@ -562,7 +567,7 @@ export default function IulGetCoveredFunnel({
     setPhase("done");
   };
 
-  const isLastQuizStep = quizStep === "investments";
+  const isLastQuizStep = quizStep === "email";
 
   return (
     <div className="relative min-h-screen bg-[#f4f6f9] dark:bg-slate-950">
@@ -718,28 +723,6 @@ export default function IulGetCoveredFunnel({
                     {fieldErrors.lastName && (
                       <p className={fieldErrorBase}>{fieldErrors.lastName}</p>
                     )}
-                  </div>
-
-                  <div>
-                    <label className={labelBase}>
-                      {tForm("email")} <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="email"
-                      name="email"
-                      autoComplete="email"
-                      value={email}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        setEmail(value);
-                        trackFieldStartedOnce("email", "contact");
-                        trackFieldCompletedOnce("email", "contact", value.trim().length > 0);
-                        if (value.trim()) clearFieldError("email");
-                      }}
-                      className={cn(inputBase, fieldErrors.email && "border-red-500")}
-                      disabled={loadingContact}
-                    />
-                    {fieldErrors.email && <p className={fieldErrorBase}>{fieldErrors.email}</p>}
                   </div>
 
                   <div>
@@ -909,30 +892,45 @@ export default function IulGetCoveredFunnel({
                         </div>
                       )}
 
-                      {quizStep === "investments" && (
+                      {quizStep === "email" && (
                         <div>
-                          <Label className="mb-1 block text-lg font-semibold text-slate-900 dark:text-white">
-                            {tQuiz("steps.2.title")}
+                          <Label
+                            htmlFor="iul-email"
+                            className="mb-4 block text-lg font-semibold text-slate-900 dark:text-white"
+                          >
+                            {tQuiz("steps.7.title")}
                           </Label>
-                          <p className="mb-4 text-sm text-slate-500 dark:text-slate-400">
-                            {tQuiz("steps.2.subtitle")}
+                          <Input
+                            id="iul-email"
+                            type="email"
+                            name="email"
+                            autoComplete="email"
+                            inputMode="email"
+                            value={email}
+                            onChange={(e) => {
+                              const value = e.target.value;
+                              setEmail(value);
+                              setQuizError(null);
+                              trackFieldStartedOnce("email", "quiz");
+                              trackFieldCompletedOnce(
+                                "email",
+                                "quiz",
+                                EMAIL_REGEX.test(value.trim())
+                              );
+                            }}
+                            onBlur={() => {
+                              // This is the last question, so `handleQuizNext` never runs here.
+                              // Save on blur so an email typed and then abandoned still reaches
+                              // the CRM in real time, exactly like every earlier answer.
+                              const value = email.trim().toLowerCase();
+                              if (EMAIL_REGEX.test(value)) saveStep2Partial({ email: value });
+                            }}
+                            placeholder={tQuiz("steps.7.placeholder")}
+                            className="h-14 text-[17px]"
+                          />
+                          <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">
+                            {t("quiz.emailNote")}
                           </p>
-                          <div className="space-y-3">
-                            {INVESTMENT_OPTIONS.map(({ key, value }) => (
-                              <label
-                                key={key}
-                                htmlFor={`inv-${key}`}
-                                className={optionClass(investments.includes(value))}
-                              >
-                                <Checkbox
-                                  id={`inv-${key}`}
-                                  checked={investments.includes(value)}
-                                  onCheckedChange={() => handleInvestmentToggle(value)}
-                                />
-                                <span className="flex-1">{tQuiz(`steps.2.options.${key}`)}</span>
-                              </label>
-                            ))}
-                          </div>
                         </div>
                       )}
 

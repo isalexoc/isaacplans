@@ -459,7 +459,7 @@ export async function POST(request: NextRequest) {
           '',
           'Contact:',
           `  Name: ${firstName} ${lastName}`,
-          `  Email: ${email}`,
+          `  Email: ${email || 'Not provided (collected in Step 2)'}`,
           `  Phone: ${phone}`,
           '',
           'Lead Details:',
