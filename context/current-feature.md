@@ -2,6 +2,54 @@
 
 ## Status
 
+Done: **IUL get-covered — less Step-1 friction, and the Step-2 CRM fields back** (branch
+`feature/iul-step2-friction-fields`).
+
+**Step 1 now asks for name + phone only.** The email moved to the LAST quiz question, so the
+form the ad traffic lands on is three fields instead of four. This is the same shape the Final
+Expense funnel already ships, and it reuses that funnel's mechanism exactly:
+`shortTermMedicalFormSchema.omit({ email: true })` derived locally — the shared schema is never
+touched, so the other fifteen forms that require an email are unaffected.
+
+**The "What are your current investments?" question is gone** from this funnel. Its translations
+(`iulQuote.form.steps.2.*`) stay, because `/iul/quote` still asks it — only
+`iulGetCoveredPage.funnel.quiz.investmentsError`, which was exclusively the funnel's, was deleted.
+Quiz order is now age → state → savings → retirement → email.
+
+**Moving the email late broke every partial save, and that was the real work.** The whole Step-2
+path was email-gated: `saveStep2Partial` early-returned without one, and `/api/contact-append-iul`
+400'd without one and then called `email.toLowerCase()` unguarded. Since the client swallows those
+errors, this would have silently dropped every answer rather than failing visibly. Phone is now the
+credential end to end — the route requires `contactId + phone`, and the `Boolean(crmEmail) &&`
+prefix on the email check is load-bearing (without it, an absent email would match an absent email
+and make any contact writable by anyone holding an id).
+
+**The email is written to the NATIVE contact field, not a custom one,** and only when the contact
+has none yet — never overwriting. A duplicate-email conflict retries the PUT with the email
+stripped, so it can never cost us the quiz answers. Deliberately NOT a second `/api/create-contact`
+call: that path fires a second Meta CAPI `Lead` with a different eventId (double-counting the
+conversion) and can retarget the write to a different contact record.
+
+**Saved on blur, not just on submit.** The last question never runs `handleQuizNext`, so an email
+typed and then abandoned would only have reached the CRM on final submit. It now saves on blur like
+every other answer.
+
+**CRM fields re-provisioned** (Isaac had deleted them): `IUL Step 2 - Current Age`,
+`Monthly Savings`, `Retirement Timeline`, all live under the existing "IUL Step 2 Ads Form" folder.
+No investments field, and no email field — email and state go to native contact fields.
+
+**`pnpm iul:step2-fields` no longer trusts dead ids.** It used to reuse whatever id was saved in
+`ghl-field-ids.ts` without checking, which is precisely why deleting the fields in the GHL UI left
+the app writing to ids that no longer existed. It now validates each saved id against the live CRM
+and recreates what is gone. The folder is verified by a direct GET, because the list endpoint
+returns only fields in this workspace (279 records, zero folders) — matching a folder by name from
+that list was never possible.
+
+**Open item for Isaac:** IUL ads leads still enrol in `AGENT_CRM_WORKFLOW_IUL`. If that workflow's
+first action sends an email, a phone-only Step-1 contact now hits it with nothing to send.
+
+---
+
 Done: **Live objection listener was only firing one objection in Spanish** (branch
 `fix/live-objection-coverage`). On real IUL calls in Spanish, "no tengo tiempo" fired and almost
 nothing else did. Measured with the new `pnpm check:objections`: **IUL/es fires 1 of 32 phrasings.

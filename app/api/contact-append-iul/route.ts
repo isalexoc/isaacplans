@@ -18,6 +18,10 @@ import { ianaTimezoneFromUsPostalCode } from "@/lib/iana-timezone-from-us-postal
  * contact created in Step 1. Verifies `email`/`phone` match the contact before updating.
  * Fires NO Meta/Pixel/CAPI events — the Lead was already counted in Step 1.
  *
+ * Step 1 is phone-only (name + phone) to cut friction, so partial saves authenticate on
+ * `phone`; the email is collected on the LAST quiz question and written to the NATIVE
+ * contact `email` field here (only when the contact has none yet — never overwritten).
+ *
  * Two modes (same endpoint):
  *  - Partial (default): called fire-and-forget after each question / on back-edit. Overwrites
  *    only the dedicated Step-2 custom fields for the answers present (+ native state/timezone
@@ -43,7 +47,6 @@ export async function POST(request: NextRequest) {
       email,
       phone,
       retirementTimeline,
-      investments,
       monthlySavings,
       age,
       state,
@@ -53,20 +56,31 @@ export async function POST(request: NextRequest) {
       email?: string;
       phone?: string;
       retirementTimeline?: string;
-      investments?: string[];
       monthlySavings?: string;
       age?: string | number;
       state?: string;
       final?: boolean;
     };
 
-    if (!contactId || !email?.trim()) {
+    // Step 1 captures name + phone only and the email is asked on the LAST quiz question, so
+    // every earlier partial save arrives phone-only — phone is the credential here. A bare
+    // `contactId` must never be enough: GHL ids leak through webhooks, exports and the CRM UI,
+    // and this route now writes the native `email` field as well as the quiz answers.
+    if (!contactId || !phone?.trim()) {
       return NextResponse.json(
         {
           success: false,
           error: "Missing required fields",
-          required: ["contactId", "email"],
+          required: ["contactId", "phone"],
         },
+        { status: 400 }
+      );
+    }
+
+    const emailTrimmed = email?.trim() ?? "";
+    if (emailTrimmed && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailTrimmed)) {
+      return NextResponse.json(
+        { success: false, error: "Invalid email" },
         { status: 400 }
       );
     }
@@ -114,7 +128,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const requestedEmail = email.toLowerCase().trim();
+    const requestedEmail = emailTrimmed.toLowerCase();
     const crmEmail = extractCrmEmail(contact);
     const crmPhone = typeof contact.phone === "string" ? contact.phone : "";
     const emailOk = Boolean(crmEmail) && crmEmail === requestedEmail;
@@ -122,9 +136,12 @@ export async function POST(request: NextRequest) {
       Boolean(phone?.trim()) && Boolean(crmPhone) && phonesMatch(phone!, crmPhone);
 
     if (!emailOk && !phoneOk) {
+      // Logged in full because the client call is fire-and-forget: a silent 403 here is the
+      // one way Step-2 answers can vanish with no error surfacing anywhere in the UI.
       console.warn("[contact-append-iul] Auth mismatch:", {
-        requestedEmail,
+        contactId,
         crmEmailPresent: Boolean(crmEmail),
+        crmPhonePresent: Boolean(crmPhone),
         phoneOkAttempted: Boolean(phone?.trim()),
       });
       return NextResponse.json(
@@ -143,11 +160,6 @@ export async function POST(request: NextRequest) {
         : (state || "").trim();
 
     const ageStr = age !== undefined && age !== null ? `${age}`.trim() : "";
-    const investmentsList = Array.isArray(investments)
-      ? investments.filter((i) => typeof i === "string" && i.trim())
-      : [];
-    const formatInvestments = (inv: string[]): string =>
-      inv.length > 0 ? inv.join(", ") : "";
 
     // Native fields: state + derived timezone (state fallback yields e.g. CA → America/Los_Angeles).
     const updatePayload: Record<string, unknown> = {};
@@ -155,6 +167,11 @@ export async function POST(request: NextRequest) {
       updatePayload.state = stateNormalized;
       const tz = ianaTimezoneFromUsPostalCode("", stateNormalized);
       if (tz) updatePayload.timezone = tz;
+    }
+    // Set the email captured on the last quiz question, but only when the contact has none yet
+    // (Step 1 created it phone-only). Never overwrite an email already on the record.
+    if (requestedEmail && !crmEmail) {
+      updatePayload.email = requestedEmail;
     }
 
     // Dedicated Step-2 custom fields — overwrite each present answer (the partial-capture model).
@@ -173,7 +190,6 @@ export async function POST(request: NextRequest) {
     pushField("iul_s2_age", ageStr);
     pushField("iul_s2_retirement_timeline", (retirementTimeline || "").trim());
     pushField("iul_s2_monthly_savings", (monthlySavings || "").trim());
-    pushField("iul_s2_investments", formatInvestments(investmentsList));
 
     // Final submission: append the readable "IUL Step 2" snapshot to lead_source_details.
     if (final === true) {
@@ -199,7 +215,7 @@ export async function POST(request: NextRequest) {
           `  State: ${stateNormalized || "Not provided"}`,
           `  Monthly savings: ${monthlySavings || "Not provided"}`,
           `  Retirement timeline: ${retirementTimeline || "Not provided"}`,
-          `  Current investments: ${formatInvestments(investmentsList) || "Not provided"}`,
+          `  Email: ${requestedEmail || crmEmail || "Not provided"}`,
           "",
           `Step 2 submitted: ${submittedAt}`,
         ].join("\n");
@@ -229,29 +245,50 @@ export async function POST(request: NextRequest) {
     }
 
     const putUrl = `${baseUrl}/contacts/${encodeURIComponent(contactId)}?${q}`;
-    const putRes = await fetch(putUrl, {
+    const putHeaders = {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${piToken}`,
+      Version: "2021-07-28",
+    };
+
+    let putRes = await fetch(putUrl, {
       method: "PUT",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${piToken}`,
-        Version: "2021-07-28",
-      },
+      headers: putHeaders,
       body: JSON.stringify(updatePayload),
     });
 
     if (!putRes.ok) {
       const errText = await putRes.text();
       console.error("[contact-append-iul] CRM PUT failed:", putRes.status, errText);
-      return NextResponse.json(
-        {
-          success: false,
-          error: "Failed to save your answers",
-          details:
-            process.env.NODE_ENV === "development" ? errText.slice(0, 500) : undefined,
-        },
-        { status: 502 }
-      );
+
+      // Retry without `email` — a duplicate-email conflict (the address already belongs to
+      // another contact) must never block saving the quiz answers, which are the critical
+      // data here. The Step-2 email is a best-effort add.
+      if (updatePayload.email != null) {
+        const { email: _droppedEmail, ...withoutEmail } = updatePayload;
+        putRes = await fetch(putUrl, {
+          method: "PUT",
+          headers: putHeaders,
+          body: JSON.stringify(withoutEmail),
+        });
+      }
+
+      if (!putRes.ok) {
+        const err2 = await putRes.text();
+        console.error("[contact-append-iul] CRM PUT retry failed:", putRes.status, err2);
+        return NextResponse.json(
+          {
+            success: false,
+            error: "Failed to save your answers",
+            details:
+              process.env.NODE_ENV === "development" ? err2.slice(0, 500) : undefined,
+          },
+          { status: 502 }
+        );
+      }
+
+      return NextResponse.json({ success: true, updated: true, emailSkipped: true });
     }
 
     return NextResponse.json({ success: true, updated: true });

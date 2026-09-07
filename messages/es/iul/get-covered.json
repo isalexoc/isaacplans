@@ -39,8 +39,8 @@
         "selectError": "Seleccione una opción para continuar.",
         "ageError": "Ingrese una edad válida (18–85).",
         "stateError": "Seleccione su estado.",
-        "investmentsError": "Seleccione al menos una opción.",
-        "sessionError": "Su sesión expiró. Por favor, empiece de nuevo."
+        "sessionError": "Su sesión expiró. Por favor, empiece de nuevo.",
+        "emailNote": "Aquí le enviamos su ilustración personalizada del IUL. Nunca enviamos spam."
       },
       "done": {
         "title": "Listo",

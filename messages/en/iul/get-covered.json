@@ -39,8 +39,8 @@
         "selectError": "Please choose an option to continue.",
         "ageError": "Please enter a valid age (18–85).",
         "stateError": "Please select your state.",
-        "investmentsError": "Please select at least one option.",
-        "sessionError": "Your session expired. Please start again."
+        "sessionError": "Your session expired. Please start again.",
+        "emailNote": "We send your personalized IUL illustration here. No spam, ever."
       },
       "done": {
         "title": "You're all set",
