@@ -19,8 +19,9 @@ import { ianaTimezoneFromUsPostalCode } from "@/lib/iana-timezone-from-us-postal
  * Fires NO Meta/Pixel/CAPI events — the Lead was already counted in Step 1.
  *
  * Step 1 is phone-only (name + phone) to cut friction, so partial saves authenticate on
- * `phone`; the email is collected on the LAST quiz question and written to the NATIVE
- * contact `email` field here (only when the contact has none yet — never overwritten).
+ * `phone`; the email is collected late in the quiz (second-to-last question, before the best
+ * time to call) and written to the NATIVE contact `email` field here — only when the contact
+ * has none yet, never overwritten.
  *
  * Two modes (same endpoint):
  *  - Partial (default): called fire-and-forget after each question / on back-edit. Overwrites
@@ -48,6 +49,7 @@ export async function POST(request: NextRequest) {
       phone,
       retirementTimeline,
       monthlySavings,
+      callTime,
       age,
       state,
       final,
@@ -57,13 +59,14 @@ export async function POST(request: NextRequest) {
       phone?: string;
       retirementTimeline?: string;
       monthlySavings?: string;
+      callTime?: string;
       age?: string | number;
       state?: string;
       final?: boolean;
     };
 
-    // Step 1 captures name + phone only and the email is asked on the LAST quiz question, so
-    // every earlier partial save arrives phone-only — phone is the credential here. A bare
+    // Step 1 captures name + phone only and the email is asked late in the quiz, so most
+    // partial saves arrive phone-only — phone is the credential here. A bare
     // `contactId` must never be enough: GHL ids leak through webhooks, exports and the CRM UI,
     // and this route now writes the native `email` field as well as the quiz answers.
     if (!contactId || !phone?.trim()) {
@@ -190,6 +193,7 @@ export async function POST(request: NextRequest) {
     pushField("iul_s2_age", ageStr);
     pushField("iul_s2_retirement_timeline", (retirementTimeline || "").trim());
     pushField("iul_s2_monthly_savings", (monthlySavings || "").trim());
+    pushField("iul_s2_call_time", (callTime || "").trim());
 
     // Final submission: append the readable "IUL Step 2" snapshot to lead_source_details.
     if (final === true) {
@@ -216,6 +220,7 @@ export async function POST(request: NextRequest) {
           `  Monthly savings: ${monthlySavings || "Not provided"}`,
           `  Retirement timeline: ${retirementTimeline || "Not provided"}`,
           `  Email: ${requestedEmail || crmEmail || "Not provided"}`,
+          `  Best time to call: ${callTime || "Not provided"}`,
           "",
           `Step 2 submitted: ${submittedAt}`,
         ].join("\n");

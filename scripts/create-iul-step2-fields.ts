@@ -67,6 +67,11 @@ const SPECS: FieldSpec[] = [
     name: `${FIELD_PREFIX}Retirement Timeline`,
     dataType: "TEXT",
   },
+  {
+    slug: "iul_s2_call_time",
+    name: `${FIELD_PREFIX}Best Time to Call`,
+    dataType: "TEXT",
+  },
 ];
 
 type CrmRecord = {

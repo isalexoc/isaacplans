@@ -8,6 +8,7 @@ export type IulGetCoveredFieldId =
   | "phone"
   | "retirement_timeline"
   | "monthly_savings"
+  | "call_time"
   | "age"
   | "state";
 
