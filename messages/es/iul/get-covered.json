@@ -50,8 +50,12 @@
             "afternoon": "En la tarde",
             "specific": "Una hora específica"
           },
-          "specificLabel": "Mejor hora para llamar",
-          "note": "Isaac hará lo posible por llamarte en el horario que elijas."
+          "note": "Isaac hará lo posible por llamarte en el horario que elijas.",
+          "picker": {
+            "hour": "Hora",
+            "minutes": "Minutos",
+            "period": "AM / PM"
+          }
         }
       },
       "done": {

@@ -2,6 +2,7 @@
 
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import HeroMedia from "@/components/media/hero-media";
+import TimeOfDayPicker from "@/components/iul/time-of-day-picker";
 import type { HeroMedia as HeroMediaValue } from "@/lib/page-media/shared";
 import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
@@ -1004,11 +1005,9 @@ export default function IulGetCoveredFunnel({
                             ))}
                           </RadioGroup>
                           {callTime === "specific" && (
-                            <Input
-                              type="time"
+                            <TimeOfDayPicker
                               value={callTimeSpecific}
-                              onChange={(e) => {
-                                const value = e.target.value;
+                              onChange={(value) => {
                                 setCallTimeSpecific(value);
                                 setQuizError(null);
                                 if (value.trim()) {
@@ -1016,9 +1015,11 @@ export default function IulGetCoveredFunnel({
                                   saveStep2Partial({ callTime: formatTimeForCrm(value) });
                                 }
                               }}
-                              aria-label={t("quiz.callTime.specificLabel")}
-                              className="mt-3 h-14 text-[17px]"
-                              autoFocus
+                              labels={{
+                                hour: t("quiz.callTime.picker.hour"),
+                                minutes: t("quiz.callTime.picker.minutes"),
+                                period: t("quiz.callTime.picker.period"),
+                              }}
                             />
                           )}
                           <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">

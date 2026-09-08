@@ -50,8 +50,12 @@
             "afternoon": "In the afternoon",
             "specific": "A specific time"
           },
-          "specificLabel": "Best time to call",
-          "note": "Isaac will do his best to call you in the window you pick."
+          "note": "Isaac will do his best to call you in the window you pick.",
+          "picker": {
+            "hour": "Hour",
+            "minutes": "Minutes",
+            "period": "AM / PM"
+          }
         }
       },
       "done": {
