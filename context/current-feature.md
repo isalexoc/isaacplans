@@ -79,9 +79,15 @@ conversion) and can retarget the write to a different contact record.
 typed and then abandoned would only have reached the CRM on final submit. It now saves on blur like
 every other answer.
 
+**A final "best time to call" question** closes the quiz: In the morning / Around midday / In the
+afternoon / A specific time, where the last option reveals a native time picker (mirrors the
+retirement "Other" pattern). The picked time is normalised to `3:30 PM` before it reaches the CRM.
+The Spanish copy is in `tú` to match the quiz questions around it — the page chrome stays `usted`.
+
 **CRM fields re-provisioned** (Isaac had deleted them): `IUL Step 2 - Current Age`,
-`Monthly Savings`, `Retirement Timeline`, all live under the existing "IUL Step 2 Ads Form" folder.
-No investments field, and no email field — email and state go to native contact fields.
+`Monthly Savings`, `Retirement Timeline`, plus the new `Best Time to Call`, all live under the
+existing "IUL Step 2 Ads Form" folder. No investments field, and no email field — email and state
+go to native contact fields.
 
 **`pnpm iul:step2-fields` no longer trusts dead ids.** It used to reuse whatever id was saved in
 `ghl-field-ids.ts` without checking, which is precisely why deleting the fields in the GHL UI left

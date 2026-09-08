@@ -18,7 +18,8 @@
 export type IulStep2FieldSlug =
   | "iul_s2_age"
   | "iul_s2_retirement_timeline"
-  | "iul_s2_monthly_savings";
+  | "iul_s2_monthly_savings"
+  | "iul_s2_call_time";
 
 /** GHL custom-field folder that groups all IUL Step-2 ads fields. Set by the provisioning script. */
 export const iulStep2FolderId = "FYCxx4vnSJranT6mRexW";
@@ -27,6 +28,7 @@ export const iulStep2FieldIds: Record<IulStep2FieldSlug, string> = {
   iul_s2_age: "OssicR5p76fhCJ33ffuZ",
   iul_s2_retirement_timeline: "zyID3z4a30eAVGObluts",
   iul_s2_monthly_savings: "m614d9NL5N5ZV9QCA0xY",
+  iul_s2_call_time: "bciIJfx3QBiZ1Nm8M6pb",
 };
 
 /** Optional per-field env overrides (set in .env to skip the live lookup / script). */
@@ -35,6 +37,7 @@ const ENV_OVERRIDES: Record<IulStep2FieldSlug, string | undefined> = {
   iul_s2_retirement_timeline:
     process.env.AGENT_CRM_CUSTOM_FIELD_IUL_S2_RETIREMENT_TIMELINE_ID,
   iul_s2_monthly_savings: process.env.AGENT_CRM_CUSTOM_FIELD_IUL_S2_MONTHLY_SAVINGS_ID,
+  iul_s2_call_time: process.env.AGENT_CRM_CUSTOM_FIELD_IUL_S2_CALL_TIME_ID,
 };
 
 /** Resolve a Step-2 custom field id: env override first, then the provisioned config id. */

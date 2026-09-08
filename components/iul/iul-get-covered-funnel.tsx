@@ -82,11 +82,31 @@ const SAVINGS_LABELS: Record<string, string> = {
   "500-1000": "$500 - $1,000",
   "more-1000": "More than $1,000",
 };
+/** Best time to call. "specific" reveals a time picker, mirroring the retirement "other" option. */
+const CALL_TIME_OPTIONS = ["morning", "midday", "afternoon", "specific"] as const;
+const CALL_TIME_LABELS: Record<string, string> = {
+  morning: "Morning (8am - 12pm)",
+  midday: "Midday (12pm - 2pm)",
+  afternoon: "Afternoon (2pm - 6pm)",
+};
+
+/** "14:30" → "2:30 PM" so the CRM note reads the way Isaac reads it. */
+function formatTimeForCrm(value: string): string {
+  const trimmed = value.trim();
+  const match = /^(\d{1,2}):(\d{2})$/.exec(trimmed);
+  if (!match) return trimmed;
+  const hours = Number(match[1]);
+  if (!Number.isFinite(hours) || hours > 23) return trimmed;
+  const period = hours >= 12 ? "PM" : "AM";
+  const hour12 = hours % 12 === 0 ? 12 : hours % 12;
+  return `${hour12}:${match[2]} ${period}`;
+}
+
 /**
- * Quiz order. `email` is deliberately LAST: Step 1 asks only for name + phone to cut
- * friction, so the email is the final ask once the lead is already invested in the flow.
+ * Quiz order. Step 1 asks only for name + phone to cut friction, so the email comes late —
+ * once the lead is already invested — and the best time to call is the final ask.
  */
-const QUIZ_STEPS = ["age", "state", "savings", "retirement", "email"] as const;
+const QUIZ_STEPS = ["age", "state", "savings", "retirement", "email", "callTime"] as const;
 type QuizStep = (typeof QUIZ_STEPS)[number];
 type Phase = "contact" | "quiz" | "done";
 
@@ -126,6 +146,8 @@ export default function IulGetCoveredFunnel({
   const [retirementTimeline, setRetirementTimeline] = useState("");
   const [retirementOther, setRetirementOther] = useState("");
   const [monthlySavings, setMonthlySavings] = useState("");
+  const [callTime, setCallTime] = useState("");
+  const [callTimeSpecific, setCallTimeSpecific] = useState("");
   const [age, setAge] = useState("");
   const [stateVal, setStateVal] = useState("");
   const [stateOpen, setStateOpen] = useState(false);
@@ -425,6 +447,12 @@ export default function IulGetCoveredFunnel({
       ? retirementOther.trim()
       : RETIREMENT_LABELS[retirementTimeline] || retirementTimeline;
 
+  /** Readable best-time-to-call answer ("A specific time" → the picked time, e.g. "3:30 PM"). */
+  const callTimeValue =
+    callTime === "specific"
+      ? formatTimeForCrm(callTimeSpecific)
+      : CALL_TIME_LABELS[callTime] || callTime;
+
   /**
    * Fire-and-forget background save of Step-2 answers to the CRM. Never awaited, errors
    * swallowed, `keepalive` so it completes even if the user navigates away. The contact
@@ -473,6 +501,8 @@ export default function IulGetCoveredFunnel({
         const emailNorm = email.trim().toLowerCase();
         return EMAIL_REGEX.test(emailNorm) ? { email: emailNorm } : null;
       }
+      case "callTime":
+        return callTimeValue ? { callTime: callTimeValue } : null;
       default:
         return null;
     }
@@ -508,6 +538,8 @@ export default function IulGetCoveredFunnel({
         return !!monthlySavings;
       case "email":
         return EMAIL_REGEX.test(email.trim());
+      case "callTime":
+        return callTime === "specific" ? callTimeSpecific.trim().length > 0 : !!callTime;
       case "age":
         return ageValid;
       case "state":
@@ -526,6 +558,7 @@ export default function IulGetCoveredFunnel({
       return;
     }
     if (quizStep === "email") setQuizError(tForm("invalidEmail"));
+    else if (quizStep === "callTime") setQuizError(t("quiz.callTimeError"));
     else if (quizStep === "age") setQuizError(t("quiz.ageError"));
     else if (quizStep === "state") setQuizError(t("quiz.stateError"));
     else setQuizError(t("quiz.selectError"));
@@ -536,6 +569,10 @@ export default function IulGetCoveredFunnel({
     const emailNorm = email.trim().toLowerCase();
     if (!EMAIL_REGEX.test(emailNorm)) {
       setQuizError(tForm("invalidEmail"));
+      return;
+    }
+    if (!callTimeValue) {
+      setQuizError(t("quiz.callTimeError"));
       return;
     }
     if (!contactId) {
@@ -560,6 +597,7 @@ export default function IulGetCoveredFunnel({
         ? SAVINGS_LABELS[monthlySavings] || monthlySavings
         : undefined,
       retirementTimeline: retirementValue || undefined,
+      callTime: callTimeValue || undefined,
       final: true,
     });
 
@@ -567,7 +605,7 @@ export default function IulGetCoveredFunnel({
     setPhase("done");
   };
 
-  const isLastQuizStep = quizStep === "email";
+  const isLastQuizStep = quizStep === "callTime";
 
   return (
     <div className="relative min-h-screen bg-[#f4f6f9] dark:bg-slate-950">
@@ -919,9 +957,8 @@ export default function IulGetCoveredFunnel({
                               );
                             }}
                             onBlur={() => {
-                              // This is the last question, so `handleQuizNext` never runs here.
-                              // Save on blur so an email typed and then abandoned still reaches
-                              // the CRM in real time, exactly like every earlier answer.
+                              // Save on blur as well as on Next, so an email typed and then
+                              // abandoned before pressing the button still reaches the CRM.
                               const value = email.trim().toLowerCase();
                               if (EMAIL_REGEX.test(value)) saveStep2Partial({ email: value });
                             }}
@@ -930,6 +967,62 @@ export default function IulGetCoveredFunnel({
                           />
                           <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">
                             {t("quiz.emailNote")}
+                          </p>
+                        </div>
+                      )}
+
+                      {quizStep === "callTime" && (
+                        <div>
+                          <Label className="mb-4 block text-lg font-semibold text-slate-900 dark:text-white">
+                            {t("quiz.callTime.title")}
+                          </Label>
+                          <RadioGroup
+                            value={callTime}
+                            onValueChange={(value) => {
+                              setCallTime(value);
+                              setQuizError(null);
+                              trackFieldStartedOnce("call_time", "quiz");
+                              if (value === "specific") {
+                                // Wait for the picked time before saving (mirrors "Other" above).
+                                return;
+                              }
+                              setCallTimeSpecific("");
+                              trackFieldCompletedOnce("call_time", "quiz", true);
+                              saveStep2Partial({ callTime: CALL_TIME_LABELS[value] || value });
+                            }}
+                            className="space-y-3"
+                          >
+                            {CALL_TIME_OPTIONS.map((opt) => (
+                              <label
+                                key={opt}
+                                htmlFor={`call-${opt}`}
+                                className={optionClass(callTime === opt)}
+                              >
+                                <RadioGroupItem value={opt} id={`call-${opt}`} />
+                                <span className="flex-1">{t(`quiz.callTime.options.${opt}`)}</span>
+                              </label>
+                            ))}
+                          </RadioGroup>
+                          {callTime === "specific" && (
+                            <Input
+                              type="time"
+                              value={callTimeSpecific}
+                              onChange={(e) => {
+                                const value = e.target.value;
+                                setCallTimeSpecific(value);
+                                setQuizError(null);
+                                if (value.trim()) {
+                                  trackFieldCompletedOnce("call_time", "quiz", true);
+                                  saveStep2Partial({ callTime: formatTimeForCrm(value) });
+                                }
+                              }}
+                              aria-label={t("quiz.callTime.specificLabel")}
+                              className="mt-3 h-14 text-[17px]"
+                              autoFocus
+                            />
+                          )}
+                          <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">
+                            {t("quiz.callTime.note")}
                           </p>
                         </div>
                       )}

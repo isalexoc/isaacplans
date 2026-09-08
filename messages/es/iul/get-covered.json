@@ -40,7 +40,19 @@
         "ageError": "Ingrese una edad válida (18–85).",
         "stateError": "Seleccione su estado.",
         "sessionError": "Su sesión expiró. Por favor, empiece de nuevo.",
-        "emailNote": "Aquí le enviamos su ilustración personalizada del IUL. Nunca enviamos spam."
+        "emailNote": "Aquí te enviamos tu ilustración personalizada del IUL. Nunca enviamos spam.",
+        "callTimeError": "Por favor indícanos a qué hora llamarte.",
+        "callTime": {
+          "title": "Y por último, cuéntanos: ¿en qué horario es mejor llamarte?",
+          "options": {
+            "morning": "En la mañana",
+            "midday": "Al mediodía",
+            "afternoon": "En la tarde",
+            "specific": "Una hora específica"
+          },
+          "specificLabel": "Mejor hora para llamar",
+          "note": "Isaac hará lo posible por llamarte en el horario que elijas."
+        }
       },
       "done": {
         "title": "Listo",
