@@ -1,4 +1,9 @@
-import type { RenderPlan, RenderProviderStatus, VideoRenderProvider } from "./types";
+import type {
+  RenderPlan,
+  RenderPlanTextCard,
+  RenderProviderStatus,
+  VideoRenderProvider,
+} from "./types";
 import { RenderPermanentError } from "./errors";
 
 // ─── Shotstack render provider ────────────────────────────────────────────────────
@@ -25,6 +30,9 @@ const CAPTION_ACTIVE_COLOR = process.env.SHOTSTACK_CAPTION_ACTIVE || "#00B4D8"; 
 // Each mode takes an optional env override for fine-tuning; otherwise the value is computed.
 const CAPTION_BOTTOM_OFFSET    = envNum("SHOTSTACK_CAPTION_BOTTOM_OFFSET") ?? 0.06;      // faceless: up from bottom
 const CAPTION_PRESENTER_OFFSET = envNum("SHOTSTACK_CAPTION_PRESENTER_OFFSET");           // presenter override (else computed)
+// A-roll: he fills the frame, so captions sit a little higher than the faceless default to clear
+// the platform's own UI (the caption/CTA furniture Reels and TikTok draw over the bottom edge).
+const CAPTION_AROLL_OFFSET     = envNum("SHOTSTACK_CAPTION_AROLL_OFFSET") ?? 0.12;
 // The caption clip's box height bounds how much text a caption page can show. ~1.5em per line
 // at CAPTION_SIZE caps pages at ~2 short lines instead of a 5-6 line wall covering the frame.
 const CAPTION_MAX_LINES     = Number(process.env.SHOTSTACK_CAPTION_MAX_LINES) || 2;
@@ -125,10 +133,15 @@ function presenterCaptionOffsetY(plan: RenderPlan, boxHeightPx: number): number 
 function richCaptionClip(plan: RenderPlan): Record<string, any> {
   const boxHeightPx = CAPTION_SIZE * 1.5 * CAPTION_MAX_LINES;
   const withPresenter = Boolean(plan.presenter);
-  // Presenter → clear band above the avatar's head (env override wins). Faceless → bottom edge.
-  const offsetY = withPresenter
-    ? (CAPTION_PRESENTER_OFFSET ?? presenterCaptionOffsetY(plan, boxHeightPx))
-    : CAPTION_BOTTOM_OFFSET;
+  // A-roll → the plan decides (he is full frame, so the bottom band is the only clear one).
+  // Corner presenter → the clear band above the avatar's head (env override wins).
+  // Faceless → bottom edge.
+  const offsetY = plan.aRoll
+    ? (plan.captionOffsetY ?? CAPTION_AROLL_OFFSET)
+    : withPresenter
+      ? (CAPTION_PRESENTER_OFFSET ?? presenterCaptionOffsetY(plan, boxHeightPx))
+      : CAPTION_BOTTOM_OFFSET;
+  const vertical = plan.captionPlacement ?? (plan.aRoll ? "bottom" : withPresenter ? "middle" : "bottom");
   return {
     asset: {
       type:      "rich-caption",
@@ -138,7 +151,7 @@ function richCaptionClip(plan: RenderPlan): Record<string, any> {
       stroke:    { width: 6, color: "#000000" },
       active:    { font: { color: CAPTION_ACTIVE_COLOR } },
       animation: { style: "karaoke" },
-      align:     { horizontal: "center", vertical: withPresenter ? "middle" : "bottom" },
+      align:     { horizontal: "center", vertical },
     },
     start:  0,
     length: "end",
@@ -173,8 +186,125 @@ function presenterClip(plan: RenderPlan): Record<string, any> {
   };
 }
 
+// ─── A-roll mode: the presenter is a real recording, not an avatar ────────────────
+// Track order (Shotstack renders the FIRST track on top):
+//   1. text cards      — hook headline, per-beat kickers, closing CTA
+//   2. karaoke captions— aliased to the speech track below
+//   3. cutaways        — the AI story, silent, dissolving in and out
+//   4. the take        — full frame, MUTED; this is the picture between cutaways
+//   5. speech          — the take's audio as its own track, aliased "speech"
+//   6. music           — under everything
+//
+// The audio is a separate track from the picture on purpose. Sync is then not something that can
+// drift: there is one continuous audio clip from 0 to the end, and covering the picture above it
+// cannot touch it. It also gives the rich-caption one unambiguous source to transcribe, which is
+// what keeps captions in whichever language he actually spoke.
+
+const CARD_FONT = process.env.SHOTSTACK_CARD_FONT || CAPTION_FONT;
+const HOOK_COLOR = process.env.SHOTSTACK_HOOK_COLOR || "#FFD400";   // the reference ad's yellow
+const CTA_COLOR  = process.env.SHOTSTACK_CTA_COLOR  || "#FFFFFF";
+const CTA_BG     = process.env.SHOTSTACK_CTA_BG     || "#0077B6";   // brand blue
+
+const CARD_SPEC = {
+  //            size  weight  colour       y offset (fraction of frame, +up)
+  hook:   { size: 72, weight: 900, color: HOOK_COLOR, offsetY:  0.30 },
+  kicker: { size: 54, weight: 800, color: "#FFFFFF",  offsetY:  0.26 },
+  cta:    { size: 68, weight: 900, color: CTA_COLOR,  offsetY: -0.18 },
+} as const;
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function buildTimeline(plan: RenderPlan): Record<string, any> {
+function textCardClip(plan: RenderPlan, card: RenderPlanTextCard): Record<string, any> {
+  const spec = CARD_SPEC[card.style];
+  const lines = Math.max(1, card.text.split(/\r?\n/).length);
+  return {
+    asset: {
+      type:   "rich-text",
+      text:   card.text,
+      font:   { family: CARD_FONT, color: spec.color, size: spec.size, weight: spec.weight },
+      stroke: { width: 8, color: "#000000" },
+      // Only the CTA gets a filled plate. On the hook a plate competes with the face behind it;
+      // on the CTA it is the point — it has to read as a button.
+      ...(card.style === "cta"
+        ? { background: { color: CTA_BG, padding: 28, borderRadius: 24, opacity: 0.92 } }
+        : {}),
+      align: { horizontal: "center", vertical: card.placement },
+    },
+    start:      round(card.start),
+    length:     round(card.length),
+    width:      Math.round(plan.width * 0.9),
+    height:     Math.round(spec.size * 1.5 * lines + 40),
+    offset:     { x: 0, y: round(spec.offsetY) },
+    transition: { in: "fade", out: "fade" },
+  };
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function buildArollTimeline(plan: RenderPlan): Record<string, any> {
+  const a = plan.aRoll!;
+
+  const cutawayClips = plan.scenes.map((s, i) => ({
+    asset: s.isVideo
+      ? { type: "video", src: s.backgroundUrl, volume: 0 } // his voice is the only voice
+      : { type: "image", src: s.backgroundUrl },
+    start:  round(s.start),
+    length: round(s.length),
+    fit:    "cover",
+    ...(s.isVideo ? {} : { effect: s.effect ?? KEN_BURNS[i % KEN_BURNS.length] }),
+    // Every cutaway dissolves in from his face and back out to it.
+    transition: { in: "fade", out: "fade" },
+  }));
+
+  // No transition on the take itself: a fade-in here would fade the whole ad up from black, and
+  // the first frame of a paid ad needs to be his face at full opacity.
+  const aRollClip = {
+    asset:  { type: "video", src: a.src, volume: 0 },
+    start:  round(a.start),
+    length: round(a.length),
+    fit:    "cover",
+    offset: { x: round(a.offsetX ?? 0), y: 0 },
+  };
+
+  const speechClip = {
+    alias:  SPEECH_ALIAS,
+    asset:  { type: "audio", src: a.audioSrc, volume: 1 },
+    start:  round(a.start),
+    length: round(a.length),
+  };
+
+  const cards = (plan.textCards ?? []).filter((c) => c.text.trim() && c.length > 0);
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const tracks: { clips: Record<string, any>[] }[] = [
+    ...(cards.length ? [{ clips: cards.map((c) => textCardClip(plan, c)) }] : []),
+    ...(plan.captions ? [{ clips: [richCaptionClip(plan)] }] : []),
+    ...(cutawayClips.length ? [{ clips: cutawayClips }] : []),
+    { clips: [aRollClip] },
+    { clips: [speechClip] },
+  ];
+
+  if (plan.musicUrl && plan.durationSec > 0) {
+    tracks.push({
+      clips: [{
+        asset:  { type: "audio", src: plan.musicUrl, volume: plan.musicVolume ?? 0.12, effect: "fadeInFadeOut" },
+        start:  0,
+        length: round(plan.durationSec),
+      }],
+    });
+  }
+
+  return { background: "#000000", tracks };
+}
+
+/**
+ * Translate a plan into a Shotstack timeline.
+ *
+ * Exported so scripts/test-aroll-plan.ts can assert the shape of the A-roll edit — track order,
+ * which clips are muted and which clip carries the speech alias — without submitting a render.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function buildTimeline(plan: RenderPlan): Record<string, any> {
+  if (plan.aRoll) return buildArollTimeline(plan);
+
   const sceneClips = plan.scenes.map((s, i) => ({
     asset: s.isVideo
       ? { type: "video", src: s.backgroundUrl, volume: 0 } // mute cinematic clips; the speech track is the audio

@@ -9,8 +9,10 @@ import {
 } from "./video-job-store";
 import {
   loadSourceAndScript,
+  loadStoryboard,
   rebuildFromLatestScript,
   persistStoryboard,
+  persistArollPlan,
   persistImagesResult,
   persistVideoUrl,
   persistSceneClip,
@@ -28,8 +30,19 @@ import { generateCategoryMusic } from "./music-generator";
 import { findReusableAsset } from "./video-asset-library";
 import { detectPresenterChromaColor } from "./chroma-detect";
 import { estimateSpokenSeconds } from "./script-narration";
+import {
+  arollAudioUrl,
+  arollLengthProblem,
+  needsCrop,
+  warmArollDerivations,
+} from "./aroll";
+import { transcribeAroll } from "./aroll-transcribe";
+import { wordsToSegments, timedWords } from "./aroll-words";
+import { directCutaways } from "./aroll-director";
+import { generateBeatImage, generateCastReference } from "./aroll-cast";
 import { RenderPermanentError } from "./render/errors";
-import type { VideoStoryboard, VideoImage } from "./types";
+import type { ArollSource, VideoScene, VideoStoryboard, VideoImage } from "./types";
+import type { ScribeWord } from "@/lib/call-study/types";
 import type { SocialVideoJobState } from "./video-job-types";
 
 /**
@@ -63,6 +76,9 @@ export function renderStages(presenter: boolean): string[] {
     ? ["Preparing", "Rendering avatar", "Composing", "Rendering video", "Finalizing"]
     : ["Preparing", "Composing", "Rendering video", "Finalizing"];
 }
+
+/** Stages for planning an A-roll ad, in the order processAroll walks them. */
+export const AROLL_STAGES = ["Preparing your clip", "Transcribing", "Writing the story"];
 
 /** Build the next jobState from a base + patch, computing stage metadata for the UI. */
 function nextState(
@@ -181,6 +197,7 @@ function dispatch(job: VideoJobRow): Promise<StepOutcome> {
     case "clip":   return processClip(job);
     case "render": return processRender(job);
     case "music":  return processMusic(job);
+    case "aroll":  return processAroll(job);
     default:       return Promise.resolve({ kind: "error", error: `Unknown job kind: ${job.kind}`, transient: false });
   }
 }
@@ -194,9 +211,31 @@ async function isCancelled(jobId: string): Promise<boolean> {
 // ── images: build storyboard → generate one image per scene (idempotent, budgeted) ──
 async function processImages(job: VideoJobRow): Promise<StepOutcome> {
   const input = job.input ?? {};
-  const stages = ["Planning storyboard", "Generating images"];
   let resultData = job.resultData ?? {};
   let storyboard: VideoStoryboard | undefined = resultData.storyboard ?? input.storyboard;
+
+  // The saved storyboard has the last word whenever it is an A-roll one. The generic
+  // "generate images" route does not pass a storyboard, and rebuilding one from the script
+  // would replace a cut timed against a real recording with an evenly-weighted slideshow —
+  // silently throwing away the whole edit. Load it instead.
+  //
+  // Deliberately NOT wrapped in a catch. loadStoryboard already answers null for a post that
+  // has no storyboard, so the only thing a catch here could swallow is a genuine read failure —
+  // and swallowing that would turn a transient Sanity blip into exactly the destructive rebuild
+  // this block exists to prevent: the faceless path would run, and persistImagesResult would
+  // overwrite the take, the cut, the cast and both cards with nulls. Letting it throw makes
+  // processVideoJob retry the tick instead, which is the correct answer to "we could not read".
+  if (!storyboard?.aRoll) {
+    const saved = await loadStoryboard(job.sanityPostId);
+    if (saved?.aRoll) storyboard = { ...saved, ...(input.subtitles !== undefined ? { subtitles: input.subtitles } : {}) };
+  }
+
+  // An A-roll ad arrives with its storyboard already planned by the `aroll` job, so there is
+  // nothing to build here — only a cast to settle on and its shots to generate.
+  const aRollMode = Boolean(storyboard?.aRoll);
+  const stages = aRollMode
+    ? ["Casting the story", "Generating shots"]
+    : ["Planning storyboard", "Generating images"];
 
   if (!storyboard) {
     await updateJobProgress(job.id, {
@@ -216,10 +255,44 @@ async function processImages(job: VideoJobRow): Promise<StepOutcome> {
   const scenes = storyboard.scenes.map((s) => ({ ...s }));
   const total = scenes.length;
   const category = job.category ?? storyboard.category ?? "general";
-  const reuseAssets = Boolean(input.reuseAssets);
+  // Never in A-roll mode, whatever the caller asked for: a library hit is a face from a
+  // different post, and one of those halfway through the story undoes the cast entirely.
+  const reuseAssets = Boolean(input.reuseAssets) && !aRollMode;
   const preferClipAssets = Boolean(input.preferClipAssets);
   const start = Date.now();
   let done = scenes.filter((s) => s.imageUrl).length;
+
+  // The cast reference: one shot of the story's protagonist, generated once, that every later
+  // shot of that person is matched against. Without it, two prompts describing the same woman
+  // produce two different women and the ad stops reading as one story.
+  let castImageUrl = storyboard.castImageUrl ?? job.jobState?.castImageUrl;
+  if (aRollMode && !castImageUrl && scenes.some((s) => s.includesCast)) {
+    await updateJobProgress(job.id, {
+      jobState: nextState(job.jobState, { step: "images" }, stages, "Casting the story", 8),
+    });
+    try {
+      castImageUrl = await generateCastReference({
+        cast:     storyboard.castDescription ?? "",
+        world:    storyboard.castWorld,
+        category,
+        locale:   storyboard.voiceLanguage,
+      });
+      storyboard = { ...storyboard, castImageUrl };
+      resultData = { ...resultData, storyboard: { ...storyboard, scenes } };
+      await updateJobProgress(job.id, {
+        resultData,
+        jobState: nextState(job.jobState, { step: "images", castImageUrl }, stages, "Generating shots", 12),
+      });
+    } catch (err) {
+      // Losing the reference costs consistency, not the ad: every shot then generates on its
+      // own, exactly as the faceless pipeline does.
+      const notice = `Couldn't create the cast reference (${(err as Error).message}) — the story's shots may not all show the same person.`;
+      console.warn(`[video-job] ${notice}`);
+      await updateJobProgress(job.id, {
+        jobState: nextState(job.jobState, { step: "images", notice }, stages, "Generating shots", 12),
+      });
+    }
+  }
 
   for (let i = 0; i < total; i++) {
     if (scenes[i].imageUrl) continue;
@@ -241,7 +314,16 @@ async function processImages(job: VideoJobRow): Promise<StepOutcome> {
       }
     }
     if (!scenes[i].imageUrl) {
-      scenes[i].imageUrl = await regenerateSceneImage(scenes[i].imageConcept, category, storyboard.voiceLanguage);
+      scenes[i].imageUrl = aRollMode
+        ? await generateBeatImage({
+            concept:      scenes[i].imageConcept,
+            cast:         storyboard.castDescription,
+            castImageUrl,
+            includesCast: Boolean(scenes[i].includesCast),
+            category,
+            locale:       storyboard.voiceLanguage,
+          })
+        : await regenerateSceneImage(scenes[i].imageConcept, category, storyboard.voiceLanguage);
     }
     done++;
     resultData = { ...resultData, storyboard: { ...storyboard, scenes } };
@@ -262,6 +344,7 @@ async function processImages(job: VideoJobRow): Promise<StepOutcome> {
   const finalStoryboard: VideoStoryboard = {
     ...storyboard,
     scenes,
+    ...(castImageUrl ? { castImageUrl } : {}),
     ...(input.subtitles   !== undefined ? { subtitles:   input.subtitles }   : {}),
     ...(input.reuseAssets !== undefined ? { reuseAssets: input.reuseAssets } : {}),
   };
@@ -273,6 +356,217 @@ async function processImages(job: VideoJobRow): Promise<StepOutcome> {
     nextState(job.jobState, { step: "done", itemsDone: total, itemsTotal: total }, stages, "Images ready", 100));
   return { kind: "done" };
 }
+
+// ── aroll: host the take → hear it → plan the story around it ──
+//
+// This is the whole "understand what he said" half of a presenter ad. It ends with a storyboard
+// whose scenes are timed cutaways and whose narration is his own words; the existing `images`
+// job then fills those scenes in, and `render` cuts them over him.
+async function processAroll(job: VideoJobRow): Promise<StepOutcome> {
+  const input = job.input ?? {};
+  const upload = input.aRollUpload;
+  if (!upload?.publicId) {
+    return { kind: "error", error: "This job has no uploaded video to work from.", transient: false };
+  }
+
+  const lengthProblem = arollLengthProblem(upload.durationSec);
+  if (lengthProblem) return { kind: "error", error: lengthProblem, transient: false };
+
+  const stages = AROLL_STAGES;
+  let state = job.jobState ?? {};
+  let resultData = job.resultData ?? {};
+  let storyboard = resultData.storyboard;
+
+  // 1) Ingest — kick off the derived audio and 9:16 renditions so the render never waits on a
+  //    cold transcode. Idempotent: a re-entry skips straight past it.
+  if (!state.arollReady) {
+    await updateJobProgress(job.id, {
+      jobState: nextState(state, { step: "ingest" }, stages, "Preparing your clip", 5),
+    });
+    await warmArollDerivations(upload.publicId, {
+      width:  upload.width,
+      height: upload.height,
+    });
+    state = { ...state, arollReady: true };
+    await updateJobProgress(job.id, {
+      jobState: nextState(state, { step: "transcribe" }, stages, "Transcribing", 12),
+    });
+  }
+
+  // 2) Transcribe — or take what he typed. Guarded by transcriptDone so a continuation tick can
+  //    never pay ElevenLabs a second time for the same take.
+  if (!state.transcriptDone) {
+    const built = await buildArollSource(job, upload, input.manualTranscript);
+    if (!built.ok) return { kind: "error", error: built.error, transient: built.transient };
+
+    storyboard = {
+      ...(storyboard ?? emptyArollStoryboard(job, built.data)),
+      aRoll:         built.data,
+      voiceLanguage: built.data.language,
+    };
+    resultData = { ...resultData, storyboard };
+    state = { ...state, transcriptDone: true };
+    await updateJobProgress(job.id, {
+      resultData,
+      jobState: nextState(state, { step: "direct" }, stages, "Writing the story", 45),
+    });
+  }
+
+  if (!storyboard?.aRoll) {
+    return { kind: "error", error: "The transcript step finished without a usable take.", transient: true };
+  }
+  if (await isCancelled(job.id)) return { kind: "done" };
+
+  // 3) Direct — GPT proposes the cutaways, deterministic validation disposes.
+  const aRoll = storyboard.aRoll;
+  const loaded = await loadSourceAndScript(job.sanityPostId, aRoll.language).catch(() => null);
+  const { direction, notice } = await directCutaways({
+    words:       arollWords(aRoll),
+    segments:    aRoll.segments,
+    durationSec: aRoll.durationSec,
+    language:    aRoll.language,
+    category:    job.category ?? storyboard.category ?? undefined,
+    title:       loaded?.source.title,
+    brief:       input.brief,
+  });
+
+  const scenes: VideoScene[] = direction.beats.map((beat) => ({
+    narration:    beat.narration,
+    onScreenText: beat.onScreenText,
+    imageConcept: beat.imageConcept,
+    imageUrl:     "",
+    role:         "broll",
+    startSec:     beat.startSec,
+    lengthSec:    Math.round((beat.endSec - beat.startSec) * 100) / 100,
+    includesCast: beat.includesCast,
+  }));
+
+  const planned: VideoStoryboard = {
+    ...storyboard,
+    scenes,
+    castDescription: direction.cast || storyboard.castDescription,
+    castWorld:       direction.world || storyboard.castWorld,
+    hookText:        direction.hookText || storyboard.hookText,
+    ctaText:         direction.ctaText || storyboard.ctaText,
+  };
+
+  await persistArollPlan(job.sanityPostId, planned, { transcript: aRoll.transcript });
+  await markJobDone(
+    job.id,
+    null,
+    { storyboard: planned, images: [] },
+    nextState(state, { step: "done", ...(notice ? { notice } : {}) }, stages, "Story ready", 100),
+  );
+  return { kind: "done" };
+}
+
+/**
+ * Word timings for the snapper, rebuilt from the persisted segments.
+ *
+ * The raw word stream is deliberately not kept — it is ten times the size of the segments and is
+ * only ever needed inside this job. Segment boundaries are real sentence boundaries, which are
+ * the best cut points anyway, so snapping against them loses almost nothing.
+ */
+function arollWords(aRoll: ArollSource): ScribeWord[] {
+  return aRoll.segments.map((seg) => ({
+    text:  seg.text,
+    start: seg.start,
+    end:   seg.end,
+    type:  "word" as const,
+  }));
+}
+
+/** Transcribe the take (or accept a typed transcript) and assemble the ArollSource record. */
+async function buildArollSource(
+  job: VideoJobRow,
+  upload: NonNullable<NonNullable<VideoJobRow["input"]>["aRollUpload"]>,
+  manualTranscript?: string,
+): Promise<{ ok: true; data: ArollSource } | { ok: false; error: string; transient: boolean }> {
+  const audioUrl = arollAudioUrl(upload.publicId);
+  const base = {
+    videoUrl:    upload.videoUrl,
+    publicId:    upload.publicId,
+    audioUrl,
+    durationSec: upload.durationSec,
+    width:       upload.width,
+    height:      upload.height,
+  };
+
+  // A typed transcript wins outright — it is only ever set because he wanted to correct or
+  // replace what the machine heard.
+  if (manualTranscript?.trim()) {
+    const text = manualTranscript.trim();
+    return {
+      ok: true,
+      data: {
+        ...base,
+        language:   job.voiceLanguage === "es" ? "es" : "en",
+        transcript: text,
+        segments:   evenSegments(text, upload.durationSec),
+      },
+    };
+  }
+
+  const result = await transcribeAroll(audioUrl);
+  if (!result.ok) {
+    // Not retried into oblivion. A transcript is the one thing that cannot be invented, so the
+    // job fails with the provider's own message and the studio offers a box to type it in.
+    return { ok: false, error: result.error, transient: false };
+  }
+
+  const words = timedWords(result.data.words);
+  return {
+    ok: true,
+    data: {
+      ...base,
+      language:   result.data.language,
+      transcript: result.data.text,
+      segments:   words.length
+        ? wordsToSegments(result.data.words)
+        : evenSegments(result.data.text, upload.durationSec),
+    },
+  };
+}
+
+/**
+ * Spread text evenly across the take when there are no real word timings.
+ *
+ * Only reached on the manual-transcript path, or a transcript that came back without timings.
+ * The cut points it produces are approximate, which is exactly why the studio lets him nudge
+ * every one of them.
+ */
+function evenSegments(text: string, durationSec: number): ArollSource["segments"] {
+  const sentences = text.split(/(?<=[.!?])\s+/).map((t) => t.trim()).filter(Boolean);
+  if (!sentences.length) return [];
+  const totalWords = sentences.reduce((n, t) => n + t.split(/\s+/).length, 0) || 1;
+
+  let elapsed = 0;
+  return sentences.map((sentence) => {
+    const share = (sentence.split(/\s+/).length / totalWords) * durationSec;
+    const segment = { text: sentence, start: round1(elapsed), end: round1(elapsed + share) };
+    elapsed += share;
+    return segment;
+  });
+}
+
+/** A storyboard shell for a take we have only just heard — the direct step adds the scenes. */
+function emptyArollStoryboard(job: VideoJobRow, aRoll: ArollSource): VideoStoryboard {
+  return {
+    scenes:          [],
+    voiceLanguage:   aRoll.language,
+    // Present only because the type demands one of two literals. The finished ad is exactly as
+    // long as the recording, and nothing in A-roll mode reads this.
+    durationSeconds: aRoll.durationSec > 45 ? 60 : 30,
+    category:        job.category ?? undefined,
+    subtitles:       true,
+    // Off by default: a library image from another post would drop a stranger's face into the
+    // middle of this story and undo the whole point of the cast reference.
+    reuseAssets:     false,
+    aRoll,
+  };
+}
+
+const round1 = (n: number) => Math.round(n * 10) / 10;
 
 // ── clip: submit one Veo op → poll → persist onto the scene ──
 async function processClip(job: VideoJobRow): Promise<StepOutcome> {
@@ -342,7 +636,11 @@ async function processRender(job: VideoJobRow): Promise<StepOutcome> {
   // existing images/clips) before doing anything else — covers presenter (so HeyGen speaks
   // the current script) and faceless renders alike. A no-op (no GPT call) when the script
   // hasn't changed since this storyboard's narration was built.
-  if (!state.scriptSynced) {
+  //
+  // NEVER for an A-roll ad. There the recording is the source of truth, not the text: the saved
+  // script is a transcript OF it, and re-deriving the storyboard from that text would replace
+  // the timed cutaways with an evenly-weighted slideshow and throw the edit away.
+  if (!state.scriptSynced && !storyboard.aRoll) {
     const synced = await rebuildFromLatestScript(job.sanityPostId, storyboard);
     if (synced !== storyboard) {
       await updateJobInput(job.id, { ...input, storyboard: synced });
@@ -352,7 +650,11 @@ async function processRender(job: VideoJobRow): Promise<StepOutcome> {
     await updateJobProgress(job.id, { jobState: state });
   }
 
-  const wantsPresenter = Boolean(storyboard.presenter && input.presenter !== false) && !state.presenterDropped;
+  // A recorded take IS the presenter — the HeyGen phase has nothing to add and no script to say.
+  const wantsPresenter =
+    !storyboard.aRoll &&
+    Boolean(storyboard.presenter && input.presenter !== false) &&
+    !state.presenterDropped;
   const step = (["presenter", "compose", "render"] as const).includes(state.step as never)
     ? (state.step as "presenter" | "compose" | "render")
     : (wantsPresenter ? "presenter" : "compose");

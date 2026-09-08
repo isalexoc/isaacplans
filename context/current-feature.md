@@ -2,6 +2,51 @@
 
 ## Status
 
+In progress: **Real Presenter story ads — Isaac on camera, an AI story cut around him** (branch
+`feature/real-presenter-story-ads`).
+
+Isaac records himself delivering a message, uploads it, and the studio builds an AI b-roll *story*
+that dramatizes what he said, then cuts the two together: him full-frame, cutaways to the story,
+karaoke captions, music bed, hook card and CTA end card. EN and ES. The point is that the presenter
+is **him** — not a HeyGen avatar, not an ElevenLabs voice.
+
+Nearly all of it is existing machinery. New: ingest + transcribe his clip, a GPT "cutaway director"
+that plans b-roll windows against real word timestamps, and an A-roll/B-roll timeline in the
+Shotstack renderer. No new vendor, no new env var name, no DB migration.
+
+**His speech rides its own audio track.** The `ac_mp3` rendition of his upload (the trick
+`lib/call-study/cloudinary.ts` already uses) is the master clock, the caption source Shotstack
+auto-transcribes, and the video's exact length. His video sits full-frame underneath, muted, with
+the cutaways layered on top — so a cutaway can never drift against his voice.
+
+**Cuts are snapped to word boundaries in code, not trusted to the model.** Same philosophy as
+`script-narration.ts`: GPT proposes beats, deterministic validation clamps them into
+`[hook hold, duration − CTA hold]`, enforces 2.5–8 s windows and a 1.5 s minimum gap, de-overlaps
+them, and re-slices each beat's narration verbatim from the words actually inside its window.
+
+**Character consistency is the risky part.** One cast reference shot is generated first and every
+later cast beat goes through `images.edit` against it. Detail shots (hands, keys, a windowsill) skip
+the reference — there is no face to match. Asset-library reuse defaults OFF in this mode: a recycled
+image from another post would hand you a different person mid-story.
+
+**Two rebuild traps closed.** The render job's "re-sync narration to the latest script" step and the
+image job's "build a storyboard from the script" step would both have replaced a cut timed against a
+real recording with an evenly-weighted slideshow — silently throwing the edit away. Both now detect
+`storyboard.aRoll` and leave it alone; the images job loads the saved storyboard rather than
+rebuilding one.
+
+**`pnpm test:aroll`** pins the edit rules against deliberately awful director output and asserts the
+Shotstack timeline shape (track order, the muted take, the aliased audio spine, silent cutaways) —
+no keys, no network, no spend. It found two real bugs before anything was rendered: a `null` entry in
+the model's JSON crashed the planner, and the fallback could place a cutaway over the opening hold.
+
+**Still to do:** a real end-to-end run. Nothing here has been through a live transcription, image
+generation or render — build, typecheck and the rule tests are green, but the first real take is the
+first proof. Suggested first pass with `SHOTSTACK_ENV=stage` so it doesn't burn production credits,
+and set `OPENAI_IMAGE_MODEL=gpt-image-2` for materially better recurring-character fidelity.
+
+---
+
 Done: **IUL get-covered — less Step-1 friction, and the Step-2 CRM fields back** (branch
 `feature/iul-step2-friction-fields`).
 

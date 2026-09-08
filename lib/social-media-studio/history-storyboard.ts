@@ -46,6 +46,20 @@ export function toStoryboardDoc(sb: VideoStoryboard) {
     veoDurationSec:      sb.veoDurationSec ?? null,
     scriptHash:          sb.scriptHash ?? null,
     reuseAssets:         sb.reuseAssets ?? true,
+    // A-roll: null rather than omitted, so switching a post back to a faceless render actually
+    // clears the take instead of leaving a stale one that would re-trigger presenter mode.
+    aRoll:               sb.aRoll
+      ? {
+          ...sb.aRoll,
+          // Sanity requires a _key on every item of an object array, or the patch is rejected.
+          segments: (sb.aRoll.segments ?? []).map((seg, i) => ({ ...seg, _key: `sg_${i}` })),
+        }
+      : null,
+    castImageUrl:        sb.castImageUrl ?? null,
+    castDescription:     sb.castDescription ?? null,
+    castWorld:           sb.castWorld ?? null,
+    hookText:            sb.hookText ?? null,
+    ctaText:             sb.ctaText ?? null,
     scenes: sb.scenes.map((s, i) => ({
       _key:         `sc_${i}`,
       narration:    s.narration,
@@ -53,6 +67,10 @@ export function toStoryboardDoc(sb: VideoStoryboard) {
       imageConcept: s.imageConcept,
       imageUrl:     s.imageUrl,
       videoClipUrl: s.videoClipUrl ?? null,
+      role:         s.role ?? null,
+      startSec:     s.startSec ?? null,
+      lengthSec:    s.lengthSec ?? null,
+      includesCast: s.includesCast ?? null,
     })),
   };
 }
@@ -88,6 +106,34 @@ export async function loadSourceAndScript(
     suggestedCaption:        post.videoScript.suggestedCaption ?? "",
   };
   return { source, videoScript, locale };
+}
+
+/**
+ * The storyboard as it is currently saved on the post.
+ *
+ * Needed because an A-roll storyboard cannot be re-derived: its scenes are cutaways timed against
+ * a recording, and the saved script is a transcript OF that recording rather than its source. Any
+ * job that would otherwise rebuild from the script has to load this instead.
+ */
+export async function loadStoryboard(id: string): Promise<VideoStoryboard | null> {
+  const sanity = getSanityWriteClient();
+  const doc = await sanity.fetch(`*[_type == "socialPost" && _id == $id][0].videoStoryboard`, { id });
+  if (!doc) return null;
+  return {
+    ...doc,
+    voiceLanguage: doc.voiceLanguage === "es" ? "es" : "en",
+    scenes: (doc.scenes ?? []).map((s: Record<string, unknown>) => ({
+      narration:    (s.narration as string) ?? "",
+      onScreenText: (s.onScreenText as string) ?? "",
+      imageConcept: (s.imageConcept as string) ?? "",
+      imageUrl:     (s.imageUrl as string) ?? "",
+      videoClipUrl: (s.videoClipUrl as string) ?? undefined,
+      role:         s.role === "broll" ? ("broll" as const) : undefined,
+      startSec:     (s.startSec as number) ?? undefined,
+      lengthSec:    (s.lengthSec as number) ?? undefined,
+      includesCast: (s.includesCast as boolean) ?? undefined,
+    })),
+  } as VideoStoryboard;
 }
 
 /** Hash of the currently-saved script, or null if the post has none yet. Cheap — no GPT call. */
@@ -132,6 +178,50 @@ export async function persistStoryboard(id: string, sb: VideoStoryboard): Promis
     .set({ videoStoryboard: toStoryboardDoc(sb), updatedAt: new Date().toISOString() })
     .commit()
     .catch((e) => console.warn("[history-storyboard] persistStoryboard failed:", (e as Error).message));
+}
+
+/**
+ * Persist a planned A-roll ad: the storyboard, and the transcript written in as the post's
+ * video script.
+ *
+ * Writing the transcript to `videoScript.fullScript` is what lets the REST of the studio work
+ * unchanged on a presenter ad — copy generation, the history list, the detail page and the
+ * publishing flow all read that field, and what he said on camera is exactly the script they
+ * would otherwise have generated. The render path deliberately does NOT re-derive the storyboard
+ * from it (see processRender): here the recording is the source of truth, not the text.
+ */
+export async function persistArollPlan(
+  id: string,
+  sb: VideoStoryboard,
+  opts: { transcript: string; title?: string } = { transcript: "" }
+): Promise<void> {
+  const patch: Record<string, unknown> = {
+    videoStoryboard: toStoryboardDoc(sb),
+    sourceType:      "presenter_video",
+    sourceLocale:    sb.voiceLanguage,
+    updatedAt:       new Date().toISOString(),
+  };
+  if (opts.transcript.trim()) {
+    patch.videoScript = {
+      duration:         sb.durationSeconds,
+      hookScript:       firstSentence(opts.transcript),
+      fullScript:       opts.transcript.trim(),
+      suggestedCaption: "",
+    };
+  }
+  if (opts.title?.trim()) patch.sourceTitle = opts.title.trim();
+
+  await getSanityWriteClient()
+    .patch(id)
+    .set(patch)
+    .commit()
+    .catch((e) => console.warn("[history-storyboard] persistArollPlan failed:", (e as Error).message));
+}
+
+/** The opening line of the take — a serviceable hook for the post's script record. */
+function firstSentence(text: string): string {
+  const match = /^[\s\S]{10,180}?[.!?](\s|$)/.exec(text.trim());
+  return (match ? match[0] : text.trim().slice(0, 160)).trim();
 }
 
 /** Persist a freshly built storyboard + append the generated images into the library. */

@@ -2,6 +2,8 @@ import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { createClient } from "next-sanity";
 import { regenerateSceneImage } from "@/lib/social-media-studio/video-generator";
+import { generateBeatImage } from "@/lib/social-media-studio/aroll-cast";
+import { loadStoryboard } from "@/lib/social-media-studio/history-storyboard";
 import type { SingleVideoImageRequest, SocialStudioResponse } from "@/lib/social-media-studio/types";
 
 export const maxDuration = 60;
@@ -35,7 +37,24 @@ export async function POST(
   }
 
   try {
-    const url = await regenerateSceneImage(body.concept, body.category, body.locale);
+    // On a presenter ad, a re-rolled shot has to come back as the SAME person as the shots
+    // around it — otherwise fixing one frame quietly breaks the story's continuity. Generate it
+    // against the cast reference the rest of the ad was built from.
+    const saved = await loadStoryboard(id).catch(() => null);
+    const scene = typeof body.sceneIndex === "number" ? saved?.scenes?.[body.sceneIndex] : undefined;
+
+    const url = saved?.aRoll
+      ? await generateBeatImage({
+          concept:      body.concept,
+          cast:         saved.castDescription,
+          castImageUrl: saved.castImageUrl,
+          // A scene we cannot identify is assumed to show the cast: a detail shot generated
+          // with a reference is a small waste, a face generated without one is a broken story.
+          includesCast: scene?.includesCast ?? true,
+          category:     body.category ?? saved.category ?? "general",
+          locale:       body.locale ?? saved.voiceLanguage,
+        })
+      : await regenerateSceneImage(body.concept, body.category, body.locale);
 
     const sanity = getWriteClient();
     const patch = sanity

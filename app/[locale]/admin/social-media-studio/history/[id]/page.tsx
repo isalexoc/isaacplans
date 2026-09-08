@@ -83,7 +83,33 @@ interface SocialPostDetail {
     veoDurationSec?: number;
     scriptHash?: string;
     reuseAssets?: boolean;
-    scenes?: { narration?: string; onScreenText?: string; imageConcept?: string; imageUrl?: string; videoClipUrl?: string }[];
+    aRoll?: {
+      videoUrl?: string;
+      publicId?: string;
+      audioUrl?: string;
+      durationSec?: number;
+      width?: number;
+      height?: number;
+      language?: string;
+      transcript?: string;
+      segments?: { text?: string; start?: number; end?: number }[];
+    };
+    castImageUrl?: string;
+    castDescription?: string;
+    castWorld?: string;
+    hookText?: string;
+    ctaText?: string;
+    scenes?: {
+      narration?: string;
+      onScreenText?: string;
+      imageConcept?: string;
+      imageUrl?: string;
+      videoClipUrl?: string;
+      role?: string;
+      startSec?: number;
+      lengthSec?: number;
+      includesCast?: boolean;
+    }[];
   };
 }
 
@@ -144,31 +170,61 @@ export default async function SocialPostDetailPage({
     : undefined;
 
   // Restore the active video storyboard (the image set used to render the Short).
-  const initialStoryboard: VideoStoryboard | undefined = post.videoStoryboard?.scenes?.length
+  const sb = post.videoStoryboard;
+  const hasStoryboard = Boolean(sb && (sb.scenes?.length || sb.aRoll?.publicId));
+  const initialStoryboard: VideoStoryboard | undefined = sb && hasStoryboard
     ? {
-        voiceLanguage:   post.videoStoryboard.voiceLanguage === "es" ? "es" : "en",
-        durationSeconds: post.videoStoryboard.durationSeconds === 60 ? 60 : 30,
-        category:        post.videoStoryboard.category,
-        musicUrl:        post.videoStoryboard.musicUrl,
-        presenter:       post.videoStoryboard.presenter ?? false,
-        presenterPlacement: post.videoStoryboard.presenterPlacement === "bottom-left" ? "bottom-left" : "bottom-right",
-        presenterAvatarId:   post.videoStoryboard.presenterAvatarId,
-        presenterAvatarName: post.videoStoryboard.presenterAvatarName,
-        presenterAvatarType: post.videoStoryboard.presenterAvatarType === "talking_photo" ? "talking_photo" : undefined,
-        presenterVoiceId:    post.videoStoryboard.presenterVoiceId,
-        presenterVoiceName:  post.videoStoryboard.presenterVoiceName,
-        subtitles:       post.videoStoryboard.subtitles ?? true,
-        cinematic:       post.videoStoryboard.cinematic ?? false,
-        veoTier:         (post.videoStoryboard.veoTier as "lite" | "fast" | "standard" | undefined),
-        veoDurationSec:  (post.videoStoryboard.veoDurationSec === 4 || post.videoStoryboard.veoDurationSec === 8 ? post.videoStoryboard.veoDurationSec : 6),
-        scriptHash:      post.videoStoryboard.scriptHash,
-        reuseAssets:     post.videoStoryboard.reuseAssets ?? true,
-        scenes: post.videoStoryboard.scenes.map((s) => ({
+        voiceLanguage:   sb.voiceLanguage === "es" ? "es" : "en",
+        durationSeconds: sb.durationSeconds === 60 ? 60 : 30,
+        category:        sb.category,
+        musicUrl:        sb.musicUrl,
+        presenter:       sb.presenter ?? false,
+        presenterPlacement: sb.presenterPlacement === "bottom-left" ? "bottom-left" : "bottom-right",
+        presenterAvatarId:   sb.presenterAvatarId,
+        presenterAvatarName: sb.presenterAvatarName,
+        presenterAvatarType: sb.presenterAvatarType === "talking_photo" ? "talking_photo" : undefined,
+        presenterVoiceId:    sb.presenterVoiceId,
+        presenterVoiceName:  sb.presenterVoiceName,
+        subtitles:       sb.subtitles ?? true,
+        cinematic:       sb.cinematic ?? false,
+        veoTier:         (sb.veoTier as "lite" | "fast" | "standard" | undefined),
+        veoDurationSec:  (sb.veoDurationSec === 4 || sb.veoDurationSec === 8 ? sb.veoDurationSec : 6),
+        scriptHash:      sb.scriptHash,
+        reuseAssets:     sb.reuseAssets ?? true,
+        // Real Presenter: the recorded take, the cast that keeps the story's person consistent,
+        // and the two burned-in cards.
+        aRoll: sb.aRoll?.publicId
+          ? {
+              videoUrl:    sb.aRoll.videoUrl ?? "",
+              publicId:    sb.aRoll.publicId,
+              audioUrl:    sb.aRoll.audioUrl ?? "",
+              durationSec: sb.aRoll.durationSec ?? 0,
+              width:       sb.aRoll.width,
+              height:      sb.aRoll.height,
+              language:    sb.aRoll.language === "es" ? "es" : "en",
+              transcript:  sb.aRoll.transcript ?? "",
+              segments:    (sb.aRoll.segments ?? []).map((seg) => ({
+                text:  seg.text ?? "",
+                start: seg.start ?? 0,
+                end:   seg.end ?? 0,
+              })),
+            }
+          : undefined,
+        castImageUrl:    sb.castImageUrl,
+        castDescription: sb.castDescription,
+        castWorld:       sb.castWorld,
+        hookText:        sb.hookText,
+        ctaText:         sb.ctaText,
+        scenes: (sb.scenes ?? []).map((s) => ({
           narration:    s.narration ?? "",
           onScreenText: s.onScreenText ?? "",
           imageConcept: s.imageConcept ?? "",
           imageUrl:     s.imageUrl ?? "",
           videoClipUrl: s.videoClipUrl,
+          role:         s.role === "broll" ? "broll" : undefined,
+          startSec:     s.startSec ?? undefined,
+          lengthSec:    s.lengthSec ?? undefined,
+          includesCast: s.includesCast ?? undefined,
         })),
       }
     : undefined;

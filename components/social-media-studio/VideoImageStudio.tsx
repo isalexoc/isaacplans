@@ -7,6 +7,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { PresenterPicker, type PresenterSelection } from "./PresenterPicker";
 import { VideoJobProgress } from "./VideoJobProgress";
+import { ARollUploader, type ArollStartPayload } from "./ARollUploader";
+import { ARollPanel } from "./ARollPanel";
 import { countWords, WORDS_PER_SECOND } from "@/lib/social-media-studio/script-narration";
 import type { VideoStoryboard, SocialLocale } from "@/lib/social-media-studio/types";
 import type { SocialVideoJobView } from "@/lib/social-media-studio/video-job-types";
@@ -41,6 +43,13 @@ export interface VideoImageStudioProps {
   cancelJob: (jobId: string) => Promise<void>;
   /** Active jobs for this post — used to reattach progress after a refresh. */
   findActiveJobs?: () => Promise<SocialVideoJobView[]>;
+  /**
+   * Real Presenter — start a durable job that ingests a recorded take, transcribes it and plans
+   * the story cut around it. Omitted (undefined) hides the whole mode.
+   */
+  startAroll?: (payload: ArollStartPayload) => Promise<{ jobId: string }>;
+  /** Save hand edits to a planned A-roll ad (hook/CTA text, nudged cut points). */
+  saveAroll?: (patch: { hookText?: string; ctaText?: string }) => Promise<void>;
 }
 
 type Phase = "idle" | "images" | "rendering" | "done";
@@ -76,6 +85,8 @@ export function VideoImageStudio({
   pollJob,
   cancelJob,
   findActiveJobs,
+  startAroll,
+  saveAroll,
 }: VideoImageStudioProps) {
   const [voiceLang, setVoiceLang]   = useState<SocialLocale>(defaultLocale);
   const [presenter, setPresenter]   = useState<boolean>(Boolean(initialStoryboard?.presenter));
@@ -110,6 +121,12 @@ export function VideoImageStudio({
   // Burned-in karaoke captions — defaults ON (undefined → true); an explicit `false` sticks.
   const [subtitles, setSubtitles] = useState<boolean>(initialStoryboard?.subtitles ?? true);
   const [scriptOpen, setScriptOpen] = useState(false);
+
+  // Real Presenter: the burned-in cards, and the plan job that produces the cut.
+  const [hookText, setHookText] = useState<string>(initialStoryboard?.hookText ?? "");
+  const [ctaText, setCtaText]   = useState<string>(initialStoryboard?.ctaText ?? "");
+  const [arollBusy, setArollBusy] = useState(false);
+  const [arollView, setArollView] = useState<SocialVideoJobView | null>(null);
 
   // Cinematic motion (Veo 3.1)
   const cinematicSupported = Boolean(startClip);
@@ -339,6 +356,48 @@ export function VideoImageStudio({
     }
   }
 
+  // ── Real Presenter: ingest the take, transcribe it, plan the cut ───────────
+  async function attachArollJob(jobId: string, initial?: SocialVideoJobView) {
+    setError(undefined);
+    setArollBusy(true);
+    if (initial) setArollView(initial);
+    try {
+      const view = await runJob(jobId, (v) => {
+        setArollView(v);
+        if (v.jobState?.notice) setNotice(v.jobState.notice);
+      });
+      if (!aliveRef.current) return;
+      const sb = view.resultData?.storyboard;
+      if (!sb) throw new Error("Planning finished without a storyboard.");
+      setHookText(sb.hookText ?? "");
+      setCtaText(sb.ctaText ?? "");
+      // The detected language wins over whatever the panel was showing: it came from his voice.
+      if (sb.voiceLanguage) setVoiceLang(sb.voiceLanguage);
+      commitStoryboard(sb);
+    } catch (err) {
+      if (aliveRef.current && !isSilent(err)) {
+        setError(err instanceof Error ? err.message : "Could not plan the ad from that video.");
+      }
+    } finally {
+      if (aliveRef.current) { setArollBusy(false); setArollView(null); }
+    }
+  }
+
+  async function startArollPlan(payload: ArollStartPayload) {
+    if (!startAroll) return;
+    setError(undefined);
+    const { jobId } = await startAroll(payload);
+    await attachArollJob(jobId);
+  }
+
+  // Persisted on blur rather than per keystroke — these are two short fields and a patch per
+  // character would be a write storm for no benefit.
+  function commitCards(next: { hookText?: string; ctaText?: string }) {
+    const cur = sbRef.current;
+    if (cur) commitStoryboard({ ...cur, ...next });
+    void saveAroll?.(next).catch(() => undefined);
+  }
+
   // ── Resume any jobs still running from a previous window/tab ───────────────
   useEffect(() => {
     let active = true;
@@ -353,6 +412,7 @@ export function VideoImageStudio({
           else if (job.kind === "images") void attachImagesJob(job.id, job);
           else if (job.kind === "clip" && job.sceneIndex != null) void attachClipJob(job.id, job.sceneIndex);
           else if (job.kind === "music") void attachMusicJob(job.id);
+          else if (job.kind === "aroll") void attachArollJob(job.id, job);
         }
       } catch { /* no active jobs / endpoint unavailable */ }
     })();
@@ -517,8 +577,18 @@ export function VideoImageStudio({
     try { await cancelJob(renderJobId); } catch { /* the poll loop will also stop on status change */ }
   }
 
-  const anyBusy = busyImages || regenIdx.size > 0 || clipIdx.size > 0 || musicBusy || phase === "rendering";
-  const hasImages = Boolean(storyboard?.scenes.length);
+  const anyBusy =
+    busyImages || regenIdx.size > 0 || clipIdx.size > 0 || musicBusy || arollBusy || phase === "rendering";
+
+  // A recorded take switches the whole panel: no TTS voice to pick, no avatar to composite, and
+  // the scenes below are cutaways over him rather than a slideshow.
+  const aRollMode = Boolean(storyboard?.aRoll);
+  // What "there is something to render" means. For a faceless video it is the scenes; for a
+  // presenter ad it is the recording, because a take with no cutaways still renders as him with
+  // captions and music.
+  const hasImages = Boolean(storyboard?.scenes.length) || aRollMode;
+  // Cutaways that have been planned but not yet drawn.
+  const missingShots = storyboard?.scenes.filter((sc) => !sc.imageUrl).length ?? 0;
   const sceneCount = storyboard?.scenes.length ?? 0;
   const animatedCount = storyboard?.scenes.filter((s) => s.videoClipUrl).length ?? 0;
   const animateAllCost = (sceneCount * veoDuration * VEO_RATE[veoTier]).toFixed(2);
@@ -534,14 +604,42 @@ export function VideoImageStudio({
     <div className="flex flex-col gap-4 rounded-lg border p-4">
       <div className="flex items-center gap-2">
         <Film className="h-4 w-4 text-blue-600" />
-        <h3 className="font-medium text-sm">AI YouTube Short</h3>
-        <span className="text-xs text-muted-foreground">— your script, spoken word for word, over AI portrait images + music, 9:16</span>
+        <h3 className="font-medium text-sm">{aRollMode ? "Real Presenter Ad" : "AI YouTube Short"}</h3>
+        <span className="text-xs text-muted-foreground">
+          {aRollMode
+            ? "— you on camera, an AI story cut around your own voice, 9:16"
+            : "— your script, spoken word for word, over AI portrait images + music, 9:16"}
+        </span>
       </div>
 
-      {!canGenerate && <p className="text-xs text-amber-600">{disabledHint ?? "Generate a video script first."}</p>}
+      {!canGenerate && !aRollMode && !startAroll && (
+        <p className="text-xs text-amber-600">{disabledHint ?? "Generate a video script first."}</p>
+      )}
 
-      {/* Voice language */}
-      <div className="flex items-center gap-3 flex-wrap">
+      {/* Real Presenter — upload a take, or work with the one already planned. */}
+      {startAroll && !aRollMode && !hasImages && (
+        arollBusy
+          ? <VideoJobProgress view={arollView} title="Reading your video and writing the story" />
+          : <ARollUploader onStart={startArollPlan} disabled={anyBusy} />
+      )}
+
+      {aRollMode && (
+        <>
+          <ARollPanel
+            storyboard={storyboard!}
+            hookText={hookText}
+            ctaText={ctaText}
+            disabled={anyBusy}
+            onHookChange={setHookText}
+            onCtaChange={setCtaText}
+            onCommit={commitCards}
+          />
+          {arollBusy && <VideoJobProgress view={arollView} title="Reading your video and writing the story" />}
+        </>
+      )}
+
+      {/* Voice language — detected from his own voice in A-roll mode, so there is nothing to pick. */}
+      <div className={cn("flex items-center gap-3 flex-wrap", aRollMode && "hidden")}>
         <span className="text-xs font-medium text-muted-foreground">Voiceover language:</span>
         <div className="flex gap-2">
           {(["en", "es"] as const).map((l) => (
@@ -560,8 +658,8 @@ export function VideoImageStudio({
         </div>
       </div>
 
-      {/* Human presenter (HeyGen) toggle */}
-      <div className="flex items-center gap-3 flex-wrap">
+      {/* Human presenter (HeyGen) toggle — meaningless when a real one is already on camera. */}
+      <div className={cn("flex items-center gap-3 flex-wrap", aRollMode && "hidden")}>
         <span className="text-xs font-medium text-muted-foreground">Human presenter:</span>
         <button
           type="button"
@@ -582,7 +680,7 @@ export function VideoImageStudio({
       </div>
 
       {/* Avatar & voice selection — only when the presenter is on */}
-      {presenter && (
+      {presenter && !aRollMode && (
         <div className="flex items-center gap-3 flex-wrap rounded-md border bg-muted/30 px-3 py-2">
           <div className="text-xs flex-1 min-w-0">
             <span className="text-muted-foreground">Presenter: </span>
@@ -714,23 +812,46 @@ export function VideoImageStudio({
       ) : (
         <>
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-xs text-muted-foreground mr-auto">{storyboard!.scenes.length} scenes — hover an image to regenerate it</span>
-            <Button variant="outline" size="sm" onClick={regenAll} disabled={anyBusy}>
-              {busyImages ? <Loader2 className="h-3 w-3 mr-1 animate-spin" /> : <RefreshCw className="h-3 w-3 mr-1" />}
-              Regenerate all
-            </Button>
+            <span className="text-xs text-muted-foreground mr-auto">
+              {aRollMode
+                ? sceneCount === 0
+                  ? "No cutaways — this renders as you, with captions and music"
+                  : missingShots > 0
+                    ? `${sceneCount} cutaways planned — ${missingShots} still to draw`
+                    : `${sceneCount} cutaways — hover one to regenerate it`
+                : `${sceneCount} scenes — hover an image to regenerate it`}
+            </span>
+            {aRollMode && missingShots > 0 && (
+              <Button size="sm" onClick={buildImages} disabled={anyBusy}>
+                {busyImages ? <Loader2 className="h-3 w-3 mr-1 animate-spin" /> : <Film className="h-3 w-3 mr-1" />}
+                Generate the story shots
+              </Button>
+            )}
+            {(!aRollMode || missingShots === 0) && sceneCount > 0 && (
+              <Button variant="outline" size="sm" onClick={regenAll} disabled={anyBusy}>
+                {busyImages ? <Loader2 className="h-3 w-3 mr-1 animate-spin" /> : <RefreshCw className="h-3 w-3 mr-1" />}
+                Regenerate all
+              </Button>
+            )}
             {cinematicSupported && cinematic && (
               <Button variant="outline" size="sm" onClick={animateAll} disabled={anyBusy} title={`≈ $${animateAllCost}`}>
                 {clipIdx.size > 0 ? <Loader2 className="h-3 w-3 mr-1 animate-spin" /> : <Clapperboard className="h-3 w-3 mr-1" />}
                 Animate all
               </Button>
             )}
-            <Button variant="ghost" size="sm" onClick={buildImages} disabled={anyBusy}>
-              Rebuild from script
-            </Button>
+            {!aRollMode && (
+              <Button variant="ghost" size="sm" onClick={buildImages} disabled={anyBusy}>
+                Rebuild from script
+              </Button>
+            )}
           </div>
 
-          {busyImages && imagesView && <VideoJobProgress view={imagesView} title="Rebuilding video images" />}
+          {busyImages && imagesView && (
+            <VideoJobProgress
+              view={imagesView}
+              title={aRollMode ? "Drawing the story" : "Rebuilding video images"}
+            />
+          )}
 
           <div className="grid grid-cols-5 gap-2">
             {storyboard!.scenes.map((scene, i) => {
@@ -750,6 +871,19 @@ export function VideoImageStudio({
                   {cinematic && hasClip && !clipBusy && (
                     <span className="absolute top-1 left-1 bg-blue-600 text-white text-[9px] px-1 py-0.5 rounded flex items-center gap-0.5">
                       <VideoIcon className="h-2.5 w-2.5" /> motion
+                    </span>
+                  )}
+
+                  {/* When this cutaway lands, and the words it covers — the only way to judge a
+                      shot is against the line it plays under. */}
+                  {aRollMode && scene.startSec !== undefined && (
+                    <span className="absolute top-1 right-1 rounded bg-black/70 px-1 py-0.5 text-[9px] font-mono text-white">
+                      {scene.startSec.toFixed(1)}s
+                    </span>
+                  )}
+                  {aRollMode && scene.narration && !busy && !clipBusy && (
+                    <span className="absolute inset-x-0 bottom-0 line-clamp-2 bg-black/70 px-1 py-0.5 text-[9px] leading-tight text-white group-hover:opacity-0">
+                      {scene.narration}
                     </span>
                   )}
 

@@ -25,6 +25,7 @@ export const socialPostType = defineType({
           { title: "Blog Post",    value: "blog_post" },
           { title: "Lead Magnet",  value: "lead_magnet" },
           { title: "Direct Topic", value: "direct_topic" },
+          { title: "Recorded Video (Real Presenter)", value: "presenter_video" },
         ],
       },
       validation: (R) => R.required(),
@@ -243,6 +244,44 @@ export const socialPostType = defineType({
         { name: "veoDurationSec",      title: "Veo Clip Length (s)",   type: "number" },
         { name: "scriptHash", title: "Script Hash", type: "string", hidden: true, description: "Fingerprint of the script this narration was built from" },
         { name: "reuseAssets", title: "Reuse Asset Library", type: "boolean", description: "Check the cross-post asset library for a similar image/clip before generating a fresh one" },
+
+        // ── Real Presenter (A-roll): Isaac recorded himself; the scenes below are cutaways ──
+        {
+          name: "aRoll",
+          title: "Recorded Take (Real Presenter)",
+          type: "object",
+          description: "Isaac's own recording. Its presence switches the render to presenter mode: his voice is the audio, his clip is the picture between cutaways, and its length is the video's length.",
+          fields: [
+            { name: "videoUrl",    title: "Original Video URL", type: "url" },
+            { name: "publicId",    title: "Cloudinary Public ID", type: "string" },
+            { name: "audioUrl",    title: "Audio Track URL", type: "url", description: "The ac_mp3 rendition — master audio and the caption source" },
+            { name: "durationSec", title: "Duration (s)", type: "number" },
+            { name: "width",       title: "Source Width",  type: "number" },
+            { name: "height",      title: "Source Height", type: "number" },
+            { name: "language",    title: "Detected Language", type: "string" },
+            { name: "transcript",  title: "Transcript", type: "text", rows: 6 },
+            {
+              name: "segments",
+              title: "Transcript Segments",
+              type: "array",
+              description: "Sentence-level timings, for the studio's transcript view",
+              of: [{
+                type: "object",
+                fields: [
+                  { name: "text",  title: "Text",  type: "text", rows: 2 },
+                  { name: "start", title: "Start (s)", type: "number" },
+                  { name: "end",   title: "End (s)",   type: "number" },
+                ],
+                preview: { select: { title: "text", subtitle: "start" } },
+              }],
+            },
+          ],
+        },
+        { name: "castImageUrl",    title: "Cast Reference Image", type: "url", description: "Every cast cutaway is generated against this so the same person recurs" },
+        { name: "castDescription", title: "Cast Description", type: "text", rows: 3 },
+        { name: "castWorld",       title: "Story World", type: "text", rows: 2 },
+        { name: "hookText",        title: "Hook Card", type: "string", description: "Headline burned over the opening seconds" },
+        { name: "ctaText",         title: "CTA Card",  type: "text", rows: 2, description: "Call to action burned over the closing seconds" },
         {
           name: "scenes",
           title: "Scenes",
@@ -256,6 +295,12 @@ export const socialPostType = defineType({
                 { name: "imageConcept", title: "Image Concept",  type: "text", rows: 2 },
                 { name: "imageUrl",     title: "Image URL",      type: "url" },
                 { name: "videoClipUrl", title: "Cinematic Clip URL", type: "url" },
+                // A-roll only: a scene is a cutaway with its own absolute window rather than
+                // one slide of a slideshow timed from its narration.
+                { name: "role",         title: "Role", type: "string", description: "broll = a cutaway over the recorded take" },
+                { name: "startSec",     title: "Cutaway Start (s)", type: "number" },
+                { name: "lengthSec",    title: "Cutaway Length (s)", type: "number" },
+                { name: "includesCast", title: "Shows the Cast", type: "boolean", description: "Generated against the cast reference so the same person appears" },
               ],
               preview: { select: { title: "narration", media: "imageUrl" } },
             },
