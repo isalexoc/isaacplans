@@ -27,7 +27,6 @@ export interface ArollStartPayload {
   height?:      number;
   sourceUrl?:   string;
   brief?:       string;
-  forceCrop?:   boolean;
 }
 
 export function ARollUploader({

@@ -101,7 +101,6 @@ export type SocialVideoJobInput = {
     height?:     number;
   };
   brief?:            string;   // optional steer: what he wants this ad to do
-  forceCrop?:        boolean;  // crop to 9:16 in Cloudinary even for a portrait source
   /** Typed by hand when transcription failed, or to correct a misheard word. */
   manualTranscript?: string;
 };

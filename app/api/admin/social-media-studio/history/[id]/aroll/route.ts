@@ -26,7 +26,6 @@ type ArollRequest = {
   category?:      string;
   locale?:        SocialLocale;
   brief?:         string;
-  forceCrop?:     boolean;
   /** Skip transcription and use these words instead. */
   manualTranscript?: string;
 };
@@ -67,7 +66,6 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       input: {
         aRollUpload:      upload,
         brief:            body.brief,
-        forceCrop:        body.forceCrop,
         manualTranscript: body.manualTranscript,
       },
       jobState: { step: "queued", progress: 0, stageLabel: "Preparing your clip" },

@@ -218,8 +218,15 @@ async function processImages(job: VideoJobRow): Promise<StepOutcome> {
   // "generate images" route does not pass a storyboard, and rebuilding one from the script
   // would replace a cut timed against a real recording with an evenly-weighted slideshow —
   // silently throwing away the whole edit. Load it instead.
+  //
+  // Deliberately NOT wrapped in a catch. loadStoryboard already answers null for a post that
+  // has no storyboard, so the only thing a catch here could swallow is a genuine read failure —
+  // and swallowing that would turn a transient Sanity blip into exactly the destructive rebuild
+  // this block exists to prevent: the faceless path would run, and persistImagesResult would
+  // overwrite the take, the cut, the cast and both cards with nulls. Letting it throw makes
+  // processVideoJob retry the tick instead, which is the correct answer to "we could not read".
   if (!storyboard?.aRoll) {
-    const saved = await loadStoryboard(job.sanityPostId).catch(() => null);
+    const saved = await loadStoryboard(job.sanityPostId);
     if (saved?.aRoll) storyboard = { ...saved, ...(input.subtitles !== undefined ? { subtitles: input.subtitles } : {}) };
   }
 
@@ -377,9 +384,8 @@ async function processAroll(job: VideoJobRow): Promise<StepOutcome> {
       jobState: nextState(state, { step: "ingest" }, stages, "Preparing your clip", 5),
     });
     await warmArollDerivations(upload.publicId, {
-      width:     upload.width,
-      height:    upload.height,
-      forceCrop: input.forceCrop,
+      width:  upload.width,
+      height: upload.height,
     });
     state = { ...state, arollReady: true };
     await updateJobProgress(job.id, {
