@@ -17,6 +17,8 @@
     "privatize:licenses": "tsx scripts/privatize-license-images.ts",
     "iul:fields": "tsx scripts/create-iul-intake-fields.ts",
     "iul:step2-fields": "tsx scripts/create-iul-step2-fields.ts",
+    "telegram:test-parse": "tsx scripts/test-telegram-parse.ts",
+    "telegram:webhook": "tsx scripts/telegram-webhook.ts",
     "test:aroll": "tsx scripts/test-aroll-plan.ts",
     "build:ach-directory": "tsx scripts/build-ach-directory.ts",
     "check:ach-directory": "tsx scripts/check-ach-directory.ts",

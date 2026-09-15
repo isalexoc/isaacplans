@@ -26,6 +26,7 @@ export default function AdminBackNav() {
     "script-generator": "Script Generator",
     "social-media-studio": "Social Media Studio",
     "social-publishing": "Social Publishing",
+    "telegram-leads": "Telegram Leads",
     history: "History",
     calendar: "Calendar",
     connections: "Connections",

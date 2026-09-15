@@ -2,6 +2,67 @@
 
 ## Status
 
+Done: **IUL leads now arrive from Telegram automatically** (branch `feature/telegram-iul-leads`).
+
+A new lead provider, Empiregrowth, delivers only over Telegram — each lead forwarded from their
+channel as a private DM to Isaac's personal account. They refused to add him to the channel, so
+every lead would otherwise be copy-pasted by hand.
+
+**A plain bot cannot read DMs sent to a personal account.** The way through is Telegram's connected
+business bot ("Chatbots" in Telegram Business): Isaac attaches his own bot to his own account and
+scopes it to that one chat, and the DMs then arrive as `business_message` updates. Verified against
+Telegram's docs: this does NOT require Telegram Premium, and only one business bot may be connected
+at a time.
+
+**This is a new front door on the Leads-the-Way machine, not a new machine.** That pipeline already
+does inbound → parse → phone-first GHL upsert → tags → note, with QStash retries and a daily
+reconcile. Roughly 80% of it is transport-agnostic and was reused.
+
+**Two of its habits were deliberately NOT copied, because they lose paid leads:**
+
+- The email webhook returns 200 and stores *nothing* when its flag is off or the sender fails the
+  allowlist. Gmail still holds the message, so that is survivable. Telegram has no history API and
+  discards undelivered updates after 24h, so here the raw update is persisted *before* every gate
+  except the secret check. The feature flag gates the CRM write, not the capture — a backlog
+  captured while disabled is drained by the daily reconcile when it is switched on.
+- An unparseable email is marked `skipped`, which is permanent, never retried, never reconciled, and
+  which nothing in the app ever queries — the lead evaporates silently. Here `needsReview` is a
+  boolean *orthogonal* to status, so a lead can be `completed` and still imperfect, and everything
+  needing a human is listed at `/en/admin/telegram-leads` and pushed to Isaac as a Telegram DM.
+
+**The parser is built for a format we have seen exactly once.** Resolution is three-tier and
+position-independent: label synonyms first (survives emoji changes), then the emoji (survives label
+renames), then shape — a line that looks like a phone/email/name claims that field even with both
+gone. Anything unclaimed is surfaced for review rather than guessed at. 70 assertions in
+`pnpm telegram:test-parse` cover emoji removal, label renaming, shuffled lines, and a personal DM
+that must never be mistaken for a lead.
+
+**The phone validator is strict on purpose.** The existing `toE164` accepts any string with 10+
+digits and keeps the last 10, so a policy number or a concatenated date becomes a "phone" the
+automation then dials. The Telegram path requires a real NANP number and rejects N11 codes, the
+555-01xx fictional range and repeated digits. OpenAI is a fallback only, and every value it returns
+must actually appear in the source message or it is dropped — schema-shaped output is not the same
+as correct output.
+
+**"Don't restart the cadence" is deterministic**, not a bet on GHL's retrigger behaviour: tags are
+diffed against the contact's live tags and only genuinely-missing ones are POSTed, so an
+already-worked lead cannot be re-enrolled. If the tag read itself fails, the tags are added anyway —
+a paid lead that never enters the cadence is worse than one extra touch.
+
+Verified end to end with a synthetic message against a real Neon database and real (read-only) CRM
+searches, in dry-run mode: parse → `AR` → `America/Chicago`, savings → `$100 - $200`, call time →
+`Afternoon (2pm - 6pm)`, both tags, note formatted — and zero contacts created. Test rows removed
+afterwards.
+
+**Still needs Isaac** (nothing works until these are done): create the bot with @BotFather and
+enable Business Mode; connect it in Settings → Telegram Business → Chatbots scoped to the provider's
+chat; put the provider's chat id in `TELEGRAM_ALLOWED_CHAT_IDS` **before** enabling, because content
+from a non-allowlisted chat is deliberately discarded; run `pnpm telegram:webhook --set`; then flip
+`TELEGRAM_LEADS_ENABLED=true`. Also worth pressing the provider on TrustedForm/Jornaya — the
+messages carry no consent evidence, and the automation calls and texts these people.
+
+---
+
 In progress: **Real Presenter story ads — Isaac on camera, an AI story cut around him** (branch
 `feature/real-presenter-story-ads`).
 
