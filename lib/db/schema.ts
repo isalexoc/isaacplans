@@ -795,6 +795,80 @@ export type LeadsTheWayJobState = {
   lastError?: string;
 };
 
+// ─── Telegram inbound IUL leads (Empiregrowth provider) ──────────────────────
+
+/**
+ * Idempotency + async job queue for IUL leads delivered over Telegram.
+ *
+ * Keyed `tg_<chatId>_<messageId>` so Telegram's redeliveries (which carry a NEW update_id)
+ * and message edits (same message_id) both land on the same row. Mirrors
+ * {@link leadsTheWayProcessed}, with two deliberate differences:
+ *
+ *  - The webhook persists BEFORE its feature-flag / parse gates. Telegram has no history API
+ *    and discards undelivered updates after 24h, so a 200 that stores nothing loses the lead
+ *    for good — unlike the email path, where the mailbox still holds the message.
+ *  - `needsReview` is a BOOLEAN orthogonal to `status`, not a terminal status. A lead can be
+ *    `completed` (synced, tagged, money made) and still imperfect (no email, unmatched lines).
+ *    Overloading status forces a false choice between "silently dropped" and "blocked", which
+ *    is how Leads the Way loses paid leads to its permanent `skipped`.
+ */
+export const telegramLeads = pgTable("telegram_leads", {
+  leadKey: text("lead_key").primaryKey(), // "tg_<chatId>_<messageId>"
+  chatId: text("chat_id"),
+  messageId: text("message_id"),
+  updateId: text("update_id"),
+  contactId: text("contact_id"), // GHL contact id once upserted
+  locationId: text("location_id"),
+  phone: text("phone"), // normalized E.164
+  email: text("email"),
+  firstName: text("first_name"),
+  lastName: text("last_name"),
+  stateCode: text("state_code"), // 2-letter
+  /** pending | processing | completed | failed | needs_review | ignored | dismissed */
+  status: text("status").notNull().default("pending"),
+  /** Orthogonal to status — see the note above. */
+  needsReview: boolean("needs_review").notNull().default(false),
+  reviewReason: text("review_reason"),
+  errorMessage: text("error_message"),
+  parseSource: text("parse_source"), // deterministic | openai | merged | manual
+  matchedBy: text("matched_by"), // phone | email | created
+  tagsAdded: jsonb("tags_added").$type<string[] | null>(),
+  /** True only when this run added the tag that starts the follow-up cadence. */
+  cadenceStarted: boolean("cadence_started").notNull().default(false),
+  jobState: jsonb("job_state").$type<TelegramLeadJobState | null>(),
+  attemptCount: integer("attempt_count").notNull().default(0),
+  nextRetryAt: timestamp("next_retry_at"),
+  messageAt: timestamp("message_at"), // Telegram message date
+  reviewedAt: timestamp("reviewed_at"),
+  reviewedByUserId: text("reviewed_by_user_id"), // Clerk id
+  processedAt: timestamp("processed_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => ({
+  statusIdx: index("telegram_leads_status_idx").on(table.status),
+  needsReviewIdx: index("telegram_leads_needs_review_idx").on(table.needsReview, table.createdAt),
+  phoneIdx: index("telegram_leads_phone_idx").on(table.phone),
+  createdAtIdx: index("telegram_leads_created_at_idx").on(table.createdAt),
+}));
+
+export type TelegramLeadJobState = {
+  step?: "parse" | "resolve" | "update" | "tag";
+  /** Verbatim message text. Only ever set for allowlisted chats. */
+  rawText?: string;
+  /** The whole Telegram update, so a parser fix can be replayed over past leads. */
+  rawUpdate?: unknown;
+  /** Structured fields parsed from the message (best-effort snapshot). */
+  parsed?: Record<string, string | undefined>;
+  diagnostics?: {
+    matchedFields?: string[];
+    unmatchedLines?: string[];
+    warnings?: string[];
+  };
+  /** Raw OpenAI JSON when the fallback ran, so the review screen can show what it proposed. */
+  aiRaw?: string;
+  dryRun?: boolean;
+  lastError?: string;
+};
+
 // ─── Missed-call SMS/WhatsApp draft notes ─────────────────────────────────────
 
 /**

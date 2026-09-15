@@ -31,6 +31,7 @@ import {
   Globe,
   MonitorPlay,
   AudioLines,
+  MessageSquare,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import {
@@ -77,6 +78,13 @@ const CONTENT_TOOLS: ToolCard[] = [
 ];
 
 const OPERATIONS_TOOLS: ToolCard[] = [
+  {
+    title: "Telegram Leads",
+    description:
+      "Review Empiregrowth IUL leads that arrived over Telegram and couldn't be read automatically.",
+    href: "/en/admin/telegram-leads",
+    icon: MessageSquare,
+  },
   {
     title: "Lead Backup",
     description:

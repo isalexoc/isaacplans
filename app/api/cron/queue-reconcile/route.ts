@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { processOneKixieCallJob } from "@/lib/kixie-call-processor";
 import { getDuePosts, processScheduledPost } from "@/lib/social-publishing/scheduler";
 import { reconcileLeadJobs } from "@/lib/leads-the-way/process";
+import { reconcileTelegramLeadJobs } from "@/lib/telegram/process";
+import { getTelegramLeadsConfig } from "@/lib/telegram/config";
+import { getWebhookInfo } from "@/lib/telegram/api";
 import { getStaleJobs } from "@/lib/social-media-studio/video-job-store";
 import { enqueueVideoJobTick } from "@/lib/social-media-studio/video-job-queue";
 import { listMeetingsAwaitingNote } from "@/lib/crankwheel/meetings";
@@ -81,6 +84,29 @@ export async function GET(req: NextRequest) {
   // ── Leads the Way: drain any lead emails QStash never delivered ──
   const leads = await reconcileLeadJobs(req.nextUrl.origin);
 
+  // ── Telegram IUL leads: same idea, plus a delivery check. Telegram discards undelivered
+  //    updates after 24h, so a silently broken webhook is the one failure that loses leads
+  //    outright — surface it here rather than finding out from a quiet pipeline. ──
+  const telegramLeadJobs = await reconcileTelegramLeadJobs(req.nextUrl.origin);
+  let telegramWebhookPending = 0;
+  let telegramWebhookError: string | null = null;
+  try {
+    const tgConfig = getTelegramLeadsConfig();
+    if (tgConfig.enabled && tgConfig.botToken) {
+      const info = await getWebhookInfo(tgConfig);
+      telegramWebhookPending = info?.pending_update_count ?? 0;
+      telegramWebhookError = info?.last_error_message ?? null;
+      if (telegramWebhookPending > 0 || telegramWebhookError) {
+        console.warn("[TELEGRAM_LEADS] Webhook health warning", {
+          pending: telegramWebhookPending,
+          lastError: telegramWebhookError,
+        });
+      }
+    }
+  } catch {
+    /* health check is best-effort */
+  }
+
   // ── Video generation: nudge any stale video jobs back onto QStash (dropped tick) ──
   const staleVideoJobs = await getStaleJobs(25);
   let videoJobsRequeued = 0;
@@ -159,6 +185,11 @@ export async function GET(req: NextRequest) {
     leadsFound: leads.found,
     leadsProcessed: leads.processed,
     leadsRepublished: leads.republished,
+    telegramLeadsFound: telegramLeadJobs.found,
+    telegramLeadsProcessed: telegramLeadJobs.processed,
+    telegramLeadsRepublished: telegramLeadJobs.republished,
+    telegramWebhookPending,
+    telegramWebhookError,
     videoJobsStale: staleVideoJobs.length,
     videoJobsRequeued,
     meetingsAwaitingNote: meetingsAwaiting.length,
