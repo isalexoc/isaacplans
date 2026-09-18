@@ -40,6 +40,13 @@ export const REDACTED_ENTITY_TYPES = [
   "password",
   "healthcare_number",
   "numerical_pii",
+  // Added once calls started being shared with other agents. `dob` and `phone_number` are both
+  // valid types the API accepts and neither was being asked for, so a date of birth read out loud
+  // sat in the transcript in plain text. `date` is deliberately still absent: a policy effective
+  // date and a first-payment date are the substance of these calls, the same reason `money` and
+  // `age` are excluded above.
+  "dob",
+  "phone_number",
 ] as const;
 
 export function getCallStudyConfig(): CallStudyConfig {

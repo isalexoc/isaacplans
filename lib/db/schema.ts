@@ -11,6 +11,7 @@ import type {
   SpeakerMap,
   Turn,
 } from "@/lib/call-study/types";
+import type { SensitiveSpan, UnmaskedRun } from "@/lib/call-study/sensitive";
 import type {
   SocialVideoJobState,
   SocialVideoJobInput,
@@ -602,6 +603,28 @@ export const callStudyRecordings = pgTable("call_study_recordings", {
   turns:           jsonb("turns").$type<Turn[] | null>(),
   metrics:         jsonb("metrics").$type<CallMetrics | null>(),
   analysis:        jsonb("analysis").$type<CallAnalysis | null>(),
+  /* ── Shareable copy ──────────────────────────────────────────────────────
+   * A second rendering of the recording with the sensitive moments replaced by a tone, so a call
+   * can be handed to another agent. The ORIGINAL in `cloudinary_public_id` is never altered: this
+   * is an additional asset, uploaded `type: "authenticated"` so it cannot be fetched without a
+   * signed URL. */
+  /** Cloudinary id of the beeped copy. Null until one has been built. */
+  shareableAudioId:   text("shareable_audio_id"),
+  shareableAudioAt:   timestamp("shareable_audio_at"),
+  /** idle | building | ready | failed */
+  shareableStatus:    text("shareable_status").notNull().default("idle"),
+  shareableError:     text("shareable_error"),
+  /** Exactly what was beeped, so the agent can audit it before sending the file to anyone. */
+  redactionSpans:     jsonb("redaction_spans").$type<SensitiveSpan[] | null>(),
+  /**
+   * Dictated numbers that detection deliberately let through, kept so the review panel can show
+   * them. Context-gating trades recall for precision; hiding what it skipped would turn that
+   * trade-off into a false guarantee.
+   */
+  unmaskedRuns:       jsonb("unmasked_runs").$type<UnmaskedRun[] | null>(),
+  /** When the stored transcript text was scrubbed to match the beeped audio. */
+  transcriptScrubbedAt: timestamp("transcript_scrubbed_at"),
+
   /** sold | not_sold | follow_up | unknown — set by the agent after listening. */
   outcome:         text("outcome").notNull().default("unknown"),
   lineOfBusiness:  text("line_of_business"),
