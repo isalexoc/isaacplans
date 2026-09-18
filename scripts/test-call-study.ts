@@ -40,6 +40,13 @@ import {
   scanText,
   scanTurns,
 } from "../lib/call-study/objection-scan";
+import {
+  findSensitiveSpans,
+  findUnmaskedRuns,
+  collapseMarkers,
+  maskWords,
+  maskedSeconds,
+} from "../lib/call-study/sensitive";
 import { REDACTED_ENTITY_TYPES } from "../lib/call-study/config";
 import {
   computeSignature,
@@ -772,6 +779,125 @@ console.log("\nObjection scanning against the trigger library");
   check("an unknown language scans both lists", scanLanguageFor(null) === "both");
   check("a Spanish call scans Spanish", scanLanguageFor("es-419") === "es");
   check("an English call scans English", scanLanguageFor("en") === "en");
+}
+
+console.log("\nFinding what has to be beeped out before a call is shared");
+{
+  /** Build a word stream: each entry is [text, startSeconds], one second long unless overlapped. */
+  const stream = (entries: [string, number][]): ScribeWord[] =>
+    entries.map(([text, start]) => ({ text, start, end: start + 0.4, type: "word" as const }));
+
+  // A cue, then digits: masked.
+  const withCue = stream([
+    ["Perfecto", 10], ["dame", 10.5], ["tu", 11], ["numero", 11.4], ["de", 11.8], ["cuenta", 12],
+    ["cuatro", 14], ["ocho", 14.6], ["dos", 15.2], ["siete", 15.8], ["uno", 16.4],
+    ["Gracias", 20],
+  ]);
+  const cued = findSensitiveSpans(withCue);
+  check("digits after a sensitive cue are masked", cued.length === 1, JSON.stringify(cued));
+  check("the cue that caused it is recorded", cued[0]?.cue === "numero de cuenta", cued[0]?.cue);
+  check("the span covers the digits", cued[0].start <= 14 && cued[0].end >= 16.8);
+  check("padding widens the span", cued[0].start < 14 && cued[0].end > 16.8);
+  check("the words before the cue are not masked", cued[0].start > 12.5);
+
+  // The same digits with no cue: deliberately left alone, but reported.
+  const noCue = stream([
+    ["Entonces", 10], ["seria", 10.5],
+    ["cuatro", 14], ["ocho", 14.6], ["dos", 15.2], ["siete", 15.8], ["uno", 16.4],
+  ]);
+  check("digits with no cue are NOT masked", findSensitiveSpans(noCue).length === 0);
+  const unmasked = findUnmaskedRuns(noCue, findSensitiveSpans(noCue));
+  check("…but they are reported for review", unmasked.length === 1 && unmasked[0].words === 5);
+  check("…with the words, so a person can judge them", unmasked[0].text.includes("cuatro"));
+
+  // A vendor marker is masked whatever else is happening.
+  const vendor = stream([["Hola", 1], ["{SSN_0}", 3], ["adios", 9]]);
+  const vendorSpans = findSensitiveSpans(vendor);
+  check("a vendor marker is always masked", vendorSpans.length === 1 && vendorSpans[0].reason === "vendor");
+  check("…and keeps the entity name", vendorSpans[0].kind === "ssn");
+
+  // The cue window expires.
+  const late = stream([
+    ["numero", 5], ["de", 5.3], ["cuenta", 5.6],
+    ["cuatro", 200], ["ocho", 200.6], ["dos", 201.2], ["siete", 201.8],
+  ]);
+  check("a cue does not reach digits minutes later", findSensitiveSpans(late).length === 0);
+
+  // Fewer than MIN_RUN_WORDS is a price, not an account number.
+  const price = stream([
+    ["tu", 10], ["fecha", 10.3], ["de", 10.6], ["nacimiento", 10.9],
+    ["ochenta", 13], ["nueve", 13.5],
+  ]);
+  check("a two-word number is not a dictated figure", findSensitiveSpans(price).length === 0);
+
+  // English works too.
+  const english = stream([
+    ["whats", 4], ["your", 4.3], ["routing", 4.6], ["number", 5],
+    ["four", 7], ["eight", 7.5], ["two", 8], ["seven", 8.5], ["one", 9],
+  ]);
+  const en = findSensitiveSpans(english);
+  check("english cues fire", en.length === 1 && en[0].cue === "routing number", JSON.stringify(en));
+
+  // Runs close together become one beep rather than a stutter.
+  const twoRuns = stream([
+    ["numero", 1], ["de", 1.3], ["ruta", 1.6],
+    ["uno", 3], ["dos", 3.5], ["tres", 4], ["cuatro", 4.5],
+    ["cinco", 5.4], ["seis", 5.9], ["siete", 6.4], ["ocho", 6.9],
+  ]);
+  check("adjacent runs merge into one span", findSensitiveSpans(twoRuns).length === 1);
+
+  check("no words, no spans", findSensitiveSpans([]).length === 0);
+  check("null is safe", findSensitiveSpans(null).length === 0);
+  check(
+    "words with no timing are ignored rather than masked at zero",
+    findSensitiveSpans([{ text: "{SSN_0}", type: "word" }]).length === 0
+  );
+  check("masked seconds adds up", Math.round(maskedSeconds(cued[0] ? cued : [])) >= 3);
+
+  // Scrubbing the transcript text.
+  const masked = maskWords(withCue, cued);
+  const text = masked.map((w) => w.text).join(" ");
+  check("the dictated digits are gone from the text", !/cuatro|ocho|siete/.test(text), text);
+  check("the surrounding conversation survives", text.includes("Perfecto") && text.includes("Gracias"));
+  check("the cue words themselves survive", text.includes("cuenta"));
+
+  // Structure must be untouched, or every stored turn index silently addresses the wrong line.
+  check("masking adds and removes nothing", masked.length === withCue.length);
+  check(
+    "timings and speakers are preserved word for word",
+    masked.every((w, i) => w.start === withCue[i].start && w.end === withCue[i].end && w.type === withCue[i].type)
+  );
+  check(
+    "turn structure is identical before and after masking",
+    wordsToTurns(maskWords(withCue, cued)).length === wordsToTurns(withCue).length
+  );
+
+  // A dictated number that crosses a speaker change is the case that breaks naive masking.
+  const readBack: ScribeWord[] = [
+    { text: "numero", start: 1, end: 1.3, type: "word", speaker_id: "agent" },
+    { text: "de", start: 1.4, end: 1.5, type: "word", speaker_id: "agent" },
+    { text: "cuenta", start: 1.6, end: 2, type: "word", speaker_id: "agent" },
+    { text: "cuatro", start: 3, end: 3.4, type: "word", speaker_id: "customer" },
+    { text: "ocho", start: 3.6, end: 4, type: "word", speaker_id: "customer" },
+    { text: "cuatro", start: 4.4, end: 4.8, type: "word", speaker_id: "agent" },
+    { text: "ocho", start: 5, end: 5.4, type: "word", speaker_id: "agent" },
+    { text: "correcto", start: 7, end: 7.5, type: "word", speaker_id: "customer" },
+  ];
+  const crossSpans = findSensitiveSpans(readBack);
+  check("a read-back across speakers is masked", crossSpans.length === 1);
+  check(
+    "…and still produces the same turns",
+    wordsToTurns(maskWords(readBack, crossSpans)).length === wordsToTurns(readBack).length,
+    `${wordsToTurns(maskWords(readBack, crossSpans)).length} vs ${wordsToTurns(readBack).length}`
+  );
+
+  check(
+    "a row of markers collapses to one in the rendered line",
+    collapseMarkers("mi cuenta es [redacted] [redacted], [redacted] correcto") ===
+      "mi cuenta es [redacted] correcto",
+    collapseMarkers("mi cuenta es [redacted] [redacted], [redacted] correcto")
+  );
+  check("a lone marker is left alone", collapseMarkers("es [redacted] ya") === "es [redacted] ya");
 }
 
 console.log(`\n${passed} passed, ${failed} failed\n`);

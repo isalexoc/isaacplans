@@ -267,6 +267,13 @@
       "when": 1789483923912,
       "tag": "0037_broken_leech",
       "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "5",
+      "when": 1789739286988,
+      "tag": "0038_kind_mad_thinker",
+      "breakpoints": true
     }
   ]
 }

@@ -2,6 +2,60 @@
 
 ## Status
 
+In progress: **A copy of a call that can be sent to another agent** (branch
+`feature/call-study-shareable-audio`, migration `0038`). Isaac wanted to share recorded calls with
+other agents without the sensitive parts. The premise he started from was that the sensitive data
+was already being omitted. It largely is not.
+
+**Scribe redacts the TRANSCRIPT, never the audio**, so the Cloudinary recording has always been the
+untouched original — there was no version of a call that could be handed to anyone.
+
+**And the transcript redaction cannot be relied on either.** On digits dictated one at a time —
+which is how every account number on a real call arrives — it mostly fails. The same 113-minute
+Spanish call, transcribed twice through the same API: **22 markers on one run, 10 on the other, with
+133 spoken digits sitting in the clear across all 18 dictated-number runs.** Alternating within a
+single number: `uno {ROUTING_NUMBER_3} uno {ROUTING_NUMBER_4}`. So beeping only what the vendor
+marked would have produced a file labelled safe that still contained most of the account number,
+which is worse than no feature at all.
+
+**Detection is therefore ours, from the word timings.** Every word — including each `{SSN_0}` marker
+— carries exact `start`/`end`, which is what makes beeping a four-digit span possible at all;
+turn-level timings would mute thirty seconds of conversation to hide four digits.
+
+**Context-gated, on Isaac's explicit choice**, so that premiums, ages and dates survive: digits are
+masked when a cue phrase named the field first, plus every vendor marker unconditionally. The cost
+of that choice is recall, so `findUnmaskedRuns` returns every dictated number the rules deliberately
+let through and the panel lists them — a redaction tool that shows only its successes is claiming a
+guarantee it does not make.
+
+**The cue list had to be rewritten after testing on a real call.** The first version carried
+`ahorros`, `banco`, `cheque`, `tarjeta` and a bare `social`, and it beeped the product itself:
+*"tú tengas tu dinero [redacted]"* and *"la mayoría de las familias [redacted] dólares"*. On an IUL
+call savings and banking ARE the subject. Every cue is now a multi-word phrase naming a FIELD
+("número de cuenta", never "cuenta"). Result on the same call: 19 spans → 12, and money false
+positives 2 → **0**. The two independent transcripts of that call now agree (12 vs 11 spans, 80 vs
+79 seconds), where the vendor's own markers differed by more than two to one.
+
+**Masking replaces words in place and removes nothing.** `wordsToTurns` groups on speaker changes
+and the stored analysis addresses the result by index — `CallPhase.startTurn`, every
+`objection.turnIndex`, every snippet. Dropping masked words would merge two turns wherever a
+dictated number crosses a speaker change, which it does constantly because the agent reads the
+digits back. Verified on the real call: **797 turns before and after.**
+
+Also added `dob` and `phone_number` to the entity list. Both are valid types the API accepts and
+neither was being requested, so a date of birth read out loud sat in the transcript in plain text.
+`date` stays out for the same reason `money` and `age` do.
+
+Verified: **218/218 offline tests**, `tsc` clean, **full `pnpm build` green**, and the whole path run
+against the real 113-minute recording — 12 spans, 80s beeped, 797 turns preserved, uploaded
+`type: "authenticated"`, signed URL returning 36.6 MB, and the tone measured present at every masked
+span while speech is untouched elsewhere. The stored transcript for that call was rebuilt with the
+corrected rules, which repaired the dollar figures the first pass had masked.
+
+**Not verified, and it needs Isaac:** listening to the beeped file, and the panel in a browser.
+
+---
+
 Done: **IUL leads now arrive from Telegram automatically** (branch `feature/telegram-iul-leads`).
 
 A new lead provider, Empiregrowth, delivers only over Telegram — each lead forwarded from their

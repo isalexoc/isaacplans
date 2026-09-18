@@ -18,6 +18,7 @@ import type {
   SpeakerMap,
   Turn,
 } from "./types";
+import type { SensitiveSpan, UnmaskedRun } from "./sensitive";
 
 export type RecordingRow = typeof callStudyRecordings.$inferSelect;
 export type SnippetRow = typeof callStudySnippets.$inferSelect;
@@ -48,6 +49,17 @@ export type RecordingDetail = RecordingSummary & {
   metrics: CallMetrics | null;
   analysis: CallAnalysis | null;
   audioUrl: string | null;
+
+  /* The beeped copy made for sharing, and the audit trail behind it. */
+  shareableStatus: ShareableStatus;
+  shareableError: string | null;
+  shareableAudioAt: string | null;
+  hasShareableAudio: boolean;
+  redactionSpans: SensitiveSpan[];
+  unmaskedRuns: UnmaskedRun[];
+  transcriptScrubbedAt: string | null;
+  /** False for calls recorded before the transcript id was stored; they cannot be redacted. */
+  canBuildShareable: boolean;
 };
 
 export function toSummary(row: RecordingRow): RecordingSummary {
@@ -75,6 +87,14 @@ export function toDetail(row: RecordingRow): RecordingDetail {
     metrics: row.metrics ?? null,
     analysis: row.analysis ?? null,
     audioUrl: row.audioUrl,
+    shareableStatus: (row.shareableStatus as ShareableStatus) ?? "idle",
+    shareableError: row.shareableError,
+    shareableAudioAt: row.shareableAudioAt?.toISOString() ?? null,
+    hasShareableAudio: Boolean(row.shareableAudioId),
+    redactionSpans: row.redactionSpans ?? [],
+    unmaskedRuns: row.unmaskedRuns ?? [],
+    transcriptScrubbedAt: row.transcriptScrubbedAt?.toISOString() ?? null,
+    canBuildShareable: Boolean(row.elevenTranscriptionId && row.cloudinaryPublicId),
   };
 }
 
@@ -218,6 +238,57 @@ export async function saveAnalysis(id: string, analysis: CallAnalysis): Promise<
   await db
     .update(callStudyRecordings)
     .set({ analysis, status: "ready", analyzedAt: new Date(), errorMessage: null, updatedAt: new Date() })
+    .where(eq(callStudyRecordings.id, id));
+}
+
+/* ─── Shareable copy ──────────────────────────────────────────────────────── */
+
+export type ShareableStatus = "idle" | "building" | "ready" | "failed";
+
+export async function setShareableStatus(
+  id: string,
+  status: ShareableStatus,
+  error?: string | null
+): Promise<void> {
+  await db
+    .update(callStudyRecordings)
+    .set({ shareableStatus: status, shareableError: error ?? null, updatedAt: new Date() })
+    .where(eq(callStudyRecordings.id, id));
+}
+
+export async function saveShareableAudio(
+  id: string,
+  data: {
+    shareableAudioId: string;
+    redactionSpans: SensitiveSpan[];
+    unmaskedRuns: UnmaskedRun[];
+  }
+): Promise<void> {
+  await db
+    .update(callStudyRecordings)
+    .set({
+      shareableAudioId: data.shareableAudioId,
+      shareableAudioAt: new Date(),
+      shareableStatus: "ready",
+      shareableError: null,
+      redactionSpans: data.redactionSpans,
+      unmaskedRuns: data.unmaskedRuns,
+      updatedAt: new Date(),
+    })
+    .where(eq(callStudyRecordings.id, id));
+}
+
+/**
+ * Replace the stored dialogue with the scrubbed version.
+ *
+ * One-way on purpose. The point of scrubbing is that the digits stop existing here; keeping an
+ * unscrubbed copy beside it to be safe would defeat the exercise. The turn COUNT is unchanged
+ * (see `maskWords`), so the analysis indices stored against it stay valid.
+ */
+export async function saveScrubbedTurns(id: string, turns: Turn[]): Promise<void> {
+  await db
+    .update(callStudyRecordings)
+    .set({ turns, transcriptScrubbedAt: new Date(), updatedAt: new Date() })
     .where(eq(callStudyRecordings.id, id));
 }
 

@@ -16,6 +16,7 @@ import type { RecordingDetail } from "@/lib/call-study/store";
 import type { Objection } from "@/lib/objections/types";
 import AnalysisPanel from "./analysis-panel";
 import DialogueReader from "./dialogue-reader";
+import SharePanel from "./share-panel";
 
 const OUTCOME_LABELS: Record<CallOutcome, string> = {
   sold: "Sold",
@@ -318,6 +319,8 @@ export default function TranscriptView({
       )}
 
       {error && <p className="text-sm text-red-600">{error}</p>}
+
+      <SharePanel recording={recording} onChanged={onChanged} />
 
       {recording.analysis && <AnalysisPanel analysis={recording.analysis} />}
     </div>
