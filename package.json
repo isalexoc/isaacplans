@@ -35,7 +35,8 @@
     "test:missed-call-drafts": "tsx scripts/test-missed-call-drafts.ts",
     "seed:call-dashboard": "tsx scripts/seed-call-dashboard-fixtures.ts",
     "postinstall": "node node_modules/ffmpeg-static/install.js",
-    "check:objections": "tsx scripts/check-objections.ts"
+    "check:objections": "tsx scripts/check-objections.ts",
+    "check:ffmpeg": "tsx scripts/check-ffmpeg-tracing.ts"
   },
   "dependencies": {
     "@clerk/localizations": "^3.28.5",

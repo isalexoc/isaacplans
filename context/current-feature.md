@@ -2,6 +2,35 @@
 
 ## Status
 
+Done: **ffmpeg was missing from nine deployed functions** (branch `fix/ffmpeg-tracing`). The Call
+Study sharing button failed in production with
+`spawn /var/task/node_modules/.pnpm/ffmpeg-static@5.3.0/node_modules/ffmpeg-static/ffmpeg ENOENT`.
+
+`ffmpeg-static` is spawned by path rather than imported, so Next's file tracing cannot see it and
+each route that needs it has to be named in `outputFileTracingIncludes`. That was already understood
+here — the config carried three routes and a comment explaining exactly this — but **seven other
+routes could already reach ffmpeg and none were listed**: `/api/cron/queue-reconcile` and
+`/api/webhooks/kixie/calls` (Whisper chunking for recordings over the 25 MB API cap) and the whole
+Social Media Studio video pipeline (chroma-key detection). They had simply not been exercised on a
+path that reached the binary yet. All thirteen are listed now.
+
+**The reason this shipped quietly is that the config could not be verified locally.** The glob named
+only the Linux binary, `ffmpeg`; on Windows the file is `ffmpeg.exe`, so a local build traced nothing
+and the config looked equally broken whether or not a route was listed. Both names are listed now —
+a glob that matches nothing is ignored, so it costs nothing and makes the setup checkable on either
+machine.
+
+**`pnpm check:ffmpeg`** walks the import graph from all 197 API routes, reports which reach ffmpeg,
+and exits non-zero if any is missing from the config. `--traced` additionally reads the build's
+`.nft.json` files to confirm the binary really is in each bundle. Its static analysis independently
+reproduced the same set of thirteen routes found by hand. `redactAudio` now also checks the binary
+exists before spawning, so the failure names its cause instead of surfacing a raw ENOENT.
+
+Verified: 13/13 routes listed and **binary traced into all thirteen bundles**, confirmed from real
+build output; 218/218 tests; full `pnpm build` green.
+
+---
+
 In progress: **A copy of a call that can be sent to another agent** (branch
 `feature/call-study-shareable-audio`, migration `0038`). Isaac wanted to share recorded calls with
 other agents without the sensitive parts. The premise he started from was that the sensitive data

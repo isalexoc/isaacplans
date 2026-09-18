@@ -14,6 +14,7 @@
 
 import "server-only";
 import { execFile } from "node:child_process";
+import { existsSync } from "node:fs";
 import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -77,7 +78,17 @@ export async function redactAudio(input: {
   /** Used to size the tone source; a few seconds over is harmless. */
   durationSeconds: number;
 }): Promise<RedactAudioResult> {
-  if (!ffmpegPath) return { ok: false, error: "ffmpeg is not available on this machine." };
+  // `ffmpegPath` is a path string whether or not anything is at it. On Vercel the binary is only
+  // present if the route was listed in `outputFileTracingIncludes` in next.config.mjs — file
+  // tracing follows imports, and this one is spawned by path. Checking here turns an opaque
+  // `spawn … ENOENT` into something that names the cause.
+  if (!ffmpegPath || !existsSync(ffmpegPath)) {
+    return {
+      ok: false,
+      error:
+        "The audio tool is missing from this deployment. Add this route to outputFileTracingIncludes in next.config.mjs.",
+    };
+  }
   if (input.spans.length > MAX_SPANS) {
     return { ok: false, error: `Refusing to process ${input.spans.length} redactions; something is wrong with detection.` };
   }
