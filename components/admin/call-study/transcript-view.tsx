@@ -146,6 +146,22 @@ export default function TranscriptView({
     onDeleted();
   }
 
+  /**
+   * Play the beeped copy whenever one exists.
+   *
+   * Studying a call means scrubbing back and forth through it, often with someone else in the
+   * room or a screen being shared, so the safe rendering is the one that should come out of the
+   * speakers by default. The original stays in Cloudinary and is still what a rebuild reads
+   * from; it is simply not what this page plays.
+   *
+   * The two files share a timeline - the beep replaces the speech rather than removing it - so
+   * every transcript timestamp still seeks to the right moment. Measured on a 113-minute call:
+   * 6798.76s against a reported 6799s, which is mp3 frame alignment, not drift.
+   */
+  const playableAudioUrl = recording.hasShareableAudio
+    ? `/api/admin/call-study/recordings/${recording.id}/shareable-audio`
+    : recording.audioUrl;
+
   const metrics = recording.metrics;
 
   return (
@@ -307,7 +323,8 @@ export default function TranscriptView({
         turns={recording.turns}
         speakerMap={speakerMap}
         analysis={recording.analysis}
-        audioUrl={recording.audioUrl}
+        audioUrl={playableAudioUrl}
+        audioIsRedacted={recording.hasShareableAudio}
         languageCode={recording.languageCode}
         libraryObjections={libraryObjections}
       />

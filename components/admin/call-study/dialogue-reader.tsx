@@ -48,6 +48,7 @@ export default function DialogueReader({
   speakerMap,
   analysis,
   audioUrl,
+  audioIsRedacted,
   languageCode,
   libraryObjections,
 }: {
@@ -55,6 +56,8 @@ export default function DialogueReader({
   speakerMap: SpeakerMap;
   analysis: CallAnalysis | null;
   audioUrl: string | null;
+  /** True when the source is the beeped copy rather than the original recording. */
+  audioIsRedacted?: boolean;
   languageCode: string | null;
   libraryObjections: Objection[];
 }) {
@@ -259,7 +262,14 @@ export default function DialogueReader({
 
   return (
     <div className="space-y-3">
-      {audioUrl && <CallAudioPlayer src={audioUrl} audioRef={audioRef} onTime={handleTime} />}
+      {audioUrl && (
+        <CallAudioPlayer
+          src={audioUrl}
+          audioRef={audioRef}
+          onTime={handleTime}
+          isRedacted={Boolean(audioIsRedacted)}
+        />
+      )}
 
       <StageRail
         stages={stages}

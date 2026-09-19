@@ -2,6 +2,33 @@
 
 ## Status
 
+Done: **The call page plays the redacted copy, not the original** (branch
+`fix/call-study-play-redacted`). Studying a call means scrubbing back and forth through it, often
+with someone else in the room or a screen being shared, so the safe rendering is the one that should
+come out of the speakers. When a beeped copy exists the player now uses it; the original stays in
+Cloudinary and is still what a rebuild reads from, it is simply not what this page plays.
+
+**The download route had to learn to stream.** It was minting a Cloudinary URL with
+`flags: attachment`, which sets `Content-Disposition` — point an `<audio>` element at that and the
+browser saves the file instead of playing it, silently. The attachment flag is now behind
+`?download=1`, which the Share panel's Download button passes and the player does not.
+
+**The two files share a timeline**, because the beep replaces the speech rather than removing it, so
+every transcript timestamp still seeks to the right moment. Measured on the 113-minute call: 6798.76s
+against a reported 6799s, which is mp3 frame alignment and ElevenLabs rounding, not drift.
+
+The player now always states which recording is loaded — a green "Redacted copy" or an amber
+"Original — has sensitive audio". Both failure directions matter: playing the original while
+believing it is safe, and hearing a beep and thinking the call itself was cut.
+
+Verified against the live asset: playback URL returns 200 `audio/mpeg` with no `Content-Disposition`
+and `Accept-Ranges: bytes`, a range request returns **206** so seeking works, and the download URL
+still returns `attachment; filename="…-shareable.mp3"`. 218/218 tests, full build green.
+
+**Not verified, and it needs Isaac:** pressing play in a real browser.
+
+---
+
 Done: **ffmpeg was missing from nine deployed functions** (branch `fix/ffmpeg-tracing`). The Call
 Study sharing button failed in production with
 `spawn /var/task/node_modules/.pnpm/ffmpeg-static@5.3.0/node_modules/ffmpeg-static/ffmpeg ENOENT`.
