@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Pause, Play, RotateCcw, RotateCw } from "lucide-react";
+import { Pause, Play, RotateCcw, RotateCw, ShieldAlert, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { formatClock } from "@/lib/call-study/reading";
 
 const SPEEDS = [1, 1.25, 1.5, 1.75, 2] as const;
@@ -24,10 +25,13 @@ export default function CallAudioPlayer({
   src,
   audioRef,
   onTime,
+  isRedacted = false,
 }: {
   src: string;
   audioRef: React.RefObject<HTMLAudioElement | null>;
   onTime: (seconds: number) => void;
+  /** Whether this is the beeped copy. Always shown, never inferred from context. */
+  isRedacted?: boolean;
 }) {
   const [playing, setPlaying] = useState(false);
   const [duration, setDuration] = useState(0);
@@ -128,6 +132,21 @@ export default function CallAudioPlayer({
       <Button size="sm" variant="ghost" className="h-8 px-2 font-mono text-xs" onClick={changeSpeed}>
         {speed}&times;
       </Button>
+
+      {/* Which recording is coming out of the speakers, stated rather than assumed. Getting this
+          wrong in either direction matters: playing the original while believing it is safe, or
+          hearing a beep and thinking the call itself was cut. */}
+      <span
+        className={cn(
+          "inline-flex items-center gap-1 whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] font-medium",
+          isRedacted
+            ? "bg-green-100 text-green-800 ring-1 ring-inset ring-green-600/20 dark:bg-green-500/15 dark:text-green-300 dark:ring-green-400/30"
+            : "bg-amber-100 text-amber-900 ring-1 ring-inset ring-amber-600/20 dark:bg-amber-500/15 dark:text-amber-200 dark:ring-amber-400/30"
+        )}
+      >
+        {isRedacted ? <ShieldCheck className="h-3 w-3" /> : <ShieldAlert className="h-3 w-3" />}
+        {isRedacted ? "Redacted copy" : "Original — has sensitive audio"}
+      </span>
 
       {failed && (
         <span className="text-xs text-red-600">

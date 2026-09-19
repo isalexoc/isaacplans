@@ -18,7 +18,7 @@ export const runtime = "nodejs";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
-export async function GET(_request: NextRequest, context: RouteContext) {
+export async function GET(request: NextRequest, context: RouteContext) {
   try {
     const { userId } = await auth();
     if (!userId) return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
@@ -39,14 +39,22 @@ export async function GET(_request: NextRequest, context: RouteContext) {
       );
     }
 
+    /**
+     * `?download=1` saves the file; without it the response streams.
+     *
+     * The distinction matters because this same URL is the `<audio>` source on the call page. The
+     * attachment flag sets Content-Disposition, which makes a browser save the file instead of
+     * playing it — so a player pointed at the download URL silently does nothing.
+     */
+    const asDownload = request.nextUrl.searchParams.get("download") === "1";
     const filename = callPdfFilename(row.title).replace(/-transcript\.pdf$/, "-shareable");
+
     const url = cloudinary.url(row.shareableAudioId, {
       resource_type: "video",
       type: "authenticated",
       sign_url: true,
       secure: true,
-      // Downloads rather than streams, under a name that says what it is.
-      flags: `attachment:${filename}`,
+      ...(asDownload ? { flags: `attachment:${filename}` } : {}),
       format: "mp3",
     });
 

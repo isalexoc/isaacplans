@@ -75,7 +75,7 @@ export default function SharePanel({
           {ready && (
             <Button size="sm" variant="outline" asChild>
               <a
-                href={`/api/admin/call-study/recordings/${recording.id}/shareable-audio`}
+                href={`/api/admin/call-study/recordings/${recording.id}/shareable-audio?download=1`}
                 target="_blank"
                 rel="noopener noreferrer"
               >
