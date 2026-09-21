@@ -12,7 +12,6 @@ import {
 
 import {
   LEGAL_SHIELD_GUIDE_COVER_URL,
-  LEGAL_SHIELD_GUIDE_TITLE,
   LS_ADVISOR_NAME,
   NOT_INSURANCE_LINE_ES,
 } from "@/lib/legal-shield/constants";
@@ -100,44 +99,27 @@ const FAQ = [
 export function LegalShieldHero() {
   return (
     <div className="mx-auto w-full max-w-2xl px-4 pt-8 sm:px-6 sm:pt-12">
-      <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#8124BC] dark:text-purple-300">
-        Guía gratis · Familias latinas en EE.&nbsp;UU.
+      <p className="text-center text-xs font-bold uppercase tracking-[0.16em] text-[#8124BC] dark:text-purple-300">
+        Guía gratis · Descarga inmediata
       </p>
-      <h1 className="mt-3 text-[26px] font-extrabold leading-tight text-gray-900 sm:text-4xl dark:text-white">
-        En este país, la mayor tranquilidad viene de saber que no tienes que enfrentar todo tú
-        solo.
+      <h1 className="mt-3 text-center text-[28px] font-extrabold leading-[1.15] text-gray-900 sm:text-[40px] dark:text-white">
+        Cómo tener un abogado a tu alcance para proteger a tu familia y tu patrimonio
       </h1>
-      <p className="mt-4 text-[17px] leading-relaxed text-gray-600 dark:text-gray-300">
-        Descarga gratis la{" "}
-        <strong className="text-gray-900 dark:text-white">{LEGAL_SHIELD_GUIDE_TITLE}</strong>:
-        orientación clara en español sobre los documentos, contratos y trámites que conviene tener
-        resueltos <em>antes</em> de necesitarlos.
-      </p>
 
-      <div className="mt-6 grid gap-6 sm:grid-cols-[minmax(0,260px)_1fr] sm:items-center">
-        <div className="overflow-hidden rounded-xl border border-gray-200 shadow-lg dark:border-gray-800">
+      {/* The book is the argument. Anything between the headline and the mockup is one more thing
+          to read before the reader sees what they are being offered, so there is nothing here. */}
+      <div className="mt-7 flex justify-center">
+        <div className="w-full max-w-[340px] rounded-2xl bg-white p-4 shadow-xl ring-1 ring-black/5 sm:max-w-[380px]">
           <Image
             src={LEGAL_SHIELD_GUIDE_COVER_URL}
-            alt={`Portada de la ${LEGAL_SHIELD_GUIDE_TITLE}`}
-            width={900}
-            height={1139}
+            alt="Portada de la guía Escudo Legal"
+            width={700}
+            height={881}
             className="h-auto w-full"
-            sizes="(min-width: 640px) 260px, 100vw"
+            sizes="(min-width: 640px) 380px, 90vw"
             priority
           />
         </div>
-        <ul className="space-y-2.5">
-          {[
-            "Escrita en español, para familias latinas en Estados Unidos",
-            "8 temas de la vida cotidiana, explicados sin tecnicismos",
-            "Gratis, sin tarjeta y sin compromiso",
-          ].map((line) => (
-            <li key={line} className="flex gap-2.5 text-[15px] text-gray-700 dark:text-gray-300">
-              <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[#8124BC] dark:text-purple-300" />
-              {line}
-            </li>
-          ))}
-        </ul>
       </div>
     </div>
   );

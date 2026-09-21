@@ -44,7 +44,10 @@ export default function LegalShieldBrand({
   const markClass = isHeader ? "h-7 w-auto sm:h-8" : "h-6 w-auto sm:h-7";
 
   return (
-    <div className="flex flex-col gap-1" aria-label={`LegalShield — ${ASSOCIATE_LINE}`}>
+    <div
+      className="flex flex-col items-center gap-1 text-center"
+      aria-label={`LegalShield — ${ASSOCIATE_LINE}`}
+    >
       <Image
         src={LEGAL_SHIELD_LOGO_URL_LIGHT}
         alt="LegalShield"

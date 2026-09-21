@@ -79,9 +79,9 @@ export async function sendLegalShieldGuideEmail({
 <div style="font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;max-width:560px;margin:0 auto;padding:24px;color:#0f172a;">
   <p style="font-size:16px;line-height:1.6;margin:0 0 16px;">${escapeHtml(greeting)}</p>
   <p style="font-size:16px;line-height:1.6;margin:0 0 24px;">
-    Aquí está la <strong>${escapeHtml(LEGAL_SHIELD_GUIDE_TITLE)}</strong> que pediste. Dentro vas
-    a encontrar orientación en español sobre documentos, vivienda y contratos, tránsito y
-    licencias, protección familiar, estafas e inmigración.
+    Aquí está tu guía <strong>${escapeHtml(LEGAL_SHIELD_GUIDE_TITLE)}</strong>. Dentro vas a
+    encontrar orientación en español sobre documentos, vivienda y contratos, tránsito y licencias,
+    protección familiar, estafas e inmigración.
   </p>
   <p style="margin:0 0 28px;">
     <a href="${escapeHtml(pdfUrl)}"

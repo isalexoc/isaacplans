@@ -54,15 +54,25 @@ export const LEGAL_SHIELD_LOGO_URL_DARK = `${CLOUDINARY}/e_trim:10/co_white,e_ma
 export const LEGAL_SHIELD_GUIDE_PDF_URL = `${CLOUDINARY}/v1790000614/guia_legal_shield_gt48jt.pdf`;
 
 /**
- * The guide's own cover, rendered from page 1 of the PDF — no second asset to keep in sync, and
- * the image on the landing page is guaranteed to be the cover of the file that actually arrives.
- * `e_trim` removes the page's white margin and the `c_crop` drops the footer line below the
- * artwork.
+ * The 3D book mockup used as the hero visual. `e_trim` crops the generous white canvas down to the
+ * book and its shadow.
+ *
+ * The white background is deliberately LEFT IN. Knocking it out looks like the obvious move, but
+ * the cover's lettering is white too, so `e_make_transparent` eats "ESCUDO LEGAL" along with the
+ * background and the title renders as holes. The image is framed in a light card instead, which is
+ * how a product shot normally sits anyway.
  */
-export const LEGAL_SHIELD_GUIDE_COVER_URL = `${CLOUDINARY}/pg_1/e_trim:10/c_crop,g_north,h_0.945/f_jpg,q_auto:good,w_900/v1790000614/guia_legal_shield_gt48jt.pdf`;
+export const LEGAL_SHIELD_GUIDE_COVER_URL = `${CLOUDINARY}/e_trim:8/f_auto,q_auto,w_700/v1790003691/legal-shield-purple_kko0wd.png`;
 
-/** What the guide is actually called. The landing page must promise the file it delivers. */
-export const LEGAL_SHIELD_GUIDE_TITLE = "Guía Preventiva para Familias Latinas";
+/**
+ * The name the offer goes by everywhere the visitor sees it — the book mockup, the button, the
+ * email subject.
+ *
+ * NOTE: the PDF's own cover is titled "Guía Preventiva para Familias Latinas", so a lead who
+ * clicks "Escudo Legal" opens a file with a different name on it. Nothing breaks, but it is worth
+ * settling: either the mockup or the PDF cover should be re-made to match the other.
+ */
+export const LEGAL_SHIELD_GUIDE_TITLE = "Escudo Legal";
 
 /** Ysmael's headshot, face-cropped square for the circular avatar on the success screen. */
 export const YSMAEL_HEADSHOT_URL = `${CLOUDINARY}/f_auto,q_auto,c_fill,g_face,z_0.7,w_192,h_192/v1790001116/677661707_10239564285542052_6169561768116144074_n_v5zqwu.jpg`;
