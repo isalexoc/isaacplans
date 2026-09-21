@@ -741,21 +741,9 @@ export async function POST(request: NextRequest) {
       const submittedAt = new Date().toLocaleString() + ' ' + (Intl.DateTimeFormat().resolvedOptions().timeZone || '');
       // Spanish, because everyone who works this lead — and the lead themselves — speaks Spanish.
       // The advisor reads this block before dialing.
-      const consentText =
-        typeof legalShieldData.consentDisclosure === 'string'
-          ? legalShieldData.consentDisclosure.trim()
-          : '';
-      // Consent is captured by submission rather than a checkbox, so the EVIDENCE is the wording
-      // the visitor was shown plus when and from where — a bare boolean would prove nothing.
-      const consentLines = consentText
-        ? [
-            '',
-            'Consentimiento (aceptado al enviar el formulario):',
-            ...consentText.split(/\r?\n/).map((l: string) => `  ${l}`),
-            `  Registrado: ${submittedAt}`,
-            `  IP: ${getClientIpFromRequest(request) || 'No disponible'}`,
-          ]
-        : [];
+      // This funnel records no consent. It had a disclosure line above the submit button whose
+      // wording was stored here as evidence; Isaac removed the line from the form, so storing it
+      // would assert the visitor saw something they did not. Nothing is better than a false record.
       leadDetailsText = [
         'LegalShield Lead',
         '================',
@@ -767,7 +755,6 @@ export async function POST(request: NextRequest) {
         `  Nombre: ${firstName} ${lastName}`,
         `  Email: ${email || 'No proporcionado'}`,
         `  Telefono: ${phone}`,
-        ...consentLines,
         '',
         'Detalles del lead:',
         `  Origen: ${legalShieldData.source || 'legal_shield_optin_ads'}`,
