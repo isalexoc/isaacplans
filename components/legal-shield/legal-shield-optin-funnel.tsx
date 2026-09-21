@@ -34,16 +34,14 @@ import {
 } from "@/lib/analytics/legal-shield-optin-ga";
 import {
   AREA_LABELS_ES,
-  AREA_SLUGS,
-  CONSENT_DISCLOSURE_ES,
+  AREA_SLUGS,
   LEGAL_SHIELD_GUIDE_PDF_URL,
   LS_APPLY_PATH,
   LS_ADVISOR_NAME,
   LS_LEAD_SOURCE,
   LS_PHONE_DISPLAY,
   LS_PHONE_TEL,
-  LS_WHATSAPP_HREF,
-  NOT_INSURANCE_LINE_ES,
+  LS_WHATSAPP_HREF,
   URGENCY_LABELS_ES,
   URGENCY_SLUGS,
   YSMAEL_HEADSHOT_URL,
@@ -259,8 +257,7 @@ export default function LegalShieldOptinFunnel({
             language: "es",
             source: LS_LEAD_SOURCE,
             campaign: "legal_shield_proteccion_legal",
-            guideVersion: GUIDE_VERSION,
-            consentDisclosure: CONSENT_DISCLOSURE_ES,
+            guideVersion: GUIDE_VERSION,
           },
           meta: {
             eventId,
@@ -422,7 +419,7 @@ export default function LegalShieldOptinFunnel({
                 ¿A dónde te enviamos tu guía gratis?
               </h2>
               <p className="mt-2 text-[15px] leading-relaxed text-gray-600 dark:text-gray-400">
-                Llena tus datos y te lo mandamos ahora mismo. Es gratis y no te compromete a nada.
+                Llena tus datos y te lo mandamos ahora mismo.
               </p>
 
               <form onSubmit={handleContactSubmit} className="mt-6 space-y-4" noValidate>
@@ -538,15 +535,6 @@ export default function LegalShieldOptinFunnel({
                   </p>
                 )}
 
-                {/*
-                  Consent by submission. Isaac asked for the checkboxes to go; this line is what
-                  replaces them, and the exact wording is stored on the CRM record with a timestamp
-                  and IP so there is still evidence of what the visitor agreed to.
-                */}
-                <p className="text-[11px] leading-relaxed text-gray-500 dark:text-gray-400">
-                  {CONSENT_DISCLOSURE_ES}
-                </p>
-
                 <button
                   type="submit"
                   disabled={loading}
@@ -566,7 +554,7 @@ export default function LegalShieldOptinFunnel({
                 </button>
 
                 <p className="text-center text-xs text-gray-500 dark:text-gray-400">
-                  100% gratis · Sin tarjeta de crédito · {NOT_INSURANCE_LINE_ES}
+                  100% gratis
                 </p>
               </form>
             </>

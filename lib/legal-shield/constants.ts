@@ -185,22 +185,6 @@ export function formatAreasForCrm(slugs: readonly string[]): string {
 }
 
 // ---------------------------------------------------------------------------
-// Consent
-// ---------------------------------------------------------------------------
-
-/**
- * Isaac asked for the consent checkboxes to be removed. Consent is therefore captured by
- * submission: this exact sentence sits directly above the submit button, and the CRM lead block
- * records it verbatim with a timestamp, the client IP and the page URL — so there is still an
- * evidentiary record of what the visitor was shown when they chose to submit.
- *
- * Writing the text itself rather than only a boolean is the point: editing this string changes
- * what is stored from now on and leaves every earlier record saying what it actually said.
- */
-export const CONSENT_DISCLOSURE_ES =
-  "Al enviar este formulario autorizas a Ysmael Orraiz a contactarte por teléfono, mensaje de texto y WhatsApp al número que proporcionaste. No es condición de compra. Pueden aplicar tarifas de tu operador. Responde STOP para dejar de recibir mensajes.";
-
-// ---------------------------------------------------------------------------
 // Compliance
 // ---------------------------------------------------------------------------
 
