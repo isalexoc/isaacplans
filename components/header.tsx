@@ -19,7 +19,7 @@ import {
   isLegalShieldLandingPath,
 } from "@/lib/ads-landing";
 import LegalShieldBrand from "@/components/legal-shield/legal-shield-brand";
-import { LS_PHONE_DISPLAY } from "@/lib/legal-shield/constants";
+import { LS_PHONE_DISPLAY, LS_PHONE_TEL } from "@/lib/legal-shield/constants";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import {
@@ -118,23 +118,29 @@ const Header = () => {
   };
 
   /** LegalShield funnel: the same bare shell, but branded LegalShield rather than Isaac Plans.
-   *  Checked FIRST so it can never fall through to a branch that renders <Logo />. The phone is
-   *  Ysmael's, read from constants — nav("phone") is Isaac's 540-426-1804 and would send a
-   *  legal-plan prospect to an insurance line. */
+   *  Checked FIRST so it can never fall through to a branch that renders <Logo />.
+   *
+   *  Stacked and centred rather than the usual logo-left / phone-right row: the mark plus the
+   *  "Asociado Independiente · Ysmael Orraiz" disclosure is already two lines wide, and pushing a
+   *  phone number opposite it squeezed both on a phone. Centring gives each its own line.
+   *
+   *  The phone is Ysmael's, read from constants — nav("phone") is Isaac's 540-426-1804 and would
+   *  send a legal-plan prospect to an insurance line. */
   if (isLegalShieldLandingPath(pathname)) {
     return (
       <Headroom style={{ zIndex: 50 }}>
         <header className="border-b border-border bg-background/95 backdrop-blur-sm shadow-sm transition-shadow duration-300 supports-[backdrop-filter]:bg-background/80">
           <div className="container mx-auto px-4 sm:px-6">
-            <div className="flex h-16 items-center justify-between md:h-20">
+            <div className="flex flex-col items-center gap-1.5 py-3 sm:py-4">
               <LegalShieldBrand size="header" />
-              <div
-                className="flex items-center gap-2 text-sm font-medium text-foreground/90"
+              <a
+                href={LS_PHONE_TEL}
+                className="flex items-center gap-1.5 text-sm font-semibold text-foreground/90 transition-colors hover:text-[#8124BC] dark:hover:text-purple-300"
                 aria-label={`Llama al ${LS_PHONE_DISPLAY}`}
               >
-                <Lucide.Phone className="h-4 w-4 shrink-0" aria-hidden="true" />
+                <Lucide.Phone className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
                 <span>{LS_PHONE_DISPLAY}</span>
-              </div>
+              </a>
             </div>
           </div>
         </header>

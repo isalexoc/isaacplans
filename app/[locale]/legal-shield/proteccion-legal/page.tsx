@@ -16,9 +16,9 @@ import LegalShieldSections, {
   LegalShieldHero,
 } from "@/components/legal-shield/legal-shield-sections";
 
-const TITLE = "Guía Preventiva gratis para familias latinas en Estados Unidos";
+const TITLE = "Guía gratis: cómo tener un abogado a tu alcance";
 const DESCRIPTION =
-  "Descarga gratis la Guía Preventiva para Familias Latinas: orientación clara en español sobre documentos, vivienda y contratos, tránsito, protección familiar, estafas e inmigración.";
+  "Descarga gratis la guía Escudo Legal: orientación clara en español sobre documentos, vivienda y contratos, tránsito, protección familiar, estafas e inmigración.";
 
 export async function generateMetadata(): Promise<Metadata> {
   const canonical = "https://www.isaacplans.com/es/legal-shield/proteccion-legal";
