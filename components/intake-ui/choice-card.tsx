@@ -13,7 +13,10 @@ import type { LucideIcon } from "lucide-react";
  * and inventing an icon for each would be noise standing in for meaning. With no icon the label
  * takes the space and the card still reads as tappable.
  *
- * Emits `role="radio"` + `aria-checked`, so wrap a group in `role="radiogroup"`.
+ * Emits `role="radio"` + `aria-checked` by default, so wrap a group in `role="radiogroup"`.
+ * Pass `role="checkbox"` for a genuinely multi-select group (wrapped in a `role="group"`) — five
+ * cards that announce as radios but let you pick several tells a screen reader user the opposite
+ * of what the control does.
  */
 export function ChoiceCard({
   selected,
@@ -21,17 +24,19 @@ export function ChoiceCard({
   label,
   onClick,
   disabled = false,
+  role = "radio",
 }: {
   selected: boolean;
   icon?: LucideIcon;
   label: string;
   onClick: () => void;
   disabled?: boolean;
+  role?: "radio" | "checkbox";
 }) {
   return (
     <button
       type="button"
-      role="radio"
+      role={role}
       aria-checked={selected}
       onClick={onClick}
       disabled={disabled}

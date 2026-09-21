@@ -78,6 +78,15 @@ const nextConfig = {
         destination: "/:locale/imanes-de-leads",
         permanent: true,
       },
+      // The LegalShield funnel is Spanish-only. Its routing entries carry the same slug in both
+      // locales (next-intl requires an entry per locale), so without this an /en/ URL would render
+      // Spanish copy under an English prefix — two addresses for one page, splitting the Meta
+      // attribution and the analytics. One canonical ad destination instead.
+      {
+        source: "/en/legal-shield/:path*",
+        destination: "/es/legal-shield/:path*",
+        permanent: true,
+      },
     ];
   },
   images: {

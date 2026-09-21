@@ -2,6 +2,76 @@
 
 ## Status
 
+Done: **LegalShield opt-in funnel** (branch `feature/legal-shield-optin-funnel`). A Spanish-only
+direct-response funnel at `/legal-shield/proteccion-legal` for Meta Ads traffic, giving away the
+*Guia Preventiva para Familias Latinas* and selling LegalShield legal-service memberships (which
+are NOT insurance). Plus `/legal-shield/apply` for the lead who would rather self-enroll.
+
+**The requirement that shaped the whole form** is one line of the sales script: *"veo aqui en tu
+formulario que te interesa especificamente el tema de \_\_\_. Ademas, me indicaste que \_\_\_."*
+Those two blanks are the ad brief's screens 2 and 3, and if they do not reach the CRM the script
+breaks on the first call. Step 1 creates the contact; screens 2 and 3 save fire-and-forget with
+`keepalive`, so someone who answers screen 2 and closes the tab is still a lead with an opening
+line.
+
+**No new custom fields**, at Isaac's request. The answers land in two places that already exist:
+tags (`ls_area_*`, `ls_urgencia_*`) carry the structured half for smart lists and workflow filters,
+and `lead_source_details` — the shared field every lead type already writes to — carries the
+readable half, so `{{contact.lead_source_details}}` still renders a sentence in the advisor's
+notification. The readable block is *replaced* rather than appended on each save, or a partial and
+then a final save would stack two contradictory copies on the record.
+
+**The bug worth knowing about**: `/api/create-contact` early-returns on the duplicate-contact path
+(~line 1128, *"no workflow enrollment - early return"*) and the workflow ladder does not start
+until ~1468. Every existing lead type survives that because GHL drives them off tags. A paid
+retargeting funnel does not: most clickers already exist as contacts, so without the enrollment
+added *inside* that branch they would merge and then sit there. `incomingTags` had the same hole.
+Both are fixed, and the GHL workflow should still trigger on **tag added: `legal_shield`** so
+neither code path is a single point of failure.
+
+**Branding is structural, not a disclaimer.** LegalShield's advertising rules for Independent
+Associates require identifying as independent, not reading as an official LegalShield property, and
+never calling the plans insurance. So: a third header variant rendering the LegalShield lockup with
+"Asociado Independiente . Ysmael Orraiz" in the same DOM block as the mark, a `legal-shield-bare`
+footer carrying the full disclosure server-rendered, no JSON-LD, noindex, and a CRM lead block that
+opens with "NO es un lead de seguros". The phone is Ysmael's (540) 376-1831 — `nav("phone")` would
+have rendered Isaac's.
+
+**Every asset is a Cloudinary derivation of one original**, so there is a single source of truth and
+the sizing happens at the CDN. All three logo files ship with a solid white background baked in, so
+`e_trim` strips the padding, `co_white,e_make_transparent` knocks the white out, and the dark
+variant adds `e_colorize,co_white` over the black original — after trimming both land at ~365x72,
+the same ratio, so the light/dark swap cannot shift the layout. The landing cover is page 1 of the
+PDF itself (`pg_1`), which means the image on the page is guaranteed to be the cover of the file
+that actually arrives. Ysmael's headshot is `g_face` cropped.
+
+**The landing copy was rewritten against the real guide.** The bullets are its actual eight
+chapters, read off the PDF, and the palette moved from the placeholder green to the brand purple
+`#8124BC` sampled from the logo. The guide opens with *"el objetivo de esta guia no es generar
+miedo"*, so the page now sells preparedness rather than dread — a fear-first headline would have set
+up a lead who opens the PDF and feels sold to.
+
+Consent checkboxes were removed at Isaac's request. Consent is captured by submission instead: the
+disclosure sits above the button and its verbatim text, timestamp and client IP are written to the
+CRM record, so there is still an evidentiary trail.
+
+Verified: full `pnpm build` green, 236/236 pages, `tsc --noEmit` clean. Both routes render the
+LegalShield header and disclosure footer with **zero** Isaac Plans logo or phone number in the
+visible DOM (the matches are all inside the serialized next-intl payload). Light AND dark mode
+checked by screenshot — the white logo swaps in correctly and the phone field needed the same
+`[&_.PhoneInputInput]:bg-transparent` override the ACA and FE funnels already carry, or it showed a
+pale box in dark mode. The success screen was verified by temporarily forcing the `done` phase.
+`/en/legal-shield/*` 308s to `/es/`. The Agent CRM chat widget and external-tracking script are both
+absent.
+
+**Not verified, and it needs Isaac:** the whole CRM leg — nothing here has touched a live contact.
+Set `AGENT_CRM_WORKFLOW_LEGAL_SHIELD`, build the workflow on the `legal_shield` tag trigger, then
+submit a test lead and a *second* one with the same phone (that is the duplicate path, the risky
+one). Still placeholders, each with a designed fallback: Ysmael's vCard, the LegalShield referral
+link and the walkthrough video. And the page needs LegalShield pre-approval before any ad spend.
+
+---
+
 Done: **The call page plays the redacted copy, not the original** (branch
 `fix/call-study-play-redacted`). Studying a call means scrubbing back and forth through it, often
 with someone else in the room or a screen being shared, so the safe rendering is the one that should
