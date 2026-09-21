@@ -1,4 +1,27 @@
 /**
+ * The LegalShield funnel — the opt-in and the self-enrollment page.
+ *
+ * Declared above ADS_LANDING_PATHNAMES because it is spread into it: these pages need the same
+ * suppression of Agent CRM's chat bubble and external-tracking script as every other ads landing.
+ *
+ * They are deliberately NOT in IUL_BARE_LANDING_PATHNAMES. That list has exactly one consumer,
+ * the bare branch in components/header.tsx, and the LegalShield branch runs before it — an entry
+ * there would be unreachable, and would read as though the two variants were interchangeable when
+ * the whole point of the LegalShield variant is that it must never render the Isaac Plans logo.
+ *
+ * Spanish-only, so there is one slug per page rather than a locale pair.
+ */
+export const LEGAL_SHIELD_LANDING_PATHNAMES = [
+  "/legal-shield/proteccion-legal",
+  "/legal-shield/apply",
+] as const;
+
+export function isLegalShieldLandingPath(pathname: string | null | undefined): boolean {
+  if (!pathname) return false;
+  return (LEGAL_SHIELD_LANDING_PATHNAMES as readonly string[]).includes(pathname);
+}
+
+/**
  * Paid-ads landing routes: minimal site chrome (logo + phone; no main nav / quote CTA).
  * Pathnames are locale-agnostic (next-intl usePathname omits the locale prefix).
  */
@@ -13,6 +36,7 @@ export const ADS_LANDING_PATHNAMES = [
   "/seguro-de-vida/obtener-cobertura",
   "/health-alternative/get-covered",
   "/alternativa-de-salud/obtener-cobertura",
+  ...LEGAL_SHIELD_LANDING_PATHNAMES,
 ] as const;
 
 export type AdsLandingPathname = (typeof ADS_LANDING_PATHNAMES)[number];

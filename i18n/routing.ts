@@ -486,6 +486,18 @@ export const routing = defineRouting({
       en: "/agent-crm",
       es: "/agent-crm",
     },
+    // LegalShield funnel — Spanish only. The slug is identical in both locales because there is no
+    // English version to point at: next.config redirects /en/legal-shield/* to /es/, so there is
+    // exactly one canonical destination for the ads. Entries still have to exist for both locales
+    // or <Link href="/legal-shield/apply"> will not typecheck.
+    "/legal-shield/proteccion-legal": {
+      en: "/legal-shield/proteccion-legal",
+      es: "/legal-shield/proteccion-legal",
+    },
+    "/legal-shield/apply": {
+      en: "/legal-shield/apply",
+      es: "/legal-shield/apply",
+    },
   },
 });
 

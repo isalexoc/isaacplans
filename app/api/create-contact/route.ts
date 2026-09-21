@@ -77,6 +77,7 @@ async function trySendMetaLeadCapiLead(
     lifeInsuranceData?: OptLeadBlob;
     healthAlternativeData?: OptLeadBlob;
     agentCrmData?: OptLeadBlob;
+    legalShieldData?: OptLeadBlob;
   }
 ): Promise<boolean> {
   const pixelId = process.env.NEXT_PUBLIC_FACEBOOK_PIXEL_ID;
@@ -101,6 +102,7 @@ async function trySendMetaLeadCapiLead(
     lifeInsuranceData,
     healthAlternativeData,
     agentCrmData,
+    legalShieldData,
   } = opts;
 
   const feSource =
@@ -118,16 +120,20 @@ async function trySendMetaLeadCapiLead(
     typeof healthAlternativeData?.source === "string" ? healthAlternativeData.source : undefined;
   const isHealthAlternativeGetCoveredAds =
     healthAlternativeSource === "health_alternative_get_covered_ads";
-  // Duplicate-merge CAPI: FE get-covered, IUL get-covered, ACA get-covered, Life Insurance, and
-  // Health Coverage Alternative get-covered ad funnels fire Lead on Step 1 (contact) even for
-  // returning/duplicate contacts, using the same eventId as the Pixel.
+  const legalShieldSource =
+    typeof legalShieldData?.source === "string" ? legalShieldData.source : undefined;
+  const isLegalShieldOptinAds = legalShieldSource === "legal_shield_optin_ads";
+  // Duplicate-merge CAPI: FE get-covered, IUL get-covered, ACA get-covered, Life Insurance,
+  // Health Coverage Alternative get-covered, and the LegalShield opt-in ad funnels fire Lead on
+  // Step 1 (contact) even for returning/duplicate contacts, using the same eventId as the Pixel.
   const allowDuplicateMergeCapi =
     !isNewContact &&
     (isFinalExpenseGetCoveredAds ||
       isIulGetCoveredAds ||
       isAcaGetCoveredAds ||
       isLifeInsuranceGetCoveredAds ||
-      isHealthAlternativeGetCoveredAds);
+      isHealthAlternativeGetCoveredAds ||
+      isLegalShieldOptinAds);
 
   const willSend = !!(
     pixelId &&
@@ -160,7 +166,12 @@ async function trySendMetaLeadCapiLead(
     const ip = getClientIpFromRequest(request);
 
     const value = 100;
-    const source = isIulGetCoveredAds
+    // LegalShield sits at the top of both chains on purpose: they terminate in "iul_lead_gen" /
+    // "IUL Lead Generation Campaign", so a blob that falls through is reported to Meta as an IUL
+    // insurance lead — wrong audience, wrong optimisation, and no error anywhere.
+    const source = isLegalShieldOptinAds
+      ? "legal_shield_optin_ads"
+      : isIulGetCoveredAds
       ? "iul_get_covered_ads"
       : isFinalExpenseGetCoveredAds
         ? "final_expense_get_covered_ads"
@@ -190,7 +201,9 @@ async function trySendMetaLeadCapiLead(
                                 ? "health_alternative"
                                 : "iul_lead_gen";
 
-    const contentName = isIulGetCoveredAds
+    const contentName = isLegalShieldOptinAds
+      ? "LegalShield legal plan opt-in (ads)"
+      : isIulGetCoveredAds
       ? "IUL get covered (ads)"
       : isFinalExpenseGetCoveredAds
         ? "Final expense get covered (VA ads)"
@@ -242,6 +255,9 @@ async function trySendMetaLeadCapiLead(
     }
     if (isHealthAlternativeGetCoveredAds) {
       customData.lead_event_source = "health_alternative_get_covered_funnel";
+    }
+    if (isLegalShieldOptinAds) {
+      customData.lead_event_source = "legal_shield_optin_funnel";
     }
 
     console.log("[Meta CAPI] Sending event:", {
@@ -309,7 +325,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { firstName, lastName, email, phone, iulLeadGenData, shortTermMedicalData, contactPageData, acaData, dentalVisionData, hospitalIndemnityData, finalExpenseData, getCoveredFastData, lifeInsuranceData, healthAlternativeData, agentCrmData, meta } = body;
+    const { firstName, lastName, email, phone, iulLeadGenData, shortTermMedicalData, contactPageData, acaData, dentalVisionData, hospitalIndemnityData, finalExpenseData, getCoveredFastData, lifeInsuranceData, healthAlternativeData, agentCrmData, legalShieldData, meta } = body;
 
     // [Workflow Debug] Log incoming lead type - helps trace why IUL workflow may be assigned
     console.log("[create-contact] Incoming request lead type:", {
@@ -323,6 +339,7 @@ export async function POST(request: NextRequest) {
       hasGetCoveredFastData: !!getCoveredFastData,
       hasLifeInsuranceData: !!lifeInsuranceData,
       hasHealthAlternativeData: !!healthAlternativeData,
+      hasLegalShieldData: !!legalShieldData,
       iulLeadGenDataKeys: iulLeadGenData ? Object.keys(iulLeadGenData) : [],
       shortTermMedicalDataKeys: shortTermMedicalData ? Object.keys(shortTermMedicalData) : [],
       contactPageDataKeys: contactPageData ? Object.keys(contactPageData) : [],
@@ -332,7 +349,10 @@ export async function POST(request: NextRequest) {
       finalExpenseDataKeys: finalExpenseData ? Object.keys(finalExpenseData) : [],
       lifeInsuranceDataKeys: lifeInsuranceData ? Object.keys(lifeInsuranceData) : [],
       healthAlternativeDataKeys: healthAlternativeData ? Object.keys(healthAlternativeData) : [],
-      leadSource: shortTermMedicalData
+      legalShieldDataKeys: legalShieldData ? Object.keys(legalShieldData) : [],
+      leadSource: legalShieldData
+        ? "legal_shield"
+        : shortTermMedicalData
         ? "short_term_medical"
         : contactPageData
           ? "contact_page"
@@ -717,6 +737,49 @@ export async function POST(request: NextRequest) {
         '',
         `Submitted: ${submittedAt}`,
       ].join('\n');
+    } else if (legalShieldData) {
+      const submittedAt = new Date().toLocaleString() + ' ' + (Intl.DateTimeFormat().resolvedOptions().timeZone || '');
+      // Spanish, because everyone who works this lead — and the lead themselves — speaks Spanish.
+      // The advisor reads this block before dialing.
+      const consentText =
+        typeof legalShieldData.consentDisclosure === 'string'
+          ? legalShieldData.consentDisclosure.trim()
+          : '';
+      // Consent is captured by submission rather than a checkbox, so the EVIDENCE is the wording
+      // the visitor was shown plus when and from where — a bare boolean would prove nothing.
+      const consentLines = consentText
+        ? [
+            '',
+            'Consentimiento (aceptado al enviar el formulario):',
+            ...consentText.split(/\r?\n/).map((l: string) => `  ${l}`),
+            `  Registrado: ${submittedAt}`,
+            `  IP: ${getClientIpFromRequest(request) || 'No disponible'}`,
+          ]
+        : [];
+      leadDetailsText = [
+        'LegalShield Lead',
+        '================',
+        '',
+        'NO es un lead de seguros. Es una membresia de servicios legales de LegalShield.',
+        `Asesor asignado: Ysmael Orraiz - (540) 376-1831`,
+        '',
+        'Contacto:',
+        `  Nombre: ${firstName} ${lastName}`,
+        `  Email: ${email || 'No proporcionado'}`,
+        `  Telefono: ${phone}`,
+        ...consentLines,
+        '',
+        'Detalles del lead:',
+        `  Origen: ${legalShieldData.source || 'legal_shield_optin_ads'}`,
+        `  Campana: ${legalShieldData.campaign || 'legal_shield_proteccion_legal'}`,
+        `  Iman de leads: ${legalShieldData.guideVersion || 'guia-escudo-legal-v1'}`,
+        `  Idioma: Espanol`,
+        `  URL de origen: ${meta?.eventSourceUrl || 'No proporcionada'}`,
+        '',
+        'Cuestionario: pendiente (se agrega abajo cuando el lead lo completa).',
+        '',
+        `Enviado: ${submittedAt}`,
+      ].join('\n');
     } else if (getCoveredFastData) {
       const languageDisplay = getCoveredFastData.language === 'es' ? 'Spanish (Español)' :
                               getCoveredFastData.language === 'en' ? 'English' : getCoveredFastData.language || 'Not provided';
@@ -898,6 +961,18 @@ export async function POST(request: NextRequest) {
       agentCrmTags.push('agent_crm_affiliate');
     }
 
+    // LegalShield opt-in funnel. Three tags, each doing a different job: the readable one so nobody
+    // working the list mistakes this for an insurance lead, the slug `legal_shield` that GHL
+    // workflows and smart lists actually trigger on, and the funnel tag for attribution.
+    // Deliberately NOT pushing 'spanish' here — that comes from localeTags below, so there is one
+    // place in this file that decides the language tag.
+    const legalShieldTags: string[] = [];
+    if (legalShieldData) {
+      legalShieldTags.push('LegalShield Lead');
+      legalShieldTags.push('legal_shield');
+      legalShieldTags.push('legal_shield_optin_funnel');
+    }
+
     // Lowercase locale tag for every line of business (coexists with the capitalized tags above) —
     // one consistent language convention site-wide, matching the IUL apply/intake flow.
     const localeTags: string[] = [];
@@ -912,13 +987,16 @@ export async function POST(request: NextRequest) {
       getCoveredFastData?.language ||
       lifeInsuranceData?.language ||
       healthAlternativeData?.language ||
-      agentCrmData?.language;
+      agentCrmData?.language ||
+      legalShieldData?.language;
     if (typeof leadLanguage === 'string' && leadLanguage.trim()) {
       localeTags.push(leadLanguage.toLowerCase().startsWith('es') ? 'spanish' : 'english');
     }
 
     // Determine lead source for CRM routing (prevents IUL workflow from auto-triggering on specialty page leads)
-    const leadSource = shortTermMedicalData
+    const leadSource = legalShieldData
+      ? "legal_shield"
+      : shortTermMedicalData
       ? "short_term_medical"
       : contactPageData
         ? "contact_page"
@@ -966,7 +1044,10 @@ export async function POST(request: NextRequest) {
     }
     // Add tags for STM leads
     if (stmTags.length > 0) {
-      contactPayload.tags = stmTags;
+      // Spread, not assign. This was the only assignment among eleven spreads, so it silently
+      // dropped anything appended before it (agentCrmTags, directly above). Harmless in practice
+      // because no two lead blobs ever arrive together — but it is a trap laid for the next blob.
+      contactPayload.tags = [...(contactPayload.tags || []), ...stmTags];
     }
     // Add tags for Contact Page leads
     if (contactPageTags.length > 0) {
@@ -1005,6 +1086,10 @@ export async function POST(request: NextRequest) {
       contactPayload.tags = [...(contactPayload.tags || []), ...healthAlternativeTags];
     }
     // Add lowercase locale tag (all lines of business)
+    // Add tags for LegalShield opt-in leads
+    if (legalShieldTags.length > 0) {
+      contactPayload.tags = [...(contactPayload.tags || []), ...legalShieldTags];
+    }
     if (localeTags.length > 0) {
       contactPayload.tags = [...(contactPayload.tags || []), ...localeTags];
     }
@@ -1150,6 +1235,7 @@ export async function POST(request: NextRequest) {
             ...lifeInsuranceTags,
             ...healthAlternativeTags,
             ...agentCrmTags,
+            ...legalShieldTags,
             ...localeTags,
           ];
 
@@ -1327,6 +1413,52 @@ export async function POST(request: NextRequest) {
                 "[create-contact] Successfully updated existing contact (duplicate path)",
                 { contactId: targetId }
               );
+
+              // This branch returns below, long before the workflow ladder starts — see the
+              // "no workflow enrollment - early return" log above. That is fine for the older lead
+              // types, which are driven by tags inside GHL, but the LegalShield funnel runs on paid
+              // retargeting where MOST clickers already exist as contacts. Without this they would
+              // be merged and then never enrolled in anything.
+              //
+              // Belt and braces: the GHL workflow should also trigger on "tag added: legal_shield"
+              // rather than on contact creation, so a merge that never reaches this line still fires.
+              if (legalShieldData) {
+                const lsWorkflowId =
+                  process.env.AGENT_CRM_WORKFLOW_LEGAL_SHIELD ||
+                  process.env.AGENT_CRM_WORKFLOW_NOTIFICATION;
+                if (lsWorkflowId) {
+                  try {
+                    const wfRes = await fetch(
+                      `${baseUrl}/contacts/${targetId}/workflow/${lsWorkflowId}?locationId=${locationId}`,
+                      {
+                        method: "POST",
+                        headers: {
+                          Accept: "application/json",
+                          Authorization: `Bearer ${piToken}`,
+                          "Content-Type": "application/json",
+                          Version: "2021-07-28",
+                        },
+                      }
+                    );
+                    console.log(
+                      "[create-contact] LegalShield workflow enrollment (duplicate path):",
+                      { contactId: targetId, ok: wfRes.ok, status: wfRes.status }
+                    );
+                  } catch (wfErr) {
+                    // Non-fatal, exactly like every other enrollment in this file: the lead is
+                    // already saved and tagged, and the tag-added trigger is the real backstop.
+                    console.error(
+                      "[create-contact] LegalShield workflow enrollment failed (duplicate path):",
+                      wfErr
+                    );
+                  }
+                } else {
+                  console.warn(
+                    "[create-contact] LegalShield duplicate lead not enrolled — neither AGENT_CRM_WORKFLOW_LEGAL_SHIELD nor AGENT_CRM_WORKFLOW_NOTIFICATION is set."
+                  );
+                }
+              }
+
               const capiDispatched = await trySendMetaLeadCapiLead(request, {
                 meta: meta as CreateContactMetaBody | undefined,
                 email,
@@ -1345,6 +1477,7 @@ export async function POST(request: NextRequest) {
                 lifeInsuranceData,
                 healthAlternativeData,
                 agentCrmData,
+                legalShieldData,
               });
               return NextResponse.json({
                 success: true,
@@ -1479,7 +1612,8 @@ export async function POST(request: NextRequest) {
       !getCoveredFastData &&
       !lifeInsuranceData &&
       !healthAlternativeData &&
-      !agentCrmData
+      !agentCrmData &&
+      !legalShieldData
     );
     console.log("[create-contact] Notification workflow:", {
       workflowId: notificationWorkflowId ?? "not configured",
@@ -1494,7 +1628,9 @@ export async function POST(request: NextRequest) {
               ? "Final Expense lead — tagged fe_get_covered_funnel (no notification workflow)"
               : lifeInsuranceData
                 ? "Life Insurance lead — use AGENT_CRM_WORKFLOW_LIFE_INSURANCE only"
-                : agentCrmData
+                : legalShieldData
+                  ? "LegalShield lead — use AGENT_CRM_WORKFLOW_LEGAL_SHIELD only"
+                  : agentCrmData
                   ? "Agent CRM affiliate lead — use AGENT_CRM_WORKFLOW_AGENT_CRM_AFFILIATE only"
                   : healthAlternativeData
                   ? "Health Coverage Alternative lead — use AGENT_CRM_WORKFLOW_HEALTH_ALTERNATIVE only"
@@ -1810,6 +1946,32 @@ export async function POST(request: NextRequest) {
       await addContactToWorkflow(agentCrmWorkflowId!, `Agent CRM Affiliate (${agentCrmLanguage})`);
     }
 
+    // LegalShield opt-in leads. Same fallback reasoning as the Agent CRM affiliate above: this is a
+    // paid funnel, so a lead that lands with no automation at all is money already spent and then
+    // dropped. The duplicate-contact branch has its own copy of this enrollment, because it returns
+    // before reaching here — and the GHL workflow should additionally trigger on
+    // "tag added: legal_shield" so neither code path is the single point of failure.
+    const legalShieldWorkflowId =
+      process.env.AGENT_CRM_WORKFLOW_LEGAL_SHIELD || notificationWorkflowId;
+    const willAddLegalShield = !!(legalShieldData && contactId && legalShieldWorkflowId);
+
+    console.log("[create-contact] LegalShield workflow decision:", {
+      hasLegalShieldData: !!legalShieldData,
+      workflowId: legalShieldWorkflowId ?? "not configured",
+      usingNotificationFallback:
+        !!legalShieldData && !process.env.AGENT_CRM_WORKFLOW_LEGAL_SHIELD && !!notificationWorkflowId,
+      willAddLegalShield,
+      reason: !legalShieldData
+        ? "not a LegalShield lead"
+        : !legalShieldWorkflowId
+          ? "neither AGENT_CRM_WORKFLOW_LEGAL_SHIELD nor AGENT_CRM_WORKFLOW_NOTIFICATION set"
+          : "LegalShield lead — adding to workflow",
+    });
+
+    if (willAddLegalShield) {
+      await addContactToWorkflow(legalShieldWorkflowId!, "LegalShield");
+    }
+
     // Final Expense leads: fe_get_covered_funnel tag only (no AGENT_CRM_WORKFLOW_FINALE enrollment)
 
     // Meta CAPI Lead — newly created row; FE get-covered duplicate-merge path sends CAPI in duplicate branch helper
@@ -1831,6 +1993,7 @@ export async function POST(request: NextRequest) {
       lifeInsuranceData,
       healthAlternativeData,
       agentCrmData,
+      legalShieldData,
     });
 
     // Success!

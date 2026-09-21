@@ -218,6 +218,12 @@ export default clerkMiddleware(async (auth, req) => {
   // reads badly and buries the one button that matters, so it renders bare like the intake forms.
   const isIulSecureCapture =
     /^(?:\/(?:en|es))?\/iul\/(?:secure|seguro)\/[^/]+$/i.test(pathname);
+
+  // The LegalShield funnel — both the opt-in and the self-enrollment page. These are the only
+  // routes on the site that must NOT show the Isaac Plans logo: LegalShield's advertising rules
+  // for Independent Associates require the page not read as an official LegalShield property, and
+  // showing an insurance agency's mark over a legal-plan offer confuses both brands at once.
+  const isLegalShield = /^(?:\/(?:en|es))?\/legal-shield\//i.test(pathname);
   if (
     pathname.includes("/get-health-coverage-fast") ||
     pathname.includes("/cobertura-salud-rapida") ||
@@ -233,9 +239,16 @@ export default clerkMiddleware(async (auth, req) => {
     pathname.includes("/alternativa-de-salud/obtener-cobertura") ||
     isAcaIntakeForm ||
     isFeIntakeForm ||
-    isIulSecureCapture
+    isIulSecureCapture ||
+    isLegalShield
   ) {
     response.headers.set("x-is-ads-landing", "1");
+  }
+  // LegalShield gets its own variant rather than joining "iul-bare": the footer has to swap the
+  // Isaac Plans logo for the LegalShield lockup and carry the Independent Associate / not-insurance
+  // disclosure. Checked before the iul-bare block so it wins.
+  if (isLegalShield) {
+    response.headers.set("x-ads-landing-variant", "legal-shield-bare");
   }
   // "Bare" funnels (IUL + final expense + ACA get-covered, ACA/FE intake forms) get an even
   // barer footer (logo + copyright only, no links) and a logo-only + phone header.
