@@ -1496,6 +1496,28 @@ Before that: **Health Coverage Alternative** (8th LOB, `feature/health-alternati
 
 ## History
 
+- 2026-09-29: **Licensed-state revalidation + code-less state guard** (branch
+  `fix/states-revalidation`). Delaware was added in Sanity and never appeared in the
+  `/admin/agent-licenses` license picker. Two causes, both now fixed.
+  - **The picker builds each option from `state.code.toLowerCase()`**
+    (`components/admin/agent-licenses-client.tsx`), and Delaware was saved with the State Code
+    field empty. GROQ returns `null` for an unset field, but all three fetches in
+    `lib/licensed-states.ts` typed it `code: string` — a type lie that made a half-filled Studio
+    entry a runtime `TypeError` rather than a missing row. The fetch generic is now
+    `code: string | null` with `?? ""` at the mapper, and the admin page filters out code-less
+    states before handing them to the client (Radix rejects an empty `SelectItem` value).
+  - **Nothing ever called `revalidateTag("states")`.** `getLicensedStates`,
+    `getLicensedStateCount` and `getStatesWithPages` all cache with
+    `{ revalidate: 3600, tags: ["states"] }`, and there were revalidate routes for blog and IUL
+    but none for states — so *every* state edit in Studio took up to an hour to show up anywhere:
+    the admin picker, the six state landing pages, the map, and the "{count}+ states" copy in the
+    hero and footer. Added `POST /api/revalidate/states` (mirrors `/api/revalidate/iul`,
+    `REVALIDATION_SECRET` bearer auth) which busts the one shared `states` tag plus
+    `/sitemap.xml`. The state landing pages are `force-dynamic`, so the tag is enough for them.
+  - **Requires a Sanity webhook** filtered to `_type == "state"` pointing at
+    `/api/revalidate/states` — without it the route exists but nothing calls it.
+  - Delaware's `order` was `0`, tied with Arizona, so it sorted second instead of last; set to 18.
+
 - 2026-08-04: **Health Coverage Alternative line of business** implemented (pending
   commit/merge). 8th line of business, promoting Isaac's existing Pivot Health STM agent link
   (`PIVOT_DIRECT_QUOTE_URL` in `lib/pivot-direct-quote.ts`) to an underserved audience:

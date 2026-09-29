@@ -27,7 +27,7 @@ export const statesSanityFetchOptions = {
  * Cached per request.
  */
 export const getLicensedStates = cache(async (): Promise<FeStateInfo[]> => {
-  const rows = await client.fetch<Array<{ name: string; code: string }>>(
+  const rows = await client.fetch<Array<{ name: string; code: string | null }>>(
     LICENSED_STATES_LIST_QUERY,
     {},
     statesSanityFetchOptions
@@ -35,7 +35,7 @@ export const getLicensedStates = cache(async (): Promise<FeStateInfo[]> => {
   return (rows ?? []).map((s) => ({
     slug: stateNameToSlug(s.name),
     name: s.name,
-    code: s.code,
+    code: s.code ?? "",
   }));
 });
 
@@ -81,7 +81,7 @@ export const STATE_PAGES_QUERY = `*[
  * Cached per request; use in server components only.
  */
 export const getStatesWithPages = cache(async (): Promise<FeStateInfo[]> => {
-  const rows = await client.fetch<Array<{ name: string; code: string }>>(
+  const rows = await client.fetch<Array<{ name: string; code: string | null }>>(
     STATE_PAGES_QUERY,
     {},
     statesSanityFetchOptions
@@ -89,7 +89,7 @@ export const getStatesWithPages = cache(async (): Promise<FeStateInfo[]> => {
   return (rows ?? []).map((s) => ({
     slug: stateNameToSlug(s.name),
     name: s.name,
-    code: s.code,
+    code: s.code ?? "",
   }));
 });
 
@@ -98,12 +98,12 @@ export const getStatesWithPages = cache(async (): Promise<FeStateInfo[]> => {
  * Safe to call in generateStaticParams (build-time, no request context).
  */
 export async function getStatesWithPagesForBuild(): Promise<FeStateInfo[]> {
-  const rows = await client.fetch<Array<{ name: string; code: string }>>(
+  const rows = await client.fetch<Array<{ name: string; code: string | null }>>(
     STATE_PAGES_QUERY
   );
   return (rows ?? []).map((s) => ({
     slug: stateNameToSlug(s.name),
     name: s.name,
-    code: s.code,
+    code: s.code ?? "",
   }));
 }

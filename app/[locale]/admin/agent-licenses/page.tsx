@@ -22,7 +22,9 @@ export default async function AgentLicensesPage() {
   return (
     <AgentLicensesClient
       licenses={licenses}
-      states={states.map(({ code, name }) => ({ code, name }))}
+      // A state saved in Studio without a code can't be a Select option
+      // (Radix rejects an empty value), so skip it rather than break the picker.
+      states={states.filter(({ code }) => code).map(({ code, name }) => ({ code, name }))}
     />
   );
 }
