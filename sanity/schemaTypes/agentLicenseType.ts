@@ -43,8 +43,14 @@ export const agentLicenseType = defineType({
       name: 'cloudinaryPublicId',
       type: 'string',
       title: 'Cloudinary Public ID',
-      description: 'Public ID of the license image in Cloudinary (e.g. "arizona_seh3e1").',
-      validation: (rule) => rule.required(),
+      description:
+        'Public ID of the license image in Cloudinary (e.g. "arizona_seh3e1") — NOT a full URL. Prefer uploading via /admin/agent-licenses, which sets this and keeps the asset on authenticated delivery.',
+      validation: (rule) =>
+        rule.required().custom((value) =>
+          typeof value === 'string' && /^https?:\/\/|\/image\/upload\//i.test(value)
+            ? 'Enter the Cloudinary public ID, not a URL. A URL here silently breaks the license image proxy.'
+            : true
+        ),
     }),
     defineField({
       name: 'active',

@@ -72,11 +72,16 @@ export const getAgentLicensesForAdmin = cache(async (): Promise<AdminAgentLicens
 export const LICENSE_PUBLIC_ID_QUERY = `*[_type == "agentLicense" && active == true && (
   ($key == "drivers" && licenseType == "drivers") ||
   (licenseType == "state" && state->code == $key)
-)][0].cloudinaryPublicId`;
+)] | order(_updatedAt desc)[0].cloudinaryPublicId`;
 
 /**
  * Resolve a license key ("drivers" or a 2-letter state code) to its Cloudinary
  * public ID. Returns null for unknown keys — Sanity is the whitelist.
+ *
+ * The `order(_updatedAt desc)` is load-bearing: nothing stops a second
+ * agentLicense doc being created by hand in Studio for a state the upload route
+ * already owns, and an unordered `[0]` picks by _id, so a stray doc can silently
+ * shadow the real upload and break the image proxy. Newest write wins.
  */
 export async function getLicensePublicId(key: string): Promise<string | null> {
   const normalizedKey = key === "drivers" ? "drivers" : key.toUpperCase();
