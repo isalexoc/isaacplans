@@ -28,27 +28,14 @@
 
 const CLOUDINARY = "https://res.cloudinary.com/isaacdev/image/upload";
 
-/**
- * The LegalShield mark, in two versions, because the site has a dark mode and a logo does not.
+/*
+ * There is deliberately NO LegalShield logo constant here.
  *
- * Both source files ship with a solid white background baked in — no alpha channel — so a raw
- * `<img>` would put a white brick in the header the moment the page goes dark. The chain fixes
- * that at the CDN:
- *
- *   e_trim:10                  strips the generous white margin around the artwork (without it
- *                              the mark renders tiny inside its own padding)
- *   co_white,e_make_transparent:12   knocks the white background out to real transparency
- *   e_colorize:100,co_white    (dark only) repaints the black artwork white
- *   h_96,c_fit                 3× the ~32px render height, so it stays crisp on a phone
- *
- * Light uses the purple original; dark starts from the black one because colorising black to
- * white is clean, while colorising purple would flatten the shield's two tones into one.
- * After trimming, both land at ~365×72 — the same aspect ratio, so swapping them cannot shift
- * the layout.
+ * The company's advertising guidelines do not let an Independent Associate put its mark on their
+ * own marketing, so the funnel brands itself "Escudo Legal" with a typographic lockup instead —
+ * see components/legal-shield/legal-shield-brand.tsx. The LegalShield NAME still appears in text
+ * where the disclosure requires it; that is nominative use, not trademark artwork.
  */
-export const LEGAL_SHIELD_LOGO_URL_LIGHT = `${CLOUDINARY}/e_trim:10/co_white,e_make_transparent:12/f_auto,q_auto,h_96,c_fit/v1790001003/images_4_qazmwo.png`;
-
-export const LEGAL_SHIELD_LOGO_URL_DARK = `${CLOUDINARY}/e_trim:10/co_white,e_make_transparent:12/e_colorize:100,co_white/f_auto,q_auto,h_96,c_fit/v1790001003/images_2_vnwni7.png`;
 
 /** The free guide. Public Cloudinary URL, versioned, so an emailed link keeps resolving. */
 export const LEGAL_SHIELD_GUIDE_PDF_URL = `${CLOUDINARY}/v1790000614/guia_legal_shield_gt48jt.pdf`;

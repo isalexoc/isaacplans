@@ -1496,6 +1496,27 @@ Before that: **Health Coverage Alternative** (8th LOB, `feature/health-alternati
 
 ## History
 
+- 2026-09-29: **Delaware license preview fix + duplicate-doc hardening** (branch
+  `fix/license-preview-duplicate`). The uploaded Delaware license would not preview on
+  `/admin/agent-licenses` even though the image was in Cloudinary.
+  - **Two `agentLicense` docs existed for Delaware.** `agentLicense-de` (from the upload route,
+    `licenses/de-1790698012325`, authenticated delivery) and a hand-made Studio doc
+    `7a06a858-…` with a *full Cloudinary URL* pasted into `cloudinaryPublicId`.
+    `LICENSE_PUBLIC_ID_QUERY` used a bare `[0]` with no ordering, so Sanity's default `_id`
+    ascending sort put `7a06a858-…` first. `fetchAgentLicenseImage` then handed that URL to
+    `cloudinary.url()` as a public ID, every candidate 404'd, and the proxy returned 502.
+  - **Fixed the data**: deleted the stray doc. Its Cloudinary asset (`SDSDGSD_hptroy`) was a real
+    license on *public* `upload` delivery — confirmed reachable unauthenticated — violating the
+    `agentLicenseType` invariant that license images stay on authenticated delivery. Deleted with
+    `invalidate=true`; origin 404s, but the edge copy carries
+    `immutable, max-age=2592000` so it may persist at Fastly for up to 30 days.
+  - **Fixed the code**: `| order(_updatedAt desc)[0]` so the newest write wins instead of an
+    arbitrary `_id` sort, plus schema validation rejecting a URL in `cloudinaryPublicId` so the
+    same paste fails loudly in Studio rather than silently breaking the proxy.
+  - **Still open**: the `agent-licenses` tag has the same no-webhook gap states had —
+    `/api/revalidate/iul` busts it but its Sanity webhook
+    (`_type in ["iulPresentation","agentLicense"]`) was never confirmed configured.
+
 - 2026-09-29: **Licensed-state revalidation + code-less state guard** (branch
   `fix/states-revalidation`). Delaware was added in Sanity and never appeared in the
   `/admin/agent-licenses` license picker. Two causes, both now fixed.
