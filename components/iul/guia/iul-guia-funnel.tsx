@@ -635,13 +635,42 @@ export default function IulGuiaFunnel({
                   {fieldError("phone")}
                 </div>
 
+                {submitError && (
+                  <p className="rounded-lg bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800 dark:bg-amber-950/40 dark:text-amber-300">
+                    {submitError}
+                  </p>
+                )}
+
+                <button type="submit" disabled={loading} className={primaryBtn}>
+                  {loading ? (
+                    <>
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                      Enviando…
+                    </>
+                  ) : (
+                    <>
+                      <Download className="h-5 w-5" />
+                      DESCARGA TU COPIA AHORA
+                    </>
+                  )}
+                </button>
+
+                <p className="text-center text-xs text-gray-500 dark:text-gray-400">
+                  100% gratis · Sin compromiso · Tus datos son privados
+                </p>
+
                 {/*
-                  TCPA consent, carried over from /iul/get-covered rather than dropped.
-                  This funnel texts and calls, and a Spanish page with English consent copy is a
-                  consent worth arguing about — so both boxes are here, in Spanish, adjacent to
-                  the button that submits them.
+                  TCPA consent, carried over from /iul/get-covered rather than dropped. This funnel
+                  texts and calls, and a Spanish page with English consent copy is a consent worth
+                  arguing about — so both boxes are here, in Spanish.
+
+                  BELOW the button at Isaac's request, so the last thing above the CTA is the phone
+                  field rather than two paragraphs of legal text. The trade is real and was flagged:
+                  most visitors submit without scrolling this far, so SMS consent rates fall. Both
+                  boxes are optional (nothing validates them), so this only changes how many leads
+                  arrive text-able — it does not block anyone.
                 */}
-                <div className="space-y-2.5 pt-1">
+                <div className="space-y-2.5 border-t border-gray-100 pt-4 dark:border-gray-800">
                   <label className="flex cursor-pointer items-start gap-2.5">
                     <input
                       type="checkbox"
@@ -669,30 +698,6 @@ export default function IulGuiaFunnel({
                     </span>
                   </label>
                 </div>
-
-                {submitError && (
-                  <p className="rounded-lg bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800 dark:bg-amber-950/40 dark:text-amber-300">
-                    {submitError}
-                  </p>
-                )}
-
-                <button type="submit" disabled={loading} className={primaryBtn}>
-                  {loading ? (
-                    <>
-                      <Loader2 className="h-5 w-5 animate-spin" />
-                      Enviando…
-                    </>
-                  ) : (
-                    <>
-                      <Download className="h-5 w-5" />
-                      DESCARGA TU COPIA AHORA
-                    </>
-                  )}
-                </button>
-
-                <p className="text-center text-xs text-gray-500 dark:text-gray-400">
-                  100% gratis · Sin compromiso · Tus datos son privados
-                </p>
               </form>
             </>
           )}
