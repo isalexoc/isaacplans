@@ -2,6 +2,65 @@
 
 ## Status
 
+Done: **IUL lead-magnet opt-in** (branch `feature/iul-guia-optin`). A Spanish-only direct-response
+opt-in at `/iul/guia` for Meta Ads traffic, giving away the *Dinero, Riqueza, IUL* guide and
+bridging into the existing IUL consultation funnel.
+
+**Why a new route instead of changing `/iul/get-covered`.** The two differ in exactly one
+structural way: this page asks for the email in step 1 because it has a guide to deliver, while
+get-covered asks for it last (commit `1d06e29`, 2026-09-07, which deliberately cut step 1 to
+name + phone). Running both at once is the only way to find out whether that field order costs
+conversion — and it keeps the September experiment accruing data instead of destroying it. Point
+the new creative here, leave the existing video on get-covered, same ad set and same budget:
+destination is an ad-level setting, so nothing fragments.
+
+**Built on the LegalShield opt-in architecture, not the get-covered funnel.** `/iul/get-covered`
+is 1,334 lines in one client component with its copy spread across three shared next-intl
+namespaces — `iulQuote.form.steps` (shared with `/iul/quote`) and `contactPage.info.form` (shared
+with ~16 forms). Editing either to fit a lead-magnet page silently changes pages nobody asked to
+change. This funnel hardcodes its Spanish and splits server copy from client state the way
+`components/legal-shield/` does.
+
+Files:
+
+- `lib/iul-guia/constants.ts` — assets, lead source, quiz label maps (ES for the visitor, EN for
+  the CRM), disclosures. No JSX: imported by the client funnel, the server sections and two route
+  handlers.
+- `lib/analytics/iul-guia-ga.ts` — GA4 events. `iul_guia_field_started/_completed` on the email
+  field is the first-party evidence for the field-order question, directly comparable to the same
+  pair on get-covered.
+- `components/iul/guia/iul-guia-sections.tsx` — server component: hero (book mockup) + persuasion
+  sections + FAQ + disclosures.
+- `components/iul/guia/scroll-cta.tsx` — the repeated CTA, scrolls to `#formulario`.
+- `components/iul/guia/iul-guia-funnel.tsx` — client funnel. Step 1 (name/apellido/email/phone +
+  two TCPA consents) → 5 quiz questions → success screen.
+- `app/[locale]/iul/guia/page.tsx` — noindex, Spanish-only.
+- `app/api/iul/guia-email/route.ts` + `lib/email/iul-guia.ts` — authenticated guide delivery.
+  `IUL_GUIA_EMAIL_VIA_CRM=1` hands delivery to GHL without a deploy.
+
+Wiring changes: `i18n/routing.ts` (route entry), `middleware.ts` (ads-landing + iul-bare),
+`lib/ads-landing.ts` (`IUL_BARE_LANDING_PATHNAMES` — the header reads this list, NOT the
+middleware header, which is why the first render still showed the full site nav),
+`app/api/create-contact/route.ts` (`iul_guia_ads` source → `allowDuplicateMergeCapi`,
+`lead_event_source`, and the `iul_guia_funnel` / `iul_guia_solicitada` tags).
+
+**The tags are the delivery hook.** `iul_guia_solicitada` is applied on step 1, before any quiz
+answer, so a GoHighLevel workflow built on that tag can send the guide within seconds. The Sanity
+`leadFormSettings.agentCrmWorkflowId` field does NOT work here — it is read only by
+`/api/lead-magnets/download`, whose only caller is the `/lead-magnets/[slug]` page.
+
+Open items before the ads run:
+
+1. **`IUL_GUIA_PDF_URL` is empty.** Paste the Cloudinary URL in `lib/iul-guia/constants.ts`. Until
+   then the success screen hides its download button and the email route no-ops — the page ships
+   and converts regardless.
+2. **The `BULLETS` in `iul-guia-sections.tsx` have not been reconciled against the real PDF.**
+   Read its table of contents and make them match, or a lead opens the guide and feels misled.
+3. End-to-end submit test (creates a real CRM contact and enrols the IUL workflow) — not run here.
+4. UTM / `fbclid` capture still is not wired for IUL; `create-contact` discards `campaign` outside
+   the `finalExpenseData` branch. Without it, "did the guide funnel beat the video" is unanswerable
+   from CRM data.
+
 Done: **LegalShield opt-in funnel** (branch `feature/legal-shield-optin-funnel`). A Spanish-only
 direct-response funnel at `/legal-shield/proteccion-legal` for Meta Ads traffic, giving away the
 *Guia Preventiva para Familias Latinas* and selling LegalShield legal-service memberships (which
