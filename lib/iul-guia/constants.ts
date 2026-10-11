@@ -44,8 +44,15 @@ export const IUL_GUIA_PDF_URL = "";
  */
 export const IUL_GUIA_COVER_URL = `${CLOUDINARY}/e_trim:8/f_auto,q_auto,w_760/v1791748128/ce4a5878-1b17-44a6-b32c-340d6646a183_g4taxo.png`;
 
-/** The name the offer goes by on the button, the success screen and the email subject. */
-export const IUL_GUIA_TITLE = "Dinero, Riqueza, IUL";
+/**
+ * The name the offer goes by on the page, the success screen and the email subject.
+ *
+ * NOTE: the cover mockup reads "DINERO · RIQUEZA · IUL", so a lead who opts in for "7 Errores
+ * Fatales" opens a file with a different name on it. Nothing breaks, but it is worth settling —
+ * either the mockup or this title should be re-made to match the other.
+ */
+export const IUL_GUIA_TITLE =
+  "7 Errores Fatales Cometidos Por Los Latinos Menores De 50 Que Los Mantiene Sin Ahorros";
 
 // ---------------------------------------------------------------------------
 // Lead routing

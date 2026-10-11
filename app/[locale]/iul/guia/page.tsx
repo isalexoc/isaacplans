@@ -20,9 +20,9 @@ import ServicePageTracker from "@/components/service-page-tracker";
 import IulGuiaFunnel from "@/components/iul/guia/iul-guia-funnel";
 import IulGuiaSections, { IulGuiaHero } from "@/components/iul/guia/iul-guia-sections";
 
-const TITLE = "Guía gratis: lo que nadie te explica del IUL antes de que firmes";
+const TITLE = "Reporte gratis: 7 errores fatales que mantienen a los latinos sin ahorros";
 const DESCRIPTION =
-  "Descarga gratis la guía en español sobre el IUL: quién califica de verdad, qué mueve el precio de una póliza, cómo leer una ilustración y en qué casos NO te conviene.";
+  "Reporte gratis en español sobre el IUL: la razón #1 por la que los latinos jóvenes se mantienen atrasados en sus finanzas, y cómo usar un seguro de vida para crecer tus ahorros.";
 
 export async function generateMetadata(): Promise<Metadata> {
   const canonical = "https://www.isaacplans.com/es/iul/guia";

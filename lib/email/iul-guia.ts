@@ -59,12 +59,12 @@ export async function sendIulGuiaEmail({
   }
 
   const greeting = firstName?.trim() ? `Hola ${firstName.trim()},` : "Hola,";
-  const subject = `Tu guia gratis: ${IUL_GUIA_TITLE}`;
+  const subject = `Tu reporte gratis: ${IUL_GUIA_TITLE}`;
 
   const text = [
     greeting,
     "",
-    "Aqui esta la guia que pediste. Descargala desde este enlace:",
+    "Aqui esta el reporte que pediste. Descargalo desde este enlace:",
     pdfUrl,
     "",
     `Cualquier duda, escribeme o llamame directamente al ${IUL_GUIA_PHONE_DISPLAY}.`,
@@ -80,13 +80,13 @@ export async function sendIulGuiaEmail({
 <div style="font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;max-width:560px;margin:0 auto;padding:24px;color:#0f172a;">
   <p style="font-size:16px;line-height:1.6;margin:0 0 16px;">${escapeHtml(greeting)}</p>
   <p style="font-size:16px;line-height:1.6;margin:0 0 24px;">
-    Aquí está tu guía <strong>${escapeHtml(IUL_GUIA_TITLE)}</strong>. Guárdala y léela con calma
-    antes de hablar con nadie — incluido yo.
+    Aquí está tu reporte <strong>&ldquo;${escapeHtml(IUL_GUIA_TITLE)}&rdquo;</strong>. Guárdalo y léelo
+    con calma antes de hablar con nadie — incluido yo.
   </p>
   <p style="margin:0 0 28px;">
     <a href="${escapeHtml(pdfUrl)}"
        style="display:inline-block;background:#0077B6;color:#ffffff;text-decoration:none;font-weight:700;font-size:16px;padding:14px 28px;border-radius:8px;">
-      Descargar mi guía gratis
+      Descargar mi reporte gratis
     </a>
   </p>
   <p style="font-size:15px;line-height:1.6;margin:0 0 8px;">
@@ -105,7 +105,7 @@ export async function sendIulGuiaEmail({
       `<p style="font-size:11px;line-height:1.6;color:#64748b;margin:0 0 8px;">${escapeHtml(p)}</p>`
   ).join("")}
   <p style="font-size:11px;line-height:1.6;color:#64748b;margin:8px 0 0;">
-    Recibiste este correo porque pediste la guía en nuestra página. Para dejar de recibir
+    Recibiste este correo porque pediste el reporte en nuestra página. Para dejar de recibir
     correos, responde a este mensaje con la palabra BAJA.
   </p>
 </div>`.trim();

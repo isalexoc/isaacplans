@@ -392,7 +392,7 @@ export default function IulGuiaFunnel({
 
       trackLead(
         {
-          contentName: "IUL — guía gratuita",
+          contentName: "IUL — reporte gratuito",
           value: LEAD_VALUE,
           currency: "USD",
           source: IUL_GUIA_LEAD_SOURCE,
@@ -483,8 +483,12 @@ export default function IulGuiaFunnel({
         aria-hidden
       />
 
-      <div className="relative z-10 bg-[#0077B6] py-2.5 text-center text-[11px] font-semibold uppercase tracking-[0.14em] text-white/95 sm:text-xs">
-        Atención: latinos de 25 a 55 años en Estados Unidos
+      {/* The model page's attention headline, verbatim. It is a headline rather than a thin strip,
+          so it gets room to wrap on a phone instead of being squeezed onto one line. */}
+      <div className="relative z-10 bg-[#0077B6] px-4 py-3 text-center sm:py-4">
+        <p className="mx-auto max-w-3xl text-[13px] font-bold uppercase leading-snug tracking-[0.06em] text-white sm:text-[15px]">
+          Atención latinos de 20-50 años que quieran crecer sus ahorros libres de impuestos
+        </p>
       </div>
 
       {phase === "contact" && hero ? <div className="relative z-10">{hero}</div> : null}
@@ -516,11 +520,12 @@ export default function IulGuiaFunnel({
 
           {phase === "contact" && (
             <>
-              <h2 className="text-2xl font-bold text-gray-900 sm:text-3xl dark:text-white">
-                ¿A dónde te enviamos tu guía gratis?
+              <h2 className="text-2xl font-bold leading-snug text-gray-900 sm:text-3xl dark:text-white">
+                ¡Accede inmediatamente a este reporte GRATIS ahora!
               </h2>
               <p className="mt-2 text-[15px] leading-relaxed text-gray-600 dark:text-gray-400">
-                Llena tus datos y te la mandamos ahora mismo.
+                Simplemente deja tus datos abajo y el reporte llegará directo a tu bandeja de
+                entrada.
               </p>
 
               <form onSubmit={handleContactSubmit} className="mt-6 space-y-4" noValidate>
@@ -601,7 +606,7 @@ export default function IulGuiaFunnel({
                     onChange={(e) => setEmail(e.target.value)}
                   />
                   <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
-                    Aquí te enviamos la guía. Nunca enviamos spam.
+                    Aquí te enviamos el reporte. Nunca enviamos spam.
                   </p>
                   {fieldError("email")}
                 </div>
@@ -680,7 +685,7 @@ export default function IulGuiaFunnel({
                   ) : (
                     <>
                       <Download className="h-5 w-5" />
-                      ENVIARME LA GUÍA GRATIS
+                      DESCARGA TU COPIA AHORA
                     </>
                   )}
                 </button>
@@ -837,7 +842,7 @@ export default function IulGuiaFunnel({
               )}
 
               <p className="mt-4 text-center text-xs text-gray-500 dark:text-gray-400">
-                Tu guía ya va en camino a tu correo. Estas preguntas son para preparar tu asesoría.
+                Tu reporte ya va en camino a tu correo. Estas preguntas son para preparar tu asesoría.
               </p>
             </>
           )}
@@ -890,7 +895,7 @@ function SuccessScreen({
       className={primaryBtn}
     >
       <FileText className="h-5 w-5" />
-      Descargar mi guía ahora
+      Descargar mi reporte ahora
     </a>
   ) : null;
 
@@ -905,8 +910,8 @@ function SuccessScreen({
       </h2>
       <p className="mt-2 text-[15px] leading-relaxed text-gray-600 dark:text-gray-400">
         {IUL_GUIA_PDF_URL
-          ? "Tu guía está lista. Descárgala aquí — también te la acabamos de enviar a tu correo."
-          : "Te enviamos tu guía a tu correo. Revisa tu bandeja de entrada en los próximos minutos."}
+          ? "Tu reporte está listo. Descárgalo aquí — también te lo acabamos de enviar a tu correo."
+          : "Te enviamos tu reporte a tu correo. Revisa tu bandeja de entrada en los próximos minutos."}
       </p>
 
       <div className="mt-6 space-y-3 text-left">
