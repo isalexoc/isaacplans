@@ -123,6 +123,8 @@ export function isAdsLandingPathResolved(pathname: string | null | undefined): b
 export const IUL_BARE_LANDING_PATHNAMES = [
   "/iul/get-covered",
   "/iul/obtener-cobertura",
+  // The IUL lead-magnet opt-in. Spanish-only, so one slug rather than a locale pair.
+  "/iul/guia",
   "/final-expense/get-covered",
   "/gastos-finales/obtener-cobertura",
   "/aca/get-covered",

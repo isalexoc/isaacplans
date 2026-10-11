@@ -231,6 +231,7 @@ export default clerkMiddleware(async (auth, req) => {
     pathname.includes("/gastos-finales/obtener-cobertura") ||
     pathname.includes("/iul/get-covered") ||
     pathname.includes("/iul/obtener-cobertura") ||
+    pathname.includes("/iul/guia") ||
     pathname.includes("/aca/get-covered") ||
     pathname.includes("/aca/obtener-cobertura") ||
     pathname.includes("/life-insurance/get-covered") ||
@@ -255,6 +256,7 @@ export default clerkMiddleware(async (auth, req) => {
   if (
     pathname.includes("/iul/get-covered") ||
     pathname.includes("/iul/obtener-cobertura") ||
+    pathname.includes("/iul/guia") ||
     pathname.includes("/final-expense/get-covered") ||
     pathname.includes("/gastos-finales/obtener-cobertura") ||
     pathname.includes("/aca/get-covered") ||

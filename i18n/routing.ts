@@ -270,6 +270,13 @@ export const routing = defineRouting({
       en: "/iul/quote",
       es: "/iul/cotizacion",
     },
+    // The lead-magnet opt-in. Spanish-only like the LegalShield funnel, so both locales resolve
+    // to the same path — entries still have to exist for both or <Link href="/iul/guia"> will
+    // not typecheck.
+    "/iul/guia": {
+      en: "/iul/guia",
+      es: "/iul/guia",
+    },
     "/iul/get-covered": {
       en: "/iul/get-covered",
       es: "/iul/obtener-cobertura",

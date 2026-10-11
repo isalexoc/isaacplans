@@ -111,6 +111,9 @@ async function trySendMetaLeadCapiLead(
   const iulSource =
     typeof iulLeadGenData?.source === "string" ? iulLeadGenData.source : undefined;
   const isIulGetCoveredAds = iulSource === "iul_get_covered_ads";
+  // The IUL lead-magnet opt-in at /iul/guia. Its own source so the two IUL ad funnels stay
+  // separable in the CRM — merging them would make the field-order comparison unreadable.
+  const isIulGuiaAds = iulSource === "iul_guia_ads";
   const acaSource = typeof acaData?.source === "string" ? acaData.source : undefined;
   const isAcaGetCoveredAds = acaSource === "aca_get_covered_ads";
   const lifeInsuranceSource =
@@ -130,6 +133,7 @@ async function trySendMetaLeadCapiLead(
     !isNewContact &&
     (isFinalExpenseGetCoveredAds ||
       isIulGetCoveredAds ||
+      isIulGuiaAds ||
       isAcaGetCoveredAds ||
       isLifeInsuranceGetCoveredAds ||
       isHealthAlternativeGetCoveredAds ||
@@ -246,6 +250,9 @@ async function trySendMetaLeadCapiLead(
     }
     if (isIulGetCoveredAds) {
       customData.lead_event_source = "iul_get_covered_funnel";
+    }
+    if (isIulGuiaAds) {
+      customData.lead_event_source = "iul_guia_funnel";
     }
     if (isAcaGetCoveredAds) {
       customData.lead_event_source = "aca_get_covered_funnel";
@@ -882,6 +889,13 @@ export async function POST(request: NextRequest) {
       // Distinguish the Meta-ads get-covered funnel from the /iul/quote + modal leads.
       if (iulLeadGenData.source === 'iul_get_covered_ads') {
         iulLeadGenTags.push('iul_get_covered_funnel');
+      }
+      // The lead-magnet opt-in at /iul/guia. This tag is the hook a GoHighLevel workflow builds
+      // on to deliver the guide — it fires on Step 1, before any quiz answer, so delivery can go
+      // out within seconds. `IUL_GUIA_EMAIL_VIA_CRM=1` then turns off the app's own SMTP send.
+      if (iulLeadGenData.source === 'iul_guia_ads') {
+        iulLeadGenTags.push('iul_guia_funnel');
+        iulLeadGenTags.push('iul_guia_solicitada');
       }
     }
 
