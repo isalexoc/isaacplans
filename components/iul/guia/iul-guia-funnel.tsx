@@ -9,6 +9,7 @@ import {
   ChevronsUpDown,
   Contact,
   Download,
+  FileSignature,
   FileText,
   Loader2,
   MessageCircle,
@@ -21,6 +22,7 @@ import "react-phone-number-input/style.css";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ChoiceCard } from "@/components/intake-ui/choice-card";
+import TimeOfDayPicker from "@/components/iul/time-of-day-picker";
 import {
   Command,
   CommandEmpty,
@@ -56,7 +58,7 @@ import {
   CALL_TIME_LABELS_ES,
   CALL_TIME_SLUGS,
   IUL_GUIA_AGENT_NAME,
-  IUL_GUIA_AGENT_TITLE,
+  IUL_GUIA_AGENT_SPECIALTY,
   IUL_GUIA_CAMPAIGN,
   IUL_GUIA_LEAD_SOURCE,
   IUL_GUIA_PDF_URL,
@@ -108,6 +110,18 @@ function toE164OrUndefined(phone: string | undefined): string | undefined {
   return parsePhoneNumber(phone, "US")?.number;
 }
 
+/** "14:30" → "2:30 PM", so the CRM note reads the way Isaac reads it. */
+function formatTimeForCrm(value: string): string {
+  const trimmed = value.trim();
+  const match = /^(\d{1,2}):(\d{2})$/.exec(trimmed);
+  if (!match) return trimmed;
+  const hours = Number(match[1]);
+  if (!Number.isFinite(hours) || hours > 23) return trimmed;
+  const period = hours >= 12 ? "PM" : "AM";
+  const hour12 = hours % 12 === 0 ? 12 : hours % 12;
+  return `${hour12}:${match[2]} ${period}`;
+}
+
 export default function IulGuiaFunnel({
   hero,
   children,
@@ -141,6 +155,8 @@ export default function IulGuiaFunnel({
   const [savings, setSavings] = useState<SavingsSlug | null>(null);
   const [retirement, setRetirement] = useState<RetirementSlug | null>(null);
   const [callTime, setCallTime] = useState<CallTimeSlug | null>(null);
+  /** 24-hour "HH:MM" from the picker, or "" while the selection is incomplete. */
+  const [callTimeSpecific, setCallTimeSpecific] = useState("");
 
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -248,6 +264,7 @@ export default function IulGuiaFunnel({
     savings?: SavingsSlug | null;
     retirement?: RetirementSlug | null;
     callTime?: CallTimeSlug | null;
+    callTimeSpecific?: string;
     final?: boolean;
   }) => {
     const contactId = contactIdRef.current;
@@ -256,6 +273,12 @@ export default function IulGuiaFunnel({
     const savingsKey = payload.savings ?? savings;
     const retirementKey = payload.retirement ?? retirement;
     const callTimeKey = payload.callTime ?? callTime;
+    /** "A specific time" sends the picked time itself; the windows send their English label. */
+    const callTimeValue = !callTimeKey
+      ? ""
+      : callTimeKey === "specific"
+        ? formatTimeForCrm(payload.callTimeSpecific ?? callTimeSpecific)
+        : CALL_TIME_CRM_LABELS[callTimeKey];
 
     void fetch("/api/contact-append-iul", {
       method: "POST",
@@ -269,7 +292,7 @@ export default function IulGuiaFunnel({
         state: payload.state ?? state,
         monthlySavings: savingsKey ? SAVINGS_CRM_LABELS[savingsKey] : "",
         retirementTimeline: retirementKey ? RETIREMENT_CRM_LABELS[retirementKey] : "",
-        callTime: callTimeKey ? CALL_TIME_CRM_LABELS[callTimeKey] : "",
+        callTime: callTimeValue,
         final: payload.final === true,
       }),
     }).catch(() => {
@@ -454,20 +477,32 @@ export default function IulGuiaFunnel({
       advance({ state });
       return;
     }
+    if (currentStep === "callTime" && callTime === "specific") {
+      if (!callTimeSpecific) {
+        setSubmitError("Elige una hora para continuar.");
+        return;
+      }
+      advance({ callTime: "specific", callTimeSpecific });
+      return;
+    }
     setSubmitError("Selecciona una opción para continuar.");
   };
 
   const quizTitle: Record<QuizStep, string> = {
     age: "¿Qué edad tienes?",
     state: "¿En qué estado vives?",
-    savings: "¿Cuánto podrías apartar cada mes sin que te apriete?",
+    savings: "¿Cuánto podrías ahorrar cada mes?",
     retirement: "¿En cuántos años te gustaría poder dejar de trabajar?",
     callTime: "Y por último: ¿a qué hora te queda mejor que te llame?",
   };
 
+  /**
+   * No subtitle on `age` on purpose. It used to explain that age moves the price of a policy,
+   * which told a visitor three screens before the end that they were being qualified for a
+   * product — the quiz is meant to read as the last step to the report, not as an application.
+   */
   const quizSubtitle: Partial<Record<QuizStep, string>> = {
-    age: "La edad es lo que más mueve el precio de una póliza.",
-    savings: "No hay respuesta correcta. Es para saber qué opciones tiene sentido mostrarte.",
+    savings: "No hay respuesta correcta. Es para saber qué opciones tienen sentido para ti.",
     callTime: `${IUL_GUIA_AGENT_NAME} hará lo posible por llamarte en el horario que elijas.`,
   };
 
@@ -817,19 +852,34 @@ export default function IulGuiaFunnel({
                 )}
 
                 {currentStep === "callTime" && (
-                  <div className="space-y-3" role="radiogroup" aria-label="Horario preferido">
-                    {CALL_TIME_SLUGS.map((slug) => (
-                      <ChoiceCard
-                        key={slug}
-                        selected={callTime === slug}
-                        label={CALL_TIME_LABELS_ES[slug]}
-                        onClick={() => {
-                          setCallTime(slug);
-                          advance({ callTime: slug });
-                        }}
-                      />
-                    ))}
-                  </div>
+                  <>
+                    <div className="space-y-3" role="radiogroup" aria-label="Horario preferido">
+                      {CALL_TIME_SLUGS.map((slug) => (
+                        <ChoiceCard
+                          key={slug}
+                          selected={callTime === slug}
+                          label={CALL_TIME_LABELS_ES[slug]}
+                          onClick={() => {
+                            setCallTime(slug);
+                            setSubmitError(null);
+                            // "Una hora específica" opens the picker instead of finishing — the
+                            // other three are a complete answer the moment they are tapped.
+                            if (slug !== "specific") advance({ callTime: slug });
+                          }}
+                        />
+                      ))}
+                    </div>
+
+                    {callTime === "specific" && (
+                      <div className="mt-5">
+                        <TimeOfDayPicker
+                          value={callTimeSpecific}
+                          onChange={setCallTimeSpecific}
+                          labels={{ hour: "Hora", minutes: "Minutos", period: "AM / PM" }}
+                        />
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
 
@@ -839,15 +889,24 @@ export default function IulGuiaFunnel({
                 </p>
               )}
 
-              {/* Only the typed steps need an explicit Next — the tappable ones advance on tap. */}
-              {(currentStep === "age" || currentStep === "state") && (
-                <button type="button" onClick={handleNext} className={cn(primaryBtn, "mt-6")}>
-                  Siguiente
+              {/* The typed steps need an explicit Next; so does "a specific time", which is only a
+                  complete answer once the picker has an hour AND an AM/PM. The other tappable
+                  options advance on tap. */}
+              {(currentStep === "age" ||
+                currentStep === "state" ||
+                (currentStep === "callTime" && callTime === "specific")) && (
+                <button
+                  type="button"
+                  onClick={handleNext}
+                  disabled={currentStep === "callTime" && !callTimeSpecific}
+                  className={cn(primaryBtn, "mt-6")}
+                >
+                  {currentStep === "callTime" ? "Listo" : "Siguiente"}
                 </button>
               )}
 
               <p className="mt-4 text-center text-xs text-gray-500 dark:text-gray-400">
-                Tu reporte ya va en camino a tu correo. Estas preguntas son para preparar tu asesoría.
+                Responde estas preguntas rápidas para recibir tu reporte.
               </p>
             </>
           )}
@@ -916,7 +975,7 @@ function SuccessScreen({
       <p className="mt-2 text-[15px] leading-relaxed text-gray-600 dark:text-gray-400">
         {IUL_GUIA_PDF_URL
           ? "Tu reporte está listo. Descárgalo aquí — también te lo acabamos de enviar a tu correo."
-          : "Te enviamos tu reporte a tu correo. Revisa tu bandeja de entrada en los próximos minutos."}
+          : "Te enviamos tu reporte a tu correo. Revisa tu bandeja de entrada."}
       </p>
 
       <div className="mt-6 space-y-3 text-left">
@@ -946,6 +1005,13 @@ function SuccessScreen({
           <MessageCircle className="h-5 w-5" />
           Escríbeme por WhatsApp
         </a>
+
+        {/* For the lead who is already decided and does not want to wait for a call. An internal
+            Link, not the absolute URL, so next-intl resolves it to /es/iul/aplicar. */}
+        <Link href="/iul/apply" className={secondaryBtn}>
+          <FileSignature className="h-5 w-5" />
+          Aplicar ahora para mi IUL
+        </Link>
       </div>
 
       {/* The agent card. Showing the face and the number here means the callback is from a name
@@ -967,7 +1033,7 @@ function SuccessScreen({
           )}
           <div>
             <p className="font-bold text-gray-900 dark:text-white">{IUL_GUIA_AGENT_NAME}</p>
-            <p className="text-sm text-gray-600 dark:text-gray-400">{IUL_GUIA_AGENT_TITLE}</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400">{IUL_GUIA_AGENT_SPECIALTY}</p>
             <p className="mt-1 text-sm font-semibold text-[#0077B6] dark:text-[#4CC9F0]">
               {IUL_GUIA_PHONE_DISPLAY}
             </p>
