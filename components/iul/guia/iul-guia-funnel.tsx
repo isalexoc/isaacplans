@@ -23,6 +23,8 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ChoiceCard } from "@/components/intake-ui/choice-card";
 import TimeOfDayPicker from "@/components/iul/time-of-day-picker";
+import QuizConfetti from "@/components/iul/guia/quiz-confetti";
+import AdvisorReveal from "@/components/iul/guia/advisor-reveal";
 import {
   Command,
   CommandEmpty,
@@ -82,6 +84,9 @@ const LEAD_VALUE = 100;
 
 /** Anything faster than this was not typed by a person. */
 const MIN_DWELL_MS = 2000;
+
+/** How long the last step spends "finding" an advisor before revealing Isaac. */
+const ADVISOR_REVEAL_MS = 3000;
 
 /**
  * The five qualification questions, asked AFTER the contact is banked.
@@ -171,6 +176,21 @@ export default function IulGuiaFunnel({
 
   const locale = "es";
   const currentStep: QuizStep = QUIZ_STEPS[stepIndex];
+  const isCallTimeStep = phase === "quiz" && currentStep === "callTime";
+
+  /**
+   * The "finding your advisor" beat on the last step. Owned here rather than inside
+   * <AdvisorReveal> because the same flag also gates the time options: the screen tells a story
+   * ("you qualified → we found you an advisor → pick a time") and showing the options first would
+   * give the ending away.
+   */
+  const [advisorFound, setAdvisorFound] = useState(false);
+  useEffect(() => {
+    if (!isCallTimeStep) return;
+    setAdvisorFound(false);
+    const timer = setTimeout(() => setAdvisorFound(true), ADVISOR_REVEAL_MS);
+    return () => clearTimeout(timer);
+  }, [isCallTimeStep]);
 
   useEffect(() => {
     trackIulGuiaPhase({ phase, locale });
@@ -503,7 +523,6 @@ export default function IulGuiaFunnel({
    */
   const quizSubtitle: Partial<Record<QuizStep, string>> = {
     savings: "No hay respuesta correcta. Es para saber qué opciones tienen sentido para ti.",
-    callTime: `${IUL_GUIA_AGENT_NAME} hará lo posible por llamarte en el horario que elijas.`,
   };
 
   const progress =
@@ -532,7 +551,7 @@ export default function IulGuiaFunnel({
         <div
           ref={cardRef}
           id="formulario"
-          className="scroll-mt-24 rounded-2xl border border-gray-200 bg-white p-6 shadow-xl sm:p-8 dark:border-gray-800 dark:bg-gray-900"
+          className="relative scroll-mt-24 overflow-hidden rounded-2xl border border-gray-200 bg-white p-6 shadow-xl sm:p-8 dark:border-gray-800 dark:bg-gray-900"
         >
           {phase !== "done" && (
             <div className="mb-6">
@@ -739,10 +758,33 @@ export default function IulGuiaFunnel({
 
           {phase === "quiz" && (
             <>
-              <h2 className="text-2xl font-bold text-gray-900 sm:text-3xl dark:text-white">
-                {quizTitle[currentStep]}
-              </h2>
-              {quizSubtitle[currentStep] && (
+              {/*
+                The last step is the one the funnel loses people on: someone who came for a report
+                did not expect to be asked when they can take a call. So it stops reading as a
+                sixth question and starts reading as a result — confetti, their own name, and an
+                asesoría they have "qualified" for. This is also the first point in the whole
+                funnel that mentions a consultation at all.
+              */}
+              {isCallTimeStep ? (
+                <>
+                  <QuizConfetti />
+                  <p className="relative z-10 text-xs font-bold uppercase tracking-[0.14em] text-[#0077B6] dark:text-[#4CC9F0]">
+                    ¡Felicidades{firstName.trim() ? `, ${capitalizeName(firstName.trim())}` : ""}!
+                  </p>
+                  <h2 className="relative z-10 mt-2 text-2xl font-bold leading-snug text-gray-900 sm:text-3xl dark:text-white">
+                    Calificas para una asesoría gratuita para diseñar tu IUL
+                  </h2>
+                  <p className="relative z-10 mt-2 text-[15px] leading-relaxed text-gray-600 dark:text-gray-400">
+                    ¿Cuál de estos horarios prefieres?
+                  </p>
+                  <AdvisorReveal found={advisorFound} className="relative z-10 mt-5" />
+                </>
+              ) : (
+                <h2 className="text-2xl font-bold text-gray-900 sm:text-3xl dark:text-white">
+                  {quizTitle[currentStep]}
+                </h2>
+              )}
+              {!isCallTimeStep && quizSubtitle[currentStep] && (
                 <p className="mt-2 text-[15px] leading-relaxed text-gray-600 dark:text-gray-400">
                   {quizSubtitle[currentStep]}
                 </p>
@@ -851,8 +893,10 @@ export default function IulGuiaFunnel({
                   </div>
                 )}
 
-                {currentStep === "callTime" && (
-                  <>
+                {/* Held back until the advisor "arrives", so the screen reads as a result rather
+                    than as a sixth question with decoration on top. */}
+                {currentStep === "callTime" && advisorFound && (
+                  <div className="animate-in fade-in slide-in-from-bottom-2 duration-500 motion-reduce:animate-none">
                     <div className="space-y-3" role="radiogroup" aria-label="Horario preferido">
                       {CALL_TIME_SLUGS.map((slug) => (
                         <ChoiceCard
@@ -879,7 +923,7 @@ export default function IulGuiaFunnel({
                         />
                       </div>
                     )}
-                  </>
+                  </div>
                 )}
               </div>
 
@@ -905,9 +949,13 @@ export default function IulGuiaFunnel({
                 </button>
               )}
 
-              <p className="mt-4 text-center text-xs text-gray-500 dark:text-gray-400">
-                Responde estas preguntas rápidas para recibir tu reporte.
-              </p>
+              {/* Not on the last step: by then the screen is about the asesoría, and a line about
+                  answering questions to get the report would undercut it. */}
+              {!isCallTimeStep && (
+                <p className="mt-4 text-center text-xs text-gray-500 dark:text-gray-400">
+                  Responde estas preguntas rápidas para recibir tu reporte.
+                </p>
+              )}
             </>
           )}
 

@@ -99,6 +99,16 @@ export const IUL_GUIA_AGENT_TITLE = "Agente de seguros con licencia";
  */
 export const IUL_GUIA_AGENT_SPECIALTY = "Especialista en diseño de IUL";
 
+/**
+ * The label on the three-second beat before Isaac is revealed on the last quiz step.
+ *
+ * Isolated here on purpose. Nothing is actually being searched — Isaac is the only advisor and he
+ * is the answer before the timer starts — so if that framing ever reads as more than the mild
+ * theatre it is, this is the one string to change. "Preparando tu asesoría…" is literally true and
+ * keeps the whole reveal intact.
+ */
+export const IUL_GUIA_SEARCHING_LABEL = "Buscando asesor…";
+
 // ---------------------------------------------------------------------------
 // Quiz options
 //
