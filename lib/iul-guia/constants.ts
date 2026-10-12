@@ -83,7 +83,21 @@ export const IUL_GUIA_PHONE_DISPLAY = "540-426-1804";
 export const IUL_GUIA_PHONE_TEL = "tel:+15404261804";
 export const IUL_GUIA_WHATSAPP_HREF = "https://wa.me/15406813507";
 export const IUL_GUIA_AGENT_NAME = "Isaac Orraiz";
+
+/**
+ * How Isaac is described on the LANDING page and in the guide email.
+ *
+ * Stays "agente de seguros con licencia" on purpose: NAIC Model 570 expects the advertiser behind
+ * a life insurance advertisement to be identifiable, and the model opt-in page this one is based
+ * on names nobody at all. This is the line that keeps the page identified.
+ */
 export const IUL_GUIA_AGENT_TITLE = "Agente de seguros con licencia";
+
+/**
+ * How Isaac is described on the SUCCESS screen only — after the opt-in, where the visitor has
+ * converted and the framing shifts from "who is advertising to me" to "who is going to call me".
+ */
+export const IUL_GUIA_AGENT_SPECIALTY = "Especialista en diseño de IUL";
 
 // ---------------------------------------------------------------------------
 // Quiz options
@@ -136,19 +150,26 @@ export const SAVINGS_CRM_LABELS: Record<SavingsSlug, string> = {
   "more-500": "More than $500",
 };
 
-export const CALL_TIME_SLUGS = ["morning", "midday", "afternoon"] as const;
+/**
+ * Preferred callback window. `specific` is the escape hatch: it reveals a tap-to-pick time
+ * selector, and the CRM gets the chosen time ("3:30 PM") instead of a window label — which is why
+ * it has no entry in {@link CALL_TIME_CRM_LABELS}.
+ */
+export const CALL_TIME_SLUGS = ["morning", "afternoon", "evening", "specific"] as const;
 export type CallTimeSlug = (typeof CALL_TIME_SLUGS)[number];
 
 export const CALL_TIME_LABELS_ES: Record<CallTimeSlug, string> = {
   morning: "En la mañana",
-  midday: "Al mediodía",
   afternoon: "En la tarde",
+  evening: "En la noche",
+  specific: "Una hora específica",
 };
 
-export const CALL_TIME_CRM_LABELS: Record<CallTimeSlug, string> = {
+/** `specific` is deliberately absent — the picked time is written instead. */
+export const CALL_TIME_CRM_LABELS: Record<Exclude<CallTimeSlug, "specific">, string> = {
   morning: "Morning (8am - 12pm)",
-  midday: "Midday (12pm - 2pm)",
-  afternoon: "Afternoon (2pm - 6pm)",
+  afternoon: "Afternoon (12pm - 5pm)",
+  evening: "Evening (5pm - 9pm)",
 };
 
 // ---------------------------------------------------------------------------
