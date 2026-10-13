@@ -1,0 +1,289 @@
+{
+  "carrierName": "National Life Group",
+  "issuingCompany": "Life Insurance Company of the Southwest",
+  "issuerAddress": "Addison, TX",
+  "productName": "FlexLife",
+  "policyForm": "20608CA(0119)",
+  "preparedDate": "2026-10-05",
+  "insured": {
+    "name": "Rodolfo Rodríguez",
+    "gender": "Male",
+    "issueAge": 43,
+    "riskClass": "Standard Non-Tobacco",
+    "state": "CA"
+  },
+  "agent": {
+    "name": "Sample Agent",
+    "addressLines": [],
+    "phone": null,
+    "email": null,
+    "license": null
+  },
+  "premium": {
+    "amount": 120,
+    "mode": "Monthly",
+    "verified": true
+  },
+  "initialDeathBenefit": 78585,
+  "initialDeathBenefitVerified": true,
+  "deathBenefitOption": "A (Level)",
+  "illustratedRate": 6.84,
+  "ledger": [
+    {
+      "policyYear": 1,
+      "age": 43,
+      "premiumOutlay": 1440,
+      "accumulationValue": 868,
+      "cashSurrenderValue": 0,
+      "deathBenefit": 78585,
+      "verified": true
+    },
+    {
+      "policyYear": 3,
+      "age": 45,
+      "premiumOutlay": 1440,
+      "accumulationValue": 2723,
+      "cashSurrenderValue": 1224,
+      "deathBenefit": 78585,
+      "verified": true
+    },
+    {
+      "policyYear": 8,
+      "age": 50,
+      "premiumOutlay": 1440,
+      "accumulationValue": 8285,
+      "cashSurrenderValue": 7710,
+      "deathBenefit": 78585,
+      "verified": true
+    },
+    {
+      "policyYear": 13,
+      "age": 55,
+      "premiumOutlay": 1440,
+      "accumulationValue": 17064,
+      "cashSurrenderValue": 17064,
+      "deathBenefit": 78585,
+      "verified": true
+    },
+    {
+      "policyYear": 18,
+      "age": 60,
+      "premiumOutlay": 1440,
+      "accumulationValue": 29864,
+      "cashSurrenderValue": 29864,
+      "deathBenefit": 78585,
+      "verified": true
+    },
+    {
+      "policyYear": 23,
+      "age": 65,
+      "premiumOutlay": 1440,
+      "accumulationValue": 47223,
+      "cashSurrenderValue": 47223,
+      "deathBenefit": 78585,
+      "verified": true
+    },
+    {
+      "policyYear": 28,
+      "age": 70,
+      "premiumOutlay": 1440,
+      "accumulationValue": 72825,
+      "cashSurrenderValue": 72825,
+      "deathBenefit": 83749,
+      "verified": true
+    },
+    {
+      "policyYear": 33,
+      "age": 75,
+      "premiumOutlay": 1440,
+      "accumulationValue": 110563,
+      "cashSurrenderValue": 110563,
+      "deathBenefit": 116091,
+      "verified": true
+    },
+    {
+      "policyYear": 38,
+      "age": 80,
+      "premiumOutlay": 1440,
+      "accumulationValue": 163819,
+      "cashSurrenderValue": 163819,
+      "deathBenefit": 172010,
+      "verified": true
+    },
+    {
+      "policyYear": 43,
+      "age": 85,
+      "premiumOutlay": 1440,
+      "accumulationValue": 237112,
+      "cashSurrenderValue": 237112,
+      "deathBenefit": 248967,
+      "verified": true
+    },
+    {
+      "policyYear": 48,
+      "age": 90,
+      "premiumOutlay": 1440,
+      "accumulationValue": 334175,
+      "cashSurrenderValue": 334175,
+      "deathBenefit": 350884,
+      "verified": true
+    },
+    {
+      "policyYear": 53,
+      "age": 95,
+      "premiumOutlay": 1440,
+      "accumulationValue": 474361,
+      "cashSurrenderValue": 474361,
+      "deathBenefit": 474361,
+      "verified": true
+    },
+    {
+      "policyYear": 58,
+      "age": 100,
+      "premiumOutlay": 1440,
+      "accumulationValue": 684333,
+      "cashSurrenderValue": 684333,
+      "deathBenefit": 684333,
+      "verified": true
+    },
+    {
+      "policyYear": 63,
+      "age": 105,
+      "premiumOutlay": 1440,
+      "accumulationValue": 983795,
+      "cashSurrenderValue": 983795,
+      "deathBenefit": 983795,
+      "verified": true
+    },
+    {
+      "policyYear": 68,
+      "age": 110,
+      "premiumOutlay": 1440,
+      "accumulationValue": 1410886,
+      "cashSurrenderValue": 1410886,
+      "deathBenefit": 1410886,
+      "verified": true
+    },
+    {
+      "policyYear": 73,
+      "age": 115,
+      "premiumOutlay": 1440,
+      "accumulationValue": 2020000,
+      "cashSurrenderValue": 2020000,
+      "deathBenefit": 2020000,
+      "verified": true
+    },
+    {
+      "policyYear": 78,
+      "age": 120,
+      "premiumOutlay": 1440,
+      "accumulationValue": 2888716,
+      "cashSurrenderValue": 2888716,
+      "deathBenefit": 2888716,
+      "verified": true
+    }
+  ],
+  "livingBenefits": [
+    {
+      "type": "terminal",
+      "riderName": "Accelerated Benefits Rider for Terminal Illness",
+      "maxPercentOfDeathBenefit": 100,
+      "maxAmount": 1500000,
+      "maxAmountVerified": true,
+      "examples": [
+        {
+          "age": 65,
+          "amount": 67870,
+          "frequency": "lump_sum",
+          "kind": "payout",
+          "label": null,
+          "verified": true
+        }
+      ]
+    },
+    {
+      "type": "chronic",
+      "riderName": "Accelerated Benefits Rider for Chronic Illness",
+      "maxPercentOfDeathBenefit": 100,
+      "maxAmount": 1500000,
+      "maxAmountVerified": true,
+      "examples": [
+        {
+          "age": 65,
+          "amount": 1206,
+          "frequency": "monthly",
+          "kind": "payout",
+          "label": null,
+          "verified": true
+        }
+      ]
+    },
+    {
+      "type": "critical_illness",
+      "riderName": "Accelerated Benefits Rider for Critical Illness",
+      "maxPercentOfDeathBenefit": 100,
+      "maxAmount": 1000000,
+      "maxAmountVerified": true,
+      "examples": [
+        {
+          "age": 65,
+          "amount": 63672,
+          "frequency": "lump_sum",
+          "kind": "max_acceleration",
+          "label": null,
+          "verified": true
+        }
+      ]
+    },
+    {
+      "type": "critical_injury",
+      "riderName": "Accelerated Benefits Rider for Critical Injury",
+      "maxPercentOfDeathBenefit": 100,
+      "maxAmount": 1000000,
+      "maxAmountVerified": true,
+      "examples": [
+        {
+          "age": 65,
+          "amount": 63672,
+          "frequency": "lump_sum",
+          "kind": "max_acceleration",
+          "label": null,
+          "verified": true
+        }
+      ]
+    },
+    {
+      "type": "alzheimers",
+      "riderName": "Accelerated Benefits Rider for Alzheimer's Disease",
+      "maxPercentOfDeathBenefit": 100,
+      "maxAmount": 1500000,
+      "maxAmountVerified": true,
+      "examples": [
+        {
+          "age": 65,
+          "amount": 61277,
+          "frequency": "lump_sum",
+          "kind": "payout",
+          "label": null,
+          "verified": true
+        }
+      ]
+    }
+  ],
+  "otherRiders": [
+    "Charitable Matching Gift Death Benefit Rider",
+    "Death Benefit Protection Rider",
+    "Lifetime Income Benefit Rider",
+    "Overloan Protection Rider",
+    "Systematic Allocation Rider"
+  ],
+  "warnings": [],
+  "meta": {
+    "model": "gpt-4o",
+    "pageCount": 31,
+    "sentChars": 110269,
+    "droppedPages": [],
+    "promptTokens": 31528,
+    "completionTokens": 1789
+  }
+}

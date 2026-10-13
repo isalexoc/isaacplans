@@ -17,6 +17,10 @@ import type {
   SocialVideoJobInput,
   SocialVideoImagesResult,
 } from "@/lib/social-media-studio/video-job-types";
+import type {
+  IllustrationExtraction,
+  PresentationData,
+} from "@/lib/illustration-studio/types";
 
 // Guides table - stores all available guides
 export const guides = pgTable("guides", {
@@ -1120,5 +1124,29 @@ export const referralPartnerClients = pgTable("referral_partner_clients", {
 }, (t) => ({
   partnerIdx: index("referral_partner_clients_partner_idx").on(t.partnerId, t.createdAt),
   partnerStatusIdx: index("referral_partner_clients_status_idx").on(t.partnerId, t.status),
+}));
+
+// ─── Illustration Studio (carrier illustration → NLG-style two-page summary) ──
+
+/**
+ * One summary per uploaded carrier illustration. The PDF itself is never stored — the browser
+ * reads its text and only the result lands here: `extraction` is what the AI pulled out (grounded
+ * against the PDF text, kept so the editor can re-pick chart ages), `presentation` is what the two
+ * pages render and what the agent edits. The client/carrier/product columns duplicate fields of
+ * `presentation` so the recent list never parses jsonb.
+ */
+export const illustrationSummaries = pgTable("illustration_summaries", {
+  id: text("id").primaryKey(), // nanoid
+  createdByUserId: text("created_by_user_id").notNull(), // Clerk id
+  carrierKey: text("carrier_key").notNull(), // americo | american_amicable | fg | mutual_of_omaha | transamerica | national_life | other
+  clientName: text("client_name").notNull().default(""),
+  productName: text("product_name").notNull().default(""),
+  sourceFileName: text("source_file_name").notNull().default(""),
+  extraction: jsonb("extraction").notNull().$type<IllustrationExtraction>(),
+  presentation: jsonb("presentation").notNull().$type<PresentationData>(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (t) => ({
+  userUpdatedIdx: index("illustration_summaries_user_updated_idx").on(t.createdByUserId, t.updatedAt),
 }));
 
