@@ -20,6 +20,7 @@ export default function AdminBackNav() {
     "call-dashboard": "Callback Priority",
     "call-metrics": "Call Metrics",
     hero: "Page Media",
+    "illustration-studio": "Illustration Studio",
     "lead-backup": "Lead Backup",
     "lead-magnet-generator": "Lead Magnet Generator",
     "mailing-labels": "Mailing Labels",

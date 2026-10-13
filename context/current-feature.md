@@ -2,6 +2,47 @@
 
 ## Status
 
+Done: **Illustration Studio** (branch `feature/illustration-studio`, migration `0039`). An
+admin tool at `/admin/illustration-studio` that turns any carrier's IUL illustration PDF into the
+two pages that sell National Life Group's FlexLife illustration: a photo cover, and "My Planned Life
+Insurance Offers" (premium banner, *If I Die Tomorrow*, *If I Need Cash* bar chart, *If I Become
+Ill* living-benefit table) — branded with the source carrier's logo and colors.
+
+**Why.** Isaac shows clients only NLG's "My Planned Life Insurance Offers" page and it closes deals;
+Americo, American Amicable, F&G, Mutual of Omaha and Transamerica don't produce one. Private use
+(screen-share), so no compliance constraints. Decisions: English only; carrier's own logo + colors;
+when the illustration prints no living-benefit dollar amounts, show "Up to" = rider max % × death
+benefit (no % → "Included"), all editable; presentations saved to the DB for reopening.
+
+**Pipeline.** The browser reads the PDF's text with `unpdf` (the PDF is never uploaded, so Vercel's
+4.5 MB body cap never applies) and rebuilds table rows by y-coordinate → OpenAI (strict
+`json_schema`) pulls premium, death benefit, the current-scale ledger and the living-benefit riders →
+every number is grounding-checked against the text → deterministic defaults → saved to
+`illustration_summaries` → editable → `@react-pdf/renderer` renders the two pages server-side.
+
+**Admin UI.** `/admin/illustration-studio` is the drop zone plus the saved list;
+`/admin/illustration-studio/[id]` is the editor (`components/admin/illustration-studio/`): every
+field on both pages, with the AI's numbers flagged amber where grounding couldn't find them. Edits
+autosave (`hooks/use-illustration-summary-autosave.ts`, one request at a time so an older save can
+never land after a newer one), and the preview beside it is the real PDF from the same route as
+Download, re-rendered after each completed save. The chart's ages are picked from the extracted
+ledger (the value fills in), and the living-benefit "at age" offers only ages the illustration prints
+amounts for — changing it refills the amounts, keeping show/hide choices and labels. A collapsed
+"What the AI read" panel shows every rider amount and ledger row with its grounding verdict. The
+layout limits (`MAX_PRESENTED_BY_LINES`, `MAX_BENEFIT_ROWS`) moved to `pdf/theme.ts` so the editor
+can warn before a row falls off the page without importing the renderer.
+
+Verified: 72/72 offline checks; live extraction on the Americo, Transamerica and Mutual of Omaha
+samples (14–22 s each) matches the fixtures exactly, saved through the real store; the editor's
+interactions driven in headless Chrome against a temporary unauthenticated harness (since deleted) —
+money input formatting, debounced autosave firing, chart age pick + re-sort, living-benefit age
+refill, carrier switch; desktop + 500 px layouts; full `pnpm build` green, 239/239. Migration `0039`
+was applied to the main Neon database on 2026-10-13 (its two statements only). The three live test
+summaries are saved under Isaac's account, so the list isn't empty on first visit.
+
+**Not verified, and it needs Isaac (signed in as admin):** dropping a PDF in a real browser, the
+preview iframe rendering, an autosave reaching the database, and Present / Download / Delete.
+
 Done: **IUL lead-magnet opt-in** (branch `feature/iul-guia-optin`). A Spanish-only direct-response
 opt-in at `/iul/guia` for Meta Ads traffic, giving away the *Dinero, Riqueza, IUL* guide and
 bridging into the existing IUL consultation funnel.

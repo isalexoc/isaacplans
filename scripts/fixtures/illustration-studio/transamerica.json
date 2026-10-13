@@ -1,0 +1,398 @@
+{
+  "carrierName": "Transamerica",
+  "issuingCompany": "Transamerica Life Insurance Company",
+  "issuerAddress": "Cedar Rapids, IA",
+  "productName": "Financial Foundation IUL II",
+  "policyForm": "ICC24 TPIU12IC-0224",
+  "preparedDate": "2026-10-13",
+  "insured": {
+    "name": "MARIO SILVA",
+    "gender": "Male",
+    "issueAge": 39,
+    "riskClass": "Select Non-Tobacco",
+    "state": "GA"
+  },
+  "agent": {
+    "name": "SAMPLE AGENT",
+    "addressLines": [
+      "100 Main St",
+      "Richmond, VA 23220"
+    ],
+    "phone": "(555) 555-0100",
+    "email": null,
+    "license": null
+  },
+  "premium": {
+    "amount": 200,
+    "mode": "Monthly",
+    "verified": true
+  },
+  "initialDeathBenefit": 196000,
+  "initialDeathBenefitVerified": true,
+  "deathBenefitOption": "Graded",
+  "illustratedRate": 7.3,
+  "ledger": [
+    {
+      "policyYear": 1,
+      "age": 40,
+      "premiumOutlay": 2400,
+      "accumulationValue": 1574,
+      "cashSurrenderValue": 0,
+      "deathBenefit": 197574,
+      "verified": true
+    },
+    {
+      "policyYear": 6,
+      "age": 45,
+      "premiumOutlay": 2400,
+      "accumulationValue": 10598,
+      "cashSurrenderValue": 7330,
+      "deathBenefit": 206598,
+      "verified": true
+    },
+    {
+      "policyYear": 11,
+      "age": 50,
+      "premiumOutlay": 2400,
+      "accumulationValue": 22553,
+      "cashSurrenderValue": 21085,
+      "deathBenefit": 218553,
+      "verified": true
+    },
+    {
+      "policyYear": 16,
+      "age": 55,
+      "premiumOutlay": 2400,
+      "accumulationValue": 38324,
+      "cashSurrenderValue": 38324,
+      "deathBenefit": 234324,
+      "verified": true
+    },
+    {
+      "policyYear": 21,
+      "age": 60,
+      "premiumOutlay": 2400,
+      "accumulationValue": 61662,
+      "cashSurrenderValue": 61662,
+      "deathBenefit": 257662,
+      "verified": true
+    },
+    {
+      "policyYear": 26,
+      "age": 65,
+      "premiumOutlay": 2400,
+      "accumulationValue": 91409,
+      "cashSurrenderValue": 91409,
+      "deathBenefit": 287409,
+      "verified": true
+    },
+    {
+      "policyYear": 31,
+      "age": 70,
+      "premiumOutlay": 2400,
+      "accumulationValue": 129342,
+      "cashSurrenderValue": 129342,
+      "deathBenefit": 325342,
+      "verified": true
+    },
+    {
+      "policyYear": 36,
+      "age": 75,
+      "premiumOutlay": 2400,
+      "accumulationValue": 177353,
+      "cashSurrenderValue": 177353,
+      "deathBenefit": 341993,
+      "verified": true
+    },
+    {
+      "policyYear": 41,
+      "age": 80,
+      "premiumOutlay": 2400,
+      "accumulationValue": 238407,
+      "cashSurrenderValue": 238407,
+      "deathBenefit": 363847,
+      "verified": true
+    },
+    {
+      "policyYear": 46,
+      "age": 85,
+      "premiumOutlay": 2400,
+      "accumulationValue": 315066,
+      "cashSurrenderValue": 315066,
+      "deathBenefit": 401306,
+      "verified": true
+    },
+    {
+      "policyYear": 51,
+      "age": 90,
+      "premiumOutlay": 2400,
+      "accumulationValue": 411791,
+      "cashSurrenderValue": 411791,
+      "deathBenefit": 458831,
+      "verified": true
+    },
+    {
+      "policyYear": 56,
+      "age": 95,
+      "premiumOutlay": 2400,
+      "accumulationValue": 554037,
+      "cashSurrenderValue": 554037,
+      "deathBenefit": 561877,
+      "verified": true
+    },
+    {
+      "policyYear": 61,
+      "age": 100,
+      "premiumOutlay": 2400,
+      "accumulationValue": 773548,
+      "cashSurrenderValue": 773548,
+      "deathBenefit": 773548,
+      "verified": true
+    },
+    {
+      "policyYear": 66,
+      "age": 105,
+      "premiumOutlay": 2400,
+      "accumulationValue": 1075018,
+      "cashSurrenderValue": 1075018,
+      "deathBenefit": 1075018,
+      "verified": true
+    },
+    {
+      "policyYear": 71,
+      "age": 110,
+      "premiumOutlay": 2400,
+      "accumulationValue": 1489100,
+      "cashSurrenderValue": 1489100,
+      "deathBenefit": 1489100,
+      "verified": true
+    },
+    {
+      "policyYear": 76,
+      "age": 115,
+      "premiumOutlay": 2400,
+      "accumulationValue": 2057857,
+      "cashSurrenderValue": 2057857,
+      "deathBenefit": 2057857,
+      "verified": true
+    },
+    {
+      "policyYear": 81,
+      "age": 120,
+      "premiumOutlay": 2400,
+      "accumulationValue": 2839068,
+      "cashSurrenderValue": 2839068,
+      "deathBenefit": 2839068,
+      "verified": true
+    }
+  ],
+  "livingBenefits": [
+    {
+      "type": "terminal",
+      "riderName": "Terminal Illness Accelerated Death Benefit Rider",
+      "maxPercentOfDeathBenefit": 100,
+      "maxAmount": 1500000,
+      "maxAmountVerified": true,
+      "examples": [
+        {
+          "age": 41,
+          "amount": 187559,
+          "frequency": "lump_sum",
+          "kind": "payout",
+          "label": null,
+          "verified": true
+        },
+        {
+          "age": 65,
+          "amount": 270512,
+          "frequency": "lump_sum",
+          "kind": "payout",
+          "label": null,
+          "verified": true
+        },
+        {
+          "age": 90,
+          "amount": 431859,
+          "frequency": "lump_sum",
+          "kind": "payout",
+          "label": null,
+          "verified": true
+        }
+      ]
+    },
+    {
+      "type": "chronic",
+      "riderName": "Chronic Illness Accelerated Death Benefit Rider",
+      "maxPercentOfDeathBenefit": 90,
+      "maxAmount": 1500000,
+      "maxAmountVerified": true,
+      "examples": [
+        {
+          "age": 41,
+          "amount": 12022,
+          "frequency": "lump_sum",
+          "kind": "payout",
+          "label": "20 Year LE",
+          "verified": true
+        },
+        {
+          "age": 41,
+          "amount": 24118,
+          "frequency": "lump_sum",
+          "kind": "payout",
+          "label": "10 Year LE",
+          "verified": true
+        },
+        {
+          "age": 41,
+          "amount": 38753,
+          "frequency": "lump_sum",
+          "kind": "payout",
+          "label": "3 Year LE",
+          "verified": true
+        },
+        {
+          "age": 65,
+          "amount": 22731,
+          "frequency": "lump_sum",
+          "kind": "payout",
+          "label": "20 Year LE",
+          "verified": true
+        },
+        {
+          "age": 65,
+          "amount": 38866,
+          "frequency": "lump_sum",
+          "kind": "payout",
+          "label": "10 Year LE",
+          "verified": true
+        },
+        {
+          "age": 65,
+          "amount": 57063,
+          "frequency": "lump_sum",
+          "kind": "payout",
+          "label": "3 Year LE",
+          "verified": true
+        },
+        {
+          "age": 90,
+          "amount": 98830,
+          "frequency": "lump_sum",
+          "kind": "payout",
+          "label": "20 Year LE",
+          "verified": true
+        },
+        {
+          "age": 90,
+          "amount": 98830,
+          "frequency": "lump_sum",
+          "kind": "payout",
+          "label": "10 Year LE",
+          "verified": true
+        },
+        {
+          "age": 90,
+          "amount": 98830,
+          "frequency": "lump_sum",
+          "kind": "payout",
+          "label": "3 Year LE",
+          "verified": true
+        }
+      ]
+    },
+    {
+      "type": "critical_illness",
+      "riderName": "Critical Illness Accelerated Death Benefit Rider",
+      "maxPercentOfDeathBenefit": 90,
+      "maxAmount": 1500000,
+      "maxAmountVerified": true,
+      "examples": [
+        {
+          "age": 41,
+          "amount": 46513,
+          "frequency": "lump_sum",
+          "kind": "payout",
+          "label": "20 Year LE",
+          "verified": true
+        },
+        {
+          "age": 41,
+          "amount": 91873,
+          "frequency": "lump_sum",
+          "kind": "payout",
+          "label": "10 Year LE",
+          "verified": true
+        },
+        {
+          "age": 41,
+          "amount": 146753,
+          "frequency": "lump_sum",
+          "kind": "payout",
+          "label": "3 Year LE",
+          "verified": true
+        },
+        {
+          "age": 65,
+          "amount": 87542,
+          "frequency": "lump_sum",
+          "kind": "payout",
+          "label": "20 Year LE",
+          "verified": true
+        },
+        {
+          "age": 65,
+          "amount": 148049,
+          "frequency": "lump_sum",
+          "kind": "payout",
+          "label": "10 Year LE",
+          "verified": true
+        },
+        {
+          "age": 65,
+          "amount": 216286,
+          "frequency": "lump_sum",
+          "kind": "payout",
+          "label": "3 Year LE",
+          "verified": true
+        },
+        {
+          "age": 90,
+          "amount": 370612,
+          "frequency": "lump_sum",
+          "kind": "payout",
+          "label": "20 Year LE",
+          "verified": true
+        },
+        {
+          "age": 90,
+          "amount": 370612,
+          "frequency": "lump_sum",
+          "kind": "payout",
+          "label": "10 Year LE",
+          "verified": true
+        },
+        {
+          "age": 90,
+          "amount": 370612,
+          "frequency": "lump_sum",
+          "kind": "payout",
+          "label": "3 Year LE",
+          "verified": true
+        }
+      ]
+    }
+  ],
+  "otherRiders": [
+    "Overloan Protection Rider"
+  ],
+  "warnings": [],
+  "meta": {
+    "model": "gpt-4o",
+    "pageCount": 40,
+    "sentChars": 121665,
+    "droppedPages": [],
+    "promptTokens": 35538,
+    "completionTokens": 2220
+  }
+}

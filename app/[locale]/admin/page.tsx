@@ -32,6 +32,7 @@ import {
   MonitorPlay,
   AudioLines,
   MessageSquare,
+  PieChart,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import {
@@ -74,6 +75,13 @@ const CONTENT_TOOLS: ToolCard[] = [
     description: "Generate bilingual sales presentation scripts and publish them to the library.",
     href: "/en/admin/script-generator",
     icon: ScrollText,
+  },
+  {
+    title: "Illustration Studio",
+    description:
+      "Turn any carrier's IUL illustration into National Life's two-page \"My Planned Life Insurance Offers\" summary.",
+    href: "/en/admin/illustration-studio",
+    icon: PieChart,
   },
 ];
 

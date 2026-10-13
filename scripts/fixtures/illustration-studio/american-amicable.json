@@ -1,0 +1,241 @@
+{
+  "carrierName": "American Amicable",
+  "issuingCompany": "American-Amicable Life Insurance Company of Texas",
+  "issuerAddress": "Waco, TX",
+  "productName": "Intelligent Choice",
+  "policyForm": "ICC24-AA3843",
+  "preparedDate": "2026-10-13",
+  "insured": {
+    "name": null,
+    "gender": "Male",
+    "issueAge": 36,
+    "riskClass": "Standard Non-Tobacco",
+    "state": "CO"
+  },
+  "agent": {
+    "name": "SAMPLE AGENT",
+    "addressLines": [],
+    "phone": null,
+    "email": null,
+    "license": null
+  },
+  "premium": {
+    "amount": 199.14,
+    "mode": "Monthly",
+    "verified": true
+  },
+  "initialDeathBenefit": 389000,
+  "initialDeathBenefitVerified": true,
+  "deathBenefitOption": "Face Amount",
+  "illustratedRate": 5.97,
+  "ledger": [
+    {
+      "policyYear": 1,
+      "age": 37,
+      "premiumOutlay": 2390,
+      "accumulationValue": 1497,
+      "cashSurrenderValue": 0,
+      "deathBenefit": 389000,
+      "verified": true
+    },
+    {
+      "policyYear": 4,
+      "age": 40,
+      "premiumOutlay": 2390,
+      "accumulationValue": 6296,
+      "cashSurrenderValue": 0,
+      "deathBenefit": 389000,
+      "verified": true
+    },
+    {
+      "policyYear": 9,
+      "age": 45,
+      "premiumOutlay": 2390,
+      "accumulationValue": 15919,
+      "cashSurrenderValue": 10415,
+      "deathBenefit": 389000,
+      "verified": true
+    },
+    {
+      "policyYear": 14,
+      "age": 50,
+      "premiumOutlay": 2390,
+      "accumulationValue": 28288,
+      "cashSurrenderValue": 27370,
+      "deathBenefit": 389000,
+      "verified": true
+    },
+    {
+      "policyYear": 19,
+      "age": 55,
+      "premiumOutlay": 2390,
+      "accumulationValue": 43889,
+      "cashSurrenderValue": 43889,
+      "deathBenefit": 389000,
+      "verified": true
+    },
+    {
+      "policyYear": 24,
+      "age": 60,
+      "premiumOutlay": 2390,
+      "accumulationValue": 63347,
+      "cashSurrenderValue": 63347,
+      "deathBenefit": 389000,
+      "verified": true
+    },
+    {
+      "policyYear": 29,
+      "age": 65,
+      "premiumOutlay": 2390,
+      "accumulationValue": 87514,
+      "cashSurrenderValue": 87514,
+      "deathBenefit": 389000,
+      "verified": true
+    },
+    {
+      "policyYear": 34,
+      "age": 70,
+      "premiumOutlay": 2390,
+      "accumulationValue": 116561,
+      "cashSurrenderValue": 116561,
+      "deathBenefit": 389000,
+      "verified": true
+    },
+    {
+      "policyYear": 39,
+      "age": 75,
+      "premiumOutlay": 2390,
+      "accumulationValue": 149688,
+      "cashSurrenderValue": 149688,
+      "deathBenefit": 389000,
+      "verified": true
+    },
+    {
+      "policyYear": 44,
+      "age": 80,
+      "premiumOutlay": 2390,
+      "accumulationValue": 184664,
+      "cashSurrenderValue": 184664,
+      "deathBenefit": 389000,
+      "verified": true
+    },
+    {
+      "policyYear": 49,
+      "age": 85,
+      "premiumOutlay": 2390,
+      "accumulationValue": 217529,
+      "cashSurrenderValue": 217529,
+      "deathBenefit": 389000,
+      "verified": true
+    },
+    {
+      "policyYear": 54,
+      "age": 90,
+      "premiumOutlay": 2390,
+      "accumulationValue": 236576,
+      "cashSurrenderValue": 236576,
+      "deathBenefit": 389000,
+      "verified": true
+    },
+    {
+      "policyYear": 59,
+      "age": 95,
+      "premiumOutlay": 2390,
+      "accumulationValue": 238238,
+      "cashSurrenderValue": 238238,
+      "deathBenefit": 389000,
+      "verified": true
+    },
+    {
+      "policyYear": 64,
+      "age": 100,
+      "premiumOutlay": 2390,
+      "accumulationValue": 241908,
+      "cashSurrenderValue": 241908,
+      "deathBenefit": 389000,
+      "verified": true
+    },
+    {
+      "policyYear": 69,
+      "age": 105,
+      "premiumOutlay": 2390,
+      "accumulationValue": 250016,
+      "cashSurrenderValue": 250016,
+      "deathBenefit": 389000,
+      "verified": true
+    },
+    {
+      "policyYear": 74,
+      "age": 110,
+      "premiumOutlay": 2390,
+      "accumulationValue": 267926,
+      "cashSurrenderValue": 267926,
+      "deathBenefit": 389000,
+      "verified": true
+    },
+    {
+      "policyYear": 79,
+      "age": 115,
+      "premiumOutlay": 2390,
+      "accumulationValue": 307489,
+      "cashSurrenderValue": 307489,
+      "deathBenefit": 389000,
+      "verified": true
+    },
+    {
+      "policyYear": 84,
+      "age": 120,
+      "premiumOutlay": 2390,
+      "accumulationValue": 394790,
+      "cashSurrenderValue": 394790,
+      "deathBenefit": 394790,
+      "verified": true
+    }
+  ],
+  "livingBenefits": [
+    {
+      "type": "confined_care",
+      "riderName": "Accelerated Benefits Rider - Confined Care",
+      "maxPercentOfDeathBenefit": null,
+      "maxAmount": null,
+      "maxAmountVerified": true,
+      "examples": []
+    },
+    {
+      "type": "chronic",
+      "riderName": "Chronic Illness Accelerated Death Benefit Rider",
+      "maxPercentOfDeathBenefit": null,
+      "maxAmount": null,
+      "maxAmountVerified": true,
+      "examples": []
+    },
+    {
+      "type": "terminal",
+      "riderName": "Terminal Illness Accelerated Death Benefit Rider",
+      "maxPercentOfDeathBenefit": 100,
+      "maxAmount": null,
+      "maxAmountVerified": true,
+      "examples": []
+    },
+    {
+      "type": "critical_illness",
+      "riderName": "Critical Illness Accelerated Death Benefit Rider",
+      "maxPercentOfDeathBenefit": 95,
+      "maxAmount": null,
+      "maxAmountVerified": true,
+      "examples": []
+    }
+  ],
+  "otherRiders": [
+    "Waiver of Surrender Charge Endorsement"
+  ],
+  "warnings": [],
+  "meta": {
+    "model": "gpt-4o",
+    "pageCount": 6,
+    "sentChars": 16651,
+    "droppedPages": [],
+    "promptTokens": 6639,
+    "completionTokens": 740
+  }
+}

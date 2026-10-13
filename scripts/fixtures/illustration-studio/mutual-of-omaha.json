@@ -1,0 +1,255 @@
+{
+  "carrierName": "Mutual of Omaha",
+  "issuingCompany": "United of Omaha Life Insurance Company",
+  "issuerAddress": "Omaha, Nebraska 68175",
+  "productName": "Indexed Universal Life Express",
+  "policyForm": "ICC19L190P",
+  "preparedDate": "2026-10-13",
+  "insured": {
+    "name": "Mario",
+    "gender": "Male",
+    "issueAge": 38,
+    "riskClass": "Standard Non-Tobacco",
+    "state": "NC"
+  },
+  "agent": {
+    "name": "Sample Agent",
+    "addressLines": [
+      "100 Main St",
+      "Richmond, VA 23220"
+    ],
+    "phone": "(555) 555-0100",
+    "email": null,
+    "license": null
+  },
+  "premium": {
+    "amount": 200,
+    "mode": "Monthly",
+    "verified": true
+  },
+  "initialDeathBenefit": 371932,
+  "initialDeathBenefitVerified": true,
+  "deathBenefitOption": "Level years 1 - 82",
+  "illustratedRate": 5.97,
+  "ledger": [
+    {
+      "policyYear": 1,
+      "age": 39,
+      "premiumOutlay": 2400,
+      "accumulationValue": 1184,
+      "cashSurrenderValue": 0,
+      "deathBenefit": 371932,
+      "verified": true
+    },
+    {
+      "policyYear": 2,
+      "age": 40,
+      "premiumOutlay": 2400,
+      "accumulationValue": 2442,
+      "cashSurrenderValue": 0,
+      "deathBenefit": 371932,
+      "verified": true
+    },
+    {
+      "policyYear": 7,
+      "age": 45,
+      "premiumOutlay": 2400,
+      "accumulationValue": 10272,
+      "cashSurrenderValue": 4693,
+      "deathBenefit": 371932,
+      "verified": true
+    },
+    {
+      "policyYear": 12,
+      "age": 50,
+      "premiumOutlay": 2400,
+      "accumulationValue": 21408,
+      "cashSurrenderValue": 19548,
+      "deathBenefit": 371932,
+      "verified": true
+    },
+    {
+      "policyYear": 17,
+      "age": 55,
+      "premiumOutlay": 2400,
+      "accumulationValue": 36621,
+      "cashSurrenderValue": 36621,
+      "deathBenefit": 371932,
+      "verified": true
+    },
+    {
+      "policyYear": 22,
+      "age": 60,
+      "premiumOutlay": 2400,
+      "accumulationValue": 56825,
+      "cashSurrenderValue": 56825,
+      "deathBenefit": 371932,
+      "verified": true
+    },
+    {
+      "policyYear": 27,
+      "age": 65,
+      "premiumOutlay": 2400,
+      "accumulationValue": 82295,
+      "cashSurrenderValue": 82295,
+      "deathBenefit": 371932,
+      "verified": true
+    },
+    {
+      "policyYear": 32,
+      "age": 70,
+      "premiumOutlay": 2400,
+      "accumulationValue": 113211,
+      "cashSurrenderValue": 113211,
+      "deathBenefit": 371932,
+      "verified": true
+    },
+    {
+      "policyYear": 37,
+      "age": 75,
+      "premiumOutlay": 2400,
+      "accumulationValue": 149670,
+      "cashSurrenderValue": 149670,
+      "deathBenefit": 371932,
+      "verified": true
+    },
+    {
+      "policyYear": 42,
+      "age": 80,
+      "premiumOutlay": 2400,
+      "accumulationValue": 190968,
+      "cashSurrenderValue": 190968,
+      "deathBenefit": 371932,
+      "verified": true
+    },
+    {
+      "policyYear": 47,
+      "age": 85,
+      "premiumOutlay": 2400,
+      "accumulationValue": 236811,
+      "cashSurrenderValue": 236811,
+      "deathBenefit": 371932,
+      "verified": true
+    },
+    {
+      "policyYear": 52,
+      "age": 90,
+      "premiumOutlay": 2400,
+      "accumulationValue": 288043,
+      "cashSurrenderValue": 288043,
+      "deathBenefit": 371932,
+      "verified": true
+    },
+    {
+      "policyYear": 57,
+      "age": 95,
+      "premiumOutlay": 2400,
+      "accumulationValue": 365570,
+      "cashSurrenderValue": 365570,
+      "deathBenefit": 371932,
+      "verified": true
+    },
+    {
+      "policyYear": 62,
+      "age": 100,
+      "premiumOutlay": 2400,
+      "accumulationValue": 496827,
+      "cashSurrenderValue": 496827,
+      "deathBenefit": 501795,
+      "verified": true
+    },
+    {
+      "policyYear": 67,
+      "age": 105,
+      "premiumOutlay": 2400,
+      "accumulationValue": 668728,
+      "cashSurrenderValue": 668728,
+      "deathBenefit": 675416,
+      "verified": true
+    },
+    {
+      "policyYear": 72,
+      "age": 110,
+      "premiumOutlay": 2400,
+      "accumulationValue": 893073,
+      "cashSurrenderValue": 893073,
+      "deathBenefit": 902003,
+      "verified": true
+    },
+    {
+      "policyYear": 77,
+      "age": 115,
+      "premiumOutlay": 2400,
+      "accumulationValue": 1183489,
+      "cashSurrenderValue": 1183489,
+      "deathBenefit": 1195323,
+      "verified": true
+    },
+    {
+      "policyYear": 82,
+      "age": 120,
+      "premiumOutlay": 2400,
+      "accumulationValue": 1555776,
+      "cashSurrenderValue": 1555776,
+      "deathBenefit": 1571334,
+      "verified": true
+    }
+  ],
+  "livingBenefits": [
+    {
+      "type": "chronic",
+      "riderName": "Accelerated Death Benefit for Chronic Illness",
+      "maxPercentOfDeathBenefit": 80,
+      "maxAmount": 297545,
+      "maxAmountVerified": true,
+      "examples": [
+        {
+          "age": null,
+          "amount": 156950,
+          "frequency": "annual",
+          "kind": "max_acceleration",
+          "label": null,
+          "verified": true
+        }
+      ]
+    },
+    {
+      "type": "critical_illness",
+      "riderName": "Accelerated Death Benefit for Critical Illness",
+      "maxPercentOfDeathBenefit": 80,
+      "maxAmount": 297545,
+      "maxAmountVerified": true,
+      "examples": [
+        {
+          "age": null,
+          "amount": 250000,
+          "frequency": "annual",
+          "kind": "max_acceleration",
+          "label": null,
+          "verified": true
+        }
+      ]
+    },
+    {
+      "type": "terminal",
+      "riderName": "Accelerated Death Benefit for Terminal Illness",
+      "maxPercentOfDeathBenefit": 80,
+      "maxAmount": null,
+      "maxAmountVerified": true,
+      "examples": []
+    }
+  ],
+  "otherRiders": [
+    "Optional Paid-Up Life Insurance Rider (Lapse Guard)",
+    "Waiver of Surrender Charges for Partial Withdrawals Rider"
+  ],
+  "warnings": [],
+  "meta": {
+    "model": "gpt-4o",
+    "pageCount": 45,
+    "sentChars": 106619,
+    "droppedPages": [],
+    "promptTokens": 34449,
+    "completionTokens": 1702
+  }
+}
