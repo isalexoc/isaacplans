@@ -2,6 +2,167 @@
 
 ## Status
 
+In progress: **Phone Finder** (branch `feature/phone-finder`, migration `0040`, merged to main
+2026-10-17; waiting on Isaac's GHL workflow and the first real tick). Tick a "Find More
+Phones" checkbox on a GHL contact and the contact's other phone numbers are written into Isaac's
+text field **Additional Possible Phones** (`contact.additional_possible_phones`). Isaac then copies
+them into Kixie.
+
+**Why.** Ad-form leads often carry a mistyped phone number, or a number that came pre-filled from
+someone else's profile.
+
+**Vendors (Isaac's choice):**
+- EnformionGO Contact Enrichment finds the person's phones: name + email/address/DOB/phone in,
+  top 5 phones out. Billed only on a match.
+- Trestle Real Contact checks each number: is it registered to this name, is it active, is the
+  subscriber a TCPA litigator.
+
+**Rejected:**
+- TruePeopleSearch has no API; only scrapers exist.
+- TLO, IDI, Accurint and CLEAR need a GLBA/DPPA permissible purpose, and sales prospecting isn't
+  one.
+
+**Nothing is added to GHL's phone list.** This was Isaac's call after the review showed two problems
+with extra phones:
+- **Duplicate merges.** GHL counts extra phones when checking for duplicates. A spouse submitting a
+  form with the household landline would be merged into this contact, and `/api/create-contact`
+  overwrites the name.
+- **Automation.** Deleting a contact's primary number makes GHL use the first extra phone for
+  automation.
+
+A text field has neither problem. The found numbers carry no consent, so they are for manual calls
+only.
+
+**Flow:**
+1. The checkbox triggers a GHL workflow.
+2. The workflow's Custom Webhook calls `/api/webhooks/agent-crm/phone-finder` (Bearer secret),
+   then its "Clear field data" step unticks the box.
+3. The webhook arms one run per contact (an atomic upsert) and queues it on QStash.
+4. The job runs:
+   - Trestle checks the number on file.
+   - EnformionGO tries up to 4 name variants, which matters for Hispanic double surnames.
+   - Trestle checks each new number.
+   - The numbers are ranked and written into the field, one per line (it's multi-line).
+
+The field value lists:
+- **✓** numbers: Trestle says they are registered to this name.
+- **•** numbers: found, but Trestle has no name for them.
+- **⛔** numbers: TCPA litigators, marked DO NOT CALL.
+- One line on whether the phone on file is theirs.
+- The required source line ("EnformionGO + Trestle"), because Trestle's terms require tagging data
+  merged into other records.
+
+A litigator number on file also tags the contact `tcpa_litigator_risk`.
+
+**Name handling is the part most likely to matter.** The intake engines write both surnames into
+GHL's `lastName`, and ad forms put the whole name in the first-name box. A three-word name is
+ambiguous: "Juan Carlos Perez" has two given names, "Maria Garcia Lopez" has two surnames. So the
+search tries, in order:
+1. The name as typed.
+2. The paternal surname alone.
+3. Without the phone, when its owner is unknown.
+4. The last surname, with the rest as a middle name.
+
+EnformionGO bills only a match, so the misses cost nothing.
+
+**Retries never pay twice in practice:**
+- A failed Trestle check degrades: the number shows without ✓.
+- Only a transient GHL read or EnformionGO error retries the search. At that point at most the
+  $0.035 check of the number on file has been paid.
+- The field text is saved on the run row before the CRM write, so a failed write retries with no
+  vendor call. The text is cleared when the run finishes; only PII-free counts are kept.
+
+**The DB guards are single statements.** The Neon HTTP driver has no transactions, so each guard is
+one statement:
+- **Arm:** `ON CONFLICT (contact_id) DO UPDATE … WHERE` the previous run has finished.
+- **Daily cap:** `… DO UPDATE … WHERE runs < limit`.
+- **Claim:** a conditional `UPDATE … RETURNING`. `attempt_count` is the fencing token for every
+  later write.
+
+The rendered SQL was checked with `toSQL()`.
+
+**What the webhook does:**
+- No GHL call. It authenticates, arms the run, queues it, and answers.
+- A timing-safe compare of SHA-256 digests, header only.
+- With QStash off, or signing keys missing, the run goes inline.
+
+**Same-input cooldown (24 h):**
+- It hashes only the search inputs, never extra phones, tags or fields.
+- It applies only to searches that actually ran.
+
+**The output write is a single-field PUT** (the pattern `lib/intake-core/server.ts` and
+`lib/crankwheel/crm.ts` already use), never the whole customFields array, and the server never
+writes the trigger box.
+
+**Provisioned:** `pnpm phone-finder:fields` created **Find More Phones** (CHECKBOX, option
+"Search", id `Iarh5XQk5wCCRjfYKn9r`). It sits in the folder of Isaac's **Additional Possible
+Phones** (LARGE_TEXT, `contact.additional_possible_phones_multiline`, id `AgQ9ETAfJCGtq6770XXE`).
+The script resolves the field by key because a deleted single-line field had the same name. A
+re-run is a no-op.
+
+**Files:**
+- `lib/phone-finder/`
+  - `inputs`, `classify`, `format`, `webhook`: pure.
+  - `trestle`, `enformion`, `ghl`, `http`: I/O, with timeouts, and they never log URLs or bodies.
+  - `pipeline`: DB-free.
+  - `store`, `process`, `config`, `log`, `ghl-field-ids`.
+- Routes:
+  - `app/api/webhooks/agent-crm/phone-finder`
+  - `app/api/queue/phone-finder`
+- The reconcile block, last in `app/api/cron/queue-reconcile`.
+- Scripts:
+  - `scripts/create-phone-finder-fields.ts`
+  - `scripts/phone-finder-try.ts` (dry run, never writes)
+  - `scripts/test-phone-finder.ts`
+- `PHONE_FINDER_SETUP.md`
+- Migration `0040_cuddly_maverick.sql`, two tables, all `IF NOT EXISTS`.
+
+**Verified:**
+- 119/119 offline checks (`pnpm test:phone-finder`).
+- `tsc` clean.
+- Full `pnpm build` green, 239/239 pages.
+- The guard SQL rendered with `toSQL()`.
+- The field script run live, and re-run as a no-op.
+
+**Not verified, and it needs Isaac:**
+- **Accounts.** Trestle and EnformionGO accounts and keys, plus the env vars.
+- **Trestle — verified live 2026-10-17.** Key works. Sandbox scenarios parse correctly:
+  - grade A → `nameMatch: true`
+  - grade F → `nameMatch: false`
+  - litigator → `add_ons.litigator_checks.phone_is_litigator_risk: true` → `litigator: true`
+
+  The sandbox returns `add_ons: null` on non-litigator numbers even with `add_ons=litigator_checks`.
+  The parser maps that to `null` (unknown), and the ranking doesn't gate on it.
+- **EnformionGO — login rejected 2026-10-17.** HTTP 401 with
+  `{requestId, requestType, requestTime, isError: true, error: {code: "Invalid Galaxy Token", message: "Access denied.", technicalErrorMessage: "Access Denied (Code 1)", inputErrors, warnings}}`.
+  - The same result with name and password swapped.
+  - The values load intact from `.env` (no quotes, `#` or `$`).
+  - So it's on the account side: wrong values copied, or API access not active yet.
+  - The parser classifies this as `auth`, and the field would read "EnformionGO account problem".
+  - **Resolved the same day.** `.env` held the wrong password. The Access Profile Password is 32
+    hex characters, like the name. With the right one, a made-up person returns HTTP 200
+    `"message": "No strong matches"` with no `person` key. The parser reads that as a free miss, and
+    the body is now a test fixture.
+- **First live search — 2026-10-17** (`pnpm phone-finder:try <id> --yes`, nothing written).
+  - Inputs: name, email, phone, state only.
+  - EnformionGO matched on the first ("full") attempt with identityScore 89.
+  - Trestle confirmed the number on file is registered to this lead.
+  - 4 new numbers: 3 ✓ registered to the name (activity 100 / 60 / 20), 1 unconfirmed landline.
+  - Ranked as designed. Cost $0.425 (5 Trestle checks + 1 match).
+- **Migration — done 2026-10-17.** `0040` applied to the main Neon database (its three statements
+  only). Both tables and the status index were confirmed present.
+- **GHL workflow.** Build it per `PHONE_FINDER_SETUP.md` §5 (Custom Webhook is a Premium action).
+- **First live calls.** A `pnpm phone-finder:try <own contact> --yes` dry run confirms:
+  - EnformionGO accepts the request (key casing, no `galaxy-client-type`).
+  - The no-match shape is what the parser expects.
+- **End-to-end tick** on a test contact. Also confirm the single-field PUT leaves the contact's
+  other custom fields untouched.
+- **EnformionGO's written OK.** Their self-serve terms (API item 7) restrict storing or merging
+  their data without an addendum, even though their docs sell CRM enrichment. Isaac should get
+  written confirmation before relying on it.
+
+---
+
 Done: **Illustration Studio** (branch `feature/illustration-studio`, migration `0039`). An
 admin tool at `/admin/illustration-studio` that turns any carrier's IUL illustration PDF into the
 two pages that sell National Life Group's FlexLife illustration: a photo cover, and "My Planned Life
