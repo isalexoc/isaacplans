@@ -172,6 +172,7 @@ For integrations:
 - Cloudinary: NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_SECRET
 - Email: EMAIL_HOST, EMAIL_PORT, EMAIL_USER_INFO, EMAIL_PASS_INFO
 - QStash (background jobs): QSTASH_ENABLED, QSTASH_TOKEN, QSTASH_URL, QSTASH_CURRENT_SIGNING_KEY, QSTASH_NEXT_SIGNING_KEY, QSTASH_TARGET_BASE_URL
+- Phone Finder: PHONE_FINDER_ENABLED, PHONE_FINDER_WEBHOOK_SECRET, TRESTLE_API_KEY, ENFORMION_AP_NAME, ENFORMION_AP_PASSWORD (tuning vars in PHONE_FINDER_SETUP.md)
 
 See .env for full list and CALL_SUMMARY_SETUP.md, META_CAPI_SETUP.md, FACEBOOK_PIXEL_GUIDE.md, QSTASH_SETUP.md for detailed integration docs.
 
@@ -193,6 +194,7 @@ Rule: **do not add a Vercel cron more frequent than daily that touches Neon.** I
 QStash delivery endpoints (auth via `Upstash-Signature`, not CRON_SECRET):
 - /api/queue/kixie-call-summary: processes one Kixie call (published from the Kixie webhook)
 - /api/queue/social-publish: publishes one scheduled social post at its exact time
+- /api/queue/phone-finder: runs one Phone Finder search (published from the GHL "Find More Phones" webhook)
 
 Crons in vercel.json (all CRON_SECRET bearer auth; all daily-or-less):
 - /api/cron/call-summary-backfill: Daily 6 AM UTC; backfills missed GHL call summaries
@@ -252,3 +254,4 @@ For feature-specific setup, see root markdown files:
 - META_CAPI_SETUP.md: Meta Conversions API
 - FACEBOOK_PIXEL_GUIDE.md: Pixel events and testing
 - CONSUMER_GUIDES_SETUP.md: Guide unlock flows
+- PHONE_FINDER_SETUP.md: "Find More Phones" checkbox → EnformionGO + Trestle → "Additional Possible Phones" field

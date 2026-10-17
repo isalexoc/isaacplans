@@ -21,6 +21,7 @@ import type {
   IllustrationExtraction,
   PresentationData,
 } from "@/lib/illustration-studio/types";
+import type { PhoneFinderRunSummary } from "@/lib/phone-finder/pipeline";
 
 // Guides table - stores all available guides
 export const guides = pgTable("guides", {
@@ -1150,3 +1151,54 @@ export const illustrationSummaries = pgTable("illustration_summaries", {
   userUpdatedIdx: index("illustration_summaries_user_updated_idx").on(t.createdByUserId, t.updatedAt),
 }));
 
+
+// ─── Phone Finder (other phone numbers for a GHL contact) ────────────────────
+
+/**
+ * ONE ROW PER GHL CONTACT: that contact's latest Phone Finder run.
+ *
+ * Keyed by contact so "one search per contact at a time" is a single
+ * INSERT … ON CONFLICT (contact_id) DO UPDATE … WHERE <previous run finished> RETURNING
+ * (the Neon HTTP driver has no transactions). A re-tick re-arms the row with a new runId.
+ *
+ * `attempt_count` is the claim's fencing token: every write after the claim matches on it, so a
+ * worker presumed dead can never overwrite the one that replaced it.
+ *
+ * `result_text` holds the field value between the paid lookups and the CRM write, so a failed
+ * write retries without paying the vendors again. It is cleared when the run finishes; `summary`
+ * keeps only PII-free counts. `last_input_hash` / `last_searched_at` survive re-arms: a re-tick
+ * with the same search inputs inside the cooldown does nothing.
+ *
+ * Status: pending | running | completed | failed | skipped
+ */
+export const phoneFinderRuns = pgTable("phone_finder_runs", {
+  contactId: text("contact_id").primaryKey(),
+  runId: text("run_id").notNull(), // "pf_<nanoid>"; QStash messages carry it
+  status: text("status").notNull().default("pending"),
+  /** found | none | no_match | not_enough_info | daily_limit | failed | recently_searched | contact_gone | wrong_location */
+  outcome: text("outcome"),
+  attemptCount: integer("attempt_count").notNull().default(0),
+  resultText: text("result_text"),
+  resultTags: jsonb("result_tags").$type<string[] | null>(),
+  summary: jsonb("summary").$type<PhoneFinderRunSummary | null>(),
+  costMills: integer("cost_mills").notNull().default(0), // estimated vendor spend, 1/1000 USD
+  dailySlotDay: text("daily_slot_day"), // YYYY-MM-DD (agent tz) whose daily slot this run used
+  errorMessage: text("error_message"),
+  lastInputHash: text("last_input_hash"),
+  lastSearchedAt: timestamp("last_searched_at"),
+  requestedAt: timestamp("requested_at").defaultNow().notNull(),
+  startedAt: timestamp("started_at"),
+  finishedAt: timestamp("finished_at"),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (t) => ({
+  statusIdx: index("phone_finder_runs_status_idx").on(t.status, t.updatedAt),
+}));
+
+/** Daily spend guard: one row per agent-local day. */
+export const phoneFinderDailyUsage = pgTable("phone_finder_daily_usage", {
+  day: text("day").primaryKey(), // "YYYY-MM-DD" in AGENT_LOCAL_TIMEZONE
+  runs: integer("runs").notNull().default(0), // searches that reached a paid vendor call
+  costMills: integer("cost_mills").notNull().default(0),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});

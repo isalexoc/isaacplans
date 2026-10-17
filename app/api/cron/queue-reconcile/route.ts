@@ -17,6 +17,7 @@ import {
 import { runAnalysis } from "@/lib/call-study/run-analysis";
 import { fetchTranscript } from "@/lib/call-study/scribe";
 import { ingestTranscript } from "@/lib/call-study/ingest";
+import { reconcilePhoneFinderRuns } from "@/lib/phone-finder/process";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -176,6 +177,15 @@ export async function GET(req: NextRequest) {
     if (analysis.ok) callsAnalysed++;
   }
 
+  // -- Phone Finder: finish searches QStash never delivered or gave up on. Last, and guarded, so a
+  //    problem here can never stop the blocks above. --
+  let phoneFinder = { found: 0, processed: 0, republished: 0 };
+  try {
+    phoneFinder = await reconcilePhoneFinderRuns(req.nextUrl.origin);
+  } catch (err) {
+    console.error("[PHONE_FINDER] Reconcile failed", err);
+  }
+
   return NextResponse.json({
     ok: true,
     kixieProcessed,
@@ -198,5 +208,8 @@ export async function GET(req: NextRequest) {
     transcriptsRecovered,
     callsAwaitingAnalysis: unanalysed.length,
     callsAnalysed,
+    phoneFinderFound: phoneFinder.found,
+    phoneFinderProcessed: phoneFinder.processed,
+    phoneFinderRepublished: phoneFinder.republished,
   });
 }
