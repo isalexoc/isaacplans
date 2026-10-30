@@ -2,11 +2,74 @@
 
 ## Status
 
-In progress: **Phone Finder** (branch `feature/phone-finder`, migration `0040`, merged to main
-2026-10-17; waiting on Isaac's GHL workflow and the first real tick). Tick a "Find More
-Phones" checkbox on a GHL contact and the contact's other phone numbers are written into Isaac's
-text field **Additional Possible Phones** (`contact.additional_possible_phones`). Isaac then copies
-them into Kixie.
+In progress: **The IUL script in English** (branch `feature/iul-script-english`). Isaac wrote the
+IUL sales script in Spanish in Studio; every English field was a one-letter `"s"` placeholder,
+and all 20 IUL objection cards were Spanish-only, so `visibleIn()` hid them in English and the
+live listener had no English IUL phrases.
+
+**Scope (Isaac's call):** the script's Spanish-only fields (Complete Script, Objection Handling)
+plus all 20 IUL cards: English title, answer and live-listener triggers. The carrier chart image
+with Spanish labels is reused as-is. No code path changes: it is content written into the English
+twin of each field, so the page, the PDF export and the live listener pick it up on their own.
+
+**How:** `pnpm translate:iul-script export | check | apply [--dry-run]`
+(`scripts/translate-iul-script.ts`). Each Portable Text block is serialized to tagged text
+(`<b> <i> <u> <hl> <good> <bad> <fill>`). The translation is checked block by block against the
+Spanish: same style, same set of marks, same line breaks, same fill-in blanks, phone/NPN intact,
+no Spanish punctuation left. Then it is rebuilt into blocks with fresh keys. Apply refuses to run if:
+- a Studio draft exists,
+- the Spanish changed since the export,
+- an English field already has real content (unless `--force`).
+
+It backs up the documents, writes in one transaction with `ifRevisionId`, and reads the result back.
+
+**The working files are gitignored** (`scripts/data/private/`). The repo is public, and the script
+carries Isaac's phone number, his NPN and his sales playbook. Only the content-free tool is committed.
+
+**Worth knowing:** when a product has cards in the viewed language, the free-text Objection
+Handling section is hidden (`presentations-dashboard.tsx`), so in English, as in Spanish, the cards
+replace it. It is still translated, for parity.
+
+**Translation:** Claude wrote it against a shared glossary (aporte → "contribution", never
+"premium"; licencia nacional → National Producer Number; "God forbid", "Does that make sense?").
+Two independent bilingual reviewers then went through it:
+- The script review made 41 targeted fidelity, consistency and naturalness fixes.
+- The card review made 3 text fixes. It also reworked the triggers against the real `scoreWindow`,
+  run over about 70 ordinary-chatter sentences, because apostrophes split into tokens and short
+  phrases fired on chatter.
+
+Wherever the cards and the Objection Handling section translate the same Spanish passage, they now
+match. Isaac's claims are translated faithfully and never softened.
+
+**Written 2026-10-29:** 21 documents in one transaction, read back identical. The backup is in
+`scripts/data/private/iul-script-en/backups/`.
+
+**Verified:**
+- All 114 units pass `check`.
+- The Spanish fields are byte-identical in all 21 documents after the write.
+- The real reading-view renderer produces identical line-break and highlight counts in both
+  languages (272/272 and 108/108; Objection Handling identical on every count).
+- The PDF payload in English has 83 script items and 20 cards, the same as Spanish.
+- All 20 cards are visible in English.
+- `pnpm check:objections --lob iul --lang en` passes 16/23 phrasings, up from 0. The 7 misses need
+  cards that exist in neither language (already covered, never called, shopping around), except
+  "no thank you", which was left out on purpose because it fires on polite chatter.
+
+**Not verified, and it needs Isaac:** reading the English on `/en/presentations` signed in, both
+the cards and the Complete Script.
+
+**Claims worth a compliance look, in both languages:**
+- 9–12% growth in the script vs 12–15% in Objection Handling.
+- "regulated under the United States Department of Finance / the Constitution".
+- "withdraw as much as you want after the first year", which ignores surrender charges.
+- "I don't gain anything from how many people I qualify".
+
+---
+
+Done: **Phone Finder** (merged to main `fca511f` 2026-10-17, migration `0040` applied, verified
+live end to end). Tick a "Find More Phones" checkbox on a GHL contact and the contact's other
+phone numbers are written into Isaac's multi-line text field **Additional Possible Phones**
+(`contact.additional_possible_phones_multiline`). Isaac then copies them into Kixie.
 
 **Why.** Ad-form leads often carry a mistyped phone number, or a number that came pre-filled from
 someone else's profile.
@@ -124,8 +187,16 @@ re-run is a no-op.
 - The guard SQL rendered with `toSQL()`.
 - The field script run live, and re-run as a no-op.
 
-**Not verified, and it needs Isaac:**
-- **Accounts.** Trestle and EnformionGO accounts and keys, plus the env vars.
+**Verified live (2026-10-17):**
+- **End to end.** Isaac built the GHL workflow and ticked the box on a real contact. The run row
+  shows:
+  - `completed` on attempt 1 in 3.6 s, from webhook to field written.
+  - EnformionGO matched on the "full" attempt, identityScore 90.
+  - The number on file confirmed as the lead's.
+  - 4 new numbers, 1 ✓.
+  - Cost $0.425, also counted in `phone_finder_daily_usage`.
+  - `result_text` cleared after the write.
+- **Accounts.** Trestle and EnformionGO accounts and keys are set locally and in Vercel.
 - **Trestle — verified live 2026-10-17.** Key works. Sandbox scenarios parse correctly:
   - grade A → `nameMatch: true`
   - grade F → `nameMatch: false`
@@ -151,12 +222,11 @@ re-run is a no-op.
   - Ranked as designed. Cost $0.425 (5 Trestle checks + 1 match).
 - **Migration — done 2026-10-17.** `0040` applied to the main Neon database (its three statements
   only). Both tables and the status index were confirmed present.
-- **GHL workflow.** Build it per `PHONE_FINDER_SETUP.md` §5 (Custom Webhook is a Premium action).
-- **First live calls.** A `pnpm phone-finder:try <own contact> --yes` dry run confirms:
-  - EnformionGO accepts the request (key casing, no `galaxy-client-type`).
-  - The no-match shape is what the parser expects.
-- **End-to-end tick** on a test contact. Also confirm the single-field PUT leaves the contact's
-  other custom fields untouched.
+- **The production endpoint** answers the health check and returns 401 without the secret.
+
+**Still open:**
+- Worth a glance on the first few contacts: confirm the single-field PUT leaves their other custom
+  fields untouched.
 - **EnformionGO's written OK.** Their self-serve terms (API item 7) restrict storing or merging
   their data without an addendum, even though their docs sell CRM enrichment. Isaac should get
   written confirmation before relying on it.
