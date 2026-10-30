@@ -173,6 +173,8 @@ export type IntakeLobConfig = {
   /** Localized `/<lob>/intake` path segments, mirroring i18n/routing.ts, for the share link. */
   intakeSlug: Record<"en" | "es", string>;
   sections: IntakeSection[];
+  /** Show the Impact Health Sharing post-sale welcome button on this line's dashboard. */
+  impactEnrollment?: boolean;
 };
 
 /** Client-safe DTOs. */

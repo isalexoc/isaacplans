@@ -53,4 +53,5 @@ export const healthAlternativeIntake: IntakeLobConfig = {
   ownerEnvVar: "HEALTH_ALTERNATIVE_DEFAULT_OWNER_USER_ID",
   intakeSlug: { en: "health-alternative/intake", es: "alternativa-de-salud/admision" },
   sections,
+  impactEnrollment: true,
 };
