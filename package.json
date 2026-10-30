@@ -29,6 +29,7 @@
     "migrate:objections": "tsx scripts/migrate-objections-to-library.ts",
     "seed:iul-triggers": "tsx scripts/seed-iul-objection-triggers.ts",
     "enrich:triggers": "tsx scripts/enrich-objection-triggers.ts",
+    "translate:iul-script": "tsx scripts/translate-iul-script.ts",
     "test:call-summary": "tsx scripts/test-call-summary.ts",
     "test:crankwheel": "tsx scripts/test-crankwheel.ts",
     "test:illustration-studio": "tsx scripts/test-illustration-studio.ts",

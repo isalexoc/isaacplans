@@ -25,3 +25,5 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+# private working data for one-off content scripts (public repo: never commit)
+/scripts/data/private/
