@@ -26,6 +26,7 @@ import { LOBS, type LobSlug } from "@/lib/lob/registry";
 import { titleCaseName, isValidEmail, isValidPhone } from "@/lib/intake-core/validation";
 import { UI, pickLocale, tr } from "@/lib/intake-core/ui-strings";
 import IntakeBreadcrumb from "@/components/intake/intake-breadcrumb";
+import ImpactEnrollmentButton, { useImpactStatuses } from "@/components/intake/impact-enrollment-dialog";
 
 const STATUS_VARIANT: Record<IntakeStatus, "secondary" | "default" | "outline"> = {
   draft: "outline",
@@ -65,6 +66,12 @@ export default function IntakeDashboard({ lob }: { lob: string }) {
   const [reopeningId, setReopeningId] = useState<string | null>(null);
   const [sendingId, setSendingId] = useState<string | null>(null);
   const [sentId, setSentId] = useState<string | null>(null);
+
+  const impact = useImpactStatuses(
+    config.impactEnrollment
+      ? [...sessions.flatMap((s) => (s.crmContactId ? [s.crmContactId] : [])), ...matches.map((c) => c.id)]
+      : []
+  );
 
   const statusLabel = useCallback(
     (s: IntakeStatus) =>
@@ -294,9 +301,19 @@ export default function IntakeDashboard({ lob }: { lob: string }) {
                           {[c.email, c.phone].filter(Boolean).join(" · ")}
                         </div>
                       </div>
-                      <Button size="sm" disabled={busy} onClick={() => startFromContact(c)}>
-                        {tr(UI.startForThis, locale)}
-                      </Button>
+                      <div className="flex flex-wrap items-center gap-2">
+                        {config.impactEnrollment && (
+                          <ImpactEnrollmentButton
+                            contactId={c.id}
+                            locale={locale}
+                            status={impact.statuses[c.id]}
+                            onSent={impact.markSent}
+                          />
+                        )}
+                        <Button size="sm" disabled={busy} onClick={() => startFromContact(c)}>
+                          {tr(UI.startForThis, locale)}
+                        </Button>
+                      </div>
                     </li>
                   ))}
                 </ul>
@@ -465,6 +482,14 @@ export default function IntakeDashboard({ lob }: { lob: string }) {
                         )}
                         {sentId === s.id ? tr(UI.linkSent, locale) : tr(UI.sendLink, locale)}
                       </Button>
+                    )}
+                    {config.impactEnrollment && s.crmContactId && (
+                      <ImpactEnrollmentButton
+                        contactId={s.crmContactId}
+                        locale={locale}
+                        status={impact.statuses[s.crmContactId]}
+                        onSent={impact.markSent}
+                      />
                     )}
                     <Button
                       size="sm"

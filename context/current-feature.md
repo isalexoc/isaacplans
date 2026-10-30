@@ -2,7 +2,84 @@
 
 ## Status
 
-In progress: **The IUL script in English** (branch `feature/iul-script-english`). Isaac wrote the
+In progress: **Impact enrollment welcome** (branch `feature/impact-enrollment`, migration `0041`).
+Isaac now sells Impact Health Sharing. After enrolling a client he must send a set of instructions
+by email, two SMS and WhatsApp: member ID, start date, monthly payment, payment day, the portal
+login, the dental ID timing, how to set up a primary care doctor, provider fees, and what needs
+pre-eligibility. Every channel must also carry the client's **member ID card**, a 2-page PDF from
+the Impact portal.
+
+**Constraint (Isaac's call):** no new CRM custom fields. Four of the values (member ID, start date,
+monthly payment, payment day) exist nowhere in the CRM.
+
+**How:** an **Impact enrollment** button on `/health-alternative/intake`, on intake rows and on CRM
+search results. It is gated by `impactEnrollment: true` on the line's intake config, so ACA and FE
+are untouched.
+
+The dialog loads the contact from the CRM:
+- name;
+- email, which is also the portal username;
+- phone;
+- language, from the `spanish`/`english` tag, else the intake locale.
+
+Isaac types the four values and picks the card PDF. pdf.js (`pdfjs-dist@4.10.38`) renders it in the
+browser into one JPG, front over back, with a preview. The PDF is vector, made with IronPdf, so
+there is no embedded photo to extract. Send then:
+1. Uploads the PDF and the JPG to the CRM media library. A resend can reuse the stored card.
+2. **Email:** the app sends it through `POST /conversations/messages` (type Email, html,
+   `attachments: [pdf]`). The HTML is in `lib/impact-enrollment/email.ts`, in ES and EN. A GHL
+   workflow cannot attach a different file per contact. The portal password comes from
+   `IMPACT_TEMP_PASSWORD`.
+3. **Texts/WhatsApp:** POSTs a flat payload with `member_card_image_url` and `member_card_url` to
+   the language's GHL **Inbound Webhook** workflow (`IMPACT_WELCOME_WEBHOOK_URL_ES` / `_EN`).
+4. Upserts `impact_enrollments`, one row per contact, which also keeps the card URLs. Then posts a
+   plain-text note on the contact.
+
+If the email fails, the workflow is not called, so a retry never doubles anything. Checkboxes let
+the agent resend one channel only.
+
+**Code:**
+- `lib/impact-enrollment/`:
+  - `format.ts`: isomorphic. Zod schema, formatting, payload.
+  - `email.ts`
+  - `card-render.ts`: browser, pdf.js.
+  - `server.ts`
+  - `api-client.ts`, `types.ts`, `ui-strings.ts`
+- `app/api/admin/impact-enrollment/`: admin-gated. Multipart POST; checks the PDF and JPG by their
+  first bytes.
+- `components/intake/impact-enrollment-dialog.tsx`
+- `scripts/impact-welcome-sample.ts`
+- `IMPACT_ENROLLMENT_SETUP.md`
+
+**Verified:**
+- `tsc` passes, and so does the production build, with and without the harness.
+- `format.ts` gives the expected ordinals, amounts, dates and payload.
+- The email renders in ES and EN, and a client's name is HTML-escaped.
+- Harness with stubbed fetch, run in dev and against `pnpm start` (production):
+  - the real sample card renders in 0.27–0.55 s to a 1200×1646 JPG of 346 KB;
+  - the PDF is posted byte-identical;
+  - the card is required on a first send and reused on a resend;
+  - the channel checkboxes work;
+  - the partial-failure warning shows;
+  - no console errors.
+
+**Not verified, needs Isaac (a real send):**
+- the Conversations API email itself: version header, attachment, sender;
+- the `conversations/message.write` scope on `AGENT_CRM_PI`;
+- GHL's SMS attachment field taking `{{inboundWebhookRequest.member_card_image_url}}`.
+
+**Not done, needs Isaac:**
+- `pnpm db:migrate` (or apply `0041` alone). Applying it to prod was blocked for Claude by the
+  permission check.
+- The PI scope.
+- The two workflows: SMS and WhatsApp only, no Send Email step.
+- Env vars in Vercel and `.env`: both webhook URLs, `IMPACT_TEMP_PASSWORD`, and optionally
+  `IMPACT_EMAIL_FROM`.
+- A test send to his own contact.
+
+---
+
+Paused (uncommitted on disk, not part of this branch's work): **The IUL script in English** (branch `feature/iul-script-english`). Isaac wrote the
 IUL sales script in Spanish in Studio; every English field was a one-letter `"s"` placeholder,
 and all 20 IUL objection cards were Spanish-only, so `visibleIn()` hid them in English and the
 live listener had no English IUL phrases.

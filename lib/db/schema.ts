@@ -1202,3 +1202,32 @@ export const phoneFinderDailyUsage = pgTable("phone_finder_daily_usage", {
   costMills: integer("cost_mills").notNull().default(0),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
+
+// ─── Impact Health Sharing post-sale welcome ─────────────────────────────────
+
+/**
+ * ONE ROW PER GHL CONTACT: the Impact enrollment details last sent to that client.
+ *
+ * The values deliberately do not live on the CRM contact. They travel only in the welcome email
+ * (sent by the app) and the inbound-webhook body of the texts/WhatsApp workflow run, so this row
+ * (plus the note posted on the contact) is the record of what was sent. A resend overwrites the
+ * values and bumps `send_count`; the card URLs let a resend reuse the card already uploaded.
+ */
+export const impactEnrollments = pgTable("impact_enrollments", {
+  crmContactId: text("crm_contact_id").primaryKey(),
+  contactName: text("contact_name"),
+  contactEmail: text("contact_email"),
+  contactPhone: text("contact_phone"),
+  memberId: text("member_id").notNull(),
+  startDate: date("start_date", { mode: "string" }).notNull(), // YYYY-MM-DD, membership start
+  monthlyAmountCents: integer("monthly_amount_cents").notNull(),
+  paymentDay: integer("payment_day").notNull(), // 1–31, day the monthly share is drafted
+  language: text("language").notNull().default("es"), // en | es: which workflow ran
+  cardPdfUrl: text("card_pdf_url"), // ID card PDF in the CRM media library (email attachment)
+  cardImageUrl: text("card_image_url"), // front-over-back JPG of the card (SMS / WhatsApp)
+  sendCount: integer("send_count").notNull().default(0),
+  lastSentAt: timestamp("last_sent_at"),
+  lastSentByUserId: text("last_sent_by_user_id"), // Clerk id
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
