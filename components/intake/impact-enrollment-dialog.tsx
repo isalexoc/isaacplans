@@ -217,7 +217,6 @@ function Warning({ text, tone = "amber" }: { text: string; tone?: "amber" | "red
 }
 
 type FormValues = {
-  language: ImpactLanguage;
   memberId: string;
   startDate: string;
   amount: string;
@@ -229,10 +228,9 @@ type FormValues = {
 /** A card picked in this dialog: the PDF plus the front-over-back JPG rendered from it. */
 type CardFile = { pdf: File; image: Blob; previewUrl: string; pages: number };
 
-function initialValues(detail: ImpactEnrollmentDetail, locale: IntakeLocale): FormValues {
+function initialValues(detail: ImpactEnrollmentDetail): FormValues {
   const previous = detail.enrollment;
   return {
-    language: previous?.language ?? detail.contact.suggestedLanguage ?? locale,
     memberId: previous?.memberId ?? "",
     startDate: previous?.startDate ?? "",
     amount: previous ? (previous.monthlyAmountCents / 100).toFixed(2) : "",
@@ -250,7 +248,6 @@ function validate(
 ): { input: ImpactEnrollmentInput } | { error: string } {
   const cents = parseAmountToCents(values.amount);
   const parsed = impactEnrollmentInputSchema.safeParse({
-    language: values.language,
     memberId: values.memberId.trim(),
     startDate: values.startDate,
     monthlyAmountCents: cents ?? 0,
@@ -279,7 +276,7 @@ function ImpactEnrollmentForm({
   onSent: (result: ImpactSendResult) => void;
 }) {
   const { contact, enrollment, webhookConfigured, emailConfigured } = detail;
-  const [values, setValues] = useState<FormValues>(() => initialValues(detail, locale));
+  const [values, setValues] = useState<FormValues>(() => initialValues(detail));
   const [card, setCard] = useState<CardFile | null>(null);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -298,7 +295,7 @@ function ImpactEnrollmentForm({
     setError(null);
   };
 
-  const workflowReady = webhookConfigured[values.language];
+  const workflowReady = webhookConfigured;
   const channels = {
     sendEmail: values.sendEmail && emailConfigured,
     sendMessages: values.sendMessages && workflowReady,
@@ -329,18 +326,6 @@ function ImpactEnrollmentForm({
       <ContactCard detail={detail} locale={locale} />
 
       <div className="grid gap-3 sm:grid-cols-2">
-        <div>
-          <Label htmlFor="impact-language">{tr(IMPACT_UI.messageLanguage, locale)}</Label>
-          <select
-            id="impact-language"
-            value={values.language}
-            onChange={(e) => set("language", e.target.value as ImpactLanguage)}
-            className={SELECT_CLASS}
-          >
-            <option value="es">{tr(IMPACT_UI.spanish, locale)}</option>
-            <option value="en">{tr(IMPACT_UI.english, locale)}</option>
-          </select>
-        </div>
         <div>
           <Label htmlFor="impact-member-id">{tr(IMPACT_UI.memberId, locale)}</Label>
           <Input
@@ -377,7 +362,7 @@ function ImpactEnrollmentForm({
             />
           </div>
         </div>
-        <div className="sm:col-span-2">
+        <div>
           <Label htmlFor="impact-payment-day">{tr(IMPACT_UI.paymentDay, locale)}</Label>
           <select
             id="impact-payment-day"
@@ -406,7 +391,7 @@ function ImpactEnrollmentForm({
         </div>
       </div>
 
-      <Preview values={values} locale={locale} />
+      <Preview values={values} language={contact.language} locale={locale} />
 
       <ChannelChecks
         locale={locale}
@@ -417,12 +402,7 @@ function ImpactEnrollmentForm({
       />
 
       {!workflowReady && (
-        <Warning
-          text={fill(tr(IMPACT_UI.workflowMissing, locale), {
-            language: tr(values.language === "es" ? IMPACT_UI.spanish : IMPACT_UI.english, locale),
-            env: IMPACT_WEBHOOK_ENV[values.language],
-          })}
-        />
+        <Warning text={fill(tr(IMPACT_UI.workflowMissing, locale), { env: IMPACT_WEBHOOK_ENV })} />
       )}
       {!emailConfigured && <Warning text={tr(IMPACT_UI.emailMissing, locale)} />}
       {error && <Warning tone="red" text={error} />}
@@ -581,6 +561,10 @@ function ContactCard({ detail, locale }: { detail: ImpactEnrollmentDetail; local
         <div className="mt-1 font-medium">{contact.name || "—"}</div>
         <div className="text-muted-foreground">{[contact.email, contact.phone].filter(Boolean).join(" · ") || "—"}</div>
         {contact.email && <div className="mt-1 text-xs text-muted-foreground">{tr(IMPACT_UI.emailHint, locale)}</div>}
+        <div className="mt-2 text-xs font-medium text-foreground">
+          {tr(contact.language === "es" ? IMPACT_UI.languageEs : IMPACT_UI.languageEn, locale)}
+        </div>
+        <div className="text-xs text-muted-foreground">{tr(IMPACT_UI.languageHint, locale)}</div>
         {enrollment?.lastSentAt && (
           <div className="mt-2 text-xs font-medium text-green-700 dark:text-green-400">
             {fill(tr(IMPACT_UI.lastSent, locale), {
@@ -600,18 +584,18 @@ function ContactCard({ detail, locale }: { detail: ImpactEnrollmentDetail; local
 }
 
 /** The four values exactly as the client will read them, in the messages' language. */
-function Preview({ values, locale }: { values: FormValues; locale: IntakeLocale }) {
+function Preview({ values, language, locale }: { values: FormValues; language: ImpactLanguage; locale: IntakeLocale }) {
   const rows = useMemo(() => {
     const cents = parseAmountToCents(values.amount);
     const day = Number(values.paymentDay);
     const validDate = /^\d{4}-\d{2}-\d{2}$/.test(values.startDate);
     return [
       [IMPACT_UI.memberId, values.memberId.trim()],
-      [IMPACT_UI.startDate, validDate ? formatStartDate(values.startDate, values.language) : ""],
+      [IMPACT_UI.startDate, validDate ? formatStartDate(values.startDate, language) : ""],
       [IMPACT_UI.monthlyAmount, cents !== null && cents > 0 ? formatAmount(cents) : ""],
-      [IMPACT_UI.paymentDay, day >= 1 && day <= 31 ? formatPaymentDay(day, values.language) : ""],
+      [IMPACT_UI.paymentDay, day >= 1 && day <= 31 ? formatPaymentDay(day, language) : ""],
     ] as const;
-  }, [values]);
+  }, [values, language]);
 
   return (
     <div className="rounded-md border border-dashed p-3">

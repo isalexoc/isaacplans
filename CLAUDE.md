@@ -173,7 +173,7 @@ For integrations:
 - Email: EMAIL_HOST, EMAIL_PORT, EMAIL_USER_INFO, EMAIL_PASS_INFO
 - QStash (background jobs): QSTASH_ENABLED, QSTASH_TOKEN, QSTASH_URL, QSTASH_CURRENT_SIGNING_KEY, QSTASH_NEXT_SIGNING_KEY, QSTASH_TARGET_BASE_URL
 - Phone Finder: PHONE_FINDER_ENABLED, PHONE_FINDER_WEBHOOK_SECRET, TRESTLE_API_KEY, ENFORMION_AP_NAME, ENFORMION_AP_PASSWORD (tuning vars in PHONE_FINDER_SETUP.md)
-- Impact welcome: IMPACT_WELCOME_WEBHOOK_URL_ES, IMPACT_WELCOME_WEBHOOK_URL_EN (GHL Inbound Webhook URLs), IMPACT_TEMP_PASSWORD (shared portal password printed in the welcome email; never in code, repo is public), IMPACT_EMAIL_FROM (optional sender)
+- Impact welcome: IMPACT_WELCOME_WEBHOOK_URL (one GHL Inbound Webhook workflow; it branches on the contact's `spanish` tag, and the app picks the email language the same way), IMPACT_TEMP_PASSWORD (shared portal password printed in the welcome email; never in code, repo is public), IMPACT_EMAIL_FROM (optional sender)
 
 See .env for full list and CALL_SUMMARY_SETUP.md, META_CAPI_SETUP.md, FACEBOOK_PIXEL_GUIDE.md, QSTASH_SETUP.md for detailed integration docs.
 

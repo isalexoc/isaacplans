@@ -20,7 +20,10 @@ The dialog loads the contact from the CRM:
 - name;
 - email, which is also the portal username;
 - phone;
-- language, from the `spanish`/`english` tag, else the intake locale.
+- language: `spanish` tag → es, otherwise en. It's read-only in the dialog. This is the exact
+  condition Isaac's GHL workflows branch on. His filter also checks field `GMoZ4zoXvtcSmBhCy6P9`,
+  but that field no longer exists (it's not in any custom-field list), so in practice it's
+  tag-only. The email (app) and the texts (workflow) therefore always match.
 
 Isaac types the four values and picks the card PDF. pdf.js (`pdfjs-dist@4.10.38`) renders it in the
 browser into one JPG, front over back, with a preview. The PDF is vector, made with IronPdf, so
@@ -31,7 +34,10 @@ there is no embedded photo to extract. Send then:
    workflow cannot attach a different file per contact. The portal password comes from
    `IMPACT_TEMP_PASSWORD`.
 3. **Texts/WhatsApp:** POSTs a flat payload with `member_card_image_url` and `member_card_url` to
-   the language's GHL **Inbound Webhook** workflow (`IMPACT_WELCOME_WEBHOOK_URL_ES` / `_EN`).
+   the single GHL **Inbound Webhook** workflow (`IMPACT_WELCOME_WEBHOOK_URL`). The workflow
+   branches ES/EN on the `spanish` tag. The WhatsApp utility template uses only contact fields
+   (first name, email), because GHL binds template variables to contact fields when the template is
+   created and can't use `inboundWebhookRequest`.
 4. Upserts `impact_enrollments`, one row per contact, which also keeps the card URLs. Then posts a
    plain-text note on the contact.
 
@@ -69,8 +75,11 @@ the agent resend one channel only.
 - GHL's SMS attachment field taking `{{inboundWebhookRequest.member_card_image_url}}`.
 
 **Not done, needs Isaac:**
-- `pnpm db:migrate` (or apply `0041` alone). Applying it to prod was blocked for Claude by the
-  permission check.
+- The live table exists, but it was created from an early draft of `0041` without the card columns,
+  so opening the dialog failed with "Failed to load the enrollment". `0042` adds them with
+  `ADD COLUMN IF NOT EXISTS`. Isaac runs `pnpm db:migrate 0042`: Claude's prod write was blocked by
+  the permission check. `apply-migrations.ts` now takes a file prefix, because a full re-run is
+  unsafe (0029 updates a column 0030 drops).
 - The PI scope.
 - The two workflows: SMS and WhatsApp only, no Send Email step.
 - Env vars in Vercel and `.env`: both webhook URLs, `IMPACT_TEMP_PASSWORD`, and optionally

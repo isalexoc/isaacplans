@@ -15,13 +15,19 @@ async function applyMigrations() {
 
     const migrationsDir = join(process.cwd(), "drizzle");
 
+    // `pnpm db:migrate 0042` applies only the migrations whose file name starts with "0042".
+    // Re-running everything is NOT safe on a live database: 0029 updates a column 0030 drops,
+    // so a full run stops there, and 0002 drops an index.
+    const only = process.argv[2]?.trim();
+
     // Find all .sql migration files (ignore meta folder)
     const files = readdirSync(migrationsDir)
       .filter((file) => file.endsWith(".sql"))
+      .filter((file) => !only || file.startsWith(only))
       .sort(); // 0000_..., 0001_..., 0002_..., 0003_...
 
     if (files.length === 0) {
-      console.log("No migration files found in drizzle/");
+      console.log(only ? `No migration in drizzle/ starts with "${only}"` : "No migration files found in drizzle/");
       return;
     }
 

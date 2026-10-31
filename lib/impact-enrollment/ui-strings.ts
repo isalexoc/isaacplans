@@ -1,6 +1,6 @@
 /**
- * Dialog chrome, in the agent's dashboard language. The client's messages are a separate choice:
- * they live in the GHL workflows, and the dialog only picks which language's workflow runs.
+ * Dialog chrome, in the agent's dashboard language. The client's messages follow the contact's
+ * `spanish` tag instead (see server.ts `contactLanguage`).
  */
 
 import type { IntakeLocale } from "@/lib/intake-core/ui-strings";
@@ -18,8 +18,8 @@ export const IMPACT_UI = {
   card: { en: "Member ID card (PDF)", es: "Tarjeta de miembro (PDF)" } as Dict,
   cardUpload: { en: "Upload the card PDF", es: "Subir el PDF de la tarjeta" } as Dict,
   cardHint: {
-    en: "The PDF from the Impact portal. It is attached to the email, and sent as an image by text and WhatsApp.",
-    es: "El PDF que descarga del portal de Impact. Va adjunto al correo, y como imagen por texto y WhatsApp.",
+    en: "The PDF from the Impact portal. It is attached to the email, and sent as an image in the first text.",
+    es: "El PDF que descarga del portal de Impact. Va adjunto al correo, y como imagen en el primer texto.",
   } as Dict,
   cardRendering: { en: "Preparing the card…", es: "Preparando la tarjeta…" } as Dict,
   cardChange: { en: "Change", es: "Cambiar" } as Dict,
@@ -60,9 +60,18 @@ export const IMPACT_UI = {
     en: "No phone in the CRM, so the texts and WhatsApp will not go out.",
     es: "No hay teléfono en el CRM, así que los textos y el WhatsApp no se enviarán.",
   } as Dict,
-  messageLanguage: { en: "Messages in", es: "Mensajes en" } as Dict,
-  spanish: { en: "Spanish", es: "Español" } as Dict,
-  english: { en: "English", es: "Inglés" } as Dict,
+  languageEs: {
+    en: "Messages in Spanish: the contact has the “spanish” tag.",
+    es: "Mensajes en español: el contacto tiene la etiqueta “spanish”.",
+  } as Dict,
+  languageEn: {
+    en: "Messages in English: the contact doesn't have the “spanish” tag.",
+    es: "Mensajes en inglés: el contacto no tiene la etiqueta “spanish”.",
+  } as Dict,
+  languageHint: {
+    en: "To switch, add or remove the “spanish” tag in the CRM, then open this again.",
+    es: "Para cambiarlo, agregue o quite la etiqueta “spanish” en el CRM y abra esto de nuevo.",
+  } as Dict,
   memberId: { en: "Member ID", es: "ID de miembro" } as Dict,
   startDate: { en: "Start date", es: "Fecha de inicio" } as Dict,
   monthlyAmount: { en: "Monthly payment", es: "Pago mensual" } as Dict,
@@ -71,8 +80,8 @@ export const IMPACT_UI = {
   dayOption: { en: "Day {day}", es: "Día {day}" } as Dict,
   preview: { en: "What the client will see", es: "Lo que verá el cliente" } as Dict,
   workflowMissing: {
-    en: "The {language} workflow is not connected yet. Set {env} in Vercel.",
-    es: "El workflow en {language} aún no está conectado. Configure {env} en Vercel.",
+    en: "The texts and WhatsApp workflow is not connected yet. Set {env} in Vercel.",
+    es: "El workflow de textos y WhatsApp aún no está conectado. Configure {env} en Vercel.",
   } as Dict,
   lastSent: { en: "Last sent {date}", es: "Último envío: {date}" } as Dict,
   sentTimes: { en: "{count} times", es: "{count} veces" } as Dict,

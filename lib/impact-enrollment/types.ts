@@ -11,8 +11,8 @@ export type ImpactContact = {
   /** Also the client's Impact portal username, so it must be the email used at enrollment. */
   email: string;
   phone: string;
-  /** From the contact's spanish/english tag, else their health-alternative intake. */
-  suggestedLanguage: ImpactLanguage | null;
+  /** `spanish` tag → es, otherwise en: the rule the GHL workflow's language branch uses. */
+  language: ImpactLanguage;
 };
 
 /** What was last sent to a contact. */
@@ -39,8 +39,8 @@ export type ImpactEnrollmentStatus = {
 export type ImpactEnrollmentDetail = {
   contact: ImpactContact;
   enrollment: ImpactEnrollmentRecord | null;
-  /** Which language's workflow URL is set. Without one, that language's texts can't be sent. */
-  webhookConfigured: Record<ImpactLanguage, boolean>;
+  /** IMPACT_WELCOME_WEBHOOK_URL is set, so the texts/WhatsApp workflow can be started. */
+  webhookConfigured: boolean;
   /** IMPACT_TEMP_PASSWORD is set, so the welcome email can be sent. */
   emailConfigured: boolean;
 };

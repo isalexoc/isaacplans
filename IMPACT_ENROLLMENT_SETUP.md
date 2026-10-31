@@ -10,7 +10,8 @@ After you enroll a client in Impact Health Sharing, open **/health-alternative/i
 
 Then click **Send welcome**. The client gets:
 - the **welcome email with the ID card PDF attached**, sent by the app through the CRM;
-- **two texts and a WhatsApp with the card as an image**, sent by your Agent CRM workflow.
+- **two texts (the first with the card as an image) and a WhatsApp**, sent by your Agent CRM
+  workflow. The WhatsApp is a utility template with no image; it points the client to their email for the card.
 
 **No custom fields are created.** The values and the card links travel in the email and in the body
 of the workflow's trigger request. They are used only for that send.
@@ -30,20 +31,25 @@ Server
      card already stored.
   2. Email: POST /conversations/messages (type Email, html, attachments: [PDF]). The email shows up
      in the contact's conversation.
-  3. Texts/WhatsApp: POST the payload to the language's GHL Inbound Webhook
-     (IMPACT_WELCOME_WEBHOOK_URL_ES or _EN).
+  3. Texts/WhatsApp: POST the payload to the GHL Inbound Webhook (IMPACT_WELCOME_WEBHOOK_URL).
   4. Save the send in `impact_enrollments`.
   5. Add a note "Impact Health Sharing enrollment" on the contact. It holds the 4 values and the
      PDF link.
 
-GHL workflow "Impact welcome (ES/EN)"
-  Inbound Webhook trigger → SMS 1 (with the card image) → SMS 2 → WhatsApp (card in the header)
-  → wait 2 business days → task "send dental ID"
+GHL workflow "Impact Health Enrollment Info" (one workflow, both languages)
+  Inbound Webhook trigger → Find Contact → Language filter (contact has the `spanish` tag?)
+    ├─ Spanish: SMS 1 (card image) → wait 1 min → SMS 2 → WhatsApp → wait 2 business days → task
+    └─ English: same steps with the English texts and template
 ```
 
 **Why the email is sent by the app and not the workflow:** a workflow's Send Email action can only
 attach a fixed file from the media library, the same file for everyone. Only the API can attach
 each client's own card.
+
+**Language:** the dialog doesn't ask for one. A contact with the `spanish` tag gets Spanish, and any
+other contact gets English. That's the same condition as the workflow's language filter, so the
+email (sent by the app) and the texts (sent by the workflow) always match. The dialog shows which
+language applies and why. To switch, change the tag in the CRM, then reopen the dialog.
 
 **What the dialog checks:**
 - The card is required on a first send.
@@ -60,59 +66,64 @@ each client's own card.
 
 ## One-time setup
 
-1. **Database:** `pnpm db:migrate` creates `impact_enrollments` (migration `0041`).
+1. **Database:** run `pnpm db:migrate 0041`, then `pnpm db:migrate 0042`. Together they create
+   `impact_enrollments` with the card columns. Don't run plain `pnpm db:migrate`: it re-runs every
+   migration from 0000, and on the live database that stops at 0029.
 2. **Let the CRM key send messages.** In Agent CRM, go to Settings → Private Integrations. Give the
    key stored in `AGENT_CRM_PI` the scope **`conversations/message.write`**, and keep its
    **`medias.write`** scope, which it needs for uploading the card. Without the first scope, the
    dialog shows "The CRM key is not allowed to send emails".
-3. **Build the workflows.** Follow the next section.
+3. **Build the workflow.** Follow the next section.
 4. **Set the env vars** in Vercel (Production) and in `.env`:
 
    | Var | Value |
    |---|---|
-   | `IMPACT_WELCOME_WEBHOOK_URL_ES` | The Spanish workflow's Inbound Webhook URL |
-   | `IMPACT_WELCOME_WEBHOOK_URL_EN` | The English workflow's Inbound Webhook URL |
+   | `IMPACT_WELCOME_WEBHOOK_URL` | The workflow's Inbound Webhook URL (one workflow for both languages) |
    | `IMPACT_TEMP_PASSWORD` | The shared temporary portal password printed in the email. Kept out of the code because the repo is public. |
    | `IMPACT_EMAIL_FROM` | Optional. The email's sender, e.g. `isaac@isaacplans.com`. When empty, the CRM uses its default sender. |
 
-   Until a language's webhook URL is set, the dialog can't send that language's texts. Until
-   `IMPACT_TEMP_PASSWORD` is set, it can't send the email. The dialog says so in both cases.
-
-   Prefer one workflow that branches on `{{inboundWebhookRequest.language}}`? Put the same URL in
-   both webhook vars.
+   Until the webhook URL is set, the dialog can't send the texts. Until `IMPACT_TEMP_PASSWORD` is
+   set, it can't send the email. The dialog says so in both cases.
 
 ## Building the workflow in Agent CRM
 
-Do this once per language.
+One workflow serves both languages.
 
 1. **Create the workflow.** Go to Automation → Workflows → Create Workflow → Start from scratch.
-   Name it `Impact welcome (ES)`.
 2. **Add the trigger.** Choose **Inbound Webhook**, then copy its URL into
-   `IMPACT_WELCOME_WEBHOOK_URL_ES` in `.env`.
+   `IMPACT_WELCOME_WEBHOOK_URL` in `.env`.
 3. **Send a sample.** Keep the workflow in **Draft** and run:
 
    ```
-   pnpm exec tsx scripts/impact-welcome-sample.ts es
+   pnpm exec tsx scripts/impact-welcome-sample.ts
    ```
 
    The script posts a fake client with placeholder card links. A Draft workflow doesn't run, so
    nobody gets a message. In the trigger, click **Fetch Sample Requests** and select the request.
-4. **Match the contact.** Map **Email → `email`** and **Phone → `phone`**. Depending on your
-   account, that's in the trigger's contact mapping or in a **Create/Update Contact** action right
-   after the trigger. Map only those two fields.
-5. **SMS 1.** In the action's **attachment** field, add the URL
+4. **Find the contact.** Add **Find Contact** with a single filter:
+   - **Contact ID** = `{{inboundWebhookRequest.contact_id}}`, if offered;
+   - otherwise **Email** = `{{inboundWebhookRequest.email}}`.
+
+   Put every step under **Contact found**.
+5. **Language filter.** Add an If/Else:
+   - **English** branch: Tags *does not include* `spanish`;
+   - **Spanish** branch: everything else.
+
+   This is the same rule the app uses. Don't branch on a custom field the app doesn't read.
+
+   In each branch, add steps 6 to 9 with that language's texts and template.
+6. **SMS 1.** In the action's **attachment** field, add the URL
    `{{inboundWebhookRequest.member_card_image_url}}`. It's a JPG, because most phones don't open a
-   PDF sent by text.
-6. **SMS 2.** Plain text, no attachment.
-7. **WhatsApp.** Use your utility template with an **image header**, and set the header URL to
-   `{{inboundWebhookRequest.member_card_image_url}}`. The card then shows right in the chat. To send
-   the PDF instead, use a **document header** with `{{inboundWebhookRequest.member_card_url}}`.
-8. **Dental reminder.** Add a **Wait** of 2 days, Monday to Friday only, then an **Add Task**:
+   PDF sent by text. Then add a **Wait** of 1 minute, so SMS 2 doesn't arrive first.
+7. **SMS 2.** Plain text, no attachment.
+8. **WhatsApp.** Send the approved utility template (`impact_bienvenida_es` / `impact_welcome_en`,
+   below). Its 2 variables come from the contact, set when the template is created. It has no image: the card is in the email.
+9. **Dental reminder.** Add a **Wait** of 2 days, Monday to Friday only, then an **Add Task**:
    "Send dental ID to {{contact.first_name}}".
-9. **Publish.** Then test from the dashboard on your own contact. After the test, check:
+10. **Publish.** Then test from the dashboard on your own contact. After the test, check:
    - the email arrived with the PDF;
    - the texts arrived with the image;
-   - the WhatsApp arrived with the card;
+   - the WhatsApp arrived with the name and email filled in;
    - the note was added to the contact.
 
 **Don't add a Send Email step to this workflow.** The app already sends the welcome email.
@@ -171,42 +182,57 @@ Hola {{contact.first_name}}, ¡felicidades por tu plan Impact Health! Aquí va t
 {{contact.first_name}}, para tu médico primario: agenda tu cita y llena los datos aquí: app.impacthealthsharing.com/forms/provider-assistance. Impact te avisará en 3-5 días hábiles cuando esté listo. Tu ID dental estará listo en 48 horas hábiles; te lo enviaré por aquí.
 ```
 
-**WhatsApp** (image header: `{{iw.member_card_image_url}}`):
+**WhatsApp: utility template `impact_bienvenida_es`** (Settings → WhatsApp → Templates).
+
+| Field | Value |
+|---|---|
+| Category | Utility |
+| Language | Spanish (`es`) |
+| Header | None |
+| Footer | `Isaac Plans Insurance · Respóndeme si tienes dudas` |
+
+It stays under Meta's 1,024-character body limit. It follows Meta's utility rules:
+- transactional only;
+- no variable at the start or end, none adjacent;
+- no password, because passwords belong to the "authentication" category; the client gets theirs
+  in the email and SMS 1.
+
+Sample values: `María`, `maria@example.com`.
 
 ```
-¡Hola {{contact.first_name}}! 🎉 *Felicidades por tu nuevo plan con Impact Health Sharing.*
+Hola {{1}}, tu inscripción en Impact Health Sharing quedó confirmada. Revisa tu correo: ahí te envié tu tarjeta de miembro y los datos de tu membresía (ID, fecha de inicio y pago mensual). Muestra la tarjeta en cada visita.
 
-📎 *Arriba está tu tarjeta de miembro.* Guárdala y muéstrala en cada visita.
+🔐 *Portal de miembro*
+Usuario: {{2}}
+Tu contraseña temporal está en mi correo; cámbiala al entrar.
 
-📋 *Tus datos:*
-• ID de miembro: {{iw.member_id}}
-• Pago mensual: {{iw.monthly_amount}}
-• Fecha de pago: {{iw.payment_day}}
-• Atención al cliente: (855) 378-6777
+🦷 Tu ID dental estará listo en 48 horas hábiles y te lo enviaré por aquí.
 
-🔐 *Tu portal:*
-https://impact.mysharable.com/signin/v1/en
-Usuario: {{contact.email}}
-Contraseña: <TEMP_PASSWORD>
-_Cámbiala la primera vez que entres._
-
-🦷 *Beneficio dental:*
-Tu ID dental estará listo en 48 horas hábiles. Podrás descargarlo y yo también te lo enviaré por aquí.
-
-👨‍⚕️ *Cómo iniciar con tu médico primario:*
-1️⃣ Agenda una cita con tu doctor (idealmente con una semana de anticipación).
-2️⃣ Llena los datos de la cita aquí: https://app.impacthealthsharing.com/forms/provider-assistance
-3️⃣ Impact coordina con el consultorio en 3 a 5 días hábiles.
-4️⃣ Te avisarán por texto o email cuando esté listo. ¡Luego ya puedes ir a tu cita!
+👨‍⚕️ *Médico primario*
+1. Agenda tu cita con una semana de anticipación.
+2. Llena los datos de la cita con el botón de abajo.
+3. Impact coordina con el consultorio (3 a 5 días hábiles) y te avisa.
 ¿No tienes doctor? Escribe a CareNavigator@AMPS.com con el tipo de doctor y tu código postal.
 
-🏥 *Al ir al doctor:*
-Muestra tu tarjeta y paga solo: $50 doctor de cabecera, $75 especialista/urgent care, $150 emergencias. La telemedicina desde el portal es *gratis*.
+🏥 En cada visita pagas solo: $50 doctor de cabecera, $75 especialista o urgent care, $150 emergencias. La telemedicina desde el portal es gratis.
 
-⚠️ *Importante:* Para cirugías no urgentes, MRI, maternidad o cáncer, tu doctor debe llamar *antes* al (855) 378-6777 para pedir aprobación.
-
-Te envié todos los detalles por correo. ¡Cualquier duda, escríbeme por aquí! 🙌
+⚠️ Para cirugías no urgentes, MRI, maternidad o cáncer, tu doctor debe llamar antes al (855) 378-6777 para pedir aprobación.
 ```
+
+Buttons:
+
+| Type | Text | Value |
+|---|---|---|
+| URL | `Entrar a mi portal` | `https://impact.mysharable.com/signin/v1/en` |
+| URL | `Datos de mi cita` | `https://app.impacthealthsharing.com/forms/provider-assistance` |
+| Phone | `Llamar a Impact` | `+1 855 378 6777` |
+
+**Variables are bound to contact fields when you create the template.** Agent CRM's template editor only offers contact and custom fields there; `{{inboundWebhookRequest.*}}` exists only inside a workflow run, so it can't be picked. That's why the WhatsApp carries only standard contact fields and sends the client to their email for the member ID, start date and payment. Those values are in the email and SMS 1. This keeps the no-custom-fields rule.
+
+| Variable | Custom variable | Sample |
+|---|---|---|
+| `{{1}}` | `{{contact.first_name}}` | `María` |
+| `{{2}}` | `{{contact.email}}` | `maria@example.com` |
 
 ### English
 
@@ -222,41 +248,38 @@ Hi {{contact.first_name}}, congratulations on your Impact Health plan! Here's yo
 {{contact.first_name}}, for your primary care doctor: book your appointment and fill in the details here: app.impacthealthsharing.com/forms/provider-assistance. Impact will let you know in 3-5 business days when it's ready. Your dental ID will be ready in 48 business hours; I'll send it to you here.
 ```
 
-**WhatsApp** (image header: `{{iw.member_card_image_url}}`):
+**WhatsApp: utility template `impact_welcome_en`.**
+
+| Field | Value |
+|---|---|
+| Category | Utility |
+| Language | English (US) |
+| Header | None |
+| Footer | `Isaac Plans Insurance · Reply here with any questions` |
+| Buttons | `Go to my portal`, `My appointment details`, `Call Impact` (same values as the Spanish ones) |
+
+The variables are the same as the Spanish ones: `{{1}}` = `{{contact.first_name}}`, `{{2}}` = `{{contact.email}}`.
+
+Sample values: `Maria`, `maria@example.com`.
 
 ```
-Hi {{contact.first_name}}! 🎉 *Congratulations on your new plan with Impact Health Sharing.*
+Hi {{1}}, your Impact Health Sharing enrollment is confirmed. Check your email: I sent you your member ID card and your membership details (ID, start date and monthly payment). Show the card at every visit.
 
-📎 *Your member ID card is above.* Save it and show it at every visit.
+🔐 *Member portal*
+Username: {{2}}
+Your temporary password is in my email; change it when you log in.
 
-📋 *Your details:*
-• Member ID: {{iw.member_id}}
-• Monthly payment: {{iw.monthly_amount}}
-• Payment date: {{iw.payment_day}}
-• Customer service: (855) 378-6777
+🦷 Your dental ID will be ready in 48 business hours, and I'll send it to you here.
 
-🔐 *Your portal:*
-https://impact.mysharable.com/signin/v1/en
-Username: {{contact.email}}
-Password: <TEMP_PASSWORD>
-_Change it the first time you log in._
-
-🦷 *Dental benefit:*
-Your dental ID will be ready in 48 business hours. You'll be able to download it, and I'll also send it to you here.
-
-👨‍⚕️ *Getting started with your primary care doctor:*
-1️⃣ Book an appointment with your doctor (ideally a week ahead).
-2️⃣ Fill in the appointment details here: https://app.impacthealthsharing.com/forms/provider-assistance
-3️⃣ Impact coordinates with the office in 3 to 5 business days.
-4️⃣ They'll text or email you when it's ready. Then you can go to your appointment!
+👨‍⚕️ *Primary care doctor*
+1. Book your appointment, ideally a week ahead.
+2. Fill in the appointment details with the button below.
+3. Impact coordinates with the office (3 to 5 business days) and lets you know.
 Don't have a doctor? Email CareNavigator@AMPS.com with the type of doctor and your ZIP code.
 
-🏥 *At the doctor:*
-Show your card and pay only: $50 primary care, $75 specialist/urgent care, $150 emergency room. Telehealth from the portal is *free*.
+🏥 At each visit you only pay: $50 primary care, $75 specialist or urgent care, $150 emergency room. Telehealth from the portal is free.
 
-⚠️ *Important:* For non-urgent surgeries, MRIs, maternity or cancer, your doctor must call (855) 378-6777 *beforehand* to request approval.
-
-I sent you all the details by email. Any questions, message me here! 🙌
+⚠️ For non-urgent surgeries, MRIs, maternity or cancer, your doctor must call (855) 378-6777 beforehand to request approval.
 ```
 
 ## Troubleshooting
