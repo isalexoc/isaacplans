@@ -10,23 +10,19 @@
  * step of that run as {{inboundWebhookRequest.<key>}}, and nothing is written to the contact.
  * The workflow's templates contain no logic, so every value arrives already formatted in the
  * client's language. The same payload also fills the email the app sends itself (see email.ts).
+ *
+ * The language is not chosen in the dialog. It comes from the contact's `spanish` tag, the same
+ * rule Isaac's GHL workflows branch on. That way the email and the texts can never disagree.
  */
 
 import { z } from "zod";
 
 export type ImpactLanguage = "en" | "es";
 
-/**
- * Env vars holding each language's GHL inbound-webhook URL. Both may hold the same URL when one
- * workflow branches on `language`.
- */
-export const IMPACT_WEBHOOK_ENV: Record<ImpactLanguage, string> = {
-  en: "IMPACT_WELCOME_WEBHOOK_URL_EN",
-  es: "IMPACT_WELCOME_WEBHOOK_URL_ES",
-};
+/** Env var holding the welcome workflow's Inbound Webhook URL. One workflow, both languages. */
+export const IMPACT_WEBHOOK_ENV = "IMPACT_WELCOME_WEBHOOK_URL";
 
 export const impactEnrollmentInputSchema = z.object({
-  language: z.enum(["en", "es"]),
   memberId: z
     .string()
     .trim()
@@ -100,6 +96,8 @@ export type ImpactContactInfo = {
   lastName: string;
   email: string;
   phone: string;
+  /** From the contact's `spanish` tag (see server.ts `contactLanguage`). */
+  language: ImpactLanguage;
 };
 
 /**
@@ -122,7 +120,7 @@ export type ImpactWelcomePayload = {
   payment_day: string;
   payment_day_number: string;
   portal_username: string;
-  /** The ID card PDF in the CRM media library, e.g. for a WhatsApp document header. */
+  /** The ID card PDF in the CRM media library (the email's attachment). */
   member_card_url: string;
   /** Front over back as one JPG, for the SMS attachment: phones display images, not PDFs. */
   member_card_image_url: string;
@@ -145,13 +143,13 @@ export function buildImpactWelcomePayload(
     last_name: contact.lastName,
     email: contact.email,
     phone: contact.phone,
-    language: input.language,
+    language: contact.language,
     member_id: input.memberId.trim(),
-    start_date: formatStartDate(input.startDate, input.language),
+    start_date: formatStartDate(input.startDate, contact.language),
     start_date_iso: input.startDate,
     monthly_amount: formatAmount(input.monthlyAmountCents),
     monthly_amount_number: (input.monthlyAmountCents / 100).toFixed(2),
-    payment_day: formatPaymentDay(input.paymentDay, input.language),
+    payment_day: formatPaymentDay(input.paymentDay, contact.language),
     payment_day_number: String(input.paymentDay),
     portal_username: contact.email,
     member_card_url: card.pdfUrl,

@@ -7,8 +7,9 @@
  *  2. Email: the app sends the welcome email itself through the CRM Conversations API, with the
  *     PDF attached. A GHL workflow cannot attach a different file per contact. The email lands in
  *     the contact's conversation like any other.
- *  3. Texts and WhatsApp: POST the values and the card URLs to the language's GHL Inbound Webhook
- *     workflow. Nothing is written to the contact's custom fields.
+ *  3. Texts and WhatsApp: POST the values and the card URLs to the GHL Inbound Webhook workflow,
+ *     which picks Spanish or English by the contact's `spanish` tag. Nothing is written to the
+ *     contact's custom fields.
  *  4. Record what went out in `impact_enrollments`, then leave a plain-text note on the contact.
  *
  * Nothing is sent until every precondition holds. If the email fails, the workflow is not
@@ -20,9 +21,9 @@
  */
 
 import "server-only";
-import { and, desc, eq, inArray, sql } from "drizzle-orm";
+import { eq, inArray, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { impactEnrollments, intakeSessions } from "@/lib/db/schema";
+import { impactEnrollments } from "@/lib/db/schema";
 import {
   AGENT_CRM_API_BASE,
   agentCrmAuthHeaders,
@@ -31,7 +32,7 @@ import {
   agentCrmUploadMedia,
 } from "@/lib/agent-crm-contacts";
 import { createContactNote } from "@/lib/agent-crm-call-summary";
-import { INTAKE_ENGLISH_TAG, INTAKE_SPANISH_TAG } from "@/lib/intake-core/server";
+import { INTAKE_SPANISH_TAG } from "@/lib/intake-core/server";
 import { getAgentLocalTimezone } from "@/lib/timezone";
 import {
   buildImpactWelcomePayload,
@@ -64,9 +65,9 @@ export type ImpactResult<T> = { ok: true; data: T } | { ok: false; status: numbe
 /** The new card for this send, already checked by the route. Null to reuse the stored one. */
 export type ImpactCardUpload = { pdf: Blob; image: Blob } | null;
 
-/** The workflow URL for a language, or null when unset or not https. */
-export function impactWebhookUrl(language: ImpactLanguage): string | null {
-  const raw = process.env[IMPACT_WEBHOOK_ENV[language]]?.trim();
+/** The welcome workflow's Inbound Webhook URL, or null when unset or not https. */
+export function impactWebhookUrl(): string | null {
+  const raw = process.env[IMPACT_WEBHOOK_ENV]?.trim();
   if (!raw) return null;
   try {
     return new URL(raw).protocol === "https:" ? raw : null;
@@ -121,20 +122,14 @@ export async function listImpactEnrollmentStatuses(
   );
 }
 
-/** Language from the contact's tag first; the locale of their latest health-alternative intake second. */
-async function suggestLanguage(contactId: string, tags: string[]): Promise<ImpactLanguage | null> {
-  const lower = tags.map((t) => t.trim().toLowerCase());
-  if (lower.includes(INTAKE_SPANISH_TAG)) return "es";
-  if (lower.includes(INTAKE_ENGLISH_TAG)) return "en";
-  const [session] = await db
-    .select({ locale: intakeSessions.locale })
-    .from(intakeSessions)
-    .where(and(eq(intakeSessions.lob, "health-alternative"), eq(intakeSessions.crmContactId, contactId)))
-    .orderBy(desc(intakeSessions.updatedAt))
-    .limit(1);
-  if (session?.locale === "es") return "es";
-  if (session?.locale === "en") return "en";
-  return null;
+/**
+ * `spanish` tag → Spanish, anything else → English. This is exactly the condition the welcome
+ * workflow's language branch uses (like every other GHL workflow of Isaac's), so the email the app
+ * sends and the texts the workflow sends always come out in the same language. To switch a
+ * client's language, change the tag in the CRM.
+ */
+function contactLanguage(tags: string[]): ImpactLanguage {
+  return tags.some((t) => t.trim().toLowerCase() === INTAKE_SPANISH_TAG) ? "es" : "en";
 }
 
 /** One GET for the fields the dialog shows plus the tags that pick the language. */
@@ -159,7 +154,7 @@ async function loadImpactContact(contactId: string, token: string): Promise<Impa
     name: [firstName, lastName].filter(Boolean).join(" ") || (c.contactName ?? ""),
     email: typeof c.email === "string" ? c.email.trim().toLowerCase() : "",
     phone: typeof c.phone === "string" ? c.phone.trim() : "",
-    suggestedLanguage: await suggestLanguage(c.id, agentCrmNormalizeContactTags(c.tags)),
+    language: contactLanguage(agentCrmNormalizeContactTags(c.tags)),
   };
 }
 
@@ -180,7 +175,7 @@ export async function getImpactEnrollmentDetail(
     data: {
       contact,
       enrollment,
-      webhookConfigured: { en: Boolean(impactWebhookUrl("en")), es: Boolean(impactWebhookUrl("es")) },
+      webhookConfigured: Boolean(impactWebhookUrl()),
       emailConfigured: Boolean(impactTempPassword()),
     },
   };
@@ -323,10 +318,9 @@ async function prepareSend(
   const creds = agentCrmGetBaseCredentials();
   if (!creds) return { ok: false, status: 400, error: "CRM is not configured." };
 
-  const workflowUrl = input.sendMessages ? impactWebhookUrl(input.language) : null;
+  const workflowUrl = input.sendMessages ? impactWebhookUrl() : null;
   if (input.sendMessages && !workflowUrl) {
-    const which = input.language === "es" ? "Spanish" : "English";
-    return { ok: false, status: 400, error: `The ${which} workflow URL is not set (${IMPACT_WEBHOOK_ENV[input.language]}).` };
+    return { ok: false, status: 400, error: `The texts/WhatsApp workflow URL is not set (${IMPACT_WEBHOOK_ENV}).` };
   }
   const tempPassword = input.sendEmail ? impactTempPassword() : null;
   if (input.sendEmail && !tempPassword) {
@@ -388,7 +382,7 @@ export async function sendImpactWelcome(params: {
     startDate: input.startDate,
     monthlyAmountCents: input.monthlyAmountCents,
     paymentDay: input.paymentDay,
-    language: input.language,
+    language: contact.language,
     cardPdfUrl: cardUrls.pdfUrl,
     cardImageUrl: cardUrls.imageUrl,
     lastSentAt: sentAt,
