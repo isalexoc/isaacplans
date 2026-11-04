@@ -11,6 +11,7 @@ import {
   resolveCallProcessingId,
 } from "@/lib/agent-crm-call-summary";
 import { createCallSummaryLogger, sanitizeCallPayload } from "@/lib/agent-crm-call-summary-log";
+import { isCallEndedPing, queueEndedCrmCalls } from "@/lib/ghl-call-jobs";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -19,7 +20,12 @@ export const maxDuration = 60;
 /**
  * Agent CRM (GoHighLevel) call webhooks → OpenAI summary → contact note.
  *
- * Workflow example (Transcript Generated + Custom Webhook):
+ * Current workflow (Call Status = completed + Custom Webhook), sends only:
+ * - contactId: {{contact.id}}
+ * The app finds the call that just ended and transcribes its recording (lib/ghl-call-jobs.ts).
+ *
+ * Older workflow (Transcript Generated + Custom Webhook), still accepted. GHL stopped
+ * transcribing these calls on 2026-09-21:
  * - transcript: {{transcript_generated.call_transcript}}
  * - contactId: {{contact.id}}
  * - direction / duration / status from transcript_generated.* or phoneCall.*
@@ -67,6 +73,27 @@ export async function POST(req: NextRequest) {
     eventType,
     payload: sanitizeCallPayload(payload),
   });
+
+  if (isCallEndedPing(payload)) {
+    if (!isCallSummaryConfigured(config)) {
+      log.error("Webhook not configured: missing API keys or CRM credentials");
+      return NextResponse.json({ received: true, error: "not_configured" });
+    }
+    const contactId = payload.contactId!.trim();
+    const origin = req.nextUrl.origin;
+    log.info("Webhook accepted; looking up the contact's ended CRM call", { contactId });
+    after(async () => {
+      try {
+        await queueEndedCrmCalls(contactId, origin);
+      } catch (err) {
+        log.error("CRM call lookup failed", {
+          contactId,
+          error: err instanceof Error ? err.message : String(err),
+        });
+      }
+    });
+    return NextResponse.json({ received: true, lookup: "crm_call" });
+  }
 
   if (!isCallSummaryWebhookPayload(payload, eventType)) {
     log.debug("Webhook ignored: not a call event", { eventType, messageType: payload.messageType });

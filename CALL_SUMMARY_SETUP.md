@@ -11,7 +11,9 @@ Automatically summarizes phone calls from GoHighLevel (Agent CRM) and creates no
 5. `POST /contacts/:contactId/notes` in Agent CRM.
 6. `call_summary_processed` table prevents duplicate notes.
 
-**Backfill:** Daily cron processes recent calls that were missed.
+**Calls dialed from the CRM (what's live):** GHL workflow on **Call Status = completed** → webhook with just `contactId` → the app finds the contact's call that just ended (`TYPE_CALL`, ≥ 60 s) → queues its GHL recording into the same job queue as Kixie → Whisper → same summary → note (`lib/ghl-call-jobs.ts`). GHL stopped transcribing these calls on 2026-09-21, which is why the app no longer waits for GHL's transcript.
+
+**Backfill:** Daily cron queues CRM calls whose ping never arrived (only back to the first call that came in through a ping).
 
 **Kixie:** End Call webhook → QStash job → Whisper on `recordingurl` → same OpenAI summary → GHL contact note (see [Kixie setup](#kixie-dialer-setup) below).
 
@@ -105,6 +107,7 @@ Requires the same `AGENT_CRM_PI`, `OPENAI_API_KEY`, and `DATABASE_URL` as the re
 | `CRON_SECRET` | *(long random string)* | Protects backfill cron route |
 | `OPENAI_WHISPER_MODEL` | `whisper-1` | Fallback when GHL transcript is empty |
 | `AGENT_CRM_CALL_SUMMARY_INCLUDE_VOICEMAIL` | `false` | Include voicemail calls |
+| `AGENT_CRM_CALL_SUMMARY_MIN_DURATION_SECONDS` | `60` | CRM-dialed calls shorter than this get no summary (GHL's Call Status trigger can't filter on duration) |
 | `AGENT_CRM_CALL_SUMMARY_DEBUG` | `true` | Verbose step-by-step logs in server console (Vercel → Logs) |
 
 ### Kixie dialer
@@ -168,26 +171,23 @@ Subscribe to:
 
 GHL signs requests with `X-GHL-Signature` (or legacy `X-WH-Signature`). No shared secret required if signatures verify.
 
-**Option B — Workflow custom webhook**
+**Option B — Workflow custom webhook (what's live: "AI Call Summary → Website")**
 
-After each completed call, add **Custom Webhook**:
-
-- URL: same as above
-- Header: `Authorization: Bearer <AGENT_CRM_CALL_SUMMARY_WEBHOOK_SECRET>`
-- Body: `contactId`, `messageType: CALL`, and `transcript` from the Transcript Generated trigger.
-- Filter short calls in the **GHL workflow** (e.g. duration &gt; 60s); the app does not enforce a minimum duration.
-
-Example workflow JSON:
+- Trigger: **Call Status**, filter status = **completed**. Not "Transcript Generated": GHL stopped generating transcripts on 2026-09-21, so that trigger never fires.
+- Action **Custom Webhook**:
+  - URL: same as above
+  - Header: `Authorization: Bearer <AGENT_CRM_CALL_SUMMARY_WEBHOOK_SECRET>`
+  - Body: only the contact. Leave out `messageType` and `transcript`, because a ping with those is treated as the old transcript flow.
 
 ```json
 {
-  "contactId": "{{contact.id}}",
-  "messageType": "CALL",
-  "transcript": "{{transcript_generated.call_transcript}}"
+  "contactId": "{{contact.id}}"
 }
 ```
 
-Use the `{ }` picker for each value. `messageId` is optional when `transcript` is sent.
+The app looks up that contact's CRM call (`TYPE_CALL`) that ended in the last 2 hours and is at least `AGENT_CRM_CALL_SUMMARY_MIN_DURATION_SECONDS` long, then transcribes the recording itself. Kixie calls (`TYPE_CUSTOM_CALL`) are ignored here because they have their own webhook. A repeated ping for the same call is a no-op.
+
+*Old flow, still accepted:* a body with `transcript: {{transcript_generated.call_transcript}}` is summarized directly, as before.
 
 ### 3. Health check (GHL)
 
@@ -255,6 +255,8 @@ GET /api/cron/call-summary-backfill
 ```
 
 Vercel sends `Authorization: Bearer <CRON_SECRET>` when `CRON_SECRET` is set in the project.
+
+It queues CRM-dialed calls (≥ 60 s, `TYPE_CALL`) that have no row yet. The 07:00 UTC queue reconcile then transcribes and summarizes them. It never reaches back before the first CRM call that arrived through a Call Status ping, so going live doesn't summarize older calls. Until that first ping it does nothing.
 
 Manual run:
 

@@ -2,7 +2,22 @@
 
 ## Status
 
-In progress: **Impact enrollment welcome** (branch `feature/impact-enrollment`, migration `0041`).
+In progress: **Fix: AI call summaries for calls dialed from the CRM** (branch `fix/ghl-call-summary-recordings`, no migration).
+Kixie calls kept getting notes, but calls dialed from the GHL number stopped on 2026-09-21: GHL stopped
+producing transcripts for them (the API answers `CONVERSATIONS_MSG_RECORDING_NOT_FOUND` for every call since,
+while every earlier call has one), so the "Transcript Generated" trigger of the "AI Call Summary → Website"
+workflow never fires. Recordings are still there.
+- **Fix (Isaac's call: the app transcribes, not GHL):** the workflow fires on **Call Status = completed** and sends
+  only `contactId`; the app finds the contact's `TYPE_CALL` that just ended (≥ 60 s, last 2 h) and queues GHL's
+  recording into the Kixie job queue (`source: ghl_native`) → Whisper → same summary → note (`lib/ghl-call-jobs.ts`).
+- **Bugs found on the way:** the daily backfill compared `messageType` to `"CALL"` (GHL sends `TYPE_CALL`), so it
+  marked every call `skipped: not_a_call` and would have overwritten completed rows. It now only queues missed CRM
+  calls, and only back to the first live one (Isaac: new calls only, no catch-up of Sept 21 → today). The long
+  recording splitter never found its own chunk files, and stream-copied WAV into `.mp3`. That broke every
+  recording over 24 MB, which is about 25 min of GHL WAV.
+- **Isaac in GHL:** change the workflow trigger to Call Status (completed). Webhook body is just `{"contactId": "{{contact.id}}"}`.
+
+Previous: **Impact enrollment welcome** (branch `feature/impact-enrollment`, migration `0041`).
 Isaac now sells Impact Health Sharing. After enrolling a client he must send a set of instructions
 by email, two SMS and WhatsApp: member ID, start date, monthly payment, payment day, the portal
 login, the dental ID timing, how to set up a primary care doctor, provider fees, and what needs
