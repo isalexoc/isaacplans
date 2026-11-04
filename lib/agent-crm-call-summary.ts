@@ -60,9 +60,12 @@ export type ExportCallMessage = {
   status?: string;
   dateAdded?: string;
   attachments?: unknown;
+  /** TYPE_CALL = dialed from the CRM; TYPE_CUSTOM_CALL = logged by Kixie. */
   messageType?: string;
   type?: string;
   userId?: string;
+  /** Where the export actually puts call length (null when unanswered). */
+  meta?: { call?: { duration?: number | null; status?: string } };
 };
 
 const TRANSCRIPTION_RETRY_MS = [0, 3_000, 8_000, 20_000];
@@ -120,7 +123,8 @@ export function parseCallDuration(value: unknown): number {
 /** Transcript text sent directly from a GHL workflow custom webhook. */
 export function extractWebhookTranscript(payload: GhlCallWebhookPayload): string {
   for (const c of [payload.transcript, payload.call_transcript, payload.callTranscript]) {
-    if (typeof c === "string" && c.trim()) return c.trim();
+    const text = normalizeMergeField(c);
+    if (text) return text;
   }
   return "";
 }
@@ -344,7 +348,9 @@ function formatNoteBody(
       ? `Generated from Kixie call recording (${meta.processingId})`
       : meta.transcriptSource === "workflow"
         ? `Generated from call transcript (workflow: ${meta.processingId})`
-        : `Generated from call transcript (messageId: ${meta.processingId})`,
+        : meta.transcriptSource === "whisper"
+          ? `Generated from call recording (messageId: ${meta.processingId})`
+          : `Generated from call transcript (messageId: ${meta.processingId})`,
   ].join("\n");
 }
 
@@ -383,7 +389,7 @@ async function resolveTranscriptForSummary(
   return { transcript: "", source: "api" };
 }
 
-/** Summarize an existing transcript and create CRM note (Kixie async processor). */
+/** Summarize an existing transcript and create CRM note (recording-job processor; the row keeps its own source). */
 export async function completeCallSummaryFromTranscript(
   payload: GhlCallWebhookPayload,
   transcript: string,
@@ -469,7 +475,6 @@ export async function completeCallSummaryFromTranscript(
         direction,
         callDurationSeconds: callDuration,
         status: "completed",
-        source: "kixie",
         errorMessage: null,
         disposition: structured?.disposition ?? null,
         lineOfBusiness: structured?.lineOfBusiness ?? null,
@@ -784,98 +789,4 @@ export async function exportCallMessages(
   });
 
   return { messages: list, nextCursor };
-}
-
-export function exportMessageToPayload(msg: ExportCallMessage, locationId: string): GhlCallWebhookPayload {
-  return {
-    locationId: msg.locationId ?? locationId,
-    contactId: msg.contactId,
-    messageId: msg.messageId ?? msg.id,
-    direction: msg.direction,
-    callDuration: msg.callDuration,
-    callStatus: msg.callStatus,
-    status: msg.status,
-    dateAdded: msg.dateAdded,
-    attachments: msg.attachments,
-    messageType: msg.messageType ?? "CALL",
-    userId: msg.userId,
-  };
-}
-
-export async function runCallSummaryBackfill(overrides?: {
-  backfillDays?: number;
-  backfillMaxPerRun?: number;
-}): Promise<{
-  processed: number;
-  skipped: number;
-  failed: number;
-  errors: string[];
-}> {
-  const config = getCallSummaryConfig();
-  const log = createCallSummaryLogger(config.debug);
-  if (!isCallSummaryConfigured(config)) {
-    throw new Error("Call summary is not configured");
-  }
-
-  const backfillDays = overrides?.backfillDays ?? config.backfillDays;
-  const max = overrides?.backfillMaxPerRun ?? config.backfillMaxPerRun;
-  const cutoff = Date.now() - backfillDays * 24 * 60 * 60 * 1000;
-  let cursor: string | null = null;
-  let processed = 0;
-  let skipped = 0;
-  let failed = 0;
-  const errors: string[] = [];
-
-  log.info("Backfill started", { backfillDays, max, cutoff: new Date(cutoff).toISOString() });
-
-  outer: while (processed + skipped + failed < max) {
-    const { messages, nextCursor } = await exportCallMessages(config, cursor, log);
-    if (messages.length === 0) {
-      log.info("Backfill: no more messages on page");
-      break;
-    }
-
-    for (const msg of messages) {
-      if (processed + skipped + failed >= max) break outer;
-
-      const messageId = (msg.messageId ?? msg.id)?.trim();
-      if (!messageId) continue;
-
-      if (msg.dateAdded) {
-        const t = new Date(msg.dateAdded).getTime();
-        if (Number.isFinite(t) && t < cutoff) {
-          log.debug("Backfill: message before cutoff", { messageId, dateAdded: msg.dateAdded });
-          continue;
-        }
-      }
-
-      log.debug("Backfill: processing message", { messageId, contactId: msg.contactId });
-      const payload = exportMessageToPayload(msg, config.locationId!);
-      const result = await processCallSummary(payload);
-      if (result.ok) processed += 1;
-      else if (
-        result.reason === "already_processed" ||
-        result.reason?.startsWith("call_status_") ||
-        result.reason === "voicemail_excluded" ||
-        result.reason === "not_a_call"
-      ) {
-        skipped += 1;
-        log.debug("Backfill: skipped", { messageId, reason: result.reason });
-      } else if (result.reason === "not_configured" || result.reason === "missing_ids") {
-        errors.push(result.reason);
-        log.error("Backfill: fatal error", { reason: result.reason });
-        break outer;
-      } else {
-        failed += 1;
-        if (result.reason) errors.push(`${messageId}: ${result.reason}`);
-        log.warn("Backfill: failed message", { messageId, reason: result.reason });
-      }
-    }
-
-    if (!nextCursor || nextCursor === cursor) break;
-    cursor = nextCursor;
-  }
-
-  log.info("Backfill finished", { processed, skipped, failed, errorCount: errors.length });
-  return { processed, skipped, failed, errors };
 }

@@ -1,4 +1,4 @@
-import { and, eq, lte, or, sql } from "drizzle-orm";
+import { and, eq, inArray, lte, or, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import {
   callSummaryProcessed,
@@ -24,6 +24,9 @@ export type ProcessedCallStatus =
 
 const MAX_KIXIE_ATTEMPTS = 5;
 
+/** Sources whose rows are recording jobs (download → Whisper → note) run by the Kixie processor. */
+const RECORDING_JOB_SOURCES: CallSummarySource[] = ["kixie", "ghl_native"];
+
 export type CallSummaryRow = typeof callSummaryProcessed.$inferSelect;
 
 export async function getProcessedCall(
@@ -44,6 +47,26 @@ export async function getProcessedCall(
     noteId: row?.noteId,
   });
   return row;
+}
+
+/** Which of these ids already have a row (any status), in one query. */
+export async function findProcessedCallIds(messageIds: string[]): Promise<Set<string>> {
+  if (messageIds.length === 0) return new Set();
+  const rows = await db
+    .select({ messageId: callSummaryProcessed.messageId })
+    .from(callSummaryProcessed)
+    .where(inArray(callSummaryProcessed.messageId, messageIds));
+  return new Set(rows.map((r) => r.messageId));
+}
+
+/** When the first row from this source was created, or null if there is none yet. */
+export async function firstCallSummaryAt(source: CallSummarySource): Promise<Date | null> {
+  const rows = await db
+    .select({ first: sql<Date | null>`min(${callSummaryProcessed.createdAt})` })
+    .from(callSummaryProcessed)
+    .where(eq(callSummaryProcessed.source, source));
+  const first = rows[0]?.first;
+  return first ? new Date(first) : null;
 }
 
 export async function markCallProcessed(
@@ -120,7 +143,7 @@ export async function markCallProcessed(
     });
 }
 
-/** Queue a Kixie End Call for async processing (webhook returns immediately). */
+/** Queue a call recording for async processing (webhook returns immediately). Kixie End Calls and CRM-dialed calls share this queue. */
 export async function enqueueKixieCallJob(
   params: {
     messageId: string;
@@ -130,6 +153,7 @@ export async function enqueueKixieCallJob(
     direction?: string | null;
     callDurationSeconds?: number | null;
     callStatus?: string | null;
+    source?: CallSummarySource;
   },
   log: CallSummaryLogger = createCallSummaryLogger()
 ): Promise<{ queued: boolean; reason?: string }> {
@@ -149,7 +173,7 @@ export async function enqueueKixieCallJob(
       direction: params.direction ?? null,
       callDurationSeconds: params.callDurationSeconds ?? null,
       status: "pending",
-      source: "kixie",
+      source: params.source ?? "kixie",
       recordingUrl: params.recordingUrl,
       jobState: { step: "download" },
       attemptCount: existing?.attemptCount ?? 0,
@@ -160,7 +184,7 @@ export async function enqueueKixieCallJob(
   return { queued: true };
 }
 
-/** Claim the next Kixie job ready to run (pending or failed with backoff elapsed). */
+/** Claim the next recording job ready to run (pending or failed with backoff elapsed). */
 export async function claimNextKixieJob(
   log: CallSummaryLogger = createCallSummaryLogger()
 ): Promise<CallSummaryRow | null> {
@@ -171,7 +195,7 @@ export async function claimNextKixieJob(
     .from(callSummaryProcessed)
     .where(
       and(
-        eq(callSummaryProcessed.source, "kixie"),
+        inArray(callSummaryProcessed.source, RECORDING_JOB_SOURCES),
         or(
           eq(callSummaryProcessed.status, "pending"),
           and(

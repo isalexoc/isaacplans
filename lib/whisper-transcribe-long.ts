@@ -4,6 +4,7 @@ import { tmpdir } from "os";
 import { join } from "path";
 import { promisify } from "util";
 import type { CallSummaryConfig } from "@/lib/agent-crm-call-summary-config";
+import { AGENT_CRM_API_BASE, AGENT_CRM_API_VERSION } from "@/lib/agent-crm-contacts";
 import type { KixieCallSummaryConfig } from "@/lib/kixie-call-summary-config";
 import { isKixieRecordingHost } from "@/lib/kixie-call-summary-config";
 import {
@@ -71,11 +72,15 @@ async function splitAudioWithFfmpeg(
   inputPath: string,
   outputPattern: string,
   segmentSeconds: number,
-  log: CallSummaryLogger
+  log: CallSummaryLogger,
+  reencode: boolean
 ): Promise<string[]> {
   const ffmpeg = await getFfmpegPath();
-  log.step("ffmpeg: split recording", { segmentSeconds, inputPath });
+  log.step("ffmpeg: split recording", { segmentSeconds, inputPath, reencode });
   const t0 = Date.now();
+  // MP3 (Kixie) splits by stream copy. WAV (GHL/Twilio) can't be copied into
+  // .mp3 segments, so it's encoded to mono 32 kbps MP3, which is plenty for speech.
+  const codecArgs = reencode ? ["-vn", "-ac", "1", "-c:a", "libmp3lame", "-b:a", "32k"] : ["-c", "copy"];
   await execFileAsync(
     ffmpeg,
     [
@@ -85,8 +90,7 @@ async function splitAudioWithFfmpeg(
       "segment",
       "-segment_time",
       String(segmentSeconds),
-      "-c",
-      "copy",
+      ...codecArgs,
       "-reset_timestamps",
       "1",
       outputPattern,
@@ -96,10 +100,11 @@ async function splitAudioWithFfmpeg(
   log.elapsed("ffmpeg: split complete", t0);
 
   const dir = join(outputPattern, "..");
+  // "rec-…-chunk-" — everything before %03d (the ".mp3" after it is checked separately).
   const prefix = outputPattern
     .split(/[/\\]/)
     .pop()!
-    .replace("%03d", "");
+    .split("%03d")[0]!;
   const files = await fs.readdir(dir);
   const chunks = files
     .filter((f) => f.startsWith(prefix) && f.endsWith(".mp3"))
@@ -138,6 +143,12 @@ export async function transcribeRecordingLong(
   let downloaded: DownloadedRecording;
   if (isKixieRecordingHost(hostname)) {
     downloaded = await downloadKixieRecording(recordingUrl, kixieConfig, log);
+  } else if (recordingUrl.startsWith(AGENT_CRM_API_BASE) && callSummaryConfig.piToken) {
+    // GHL's recording endpoint (CRM-dialed calls) needs the CRM key.
+    downloaded = await downloadRecordingUrl(recordingUrl, log, {
+      Authorization: `Bearer ${callSummaryConfig.piToken}`,
+      Version: AGENT_CRM_API_VERSION,
+    });
   } else {
     downloaded = await downloadRecordingUrl(recordingUrl, log);
   }
@@ -159,8 +170,9 @@ export async function transcribeRecordingLong(
     return { transcript, chunksTotal: 1 };
   }
 
+  const isMp3 = contentType.includes("mpeg") || contentType.includes("mp3");
   const workId = `rec-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-  const inputPath = join(tmpdir(), `${workId}.mp3`);
+  const inputPath = join(tmpdir(), `${workId}.${isMp3 ? "mp3" : "wav"}`);
   const chunkPattern = join(tmpdir(), `${workId}-chunk-%03d.mp3`);
 
   try {
@@ -169,7 +181,8 @@ export async function transcribeRecordingLong(
       inputPath,
       chunkPattern,
       segmentSeconds,
-      log
+      log,
+      !isMp3
     );
     const chunksTotal = chunkPaths.length;
     log.info("Transcribing split segments", { chunksTotal, byteLength });

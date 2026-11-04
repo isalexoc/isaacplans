@@ -6,6 +6,8 @@ export type CallSummaryConfig = {
   webhookSecret: string | null;
   notePrefix: string;
   includeVoicemail: boolean;
+  /** CRM-dialed calls shorter than this get no summary (GHL's Call Status trigger can't filter on duration). */
+  minDurationSeconds: number;
   openaiApiKey: string | null;
   openaiModel: string;
   openaiMaxOutputTokens: number;
@@ -47,6 +49,7 @@ export function getCallSummaryConfig(): CallSummaryConfig {
     webhookSecret: process.env.AGENT_CRM_CALL_SUMMARY_WEBHOOK_SECRET?.trim() || null,
     notePrefix: stripQuotes(notePrefixRaw || "AI Call Summary"),
     includeVoicemail: parseBool(process.env.AGENT_CRM_CALL_SUMMARY_INCLUDE_VOICEMAIL, false),
+    minDurationSeconds: parseIntEnv(process.env.AGENT_CRM_CALL_SUMMARY_MIN_DURATION_SECONDS, 60),
     openaiApiKey: process.env.OPENAI_API_KEY?.trim() || null,
     openaiModel: process.env.OPENAI_MODEL?.trim() || "gpt-4o",
     openaiMaxOutputTokens: parseIntEnv(process.env.OPENAI_MAX_OUTPUT_TOKENS, 3000),

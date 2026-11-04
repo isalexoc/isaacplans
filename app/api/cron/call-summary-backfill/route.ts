@@ -3,7 +3,7 @@ import {
   getCallSummaryConfig,
   isCallSummaryConfigured,
 } from "@/lib/agent-crm-call-summary-config";
-import { runCallSummaryBackfill } from "@/lib/agent-crm-call-summary";
+import { runCallSummaryBackfill } from "@/lib/ghl-call-jobs";
 import { createCallSummaryLogger } from "@/lib/agent-crm-call-summary-log";
 
 export const runtime = "nodejs";
@@ -11,7 +11,8 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
 /**
- * Backfill call summaries for recent calls not yet processed.
+ * Queue recent CRM-dialed calls that never got a summary (their "call ended" ping was lost).
+ * The daily queue reconcile then transcribes and summarizes them.
  *
  * Authorization: Bearer <CRON_SECRET>
  *

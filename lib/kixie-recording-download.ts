@@ -127,10 +127,11 @@ export async function downloadKixieRecording(
   );
 }
 
-/** Generic recording download (GHL attachments, etc.). */
+/** Generic recording download (GHL attachments, GHL recording API, etc.). */
 export async function downloadRecordingUrl(
   recordingUrl: string,
-  log: CallSummaryLogger = createCallSummaryLogger()
+  log: CallSummaryLogger = createCallSummaryLogger(),
+  authHeaders?: Record<string, string>
 ): Promise<DownloadedRecording> {
   let hostname = "";
   try {
@@ -148,6 +149,7 @@ export async function downloadRecordingUrl(
     method: "GET",
     headers: {
       "User-Agent": BROWSER_UA,
+      ...authHeaders,
       Accept: "audio/mpeg,audio/*,*/*;q=0.8",
     },
     redirect: "follow",
@@ -167,6 +169,6 @@ export async function downloadRecordingUrl(
     contentType,
     byteLength: buffer.byteLength,
     finalUrl: recordingUrl,
-    authMethod: "plain",
+    authMethod: authHeaders ? "bearer" : "plain",
   };
 }
