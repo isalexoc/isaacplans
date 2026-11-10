@@ -18,6 +18,7 @@ import { runAnalysis } from "@/lib/call-study/run-analysis";
 import { fetchTranscript } from "@/lib/call-study/scribe";
 import { ingestTranscript } from "@/lib/call-study/ingest";
 import { reconcilePhoneFinderRuns } from "@/lib/phone-finder/process";
+import { reconcileAcaConfirmations } from "@/lib/aca-confirmation/finalize";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -186,6 +187,16 @@ export async function GET(req: NextRequest) {
     console.error("[PHONE_FINDER] Reconcile failed", err);
   }
 
+  // -- ACA confirmations: finish any signed confirmation whose PDF/CRM steps didn't complete.
+  //    QStash normally does this seconds after the client signs; this catches the ones it gave up
+  //    on, or that ran inline with QStash off and died. Guarded, like Phone Finder above. --
+  let acaConfirmations = { checked: 0, completed: 0, failed: 0 };
+  try {
+    acaConfirmations = await reconcileAcaConfirmations(10);
+  } catch (err) {
+    console.error("[ACA_CONFIRMATION] Reconcile failed", err);
+  }
+
   return NextResponse.json({
     ok: true,
     kixieProcessed,
@@ -211,5 +222,8 @@ export async function GET(req: NextRequest) {
     phoneFinderFound: phoneFinder.found,
     phoneFinderProcessed: phoneFinder.processed,
     phoneFinderRepublished: phoneFinder.republished,
+    acaConfirmationsChecked: acaConfirmations.checked,
+    acaConfirmationsCompleted: acaConfirmations.completed,
+    acaConfirmationsFailed: acaConfirmations.failed,
   });
 }

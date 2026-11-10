@@ -87,8 +87,12 @@ export default async function LocaleLayout({
     notFound();
   }
 
-  const isAdsLanding =
-    (await headers()).get("x-is-ads-landing") === "1";
+  const requestHeaders = await headers();
+  const isAdsLanding = requestHeaders.get("x-is-ads-landing") === "1";
+  // Pages whose URL is a credential and that show a client's personal data (middleware sets this
+  // for the ACA confirmation signing link). No third-party trackers there: Meta Pixel, GA and the
+  // CRM's scripts all report the full page URL, token included.
+  const isPrivatePage = requestHeaders.get("x-private-page") === "1";
 
   // Get Facebook Pixel ID from environment variable
   const facebookPixelId = process.env.NEXT_PUBLIC_FACEBOOK_PIXEL_ID;
@@ -150,10 +154,10 @@ export default async function LocaleLayout({
           {/* @ts-ignore - Footer is an async server component, works correctly with React 19 */}
           <Footer />
           {/* Facebook Pixel */}
-          {facebookPixelId && <MetaPixelWrapper pixelId={facebookPixelId} />}
+          {facebookPixelId && !isPrivatePage && <MetaPixelWrapper pixelId={facebookPixelId} />}
           {/* LeadConnector chat — omit on paid landing routes (middleware x-is-ads-landing) for perf + funnel focus */}
-          {!isAdsLanding ? <AgentCrmChat /> : null}
-          {!isAdsLanding && agentCrmTrackingId ? (
+          {!isAdsLanding && !isPrivatePage ? <AgentCrmChat /> : null}
+          {!isAdsLanding && !isPrivatePage && agentCrmTrackingId ? (
             <AgentCrmExternalTracking
               trackingId={agentCrmTrackingId}
               src={agentCrmTrackingSrc}
@@ -175,7 +179,7 @@ export default async function LocaleLayout({
           }}
         />
       </body>
-      <GoogleAnalytics gaId="G-5SDTGH29ER" />
+      {!isPrivatePage && <GoogleAnalytics gaId="G-5SDTGH29ER" />}
     </html>
   );
 }

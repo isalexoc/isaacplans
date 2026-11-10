@@ -32,6 +32,7 @@ import {
   agentCrmUploadMedia,
 } from "@/lib/agent-crm-contacts";
 import { createContactNote } from "@/lib/agent-crm-call-summary";
+import { sendCrmEmail } from "@/lib/agent-crm-email";
 import { INTAKE_SPANISH_TAG } from "@/lib/intake-core/server";
 import { getAgentLocalTimezone } from "@/lib/timezone";
 import {
@@ -55,8 +56,6 @@ const LOG = "[IMPACT_ENROLLMENT]";
 const NOTE_TITLE = "Impact Health Sharing enrollment";
 const WEBHOOK_TIMEOUT_MS = 15_000;
 const EMAIL_TIMEOUT_MS = 20_000;
-/** The Conversations endpoints are documented against this API version. */
-const CONVERSATIONS_API_VERSION = "2021-04-15";
 
 type ImpactEnrollmentRow = typeof impactEnrollments.$inferSelect;
 
@@ -204,48 +203,29 @@ async function sendWelcomeEmail(
   token: string
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   const { subject, html } = renderImpactWelcomeEmail(payload, tempPassword);
-  const emailFrom = process.env.IMPACT_EMAIL_FROM?.trim();
-  try {
-    const res = await fetch(`${AGENT_CRM_API_BASE}/conversations/messages`, {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-        Version: CONVERSATIONS_API_VERSION,
-      },
-      body: JSON.stringify({
-        type: "Email",
-        contactId,
-        subject,
-        html,
-        attachments: [payload.member_card_url],
-        ...(emailFrom ? { emailFrom } : {}),
-      }),
-      signal: AbortSignal.timeout(EMAIL_TIMEOUT_MS),
-    });
-    if (res.ok) return { ok: true };
-    const text = (await res.text()).slice(0, 300);
-    console.warn(`${LOG} Email send rejected:`, res.status, text);
-    if (res.status === 401 || res.status === 403) {
-      return {
-        ok: false,
-        error:
-          "The CRM key is not allowed to send emails. In Agent CRM → Settings → Private Integrations, add the conversations/message.write scope to the key in AGENT_CRM_PI. Nothing was sent.",
-      };
-    }
-    let detail = "";
-    try {
-      const parsed = JSON.parse(text) as { message?: unknown };
-      detail = typeof parsed.message === "string" ? ` ${parsed.message}` : "";
-    } catch {
-      /* not JSON */
-    }
-    return { ok: false, error: `The CRM did not send the email (${res.status}).${detail} Nothing was sent.` };
-  } catch (error) {
-    console.warn(`${LOG} Email send failed:`, error);
+  const result = await sendCrmEmail({
+    contactId,
+    token,
+    subject,
+    html,
+    attachments: [payload.member_card_url],
+    emailFrom: process.env.IMPACT_EMAIL_FROM?.trim() || null,
+    logPrefix: LOG,
+    timeoutMs: EMAIL_TIMEOUT_MS,
+  });
+  if (result.ok) return { ok: true };
+  if (result.reason === "scope") {
+    return {
+      ok: false,
+      error:
+        "The CRM key is not allowed to send emails. In Agent CRM → Settings → Private Integrations, add the conversations/message.write scope to the key in AGENT_CRM_PI. Nothing was sent.",
+    };
+  }
+  if (result.reason === "network") {
     return { ok: false, error: "The CRM did not answer when sending the email. Nothing was sent. Try again." };
   }
+  const detail = result.detail ? ` ${result.detail}` : "";
+  return { ok: false, error: `The CRM did not send the email (${result.status}).${detail} Nothing was sent.` };
 }
 
 async function postToWorkflow(url: string, payload: ImpactWelcomePayload): Promise<boolean> {

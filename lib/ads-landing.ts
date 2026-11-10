@@ -97,12 +97,26 @@ export function isPartnerLandingPath(pathname: string | null | undefined): boole
   return PARTNER_LANDING_RE.test(pathname);
 }
 
+/**
+ * The ACA application-review signing link a client opens from email,
+ * `/aca/confirmation/<token>` (es: `/aca/confirmacion/<token>`). Bare chrome like the intake
+ * client form, and treated as an ads landing so no client-side tracking runs there either (the
+ * layout already leaves the scripts out via middleware's `x-private-page`).
+ */
+const ACA_CONFIRMATION_RE = /^(?:\/(?:en|es))?\/aca\/(?:confirmation|confirmacion)\/[^/]+$/i;
+
+export function isAcaConfirmationPath(pathname: string | null | undefined): boolean {
+  if (!pathname) return false;
+  return ACA_CONFIRMATION_RE.test(pathname);
+}
+
 export function isAdsLandingPath(pathname: string | null | undefined): boolean {
   if (!pathname) return false;
   return (
     (ADS_LANDING_PATHNAMES as readonly string[]).includes(pathname) ||
     isAcaIntakeFormPath(pathname) ||
-    isFeIntakeFormPath(pathname)
+    isFeIntakeFormPath(pathname) ||
+    isAcaConfirmationPath(pathname)
   );
 }
 
@@ -140,6 +154,7 @@ export function isIulBareLandingPath(pathname: string | null | undefined): boole
   return (
     (IUL_BARE_LANDING_PATHNAMES as readonly string[]).includes(pathname) ||
     isAcaIntakeFormPath(pathname) ||
-    isFeIntakeFormPath(pathname)
+    isFeIntakeFormPath(pathname) ||
+    isAcaConfirmationPath(pathname)
   );
 }

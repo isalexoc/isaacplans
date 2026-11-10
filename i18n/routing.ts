@@ -111,6 +111,12 @@ export const routing = defineRouting({
       en: "/aca/intake/[token]/view",
       es: "/aca/admision/[token]/view",
     },
+    // The client's CMS application-review signing link. Two segments on purpose: a one-segment
+    // path would collide with /aca/[state].
+    "/aca/confirmation/[token]": {
+      en: "/aca/confirmation/[token]",
+      es: "/aca/confirmacion/[token]",
+    },
     "/aca/get-covered": {
       en: "/aca/get-covered",
       es: "/aca/obtener-cobertura",

@@ -2,7 +2,79 @@
 
 ## Status
 
-In progress: **Fix: AI call summaries for calls dialed from the CRM** (branch `fix/ghl-call-summary-recordings`, no migration).
+In progress: **ACA application review confirmation: the CMS e-signature, sent by email** (branch
+`feature/aca-application-confirmation`, migration `0043`).
+CMS (45 CFR 155.220(j)(2)(ii)(A), in force since June 2023) requires a record that the client reviewed their
+Marketplace eligibility application and confirmed it is accurate. It must be captured **after the application is
+complete and before it is submitted**, again for every new application, update or plan change, and kept 10 years.
+It must show the date reviewed, the client's name, that the attestations were explained, and the agent's name.
+Isaac's first CMS consent (agent of record) stays in his Agent CRM workflow, untouched.
+- **How:** a **Confirmación** button on `/aca/intake` (session rows and CRM search results, like Impact). The app
+  emails the client through the CRM Conversations API. The client reviews a one-page bilingual form at
+  `/aca/confirmation/[token]` (es `/aca/confirmacion/[token]`) and signs it, drawn or typed. The dialog shows
+  Sent → Opened → Signed live, so Isaac submits only after it is signed.
+- **After signing** (QStash job, daily reconcile as backstop): render the PDF (form page + signature trail page),
+  archive it in Cloudinary (`authenticated`), upload it to a File Upload field (GHL lists those in the contact's
+  Documents → Internal → Custom Fields; GHL has no API for the Documents "+ Add" button), add a note and the
+  `aca_confirmation_signed` tag.
+- **Isaac's calls (2026-11-09):** always Isaac + NPN (the NPN comes from env, never the repo); dashboard only;
+  draw or type, Draw by default; note + tag + Documents, no copy emailed to the client; CMS model wording
+  (Model Eligibility Application Review Form, OMB 0938-1438, EN + ES).
+- **Heads-up:** from plan year 2028 (enrollments from Aug 1, 2027) CMS requires its own HHS form word for word,
+  for both consent and review, and typed signatures stop counting. The form text is a versioned template so the
+  HHS text drops in as a new version.
+
+**Code:** `lib/aca-confirmation/` (form-text = the versioned wording; server; finalize; pdf; email; storage;
+evidence), `components/aca-confirmation/`, `hooks/use-aca-confirmation-status.ts`, routes under
+`app/api/aca-confirmation`, `app/api/admin/aca-confirmation`, `app/api/queue/aca-confirmation-finalize`, page
+`app/[locale]/aca/confirmation/[token]`. `lib/agent-crm-email.ts` is the Conversations API sender, now shared with
+Impact (same requests and messages). Middleware sets `x-private-page` on the signing route, and the layout drops
+Meta Pixel, GA and the CRM chat/tracking there. Setup: `ACA_CONFIRMATION_SETUP.md`.
+
+**Hardening from an independent review:**
+- one pending request per contact (partial unique index; expired ones superseded);
+- a finalize lease, so QStash duplicates never post twice;
+- copies are always the archived bytes, and the download refuses a re-render once archived;
+- the tag waits for every copy;
+- the signer's IP is compared with the agent's (flag on the dialog and PDF);
+- history survives a merged or deleted contact;
+- non-Latin-1 names are transliterated in the PDF;
+- the typed signature starts empty.
+
+**Verified:**
+- `tsc` passes, and so does `pnpm build`.
+- `pnpm test:aca-confirmation` passes all its checks:
+  - PDFs in EN and ES, drawn and typed, are 2 pages, including a 120-character name with the logo header;
+  - all 4 CMS elements and the NPN are on page 1;
+  - email escaping;
+  - the evidence hash;
+  - PNG validation, the sign schema and the formatters.
+- The migration runner's parsing was simulated: 7 statements, and the partial index keeps its `WHERE`.
+  drizzle-kit 0.20 drops `.where()`, so the SQL was hand-fixed.
+- The real signing page on `pnpm start`, driven over CDP at 390 px with touch input, with only the API mocked:
+  - noindex and no-referrer, no og:url, bare chrome;
+  - **no** GA, Pixel or CRM scripts (a normal page has them);
+  - Sign is disabled until signature + checkbox;
+  - the EN/ES toggle and the typed tab work;
+  - the drawn signature posts as a cropped PNG with strokes;
+  - the done and expired screens work. The done screen scrolling under the header was fixed.
+
+**Not verified, needs Isaac (no DB table yet, Clerk-gated dialog):**
+- the admin dialog in a browser;
+- a real send via the Conversations API;
+- Cloudinary raw/authenticated upload and read-back;
+- the File Upload field upload showing in Documents → Internal → Custom Fields;
+- the note and tag;
+- QStash delivery.
+
+**Not done, needs Isaac:**
+- `pnpm db:migrate 0043`;
+- the PI scopes `conversations/message.write` + `forms.write`;
+- `pnpm aca-confirmation:field`;
+- env `ACA_AGENT_NPN` and `ACA_CONFIRMATION_FILE_FIELD_ID` in Vercel + `.env`;
+- a test on his own contact (checklist in the setup doc).
+
+Previous: **Fix: AI call summaries for calls dialed from the CRM** (branch `fix/ghl-call-summary-recordings`, no migration, merged `fa24d02`).
 Kixie calls kept getting notes, but calls dialed from the GHL number stopped on 2026-09-21: GHL stopped
 producing transcripts for them (the API answers `CONVERSATIONS_MSG_RECORDING_NOT_FOUND` for every call since,
 while every earlier call has one), so the "Transcript Generated" trigger of the "AI Call Summary → Website"

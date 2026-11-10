@@ -1,4 +1,5 @@
 import { pgTable, text, timestamp, boolean, integer, index, uniqueIndex, jsonb, date } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
 import type { LeaveBehindQuoteData } from "@/lib/leave-behind-clients";
 import type { IntakeData } from "@/lib/iul-intake/schema";
 import type { AcaIntakeData } from "@/lib/aca-intake/schema";
@@ -22,6 +23,7 @@ import type {
   PresentationData,
 } from "@/lib/illustration-studio/types";
 import type { PhoneFinderRunSummary } from "@/lib/phone-finder/pipeline";
+import type { AcaConfirmationSnapshot, SignatureStroke } from "@/lib/aca-confirmation/types";
 
 // Guides table - stores all available guides
 export const guides = pgTable("guides", {
@@ -1231,3 +1233,117 @@ export const impactEnrollments = pgTable("impact_enrollments", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
+
+// ─── ACA application review confirmation (CMS e-signature) ───────────────────
+
+/**
+ * ONE ROW PER SIGNING REQUEST: the record CMS requires (45 CFR 155.220(j)(2)(ii)(A)) that the
+ * consumer reviewed their Marketplace eligibility application and confirmed it is accurate before
+ * it was submitted. Kept at least 10 years and produced on request, so rows are append-only: every
+ * new application, update or plan change gets a NEW row, and nothing here is ever overwritten
+ * once signed, or deleted.
+ *
+ * Everything the signed document shows is snapshotted on the row (names, agent, NPN, and at
+ * signing the exact text), so a later code or env change cannot alter a past record.
+ *
+ * `token` is the client's only credential (nanoid(32), sent to their email). The link works while
+ * `status = 'pending'` and `expires_at` is in the future. Signing closes it with ONE conditional
+ * UPDATE (… WHERE status = 'pending' AND expires_at > now): the Neon HTTP driver has no
+ * transactions, and two taps on "Sign" must not both win.
+ *
+ * The post-signing steps (PDF archive, CRM Documents file, note, tag) each stamp their own
+ * column, so the QStash job and the daily reconcile can resume exactly where a failure stopped.
+ */
+export const acaConfirmations = pgTable("aca_confirmations", {
+  id: text("id").primaryKey(), // nanoid, printed on the PDF as the document ID
+  token: text("token").notNull(),
+  crmContactId: text("crm_contact_id").notNull(),
+  acaIntakeSessionId: text("aca_intake_session_id"), // the intake row the dialog was opened from
+  status: text("status").notNull().default("pending"), // pending | signed | cancelled
+  language: text("language").notNull().default("es"), // en | es: the email and the link's first language
+  formVersion: text("form_version").notNull(), // lib/aca-confirmation/form-text.ts
+  // ── Snapshots taken when the request is issued ──
+  consumerName: text("consumer_name").notNull(), // legal name as the agent entered it
+  contactEmail: text("contact_email").notNull(),
+  contactPhone: text("contact_phone"),
+  agentName: text("agent_name").notNull(),
+  agentNpn: text("agent_npn").notNull(),
+  agentPhone: text("agent_phone").notNull(),
+  agentEmail: text("agent_email").notNull(),
+  agency: text("agency").notNull(),
+  // ── The request ──
+  createdByUserId: text("created_by_user_id").notNull(), // Clerk id
+  requestIp: text("request_ip"),
+  requestCity: text("request_city"),
+  requestRegion: text("request_region"),
+  requestCountry: text("request_country"),
+  requestUserAgent: text("request_user_agent"),
+  sendCount: integer("send_count").notNull().default(0),
+  lastSentAt: timestamp("last_sent_at"),
+  expiresAt: timestamp("expires_at").notNull(),
+  firstViewedAt: timestamp("first_viewed_at"),
+  lastViewedAt: timestamp("last_viewed_at"),
+  viewCount: integer("view_count").notNull().default(0),
+  // ── The signature ──
+  signedAt: timestamp("signed_at"),
+  signedLanguage: text("signed_language"), // en | es: the language shown when signed
+  signerIp: text("signer_ip"),
+  signerCity: text("signer_city"),
+  signerRegion: text("signer_region"),
+  signerCountry: text("signer_country"),
+  signerUserAgent: text("signer_user_agent"),
+  // The signer's IP matched an IP the agent used for this request: flagged on the dialog and the PDF,
+  // because CMS enforcement targets agents signing for consumers. Flag only, never a refusal.
+  signerIpMatchesAgent: boolean("signer_ip_matches_agent").notNull().default(false),
+  signatureMethod: text("signature_method"), // drawn | typed
+  signaturePng: text("signature_png"), // data:image/png;base64,… (≤300 KB)
+  signatureStrokes: jsonb("signature_strokes").$type<SignatureStroke[]>(), // drawn only
+  typedName: text("typed_name"), // typed only
+  signedSnapshot: jsonb("signed_snapshot").$type<AcaConfirmationSnapshot>(), // the exact text signed
+  evidenceSha256: text("evidence_sha256"),
+  // ── After signing ──
+  pdfPublicId: text("pdf_public_id"), // Cloudinary, raw + authenticated: never readable unsigned
+  pdfSha256: text("pdf_sha256"),
+  pdfBytes: integer("pdf_bytes"),
+  pdfStoredAt: timestamp("pdf_stored_at"),
+  crmFileUrl: text("crm_file_url"), // the copy in the contact's File Upload field (Documents tab)
+  crmFileSavedAt: timestamp("crm_file_saved_at"),
+  notePostedAt: timestamp("note_posted_at"),
+  taggedAt: timestamp("tagged_at"),
+  // One finalize run at a time (QStash can deliver twice; reconcile can overlap a retry).
+  finalizeLeaseUntil: timestamp("finalize_lease_until"),
+  cancelledAt: timestamp("cancelled_at"),
+  cancelledByUserId: text("cancelled_by_user_id"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (t) => ({
+  tokenUniqueIdx: uniqueIndex("aca_confirmation_token_unique_idx").on(t.token),
+  contactIdx: index("aca_confirmation_contact_idx").on(t.crmContactId, t.createdAt),
+  statusIdx: index("aca_confirmation_status_idx").on(t.status, t.signedAt),
+  // At most one request waiting for a signature per contact. The check in createAndSend is a
+  // courtesy; this is the guarantee (two tabs or two admins sending at once).
+  onePendingPerContact: uniqueIndex("aca_confirmation_one_pending_idx")
+    .on(t.crmContactId)
+    .where(sql`status = 'pending'`),
+}));
+
+/**
+ * The signature trail: one row per thing that happened to a confirmation (created, emailed,
+ * viewed, signed, cancelled, and each post-signing step). Append-only. The PDF's second page is
+ * printed from it, and it records the IP, location and browser of whoever acted.
+ */
+export const acaConfirmationEvents = pgTable("aca_confirmation_events", {
+  id: text("id").primaryKey(), // nanoid
+  confirmationId: text("confirmation_id").notNull(),
+  type: text("type").notNull(), // AcaConfirmationEventType
+  at: timestamp("at").defaultNow().notNull(),
+  ip: text("ip"),
+  city: text("city"),
+  region: text("region"),
+  country: text("country"),
+  userAgent: text("user_agent"),
+  actorUserId: text("actor_user_id"), // Clerk id for agent actions; null for the client
+  detail: jsonb("detail").$type<Record<string, unknown>>(),
+}, (t) => ({
+  confirmationIdx: index("aca_confirmation_events_confirmation_idx").on(t.confirmationId, t.at),
+}));

@@ -174,6 +174,7 @@ For integrations:
 - QStash (background jobs): QSTASH_ENABLED, QSTASH_TOKEN, QSTASH_URL, QSTASH_CURRENT_SIGNING_KEY, QSTASH_NEXT_SIGNING_KEY, QSTASH_TARGET_BASE_URL
 - Phone Finder: PHONE_FINDER_ENABLED, PHONE_FINDER_WEBHOOK_SECRET, TRESTLE_API_KEY, ENFORMION_AP_NAME, ENFORMION_AP_PASSWORD (tuning vars in PHONE_FINDER_SETUP.md)
 - Impact welcome: IMPACT_WELCOME_WEBHOOK_URL (one GHL Inbound Webhook workflow; it branches on the contact's `spanish` tag, and the app picks the email language the same way), IMPACT_TEMP_PASSWORD (shared portal password printed in the welcome email; never in code, repo is public), IMPACT_EMAIL_FROM (optional sender)
+- ACA application review confirmation: ACA_AGENT_NPN (required; never in code, repo is public), ACA_CONFIRMATION_FILE_FIELD_ID (File Upload field from `pnpm aca-confirmation:field`; the signed PDF lands in the contact's Documents), optional ACA_CONFIRMATION_EMAIL_FROM / ACA_AGENT_NAME / ACA_AGENT_PHONE / ACA_AGENT_EMAIL
 
 See .env for full list and CALL_SUMMARY_SETUP.md, META_CAPI_SETUP.md, FACEBOOK_PIXEL_GUIDE.md, QSTASH_SETUP.md for detailed integration docs.
 
@@ -196,6 +197,7 @@ QStash delivery endpoints (auth via `Upstash-Signature`, not CRON_SECRET):
 - /api/queue/kixie-call-summary: processes one Kixie call (published from the Kixie webhook)
 - /api/queue/social-publish: publishes one scheduled social post at its exact time
 - /api/queue/phone-finder: runs one Phone Finder search (published from the GHL "Find More Phones" webhook)
+- /api/queue/aca-confirmation-finalize: finishes one signed ACA confirmation (PDF archive, CRM Documents file, note, tag; published when the client signs)
 
 Crons in vercel.json (all CRON_SECRET bearer auth; all daily-or-less):
 - /api/cron/call-summary-backfill: Daily 6 AM UTC; backfills missed GHL call summaries
@@ -257,3 +259,4 @@ For feature-specific setup, see root markdown files:
 - CONSUMER_GUIDES_SETUP.md: Guide unlock flows
 - PHONE_FINDER_SETUP.md: "Find More Phones" checkbox → EnformionGO + Trestle → "Additional Possible Phones" field
 - IMPACT_ENROLLMENT_SETUP.md: Impact Health Sharing post-sale welcome from /health-alternative/intake: email with the ID card PDF attached sent by the app (Conversations API), texts/WhatsApp with the card image via a GHL Inbound Webhook workflow; values ride in the email/webhook body, never custom fields
+- ACA_CONFIRMATION_SETUP.md: CMS application review confirmation (the second CMS signature, before submission) from /aca/intake: app-sent email → client e-signs a one-page CMS-model form at /aca/confirmation/[token] → PDF + signature trail archived (Cloudinary, 10 yrs), saved to the contact's Documents, note + tag; first consent stays in the GHL workflow
