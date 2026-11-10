@@ -41,7 +41,9 @@
     "seed:call-dashboard": "tsx scripts/seed-call-dashboard-fixtures.ts",
     "postinstall": "node node_modules/ffmpeg-static/install.js",
     "check:objections": "tsx scripts/check-objections.ts",
-    "check:ffmpeg": "tsx scripts/check-ffmpeg-tracing.ts"
+    "check:ffmpeg": "tsx scripts/check-ffmpeg-tracing.ts",
+    "aca-confirmation:field": "tsx scripts/create-aca-confirmation-field.ts",
+    "test:aca-confirmation": "tsx scripts/test-aca-confirmation.ts"
   },
   "dependencies": {
     "@clerk/localizations": "^3.28.5",
@@ -124,6 +126,7 @@
     "recharts": "2.15.0",
     "sanity": "^4.18.0",
     "schema-dts": "^1.1.5",
+    "signature_pad": "^5.1.4",
     "sonner": "^1.7.1",
     "styled-components": "^6.1.19",
     "tailwind-merge": "^2.5.5",

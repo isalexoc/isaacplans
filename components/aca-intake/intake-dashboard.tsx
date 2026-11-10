@@ -24,6 +24,8 @@ import { buildAcaIntakeShareUrl } from "@/lib/aca-intake/share-url";
 import { titleCaseName, isValidEmail, isValidPhone } from "@/lib/aca-intake/validation";
 import { UI, pickLocale, tr } from "@/lib/aca-intake/ui-strings";
 import AcaIntakeBreadcrumb from "@/components/aca-intake/intake-breadcrumb";
+import AcaConfirmationButton from "@/components/aca-confirmation/confirmation-dialog";
+import { useAcaConfirmationBadges } from "@/hooks/use-aca-confirmation-status";
 
 const STATUS_VARIANT: Record<AcaIntakeStatus, "secondary" | "default" | "outline"> = {
   draft: "outline",
@@ -61,6 +63,12 @@ export default function AcaIntakeDashboard() {
   const [reopeningId, setReopeningId] = useState<string | null>(null);
   const [sendingId, setSendingId] = useState<string | null>(null);
   const [sentId, setSentId] = useState<string | null>(null);
+
+  // Badges for the CMS application review confirmation, for every CRM contact on screen.
+  const confirmations = useAcaConfirmationBadges([
+    ...sessions.flatMap((s) => (s.crmContactId ? [s.crmContactId] : [])),
+    ...matches.map((c) => c.id),
+  ]);
 
   const statusLabel = useCallback(
     (s: AcaIntakeStatus) =>
@@ -290,9 +298,17 @@ export default function AcaIntakeDashboard() {
                           {[c.email, c.phone].filter(Boolean).join(" · ")}
                         </div>
                       </div>
-                      <Button size="sm" disabled={busy} onClick={() => startFromContact(c)}>
-                        {tr(UI.startForThis, locale)}
-                      </Button>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <AcaConfirmationButton
+                          contactId={c.id}
+                          locale={locale}
+                          badge={confirmations.badges[c.id]}
+                          onChange={confirmations.update}
+                        />
+                        <Button size="sm" disabled={busy} onClick={() => startFromContact(c)}>
+                          {tr(UI.startForThis, locale)}
+                        </Button>
+                      </div>
                     </li>
                   ))}
                 </ul>
@@ -461,6 +477,15 @@ export default function AcaIntakeDashboard() {
                         )}
                         {sentId === s.id ? tr(UI.linkSent, locale) : tr(UI.sendLink, locale)}
                       </Button>
+                    )}
+                    {s.crmContactId && (
+                      <AcaConfirmationButton
+                        contactId={s.crmContactId}
+                        intakeSessionId={s.id}
+                        locale={locale}
+                        badge={confirmations.badges[s.crmContactId]}
+                        onChange={confirmations.update}
+                      />
                     )}
                     <Button
                       size="sm"

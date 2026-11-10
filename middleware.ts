@@ -219,6 +219,16 @@ export default clerkMiddleware(async (auth, req) => {
   const isIulSecureCapture =
     /^(?:\/(?:en|es))?\/iul\/(?:secure|seguro)\/[^/]+$/i.test(pathname);
 
+  // The ACA application-review signing page (the CMS e-signature link a client opens from email).
+  // Bare chrome like the secure-capture page, and private: it shows the client's name and email
+  // and its URL is a live credential, so x-private-page keeps Meta Pixel, GA and the CRM
+  // chat/tracking scripts off it (they would report the tokenized URL to third parties).
+  const isAcaConfirmation =
+    /^(?:\/(?:en|es))?\/aca\/(?:confirmation|confirmacion)\/[^/]+$/i.test(pathname);
+  if (isAcaConfirmation) {
+    response.headers.set("x-private-page", "1");
+  }
+
   // The LegalShield funnel — both the opt-in and the self-enrollment page. These are the only
   // routes on the site that must NOT show the Isaac Plans logo: LegalShield's advertising rules
   // for Independent Associates require the page not read as an official LegalShield property, and
@@ -241,6 +251,7 @@ export default clerkMiddleware(async (auth, req) => {
     isAcaIntakeForm ||
     isFeIntakeForm ||
     isIulSecureCapture ||
+    isAcaConfirmation ||
     isLegalShield
   ) {
     response.headers.set("x-is-ads-landing", "1");
@@ -267,7 +278,8 @@ export default clerkMiddleware(async (auth, req) => {
     pathname.includes("/alternativa-de-salud/obtener-cobertura") ||
     isAcaIntakeForm ||
     isFeIntakeForm ||
-    isIulSecureCapture
+    isIulSecureCapture ||
+    isAcaConfirmation
   ) {
     response.headers.set("x-ads-landing-variant", "iul-bare");
   }
