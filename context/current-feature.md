@@ -2,8 +2,74 @@
 
 ## Status
 
-In progress: **ACA application review confirmation: the CMS e-signature, sent by email** (branch
-`feature/aca-application-confirmation`, migration `0043`).
+In progress: **Impact enrollments on the Health Coverage intake** (branch `feature/impact-intake-fields`, no
+migration). Isaac now uses `/health-alternative/intake` mainly to enroll clients in Impact Health Sharing, and
+Impact's enrollment needs things the form didn't ask.
+- **Impact logo** on the client form header and the thank-you screen (`public/images/impact/`, from Isaac's files;
+  on a white chip in dark mode because the wordmark is navy).
+- **Height and weight for every member**: the applicant and each added person. Height is feet + inches selects.
+- **SSN or ITIN, required**: the applicant picks which one and must enter it. Added people pick SSN, ITIN or
+  "doesn't have one".
+- **Email and phone for every added person**, required (the applicant already had both).
+- **Start date = the 1st of a month only**: a select of the next 6 months' 1sts. After the 28th, next month's 1st
+  is gone, since no payment day could still fall before it.
+- **Payment day, 1 to 28.** The first payment is due in the month before coverage starts. So on Nov 10 a Dec 1
+  start needs a day from 10 to 28; the 3rd would mean a first payment on Dec 3 and a Jan 1 start. The form says
+  this live under the question, and an impossible combination blocks submission until it is fixed.
+- **$79 note** on the Payment step: one-time enrollment fee for new members, once per family, on top of the
+  monthly payment, never again when family members are added later.
+- **Valid photo ID** for the applicant (the Documents step, now "Your ID") and for a spouse or domestic partner
+  (in their person row). Children are not asked. Fields:
+  - type: driver's license, state ID, passport, permanent resident card, military ID;
+  - ID number (encrypted like the SSN);
+  - issuing state, asked only for a driver's license or state ID (50 states + DC + Puerto Rico);
+  - issue date (not in the future);
+  - expiration date (an expired ID shows "This ID has expired" right away and blocks submission).
+- "Today" for these date rules is US Eastern on both browser and server, so they never disagree near midnight.
+
+**Engine additions (generic, opt-in per config):**
+- field types `height`, `monthStart` and `dateParts` (month/day/year with its own year range and a `past` or
+  `notExpired` rule);
+- `showIf` takes a list of conditions (all must hold);
+- field hooks `liveNote` (a note under a field, recomputed live) and `isValid` (a cross-field check that runs in
+  the step gate and at completion);
+- section `callout`;
+- config `brandLogo`. Impact's rule lives in `lib/intake-configs/impact-schedule.ts`, the calendar
+helpers in `lib/intake-core/month-start.ts`.
+
+**CRM:** no new custom fields (Isaac's rule for Impact data). The applicant's height, weight, ID type and payment
+day live in the app and show on the client summary; the CRM `SSN` field may now hold an ITIN. An added person's
+new answers go into the existing `ha_dependent_N` lines.
+
+**Verified:**
+- `tsc` and `pnpm build` pass. (`pnpm lint` can't run: the repo has no ESLint config. That predates this branch.)
+- A scratch script ran the real config: options on Nov 10/28/29 and Dec 31; ok, late, "today counts", year rollover;
+  a stale start; the completion check (payment day 3 blocks a Dec 1 start but not Jan 1); per-person required
+  fields; the CRM line for an added person.
+- The real form on `pnpm dev`, driven over CDP at 390 px with only the intake API mocked: EN + ES, light + dark,
+  logo, height selects, SSN/ITIN, the person row, the 6 start dates, all 3 payment notes, the $79 callout, the
+  thank-you screen. A client pressing Next with an impossible day stays on the step. No console errors.
+
+- Second round (photo ID): the same script plus ID cases:
+  - required for the applicant and a spouse, never for a child;
+  - state only for state-issued IDs;
+  - expired yesterday is blocked, expires today passes;
+  - a future issue date and Feb 30 are rejected;
+  - a row changed from Spouse to Son drops the ID from both the questions and the CRM line.
+- The browser pass covered: the "Your ID" step, the state question appearing for a driver's license and going away
+  for a passport, the expired message appearing and clearing, and the spouse row (ES, dark) with ID versus the child
+  row without it.
+
+**Isaac's answers (2026-11-10):**
+- a child can use a parent's email and phone;
+- 6 start dates is right;
+- added people keep "doesn't have one" for SSN/ITIN, but a spouse needs a valid photo ID.
+
+**Still to confirm:** whether Impact's form asks an issuing state even for a passport, green card or military ID.
+The form asks it only for a driver's license and state ID.
+
+Previous: **ACA application review confirmation: the CMS e-signature, sent by email** (branch
+`feature/aca-application-confirmation`, migration `0043`, merged `f4279f1`).
 CMS (45 CFR 155.220(j)(2)(ii)(A), in force since June 2023) requires a record that the client reviewed their
 Marketplace eligibility application and confirmed it is accurate. It must be captured **after the application is
 complete and before it is submitted**, again for every new application, update or plan change, and kept 10 years.

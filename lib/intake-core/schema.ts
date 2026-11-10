@@ -66,6 +66,12 @@ export function sanitizeIntakeData(sections: IntakeSection[], input: unknown): I
 
 const str = (v: unknown): string => (typeof v === "string" ? v.trim() : v == null ? "" : String(v));
 
+/** Malformed, or rejected by the field's `isValid` against the rest of the data (row or form). */
+function isInvalid(field: IntakeField, value: string, data: IntakeData): boolean {
+  if (fieldFormatError(field, value)) return true;
+  return field.isValid ? !field.isValid(value, data) : false;
+}
+
 /** Rows that must be validated: every filled row, plus the first `minRows` regardless. */
 export function significantRows(field: IntakeField, data: IntakeData): RepeaterRow[] {
   const raw = data[field.key];
@@ -110,7 +116,7 @@ function repeaterMissingFields(field: IntakeField, data: IntakeData): string[] {
         missing.push(path);
         continue;
       }
-      if (value && !isMaskedValue(value) && fieldFormatError(sub, value)) missing.push(path);
+      if (value && !isMaskedValue(value) && isInvalid(sub, value, rowData as IntakeData)) missing.push(path);
     }
   });
 
@@ -152,8 +158,9 @@ export function sectionMissingFields(section: IntakeSection, data: IntakeData): 
       continue;
     }
 
-    // Present but clearly malformed (email/phone/zip/ssn/dob/routing/card).
-    if (value && !isMaskedValue(value) && fieldFormatError(field, value)) missing.push(field.key);
+    // Present but clearly malformed (email/phone/zip/ssn/dob/routing/card), or failing the
+    // field's own cross-field check (a payment day that can't meet the start date).
+    if (value && !isMaskedValue(value) && isInvalid(field, value, data)) missing.push(field.key);
   }
   return missing;
 }

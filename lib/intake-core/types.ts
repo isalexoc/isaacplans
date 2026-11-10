@@ -50,7 +50,16 @@ export type IntakeFieldType =
   | "address"
   | "textarea"
   | "repeater"
-  | "file";
+  | "file"
+  /** Feet + inches selects, stored as `5'7"`. */
+  | "height"
+  /** A select of upcoming 1st-of-the-month dates, stored as ISO `YYYY-MM-01`. */
+  | "monthStart"
+  /** Month / day / year selects like `dob`, but with its own year range and rule. ISO value. */
+  | "dateParts";
+
+/** One `showIf` condition: another field (or, in a repeater, a sibling in the row) equals a value. */
+export type ShowIfCondition = { field: string; equals: string | string[] };
 
 /** A file stored in the CRM media library and referenced on a FILE_UPLOAD custom field. */
 export type FileRef = {
@@ -107,12 +116,39 @@ export type IntakeField = {
   placeholderEs?: string;
   /**
    * Show this field only when another field equals one of these values. Inside a `repeater`
-   * the referenced field is resolved against the ROW, not the top-level form data.
+   * the referenced field is resolved against the ROW, not the top-level form data. A list means
+   * every condition must hold (e.g. "is a spouse" AND "the ID has an issuing state").
    */
-  showIf?: { field: string; equals: string | string[] };
+  showIf?: ShowIfCondition | ShowIfCondition[];
   /** Hint rendered under the input. */
   helpEn?: string;
   helpEs?: string;
+  /**
+   * Note recomputed from the whole form on every change and rendered under the field (top-level
+   * fields only). For answers that only make sense next to another one, e.g. a payment day that
+   * decides when a chosen start date can actually happen.
+   */
+  liveNote?: (data: IntakeData, locale: "en" | "es") => IntakeNote | null;
+  /**
+   * Extra check that needs the rest of the form. Runs wherever format errors do (client step gate
+   * and server completion), so a false here blocks completion just like a malformed email.
+   */
+  isValid?: (value: string, data: IntakeData) => boolean;
+  // ── `monthStart` only ──
+  /** How many upcoming 1sts to offer (default 6). */
+  monthCount?: number;
+  /**
+   * After this day of the month, next month's 1st is no longer offered. Impact needs the first
+   * payment by the 28th of the month before coverage starts, so on the 29th it is too late.
+   */
+  monthCutoffDay?: number;
+  // ── `dateParts` only ──
+  /** Years offered before the current one (default 100). */
+  yearsBack?: number;
+  /** Years offered after the current one (default 0). */
+  yearsAhead?: number;
+  /** `past`: not after today (an issue date). `notExpired`: today or later (an expiration date). */
+  dateRule?: "past" | "notExpired";
   // ── `repeater` only ──
   /** Sub-fields rendered for each row. */
   rowFields?: IntakeField[];
@@ -136,6 +172,13 @@ export type IntakeField = {
   rowFormat?: (row: RepeaterRow, index: number) => string;
 };
 
+/** A short message shown inside the form: a live field note or a step callout. */
+export type IntakeNote = {
+  tone: "info" | "success" | "warning";
+  title?: string;
+  text: string;
+};
+
 export type IntakeSection = {
   key: string;
   titleEn: string;
@@ -144,6 +187,14 @@ export type IntakeSection = {
   descriptionEs?: string;
   /** Hidden from clients; only the admin (owner) sees this whole section. */
   ownerOnly?: boolean;
+  /** Box shown at the top of the step, under the description. */
+  callout?: {
+    tone: IntakeNote["tone"];
+    titleEn: string;
+    titleEs: string;
+    bodyEn: string;
+    bodyEs: string;
+  };
   fields: IntakeField[];
 };
 
@@ -175,6 +226,8 @@ export type IntakeLobConfig = {
   sections: IntakeSection[];
   /** Show the Impact Health Sharing post-sale welcome button on this line's dashboard. */
   impactEnrollment?: boolean;
+  /** Partner logo above the client form's title and on its thank-you screen. A file in /public. */
+  brandLogo?: { src: string; alt: string; width: number; height: number };
 };
 
 /** Client-safe DTOs. */

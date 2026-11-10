@@ -70,10 +70,11 @@ export function rowFieldByKey(
  */
 export function isFieldVisible(field: IntakeField, data: Record<string, unknown>): boolean {
   if (!field.showIf) return true;
-  const current = data[field.showIf.field];
-  const expected = field.showIf.equals;
-  if (Array.isArray(expected)) return expected.includes(String(current ?? ""));
-  return String(current ?? "") === expected;
+  const conditions = Array.isArray(field.showIf) ? field.showIf : [field.showIf];
+  return conditions.every(({ field: key, equals }) => {
+    const current = String(data[key] ?? "");
+    return Array.isArray(equals) ? equals.includes(current) : current === equals;
+  });
 }
 
 /** A row counts as "filled" when any non-file sub-field has a value. */

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import Image from "next/image";
 import { useLocale } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,6 +30,9 @@ import {
   CreditCard,
   Stethoscope,
   StickyNote,
+  Info,
+  CheckCircle2,
+  AlertTriangle,
   type LucideIcon,
 } from "lucide-react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
@@ -54,10 +58,12 @@ import { digitsToStored, formatMoneyDisplay } from "@/lib/iul-intake/money";
 import { sectionMissingFields } from "@/lib/intake-core/schema";
 import { isMaskedValue } from "@/lib/intake-shared/masking";
 import { requireIntakeConfig } from "@/lib/intake-configs";
+import { businessToday, formatIsoLong, monthStartOptions } from "@/lib/intake-core/month-start";
 import type {
   FileRef,
   IntakeData,
   IntakeField,
+  IntakeNote,
   IntakeOption,
   IntakeSession,
   RepeaterRow,
@@ -113,6 +119,18 @@ function errorMessageFor(key: FieldErrorKey, locale: IntakeLocale): string {
       return tr(UI.errCardExpiration, locale);
     case "cvv":
       return tr(UI.errCvv, locale);
+    case "startDate":
+      return tr(UI.errStartDate, locale);
+    case "height":
+      return tr(UI.errHeight, locale);
+    case "weight":
+      return tr(UI.errWeight, locale);
+    case "date":
+      return tr(UI.errDate, locale);
+    case "datePast":
+      return tr(UI.errDatePast, locale);
+    case "expired":
+      return tr(UI.errExpired, locale);
     default:
       return tr(UI.fixErrors, locale);
   }
@@ -221,9 +239,18 @@ export default function IntakeForm({ lob, token }: { lob: string; token: string 
     });
   }
 
+  // Fields whose validity depends on other answers (`isValid`). One can be fixed by changing a
+  // DIFFERENT field (a payment day, by moving the start date), so any edit clears their flags;
+  // Next and Submit check them again.
+  const crossChecked = useMemo(
+    () => config.sections.flatMap((s) => s.fields).filter((f) => f.isValid).map((f) => f.key),
+    [config.sections]
+  );
+
   function setField(key: string, value: unknown) {
     setData((prev) => ({ ...prev, [key]: value }));
     clearFlags(key);
+    crossChecked.forEach((k) => k !== key && clearFlags(k));
   }
 
   /** Update one sub-field of one repeater row, keyed by path for validation flags. */
@@ -389,6 +416,7 @@ export default function IntakeForm({ lob, token }: { lob: string; token: string 
   if (lockedForClient) {
     return (
       <div className="mx-auto flex min-h-[70vh] max-w-md flex-col items-center justify-center px-5 text-center">
+        {config.brandLogo && <BrandLogo logo={config.brandLogo} className="mb-8" />}
         <motion.div
           initial={reduceMotion ? false : { scale: 0, rotate: -20 }}
           animate={{ scale: 1, rotate: 0 }}
@@ -428,6 +456,7 @@ export default function IntakeForm({ lob, token }: { lob: string; token: string 
       {isOwner && <IntakeBreadcrumb lob={lob} current={tr(UI.navForm, locale)} />}
       {/* Out-of-flow save status — fixed so it never shifts the page layout. */}
       <SaveIndicator status={saveStatus} locale={locale} />
+      {config.brandLogo && <BrandLogo logo={config.brandLogo} className="mb-4" />}
       <h1 className="mb-1 text-2xl font-extrabold tracking-tight sm:text-3xl">{config.formTitle[locale]}</h1>
       <p className="mb-1 text-sm text-muted-foreground">{tr(UI.formSubtitle, locale)}</p>
       <p className="mb-5 flex items-center gap-1.5 text-xs text-muted-foreground">
@@ -478,6 +507,16 @@ export default function IntakeForm({ lob, token }: { lob: string; token: string 
           </div>
           {sectionDescription(current, locale) && (
             <p className="mt-2 text-sm text-muted-foreground">{sectionDescription(current, locale)}</p>
+          )}
+          {current.callout && (
+            <NoteBox
+              className="mt-4"
+              note={{
+                tone: current.callout.tone,
+                title: locale === "es" ? current.callout.titleEs : current.callout.titleEn,
+                text: locale === "es" ? current.callout.bodyEs : current.callout.bodyEn,
+              }}
+            />
           )}
 
           <AnimatePresence mode="wait">
@@ -532,32 +571,35 @@ export default function IntakeForm({ lob, token }: { lob: string; token: string 
                   );
                 }
 
+                const note = field.liveNote?.(data, locale) ?? null;
                 return (
-                  <FieldInput
-                    key={field.key}
-                    field={field}
-                    locale={locale}
-                    value={str(data[field.key])}
-                    onChange={(v) => setField(field.key, v)}
-                    onBlur={(v) => validateOnBlur(field, v, field.key)}
-                    onResolveAddress={(addr) => {
-                      if (field.fullAddress) {
-                        setField(field.key, addr.formatted || addr.line1);
-                        return;
-                      }
-                      setField(field.key, addr.line1);
-                      const t = field.addressTargets;
-                      if (t?.city && addr.city) setField(t.city, addr.city);
-                      if (t?.state && addr.state) setField(t.state, addr.state);
-                      if (t?.zip && addr.zip) setField(t.zip, addr.zip);
-                      if (t?.county && addr.county) setField(t.county, addr.county);
-                    }}
-                    invalid={missing.has(field.key)}
-                    errorKey={errors[field.key]}
-                    reveal={reveal}
-                    isOwner={!!isOwner}
-                    onToggleReveal={() => setReveal((r) => !r)}
-                  />
+                  <div key={field.key}>
+                    <FieldInput
+                      field={field}
+                      locale={locale}
+                      value={str(data[field.key])}
+                      onChange={(v) => setField(field.key, v)}
+                      onBlur={(v) => validateOnBlur(field, v, field.key)}
+                      onResolveAddress={(addr) => {
+                        if (field.fullAddress) {
+                          setField(field.key, addr.formatted || addr.line1);
+                          return;
+                        }
+                        setField(field.key, addr.line1);
+                        const t = field.addressTargets;
+                        if (t?.city && addr.city) setField(t.city, addr.city);
+                        if (t?.state && addr.state) setField(t.state, addr.state);
+                        if (t?.zip && addr.zip) setField(t.zip, addr.zip);
+                        if (t?.county && addr.county) setField(t.county, addr.county);
+                      }}
+                      invalid={missing.has(field.key)}
+                      errorKey={errors[field.key]}
+                      reveal={reveal}
+                      isOwner={!!isOwner}
+                      onToggleReveal={() => setReveal((r) => !r)}
+                    />
+                    {note && <NoteBox note={note} className="mt-2" live />}
+                  </div>
                 );
               })}
             </motion.div>
@@ -855,6 +897,32 @@ function FieldInput({
         )
       ) : field.type === "dob" ? (
         <DobParts value={value} onChange={onChange} invalid={showInvalid} locale={locale} disabled={disabled} />
+      ) : field.type === "dateParts" ? (
+        // Selects never blur like a text box, so check the date as soon as it is complete:
+        // an expired ID says so right away instead of just turning red at Next.
+        <DobParts
+          value={value}
+          onChange={(iso) => {
+            onChange(iso);
+            onBlur(iso);
+          }}
+          invalid={showInvalid}
+          locale={locale}
+          disabled={disabled}
+          years={yearOptions(field.yearsBack ?? 100, field.yearsAhead ?? 0)}
+        />
+      ) : field.type === "height" ? (
+        <HeightParts value={value} onChange={onChange} invalid={showInvalid} locale={locale} disabled={disabled} />
+      ) : field.type === "monthStart" ? (
+        <MonthStartSelect
+          id={id}
+          field={field}
+          value={value}
+          onChange={onChange}
+          invalid={showInvalid}
+          locale={locale}
+          disabled={disabled}
+        />
       ) : field.type === "address" && onResolveAddress ? (
         <IntakeAddressInput
           id={id}
@@ -988,6 +1056,16 @@ function CurrencyInput({
   );
 }
 
+/**
+ * Years for a `dateParts` select. Mostly-future ranges (an expiration date) run soonest first;
+ * everything else runs newest first, like a birth year.
+ */
+function yearOptions(back: number, ahead: number): string[] {
+  const current = new Date().getFullYear();
+  const years = Array.from({ length: back + ahead + 1 }, (_, i) => String(current - back + i));
+  return ahead > back ? years : years.reverse();
+}
+
 /** Month / day / year selects → ISO date. Avoids the native date picker on mobile. */
 function DobParts({
   value,
@@ -995,12 +1073,15 @@ function DobParts({
   invalid,
   locale,
   disabled,
+  years: yearList,
 }: {
   value: string;
   onChange: (iso: string) => void;
   invalid?: boolean;
   locale: IntakeLocale;
   disabled?: boolean;
+  /** Year choices; defaults to the last 100 years, newest first. */
+  years?: string[];
 }) {
   const [parts, setParts] = useState(() => splitDobIso(value));
 
@@ -1014,7 +1095,7 @@ function DobParts({
   }, [value]);
 
   const currentYear = new Date().getFullYear();
-  const years = Array.from({ length: 100 }, (_, i) => String(currentYear - i));
+  const years = yearList ?? Array.from({ length: 100 }, (_, i) => String(currentYear - i));
   const cls = `${selectCls} ${invalid ? "border-red-500" : ""} ${disabled ? "opacity-60" : ""}`;
 
   function set(next: { month?: string; day?: string; year?: string }) {
@@ -1049,6 +1130,157 @@ function DobParts({
           </option>
         ))}
       </select>
+    </div>
+  );
+}
+
+/** Feet + inches selects → `5'7"`. Emits "" until both are picked, like `DobParts`. */
+function HeightParts({
+  value,
+  onChange,
+  invalid,
+  locale,
+  disabled,
+}: {
+  value: string;
+  onChange: (height: string) => void;
+  invalid?: boolean;
+  locale: IntakeLocale;
+  disabled?: boolean;
+}) {
+  const split = (v: string) => {
+    const m = /^(\d)'(\d{1,2})"$/.exec((v ?? "").trim());
+    return m ? { feet: m[1], inches: String(Number(m[2])) } : { feet: "", inches: "" };
+  };
+  const join = (p: { feet: string; inches: string }) => (p.feet && p.inches ? `${p.feet}'${p.inches}"` : "");
+  const [parts, setParts] = useState(() => split(value));
+
+  // Re-sync when the parent value changes to a different complete height (e.g. loaded data).
+  useEffect(() => {
+    setParts((prev) => (value && value !== join(prev) ? split(value) : prev));
+  }, [value]);
+
+  const cls = `${selectCls} ${invalid ? "border-red-500" : ""} ${disabled ? "opacity-60" : ""}`;
+
+  function set(next: { feet?: string; inches?: string }) {
+    const merged = { ...parts, ...next };
+    setParts(merged);
+    onChange(join(merged));
+  }
+
+  return (
+    <div className="grid grid-cols-2 gap-2">
+      <select aria-label={tr(UI.heightFeet, locale)} value={parts.feet} disabled={disabled} onChange={(e) => set({ feet: e.target.value })} className={cls}>
+        <option value="">{tr(UI.heightFeet, locale)}</option>
+        {[1, 2, 3, 4, 5, 6, 7].map((n) => (
+          <option key={n} value={String(n)}>
+            {n} {tr(UI.feetUnit, locale)}
+          </option>
+        ))}
+      </select>
+      <select aria-label={tr(UI.heightInches, locale)} value={parts.inches} disabled={disabled} onChange={(e) => set({ inches: e.target.value })} className={cls}>
+        <option value="">{tr(UI.heightInches, locale)}</option>
+        {Array.from({ length: 12 }, (_, n) => (
+          <option key={n} value={String(n)}>
+            {n} {tr(UI.inchesUnit, locale)}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
+/**
+ * Upcoming 1sts of the month. A stored date that has since dropped off the list (the form was
+ * left open into a new month) still shows, so the client sees what they picked, and the
+ * completion check flags it.
+ */
+function MonthStartSelect({
+  id,
+  field,
+  value,
+  onChange,
+  invalid,
+  locale,
+  disabled,
+}: {
+  id: string;
+  field: IntakeField;
+  value: string;
+  onChange: (iso: string) => void;
+  invalid?: boolean;
+  locale: IntakeLocale;
+  disabled?: boolean;
+}) {
+  const options = useMemo(
+    () => monthStartOptions(businessToday(), field.monthCount ?? 6, field.monthCutoffDay),
+    [field.monthCount, field.monthCutoffDay]
+  );
+  const stale = value && !options.includes(value);
+
+  return (
+    <select
+      id={id}
+      value={value}
+      disabled={disabled}
+      onChange={(e) => onChange(e.target.value)}
+      className={`${selectCls} ${invalid ? "border-red-500 focus-visible:ring-red-500" : ""} ${disabled ? "opacity-60" : ""}`}
+    >
+      <option value="">{tr(UI.choose, locale)}</option>
+      {stale && <option value={value}>{formatIsoLong(value, locale)}</option>}
+      {options.map((iso) => (
+        <option key={iso} value={iso}>
+          {formatIsoLong(iso, locale)}
+        </option>
+      ))}
+    </select>
+  );
+}
+
+const NOTE_STYLES: Record<IntakeNote["tone"], { box: string; icon: LucideIcon }> = {
+  info: {
+    box: "border-brand/30 bg-brand/5 text-foreground dark:border-brand/40 dark:bg-brand/10",
+    icon: Info,
+  },
+  success: {
+    box: "border-green-200 bg-green-50 text-green-900 dark:border-green-900 dark:bg-green-950/50 dark:text-green-100",
+    icon: CheckCircle2,
+  },
+  warning: {
+    box: "border-amber-300 bg-amber-50 text-amber-950 dark:border-amber-800 dark:bg-amber-950/50 dark:text-amber-100",
+    icon: AlertTriangle,
+  },
+};
+
+/** A step callout or a live field note. `live` announces changes to screen readers. */
+function NoteBox({ note, className = "", live }: { note: IntakeNote; className?: string; live?: boolean }) {
+  const { box, icon: Icon } = NOTE_STYLES[note.tone];
+  const iconColor = note.tone === "info" ? "text-brand" : "";
+  return (
+    <div aria-live={live ? "polite" : undefined} className={`flex items-start gap-2.5 rounded-xl border p-3 text-sm ${box} ${className}`}>
+      <Icon className={`mt-0.5 h-4 w-4 shrink-0 ${iconColor}`} />
+      <div className="min-w-0">
+        {note.title && <p className="font-semibold">{note.title}</p>}
+        <p className={note.title ? "mt-0.5" : undefined}>{note.text}</p>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Partner logo (Impact Health Sharing on the Health Coverage form). The wordmark is dark navy,
+ * so in dark mode it sits on a white chip instead of vanishing into the background.
+ */
+function BrandLogo({
+  logo,
+  className = "",
+}: {
+  logo: { src: string; alt: string; width: number; height: number };
+  className?: string;
+}) {
+  return (
+    <div className={`inline-flex dark:rounded-lg dark:bg-white dark:px-3 dark:py-2 ${className}`}>
+      <Image src={logo.src} alt={logo.alt} width={logo.width} height={logo.height} priority className="h-9 w-auto" />
     </div>
   );
 }
