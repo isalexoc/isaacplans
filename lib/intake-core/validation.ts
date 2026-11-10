@@ -10,6 +10,7 @@
  */
 
 import type { IntakeField } from "./types";
+import { businessToday, compareYmd, isValidMonthStart, parseIso } from "./month-start";
 
 const digits = (v: string): string => (v ?? "").replace(/\D/g, "");
 
@@ -102,7 +103,36 @@ export type FieldErrorKey =
   | "routing"
   | "card"
   | "cardExpiration"
-  | "cvv";
+  | "cvv"
+  | "startDate"
+  | "height"
+  | "weight"
+  | "date"
+  | "datePast"
+  | "expired";
+
+/**
+ * A `dateParts` value: a real calendar date, then the field's rule against today (US Eastern,
+ * like every other date rule in the engine).
+ */
+export function datePartsError(field: IntakeField, v: string): FieldErrorKey | null {
+  const date = parseIso(v);
+  if (!date) return "date";
+  const check = new Date(Date.UTC(date.y, date.m - 1, date.d));
+  if (check.getUTCFullYear() !== date.y || check.getUTCMonth() !== date.m - 1 || check.getUTCDate() !== date.d) {
+    return "date";
+  }
+  const vsToday = compareYmd(date, businessToday());
+  if (field.dateRule === "past" && vsToday > 0) return "datePast";
+  if (field.dateRule === "notExpired" && vsToday < 0) return "expired";
+  return null;
+}
+
+/** Height as stored by the feet + inches selects: `5'7"`. */
+export function isValidHeight(v: string): boolean {
+  const match = /^(\d)'(\d{1,2})"$/.exec((v ?? "").trim());
+  return !!match && Number(match[1]) >= 1 && Number(match[2]) <= 11;
+}
 
 /**
  * Format error for a single field, or null if the value is empty or well-formed.
@@ -123,6 +153,12 @@ export function fieldFormatError(field: IntakeField, value: string): FieldErrorK
       return isValidSsn(v) ? null : "ssn";
     case "zip":
       return isValidZip(v) ? null : "zip";
+    case "monthStart":
+      return isValidMonthStart(v, field.monthCutoffDay) ? null : "startDate";
+    case "height":
+      return isValidHeight(v) ? null : "height";
+    case "dateParts":
+      return datePartsError(field, v);
     default:
       break;
   }
@@ -137,6 +173,8 @@ export function fieldFormatError(field: IntakeField, value: string): FieldErrorK
       return isValidCardExpiration(v) ? null : "cardExpiration";
     case "cardCvv":
       return isValidCvv(v) ? null : "cvv";
+    case "weight":
+      return Number(digits(v)) >= 1 ? null : "weight";
     default:
       return null;
   }

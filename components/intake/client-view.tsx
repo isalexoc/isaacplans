@@ -11,6 +11,7 @@ import { formatMoneyDisplay } from "@/lib/iul-intake/money";
 import IntakeBreadcrumb from "@/components/intake/intake-breadcrumb";
 import FilePreview from "@/components/intake/file-preview";
 import { isFieldVisible, isRowFilled } from "@/lib/intake-core/fields";
+import { formatIsoLong } from "@/lib/intake-core/month-start";
 import { requireIntakeConfig } from "@/lib/intake-configs";
 import { LOBS, type LobSlug } from "@/lib/lob/registry";
 import type {
@@ -34,6 +35,7 @@ import {
 function displayValue(field: IntakeField, raw: unknown, locale: IntakeLocale): string {
   if (raw == null || raw === "") return "";
   const value = String(raw);
+  if (field.type === "monthStart") return formatIsoLong(value, locale);
   if (field.type === "select" && field.options) {
     const opt = field.options.find((o) => o.value === value);
     return opt ? optionLabel(opt, locale) : value;

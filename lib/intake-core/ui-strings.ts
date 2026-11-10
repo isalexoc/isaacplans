@@ -202,6 +202,12 @@ export const UI = {
   dobDay: { en: "Day", es: "Día" } as Dict,
   dobYear: { en: "Year", es: "Año" } as Dict,
 
+  // Height selects
+  heightFeet: { en: "Feet", es: "Pies" } as Dict,
+  heightInches: { en: "Inches", es: "Pulgadas" } as Dict,
+  feetUnit: { en: "ft", es: "pies" } as Dict,
+  inchesUnit: { en: "in", es: "pulg." } as Dict,
+
   // Copy (view page)
   copy: { en: "Copy", es: "Copiar" } as Dict,
   copied: { en: "Copied", es: "Copiado" } as Dict,
@@ -217,6 +223,15 @@ export const UI = {
   errCard: { en: "Enter a valid card number.", es: "Ingrese un número de tarjeta válido." } as Dict,
   errCardExpiration: { en: "Enter a valid expiration date (MM/YY).", es: "Ingrese una fecha de vencimiento válida (MM/AA)." } as Dict,
   errCvv: { en: "Enter the 3 or 4 digit security code.", es: "Ingrese el código de seguridad de 3 o 4 dígitos." } as Dict,
+  errStartDate: { en: "Pick one of the start dates in the list.", es: "Elija una de las fechas de inicio de la lista." } as Dict,
+  errHeight: { en: "Pick feet and inches.", es: "Elija pies y pulgadas." } as Dict,
+  errWeight: { en: "Enter the weight in pounds.", es: "Ingrese el peso en libras." } as Dict,
+  errDate: { en: "Enter a real date.", es: "Ingrese una fecha real." } as Dict,
+  errDatePast: { en: "This date can't be in the future.", es: "Esta fecha no puede ser futura." } as Dict,
+  errExpired: {
+    en: "This ID has expired. Please use one that hasn't.",
+    es: "Esta identificación está vencida. Use una que esté vigente.",
+  } as Dict,
   fixErrors: {
     en: "Please fix the highlighted fields before continuing.",
     es: "Corrija los campos resaltados antes de continuar.",

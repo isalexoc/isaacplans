@@ -64,6 +64,8 @@ function dataTypeFor(type: IntakeFieldType): GhlDataType {
     case "tel":
       return "PHONE";
     case "date":
+    case "monthStart":
+    case "dateParts":
       return "DATE";
     case "select":
       return "SINGLE_OPTIONS";
