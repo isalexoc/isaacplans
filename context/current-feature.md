@@ -2,7 +2,41 @@
 
 ## Status
 
-In progress: **Impact sales presentation + CrankWheel on the Health Coverage intake** (branch
+In progress: **Health Coverage intake reorder + secure link** (branch `feature/impact-intake-reorder-secure-link`,
+migration `0044` creates one new table). Isaac found asking for the SSN/ITIN on the first screen too aggressive.
+- **New step order:** 1 About you (no SSN) → 2 Who else to cover → 3 Home address → 4 Coverage → 5 Your ID (now
+  "Which number will you use?" + the SSN/ITIN, then the photo ID) → 6 Payment → agent notes. Field keys are
+  unchanged, so saved answers and CRM fields carry over.
+- **Payment is bank-only.** Impact only drafts a bank account: "How would you like to pay?" and every card
+  question are gone, and bank name, routing, account number and account type are required. "Are you the one
+  paying?" stays (someone else can pay).
+- **Secure link, admin only, on steps 5 and 6** — the IUL secure capture, rebuilt for the shared intake engine
+  (`config.secureCapture`). The agent ticks what to ask for (SSN/ITIN, ID number, bank account), copies the
+  link or sends it through the CRM; the client types the numbers on their own phone at `/secure/<token>`
+  (es `/seguro/<token>`), and the agent's form shows only the last four digits. One live link per intake, single
+  use, valid until the intake is completed. The SSN/ITIN and ID groups need their type picked first, so the
+  client page can say which number it wants. Sending reuses the CRM field `iul_secure_capture_link` (no new
+  custom field) with tag `ha_secure_capture_sent` for a GHL workflow.
+- **Deploy safety:** the capture state lives in a new table (`intake_secure_captures`); `intake_sessions` is not
+  touched, so deploying before `pnpm db:migrate 0044` breaks only the secure link, never the intake itself.
+  The 15 s post-capture grace window reads `submitted_at` from that table, and only when an agent's save would
+  change a captured value (a failed lookup skips the window, never the save).
+- Setup for Isaac in `IMPACT_ENROLLMENT_SETUP.md` → "Secure link": the migration, and an optional GHL workflow on
+  tag `ha_secure_capture_sent` sending `{{contact.iul_secure_capture_link}}`.
+
+Verified:
+- `tsc` and `pnpm build` pass;
+- a config check against the real config: step order, the SSN moved to step 5 (still `ha_ssn`), payment fields
+  (bank four required, no method or card questions), capture groups, the type-first rule, server validation
+  (ITIN accepted, bad checksum / short account / "Cash" rejected, an empty bank link refused), link URLs;
+- headless Chrome with every API mocked (no DB writes): the agent form shows the new steps, the panel on steps 5
+  and 6 with that step's items ticked, pending → received with the SSN field turning into `•••••6789`, and the
+  client page at `/es/seguro/<token>` (bare header, no chat, Impact logo, "ITIN" / "Licencia de conducir" chips,
+  bank name from the routing number) posting exactly the asked keys;
+- `/secure` and `/seguro` get `x-private-page` + the bare header and footer.
+Not verifiable locally: the real DB round trip (prod writes are blocked) and the GHL workflow.
+
+Previous: **Impact sales presentation + CrankWheel on the Health Coverage intake** (branch
 `feature/impact-presentation`, no migration). Isaac sells Impact over the phone and screen-shares with CrankWheel;
 99% of clients watch on a phone, so the deck is vertical (9:16). A cloud Claude session built the deck as one
 HTML file (`Impact_Presentacion.html`, 9 slides, ES/EN); this brings it into the site.

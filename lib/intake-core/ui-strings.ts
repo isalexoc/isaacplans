@@ -257,6 +257,73 @@ export const UI = {
   } as Dict,
   presentationOpen: { en: "Open presentation", es: "Abrir presentación" } as Dict,
   backToPresentation: { en: "Back to the presentation", es: "Volver a la presentación" } as Dict,
+
+  // Secure link — the panel the AGENT sees on the steps it covers
+  capturePanelTitle: {
+    en: "Client would rather not say it out loud?",
+    es: "¿El cliente prefiere no decirlo en voz alta?",
+  } as Dict,
+  capturePanelBody: {
+    en: "Send a private link and they type the numbers on their own phone. Only the last 4 digits show up here.",
+    es: "Envíele un enlace privado y escribirá los números en su propio teléfono. Aquí solo aparecen los últimos 4 dígitos.",
+  } as Dict,
+  captureAskFor: { en: "Ask the client for:", es: "Pedirle al cliente:" } as Dict,
+  captureNeedsType: { en: "Answer first:", es: "Responda primero:" } as Dict,
+  captureCreate: { en: "Create secure link", es: "Crear enlace seguro" } as Dict,
+  captureCreating: { en: "Creating…", es: "Creando…" } as Dict,
+  captureWaiting: { en: "Waiting for the client…", es: "Esperando al cliente…" } as Dict,
+  captureOpened: { en: "They opened it and are filling it in.", es: "Ya lo abrió y lo está llenando." } as Dict,
+  captureAskingFor: { en: "Asking for:", es: "Solicitando:" } as Dict,
+  captureReceived: { en: "Received:", es: "Recibido:" } as Dict,
+  captureReplaced: {
+    en: "This replaced a value you had typed.",
+    es: "Esto reemplazó un valor que usted había escrito.",
+  } as Dict,
+  captureAnother: { en: "Create another link", es: "Crear otro enlace" } as Dict,
+  captureCancel: { en: "Cancel link", es: "Cancelar enlace" } as Dict,
+  captureCopy: { en: "Copy link", es: "Copiar enlace" } as Dict,
+  captureCopied: { en: "Copied", es: "Copiado" } as Dict,
+  captureSendText: { en: "Send by text", es: "Enviar por texto" } as Dict,
+  captureSent: { en: "Sent", es: "Enviado" } as Dict,
+  captureNoContact: {
+    en: "No CRM contact on this intake, so copy the link and send it yourself.",
+    es: "Esta solicitud no tiene contacto en el CRM: copie el enlace y envíelo usted.",
+  } as Dict,
+  captureError: {
+    en: "Something went wrong with the link. Try again.",
+    es: "Algo salió mal con el enlace. Intente de nuevo.",
+  } as Dict,
+
+  // Secure link — the page the CLIENT opens on their own phone
+  secureTitle: { en: "Send your details securely", es: "Envíe sus datos de forma segura" } as Dict,
+  secureTitleNamed: { en: "{name}, send your details securely", es: "{name}, envíe sus datos de forma segura" } as Dict,
+  secureIntro: {
+    en: "We are finishing your application and need this information. This is your private, secure link.",
+    es: "Estamos terminando su solicitud y necesitamos esta información. Este es su enlace privado y seguro.",
+  } as Dict,
+  secureLinkNote: { en: "Secure and encrypted", es: "Seguro y cifrado" } as Dict,
+  secureRoutingHelp: {
+    en: "The 9 digits at the bottom left of a check.",
+    es: "Los 9 dígitos en la parte inferior izquierda de un cheque.",
+  } as Dict,
+  secureBankName: { en: "Bank:", es: "Banco:" } as Dict,
+  secureSend: { en: "Send securely", es: "Enviar de forma segura" } as Dict,
+  secureSending: { en: "Sending…", es: "Enviando…" } as Dict,
+  secureSubmitError: {
+    en: "We couldn't send that. Please check the numbers and try again.",
+    es: "No pudimos enviarlo. Revise los números e intente de nuevo.",
+  } as Dict,
+  secureDoneTitle: { en: "Sent. Thank you.", es: "Enviado. Gracias." } as Dict,
+  secureDoneBody: {
+    en: "We have what we needed. You can close this page.",
+    es: "Ya tenemos lo que necesitábamos. Puede cerrar esta página.",
+  } as Dict,
+  secureFooter: {
+    en: "This link works once, and only for your application.",
+    es: "Este enlace funciona una sola vez y solo para su solicitud.",
+  } as Dict,
+  secureLooksGood: { en: "Looks good", es: "Se ve bien" } as Dict,
+  secureDigitsLeft: { en: "{n} more digit(s) to go", es: "Faltan {n} dígito(s)" } as Dict,
 } as const;
 
 export function tr(dict: Dict, locale: IntakeLocale): string {

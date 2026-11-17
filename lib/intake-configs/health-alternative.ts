@@ -20,7 +20,12 @@ import {
  *    the applicant only. Impact confirmed no other member needs one;
  *  - a start date that can only be the 1st of a month, and a payment day from 1 to 28, checked
  *    against each other (see impact-schedule.ts);
- *  - the one-time $79 enrollment fee, stated before the client gives payment details.
+ *  - the one-time $79 enrollment fee, stated before the client gives payment details;
+ *  - a bank account as the only way to pay (Impact takes no cards).
+ *
+ * Steps run About you → Who else → Address → Coverage → Your ID (SSN/ITIN + photo ID) → Payment,
+ * and the numbers on the last two can come in through a secure link the client fills on their own
+ * phone (`secureCapture`).
  *
  * The new applicant answers are not CRM fields. Isaac keeps Impact data out of new GHL custom
  * fields, and he reads these from the client summary when he enrolls. An added person's answers
@@ -142,35 +147,42 @@ function formatMemberRow(row: RepeaterRow, index: number): string {
   return parts.length ? `${index + 1}. ${parts.join(", ")}` : "";
 }
 
-/** Applicant: SSN-or-ITIN instead of SSN-only, height + weight after sex, no second phone. */
+/**
+ * "Which number will you use?" and the number itself. Asked on the ID step, not on the first
+ * screen: Isaac found an SSN as the sixth question a client sees too much, too soon.
+ */
+function taxIdFields(ssn: IntakeField): IntakeField[] {
+  return [
+    {
+      key: "taxIdType",
+      labelEn: "Which number will you use?",
+      labelEs: "¿Qué número va a usar?",
+      type: "select",
+      required: true,
+      options: ID_TYPE_OPTIONS,
+      helpEn: "Impact needs one of the two. No Social Security number? Your ITIN works.",
+      helpEs: "Impact necesita uno de los dos. ¿No tiene número de Seguro Social? Su ITIN sirve.",
+    },
+    {
+      ...ssn,
+      labelEn: "SSN or ITIN number",
+      labelEs: "Número de SSN o ITIN",
+      required: true,
+      showIf: { field: "taxIdType", equals: HAS_ID_NUMBER },
+      helpEn: "Encrypted, and never shown back to you in full.",
+      helpEs: "Se guarda encriptado y nunca se le muestra completo.",
+    },
+  ];
+}
+
+/** Applicant: height + weight after sex, no second phone, and no SSN (it moved to the ID step). */
 function personal(section: IntakeSection): IntakeSection {
   return {
     ...section,
     fields: section.fields.flatMap((field): IntakeField[] => {
-      if (field.key === "altPhone") return [];
+      if (field.key === "altPhone" || field.key === "ssn") return [];
       if (field.key === "sex") return [field, { ...heightField }, { ...weightField }];
-      if (field.key !== "ssn") return [field];
-      return [
-        {
-          key: "taxIdType",
-          labelEn: "Which number will you use?",
-          labelEs: "¿Qué número va a usar?",
-          type: "select",
-          required: true,
-          options: ID_TYPE_OPTIONS,
-          helpEn: "Impact needs one of the two. No Social Security number? Your ITIN works.",
-          helpEs: "Impact necesita uno de los dos. ¿No tiene número de Seguro Social? Su ITIN sirve.",
-        },
-        {
-          ...field,
-          labelEn: "SSN or ITIN number",
-          labelEs: "Número de SSN o ITIN",
-          required: true,
-          showIf: { field: "taxIdType", equals: HAS_ID_NUMBER },
-          helpEn: "Encrypted, and never shown back to you in full.",
-          helpEs: "Se guarda encriptado y nunca se le muestra completo.",
-        },
-      ];
+      return [field];
     }),
   };
 }
@@ -255,24 +267,42 @@ function coverage(section: IntakeSection): IntakeSection {
 }
 
 /**
- * The shared "Documents" step becomes the applicant's photo ID, typed in. Its two uploads (photo of
- * the ID, current insurance card) are dropped: Isaac doesn't need them.
+ * The shared "Documents" step becomes the applicant's identification: the SSN or ITIN, then the
+ * photo ID, typed in. Its two uploads (photo of the ID, current insurance card) are dropped: Isaac
+ * doesn't need them.
  */
-function documents(section: IntakeSection): IntakeSection {
+function documents(section: IntakeSection, ssn: IntakeField): IntakeSection {
   return {
     ...section,
     titleEn: "Your ID",
     titleEs: "Su identificación",
-    descriptionEn: "Impact needs a valid ID that hasn't expired.",
-    descriptionEs: "Impact necesita una identificación válida y vigente.",
-    fields: PHOTO_ID_FIELDS.map((field) => ({ ...field })),
+    descriptionEn: "Your SSN or ITIN, and a valid ID that hasn't expired.",
+    descriptionEs: "Su número de Seguro Social o ITIN, y una identificación válida y vigente.",
+    fields: [...taxIdFields(ssn), ...PHOTO_ID_FIELDS.map((field) => ({ ...field }))],
   };
 }
 
-/** The $79 fee, said up front on the step where they give payment details. */
+/** The bank questions, which become the whole payment method. */
+const BANK_FIELD_KEYS = ["bankName", "routingNumber", "accountNumber", "accountType"];
+
+/**
+ * Bank account only: Impact drafts the monthly share from a bank account and takes no cards, so
+ * "How would you like to pay?" and every card question are gone, and the bank details stop hiding
+ * behind a "Bank draft" answer and become required. The $79 fee is said up front here too.
+ */
 function payment(section: IntakeSection): IntakeSection {
   return {
     ...section,
+    descriptionEn:
+      "Impact takes payments from a bank account only. Nothing is charged until your coverage is approved and you confirm.",
+    descriptionEs:
+      "Impact solo acepta pagos desde una cuenta bancaria. No se cobra nada hasta que su cobertura sea aprobada y usted confirme.",
+    fields: section.fields.flatMap((field): IntakeField[] => {
+      if (BANK_FIELD_KEYS.includes(field.key)) return [{ ...field, showIf: undefined, required: true }];
+      const gatedByMethod = [field.showIf ?? []].flat().some((c) => c.field === "paymentMethod");
+      if (field.key === "paymentMethod" || gatedByMethod) return [];
+      return [field];
+    }),
     callout: {
       tone: "info",
       titleEn: "One-time $79 enrollment fee",
@@ -287,19 +317,32 @@ function payment(section: IntakeSection): IntakeSection {
   };
 }
 
+const base = ancillarySections("ha", {
+  includeTobacco: true,
+  coverageTitleEn: "Coverage you need",
+  coverageTitleEs: "Cobertura que necesita",
+});
+
+/** The shared SSN question (encrypted, CRM field `ha_ssn`), lifted out of "About you". */
+const ssnField = base.flatMap((s) => s.fields).find((f) => f.key === "ssn") as IntakeField;
+
 const RESHAPE: Record<string, (section: IntakeSection) => IntakeSection> = {
   personal,
   dependents,
   coverage,
-  documents,
+  documents: (section) => documents(section, ssnField),
   payment,
 };
 
-const sections = ancillarySections("ha", {
-  includeTobacco: true,
-  coverageTitleEn: "Coverage you need",
-  coverageTitleEs: "Cobertura que necesita",
-}).map((section) => RESHAPE[section.key]?.(section) ?? section);
+/**
+ * Isaac's step order. Who else is covered comes right after the applicant, while the family is
+ * the topic, and the address after that; the numbers wait until step 5.
+ */
+const STEP_ORDER = ["personal", "dependents", "residence", "coverage", "documents", "payment", "agent"];
+
+const sections = base
+  .map((section) => RESHAPE[section.key]?.(section) ?? section)
+  .sort((a, b) => STEP_ORDER.indexOf(a.key) - STEP_ORDER.indexOf(b.key));
 
 export const healthAlternativeIntake: IntakeLobConfig = {
   lob: "health-alternative",
@@ -315,6 +358,35 @@ export const healthAlternativeIntake: IntakeLobConfig = {
   sections,
   impactEnrollment: true,
   impactPresentation: true,
+  secureCapture: {
+    groups: [
+      {
+        key: "taxId",
+        labelEn: "SSN or ITIN",
+        labelEs: "Seguro Social o ITIN",
+        fieldKeys: ["ssn"],
+        requires: "taxIdType",
+        sections: ["documents"],
+      },
+      {
+        key: "idNumber",
+        labelEn: "ID number",
+        labelEs: "Número de identificación",
+        fieldKeys: ["idDocNumber"],
+        requires: "idDocType",
+        sections: ["documents"],
+      },
+      {
+        key: "bank",
+        labelEn: "Bank account",
+        labelEs: "Cuenta bancaria",
+        // Account type rides with the numbers: routing + account without checking/savings isn't a
+        // draftable instruction. The bank name is filled from the routing number on arrival.
+        fieldKeys: ["routingNumber", "accountNumber", "accountType"],
+        sections: ["payment"],
+      },
+    ],
+  },
   brandLogo: {
     src: "/images/impact/impact-health-sharing-logo.png",
     alt: "Impact Health Sharing",

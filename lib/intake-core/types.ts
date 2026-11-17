@@ -233,6 +233,27 @@ export type IntakeLobConfig = {
    * presentation (`/health-alternative/intake/[token]/presentation`) in a new tab.
    */
   impactPresentation?: boolean;
+  /**
+   * Numbers a client may type on their own phone through a one-time secure link instead of reading
+   * them out on the call. The agent's panel offers these groups; see lib/intake-core/secure-capture.ts.
+   */
+  secureCapture?: { groups: SecureCaptureGroup[] };
+};
+
+/** One thing a secure link can ask the client for: "SSN or ITIN", "ID number", "Bank account". */
+export type SecureCaptureGroup = {
+  key: string;
+  labelEn: string;
+  labelEs: string;
+  /** Field keys the link may write for this group. Frozen into each link when it is issued. */
+  fieldKeys: string[];
+  /**
+   * A non-sensitive field that must be answered first (the SSN-or-ITIN choice, the ID type). Its
+   * answer tells the client's page which number it is asking for.
+   */
+  requires?: string;
+  /** Steps where the agent's panel shows, with this group pre-selected. */
+  sections: string[];
 };
 
 /** Client-safe DTOs. */

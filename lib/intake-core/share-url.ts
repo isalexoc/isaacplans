@@ -17,3 +17,13 @@ export function buildIntakeShareUrl(
   const base = (origin ?? SITE_URL).replace(/\/+$/, "");
   return `${base}/${loc}/${config.intakeSlug[loc]}/${token}`;
 }
+
+/**
+ * The client's secure-capture link (`/en/secure/<token>`, `/es/seguro/<token>`, mirroring
+ * i18n/routing.ts). Deliberately free of any product name: it sits in a text message.
+ */
+export function buildSecureCaptureUrl(token: string, locale: string, origin?: string): string {
+  const loc = locale === "es" ? "es" : "en";
+  const base = (origin ?? SITE_URL).replace(/\/+$/, "");
+  return `${base}/${loc}/${loc === "es" ? "seguro" : "secure"}/${token}`;
+}

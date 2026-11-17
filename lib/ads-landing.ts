@@ -125,6 +125,18 @@ export function isImpactPresentationPath(pathname: string | null | undefined): b
   return IMPACT_PRESENTATION_RE.test(pathname);
 }
 
+/**
+ * A client's secure link for the shared intake engine, `/secure/<token>` (es: `/seguro/<token>`).
+ * Bare chrome like the ACA signing page: it collects an SSN or bank details on a phone, and the
+ * one button that matters should not sit under a nav menu and a footer sitemap.
+ */
+const INTAKE_SECURE_CAPTURE_RE = /^(?:\/(?:en|es))?\/(?:secure|seguro)\/[^/]+$/i;
+
+export function isIntakeSecureCapturePath(pathname: string | null | undefined): boolean {
+  if (!pathname) return false;
+  return INTAKE_SECURE_CAPTURE_RE.test(pathname);
+}
+
 export function isAdsLandingPath(pathname: string | null | undefined): boolean {
   if (!pathname) return false;
   return (
@@ -132,6 +144,7 @@ export function isAdsLandingPath(pathname: string | null | undefined): boolean {
     isAcaIntakeFormPath(pathname) ||
     isFeIntakeFormPath(pathname) ||
     isAcaConfirmationPath(pathname) ||
+    isIntakeSecureCapturePath(pathname) ||
     // Not in isIulBareLandingPath: the bare header drops the language switch the deck needs.
     isImpactPresentationPath(pathname)
   );
@@ -172,6 +185,7 @@ export function isIulBareLandingPath(pathname: string | null | undefined): boole
     (IUL_BARE_LANDING_PATHNAMES as readonly string[]).includes(pathname) ||
     isAcaIntakeFormPath(pathname) ||
     isFeIntakeFormPath(pathname) ||
-    isAcaConfirmationPath(pathname)
+    isAcaConfirmationPath(pathname) ||
+    isIntakeSecureCapturePath(pathname)
   );
 }

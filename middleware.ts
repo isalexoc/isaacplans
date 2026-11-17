@@ -240,6 +240,14 @@ export default clerkMiddleware(async (auth, req) => {
     response.headers.set("x-private-page", "1");
   }
 
+  // A client's secure link for the shared intake engine (/secure/<token>, es /seguro/<token>): a
+  // live credential that collects an SSN or bank details, so private and bare like the ACA
+  // signing page.
+  const isIntakeSecureCapture = /^(?:\/(?:en|es))?\/(?:secure|seguro)\/[^/]+$/i.test(pathname);
+  if (isIntakeSecureCapture) {
+    response.headers.set("x-private-page", "1");
+  }
+
   // The LegalShield funnel — both the opt-in and the self-enrollment page. These are the only
   // routes on the site that must NOT show the Isaac Plans logo: LegalShield's advertising rules
   // for Independent Associates require the page not read as an official LegalShield property, and
@@ -264,6 +272,7 @@ export default clerkMiddleware(async (auth, req) => {
     isIulSecureCapture ||
     isAcaConfirmation ||
     isImpactPresentation ||
+    isIntakeSecureCapture ||
     isLegalShield
   ) {
     response.headers.set("x-is-ads-landing", "1");
@@ -291,7 +300,8 @@ export default clerkMiddleware(async (auth, req) => {
     isAcaIntakeForm ||
     isFeIntakeForm ||
     isIulSecureCapture ||
-    isAcaConfirmation
+    isAcaConfirmation ||
+    isIntakeSecureCapture
   ) {
     response.headers.set("x-ads-landing-variant", "iul-bare");
   }
