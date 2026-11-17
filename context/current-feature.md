@@ -2,7 +2,8 @@
 
 ## Status
 
-In progress: **Self-serve Impact presentation** (branch `feature/impact-self-serve-presentation`, no migration). For
+Done: **Self-serve Impact presentation** (branch `feature/impact-self-serve-presentation`, merged `5df1a78`, no
+migration). For
 leads Isaac can't get on a call: one general link (`isaacplans.com/impact`, es `/impacto`) he shares by WhatsApp or
 text, which anyone opens on a phone or computer and walks through alone, then applies.
 - **Separate from the CrankWheel deck**, same words and pictures (`components/impact-presentation/copy.ts`), so an
