@@ -785,6 +785,42 @@ export const intakeSessions = pgTable("intake_sessions", {
   statusIdx:      index("intake_status_idx").on(t.lob, t.status),
 }));
 
+/**
+ * One-shot links that let a client type their own SSN/ITIN, ID number or bank details on their own
+ * phone, for the shared intake engine. The IUL intake's `iulSecureCaptures`, one table over.
+ *
+ * Same reasoning as that table: a separate credential from the intake link (reusing the session
+ * token would hand the phone the whole application), no `data` column (captured values go straight
+ * into `intake_sessions.data`, encrypted, so there is one system of record), and no `expiresAt`
+ * (valid while `pending` and the intake is not completed).
+ *
+ * **Nothing was added to `intake_sessions`.** Every engine line reads that table on every request,
+ * so a new column there would break all of them if the code shipped before the migration ran. The
+ * IUL table keeps a `sensitiveCapturedAt` stamp on its session for the post-capture grace window;
+ * here the window is read from `submittedAt` on this table, and only when an agent's save would
+ * actually change a captured value.
+ */
+export const intakeSecureCaptures = pgTable("intake_secure_captures", {
+  id:           text("id").primaryKey(), // nanoid
+  /** Its own credential — longer than the intake token because this one gets texted. */
+  token:        text("token").notNull(),
+  lob:          text("lob").notNull(),
+  /** `intake_sessions.id`, not its token: `resetIntakeLink` rotates the token. */
+  sessionId:    text("session_id").notNull(),
+  ownerUserId:  text("owner_user_id").notNull(),
+  status:       text("status").notNull().default("pending"), // pending|submitted|cancelled
+  /** The field keys this link may write, frozen when it was issued. */
+  fieldKeys:    jsonb("field_keys").notNull().$type<string[]>().default([]),
+  openedAt:     timestamp("opened_at"),
+  submittedAt:  timestamp("submitted_at"),
+  cancelledAt:  timestamp("cancelled_at"),
+  createdAt:    timestamp("created_at").defaultNow().notNull(),
+  updatedAt:    timestamp("updated_at").defaultNow().notNull(),
+}, (t) => ({
+  tokenUniqueIdx: uniqueIndex("intake_capture_token_unique_idx").on(t.token),
+  sessionIdx:     index("intake_capture_session_idx").on(t.sessionId, t.status),
+}));
+
 // ─── Leads the Way (Senior Life) email → GHL sync ─────────────────────────────
 
 /**

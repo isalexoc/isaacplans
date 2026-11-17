@@ -302,3 +302,25 @@ Don't have a doctor? Email CareNavigator@AMPS.com with the type of doctor and yo
   contact mapping in step 4 of the workflow build.
 - **The dialog says a workflow or the password is "not connected yet".** Set the env var in Vercel
   and redeploy. Env changes only apply to new deployments.
+
+## Secure link for SSN/ITIN, ID number and bank details
+
+On the Health Coverage intake, the agent's view of **step 5 (Your ID)** and **step 6 (Payment)**
+has a panel: *"Client would rather not say it out loud?"*. Tick what to ask for (SSN or ITIN, ID
+number, bank account), press **Create secure link**, then **Copy link** or **Send by text**. The
+client opens `isaacplans.com/es/seguro/…` (or `/en/secure/…`) on their phone, types the numbers,
+and the agent's form shows only the last 4 digits. The link works once and stops working when the
+intake is completed. A note lands on the contact when the numbers arrive. The SSN/ITIN and ID number
+need their type picked first ("Which number will you use?", "Type of ID"), so the page can say which
+number it wants.
+
+One-time setup:
+
+1. **Run the migration:** `pnpm db:migrate 0044` (creates `intake_secure_captures`). Until then the
+   panel shows an error; the intake itself keeps working.
+2. **GHL workflow for "Send by text"** (optional, **Copy link** works without it): trigger *Contact
+   Tag Added* = `ha_secure_capture_sent`, then a *Send SMS* (and/or WhatsApp) with the custom field
+   **IUL Secure Capture Link** (`{{contact.iul_secure_capture_link}}`). The app writes the link to
+   that existing field (the IUL intake's, reused so no new custom field is needed) and re-adds the
+   tag on every send. Branch on the `spanish` tag for the wording, as the welcome workflow does.
+   Keep the text vague ("your secure link"), since it shows on a lock screen.

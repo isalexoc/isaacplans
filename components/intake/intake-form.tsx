@@ -46,6 +46,14 @@ import {
 import { useIntakeAutosave } from "@/hooks/use-intake-autosave";
 import IntakeBreadcrumb from "@/components/intake/intake-breadcrumb";
 import ImpactPresentationBar from "@/components/intake/impact-presentation-bar";
+import SecureCapturePanel, { type CaptureOption } from "@/components/intake/secure-capture-panel";
+import { useIntakeSecureCapture } from "@/hooks/use-intake-secure-capture";
+import {
+  captureFieldKeys,
+  captureGroups,
+  groupReady,
+  groupsForSection,
+} from "@/lib/intake-core/secure-capture-groups";
 import FilePreview from "@/components/intake/file-preview";
 import IntakeAddressInput, { type ResolvedAddress } from "@/components/shared/intake-address-input";
 import {
@@ -94,6 +102,9 @@ import {
 /* ------------------------------- helpers ------------------------------- */
 
 const str = (v: unknown): string => (typeof v === "string" ? v : "");
+
+/** The last four characters of a value or its mask, to tell "same number, now masked" from a new one. */
+const lastFour = (v: string): string => v.replace(/[•\s-]/g, "").slice(-4);
 
 /** Path used for per-row validation keys: `householdMembers[2].ssn`. */
 function rowPath(repeaterKey: string, index: number, subKey: string): string {
@@ -290,6 +301,48 @@ export default function IntakeForm({
   const crossChecked = useMemo(
     () => config.sections.flatMap((s) => s.fields).filter((f) => f.isValid).map((f) => f.key),
     [config.sections]
+  );
+
+  /*
+   * Secure link (agent only): the client types numbers on their own phone and this form receives
+   * them masked, `•••••6789`. A field the agent is typing in is left alone (the next poll retries),
+   * and a different number replacing one the agent had typed is flagged rather than swapped quietly.
+   */
+  const captureKeys = useMemo(() => captureFieldKeys(config), [config]);
+  const focusedKeyRef = useRef<string | null>(null);
+  const [captureReplaced, setCaptureReplaced] = useState(false);
+  const secureCapture = useIntakeSecureCapture({
+    lob,
+    token,
+    enabled: agentChrome && Boolean(config.secureCapture) && !completed,
+    onValues: (values) =>
+      setData((prev) => {
+        let changed = false;
+        const next = { ...prev };
+        for (const key of captureKeys) {
+          const incoming = values[key];
+          if (typeof incoming !== "string" || !incoming || focusedKeyRef.current === key) continue;
+          const current = typeof prev[key] === "string" ? (prev[key] as string) : "";
+          if (current === incoming) continue;
+          if (current && !isMaskedValue(current) && lastFour(current) !== lastFour(incoming)) setCaptureReplaced(true);
+          next[key] = incoming;
+          changed = true;
+        }
+        return changed ? next : prev;
+      }),
+  });
+  const captureOptions: CaptureOption[] = useMemo(
+    () =>
+      captureGroups(config).map((group) => {
+        const needs = group.requires ? fieldByKey(config.sections, group.requires) : undefined;
+        return {
+          key: group.key,
+          label: locale === "es" ? group.labelEs : group.labelEn,
+          ready: groupReady(group, data),
+          needs: needs ? fieldLabel(needs, locale) : null,
+        };
+      }),
+    [config, data, locale]
   );
 
   function setField(key: string, value: unknown) {
@@ -567,6 +620,26 @@ export default function IntakeForm({
               }}
             />
           )}
+          {/* Offered, never imposed: most clients read their numbers out. Agent only. */}
+          {agentChrome && !completed && groupsForSection(config, current.key).length > 0 && (
+            <div className="mt-4">
+              <SecureCapturePanel
+                locale={locale}
+                stepKey={current.key}
+                options={captureOptions}
+                defaultKeys={groupsForSection(config, current.key).map((g) => g.key)}
+                capture={secureCapture.capture}
+                url={secureCapture.url}
+                busy={secureCapture.busy}
+                error={secureCapture.error}
+                canSend={Boolean(session?.crmContactId)}
+                replacedExisting={captureReplaced}
+                onCreate={secureCapture.create}
+                onCancel={secureCapture.cancel}
+                onSend={secureCapture.send}
+              />
+            </div>
+          )}
 
           <AnimatePresence mode="wait">
             <motion.div
@@ -622,7 +695,15 @@ export default function IntakeForm({
 
                 const note = field.liveNote?.(data, locale) ?? null;
                 return (
-                  <div key={field.key}>
+                  <div
+                    key={field.key}
+                    onFocusCapture={() => {
+                      focusedKeyRef.current = field.key;
+                    }}
+                    onBlurCapture={() => {
+                      focusedKeyRef.current = null;
+                    }}
+                  >
                     <FieldInput
                       field={field}
                       locale={locale}

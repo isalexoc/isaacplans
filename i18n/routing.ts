@@ -407,6 +407,11 @@ export const routing = defineRouting({
       en: "/health-alternative/intake/[token]/view",
       es: "/alternativa-de-salud/admision/[token]/view",
     },
+    // A client's secure link for the shared intake engine. No product name in it: it is texted.
+    "/secure/[captureToken]": {
+      en: "/secure/[captureToken]",
+      es: "/seguro/[captureToken]",
+    },
     "/health-alternative/intake/[token]/presentation": {
       en: "/health-alternative/intake/[token]/presentation",
       es: "/alternativa-de-salud/admision/[token]/presentacion",

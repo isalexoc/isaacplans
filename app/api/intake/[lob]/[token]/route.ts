@@ -24,9 +24,40 @@ import {
   maskSensitiveForClient,
   mergePreservedSensitive,
 } from "@/lib/intake-core/sensitive";
-import type { IntakeData } from "@/lib/intake-core/types";
+import { captureFieldKeys } from "@/lib/intake-core/secure-capture-groups";
+import { CAPTURE_GRACE_MS, recentlyCapturedKeys } from "@/lib/intake-core/secure-capture";
+import type { IntakeData, IntakeLobConfig } from "@/lib/intake-core/types";
 
 type RouteContext = { params: Promise<{ lob: string; token: string }> };
+
+/**
+ * Grace window after a client sends numbers through a secure link.
+ *
+ * Once the agent's next poll lands, their form holds masks and `mergePreservedSensitive` turns
+ * those saves into no-ops. The exposure is the few seconds before: a value the agent was half-way
+ * through typing is neither a mask nor empty, so it would quietly replace the client's. For a
+ * short window the stored values win. The lookup only runs when this save would actually change a
+ * value a link can capture, so ordinary autosaves cost nothing extra; and a failure (the table not
+ * migrated yet, say) just skips the window rather than failing the save.
+ */
+async function keepFreshCapture(
+  config: IntakeLobConfig,
+  sessionId: string,
+  merged: IntakeData,
+  stored: IntakeData
+): Promise<void> {
+  const changing = captureFieldKeys(config).filter((key) => {
+    const previous = stored[key];
+    return typeof previous === "string" && previous !== "" && merged[key] !== previous;
+  });
+  if (!changing.length) return;
+  try {
+    const fresh = new Set(await recentlyCapturedKeys(sessionId, CAPTURE_GRACE_MS));
+    for (const key of changing) if (fresh.has(key)) merged[key] = stored[key];
+  } catch (error) {
+    console.warn("[intake] secure-capture grace check skipped:", error);
+  }
+}
 
 // GET /api/intake/[lob]/[token] — load (decrypts sensitive; claims unbound sessions to this device)
 export async function GET(_request: NextRequest, context: RouteContext) {
@@ -69,6 +100,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     // must not overwrite what's stored.
     const stored = decryptIntakeData(config, (row.data ?? {}) as IntakeData);
     const merged = mergePreservedSensitive(config, clean, stored);
+    if (access.role === "owner") await keepFreshCapture(config, row.id, merged, stored);
     const encrypted = encryptIntakeData(config, merged);
     const nextStatus = row.status === "completed" ? "completed" : "in_progress";
 
