@@ -257,6 +257,19 @@ export const UI = {
   } as Dict,
   presentationOpen: { en: "Open presentation", es: "Abrir presentación" } as Dict,
   backToPresentation: { en: "Back to the presentation", es: "Volver a la presentación" } as Dict,
+  quoteTitle: { en: "Impact quote", es: "Cotización de Impact" } as Dict,
+  quoteNeedsDob: {
+    en: "Fill in the dates of birth (About you, Who else) to quote, or type the prices.",
+    es: "Llene las fechas de nacimiento (Sobre usted, A quién más cubrir) para cotizar, o escriba los precios.",
+  } as Dict,
+  quoteFetch: { en: "Quote with Impact", es: "Cotizar con Impact" } as Dict,
+  quoteFetching: { en: "Quoting…", es: "Cotizando…" } as Dict,
+  quoteFailed: {
+    en: "Impact didn't answer. Type the prices from Impact's quote page.",
+    es: "Impact no respondió. Escriba los precios de la página de cotización de Impact.",
+  } as Dict,
+  quoteLive: { en: "The presentation shows these prices.", es: "La presentación muestra estos precios." } as Dict,
+  quoteMonthly: { en: "Monthly price ($)", es: "Precio mensual ($)" } as Dict,
 
   // Secure link — the panel the AGENT sees on the steps it covers
   capturePanelTitle: {
