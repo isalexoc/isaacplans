@@ -2,7 +2,45 @@
 
 ## Status
 
-In progress: **Impact intake trim** (branch `fix/impact-intake-trim`, no migration). Isaac checked with Impact
+In progress: **Impact sales presentation + CrankWheel on the Health Coverage intake** (branch
+`feature/impact-presentation`, no migration). Isaac sells Impact over the phone and screen-shares with CrankWheel;
+99% of clients watch on a phone, so the deck is vertical (9:16). A cloud Claude session built the deck as one
+HTML file (`Impact_Presentacion.html`, 9 slides, ES/EN); this brings it into the site.
+- **Agent's form** (`/health-alternative/intake/[token]`, owner view): the same CrankWheel panel as the IUL
+  intake (meet now / schedule, copy or text the link, "client joined" badge), anchored to the CRM contact the
+  way `/admin/meet` does, so `crankwheel_meetings` needs no new column. Beside it a **Presentation** button that
+  opens the deck in a new tab; it lights up once the client joins. Opt-in per line (`impactPresentation`).
+- **Deck route** `/health-alternative/intake/[token]/presentation` (es `/alternativa-de-salud/admision/[token]/presentacion`),
+  admin + session owner only. The button opens it in the **client's** language (CRM `spanish` tag, else the
+  session's locale, same rule as the meeting link). The header's language switch flips the deck and keeps the
+  slide. Slim header (logo, phone, theme, language), no footer, no chat bubble / admin gear / trackers, since
+  the tab is on the client's screen.
+- **Filled from the intake**: the client's first name on the welcome slide, the chosen start date (else the
+  earliest valid 1st) on the last slide, and the licensed-state count from Sanity on the agent slide. The
+  HTML's agent panel (⚙) goes away.
+- **"Confirm my details"** on the last slide turns the same tab into the intake form, without agent chrome
+  (no breadcrumb, meeting panel or owner-only questions); "Back to the presentation" returns to the deck.
+  An intake form reloads the saved answers when its tab comes back into view, so filling in one tab and then
+  the other never writes stale data over newer answers.
+- Agent IBO # lives in env `IMPACT_AGENT_IBO` (the repo is public, same rule as the NPN). Content is in code
+  (Isaac's choice); images from the HTML go to `public/images/impact/presentation/`. The sample member card is
+  fictional ("María Ejemplo").
+
+Verified (temporary harness page + headless Chrome over CDP, intake and meeting APIs mocked, no DB writes):
+- `tsc` and `pnpm build` pass;
+- all 9 slides in ES and EN at a 430×900 window, and letterboxed at 1280×800;
+- the slide survives a language switch (sessionStorage), the stage fits under the header, page scroll is locked;
+- "Confirm my details" shows the form with no breadcrumb, meeting panel or agent-notes step (6 steps, not 7), and
+  "Back to the presentation" returns to the deck;
+- the agent's form shows the meeting panel and the Presentation card, idle and "client joined"; the button links to
+  `…/presentation?lang=client` in a new tab;
+- returning to the form's tab reloads the saved answers once;
+- middleware sets `x-private-page` + `x-is-ads-landing` on the EN and ES deck URLs only, and a signed-out request
+  redirects to sign-in.
+Not verifiable locally: CrankWheel's "client joined" hook (needs a public https origin) and the CRM `spanish` tag
+lookup behind `lang=client`.
+
+Previous: **Impact intake trim** (branch `fix/impact-intake-trim`, merged `9e11a1a`, no migration). Isaac checked with Impact
 and doesn't need some of the questions. Removed from `/health-alternative/intake` (config only,
 `lib/intake-configs/health-alternative.ts`):
 - "Another phone number";

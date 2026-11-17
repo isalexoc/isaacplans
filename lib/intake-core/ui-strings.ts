@@ -244,6 +244,19 @@ export const UI = {
   empty: { en: "—", es: "—" } as Dict,
   notProvided: { en: "Not provided", es: "No proporcionado" } as Dict,
   household: { en: "Household", es: "Hogar" } as Dict,
+
+  // Impact presentation (agent's form)
+  presentationTitle: { en: "Impact presentation", es: "Presentación de Impact" } as Dict,
+  presentationBody: {
+    en: "Opens in a new tab, in the client's language. Share that tab in CrankWheel.",
+    es: "Se abre en una pestaña nueva, en el idioma del cliente. Comparta esa pestaña en CrankWheel.",
+  } as Dict,
+  presentationJoined: {
+    en: "The client is connected. Start the presentation.",
+    es: "El cliente está conectado. Comience la presentación.",
+  } as Dict,
+  presentationOpen: { en: "Open presentation", es: "Abrir presentación" } as Dict,
+  backToPresentation: { en: "Back to the presentation", es: "Volver a la presentación" } as Dict,
 } as const;
 
 export function tr(dict: Dict, locale: IntakeLocale): string {

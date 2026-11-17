@@ -36,6 +36,7 @@ export function useIntakeAutosave({
   const skipFirstRef = useRef(true);
   const lastSnapshotRef = useRef<string | null>(null);
   const savedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const inFlightRef = useRef(0);
 
   dataRef.current = data;
   onSavedRef.current = onSaved;
@@ -50,6 +51,7 @@ export function useIntakeAutosave({
 
   const persist = useCallback(async (): Promise<boolean> => {
     const generation = ++generationRef.current;
+    inFlightRef.current += 1;
     setStatus("pending");
     try {
       const payload = dataRef.current;
@@ -67,6 +69,8 @@ export function useIntakeAutosave({
       if (generation !== generationRef.current) return false;
       setStatus("error");
       return false;
+    } finally {
+      inFlightRef.current -= 1;
     }
   }, [lob, token]);
 
@@ -93,5 +97,16 @@ export function useIntakeAutosave({
     return persist();
   }, [persist]);
 
-  return { status, saveNow, isSaving: status === "pending" };
+  /** True when everything on screen is on the server: no unsaved edit, no save in flight. */
+  const isSynced = useCallback(
+    () => inFlightRef.current === 0 && JSON.stringify(dataRef.current) === lastSnapshotRef.current,
+    []
+  );
+
+  /** Take answers just read from the server as the saved state, so they aren't written back. */
+  const adoptSaved = useCallback((saved: IntakeData) => {
+    lastSnapshotRef.current = JSON.stringify(saved);
+  }, []);
+
+  return { status, saveNow, isSaving: status === "pending", isSynced, adoptSaved };
 }

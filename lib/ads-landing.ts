@@ -110,13 +110,30 @@ export function isAcaConfirmationPath(pathname: string | null | undefined): bool
   return ACA_CONFIRMATION_RE.test(pathname);
 }
 
+/**
+ * The Impact sales presentation, `/health-alternative/intake/<token>/presentation`
+ * (es: `/alternativa-de-salud/admision/<token>/presentacion`). Agent-only, but its tab is what the
+ * client watches through CrankWheel, so it gets the slim header (logo, phone, theme and the
+ * language switch that flips the deck) and no chat bubble. Middleware also marks it private, which
+ * keeps trackers and the admin gear off the client's screen.
+ */
+const IMPACT_PRESENTATION_RE =
+  /^(?:\/(?:en|es))?\/(?:health-alternative\/intake|alternativa-de-salud\/admision)\/[^/]+\/(?:presentation|presentacion)$/i;
+
+export function isImpactPresentationPath(pathname: string | null | undefined): boolean {
+  if (!pathname) return false;
+  return IMPACT_PRESENTATION_RE.test(pathname);
+}
+
 export function isAdsLandingPath(pathname: string | null | undefined): boolean {
   if (!pathname) return false;
   return (
     (ADS_LANDING_PATHNAMES as readonly string[]).includes(pathname) ||
     isAcaIntakeFormPath(pathname) ||
     isFeIntakeFormPath(pathname) ||
-    isAcaConfirmationPath(pathname)
+    isAcaConfirmationPath(pathname) ||
+    // Not in isIulBareLandingPath: the bare header drops the language switch the deck needs.
+    isImpactPresentationPath(pathname)
   );
 }
 

@@ -314,6 +314,7 @@ export const healthAlternativeIntake: IntakeLobConfig = {
   intakeSlug: { en: "health-alternative/intake", es: "alternativa-de-salud/admision" },
   sections,
   impactEnrollment: true,
+  impactPresentation: true,
   brandLogo: {
     src: "/images/impact/impact-health-sharing-logo.png",
     alt: "Impact Health Sharing",

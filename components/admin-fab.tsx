@@ -1,3 +1,4 @@
+import { headers } from "next/headers";
 import { Settings } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { getIsAdmin } from "@/lib/auth/admin";
@@ -11,6 +12,9 @@ import { getIsAdmin } from "@/lib/auth/admin";
  * visitors and regular signed-in users never see it.
  */
 export default async function AdminFab() {
+  // Private pages can be on a client's screen — the Impact presentation is shared through
+  // CrankWheel — so they never show admin chrome.
+  if ((await headers()).get("x-private-page") === "1") return null;
   const isAdmin = await getIsAdmin();
   if (!isAdmin) return null;
 
