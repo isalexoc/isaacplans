@@ -7,7 +7,54 @@
  * Client-only.
  */
 
-import type { ImpactQuote } from "./plans";
+import type { ImpactQuote, ImpactTierKey } from "./plans";
+
+/** A plan picked on a quote screen, on its way to the intake form's "Your plan". */
+export type PlanChoice = { tier: ImpactTierKey; monthly: number | null };
+
+const planKey = (scope: string) => `impact-plan:${scope}`;
+
+/**
+ * Remember (and broadcast) the plan picked on a quote screen. `scope` is the intake token for the
+ * CrankWheel deck — the agent's open form applies it at once — or "guide" for the self-serve page,
+ * whose visitor has no intake yet: the form they start next reads it on load.
+ */
+export function publishPlanChoice(scope: string, choice: PlanChoice): void {
+  try {
+    localStorage.setItem(planKey(scope), JSON.stringify(choice));
+  } catch {
+    /* storage blocked */
+  }
+  try {
+    const channel = new BroadcastChannel(planKey(scope));
+    channel.postMessage(choice);
+    channel.close();
+  } catch {
+    /* no BroadcastChannel */
+  }
+}
+
+export function readPlanChoice(scope: string): PlanChoice | null {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(planKey(scope)) ?? "null") as PlanChoice | null;
+    return parsed && typeof parsed.tier === "string" ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
+export function subscribePlanChoice(scope: string, onChoice: (choice: PlanChoice) => void): () => void {
+  try {
+    const channel = new BroadcastChannel(planKey(scope));
+    channel.onmessage = (event) => {
+      const choice = event.data as PlanChoice | null;
+      if (choice && typeof choice.tier === "string") onChoice(choice);
+    };
+    return () => channel.close();
+  } catch {
+    return () => {};
+  }
+}
 
 const key = (token: string) => `impact-quote:${token}`;
 

@@ -270,6 +270,15 @@ export const UI = {
   } as Dict,
   quoteLive: { en: "The presentation shows these prices.", es: "La presentación muestra estos precios." } as Dict,
   quoteMonthly: { en: "Monthly price ($)", es: "Precio mensual ($)" } as Dict,
+  planNote: {
+    en: "Every plan includes every benefit. Only your annual share (PRA) changes, if you have a large medical bill.",
+    es: "Todos los planes incluyen todos los beneficios. Solo cambia su parte anual (PRA), si tiene un gasto médico grande.",
+  } as Dict,
+  planPriceLater: {
+    en: "Prices show once the dates of birth are filled in.",
+    es: "Los precios aparecen cuando estén las fechas de nacimiento.",
+  } as Dict,
+  planMonthly: { en: "Monthly price:", es: "Precio mensual:" } as Dict,
 
   // Secure link — the panel the AGENT sees on the steps it covers
   capturePanelTitle: {

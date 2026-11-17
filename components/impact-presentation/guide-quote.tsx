@@ -11,6 +11,7 @@ import {
   type HouseholdSize,
   type ImpactPlan,
 } from "@/lib/impact-quote/plans";
+import { publishPlanChoice } from "@/lib/impact-quote/sync";
 import { AGENT, DECK_COPY, type DeckCopy, type DeckLocale } from "./copy";
 import { Glyph } from "./icons";
 
@@ -188,6 +189,15 @@ export default function GuideQuote({ locale }: { locale: DeckLocale }) {
 function Plans({ t, result, onChange }: { t: DeckCopy; result: Result; onChange: () => void }) {
   const q = t.quote;
   const [selected, setSelected] = useState<string>(RECOMMENDED_TIER);
+
+  /**
+   * What shows as chosen here arrives chosen on the application ("Your plan"), where it can still
+   * be changed: the highlighted plan counts from the start, not only after a tap.
+   */
+  useEffect(() => {
+    const plan = result.plans.find((p) => (p.tier ?? String(p.pra)) === selected);
+    if (plan?.tier) publishPlanChoice("guide", { tier: plan.tier, monthly: plan.monthly });
+  }, [result, selected]);
   return (
     <div className="mt-5">
       <div className="flex flex-wrap items-center justify-between gap-2">

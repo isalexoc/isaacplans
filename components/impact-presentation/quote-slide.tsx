@@ -10,7 +10,7 @@ import {
   type ImpactPlan,
   type ImpactQuote,
 } from "@/lib/impact-quote/plans";
-import { readStoredQuote, subscribeQuote } from "@/lib/impact-quote/sync";
+import { publishPlanChoice, readStoredQuote, subscribeQuote } from "@/lib/impact-quote/sync";
 import { DECK_COPY, type DeckCopy, type DeckLocale } from "./copy";
 import { Brandbar, Kicker, Slide, Title } from "./deck-parts";
 import { Glyph } from "./icons";
@@ -81,7 +81,11 @@ export default function QuoteSlide({
               plan={plan}
               t={t}
               selected={selected === (plan.tier ?? String(plan.pra))}
-              onSelect={() => setSelected(plan.tier ?? String(plan.pra))}
+              onSelect={() => {
+                setSelected(plan.tier ?? String(plan.pra));
+                // The client's pick goes straight into the agent's open form ("Your plan").
+                if (plan.tier) publishPlanChoice(token, { tier: plan.tier, monthly: plan.monthly });
+              }}
             />
           ))}
         </div>

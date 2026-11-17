@@ -2,8 +2,35 @@
 
 ## Status
 
-In progress: **Impact quote slide, member-portal slide, Urgent Care fee** (branch `feature/impact-quote-portal`, no
-migration). Both presentations (CrankWheel deck and `/impact` guide) now run: … fees → ID card → **portal** →
+In progress: **"Your plan" on the Health Coverage form + security hardening** (branch
+`feature/impact-plan-field-security`, no migration).
+- **"Your plan"** (`impactPlan`, required, first on the coverage step) + `impactMonthly` (money, beside it): four
+  cards priced live for the form's household (`/api/impact/quote`), Esencial recommended; the chosen plan's price
+  follows the quote (add a family member, it re-prices); the agent can type a price when there's no quote. Shown in
+  both views and in the summary. A plan picked on the CrankWheel deck lands live in the agent's open form
+  (BroadcastChannel `impact-plan:<token>`); the one shown on `/impact` is carried into the client's new application
+  (localStorage `impact-plan:guide`), never over a plan already chosen. App-only (`ha_plan_selected` was never
+  created in GHL); the agent notes' free-text "Plan selected" is gone for this line.
+- **Security review** (2026-11-17): AES-256-GCM field encryption, HTTPS/HSTS, 24-char device-bound 30-day intake
+  links, single-use secure links, no SSN/bank in the CRM for this line — all already in place. Fixed:
+  - **No third-party scripts on any page with client data** (`lib/private-pages.ts`): every line's intake (dashboard,
+    form, summary, deck), secure/document links, the ACA signing page, /admin. Meta Pixel, GA and the CRM's chat,
+    tracking and form capture loaded on the forms where clients type an SSN; none fired conversions. Middleware marks
+    them `x-private-page`; the Pixel page view, CRM chat/tracking and GA (opt-out flag) also stand down after a
+    client-side navigation into one.
+  - **Browser protections**: `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy` site-wide
+    (next.config); private pages also refuse other sites' frames (`X-Frame-Options: SAMEORIGIN`,
+    `frame-ancestors 'self'`) and send `X-Robots-Tag: noindex`.
+  - Isaac's choices: keep sensitive data encrypted (no purge), no masking change while presenting. His to do: 2FA on
+    his Clerk account; mark `INTAKE_ENCRYPTION_KEY` as a Sensitive env var in Vercel.
+
+Verified: `tsc` and `pnpm build` pass; config/sanitize/private-path checks (15 private paths, 10 public ones incl.
+`/es/seguro-de-vida`, `/impacto`); headers on a form vs public pages; the form's HTML carries no Pixel, GA or CRM
+script while `/impacto` keeps GA; headless Chrome (APIs mocked): the agent form receives Plus from a deck pick and
+saves `plus|364.00`, a client form opens with the `/impact` pick and saves `esencial|306.00`.
+
+Done: **Impact quote slide, member-portal slide, Urgent Care fee** (branch `feature/impact-quote-portal`, merged
+`60ff5db`, no migration). Both presentations (CrankWheel deck and `/impact` guide) now run: … fees → ID card → **portal** →
 **quote** → next steps (11 screens).
 - **Urgent Care $75** gets its own fee tile (Impact's FAQ, 2026-11-17: office $50, specialist/outpatient $75, urgent
   care $75, ER/inpatient $150); the specialist tile no longer says "urgent care".
