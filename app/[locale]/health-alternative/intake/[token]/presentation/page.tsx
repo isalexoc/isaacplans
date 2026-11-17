@@ -26,6 +26,16 @@ import {
   toIso,
 } from "@/lib/intake-core/month-start";
 import { resolveCrmContactLocale } from "@/lib/iul-intake/server";
+import { decryptIntakeData } from "@/lib/intake-core/sensitive";
+import type { IntakeData } from "@/lib/intake-core/types";
+import {
+  ageOn,
+  householdFromIntake,
+  householdSize,
+  SENIOR_AGE,
+  type ImpactQuote,
+} from "@/lib/impact-quote/plans";
+import { fetchImpactPlans } from "@/lib/impact-quote/server";
 import { getLicensedStateCount } from "@/lib/licensed-states";
 import ImpactPresentation from "@/components/impact-presentation/impact-presentation";
 import { buildImpactSlides } from "@/components/impact-presentation/slides";
@@ -55,6 +65,22 @@ function coverageStart(row: IntakeSessionRow, locale: DeckLocale): string {
     ? picked
     : toIso(earliestMonthStart(businessToday(), IMPACT_LAST_PAYMENT_DAY));
   return formatIsoLong(iso, locale);
+}
+
+/**
+ * Impact's prices for the household the intake describes (how many people, the oldest birth
+ * date), or null when the form doesn't say yet or Impact's service is down. The agent's quote
+ * panel can always supply prices afterwards.
+ */
+async function initialQuote(row: IntakeSessionRow): Promise<ImpactQuote | null> {
+  const config = requireIntakeConfig("health-alternative");
+  const data = decryptIntakeData(config, (row.data ?? {}) as IntakeData);
+  const { people, oldestDob } = householdFromIntake(data);
+  if (!oldestDob) return null;
+  const oldestAge = ageOn(oldestDob);
+  const members = oldestAge !== null && oldestAge >= SENIOR_AGE ? 1 : householdSize(people);
+  const plans = await fetchImpactPlans(oldestDob, members);
+  return plans ? { plans, members, oldestAge, source: "impact" } : null;
 }
 
 async function licensedStates(): Promise<number> {
@@ -103,6 +129,8 @@ export default async function ImpactPresentationPage({
     startDate: coverageStart(row, locale),
     licensedStates: await licensedStates(),
     agentIbo: process.env.IMPACT_AGENT_IBO?.trim() || null,
+    token,
+    quote: await initialQuote(row),
   });
 
   return <ImpactPresentation token={token} locale={locale} slides={slides} />;

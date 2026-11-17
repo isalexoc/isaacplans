@@ -94,11 +94,27 @@ const GLYPHS = {
       <path d="M14 2v6h6M8 13h8M8 17h5" />
     </>
   ),
+  idCard: (
+    <>
+      <rect x="3" y="5" width="18" height="14" rx="2" />
+      <circle cx="9" cy="11" r="2" />
+      <path d="M6.5 16h5M14 10h4M14 14h3" />
+    </>
+  ),
+  payCard: (
+    <>
+      <rect x="2.5" y="5" width="19" height="14" rx="2" />
+      <path d="M2.5 10h19M6 15h4" />
+    </>
+  ),
   check: <path d="M5 12l5 5 9-10" />,
   arrowRight: <path d="M5 12h14M13 6l6 6-6 6" />,
 } as const;
 
 export type GlyphName = keyof typeof GLYPHS;
+
+/** One icon per `copy.portal.features` entry, in order (card, bills, telehealth, payments, sharing). */
+export const PORTAL_ICONS: GlyphName[] = ["idCard", "bill", "phonePlus", "payCard", "heart"];
 
 export function Glyph({
   name,

@@ -3,6 +3,7 @@
 import { CheckCircle2, ExternalLink, Presentation } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import MeetingPanel from "@/components/crankwheel/meeting-panel";
+import ImpactQuotePanel from "@/components/intake/impact-quote-panel";
 import { OUTLINE_BTN } from "@/components/intake-ui";
 import { useCrankwheelMeeting } from "@/hooks/use-crankwheel-meeting";
 import { UI, tr, type IntakeLocale } from "@/lib/intake-core/ui-strings";
@@ -22,10 +23,13 @@ import type { IntakeSession } from "@/lib/intake-core/types";
 export default function ImpactPresentationBar({
   token,
   session,
+  data,
   locale,
 }: {
   token: string;
   session: IntakeSession;
+  /** The live answers: the quote reads the household from them. */
+  data: Record<string, unknown>;
   locale: IntakeLocale;
 }) {
   const meeting = useCrankwheelMeeting({
@@ -98,6 +102,8 @@ export default function ImpactPresentationBar({
           {tr(UI.presentationOpen, locale)}
         </Link>
       </div>
+
+      <ImpactQuotePanel token={token} data={data} locale={locale} />
     </>
   );
 }

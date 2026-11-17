@@ -12,7 +12,9 @@ import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { Link } from "@/i18n/navigation";
 import { AGENT, DECK_COPY, TELEHEALTH_NAME, type DeckCopy, type DeckLocale } from "./copy";
-import { Glyph, type GlyphName } from "./icons";
+import { Glyph, PORTAL_ICONS, type GlyphName } from "./icons";
+import GuideQuote from "./guide-quote";
+import PortalMockup from "./portal-mockup";
 
 const IMG = "/images/impact/presentation";
 
@@ -277,13 +279,12 @@ function More({ t }: { t: DeckCopy }) {
 
 /* ─── 7. Provider fees ──────────────────────────────────────────────────────── */
 
-function Fee({ value, what, sub, zero, wide }: { value: string; what: ReactNode; sub?: string; zero?: boolean; wide?: boolean }) {
+function Fee({ value, what, sub, zero }: { value: string; what: ReactNode; sub?: string; zero?: boolean }) {
   return (
     <div
       className={cn(
         "rounded-3xl border px-4 py-5 text-center",
-        zero ? "border-[#bfe7e0] bg-[#d6f2ee]" : "border-[#e6e9ef] bg-white",
-        wide && "col-span-2 flex items-center justify-center gap-4 text-left"
+        zero ? "border-[#bfe7e0] bg-[#d6f2ee]" : "border-[#e6e9ef] bg-white"
       )}
     >
       <p className={cn("text-4xl font-extrabold leading-none", zero ? "text-[#2f97a0]" : "text-[#0b2a4a]")}>
@@ -291,7 +292,7 @@ function Fee({ value, what, sub, zero, wide }: { value: string; what: ReactNode;
         {value}
       </p>
       <div>
-        <p className={cn("text-base font-bold leading-snug text-[#14243a]", !wide && "mt-2")}>{what}</p>
+        <p className="mt-2 text-base font-bold leading-snug text-[#14243a]">{what}</p>
         {sub && <p className="mt-0.5 text-sm text-[#56657a]">{sub}</p>}
       </div>
     </div>
@@ -309,7 +310,8 @@ function Fees({ t }: { t: DeckCopy }) {
         <Fee value="0" zero what={f.wellness.what} sub={f.wellness.sub} />
         <Fee value="50" what={f.primary.what} sub={f.primary.sub} />
         <Fee value="75" what={f.specialist.what} sub={f.specialist.sub} />
-        <Fee value="150" wide what={`${f.emergency[0]} ${f.emergency[1]}`} />
+        <Fee value="75" what={f.urgentCare.what} sub={f.urgentCare.sub} />
+        <Fee value="150" what={`${f.emergency[0]} ${f.emergency[1]}`} />
       </div>
       <p className="mt-3 rounded-3xl bg-[#0b2a4a] px-5 py-4 text-base leading-relaxed text-white">
         <b className="text-[#ff8f74]">{f.howLabel}</b> {f.how}
@@ -342,6 +344,32 @@ function MemberCard({ t }: { t: DeckCopy }) {
             )}
             <Image src={src} alt={label} width={1200} height={height} sizes="(min-width: 640px) 640px, 100vw" className="block h-auto w-full rounded-2xl" />
           </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ─── The member portal ─────────────────────────────────────────────────────── */
+
+function Portal({ t, locale }: { t: DeckCopy; locale: DeckLocale }) {
+  return (
+    <div>
+      <Kicker>{t.portal.kicker}</Kicker>
+      <Title>{t.portal.title}</Title>
+      <Lead>{t.portal.lead}</Lead>
+      <div className="mt-6 flex justify-center">
+        <PortalMockup locale={locale} />
+      </div>
+      <div className="mt-6 space-y-3">
+        {t.portal.features.map((feature, i) => (
+          <Card key={feature.title} className="flex items-start gap-3 p-4">
+            <IconTile icon={PORTAL_ICONS[i] ?? "check"} />
+            <div>
+              <h3 className="text-lg font-bold leading-snug text-[#0b2a4a]">{feature.title}</h3>
+              <p className="mt-0.5 text-[15px] leading-relaxed text-[#56657a]">{feature.body}</p>
+            </div>
+          </Card>
         ))}
       </div>
     </div>
@@ -392,6 +420,8 @@ export function buildGuideSteps(data: GuideData): ReactNode[] {
     <More key="more" t={t} />,
     <Fees key="fees" t={t} />,
     <MemberCard key="card" t={t} />,
+    <Portal key="portal" t={t} locale={data.locale} />,
+    <GuideQuote key="quote" locale={data.locale} />,
     <NextSteps key="next" t={t} startDate={data.startDate} />,
   ];
 }

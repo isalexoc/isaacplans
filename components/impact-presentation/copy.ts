@@ -72,6 +72,7 @@ export type DeckCopy = {
     wellness: { what: string; sub: string };
     primary: { what: string; sub: string };
     specialist: { what: string; sub: string };
+    urgentCare: { what: string; sub: string };
     emergency: [string, string];
     howLabel: string;
     how: string;
@@ -87,6 +88,39 @@ export type DeckCopy = {
     ];
     cta: string;
     disclaimer: string;
+  };
+  /** The Member Center (impact.mysharable.com), drawn as an illustration (portal-mockup.tsx). */
+  portal: {
+    kicker: string;
+    title: string;
+    lead: string;
+    features: { title: string; body: string }[];
+  };
+  /** "Your options": the four programs at this household's prices (lib/impact-quote). */
+  quote: {
+    kicker: string;
+    title: string;
+    household: (members: 1 | 2 | 3, age: number | null) => string;
+    allIncludedTitle: string;
+    allIncluded: [string, string, string, string, string, string];
+    recommended: string;
+    perMonth: string;
+    perDay: (amount: string) => string;
+    pra: string;
+    then: string;
+    max: string;
+    note: string;
+    fee: string;
+    pending: string;
+    names: Record<"esencial" | "plus" | "premium" | "total", { name: string; tagline: string }>;
+    senior: string;
+    under18: string;
+    membersQuestion: string;
+    members: [string, string, string];
+    dobQuestion: string;
+    see: string;
+    change: string;
+    error: string;
   };
   /** The self-serve guide (`/impact`): the same story, walked alone, ending in "Apply now". */
   guide: {
@@ -205,7 +239,8 @@ const ES: DeckCopy = {
     telehealth: { what: "Telemedicina 24/7", sub: "y teleterapia" },
     wellness: { what: "Chequeo anual", sub: "+ $150 en laboratorios" },
     primary: { what: "Médico primario", sub: "y pruebas de alergia" },
-    specialist: { what: "Especialista", sub: "urgencias y ambulatorio" },
+    specialist: { what: "Especialista", sub: "y servicios ambulatorios" },
+    urgentCare: { what: "Urgent Care", sub: "centros de urgencia, sin cita" },
     emergency: ["Emergencia u", "hospitalización"],
     howLabel: "¿Cómo funciona?",
     how: "Paga su copago fijo en la visita y su médico le envía la factura a Impact. Luego aplica su PRA y, después, el 90/10 con tope de $5,000 al año.",
@@ -236,6 +271,55 @@ const ES: DeckCopy = {
     cta: "Confirmar mis datos",
     disclaimer:
       "Impact Health Sharing es una organización sin fines de lucro 501(c)(3). No es un seguro. Divulgaciones por estado: impacthealthsharing.com/disclosures",
+  },
+  portal: {
+    kicker: "Su portal de miembro",
+    title: "Todo su plan, en su teléfono",
+    lead: "En el Member Center de Impact usted ve y controla su membresía las 24 horas, desde el teléfono o la computadora.",
+    features: [
+      { title: "Su tarjeta digital", body: "Véala, imprímala o guárdela en PDF cuando la necesite." },
+      {
+        title: "Sus facturas",
+        body: "Envíe una factura con una foto y siga cada una: enviada, en proceso o completada, con su explicación.",
+      },
+      { title: "Telemedicina y medicinas", body: "Consulte a un médico 24/7 y compare precios de medicinas en farmacias." },
+      { title: "Pagos y bienestar", body: "Pague su aporte, active el pago automático y envíe sus recibos de premios de bienestar." },
+      { title: "Personas ayudando a personas", body: "Vea a quién ayuda su aporte y envíe mensajes de ánimo a otros miembros." },
+    ],
+  },
+  quote: {
+    kicker: "Su cotización",
+    title: "Elija su plan",
+    household: (members, age) =>
+      [members === 1 ? "1 persona" : members === 2 ? "2 personas" : "3 personas o más", age !== null ? `Mayor: ${age} años` : ""]
+        .filter(Boolean)
+        .join(" · "),
+    allIncludedTitle: "Todos los planes incluyen todos los beneficios",
+    allIncluded: ["Telemedicina $0", "Chequeo anual $0", "Dental y visión", "Medicinas", "Red abierta", "Maternidad"],
+    recommended: "★ RECOMENDADO",
+    perMonth: "/mes",
+    perDay: (amount) => `≈ ${amount} al día`,
+    pra: "Su parte anual",
+    then: "Luego",
+    max: "Máximo al año",
+    note: "Lo único que cambia es su parte anual (PRA) si tiene un gasto médico grande. Los beneficios y los copagos son los mismos en los cuatro planes.",
+    fee: "+ $79 de inscripción, una sola vez por familia",
+    pending: "Su cotización está casi lista.",
+    names: {
+      esencial: { name: "Esencial", tagline: "El menor aporte mensual" },
+      plus: { name: "Plus", tagline: "Protección con ahorro" },
+      premium: { name: "Premium", tagline: "El balance perfecto" },
+      total: { name: "Total", tagline: "Máxima tranquilidad" },
+    },
+    senior: "Programa Senior de Impact (65+): una membresía por persona, con Medicare partes A y B.",
+    under18:
+      "Para menores de 18 años, un adulto crea una «membresía de tutor» y la paga. El precio es el mismo para todas las edades hasta los 18.",
+    membersQuestion: "¿Cuántas personas va a cubrir?",
+    members: ["Solo yo", "2 personas", "3 o más"],
+    dobQuestion: "Fecha de nacimiento de la persona mayor",
+    see: "Ver mis precios",
+    change: "Cambiar mis datos",
+    error: "No pudimos traer los precios ahora. Escríbale a Isaac por WhatsApp y le envía su cotización.",
   },
   guide: {
     intro: "Una presentación de 2 minutos. Toque «Comenzar» y avance a su ritmo.",
@@ -365,7 +449,8 @@ const EN: DeckCopy = {
     telehealth: { what: "24/7 Telehealth", sub: "and teletherapy" },
     wellness: { what: "Annual wellness visit", sub: "+ $150 in labs" },
     primary: { what: "Primary care", sub: "and allergy tests" },
-    specialist: { what: "Specialist", sub: "urgent care & outpatient" },
+    specialist: { what: "Specialist", sub: "and outpatient services" },
+    urgentCare: { what: "Urgent care", sub: "walk-in clinics" },
     emergency: ["ER or", "hospital stay"],
     howLabel: "How it works:",
     how: "pay the flat fee at the visit and your provider bills Impact. Then your PRA applies, and after that it's 90/10 with a $5,000 annual cap.",
@@ -392,6 +477,52 @@ const EN: DeckCopy = {
     cta: "Confirm my details",
     disclaimer:
       "Impact Health Sharing is a 501(c)(3) nonprofit. It is not insurance. State disclosures: impacthealthsharing.com/disclosures",
+  },
+  portal: {
+    kicker: "Your member portal",
+    title: "Your whole plan, on your phone",
+    lead: "In Impact's Member Center you see and manage your membership 24/7, from your phone or computer.",
+    features: [
+      { title: "Your digital ID card", body: "See it, print it or save it as a PDF whenever you need it." },
+      { title: "Your bills", body: "Send a bill with a photo and follow each one: submitted, processing or completed, with its explanation." },
+      { title: "Telehealth & prescriptions", body: "See a doctor 24/7 and compare prescription prices across pharmacies." },
+      { title: "Payments & wellness", body: "Pay your share, turn on AutoPay and send your Wellness Rewards receipts." },
+      { title: "People helping people", body: "See whose bills your share helps and send encouragement to other members." },
+    ],
+  },
+  quote: {
+    kicker: "Your quote",
+    title: "Choose your plan",
+    household: (members, age) =>
+      [members === 1 ? "1 person" : members === 2 ? "2 people" : "3 or more people", age !== null ? `Oldest: ${age}` : ""]
+        .filter(Boolean)
+        .join(" · "),
+    allIncludedTitle: "Every plan includes every benefit",
+    allIncluded: ["$0 telehealth", "$0 annual checkup", "Dental & vision", "Prescriptions", "No network limits", "Maternity"],
+    recommended: "★ RECOMMENDED",
+    perMonth: "/mo",
+    perDay: (amount) => `≈ ${amount} a day`,
+    pra: "Your annual share",
+    then: "Then",
+    max: "Annual max",
+    note: "The only difference is your annual share (PRA) if you have a large medical bill. Benefits and provider fees are the same in all four plans.",
+    fee: "+ $79 enrollment fee, once per family",
+    pending: "Your quote is almost ready.",
+    names: {
+      esencial: { name: "Essential", tagline: "Lowest monthly share" },
+      plus: { name: "Plus", tagline: "Protection with savings" },
+      premium: { name: "Premium", tagline: "The perfect balance" },
+      total: { name: "Total", tagline: "Maximum peace of mind" },
+    },
+    senior: "Impact Senior Program (65+): one membership per person, with Medicare Parts A and B.",
+    under18:
+      "For anyone under 18, an adult sets up a “Guardian Membership” and pays for it. Pricing is the same for all ages up to 18.",
+    membersQuestion: "How many people will be covered?",
+    members: ["Just me", "2 people", "3 or more"],
+    dobQuestion: "Date of birth of the oldest person",
+    see: "See my prices",
+    change: "Change my answers",
+    error: "We couldn't get the prices right now. Message Isaac on WhatsApp and he'll send your quote.",
   },
   guide: {
     intro: "A 2-minute presentation. Tap “Start” and go at your own pace.",

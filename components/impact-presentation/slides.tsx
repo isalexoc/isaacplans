@@ -10,13 +10,13 @@
 import Image from "next/image";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import type { ImpactQuote } from "@/lib/impact-quote/plans";
 import { AGENT, DECK_COPY, TELEHEALTH_NAME, type DeckCopy, type DeckLocale } from "./copy";
-import { Glyph, type GlyphName } from "./icons";
+import { Brandbar, IMG, Kicker, Lead, LOGO_WHITE, Slide, Title } from "./deck-parts";
+import { Glyph, PORTAL_ICONS, type GlyphName } from "./icons";
 import ConfirmDetailsButton from "./confirm-details-button";
-
-const IMG = "/images/impact/presentation";
-const LOGO_WHITE = { src: `${IMG}/logo-white.png`, width: 409, height: 112 };
-const LOGO_COLOR = { src: `${IMG}/logo-color.png`, width: 306, height: 81 };
+import PortalMockup from "./portal-mockup";
+import QuoteSlide from "./quote-slide";
 
 export type DeckData = {
   locale: DeckLocale;
@@ -28,63 +28,11 @@ export type DeckData = {
   licensedStates: number;
   /** Impact IBO number (env `IMPACT_AGENT_IBO`); null shows a dash. */
   agentIbo: string | null;
+  /** The intake's token, for the live quote the agent pushes from the form. */
+  token: string;
+  /** Impact's prices for this household at render time, or null (the agent supplies them). */
+  quote: ImpactQuote | null;
 };
-
-/* ─── building blocks ───────────────────────────────────────────────────────── */
-
-function Slide({ dark, className, children }: { dark?: boolean; className?: string; children: ReactNode }) {
-  return (
-    <section
-      className={cn(
-        "absolute inset-0 flex flex-col px-[56px] pb-[120px] pt-[90px]",
-        dark ? "bg-[#0b2a4a] text-white" : "bg-[#fbf6f2] text-[#14243a]",
-        className
-      )}
-    >
-      {children}
-    </section>
-  );
-}
-
-function Kicker({ children }: { children: ReactNode }) {
-  return (
-    <div className="mb-[14px] text-[22px] font-bold uppercase tracking-[.12em] text-[#f2735a]">{children}</div>
-  );
-}
-
-function Title({ dark, children }: { dark?: boolean; children: ReactNode }) {
-  return (
-    <h2
-      className={cn(
-        "text-[62px] font-extrabold leading-[1.06] tracking-[-.01em]",
-        dark ? "text-white" : "text-[#0b2a4a]"
-      )}
-    >
-      {children}
-    </h2>
-  );
-}
-
-function Lead({ children }: { children: ReactNode }) {
-  return <p className="mt-[22px] text-[29px] leading-[1.45] text-[#56657a]">{children}</p>;
-}
-
-function Brandbar({ dark, page, note }: { dark?: boolean; page: string; note?: string }) {
-  const logo = dark ? LOGO_WHITE : LOGO_COLOR;
-  return (
-    <div
-      className={cn(
-        "absolute bottom-[40px] left-[56px] right-[56px] z-[5] flex items-center justify-between text-[18px]",
-        dark ? "text-white/65" : "text-[#56657a]"
-      )}
-    >
-      <Image src={logo.src} alt="" width={logo.width} height={logo.height} className="h-[56px] w-auto" />
-      {note && <span className="text-[16px]">{note}</span>}
-      <span>{page}</span>
-    </div>
-  );
-}
-
 /* ─── 1. Welcome ────────────────────────────────────────────────────────────── */
 
 function WelcomeSlide({ t, firstName }: { t: DeckCopy; firstName: string }) {
@@ -400,7 +348,7 @@ function Amount({ value, zero }: { value: string; zero?: boolean }) {
   );
 }
 
-function Fee({ value, what, sub, zero }: { value: string; what: string; sub: string; zero?: boolean }) {
+function Fee({ value, what, sub, zero }: { value: string; what: ReactNode; sub: string; zero?: boolean }) {
   return (
     <div
       className={cn(
@@ -426,14 +374,18 @@ function FeesSlide({ t, page }: { t: DeckCopy; page: string }) {
         <Fee value="0" zero what={f.wellness.what} sub={f.wellness.sub} />
         <Fee value="50" what={f.primary.what} sub={f.primary.sub} />
         <Fee value="75" what={f.specialist.what} sub={f.specialist.sub} />
-        <div className="col-span-2 flex items-center justify-center gap-[30px] rounded-[26px] border border-[#e6e9ef] bg-white px-[24px] py-[30px] text-left">
-          <Amount value="150" />
-          <div className="text-[26px] font-bold leading-[1.25] text-[#14243a]">
-            {f.emergency[0]}
-            <br />
-            {f.emergency[1]}
-          </div>
-        </div>
+        <Fee value="75" what={f.urgentCare.what} sub={f.urgentCare.sub} />
+        <Fee
+          value="150"
+          what={
+            <>
+              {f.emergency[0]}
+              <br />
+              {f.emergency[1]}
+            </>
+          }
+          sub=""
+        />
       </div>
       <div className="mt-[22px] rounded-[24px] bg-[#0b2a4a] px-[32px] py-[28px] text-[24px] leading-[1.45] text-white">
         <b className="text-[#ff8f74]">{f.howLabel}</b> {f.how}
@@ -506,6 +458,39 @@ function CardSlide({ t, page }: { t: DeckCopy; page: string }) {
   );
 }
 
+/* ─── The member portal ─────────────────────────────────────────────────────── */
+
+function PortalSlide({ t, locale, page }: { t: DeckCopy; locale: DeckLocale; page: string }) {
+  return (
+    <Slide>
+      <Kicker>{t.portal.kicker}</Kicker>
+      <Title>{t.portal.title}</Title>
+      <Lead>{t.portal.lead}</Lead>
+      <div className="mt-[36px] flex items-start gap-[30px]">
+        <div className="relative h-[736px] w-[368px] flex-none">
+          <div className="absolute left-0 top-0 origin-top-left scale-[1.15]">
+            <PortalMockup locale={locale} />
+          </div>
+        </div>
+        <div className="grid gap-[16px]">
+          {t.portal.features.map((feature, i) => (
+            <div key={feature.title} className="flex items-start gap-[16px]">
+              <span className="flex h-[56px] w-[56px] flex-none items-center justify-center rounded-[16px] bg-[#d6f2ee] text-[#0b2a4a]">
+                <Glyph name={PORTAL_ICONS[i] ?? "check"} className="h-[30px] w-[30px]" />
+              </span>
+              <div>
+                <h3 className="text-[25px] font-bold leading-[1.2] text-[#0b2a4a]">{feature.title}</h3>
+                <p className="mt-[4px] text-[19px] leading-[1.4] text-[#56657a]">{feature.body}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+      <Brandbar page={page} />
+    </Slide>
+  );
+}
+
 /* ─── 9. Next steps ─────────────────────────────────────────────────────────── */
 
 function NextSlide({ t, startDate, page }: { t: DeckCopy; startDate: string; page: string }) {
@@ -539,20 +524,24 @@ function NextSlide({ t, startDate, page }: { t: DeckCopy; startDate: string; pag
 
 /* ─── the deck ──────────────────────────────────────────────────────────────── */
 
-/** The slides in order, each keyed and numbered. */
+/**
+ * The slides in order, each keyed and numbered. The quote sits right before "Next steps": the
+ * client sees the price once they've seen everything it buys.
+ */
 export function buildImpactSlides(data: DeckData): ReactNode[] {
   const t = DECK_COPY[data.locale];
-  const total = 9;
-  const page = (n: number) => `${n} / ${total}`;
-  return [
-    <WelcomeSlide key="welcome" t={t} firstName={data.firstName} />,
-    <AgentSlide key="agent" t={t} data={data} page={page(2)} />,
-    <WhatSlide key="what" t={t} page={page(3)} />,
-    <BenefitsSlide key="benefits" t={t} page={page(4)} />,
-    <Benefits2Slide key="benefits2" t={t} page={page(5)} />,
-    <MoreSlide key="more" t={t} page={page(6)} />,
-    <FeesSlide key="fees" t={t} page={page(7)} />,
-    <CardSlide key="card" t={t} page={page(8)} />,
-    <NextSlide key="next" t={t} startDate={data.startDate} page={page(9)} />,
+  const order: ((page: string) => ReactNode)[] = [
+    () => <WelcomeSlide key="welcome" t={t} firstName={data.firstName} />,
+    (page) => <AgentSlide key="agent" t={t} data={data} page={page} />,
+    (page) => <WhatSlide key="what" t={t} page={page} />,
+    (page) => <BenefitsSlide key="benefits" t={t} page={page} />,
+    (page) => <Benefits2Slide key="benefits2" t={t} page={page} />,
+    (page) => <MoreSlide key="more" t={t} page={page} />,
+    (page) => <FeesSlide key="fees" t={t} page={page} />,
+    (page) => <CardSlide key="card" t={t} page={page} />,
+    (page) => <PortalSlide key="portal" t={t} locale={data.locale} page={page} />,
+    (page) => <QuoteSlide key="quote" locale={data.locale} token={data.token} initial={data.quote} page={page} />,
+    (page) => <NextSlide key="next" t={t} startDate={data.startDate} page={page} />,
   ];
+  return order.map((slide, i) => slide(`${i + 1} / ${order.length}`));
 }

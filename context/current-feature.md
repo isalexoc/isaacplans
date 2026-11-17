@@ -2,6 +2,34 @@
 
 ## Status
 
+In progress: **Impact quote slide, member-portal slide, Urgent Care fee** (branch `feature/impact-quote-portal`, no
+migration). Both presentations (CrankWheel deck and `/impact` guide) now run: … fees → ID card → **portal** →
+**quote** → next steps (11 screens).
+- **Urgent Care $75** gets its own fee tile (Impact's FAQ, 2026-11-17: office $50, specialist/outpatient $75, urgent
+  care $75, ER/inpatient $150); the specialist tile no longer says "urgent care".
+- **Quote ("Choose your plan")**: the four programs named Esencial / Plus / Premium / Total (PRA $10k / $7.5k /
+  $5k / $2.5k, Isaac's names), the cheapest marked "★ Recommended" and biggest; "every plan includes every benefit"
+  first; per-day price; PRA, 90/10 and annual max (PRA + $5,000) per plan; "+ $79 once per family".
+- **Prices from Impact's own quote service** (`api.impacthealthsharing.com/api/v1/price?dateOfBirth&groupTypeId`, what
+  Impact's public quote page calls; not a published partner API — Isaac chose it 2026-11-17, with typed prices as the
+  fallback). `lib/impact-quote/server.ts` (6 s timeout, cached a day per input, fails soft) behind public
+  `GET /api/impact/quote?dob&members`. groupTypeId 1/2/3 = 1, 2, 3+; 65+ = Impact's Senior Program, one person.
+- **Deck**: the page quotes the intake's household on render (applicant + added people, oldest birth date). The
+  agent's form has an "Impact quote" panel (one click to re-quote, four editable prices); it publishes to the
+  presentation tab over BroadcastChannel + localStorage, so typed prices show at once on the shared screen.
+- **Guide**: the quote screen asks two things (how many people, the oldest's birth date) and shows the plans; on
+  failure, WhatsApp.
+- **Portal slide**: a drawn phone (labelled illustration, sample member "María Ejemplo") + five features, all from
+  Impact's Help Center: digital card (print/PDF), bill submission and tracking with the EOS, telehealth + Rx price
+  tool, payments/AutoPay + Wellness Rewards receipts, ShareStream. PRA progress is NOT shown: Impact says it has no
+  visibility into whether a PRA was paid. No Impact app exists (web portal at impact.mysharable.com).
+
+Verified: `tsc` and `pnpm build` pass; the local route returned Impact's real prices for the screenshot household
+($306/$364/$421/$479, oldest 39) and rejects a bad date; headless Chrome (quote API and intake mocked): deck fees,
+portal and quote slides in ES/EN at 430×900 and 1280×800, a typed-price broadcast updating the open deck, the
+guide's form → plans and portal screens at 390×844, the agent panel reading "2 personas · Mayor: 39 años" and
+publishing.
+
 Done: **Self-serve Impact presentation** (branch `feature/impact-self-serve-presentation`, merged `5df1a78`, no
 migration). For
 leads Isaac can't get on a call: one general link (`isaacplans.com/impact`, es `/impacto`) he shares by WhatsApp or
