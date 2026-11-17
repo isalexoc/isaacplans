@@ -1,11 +1,4 @@
-import type {
-  IntakeField,
-  IntakeLobConfig,
-  IntakeOption,
-  IntakeSection,
-  RepeaterRow,
-  ShowIfCondition,
-} from "@/lib/intake-core/types";
+import type { IntakeField, IntakeLobConfig, IntakeOption, IntakeSection, RepeaterRow } from "@/lib/intake-core/types";
 import { US_STATE_OPTIONS } from "@/lib/get-covered-fast/us-states";
 import { ancillarySections } from "./_shared";
 import {
@@ -24,7 +17,7 @@ import {
  *    serve, so a Social Security number alone would turn away the exact prospect it is for;
  *    the ITIN keeps the door open. Added people may have neither (a newborn, say);
  *  - a valid, unexpired photo ID (type, number, issuing state, issue and expiration dates) for
- *    the applicant and a spouse or domestic partner. Children don't need one;
+ *    the applicant only. Impact confirmed no other member needs one;
  *  - a start date that can only be the 1st of a month, and a payment day from 1 to 28, checked
  *    against each other (see impact-schedule.ts);
  *  - the one-time $79 enrollment fee, stated before the client gives payment details.
@@ -46,7 +39,7 @@ const ID_TYPE_OR_NONE: IntakeOption[] = [
 
 const HAS_ID_NUMBER = ["SSN", "ITIN"];
 
-// ── Photo ID: Impact needs a valid, unexpired one for the applicant and a spouse ──
+// ── Photo ID: Impact needs a valid, unexpired one for the applicant (no other member) ──
 
 const PHOTO_ID_OPTIONS: IntakeOption[] = [
   { value: "Driver's license", labelEn: "Driver's license", labelEs: "Licencia de conducir" },
@@ -66,69 +59,54 @@ const ID_STATE_OPTIONS: IntakeOption[] = [...US_STATE_OPTIONS, { code: "PR", nam
   .sort((a, b) => a.name.localeCompare(b.name))
   .map(({ code, name }) => ({ value: code, labelEn: name, labelEs: name }));
 
-const SPOUSE = ["Spouse", "Domestic partner"];
-
-/**
- * The five ID questions. `onlyIf` is the extra condition every one of them needs (in a person
- * row: "is a spouse"), so a child never sees them.
- */
-function photoIdFields(onlyIf?: ShowIfCondition): IntakeField[] {
-  const when = (extra?: ShowIfCondition): IntakeField["showIf"] => {
-    const all = [onlyIf, extra].filter((c): c is ShowIfCondition => Boolean(c));
-    return all.length ? all : undefined;
-  };
-  return [
-    {
-      key: "idDocType",
-      labelEn: "Type of ID",
-      labelEs: "Tipo de identificación",
-      type: "select",
-      required: true,
-      options: PHOTO_ID_OPTIONS,
-      showIf: when(),
-    },
-    {
-      key: "idDocNumber",
-      labelEn: "ID number",
-      labelEs: "Número de identificación",
-      type: "text",
-      required: true,
-      sensitive: true,
-      maxLength: 25,
-      showIf: when(),
-    },
-    {
-      key: "idDocState",
-      labelEn: "State where it was issued",
-      labelEs: "Estado que la emitió",
-      type: "select",
-      required: true,
-      options: ID_STATE_OPTIONS,
-      showIf: when({ field: "idDocType", equals: STATE_ISSUED_IDS }),
-    },
-    {
-      key: "idDocIssueDate",
-      labelEn: "Issue date",
-      labelEs: "Fecha de emisión",
-      type: "dateParts",
-      required: true,
-      yearsBack: 40,
-      dateRule: "past",
-      showIf: when(),
-    },
-    {
-      key: "idDocExpiration",
-      labelEn: "Expiration date",
-      labelEs: "Fecha de vencimiento",
-      type: "dateParts",
-      required: true,
-      yearsBack: 2,
-      yearsAhead: 20,
-      dateRule: "notExpired",
-      showIf: when(),
-    },
-  ];
-}
+/** The applicant's five ID questions. */
+const PHOTO_ID_FIELDS: IntakeField[] = [
+  {
+    key: "idDocType",
+    labelEn: "Type of ID",
+    labelEs: "Tipo de identificación",
+    type: "select",
+    required: true,
+    options: PHOTO_ID_OPTIONS,
+  },
+  {
+    key: "idDocNumber",
+    labelEn: "ID number",
+    labelEs: "Número de identificación",
+    type: "text",
+    required: true,
+    sensitive: true,
+    maxLength: 25,
+  },
+  {
+    key: "idDocState",
+    labelEn: "State where it was issued",
+    labelEs: "Estado que la emitió",
+    type: "select",
+    required: true,
+    options: ID_STATE_OPTIONS,
+    showIf: { field: "idDocType", equals: STATE_ISSUED_IDS },
+  },
+  {
+    key: "idDocIssueDate",
+    labelEn: "Issue date",
+    labelEs: "Fecha de emisión",
+    type: "dateParts",
+    required: true,
+    yearsBack: 40,
+    dateRule: "past",
+  },
+  {
+    key: "idDocExpiration",
+    labelEn: "Expiration date",
+    labelEs: "Fecha de vencimiento",
+    type: "dateParts",
+    required: true,
+    yearsBack: 2,
+    yearsAhead: 20,
+    dateRule: "notExpired",
+  },
+];
 
 const heightField: IntakeField = { key: "height", labelEn: "Height", labelEs: "Estatura", type: "height", required: true };
 
@@ -161,22 +139,15 @@ function formatMemberRow(row: RepeaterRow, index: number): string {
   const idType = str(row.idType);
   if (HAS_ID_NUMBER.includes(idType) && str(row.ssn)) parts.push(`${idType} ${str(row.ssn)}`);
   else if (idType === "None") parts.push("No SSN/ITIN");
-  // Photo ID: spouses only, and only while the row is still a spouse (stale answers are skipped).
-  if (SPOUSE.includes(str(row.relationship)) && str(row.idDocType)) {
-    const state = STATE_ISSUED_IDS.includes(str(row.idDocType)) && str(row.idDocState) ? ` (${str(row.idDocState)})` : "";
-    const doc = [`${str(row.idDocType)} ${str(row.idDocNumber)}`.trim() + state];
-    if (str(row.idDocIssueDate)) doc.push(`issued ${str(row.idDocIssueDate)}`);
-    if (str(row.idDocExpiration)) doc.push(`expires ${str(row.idDocExpiration)}`);
-    parts.push(doc.join(", "));
-  }
   return parts.length ? `${index + 1}. ${parts.join(", ")}` : "";
 }
 
-/** Applicant: SSN-or-ITIN instead of SSN-only, and height + weight after sex. */
+/** Applicant: SSN-or-ITIN instead of SSN-only, height + weight after sex, no second phone. */
 function personal(section: IntakeSection): IntakeSection {
   return {
     ...section,
     fields: section.fields.flatMap((field): IntakeField[] => {
+      if (field.key === "altPhone") return [];
       if (field.key === "sex") return [field, { ...heightField }, { ...weightField }];
       if (field.key !== "ssn") return [field];
       return [
@@ -241,18 +212,21 @@ function dependents(section: IntakeSection): IntakeSection {
           required: true,
           showIf: { field: "idType", equals: HAS_ID_NUMBER },
         },
-        ...photoIdFields({ field: "relationship", equals: SPOUSE }),
       ];
       return { ...field, rowFields, rowFormat: formatMemberRow };
     }),
   };
 }
 
-/** Start date as a 1st of the month, followed by the payment day it depends on. */
+/**
+ * Start date as a 1st of the month, followed by the payment day it depends on. "Do you have
+ * coverage right now?" (and the carrier question it opens) is dropped: Isaac doesn't use it.
+ */
 function coverage(section: IntakeSection): IntakeSection {
   return {
     ...section,
     fields: section.fields.flatMap((field): IntakeField[] => {
+      if (field.key === "currentlyInsured" || field.key === "currentCarrier") return [];
       if (field.key !== "requestedEffectiveDate") return [field];
       return [
         {
@@ -280,22 +254,18 @@ function coverage(section: IntakeSection): IntakeSection {
   };
 }
 
-/** The applicant's photo ID, typed in, next to the (still optional) photo of it. */
+/**
+ * The shared "Documents" step becomes the applicant's photo ID, typed in. Its two uploads (photo of
+ * the ID, current insurance card) are dropped: Isaac doesn't need them.
+ */
 function documents(section: IntakeSection): IntakeSection {
   return {
     ...section,
     titleEn: "Your ID",
     titleEs: "Su identificación",
-    descriptionEn: "Impact needs a valid ID that hasn't expired. A photo of it is optional.",
-    descriptionEs: "Impact necesita una identificación válida y vigente. La foto es opcional.",
-    fields: [
-      ...photoIdFields(),
-      ...section.fields.map((field) =>
-        field.key === "docPhotoId"
-          ? { ...field, labelEn: "Photo of your ID", labelEs: "Foto de su identificación" }
-          : field
-      ),
-    ],
+    descriptionEn: "Impact needs a valid ID that hasn't expired.",
+    descriptionEs: "Impact necesita una identificación válida y vigente.",
+    fields: PHOTO_ID_FIELDS.map((field) => ({ ...field })),
   };
 }
 
