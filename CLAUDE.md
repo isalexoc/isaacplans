@@ -235,6 +235,7 @@ QStash is feature-flagged by `QSTASH_ENABLED`; when off, the Kixie webhook falls
 - Meta CAPI deduplication: Client-side Pixel and server-side CAPI must use same eventId
 - Leave-behind images: html2canvas may fail on complex layouts; test locally
 - pnpm only: Package manager is pnpm; npm/yarn may break lockfile
+- Client-data pages are private: any page where a client's personal data is typed or shown, or whose URL is a credential, must match lib/private-pages.ts (every `/intake|admision` route, secure/document links, /admin already do). Middleware then drops Meta Pixel, GA and the CRM chat/tracking/form capture and blocks framing by other sites. Never add a third-party script to those pages
 
 ---
 

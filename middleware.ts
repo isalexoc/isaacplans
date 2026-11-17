@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { clerkMiddleware, clerkClient, createRouteMatcher } from "@clerk/nextjs/server";
 import createMiddleware from "next-intl/middleware";
 import { routing } from "./i18n/routing";
+import { isPrivatePagePath } from "./lib/private-pages";
 
 // Create the next-intl middleware
 const intlMiddleware = createMiddleware(routing);
@@ -225,31 +226,32 @@ export default clerkMiddleware(async (auth, req) => {
   // chat/tracking scripts off it (they would report the tokenized URL to third parties).
   const isAcaConfirmation =
     /^(?:\/(?:en|es))?\/aca\/(?:confirmation|confirmacion)\/[^/]+$/i.test(pathname);
-  if (isAcaConfirmation) {
-    response.headers.set("x-private-page", "1");
-  }
 
   // The Impact sales presentation. Agent-only, but its tab is on the client's phone through
-  // CrankWheel: private (no trackers, no admin gear, and the tokenized URL stays first-party) and
-  // an ads landing for the slim header and no chat bubble.
+  // CrankWheel: an ads landing for the slim header and no chat bubble (private via the rule below).
   const isImpactPresentation =
     /^(?:\/(?:en|es))?\/(?:health-alternative\/intake|alternativa-de-salud\/admision)\/[^/]+\/(?:presentation|presentacion)$/i.test(
       pathname
     );
-  if (isImpactPresentation) {
-    response.headers.set("x-private-page", "1");
-  }
 
-  // A client's secure link for the shared intake engine (/secure/<token>, es /seguro/<token>): a
-  // live credential that collects an SSN or bank details, so private and bare like the ACA
-  // signing page.
+  // A client's secure link for the shared intake engine (/secure/<token>, es /seguro/<token>):
+  // bare like the ACA signing page (private via the rule below).
   const isIntakeSecureCapture = /^(?:\/(?:en|es))?\/(?:secure|seguro)\/[^/]+$/i.test(pathname);
 
   // The self-serve Impact presentation: public (Pixel and GA stay), but no CRM chat bubble, which
   // would sit on its Next button, and the slim header.
   const isImpactGuide = /^(?:\/(?:en|es))?\/(?:impact|impacto)\/?$/i.test(pathname);
-  if (isIntakeSecureCapture) {
+
+  // Every page with a client's data on it — every line's intake (dashboard, form, summary, the
+  // Impact deck), secure and document links, the ACA signing page, /admin. See lib/private-pages.ts.
+  // x-private-page keeps Meta Pixel, GA and the CRM's chat, tracking and form capture off it (they
+  // would report the tokenized URL, and the CRM script captures forms). Only this site may frame
+  // it (clickjacking), and it is never indexed.
+  if (isPrivatePagePath(pathname)) {
     response.headers.set("x-private-page", "1");
+    response.headers.set("X-Frame-Options", "SAMEORIGIN");
+    response.headers.set("Content-Security-Policy", "frame-ancestors 'self'");
+    response.headers.set("X-Robots-Tag", "noindex, nofollow");
   }
 
   // The LegalShield funnel — both the opt-in and the self-enrollment page. These are the only

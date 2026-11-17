@@ -56,6 +56,22 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: false,
   },
+  // Browser protections on every response. HTTPS is already forced by Vercel (HSTS, 2 years).
+  // Framing is limited only on pages with a client's data (middleware + lib/private-pages.ts), so
+  // Sanity's visual editing and any embed of a public page keep working. Nothing on the site uses
+  // geolocation, payments or USB; camera and microphone stay available to the site itself.
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          { key: "Permissions-Policy", value: "camera=(self), microphone=(self), geolocation=(), payment=(), usb=()" },
+        ],
+      },
+    ];
+  },
   async redirects() {
     return [
       {
