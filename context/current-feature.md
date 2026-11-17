@@ -2,8 +2,25 @@
 
 ## Status
 
-In progress: **Impact enrollments on the Health Coverage intake** (branch `feature/impact-intake-fields`, no
-migration). Isaac now uses `/health-alternative/intake` mainly to enroll clients in Impact Health Sharing, and
+In progress: **Impact intake trim** (branch `fix/impact-intake-trim`, no migration). Isaac checked with Impact
+and doesn't need some of the questions. Removed from `/health-alternative/intake` (config only,
+`lib/intake-configs/health-alternative.ts`):
+- "Another phone number";
+- "Do you have coverage right now?", and the carrier question it opened;
+- the photo ID for added people: **only the applicant needs a valid ID**, so the spouse no longer gets the five ID
+  questions;
+- both uploads on the "Your ID" step (photo of the ID, current insurance card). The step is now just the
+  applicant's five ID questions.
+
+Old answers to these stay in the database and on the CRM contact, but the form and summary no longer show them.
+Verified:
+- `tsc` and `pnpm build` pass;
+- a config check confirms the 5 questions are gone, the spouse completes without an ID, and the applicant's ID is
+  still required;
+- the form at 390 px shows none of them and has no console errors.
+
+Previous: **Impact enrollments on the Health Coverage intake** (branch `feature/impact-intake-fields`, no
+migration, merged `20afb93`). Isaac now uses `/health-alternative/intake` mainly to enroll clients in Impact Health Sharing, and
 Impact's enrollment needs things the form didn't ask.
 - **Impact logo** on the client form header and the thank-you screen (`public/images/impact/`, from Isaac's files;
   on a white chip in dark mode because the wordmark is navy).
