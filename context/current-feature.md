@@ -2,8 +2,32 @@
 
 ## Status
 
-In progress: **Health Coverage intake reorder + secure link** (branch `feature/impact-intake-reorder-secure-link`,
-migration `0044` creates one new table). Isaac found asking for the SSN/ITIN on the first screen too aggressive.
+In progress: **Self-serve Impact presentation** (branch `feature/impact-self-serve-presentation`, no migration). For
+leads Isaac can't get on a call: one general link (`isaacplans.com/impact`, es `/impacto`) he shares by WhatsApp or
+text, which anyone opens on a phone or computer and walks through alone, then applies.
+- **Separate from the CrankWheel deck**, same words and pictures (`components/impact-presentation/copy.ts`), so an
+  Impact change is made once. Not the 9:16 canvas: a normal responsive page, **one screen at a time** (Isaac's
+  choice) with a big "Next" button, "3 of 9" progress, Back, swipe on phones, arrow keys, and the phone's back
+  button going to the previous screen (the step lives in the URL hash).
+- Self-serve wording where the deck assumed an agent: the welcome says it's a 2-minute presentation; the next
+  steps start with "Fill out your application"; the last screen's button is **Apply now**, into the existing
+  self-start flow (`/health-alternative/apply/start` → a new intake, the form in its new order).
+- A WhatsApp button on every screen for questions. ES/EN through the header switch (keeps the screen).
+- Public: slim header, no CRM chat bubble (it would sit on the Next button), Pixel/GA kept. Not indexed.
+- WhatsApp share preview: `public/images/impact/presentation/og-impact.jpg` (1200×630, the welcome photo + white
+  Impact logo).
+
+Verified:
+- `tsc` and `pnpm build` pass;
+- headless Chrome at 390×844 (phone) and 1280×800: all 9 Spanish screens, the welcome in English; Start/Next move
+  forward, the hash follows (`#9` on the last), the browser Back button returns to `#8`, a reload in the other
+  language lands back on screen 8 (sessionStorage), arrow keys work;
+- "Apply now" (bar and screen) links to `/es/alternativa-de-salud/aplicar/start`; WhatsApp opens wa.me with the
+  question prefilled; no CRM chat bubble; `x-is-ads-landing` on `/en/impact` and `/es/impacto`, no
+  `x-private-page`; noindex and the OG image in the HTML.
+
+Previous: **Health Coverage intake reorder + secure link** (branch `feature/impact-intake-reorder-secure-link`,
+merged `a1af2c4`, migration `0044` creates one new table). Isaac found asking for the SSN/ITIN on the first screen too aggressive.
 - **New step order:** 1 About you (no SSN) → 2 Who else to cover → 3 Home address → 4 Coverage → 5 Your ID (now
   "Which number will you use?" + the SSN/ITIN, then the photo ID) → 6 Payment → agent notes. Field keys are
   unchanged, so saved answers and CRM fields carry over.

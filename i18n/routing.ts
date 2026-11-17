@@ -407,6 +407,11 @@ export const routing = defineRouting({
       en: "/health-alternative/intake/[token]/view",
       es: "/alternativa-de-salud/admision/[token]/view",
     },
+    // The self-serve Impact presentation Isaac shares by link.
+    "/impact": {
+      en: "/impact",
+      es: "/impacto",
+    },
     // A client's secure link for the shared intake engine. No product name in it: it is texted.
     "/secure/[captureToken]": {
       en: "/secure/[captureToken]",

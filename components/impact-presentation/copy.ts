@@ -15,6 +15,8 @@ export type DeckLocale = "en" | "es";
 export const AGENT = {
   name: "Isaac Orraiz",
   whatsapp: "(540) 681-3507",
+  /** The same number for wa.me links. */
+  whatsappDigits: "15406813507",
   site: "isaacplans.com",
   photo: "/images/impact/presentation/agent-isaac.jpg",
   languages: "Español · English",
@@ -85,6 +87,23 @@ export type DeckCopy = {
     ];
     cta: string;
     disclaimer: string;
+  };
+  /** The self-serve guide (`/impact`): the same story, walked alone, ending in "Apply now". */
+  guide: {
+    intro: string;
+    start: string;
+    next: string;
+    back: string;
+    stepOf: (n: number, total: number) => string;
+    apply: string;
+    applyNote: string;
+    questions: string;
+    whatsappText: string;
+    steps: [
+      { n: string; title: string; body: string },
+      { n: string; title: string; body: string },
+      { n: string; title: string; body: string },
+    ];
   };
 };
 
@@ -218,6 +237,34 @@ const ES: DeckCopy = {
     disclaimer:
       "Impact Health Sharing es una organización sin fines de lucro 501(c)(3). No es un seguro. Divulgaciones por estado: impacthealthsharing.com/disclosures",
   },
+  guide: {
+    intro: "Una presentación de 2 minutos. Toque «Comenzar» y avance a su ritmo.",
+    start: "Comenzar",
+    next: "Siguiente",
+    back: "Atrás",
+    stepOf: (n, total) => `${n} de ${total}`,
+    apply: "Aplicar ahora",
+    applyNote: "Toma unos minutos desde su teléfono o computadora. Su progreso se guarda solo.",
+    questions: "¿Preguntas?",
+    whatsappText: "Hola Isaac, vi la presentación de Impact y tengo una pregunta.",
+    steps: [
+      {
+        n: "PASO 1 · HOY",
+        title: "Llene su solicitud",
+        body: "Unos minutos desde su teléfono o computadora. Su progreso se guarda solo.",
+      },
+      {
+        n: "PASO 2",
+        title: "Revisión y aprobación",
+        body: "Revisamos su solicitud con usted, la enviamos a Impact y le confirmamos el resultado.",
+      },
+      {
+        n: "PASO 3",
+        title: "¡Bienvenido a Impact!",
+        body: "Recibe su tarjeta de miembro y sus beneficios comienzan el:",
+      },
+    ],
+  },
 };
 
 const EN: DeckCopy = {
@@ -345,6 +392,30 @@ const EN: DeckCopy = {
     cta: "Confirm my details",
     disclaimer:
       "Impact Health Sharing is a 501(c)(3) nonprofit. It is not insurance. State disclosures: impacthealthsharing.com/disclosures",
+  },
+  guide: {
+    intro: "A 2-minute presentation. Tap “Start” and go at your own pace.",
+    start: "Start",
+    next: "Next",
+    back: "Back",
+    stepOf: (n, total) => `${n} of ${total}`,
+    apply: "Apply now",
+    applyNote: "Takes a few minutes from your phone or computer. Your progress saves on its own.",
+    questions: "Questions?",
+    whatsappText: "Hi Isaac, I saw the Impact presentation and I have a question.",
+    steps: [
+      {
+        n: "STEP 1 · TODAY",
+        title: "Fill out your application",
+        body: "A few minutes from your phone or computer. Your progress saves on its own.",
+      },
+      {
+        n: "STEP 2",
+        title: "Review & approval",
+        body: "We review your application with you, send it to Impact and confirm the result.",
+      },
+      { n: "STEP 3", title: "Welcome to Impact!", body: "You receive your member ID card and your benefits start on:" },
+    ],
   },
 };
 
