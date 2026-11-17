@@ -244,6 +244,10 @@ export default clerkMiddleware(async (auth, req) => {
   // live credential that collects an SSN or bank details, so private and bare like the ACA
   // signing page.
   const isIntakeSecureCapture = /^(?:\/(?:en|es))?\/(?:secure|seguro)\/[^/]+$/i.test(pathname);
+
+  // The self-serve Impact presentation: public (Pixel and GA stay), but no CRM chat bubble, which
+  // would sit on its Next button, and the slim header.
+  const isImpactGuide = /^(?:\/(?:en|es))?\/(?:impact|impacto)\/?$/i.test(pathname);
   if (isIntakeSecureCapture) {
     response.headers.set("x-private-page", "1");
   }
@@ -273,6 +277,7 @@ export default clerkMiddleware(async (auth, req) => {
     isAcaConfirmation ||
     isImpactPresentation ||
     isIntakeSecureCapture ||
+    isImpactGuide ||
     isLegalShield
   ) {
     response.headers.set("x-is-ads-landing", "1");

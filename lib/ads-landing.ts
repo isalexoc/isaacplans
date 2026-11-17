@@ -36,6 +36,9 @@ export const ADS_LANDING_PATHNAMES = [
   "/seguro-de-vida/obtener-cobertura",
   "/health-alternative/get-covered",
   "/alternativa-de-salud/obtener-cobertura",
+  // The self-serve Impact presentation: its Next button sits where the chat bubble would.
+  "/impact",
+  "/impacto",
   ...LEGAL_SHIELD_LANDING_PATHNAMES,
 ] as const;
 
