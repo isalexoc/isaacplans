@@ -90,15 +90,20 @@ function Brandbar({ dark, page, note }: { dark?: boolean; page: string; note?: s
 function WelcomeSlide({ t, firstName }: { t: DeckCopy; firstName: string }) {
   return (
     <section className="absolute inset-0 overflow-hidden bg-[#0b2a4a] text-white">
+      {/*
+        Photo: Letícia Alvares on Pexels (pexels.com/photo/36393879), free for commercial use under the
+        Pexels license. Pre-cropped to 9:16 so the faces sit in the top 40%, clear of the welcome text;
+        the shade stays light over them, darkens under the text and dims the top for the logo.
+      */}
       <Image
-        src={`${IMG}/welcome-family.jpg`}
+        src={`${IMG}/welcome-mother-daughter.jpg`}
         alt=""
         fill
         priority
         sizes="900px"
-        className="object-cover object-[62%_center]"
+        className="object-cover object-center"
       />
-      <div className="absolute inset-0 bg-[linear-gradient(0deg,rgba(7,28,51,1)_0%,rgba(7,28,51,.94)_42%,rgba(7,28,51,.35)_65%,rgba(7,28,51,.15)_100%)]" />
+      <div className="absolute inset-0 bg-[linear-gradient(0deg,rgba(7,28,51,1)_0%,rgba(7,28,51,.96)_40%,rgba(7,28,51,.6)_52%,rgba(7,28,51,.1)_61%,rgba(7,28,51,.08)_82%,rgba(7,28,51,.55)_100%)]" />
       <Image
         src={LOGO_WHITE.src}
         alt="Impact Health Sharing"

@@ -38,7 +38,13 @@ Verified (temporary harness page + headless Chrome over CDP, intake and meeting 
 - middleware sets `x-private-page` + `x-is-ads-landing` on the EN and ES deck URLs only, and a signed-out request
   redirects to sign-in.
 Not verifiable locally: CrankWheel's "client joined" hook (needs a public https origin) and the CRM `spanish` tag
-lookup behind `lang=client`.
+lookup behind `lang=client`. Merged `aa326c7`.
+
+Follow-up (branch `fix/impact-welcome-photo`): the welcome slide's photo (557×380, from the HTML) was too small for a
+full-bleed vertical slide. Isaac's replacement was a watermarked Dreamstime preview (not licensed, so not used); it
+is now Letícia Alvares' Pexels photo 36393879 (free for commercial use), pre-cropped to 9:16 at 1080×1920 with the
+faces in the top 40%. The slide's shade was retuned: light over the faces, dark under the text, dim at the top for
+the logo. Checked in ES and EN at 430×900; build passes.
 
 Previous: **Impact intake trim** (branch `fix/impact-intake-trim`, merged `9e11a1a`, no migration). Isaac checked with Impact
 and doesn't need some of the questions. Removed from `/health-alternative/intake` (config only,
