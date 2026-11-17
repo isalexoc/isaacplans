@@ -8,6 +8,7 @@ import "@/app/globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
+import AnalyticsPrivacyGuard from "@/components/analytics-privacy-guard";
 import { getMessages, getTranslations } from "next-intl/server";
 import { getAgencyLd, siteLd, getIsaacPersonLd } from "@/lib/seo/jsonld";
 import { getLocale } from "next-intl/server";
@@ -147,6 +148,7 @@ export default async function LocaleLayout({
           <Header />
           <main className="flex-1 w-full">{children}</main>
           <Toaster />
+          <AnalyticsPrivacyGuard gaId="G-5SDTGH29ER" />
           {/* Floating admin shortcut — server-gated, only renders for admins */}
           {/* @ts-ignore - AdminFab is an async server component, works correctly with React 19 */}
           <AdminFab />

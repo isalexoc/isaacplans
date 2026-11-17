@@ -56,7 +56,12 @@ export type IntakeFieldType =
   /** A select of upcoming 1st-of-the-month dates, stored as ISO `YYYY-MM-01`. */
   | "monthStart"
   /** Month / day / year selects like `dob`, but with its own year range and rule. ISO value. */
-  | "dateParts";
+  | "dateParts"
+  /**
+   * Impact Health Sharing plan cards (Esencial / Plus / Premium / Total) priced live for the
+   * household on the form. Stores the tier key; the monthly price goes to `pairedKey`.
+   */
+  | "impactPlan";
 
 /** One `showIf` condition: another field (or, in a repeater, a sibling in the row) equals a value. */
 export type ShowIfCondition = { field: string; equals: string | string[] };
@@ -149,6 +154,11 @@ export type IntakeField = {
   yearsAhead?: number;
   /** `past`: not after today (an issue date). `notExpired`: today or later (an expiration date). */
   dateRule?: "past" | "notExpired";
+  /**
+   * `impactPlan` only: the sibling field holding the chosen plan's monthly price. The plan cards
+   * fill it, so it is not drawn as an input of its own (the summary still shows it).
+   */
+  pairedKey?: string;
   // ── `repeater` only ──
   /** Sub-fields rendered for each row. */
   rowFields?: IntakeField[];

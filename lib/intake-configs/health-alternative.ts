@@ -231,8 +231,32 @@ function dependents(section: IntakeSection): IntakeSection {
 }
 
 /**
- * Start date as a 1st of the month, followed by the payment day it depends on. "Do you have
- * coverage right now?" (and the carrier question it opens) is dropped: Isaac doesn't use it.
+ * The Impact plan, first on the coverage step: four cards priced live for the household this form
+ * describes (lib/impact-quote), arriving pre-chosen from the presentation or the self-serve quote,
+ * changeable by the client. Stores the tier and, beside it, the monthly price. App-only: the CRM's
+ * `ha_plan_selected` field was never created, and Impact data stays out of new custom fields.
+ */
+const PLAN_FIELDS: IntakeField[] = [
+  {
+    key: "impactPlan",
+    labelEn: "Your plan",
+    labelEs: "Su plan",
+    type: "impactPlan",
+    required: true,
+    pairedKey: "impactMonthly",
+    options: [
+      { value: "esencial", labelEn: "Essential (PRA $10,000)", labelEs: "Esencial (PRA $10,000)" },
+      { value: "plus", labelEn: "Plus (PRA $7,500)", labelEs: "Plus (PRA $7,500)" },
+      { value: "premium", labelEn: "Premium (PRA $5,000)", labelEs: "Premium (PRA $5,000)" },
+      { value: "total", labelEn: "Total (PRA $2,500)", labelEs: "Total (PRA $2,500)" },
+    ],
+  },
+  { key: "impactMonthly", labelEn: "Monthly price of the plan", labelEs: "Precio mensual del plan", type: "money" },
+];
+
+/**
+ * The plan, then the start date as a 1st of the month and the payment day it depends on. "Do you
+ * have coverage right now?" (and the carrier question it opens) is dropped: Isaac doesn't use it.
  */
 function coverage(section: IntakeSection): IntakeSection {
   return {
@@ -241,6 +265,7 @@ function coverage(section: IntakeSection): IntakeSection {
       if (field.key === "currentlyInsured" || field.key === "currentCarrier") return [];
       if (field.key !== "requestedEffectiveDate") return [field];
       return [
+        ...PLAN_FIELDS.map((f) => ({ ...f })),
         {
           ...field,
           type: "monthStart",
@@ -326,12 +351,18 @@ const base = ancillarySections("ha", {
 /** The shared SSN question (encrypted, CRM field `ha_ssn`), lifted out of "About you". */
 const ssnField = base.flatMap((s) => s.fields).find((f) => f.key === "ssn") as IntakeField;
 
+/** Agent notes without the free-text "Plan selected": the plan is a real question now. */
+function agent(section: IntakeSection): IntakeSection {
+  return { ...section, fields: section.fields.filter((f) => f.key !== "planSelected") };
+}
+
 const RESHAPE: Record<string, (section: IntakeSection) => IntakeSection> = {
   personal,
   dependents,
   coverage,
   documents: (section) => documents(section, ssnField),
   payment,
+  agent,
 };
 
 /**

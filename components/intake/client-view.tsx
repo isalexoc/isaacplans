@@ -36,7 +36,7 @@ function displayValue(field: IntakeField, raw: unknown, locale: IntakeLocale): s
   if (raw == null || raw === "") return "";
   const value = String(raw);
   if (field.type === "monthStart") return formatIsoLong(value, locale);
-  if (field.type === "select" && field.options) {
+  if ((field.type === "select" || field.type === "impactPlan") && field.options) {
     const opt = field.options.find((o) => o.value === value);
     return opt ? optionLabel(opt, locale) : value;
   }

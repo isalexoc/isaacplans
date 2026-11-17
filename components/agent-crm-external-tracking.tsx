@@ -4,6 +4,7 @@ import Script from "next/script";
 import { usePathname } from "@/i18n/navigation";
 import { isAgentCrmBookingCalendarPathname } from "@/lib/agent-crm-calendar-route";
 import { isAdsLandingPathResolved, isPartnerLandingPath } from "@/lib/ads-landing";
+import { isPrivatePagePath } from "@/lib/private-pages";
 
 type Props = {
   trackingId: string;
@@ -30,7 +31,8 @@ export default function AgentCrmExternalTracking({
     return null;
   }
 
-  if (isAdsLandingPathResolved(path)) {
+  // Paid landings, and pages with a client's data on them (their form capture must never run there).
+  if (isAdsLandingPathResolved(path) || isPrivatePagePath(path)) {
     return null;
   }
 

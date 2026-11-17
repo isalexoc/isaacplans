@@ -12,6 +12,7 @@ import {
   AGENT_CRM_CHAT_SCRIPT_ID,
 } from "@/lib/agent-crm-chat-config";
 import { isAdsLandingPathResolved } from "@/lib/ads-landing";
+import { isPrivatePagePath } from "@/lib/private-pages";
 
 /**
  * Loads exactly one LeadConnector chat widget for the current locale.
@@ -68,8 +69,8 @@ export default function AgentCrmChat() {
     if (isAgentCrmBookingCalendarPathname(path)) {
       return;
     }
-    /** Paid landing routes — strip widget if user SPA-navigated here from another page. */
-    if (isAdsLandingPathResolved(path)) {
+    /** Paid landing and private (client-data) routes — strip the widget after a client-side navigation. */
+    if (isAdsLandingPathResolved(path) || isPrivatePagePath(path)) {
       removeLeadConnectorChatArtifacts();
       return;
     }

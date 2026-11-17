@@ -47,6 +47,8 @@ import { useIntakeAutosave } from "@/hooks/use-intake-autosave";
 import IntakeBreadcrumb from "@/components/intake/intake-breadcrumb";
 import ImpactPresentationBar from "@/components/intake/impact-presentation-bar";
 import SecureCapturePanel, { type CaptureOption } from "@/components/intake/secure-capture-panel";
+import ImpactPlanPicker from "@/components/intake/impact-plan-picker";
+import { readPlanChoice, subscribePlanChoice, type PlanChoice } from "@/lib/impact-quote/sync";
 import { useIntakeSecureCapture } from "@/hooks/use-intake-secure-capture";
 import {
   captureFieldKeys,
@@ -331,6 +333,36 @@ export default function IntakeForm({
         return changed ? next : prev;
       }),
   });
+  /*
+   * "Your plan" (Impact): a plan picked on a quote screen lands here. From the CrankWheel deck it
+   * arrives live in the agent's open form (same browser, keyed by this intake's token); from the
+   * self-serve page, the client's new application reads it on load. Never over a plan already on
+   * the form, except a live pick from the deck, which is the agent and client deciding now.
+   */
+  const planField = useMemo(
+    () => config.sections.flatMap((s) => s.fields).find((f) => f.type === "impactPlan"),
+    [config.sections]
+  );
+  const pairedKeys = useMemo(
+    () => new Set(config.sections.flatMap((s) => s.fields).map((f) => f.pairedKey).filter(Boolean)),
+    [config.sections]
+  );
+  useEffect(() => {
+    if (loadState !== "ready" || !planField) return;
+    const apply = (choice: PlanChoice) =>
+      setData((prev) => ({
+        ...prev,
+        [planField.key]: choice.tier,
+        ...(planField.pairedKey && choice.monthly != null ? { [planField.pairedKey]: choice.monthly.toFixed(2) } : {}),
+      }));
+    if (!str(data[planField.key])) {
+      const saved = readPlanChoice(token) ?? (isOwner ? null : readPlanChoice("guide"));
+      if (saved) apply(saved);
+    }
+    return subscribePlanChoice(token, apply);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loadState, token, planField, isOwner]);
+
   const captureOptions: CaptureOption[] = useMemo(
     () =>
       captureGroups(config).map((group) => {
@@ -674,6 +706,28 @@ export default function IntakeForm({
                     />
                   );
                 }
+
+                if (field.type === "impactPlan") {
+                  return (
+                    <ImpactPlanPicker
+                      key={field.key}
+                      field={field}
+                      value={str(data[field.key])}
+                      monthly={field.pairedKey ? str(data[field.pairedKey]) : ""}
+                      data={data}
+                      locale={locale}
+                      isOwner={!!isOwner}
+                      invalid={missing.has(field.key)}
+                      onPick={(tier, price) => {
+                        setField(field.key, tier);
+                        if (field.pairedKey) setField(field.pairedKey, price !== null ? price.toFixed(2) : "");
+                      }}
+                      onMonthly={(value) => field.pairedKey && setField(field.pairedKey, value)}
+                    />
+                  );
+                }
+                // A plan's monthly price is filled by the plan cards, not typed on its own.
+                if (pairedKeys.has(field.key)) return null;
 
                 if (field.type === "file") {
                   return (
