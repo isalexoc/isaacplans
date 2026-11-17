@@ -408,10 +408,10 @@ function NextSteps({ t, startDate }: { t: DeckCopy; startDate: string }) {
   );
 }
 
-/** The screens in order, keyed. */
-export function buildGuideSteps(data: GuideData): ReactNode[] {
+/** The screens in order, keyed, and where "Choose your plan" sits (the gate before "Apply now"). */
+export function buildGuideSteps(data: GuideData): { steps: ReactNode[]; quoteStep: number } {
   const t = DECK_COPY[data.locale];
-  return [
+  const steps = [
     <Welcome key="welcome" t={t} />,
     <Agent key="agent" t={t} data={data} />,
     <What key="what" t={t} />,
@@ -424,4 +424,5 @@ export function buildGuideSteps(data: GuideData): ReactNode[] {
     <GuideQuote key="quote" locale={data.locale} />,
     <NextSteps key="next" t={t} startDate={data.startDate} />,
   ];
+  return { steps, quoteStep: steps.findIndex((step) => (step as { key?: string }).key === "quote") };
 }

@@ -1,12 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Poppins } from "next/font/google";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ArrowLeft, ArrowRight, MessageCircle } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import { AGENT, DECK_COPY, type DeckLocale } from "./copy";
+import { GuideGateContext, readQuoteGate, writeQuoteGate } from "./guide-gate";
 
 const poppins = Poppins({ subsets: ["latin"], weight: ["400", "500", "600", "700", "800"], display: "swap" });
 
@@ -29,17 +30,39 @@ function stepFromHash(count: number): number | null {
  * page: every screen is a history entry (`#3`). The screen also survives the header's language
  * switch, which reloads the page under the other locale.
  */
-export default function ImpactGuide({ locale, steps }: { locale: DeckLocale; steps: ReactNode[] }) {
+export default function ImpactGuide({
+  locale,
+  steps,
+  quoteStep,
+  canSkipQuote,
+}: {
+  locale: DeckLocale;
+  steps: ReactNode[];
+  /** "Choose your plan": a visitor can't go past it without seeing their prices. -1 = no gate. */
+  quoteStep: number;
+  /** A signed-in admin (Isaac) walks straight through. */
+  canSkipQuote: boolean;
+}) {
   const t = DECK_COPY[locale];
   const g = t.guide;
   const count = steps.length;
   const [step, setStep] = useState(0);
+  const [quoted, setQuoted] = useState(false);
+  const [nudge, setNudge] = useState(false);
   const touch = useRef<{ x: number; y: number } | null>(null);
   const reduceMotion = useReducedMotion();
   const last = step === count - 1;
+  const gateOpen = canSkipQuote || quoted || quoteStep < 0;
+  const gateOpenRef = useRef(gateOpen);
+  gateOpenRef.current = gateOpen;
+  /** The furthest screen reachable right now: all of them, or up to the quote. */
+  const furthest = useCallback((open: boolean) => (open ? count - 1 : quoteStep), [count, quoteStep]);
 
-  // Arriving on #5, or back from the language switch: start where the visitor was.
+  // Arriving on #5, or back from the language switch: start where the visitor was — but never
+  // past the quote before it has been seen, whatever the URL says.
   useEffect(() => {
+    const open = canSkipQuote || readQuoteGate() || quoteStep < 0;
+    if (readQuoteGate()) setQuoted(true);
     let start = stepFromHash(count);
     if (start === null) {
       try {
@@ -49,14 +72,38 @@ export default function ImpactGuide({ locale, steps }: { locale: DeckLocale; ste
         /* storage blocked: start at the beginning */
       }
     }
+    if (start !== null) start = Math.min(start, furthest(open));
     if (start !== null && start > 0) {
       setStep(start);
       window.history.replaceState(null, "", `#${start + 1}`);
     }
-    const onPop = () => setStep(stepFromHash(count) ?? 0);
+    // The browser's Back/Forward obey the same gate as the Next button.
+    const onPop = () => {
+      const max = furthest(gateOpenRef.current);
+      const target = stepFromHash(count) ?? 0;
+      if (target > max) window.history.replaceState(null, "", `#${max + 1}`);
+      setStep(Math.min(target, max));
+    };
     window.addEventListener("popstate", onPop);
     return () => window.removeEventListener("popstate", onPop);
-  }, [count]);
+  }, [count, canSkipQuote, quoteStep, furthest]);
+
+  useEffect(() => {
+    if (!nudge) return;
+    const timer = setTimeout(() => setNudge(false), 4000);
+    return () => clearTimeout(timer);
+  }, [nudge]);
+
+  const gate = useMemo(
+    () => ({
+      markQuoted: () => {
+        writeQuoteGate();
+        setQuoted(true);
+        setNudge(false);
+      },
+    }),
+    []
+  );
 
   useEffect(() => {
     try {
@@ -68,13 +115,15 @@ export default function ImpactGuide({ locale, steps }: { locale: DeckLocale; ste
 
   const go = useCallback(
     (next: number) => {
-      const target = Math.max(0, Math.min(count - 1, next));
+      const max = furthest(gateOpenRef.current);
+      if (next > max) setNudge(true);
+      const target = Math.max(0, Math.min(max, next));
       if (target === step) return;
       setStep(target);
       window.history.pushState(null, "", `#${target + 1}`);
       window.scrollTo({ top: 0, behavior: reduceMotion ? "auto" : "smooth" });
     },
-    [count, step, reduceMotion]
+    [furthest, step, reduceMotion]
   );
 
   useEffect(() => {
@@ -89,6 +138,8 @@ export default function ImpactGuide({ locale, steps }: { locale: DeckLocale; ste
   }, [go, step]);
 
   const whatsappHref = `https://wa.me/${AGENT.whatsappDigits}?text=${encodeURIComponent(g.whatsappText)}`;
+  /** On the quote screen with no prices yet: Next only nudges toward "See my prices". */
+  const waitingForQuote = step === quoteStep && !gateOpen;
   const primary = cn(
     "flex h-14 flex-1 items-center justify-center gap-2 rounded-2xl text-lg font-extrabold text-white transition active:scale-[0.98]",
     "bg-[#f2735a] shadow-[0_10px_24px_rgba(242,115,90,.35)] hover:bg-[#e8644b]"
@@ -122,7 +173,7 @@ export default function ImpactGuide({ locale, steps }: { locale: DeckLocale; ste
             exit={reduceMotion ? { opacity: 0 } : { opacity: 0, x: -24 }}
             transition={{ duration: 0.22, ease: "easeOut" }}
           >
-            {steps[step]}
+            <GuideGateContext.Provider value={gate}>{steps[step]}</GuideGateContext.Provider>
           </motion.section>
         </AnimatePresence>
         <p className="mt-8 text-center text-xs text-[#56657a]">{t.notInsurance}</p>
@@ -139,7 +190,19 @@ export default function ImpactGuide({ locale, steps }: { locale: DeckLocale; ste
             style={{ width: `${((step + 1) / count) * 100}%` }}
           />
         </div>
-        <p className="pt-1.5 text-center text-xs font-medium text-[#56657a]">{g.stepOf(step + 1, count)}</p>
+        {waitingForQuote ? (
+          <p
+            role="status"
+            className={cn(
+              "px-4 pt-1.5 text-center text-sm font-bold text-[#f2735a] transition",
+              nudge && "motion-safe:animate-pulse"
+            )}
+          >
+            {g.quoteFirst}
+          </p>
+        ) : (
+          <p className="pt-1.5 text-center text-xs font-medium text-[#56657a]">{g.stepOf(step + 1, count)}</p>
+        )}
         <div className="mx-auto flex w-full max-w-xl items-center gap-2 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-1.5 sm:px-6">
           {step > 0 ? (
             <button
@@ -166,7 +229,12 @@ export default function ImpactGuide({ locale, steps }: { locale: DeckLocale; ste
               {g.apply} <ArrowRight className="h-5 w-5" />
             </Link>
           ) : (
-            <button type="button" onClick={() => go(step + 1)} className={primary}>
+            <button
+              type="button"
+              onClick={() => go(step + 1)}
+              aria-disabled={waitingForQuote}
+              className={cn(primary, waitingForQuote && "opacity-40 shadow-none")}
+            >
               {step === 0 ? g.start : g.next} <ArrowRight className="h-5 w-5" />
             </button>
           )}

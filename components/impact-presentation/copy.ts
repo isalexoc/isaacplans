@@ -133,6 +133,8 @@ export type DeckCopy = {
     applyNote: string;
     questions: string;
     whatsappText: string;
+    /** Under the Next button while the quote screen still has no prices. */
+    quoteFirst: string;
     steps: [
       { n: string; title: string; body: string },
       { n: string; title: string; body: string },
@@ -331,6 +333,7 @@ const ES: DeckCopy = {
     applyNote: "Toma unos minutos desde su teléfono o computadora. Su progreso se guarda solo.",
     questions: "¿Preguntas?",
     whatsappText: "Hola Isaac, vi la presentación de Impact y tengo una pregunta.",
+    quoteFirst: "Primero toque «Ver mis precios» para continuar.",
     steps: [
       {
         n: "PASO 1 · HOY",
@@ -534,6 +537,7 @@ const EN: DeckCopy = {
     applyNote: "Takes a few minutes from your phone or computer. Your progress saves on its own.",
     questions: "Questions?",
     whatsappText: "Hi Isaac, I saw the Impact presentation and I have a question.",
+    quoteFirst: "First tap “See my prices” to continue.",
     steps: [
       {
         n: "STEP 1 · TODAY",

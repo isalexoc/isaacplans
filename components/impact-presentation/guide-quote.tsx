@@ -13,6 +13,7 @@ import {
 } from "@/lib/impact-quote/plans";
 import { publishPlanChoice } from "@/lib/impact-quote/sync";
 import { AGENT, DECK_COPY, type DeckCopy, type DeckLocale } from "./copy";
+import { useGuideGate } from "./guide-gate";
 import { Glyph } from "./icons";
 
 type Result = { plans: ImpactPlan[]; members: HouseholdSize; age: number; senior: boolean; under18: boolean };
@@ -33,6 +34,13 @@ export default function GuideQuote({ locale }: { locale: DeckLocale }) {
   const [year, setYear] = useState("");
   const [result, setResult] = useState<Result | null>(null);
   const [phase, setPhase] = useState<"form" | "loading" | "error">("form");
+  const gate = useGuideGate();
+
+  // Prices on screen open the way to "Apply now". So does a failed quote: the screen then sends
+  // the visitor to WhatsApp, and they must not be stuck here.
+  useEffect(() => {
+    if (result || phase === "error") gate?.markQuoted();
+  }, [result, phase, gate]);
 
   useEffect(() => {
     try {

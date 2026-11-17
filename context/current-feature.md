@@ -2,8 +2,21 @@
 
 ## Status
 
-In progress: **"Your plan" on the Health Coverage form + security hardening** (branch
-`feature/impact-plan-field-security`, no migration).
+In progress: **Quote before the application on `/impact`** (branch `feature/impact-guide-quote-gate`, no migration).
+A visitor of the self-serve guide could tap Next past "Choose your plan" without quoting and reach "Apply now".
+Now a visitor must see their prices first: Next, swipe, arrow keys, the browser's Back/Forward and a `#11` link all
+stop at the quote screen until it has prices, with a nudge to tap "See my prices". If Impact's price service fails,
+the gate opens (the screen already points to WhatsApp) so nobody is stuck. A signed-in admin (Clerk
+`role: admin`) skips it. Remembered per tab (sessionStorage), so a language switch keeps it open. The CrankWheel
+deck is unchanged (the agent drives it).
+
+Verified: `tsc` and `pnpm build` pass; headless Chrome at 390×844 (quote API mocked): a visitor stays on 10/11 after
+Next, ArrowRight and a direct `#11` link, with the nudge showing; after "See my prices" Next reaches 11/11 and an
+EN reload stays open; a failed quote opens the gate; the admin view (temporary harness with `canSkipQuote`) walks
+from 10 to 11 without quoting.
+
+Done: **"Your plan" on the Health Coverage form + security hardening** (branch
+`feature/impact-plan-field-security`, merged `74ea792`, no migration).
 - **"Your plan"** (`impactPlan`, required, first on the coverage step) + `impactMonthly` (money, beside it): four
   cards priced live for the form's household (`/api/impact/quote`), Esencial recommended; the chosen plan's price
   follows the quote (add a family member, it re-prices); the agent can type a price when there's no quote. Shown in

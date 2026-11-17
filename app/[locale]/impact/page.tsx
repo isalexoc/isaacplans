@@ -15,6 +15,7 @@ import { DECK_COPY, type DeckLocale } from "@/components/impact-presentation/cop
 import { IMPACT_LAST_PAYMENT_DAY } from "@/lib/intake-configs/impact-schedule";
 import { businessToday, earliestMonthStart, formatLongDate } from "@/lib/intake-core/month-start";
 import { getLicensedStateCount } from "@/lib/licensed-states";
+import { getIsAdmin } from "@/lib/auth/admin";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.isaacplans.com";
 
@@ -44,12 +45,13 @@ async function licensedStates(): Promise<number> {
 
 export default async function ImpactGuidePage() {
   const locale: DeckLocale = (await getLocale()) === "es" ? "es" : "en";
-  const steps = buildGuideSteps({
+  const { steps, quoteStep } = buildGuideSteps({
     locale,
     // Nobody has picked a date yet, so the earliest 1st Impact allows today.
     startDate: formatLongDate(earliestMonthStart(businessToday(), IMPACT_LAST_PAYMENT_DAY), locale),
     licensedStates: await licensedStates(),
     agentIbo: process.env.IMPACT_AGENT_IBO?.trim() || null,
   });
-  return <ImpactGuide locale={locale} steps={steps} />;
+  // A visitor must quote before "Apply now"; Isaac, signed in as admin, can walk straight through.
+  return <ImpactGuide locale={locale} steps={steps} quoteStep={quoteStep} canSkipQuote={await getIsAdmin()} />;
 }
