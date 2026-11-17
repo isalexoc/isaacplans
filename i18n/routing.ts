@@ -407,6 +407,10 @@ export const routing = defineRouting({
       en: "/health-alternative/intake/[token]/view",
       es: "/alternativa-de-salud/admision/[token]/view",
     },
+    "/health-alternative/intake/[token]/presentation": {
+      en: "/health-alternative/intake/[token]/presentation",
+      es: "/alternativa-de-salud/admision/[token]/presentacion",
+    },
     "/faq": {
       en: "/faq",
       es: "/preguntas-frecuentes",

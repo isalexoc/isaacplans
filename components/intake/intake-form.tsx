@@ -45,6 +45,7 @@ import {
 } from "@/lib/intake-core/api-client";
 import { useIntakeAutosave } from "@/hooks/use-intake-autosave";
 import IntakeBreadcrumb from "@/components/intake/intake-breadcrumb";
+import ImpactPresentationBar from "@/components/intake/impact-presentation-bar";
 import FilePreview from "@/components/intake/file-preview";
 import IntakeAddressInput, { type ResolvedAddress } from "@/components/shared/intake-address-input";
 import {
@@ -164,7 +165,19 @@ function addLabelFor(field: IntakeField, locale: IntakeLocale): string {
 
 /* ------------------------------- component ------------------------------- */
 
-export default function IntakeForm({ lob, token }: { lob: string; token: string }) {
+export default function IntakeForm({
+  lob,
+  token,
+  presenting = false,
+}: {
+  lob: string;
+  token: string;
+  /**
+   * The agent is filling the form on a screen the client is watching (the Impact presentation's
+   * "Confirm my details"): no breadcrumb, meeting panel or owner-only questions.
+   */
+  presenting?: boolean;
+}) {
   const locale = pickLocale(useLocale());
   const config = requireIntakeConfig(lob);
 
@@ -202,13 +215,45 @@ export default function IntakeForm({ lob, token }: { lob: string; token: string 
     };
   }, [lob, token]);
 
-  const { status: saveStatus } = useIntakeAutosave({ lob, token, data });
+  const { status: saveStatus, isSynced, adoptSaved } = useIntakeAutosave({ lob, token, data });
 
   const isOwner = session?.role === "owner";
+  // Agent-only chrome and questions. Off while presenting: the client is watching this screen.
+  const agentChrome = Boolean(isOwner) && !presenting;
   const sections = useMemo(
-    () => visibleSections(config.sections, !!isOwner),
-    [config.sections, isOwner]
+    () => visibleSections(config.sections, agentChrome),
+    [config.sections, agentChrome]
   );
+
+  /*
+   * The agent can have this intake open in two tabs: the form, and the presentation tab after
+   * "Confirm my details". Autosave writes the whole answer set, so a tab still holding answers from
+   * before the other tab's edits would overwrite them on its next save. When the tab comes back
+   * into view, reload the saved answers, unless this tab has an edit that isn't saved yet.
+   * Agent only: a client's reload would swap the SSN they just typed for its masked form.
+   */
+  useEffect(() => {
+    if (loadState !== "ready" || !isOwner) return;
+    let active = true;
+    const onVisible = async () => {
+      if (document.visibilityState !== "visible" || !isSynced()) return;
+      try {
+        const s = await fetchIntake(lob, token);
+        if (!active || !isSynced()) return;
+        const saved = s.data ?? {};
+        adoptSaved(saved);
+        setData({ ...saved });
+        setCompleted(s.status === "completed");
+      } catch {
+        /* keep what's on screen; the next return to this tab tries again */
+      }
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      active = false;
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+  }, [loadState, isOwner, lob, token, isSynced, adoptSaved]);
   // A client who has submitted can't edit until an admin re-opens the form.
   const lockedForClient = !isOwner && completed && !session?.reopenedForClient;
 
@@ -453,7 +498,7 @@ export default function IntakeForm({ lob, token }: { lob: string; token: string 
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-8">
-      {isOwner && <IntakeBreadcrumb lob={lob} current={tr(UI.navForm, locale)} />}
+      {agentChrome && <IntakeBreadcrumb lob={lob} current={tr(UI.navForm, locale)} />}
       {/* Out-of-flow save status — fixed so it never shifts the page layout. */}
       <SaveIndicator status={saveStatus} locale={locale} />
       {config.brandLogo && <BrandLogo logo={config.brandLogo} className="mb-4" />}
@@ -480,6 +525,10 @@ export default function IntakeForm({ lob, token }: { lob: string; token: string 
           />
         </div>
       </div>
+
+      {agentChrome && config.impactPresentation && session && !completed && (
+        <ImpactPresentationBar token={token} session={session} locale={locale} />
+      )}
 
       {completed && isOwner && (
         <div className="mb-4 flex items-center gap-2 rounded-xl border border-green-200 bg-green-50 p-3 text-sm text-green-800 dark:border-green-900 dark:bg-green-950 dark:text-green-300">
@@ -530,7 +579,7 @@ export default function IntakeForm({ lob, token }: { lob: string; token: string 
             >
               {current.fields.map((field) => {
                 if (!isFieldVisible(field, data)) return null;
-                if (field.ownerOnly && !isOwner) return null;
+                if (field.ownerOnly && !agentChrome) return null;
 
                 if (field.type === "repeater") {
                   return (

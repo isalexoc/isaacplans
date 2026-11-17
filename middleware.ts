@@ -229,6 +229,17 @@ export default clerkMiddleware(async (auth, req) => {
     response.headers.set("x-private-page", "1");
   }
 
+  // The Impact sales presentation. Agent-only, but its tab is on the client's phone through
+  // CrankWheel: private (no trackers, no admin gear, and the tokenized URL stays first-party) and
+  // an ads landing for the slim header and no chat bubble.
+  const isImpactPresentation =
+    /^(?:\/(?:en|es))?\/(?:health-alternative\/intake|alternativa-de-salud\/admision)\/[^/]+\/(?:presentation|presentacion)$/i.test(
+      pathname
+    );
+  if (isImpactPresentation) {
+    response.headers.set("x-private-page", "1");
+  }
+
   // The LegalShield funnel — both the opt-in and the self-enrollment page. These are the only
   // routes on the site that must NOT show the Isaac Plans logo: LegalShield's advertising rules
   // for Independent Associates require the page not read as an official LegalShield property, and
@@ -252,6 +263,7 @@ export default clerkMiddleware(async (auth, req) => {
     isFeIntakeForm ||
     isIulSecureCapture ||
     isAcaConfirmation ||
+    isImpactPresentation ||
     isLegalShield
   ) {
     response.headers.set("x-is-ads-landing", "1");

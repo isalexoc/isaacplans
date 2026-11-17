@@ -228,6 +228,11 @@ export type IntakeLobConfig = {
   impactEnrollment?: boolean;
   /** Partner logo above the client form's title and on its thank-you screen. A file in /public. */
   brandLogo?: { src: string; alt: string; width: number; height: number };
+  /**
+   * The agent's form gets the CrankWheel meeting panel and a button that opens the Impact sales
+   * presentation (`/health-alternative/intake/[token]/presentation`) in a new tab.
+   */
+  impactPresentation?: boolean;
 };
 
 /** Client-safe DTOs. */
