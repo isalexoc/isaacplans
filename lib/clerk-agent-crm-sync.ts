@@ -140,7 +140,9 @@ export async function syncClerkUserToAgentCrm(userData: Record<string, unknown>)
 
     if (agentCrmIsDuplicateContactError(postRes.status, errJson)) {
       const fromMeta = errJson.meta?.contactId;
-      let target = fromMeta ? await agentCrmFetchContactById(fromMeta, locationId, token) : null;
+      let target: { id: string; tags: string[] } | null = fromMeta
+        ? await agentCrmFetchContactById(fromMeta, locationId, token)
+        : null;
       if (!target) {
         target = await agentCrmFindContactByEmail(email, locationId, token, LOG);
       }

@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { AI_SETTER_TAG, getAiSetterConfig } from "@/lib/ai-setter/config";
 import { sendMetaCapiEvent } from "@/lib/meta-capi";
+import { createContactNote } from "@/lib/agent-crm-call-summary";
 import {
   agentCrmFetchContactById,
   agentCrmFindContactByEmail,
   agentCrmFindContactByPhone,
   agentCrmIsDuplicateContactError,
+  agentCrmMergePhoneDecision,
   type AgentCrmCreateContactErrorBody,
 } from "@/lib/agent-crm-contacts";
 
@@ -1246,6 +1248,9 @@ export async function POST(request: NextRequest) {
             ...localeTags,
           ];
 
+          /** Set by buildMergePayload: the contact that kept its phone while the form sent another. */
+          let phoneKeptOn: string | null = null;
+
           const buildMergePayload = async (
             mergeContactId: string,
             includePhone: boolean,
@@ -1266,8 +1271,14 @@ export async function POST(request: NextRequest) {
             if (includeEmail) {
               p.email = email;
             }
-            if (includePhone) {
-              p.phone = phone;
+            // The public form never replaces an existing contact's phone (Isaac, 2026-11-17): it
+            // only fills a blank one. A different number goes into a note after the merge. When
+            // the contact couldn't be read, its phone is unknown, so nothing is written.
+            phoneKeptOn = null;
+            if (includePhone && existingRow) {
+              const decision = agentCrmMergePhoneDecision(existingRow.phone, phone);
+              if (decision === "fill") p.phone = phone;
+              else if (decision === "keep_existing") phoneKeptOn = mergeContactId;
             }
             if (includeCustomFields && customFieldsArray.length > 0) {
               p.customFields = customFieldsArray;
@@ -1420,6 +1431,29 @@ export async function POST(request: NextRequest) {
                 "[create-contact] Successfully updated existing contact (duplicate path)",
                 { contactId: targetId }
               );
+
+              // The form brought a different number: the contact kept its phone (see
+              // buildMergePayload); Isaac gets the new one in a note and decides by hand.
+              if (phoneKeptOn === targetId) {
+                console.log("[create-contact] Existing phone kept; the form's number went to a note", {
+                  contactId: targetId,
+                });
+                // Public input: only phone characters reach the note (no planted text or links).
+                const shownPhone = String(phone).replace(/[^\d+()\-.\s]/g, "").trim().slice(0, 25);
+                try {
+                  await createContactNote({
+                    contactId: targetId,
+                    token: piToken,
+                    title: "Teléfono distinto en un formulario",
+                    body:
+                      `Este contacto llenó un formulario con otro teléfono: ${shownPhone}. ` +
+                      `El teléfono del contacto no se cambió: el formulario nunca reemplaza el teléfono de un ` +
+                      `contacto que ya existe. Si el número nuevo es el correcto, cámbialo a mano.`,
+                  });
+                } catch (noteError) {
+                  console.warn("[create-contact] Could not post the different-phone note:", noteError);
+                }
+              }
 
               // This branch returns below, long before the workflow ladder starts — see the
               // "no workflow enrollment - early return" log above. That is fine for the older lead
