@@ -10,7 +10,7 @@
 import Image from "next/image";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
-import type { ImpactQuote } from "@/lib/impact-quote/plans";
+import type { HouseholdSize, ImpactQuote } from "@/lib/impact-quote/plans";
 import { AGENT, DECK_COPY, TELEHEALTH_NAME, type DeckCopy, type DeckLocale } from "./copy";
 import { Brandbar, IMG, Kicker, Lead, LOGO_WHITE, Slide, Title } from "./deck-parts";
 import { Glyph, PORTAL_ICONS, type GlyphName } from "./icons";
@@ -30,8 +30,10 @@ export type DeckData = {
   agentIbo: string | null;
   /** The intake's token, for the live quote the agent pushes from the form. */
   token: string;
-  /** Impact's prices for this household at render time, or null (the agent supplies them). */
+  /** Impact's prices for this household at render time, or null (the slide asks and quotes). */
   quote: ImpactQuote | null;
+  /** What the intake says about the household, to pre-fill the slide's quote questions. */
+  household: { members: HouseholdSize; oldestDob: string | null };
 };
 /* ─── 1. Welcome ────────────────────────────────────────────────────────────── */
 
@@ -540,7 +542,16 @@ export function buildImpactSlides(data: DeckData): ReactNode[] {
     (page) => <FeesSlide key="fees" t={t} page={page} />,
     (page) => <CardSlide key="card" t={t} page={page} />,
     (page) => <PortalSlide key="portal" t={t} locale={data.locale} page={page} />,
-    (page) => <QuoteSlide key="quote" locale={data.locale} token={data.token} initial={data.quote} page={page} />,
+    (page) => (
+      <QuoteSlide
+        key="quote"
+        locale={data.locale}
+        token={data.token}
+        initial={data.quote}
+        household={data.household}
+        page={page}
+      />
+    ),
     (page) => <NextSlide key="next" t={t} startDate={data.startDate} page={page} />,
   ];
   return order.map((slide, i) => slide(`${i + 1} / ${order.length}`));

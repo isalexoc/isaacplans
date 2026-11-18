@@ -279,6 +279,16 @@ export const UI = {
     es: "Los precios aparecen cuando estén las fechas de nacimiento.",
   } as Dict,
   planMonthly: { en: "Monthly price:", es: "Precio mensual:" } as Dict,
+  quoteImageTitle: { en: "Image to share", es: "Imagen para compartir" } as Dict,
+  quoteImageCreate: { en: "Create image", es: "Crear imagen" } as Dict,
+  quoteImageCreating: { en: "Creating…", es: "Creando…" } as Dict,
+  quoteImageDownload: { en: "Download", es: "Descargar" } as Dict,
+  quoteImageShare: { en: "Share", es: "Compartir" } as Dict,
+  quoteImageNeedPrice: {
+    en: "Quote first (or type the price) to create the image.",
+    es: "Cotice primero (o escriba el precio) para crear la imagen.",
+  } as Dict,
+  quoteImageFailed: { en: "The image couldn't be created. Try again.", es: "No se pudo crear la imagen. Intente de nuevo." } as Dict,
 
   // Secure link — the panel the AGENT sees on the steps it covers
   capturePanelTitle: {

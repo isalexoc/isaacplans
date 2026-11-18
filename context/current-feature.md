@@ -2,6 +2,23 @@
 
 ## Status
 
+In progress: **Impact deck quotes on the slide + shareable quote image** (branch `feature/impact-deck-quote-image`, no
+migration).
+- **Bug:** the CrankWheel deck's quote slide only priced the household the intake already described when the deck
+  opened; Isaac opens it right after finding the client, before any birth date is on the form, so it sat on "Your
+  quote is almost ready" with no way to quote from the shared screen. Now the slide asks the same two questions as
+  `/impact` (how many people, the oldest's birth date), pre-filled from the intake when it has them, and quotes in
+  place; the highlighted plan (Esencial by default) goes to the agent's open form. `/impact` is unchanged.
+- **Quote image:** "Create image" on the agent's "Impact quote" panel renders a vertical 1080×1920 PNG (next/og, like
+  the IUL credentials card): the applicant's and every covered member's names, the plan and its monthly price,
+  the benefits as icons, provider fees, the $79 fee, the start date, Isaac's contact, Impact's logo and the
+  not-insurance line. Download, or share straight to WhatsApp where the device allows it.
+- Verified: `tsc` and `pnpm build` pass; the image rendered in ES and EN (Poppins; "★" dropped because the font
+  lacks it, and SVG fragments unwrapped for Satori); headless Chrome (APIs mocked): a quote-less deck pre-fills
+  "2 personas" and 5/5/1987 from the intake, "Ver mis precios" shows the plans, sends Esencial to the form and the
+  quote to the panel; the panel asks for `quote-image?tier=plus&monthly=364&lang=es` from the form's plan and offers
+  Download and Share.
+
 In progress: **AI Setter — Fase 1: la IA responde y agenda** (branch `feature/ai-setter`, migration `0045`).
 Leads come in from many sources (web forms, ads, Senior Life, Telegram, referrals) and Isaac can't answer them all when
 they arrive; until now nothing in the app even received inbound SMS/WhatsApp. The AI Setter (Claude Opus 5.5) answers

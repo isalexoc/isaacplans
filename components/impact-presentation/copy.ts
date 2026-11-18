@@ -111,7 +111,8 @@ export type DeckCopy = {
     max: string;
     note: string;
     fee: string;
-    pending: string;
+    /** On the deck's quote questions when Impact's price service doesn't answer. */
+    retry: string;
     names: Record<"esencial" | "plus" | "premium" | "total", { name: string; tagline: string }>;
     senior: string;
     under18: string;
@@ -306,7 +307,7 @@ const ES: DeckCopy = {
     max: "Máximo al año",
     note: "Lo único que cambia es su parte anual (PRA) si tiene un gasto médico grande. Los beneficios y los copagos son los mismos en los cuatro planes.",
     fee: "+ $79 de inscripción, una sola vez por familia",
-    pending: "Su cotización está casi lista.",
+    retry: "No pudimos traer los precios. Intente de nuevo en un momento.",
     names: {
       esencial: { name: "Esencial", tagline: "El menor aporte mensual" },
       plus: { name: "Plus", tagline: "Protección con ahorro" },
@@ -510,7 +511,7 @@ const EN: DeckCopy = {
     max: "Annual max",
     note: "The only difference is your annual share (PRA) if you have a large medical bill. Benefits and provider fees are the same in all four plans.",
     fee: "+ $79 enrollment fee, once per family",
-    pending: "Your quote is almost ready.",
+    retry: "We couldn't get the prices. Please try again in a moment.",
     names: {
       esencial: { name: "Essential", tagline: "Lowest monthly share" },
       plus: { name: "Plus", tagline: "Protection with savings" },

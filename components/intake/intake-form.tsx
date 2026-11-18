@@ -612,7 +612,7 @@ export default function IntakeForm({
       </div>
 
       {agentChrome && config.impactPresentation && session && !completed && (
-        <ImpactPresentationBar token={token} session={session} data={data} locale={locale} />
+        <ImpactPresentationBar lob={lob} token={token} session={session} data={data} locale={locale} />
       )}
 
       {completed && isOwner && (

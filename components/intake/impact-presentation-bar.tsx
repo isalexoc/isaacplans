@@ -21,11 +21,13 @@ import type { IntakeSession } from "@/lib/intake-core/types";
  * whatever language the agent's form happens to be in.
  */
 export default function ImpactPresentationBar({
+  lob,
   token,
   session,
   data,
   locale,
 }: {
+  lob: string;
   token: string;
   session: IntakeSession;
   /** The live answers: the quote reads the household from them. */
@@ -103,7 +105,7 @@ export default function ImpactPresentationBar({
         </Link>
       </div>
 
-      <ImpactQuotePanel token={token} data={data} locale={locale} />
+      <ImpactQuotePanel lob={lob} token={token} data={data} locale={locale} clientLocale={session.locale} />
     </>
   );
 }

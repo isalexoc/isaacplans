@@ -9,12 +9,15 @@ import {
   householdFromIntake,
   householdSize,
   manualPlans,
+  RECOMMENDED_TIER,
   SENIOR_AGE,
   TIERS,
   type ImpactPlan,
+  type ImpactQuote,
   type ImpactTierKey,
 } from "@/lib/impact-quote/plans";
-import { publishQuote, readStoredQuote } from "@/lib/impact-quote/sync";
+import { publishQuote, readStoredQuote, subscribeQuote } from "@/lib/impact-quote/sync";
+import ImpactQuoteImage from "@/components/intake/impact-quote-image";
 import { UI, tr, type IntakeLocale } from "@/lib/intake-core/ui-strings";
 
 type Prices = Record<ImpactTierKey, string>;
@@ -35,13 +38,18 @@ function pricesFrom(plans: ImpactPlan[]): Prices {
  * presentation tab updates at once.
  */
 export default function ImpactQuotePanel({
+  lob,
   token,
   data,
   locale,
+  clientLocale,
 }: {
+  lob: string;
   token: string;
   data: Record<string, unknown>;
   locale: IntakeLocale;
+  /** The client's language, the image's default. */
+  clientLocale: string;
 }) {
   const names = DECK_COPY[locale].quote;
   const { people, oldestDob } = useMemo(() => householdFromIntake(data), [data]);
@@ -50,13 +58,26 @@ export default function ImpactQuotePanel({
   const [prices, setPrices] = useState<Prices>(EMPTY);
   const [status, setStatus] = useState<"idle" | "loading" | "error" | "live">("idle");
 
+  // The latest quote for this intake, and every one after it — including one made on the deck's
+  // quote slide, which is where it usually happens now.
   useEffect(() => {
-    const stored = readStoredQuote(token);
-    if (stored?.plans.length) {
-      setPrices(pricesFrom(stored.plans));
+    const show = (quote: ImpactQuote | null) => {
+      if (!quote?.plans.length) return;
+      setPrices(pricesFrom(quote.plans));
       setStatus("live");
-    }
+    };
+    show(readStoredQuote(token));
+    return subscribeQuote(token, show);
   }, [token]);
+
+  // The plan the image is about: the form's "Your plan", or Esencial until one is chosen.
+  const imageTier: ImpactTierKey = TIERS.some((t) => t.key === data.impactPlan)
+    ? (data.impactPlan as ImpactTierKey)
+    : RECOMMENDED_TIER;
+  const imageMonthly =
+    data.impactPlan === imageTier && Number(data.impactMonthly) > 0
+      ? Number(data.impactMonthly)
+      : Number(prices[imageTier]) || 0;
 
   async function quoteWithImpact() {
     if (!oldestDob) return;
@@ -122,6 +143,19 @@ export default function ImpactQuotePanel({
         )}
         {status === "error" && <span className="text-sm font-medium text-amber-700">{tr(UI.quoteFailed, locale)}</span>}
       </div>
+      <ImpactQuoteImage
+        endpoint={`/api/intake/${lob}/${token}/quote-image`}
+        tier={imageTier}
+        monthly={imageMonthly}
+        fileName={`impact-${
+          String(data.firstName ?? "")
+            .normalize("NFD")
+            .replace(/[^\w-]/g, "")
+            .toLowerCase() || "cliente"
+        }`}
+        locale={locale}
+        clientLocale={clientLocale}
+      />
     </div>
   );
 }
