@@ -58,11 +58,30 @@ function parseContactsSearchResponse(data: unknown): LcContact[] {
   return [];
 }
 
+/**
+ * What a public form submission may do to an EXISTING contact's phone (Isaac, 2026-11-17: the
+ * form never replaces a lead's phone). The form is unauthenticated and its duplicate merge matches
+ * by email, so anyone who knows a lead's email could otherwise point the lead's calls, CRM texts
+ * and AI replies at a different number.
+ *   fill          — the contact has no phone: the form's number is written.
+ *   same          — the same number in another format: nothing to write.
+ *   keep_existing — a different number: the contact keeps its phone; the new one goes in a note.
+ */
+export function agentCrmMergePhoneDecision(
+  existingPhone: string | null | undefined,
+  incomingPhone: string | null | undefined
+): "fill" | "same" | "keep_existing" {
+  const tenDigits = (v: string | null | undefined) => (v ?? "").replace(/\D/g, "").slice(-10);
+  const existing = tenDigits(existingPhone);
+  if (!existing) return "fill";
+  return existing === tenDigits(incomingPhone) ? "same" : "keep_existing";
+}
+
 export async function agentCrmFetchContactById(
   contactId: string,
   locationId: string,
   token: string
-): Promise<{ id: string; tags: string[] } | null> {
+): Promise<{ id: string; tags: string[]; phone: string | null } | null> {
   const q = new URLSearchParams({ locationId });
   const res = await fetch(`${AGENT_CRM_API_BASE}/contacts/${contactId}?${q}`, {
     method: "GET",
@@ -75,7 +94,11 @@ export async function agentCrmFetchContactById(
   const data = await res.json();
   const c = (data.contact ?? data) as LcContact;
   if (!c?.id) return null;
-  return { id: c.id, tags: agentCrmNormalizeContactTags(c.tags) };
+  return {
+    id: c.id,
+    tags: agentCrmNormalizeContactTags(c.tags),
+    phone: typeof c.phone === "string" && c.phone.trim() ? c.phone.trim() : null,
+  };
 }
 
 /** POST /contacts/search — GET ?email= is no longer supported. */

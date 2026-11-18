@@ -33,6 +33,11 @@ gives prices, product details or advice.
   the lead declines times; license follows the address or what the lead said, never the area code; shadow mode and the
   CLI make no CRM writes; Telegram cards and buttons only for `TELEGRAM_ADMIN_CHAT_ID`; Claude cost priced per attempt
   in `usage.iterations`. Offline suite: 379 checks, 0 failing.
+- **The website form never replaces an existing lead's phone (Isaac, 2026-11-17).** `create-contact`'s duplicate merge
+  matched by email and overwrote the phone, so anyone who knew a lead's email could repoint the lead's calls, CRM texts
+  and AI replies. Now it only fills a blank phone (`agentCrmMergePhoneDecision`); a different number goes into a contact
+  note ("Teléfono distinto en un formulario") for Isaac to change by hand; never GHL's additional-phones list (Isaac's
+  2026-10-16 rule: extra phones join duplicate matching). Branch `fix/form-keeps-existing-phone`.
 
 **Isaac's decisions (2026-11-17):**
 - **Claude Opus 5.5** (`claude-opus-5-5`), in its own Anthropic workspace with a monthly spend limit. The rest of the
@@ -84,12 +89,7 @@ gives prices, product details or advice.
    AI vars Production-only in Vercel; MFA on his Clerk account.
 10. Then: `pnpm db:migrate 0045`, the three GHL workflows, the env vars, template approvals in the panel, shadow →
     approval mode.
-11. **Decide (security):** `create-contact`'s duplicate merge overwrites an existing contact's phone when the email
-    matches. Someone could swap a lead's number during the 20 s debounce and get the AI to text a stranger. The send
-    already refuses when the phone changed after the turn read it, and the turn refuses when GHL reports a different
-    sender (`--sources` will show whether GHL reports it). Options: never overwrite a non-empty phone from the public
-    form (keep the new one as an additional phone), or rely on the sender check once `--sources` confirms it.
-12. For Phase 2, not blocking: % of last-90-day web leads with "SMS Consent: Yes"; is the CRM's WhatsApp 540-681-3507
+11. For Phase 2, not blocking: % of last-90-day web leads with "SMS Consent: Yes"; is the CRM's WhatsApp 540-681-3507
     in coexistence; the QStash plan (delay limit); the legal review; does Isaac sell Medicare Advantage / Part D?
 
 Done: **Quote before the application on `/impact`** (branch `feature/impact-guide-quote-gate`, merged `6bc6e10`, no
