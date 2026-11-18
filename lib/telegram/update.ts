@@ -5,6 +5,19 @@
 
 export type NormalizedUpdate =
   | {
+      /** A tap on an inline-keyboard button of a message the bot sent (the AI Setter cards). */
+      kind: "callback_query";
+      updateId: string;
+      callbackQueryId: string;
+      /** Who tapped. */
+      fromId: string | null;
+      /** Chat and message the button sits on; null when Telegram no longer includes the message. */
+      chatId: string | null;
+      messageId: string | null;
+      /** The button's `callback_data` ("" when it has none). */
+      data: string;
+    }
+  | {
       kind: "business_connection";
       updateId: string;
       connectionId: string | null;
@@ -61,10 +74,29 @@ function normalizeMessage(
   };
 }
 
+function normalizeCallbackQuery(updateId: string, query: Record<string, unknown>): NormalizedUpdate {
+  const callbackQueryId = idOf(query.id);
+  // Without its id a press can't even be answered.
+  if (!callbackQueryId) return { kind: "other", updateId };
+  const message = asRecord(query.message);
+  return {
+    kind: "callback_query",
+    updateId,
+    callbackQueryId,
+    fromId: idOf(asRecord(query.from)?.id),
+    chatId: idOf(asRecord(message?.chat)?.id),
+    messageId: idOf(message?.message_id),
+    data: typeof query.data === "string" ? query.data : "",
+  };
+}
+
 export function normalizeUpdate(raw: unknown): NormalizedUpdate {
   const update = asRecord(raw);
   const updateId = idOf(update?.update_id) ?? "unknown";
   if (!update) return { kind: "other", updateId };
+
+  const callbackQuery = asRecord(update.callback_query);
+  if (callbackQuery) return normalizeCallbackQuery(updateId, callbackQuery);
 
   const connection = asRecord(update.business_connection);
   if (connection) {

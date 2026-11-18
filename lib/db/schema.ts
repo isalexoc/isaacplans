@@ -1383,3 +1383,151 @@ export const acaConfirmationEvents = pgTable("aca_confirmation_events", {
 }, (t) => ({
   confirmationIdx: index("aca_confirmation_events_confirmation_idx").on(t.confirmationId, t.at),
 }));
+
+// ─── AI Setter (answers leads over the CRM's SMS/WhatsApp, books calls with Isaac) ──
+
+type AiSetterLeadRecord = import("@/lib/ai-setter/types").LeadRecord;
+type AiSetterMessageRecord = import("@/lib/ai-setter/types").MessageRecord;
+
+/**
+ * ONE ROW PER GHL CONTACT the AI Setter has seen: conversation state, the slots it offered, the
+ * appointment it booked, and the turn fencing. lib/ai-setter/store.ts maps rows to `LeadRecord`.
+ *
+ * Turn fencing copies `phone_finder_runs`: the webhook arms a turn with one
+ * INSERT … ON CONFLICT (contact_id) DO UPDATE … WHERE idle OR stale RETURNING run_id (only the
+ * caller that armed publishes the QStash job), the consumer claims it with attempt_count + 1, and
+ * every write after the claim matches (contact_id, run_id, attempt_count, turn_state = 'running'),
+ * so a worker presumed dead can never overwrite the one that replaced it. The Neon HTTP driver has
+ * no interactive transactions, so each guard is one statement.
+ *
+ * PII: only the first name is copied out of GHL (for the admin list). No phone, no message text.
+ */
+export const aiSetterLeads = pgTable("ai_setter_leads", {
+  contactId: text("contact_id").primaryKey(),
+  firstName: text("first_name"),
+  status: text("status").notNull().default("active"), // active | paused | handoff | booked | stopped | opted_out
+  language: text("language"), // en | es
+  register: text("register"), // usted | tu
+  product: text("product"), // ProductLine (lib/ai-setter/types.ts)
+  leadTimezone: text("lead_timezone"), // IANA
+  stateCode: text("state_code"), // 2-letter
+  runId: text("run_id"), // "ais_<nanoid>"; QStash turn messages carry it
+  attemptCount: integer("attempt_count").notNull().default(0), // the claim's fencing token
+  turnState: text("turn_state").notNull().default("idle"), // idle | armed | running
+  /** A webhook poke arrived while a turn was running: the finishing turn re-arms instead of idling. */
+  pokePending: boolean("poke_pending").notNull().default(false),
+  armedAt: timestamp("armed_at"),
+  /** Watermark: the newest inbound GHL message id a finished turn has handled. */
+  lastHandledInboundId: text("last_handled_inbound_id"),
+  lastHandledInboundAt: timestamp("last_handled_inbound_at"),
+  lastInboundAt: timestamp("last_inbound_at"),
+  lastAiOutboundAt: timestamp("last_ai_outbound_at"),
+  /** channel → ISO time the AI disclosure last went out on it. */
+  disclosedChannels: jsonb("disclosed_channels").notNull().$type<AiSetterLeadRecord["disclosedChannels"]>().default({}),
+  pausedUntil: timestamp("paused_until"),
+  pauseReason: text("pause_reason"),
+  offeredSlots: jsonb("offered_slots").notNull().$type<AiSetterLeadRecord["offeredSlots"]>().default([]),
+  offeredAt: timestamp("offered_at"),
+  rejectionsCount: integer("rejections_count").notNull().default(0),
+  appointmentId: text("appointment_id"),
+  appointmentAt: timestamp("appointment_at"),
+  calendarId: text("calendar_id"),
+  /** Saved BEFORE the booking POST, so a retried turn never books twice. */
+  bookingIntent: jsonb("booking_intent").$type<AiSetterLeadRecord["bookingIntent"]>(),
+  callNowState: text("call_now_state"), // waiting | calling | declined | timeout
+  callNowRequestedAt: timestamp("call_now_requested_at"),
+  turnsDay: text("turns_day"), // YYYY-MM-DD (agent tz) that turns_today counts
+  turnsToday: integer("turns_today").notNull().default(0),
+  threadTurns: integer("thread_turns").notNull().default(0),
+  optOutPending: boolean("opt_out_pending").notNull().default(false),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (t) => ({
+  statusIdx: index("ai_setter_leads_status_idx").on(t.status, t.updatedAt),
+  turnStateIdx: index("ai_setter_leads_turn_state_idx").on(t.turnState, t.updatedAt),
+}));
+
+/**
+ * Every message the AI Setter drafted, sent, held or blocked, with the decision that produced it.
+ *
+ * Status machine: draft → approved → sending → sent | send_unknown | failed, plus the dead ends
+ * stale | rejected | superseded | blocked | shadow. Every transition is one conditional UPDATE
+ * (… WHERE id AND status IN (from)), so a late approval or a duplicate send job can never win twice.
+ *
+ * Retention: `body` / `original_body` are cleared after 90 days; the metadata (decision, tokens,
+ * cost, who approved) is kept 5 years.
+ */
+export const aiSetterMessages = pgTable("ai_setter_messages", {
+  id: text("id").primaryKey(), // "aim_<nanoid>"
+  contactId: text("contact_id").notNull(),
+  channel: text("channel").notNull(), // SMS | WhatsApp
+  kind: text("kind").notNull(), // template | free_text
+  templateId: text("template_id"),
+  templateHash: text("template_hash"),
+  body: text("body"), // null after the 90-day purge
+  originalBody: text("original_body"), // the AI's text when Isaac edited it
+  status: text("status").notNull(), // MessageStatus (lib/ai-setter/types.ts)
+  intent: text("intent"),
+  inReplyToInboundId: text("in_reply_to_inbound_id"),
+  turnRunId: text("turn_run_id"),
+  ghlMessageId: text("ghl_message_id"),
+  /** Compliance decision snapshot: rule inputs + outcome. Never message text. */
+  decision: jsonb("decision").$type<AiSetterMessageRecord["decision"]>(),
+  guardFlags: jsonb("guard_flags").notNull().$type<string[]>().default([]),
+  model: text("model"),
+  inputTokens: integer("input_tokens").notNull().default(0),
+  outputTokens: integer("output_tokens").notNull().default(0),
+  cacheReadTokens: integer("cache_read_tokens").notNull().default(0),
+  costMicros: integer("cost_micros").notNull().default(0), // 1/1,000,000 USD
+  usedFallback: boolean("used_fallback").notNull().default(false),
+  approvedBy: text("approved_by"), // Clerk id, or "telegram"
+  approvedAt: timestamp("approved_at"),
+  sentAt: timestamp("sent_at"),
+  notBefore: timestamp("not_before"), // held for the lead's window
+  expiresAt: timestamp("expires_at"), // drafts only; then → stale
+  error: text("error"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (t) => ({
+  contactIdx: index("ai_setter_messages_contact_idx").on(t.contactId, t.createdAt),
+  statusIdx: index("ai_setter_messages_status_idx").on(t.status, t.createdAt),
+  ghlMessageIdx: index("ai_setter_messages_ghl_message_idx").on(t.ghlMessageId),
+}));
+
+/** Append-only audit trail per lead (turns, pauses, bookings, opt-outs). `detail` never holds message text. */
+export const aiSetterEvents = pgTable("ai_setter_events", {
+  id: text("id").primaryKey(), // "aie_<nanoid>"
+  contactId: text("contact_id").notNull(),
+  type: text("type").notNull(), // "turn" rows feed the global hourly cap
+  detail: jsonb("detail").$type<Record<string, unknown> | null>(),
+  at: timestamp("at").defaultNow().notNull(),
+}, (t) => ({
+  contactIdx: index("ai_setter_events_contact_idx").on(t.contactId, t.at),
+  typeIdx: index("ai_setter_events_type_idx").on(t.type, t.at),
+}));
+
+/**
+ * Opt-outs, BY PHONE (E.164) and forever: a STOP keeps that number out even if the CRM contact is
+ * deleted or recreated. START / UNSTOP lifts it, stamping `lifted_at` + `lift_reason` instead of
+ * deleting the row. Never purged.
+ */
+export const aiSetterSuppressions = pgTable("ai_setter_suppressions", {
+  e164: text("e164").primaryKey(),
+  scope: text("scope").notNull().default("all"), // all | sms | whatsapp
+  source: text("source").notNull(), // what detected it, e.g. "stop_keyword" | "phrase" | "admin"
+  rawText: text("raw_text"), // the opt-out message itself, kept as evidence
+  contactId: text("contact_id"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  liftedAt: timestamp("lifted_at"),
+  liftReason: text("lift_reason"),
+});
+
+/** Daily Claude spend guard: one row per agent-local day (same pattern as `phone_finder_daily_usage`). */
+export const aiSetterDailyUsage = pgTable("ai_setter_daily_usage", {
+  day: text("day").primaryKey(), // "YYYY-MM-DD" in the agent's time zone
+  turns: integer("turns").notNull().default(0),
+  reservedMicros: integer("reserved_micros").notNull().default(0), // in-flight reservations
+  costMicros: integer("cost_micros").notNull().default(0), // settled spend
+  sends: integer("sends").notNull().default(0),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});

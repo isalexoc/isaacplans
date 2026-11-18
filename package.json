@@ -43,9 +43,12 @@
     "check:objections": "tsx scripts/check-objections.ts",
     "check:ffmpeg": "tsx scripts/check-ffmpeg-tracing.ts",
     "aca-confirmation:field": "tsx scripts/create-aca-confirmation-field.ts",
-    "test:aca-confirmation": "tsx scripts/test-aca-confirmation.ts"
+    "test:aca-confirmation": "tsx scripts/test-aca-confirmation.ts",
+    "test:ai-setter": "tsx scripts/test-ai-setter.ts",
+    "ai-setter:try": "tsx --conditions=react-server scripts/ai-setter-try.ts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "1.8.0",
     "@clerk/localizations": "^3.28.5",
     "@clerk/nextjs": "^6.35.5",
     "@clerk/themes": "^2.4.57",
@@ -126,6 +129,7 @@
     "recharts": "2.15.0",
     "sanity": "^4.18.0",
     "schema-dts": "^1.1.5",
+    "server-only": "0.0.1",
     "signature_pad": "^5.1.4",
     "sonner": "^1.7.1",
     "styled-components": "^6.1.19",

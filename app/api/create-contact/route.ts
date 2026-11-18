@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { AI_SETTER_TAG, getAiSetterConfig } from "@/lib/ai-setter/config";
 import { sendMetaCapiEvent } from "@/lib/meta-capi";
 import {
   agentCrmFetchContactById,
@@ -1093,6 +1094,11 @@ export async function POST(request: NextRequest) {
     }
     if (localeTags.length > 0) {
       contactPayload.tags = [...(contactPayload.tags || []), ...localeTags];
+    }
+    // AI Setter (Phase 1): the tag only lets the assistant ANSWER this lead when they write;
+    // it never starts a conversation. LegalShield (Ysmael's) and agent-affiliate leads stay out.
+    if (getAiSetterConfig().tagNewLeads && !legalShieldData && !agentCrmData) {
+      contactPayload.tags = [...(contactPayload.tags || []), AI_SETTER_TAG];
     }
 
     const consumerGuideTagSources = [

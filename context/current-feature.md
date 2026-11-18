@@ -2,7 +2,98 @@
 
 ## Status
 
-In progress: **Quote before the application on `/impact`** (branch `feature/impact-guide-quote-gate`, no migration).
+In progress: **AI Setter — Fase 1: la IA responde y agenda** (branch `feature/ai-setter`, migration `0045`).
+Leads come in from many sources (web forms, ads, Senior Life, Telegram, referrals) and Isaac can't answer them all when
+they arrive; until now nothing in the app even received inbound SMS/WhatsApp. The AI Setter (Claude Opus 5.5) answers
+`ai_setter`-tagged leads in English or Spanish over the CRM's SMS/WhatsApp with one goal: a call with Isaac, booked into
+the GHL calendar of the lead's product and language (so GHL's own confirmations and reminders fire), or "call now" when
+he's free (Telegram card [Estoy llamando] [No puedo]; two times instead if he doesn't tap within 3 minutes). It never
+gives prices, product details or advice.
+- **Built in the app, not GHL's Conversation AI:** that one takes one calendar per bot, doesn't pause when Isaac replies
+  from his phone, can't read call outcomes and has no per-state rules. GHL stays the channel and the record: every text
+  goes out through `POST /conversations/messages`, every booking is `POST /calendars/events/appointments`.
+- **How:** GHL "Customer Replied" workflow → Custom Webhook (Bearer) → `/api/webhooks/agent-crm/ai-setter` arms one turn
+  per contact (20 s debounce) → QStash → `/api/queue/ai-setter`. Code rules run first (opt-out tiers, HELP, START,
+  suppression by phone, tags, DND, clients, Isaac took over, reply windows incl. PA, WhatsApp 24 h, license, Medicare,
+  caps, budget); then Claude ends the turn with ONE action (template, free-text draft, book / reschedule / cancel, call
+  now, hand off, opt out, nothing). A send is its own job that re-checks everything right before posting (two-phase).
+  The AI disclosure, brand and STOP line are added by code, never by the model.
+- **Code:** `lib/ai-setter/` (pure core, GHL and Claude adapters, server-only store / settings / notify / process), the
+  webhook and queue routes, the admin API and panel `/admin/ai-setter` (Bandeja, Leads, Ajustes), Telegram
+  `callback_query` buttons, a reconcile block, one `create-contact` line (tags new web leads, off by default),
+  `scripts/test-ai-setter.ts` and `scripts/ai-setter-try.ts`, `@anthropic-ai/sdk` pinned. Setup, env, workflows, tests
+  and the written do-not-contact policy: `AI_SETTER_SETUP.md`.
+- **Second review round (2026-11-17), all applied:** a poke during a running turn sets `poke_pending` (new column in
+  `0045`) and that turn re-arms when it finishes, so a mid-turn STOP or Isaac's reply is never lost; opt-outs are checked
+  by code on every turn reason and every text channel; the ambiguous-opt-out freeze is enforced (yes → opt-out, clear no →
+  go on, else frozen); DND lands on every channel even when the confirmation can't go out; compliance texts expire after
+  30 min and reach only AI-managed contacts; sends use the turn's read time as the "newer" boundary, go only to the number
+  the turn read, regenerate when a held text says today/tomorrow on another day or offers a time under an hour away, and
+  give up after 2 h of error holds; one decision path after a guard retry (bookings confirmed); rejections count only when
+  the lead declines times; license follows the address or what the lead said, never the area code; shadow mode and the
+  CLI make no CRM writes; Telegram cards and buttons only for `TELEGRAM_ADMIN_CHAT_ID`; Claude cost priced per attempt
+  in `usage.iterations`. Offline suite: 379 checks, 0 failing.
+
+**Isaac's decisions (2026-11-17):**
+- **Claude Opus 5.5** (`claude-opus-5-5`), in its own Anthropic workspace with a monthly spend limit. The rest of the
+  app stays on OpenAI.
+- **Approval first, with once-approved templates sending on their own.** Isaac approves each fixed template once (offer
+  times, confirm, "let me see if Isaac is free", …); the approval is a hash of its EN / ES-usted / ES-tú wording, so an
+  edited template needs approving again. Approved templates go out at once; only the AI's free text waits for his OK,
+  in Telegram or the panel. A reply type turns automatic when its numbers justify it (30+ reviewed, 90%+ unedited), in
+  Phase 2.
+- **WhatsApp: SMS + a wa.me link + a manual one-tap outbox (Phase 2), never WhatsApp Web automation** (WhatsApp Business
+  Terms §5; Meta doesn't deliver marketing templates to US numbers). A lead who writes on WhatsApp is answered there,
+  inside the 24-hour window.
+- **Call hours (ET, editable in Ajustes):** Mon/Wed/Thu 9:00a–2:00p and 9:30p–12:00a; Tue/Sun 9:00a–12:00a; Fri/Sat
+  9:00a–1:00p and 10:30p–12:00a. Leads are offered 9a–9p their time, or the hour they ask for when it fits. Outside
+  these hours Isaac doesn't call, but he still reviews and approves.
+- **Usted by default** in Spanish; tú only once the lead uses it, remembered per lead.
+
+**Phases:**
+- **Phase 0, prep:** Isaac's accounts and settings plus two read-only checks (`--calendars`, `--sources`, which freeze
+  the human/automation classifier). Required before Phase 1 goes live.
+- **Phase 1, answers and books (this branch):** replies only to leads who write in; the existing GHL workflows still
+  send the first text. Shadow mode first, then approval mode.
+- **Phase 2, first touch and follow-up:** proactive first text and cadence once recorded consent, a hardened form (bot
+  check, Trestle), per-state rules and one texting owner per lead are in place; WhatsApp link + outbox; autopilot.
+- **Phase 3, more reach:** reactivating old leads (after a legal review), FB / IG / chat / email, and recovering missed
+  appointments.
+
+**Pending from Isaac (Phase 0)**, with every command in `AI_SETTER_SETUP.md`:
+1. Anthropic: own workspace + monthly spend limit; a production key (`ANTHROPIC_API_KEY` in Vercel) and a separate
+   development key.
+2. GHL: a new Private Integration only for the AI (`AI_SETTER_GHL_PI`) with `conversations.readonly`,
+   `conversations/message.readonly`, `conversations/message.write`, `contacts.readonly`, `contacts.write`,
+   `calendars.readonly`, `calendars/events.readonly`, `calendars/events.write`, `users.readonly`. `AGENT_CRM_PI` is not
+   widened.
+3. Telegram: a BotFather bot (`TELEGRAM_BOT_TOKEN`), `/start` from his account, `pnpm telegram:webhook --set` after the
+   deploy.
+4. `pnpm ai-setter:try --calendars`, plus by hand: notice ≤ 1 h, a 7-day range, open hours ≥ his schedule, Google
+   Calendar connected.
+5. `pnpm ai-setter:try --sources <his contact>` after one message of each kind (manual web + mobile, workflow SMS,
+   calendar confirmation, API, WhatsApp from his phone, a Kixie call) → freeze `classify.ts`.
+6. Inventory of the `AGENT_CRM_WORKFLOW_*` and tag workflows (Telegram and Senior Life cadences included): what each
+   sends and when. A simple first text in GHL if new leads get none.
+7. Booking test: `pnpm ai-setter:try --book <contactId> --yes` (his contact in `AI_SETTER_TEST_CONTACT_IDS`). Do API
+   bookings fire the reminders (else add the "Appointment Status (Modified By: API)" trigger)? Keep ONE confirmation,
+   the AI's or GHL's.
+8. SMS/A2P: the 10DLC campaign, GHL's SMS compliance settings (does it add its own STOP line?), whether the number
+   already answers HELP; GHL Conversation AI off on SMS and WhatsApp.
+9. Security: confirm the public `/api/test-agent-crm` is gone (it returned the first 20 characters of `AGENT_CRM_PI`);
+   AI vars Production-only in Vercel; MFA on his Clerk account.
+10. Then: `pnpm db:migrate 0045`, the three GHL workflows, the env vars, template approvals in the panel, shadow →
+    approval mode.
+11. **Decide (security):** `create-contact`'s duplicate merge overwrites an existing contact's phone when the email
+    matches. Someone could swap a lead's number during the 20 s debounce and get the AI to text a stranger. The send
+    already refuses when the phone changed after the turn read it, and the turn refuses when GHL reports a different
+    sender (`--sources` will show whether GHL reports it). Options: never overwrite a non-empty phone from the public
+    form (keep the new one as an additional phone), or rely on the sender check once `--sources` confirms it.
+12. For Phase 2, not blocking: % of last-90-day web leads with "SMS Consent: Yes"; is the CRM's WhatsApp 540-681-3507
+    in coexistence; the QStash plan (delay limit); the legal review; does Isaac sell Medicare Advantage / Part D?
+
+Done: **Quote before the application on `/impact`** (branch `feature/impact-guide-quote-gate`, merged `6bc6e10`, no
+migration).
 A visitor of the self-serve guide could tap Next past "Choose your plan" without quoting and reach "Apply now".
 Now a visitor must see their prices first: Next, swipe, arrow keys, the browser's Back/Forward and a `#11` link all
 stop at the quote screen until it has prices, with a nudge to tap "See my prices". If Impact's price service fails,

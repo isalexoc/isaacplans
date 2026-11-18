@@ -21,7 +21,10 @@ export type TelegramLeadsConfig = {
   webhookSecret: string | null;
   /** Chats whose CONTENT we are allowed to store. No default — see below. */
   allowedChatIds: string[];
-  /** Fallback target for alerts; the id learned from `business_connection` wins. */
+  /**
+   * Isaac's chat id (TELEGRAM_ADMIN_CHAT_ID). The ONLY chat AI Setter cards go to and the only
+   * user whose button presses count; lead alerts use it first, then a chat learned during setup.
+   */
   adminChatId: string | null;
   /** Always applied, in this order. Env may only ADD. */
   baseTags: string[];

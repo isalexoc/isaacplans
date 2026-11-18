@@ -2,8 +2,9 @@
  * Alerts for the Telegram lead pipeline.
  *
  * Primary channel is the bot DMing Isaac — no new email plumbing, and it lands on the phone he is
- * already holding. The target chat id is learned automatically from the `business_connection`
- * update (`user_chat_id`), with a `/start` fallback and an env override.
+ * already holding. The target is TELEGRAM_ADMIN_CHAT_ID; while that is unset, the chat learned
+ * during setup (the first `/start` DM or business connection, see `rememberAdminChatId`). The AI
+ * Setter's cards never use a learned chat: lib/ai-setter/notify.ts sends to the env value only.
  *
  * Never throws: an alert failing must not fail a lead sync.
  */
@@ -23,14 +24,40 @@ export type TelegramNotifyEvent =
   | { kind: "connection_lost" }
   | { kind: "reconcile_summary"; found: number; processed: number };
 
-/** Resolve the admin chat: learned id first, then the env override. */
+/**
+ * Resolve the chat for the Telegram-leads alerts: the env value TELEGRAM_ADMIN_CHAT_ID wins, then
+ * the learned id. Never use it to authorize anything: a learned chat is first come, first served
+ * during setup. The AI Setter's cards and button presses trust `config.adminChatId` alone.
+ */
 export async function resolveAdminChatId(config: TelegramLeadsConfig): Promise<string | null> {
+  if (config.adminChatId) return config.adminChatId;
   const learned = await getTelegramSetting("admin_chat_id");
-  return learned || config.adminChatId || null;
+  return learned || null;
 }
 
-export async function rememberAdminChatId(chatId: string): Promise<void> {
+/**
+ * Remember Isaac's chat from a `/start` DM or a `business_connection` update's `user_chat_id`.
+ * Neither is trusted by itself: anyone can DM the bot, and any Telegram Premium user can connect
+ * it as a business bot to THEIR account (the update then names THEIR chat).
+ * - TELEGRAM_ADMIN_CHAT_ID set (`envAdminChatId`): only that chat counts, and it replaces any
+ *   learned one; any other chat changes nothing.
+ * - Unset: first come, first served during setup. The first chat is stored; afterwards only that
+ *   one counts.
+ * Returns whether `chatId` is (now) the admin chat.
+ */
+export async function rememberAdminChatId(
+  chatId: string,
+  opts: { envAdminChatId: string | null }
+): Promise<boolean> {
+  if (opts.envAdminChatId) {
+    if (opts.envAdminChatId !== chatId) return false;
+    await setTelegramSetting("admin_chat_id", chatId);
+    return true;
+  }
+  const learned = await getTelegramSetting("admin_chat_id");
+  if (learned) return learned === chatId;
   await setTelegramSetting("admin_chat_id", chatId);
+  return true;
 }
 
 function renderEvent(event: TelegramNotifyEvent): string {

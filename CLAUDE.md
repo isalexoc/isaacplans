@@ -13,7 +13,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Database: PostgreSQL (Neon) via Drizzle ORM
 - CMS: Sanity.io (blog, presentation scripts)
 - Auth: Clerk
-- Integrations: Agent CRM (LeadConnector), Meta CAPI, Facebook Pixel, Kixie Dialer, OpenAI (Whisper + GPT), Nodemailer
+- Integrations: Agent CRM (LeadConnector), Meta CAPI, Facebook Pixel, Kixie Dialer, OpenAI (Whisper + GPT), Anthropic Claude (Opus 5.5 via @anthropic-ai/sdk, ANTHROPIC_API_KEY; used only by the AI Setter), Nodemailer
 - i18n: next-intl (en, es locales)
 - Deployment: Vercel
 
@@ -175,6 +175,7 @@ For integrations:
 - Phone Finder: PHONE_FINDER_ENABLED, PHONE_FINDER_WEBHOOK_SECRET, TRESTLE_API_KEY, ENFORMION_AP_NAME, ENFORMION_AP_PASSWORD (tuning vars in PHONE_FINDER_SETUP.md)
 - Impact welcome: IMPACT_WELCOME_WEBHOOK_URL (one GHL Inbound Webhook workflow; it branches on the contact's `spanish` tag, and the app picks the email language the same way), IMPACT_TEMP_PASSWORD (shared portal password printed in the welcome email; never in code, repo is public), IMPACT_EMAIL_FROM (optional sender), IMPACT_AGENT_IBO (Isaac's Impact IBO # on the sales presentation's agent slide; never in code, repo is public; unset shows "—")
 - ACA application review confirmation: ACA_AGENT_NPN (required; never in code, repo is public), ACA_CONFIRMATION_FILE_FIELD_ID (File Upload field from `pnpm aca-confirmation:field`; the signed PDF lands in the contact's Documents), optional ACA_CONFIRMATION_EMAIL_FROM / ACA_AGENT_NAME / ACA_AGENT_PHONE / ACA_AGENT_EMAIL
+- AI Setter: AI_SETTER_ENABLED (default false), AI_SETTER_DRY_RUN (default true = shadow mode, nothing is sent), AI_SETTER_WEBHOOK_SECRET, AI_SETTER_GHL_PI (its own Private Integration, never AGENT_CRM_PI), AI_SETTER_GHL_USER_ID, ANTHROPIC_API_KEY (Claude; only the AI Setter uses it). Production-only in Vercel; tuning vars (AI_SETTER_*) in AI_SETTER_SETUP.md
 
 See .env for full list and CALL_SUMMARY_SETUP.md, META_CAPI_SETUP.md, FACEBOOK_PIXEL_GUIDE.md, QSTASH_SETUP.md for detailed integration docs.
 
@@ -198,13 +199,14 @@ QStash delivery endpoints (auth via `Upstash-Signature`, not CRON_SECRET):
 - /api/queue/social-publish: publishes one scheduled social post at its exact time
 - /api/queue/phone-finder: runs one Phone Finder search (published from the GHL "Find More Phones" webhook)
 - /api/queue/aca-confirmation-finalize: finishes one signed ACA confirmation (PDF archive, CRM Documents file, note, tag; published when the client signs)
+- /api/queue/ai-setter: one AI Setter job: a turn (code rules, then Claude picks one reply or action), a send (re-checks everything, then posts the approved text to GHL) with its verify-send, or a call-now timeout (published from the GHL reply webhook, approvals and the turn itself)
 
 Crons in vercel.json (all CRON_SECRET bearer auth; all daily-or-less):
 - /api/cron/call-summary-backfill: Daily 6 AM UTC; backfills missed GHL call summaries
-- /api/cron/queue-reconcile: Daily 7 AM UTC; safety-net that drains any Kixie job / social post QStash missed
+- /api/cron/queue-reconcile: Daily 7 AM UTC; safety-net that drains any Kixie job / social post QStash missed; for the AI Setter it only re-publishes stuck turns and approved sends (never runs them inline), expires old drafts and erases 90-day-old message text
 - /api/cron/social-token-refresh: Weekly (Mon 8 AM UTC); refreshes social OAuth tokens
 
-QStash is feature-flagged by `QSTASH_ENABLED`; when off, the Kixie webhook falls back to a direct processor kick and posts wait for the daily reconcile.
+QStash is feature-flagged by `QSTASH_ENABLED`; when off, the Kixie webhook falls back to a direct processor kick and posts wait for the daily reconcile. The AI Setter has no inline fallback: without QStash its webhook ignores every poke.
 
 ## Deployment
 
@@ -261,3 +263,4 @@ For feature-specific setup, see root markdown files:
 - PHONE_FINDER_SETUP.md: "Find More Phones" checkbox → EnformionGO + Trestle → "Additional Possible Phones" field
 - IMPACT_ENROLLMENT_SETUP.md: Impact Health Sharing post-sale welcome from /health-alternative/intake: email with the ID card PDF attached sent by the app (Conversations API), texts/WhatsApp with the card image via a GHL Inbound Webhook workflow; values ride in the email/webhook body, never custom fields. Also the Health Coverage intake's secure link (client types SSN/ITIN, ID number, bank details at /secure/<token>; `config.secureCapture`, table `intake_secure_captures`, tag `ha_secure_capture_sent`)
 - ACA_CONFIRMATION_SETUP.md: CMS application review confirmation (the second CMS signature, before submission) from /aca/intake: app-sent email → client e-signs a one-page CMS-model form at /aca/confirmation/[token] → PDF + signature trail archived (Cloudinary, 10 yrs), saved to the contact's Documents, note + tag; first consent stays in the GHL workflow
+- AI_SETTER_SETUP.md: AI Setter (Claude Opus 5.5) answers `ai_setter`-tagged leads' SMS/WhatsApp replies (GHL "Customer Replied" workflow → webhook → QStash) and books calls into the product + language GHL calendar, or asks Isaac on Telegram to call now; shadow mode by default, approval-first templates, compliance rules in code (`lib/ai-setter/`), migration 0045, written internal DNC policy
