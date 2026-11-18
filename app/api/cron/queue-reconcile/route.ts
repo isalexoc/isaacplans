@@ -19,6 +19,7 @@ import { fetchTranscript } from "@/lib/call-study/scribe";
 import { ingestTranscript } from "@/lib/call-study/ingest";
 import { reconcilePhoneFinderRuns } from "@/lib/phone-finder/process";
 import { reconcileAcaConfirmations } from "@/lib/aca-confirmation/finalize";
+import { reconcileAiSetter } from "@/lib/ai-setter/process";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -197,6 +198,16 @@ export async function GET(req: NextRequest) {
     console.error("[ACA_CONFIRMATION] Reconcile failed", err);
   }
 
+  // -- AI Setter: expire old drafts, purge 90-day-old message text, and RE-PUBLISH stuck turns /
+  //    approved sends; sends stuck in "sending" go to verification. Never runs a turn or a send
+  //    here (this fires at 2-3 AM Eastern). Guarded. --
+  let aiSetter = { expired: 0, purged: 0, turns: 0, sends: 0, stuck: 0 };
+  try {
+    aiSetter = await reconcileAiSetter(req.nextUrl.origin);
+  } catch (err) {
+    console.error("[AI_SETTER] Reconcile failed", err instanceof Error ? err.name : "unknown");
+  }
+
   return NextResponse.json({
     ok: true,
     kixieProcessed,
@@ -225,5 +236,9 @@ export async function GET(req: NextRequest) {
     acaConfirmationsChecked: acaConfirmations.checked,
     acaConfirmationsCompleted: acaConfirmations.completed,
     acaConfirmationsFailed: acaConfirmations.failed,
+    aiSetterDraftsExpired: aiSetter.expired,
+    aiSetterTextPurged: aiSetter.purged,
+    aiSetterTurnsRepublished: aiSetter.turns,
+    aiSetterSendsRepublished: aiSetter.sends,
   });
 }

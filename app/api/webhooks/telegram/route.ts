@@ -2,12 +2,17 @@ import { NextResponse, after, type NextRequest } from "next/server";
 import { timingSafeEqual } from "crypto";
 
 import { publishJob } from "@/lib/qstash/client";
-import { sendTelegramMessage } from "@/lib/telegram/api";
+import {
+  answerTelegramCallback,
+  editTelegramMessageText,
+  sendTelegramMessage,
+} from "@/lib/telegram/api";
 import {
   getTelegramLeadsConfig,
   isAllowlistedChat,
+  type TelegramLeadsConfig,
 } from "@/lib/telegram/config";
-import { createTelegramLogger } from "@/lib/telegram/log";
+import { createTelegramLogger, type TelegramLogger } from "@/lib/telegram/log";
 import { notifyTelegramLeadEvent, rememberAdminChatId } from "@/lib/telegram/notify";
 import {
   TELEGRAM_LEADS_QUEUE_PATH,
@@ -16,7 +21,7 @@ import {
 import { contentHashOf, deriveTelegramLeadKey } from "@/lib/telegram/parse";
 import { setBusinessConnection } from "@/lib/telegram/settings";
 import { enqueueTelegramLead, getTelegramLead } from "@/lib/telegram/store";
-import { normalizeUpdate } from "@/lib/telegram/update";
+import { normalizeUpdate, type NormalizedUpdate } from "@/lib/telegram/update";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -48,6 +53,63 @@ function verifySecret(req: NextRequest, secret: string): boolean {
   return timingSafeEqual(a, b);
 }
 
+type CallbackUpdate = Extract<NormalizedUpdate, { kind: "callback_query" }>;
+type CallbackReply = { toast: string; editText?: string };
+
+/**
+ * Loaded on demand so the AI Setter's module graph can never break lead capture: if it fails to
+ * load or throws, only this button press fails.
+ */
+async function runAiSetterCallback(update: CallbackUpdate, log: TelegramLogger): Promise<CallbackReply> {
+  try {
+    const { handleAiSetterTelegramCallback } = await import("@/lib/ai-setter/actions");
+    return await handleAiSetterTelegramCallback(update.data, {
+      chatId: update.chatId,
+      messageId: update.messageId,
+    });
+  } catch (err) {
+    log.error("AI Setter button handler failed", { error: err instanceof Error ? err.name : "unknown" });
+    return { toast: "Error, abre el panel" };
+  }
+}
+
+/**
+ * A button press on a card the bot sent. Only Isaac may act, and Isaac is ONLY the env value
+ * TELEGRAM_ADMIN_CHAT_ID, never a learned chat: that one is first come during setup, and a
+ * Telegram Premium user can get theirs learned by connecting the bot to their own account. A
+ * private chat's id equals its user's id, so the presser's `from.id` must equal the env value.
+ * Every press is answered (that stops the button's spinner) and gets a 200: a press can never
+ * become valid later, so a retry from Telegram would only repeat it.
+ */
+async function handleCallbackQuery(
+  update: CallbackUpdate,
+  config: TelegramLeadsConfig,
+  log: TelegramLogger
+): Promise<NextResponse> {
+  const adminChatId = config.adminChatId;
+  if (!adminChatId || update.fromId !== adminChatId) {
+    log.warn("Button press not from TELEGRAM_ADMIN_CHAT_ID; refused", {
+      reason: adminChatId ? "not_admin" : "admin_chat_not_set",
+      fromId: update.fromId,
+      chatId: update.chatId,
+    });
+    await answerTelegramCallback(update.callbackQueryId, "No permitido", config);
+    return NextResponse.json({ ok: true, ignored: "callback_not_allowed" });
+  }
+
+  if (!update.data.startsWith("ais:")) {
+    await answerTelegramCallback(update.callbackQueryId, "Acción desconocida", config);
+    return NextResponse.json({ ok: true, ignored: "callback_unknown" });
+  }
+
+  const reply = await runAiSetterCallback(update, log);
+  await answerTelegramCallback(update.callbackQueryId, reply.toast, config);
+  if (reply.editText && update.chatId && update.messageId) {
+    await editTelegramMessageText(update.chatId, update.messageId, reply.editText, config);
+  }
+  return NextResponse.json({ ok: true, kind: "callback_query" });
+}
+
 export async function POST(req: NextRequest) {
   const config = getTelegramLeadsConfig();
   const log = createTelegramLogger(config.debug);
@@ -75,12 +137,31 @@ export async function POST(req: NextRequest) {
 
   const update = normalizeUpdate(json);
 
+  // ── A button on an AI Setter card was tapped ──────────────────────────────────────
+  if (update.kind === "callback_query") {
+    return handleCallbackQuery(update, config, log);
+  }
+
   // ── The bot was connected / disconnected from Isaac's account ──────────────────────
   if (update.kind === "business_connection") {
+    // NOT trusted by itself: any Telegram Premium user can connect this bot as a business bot to
+    // THEIR account, and the update then names THEIR chat. Same rule as /start: the chat in
+    // TELEGRAM_ADMIN_CHAT_ID or, while that is unset, the first chat during setup.
+    const isAdmin = update.userChatId
+      ? await rememberAdminChatId(update.userChatId, { envAdminChatId: config.adminChatId })
+      : false;
     log.info("Business connection update", {
       connectionId: update.connectionId,
       isEnabled: update.isEnabled,
+      isAdmin,
     });
+    if (!isAdmin) {
+      // Someone else's account: its connection record and its disconnects are not Isaac's.
+      log.warn("Business connection from an account that is not the admin; ignored", {
+        userChatId: update.userChatId,
+      });
+      return NextResponse.json({ ok: true, ignored: "connection_not_admin" });
+    }
     if (update.connectionId) {
       await setBusinessConnection({
         id: update.connectionId,
@@ -88,8 +169,6 @@ export async function POST(req: NextRequest) {
         isEnabled: update.isEnabled,
       });
     }
-    // `user_chat_id` is Isaac's own chat — this is how alerts find him with no setup step.
-    if (update.userChatId) await rememberAdminChatId(update.userChatId);
     if (!update.isEnabled) {
       await notifyTelegramLeadEvent({ kind: "connection_lost" }, config, log);
     }
@@ -99,12 +178,18 @@ export async function POST(req: NextRequest) {
   // ── An ordinary DM to the bot: only ever the /start bootstrap, never a lead ────────
   if (update.kind === "message") {
     if (update.chatId) {
-      await rememberAdminChatId(update.chatId);
-      await sendTelegramMessage(
-        update.chatId,
-        `Connected. This chat will receive Empiregrowth lead alerts.\n\nChat id: ${update.chatId}`,
-        config
-      );
+      // Untrusted: anyone can DM the bot. Only the chat in TELEGRAM_ADMIN_CHAT_ID (or, while that
+      // is unset, the first chat during setup) becomes the admin chat; a later stranger gets no reply.
+      const isAdmin = await rememberAdminChatId(update.chatId, { envAdminChatId: config.adminChatId });
+      if (isAdmin) {
+        // AI Setter cards and buttons trust only the env value, never a learned chat.
+        const scope = config.adminChatId
+          ? "This chat will receive lead and AI Setter alerts."
+          : "This chat will receive lead alerts. AI Setter cards also need this id in TELEGRAM_ADMIN_CHAT_ID.";
+        await sendTelegramMessage(update.chatId, `Connected. ${scope}\n\nChat id: ${update.chatId}`, config);
+      } else {
+        log.warn("DM from a chat that is not the admin chat; ignored", { chatId: update.chatId });
+      }
     }
     return NextResponse.json({ ok: true, kind: "message" });
   }

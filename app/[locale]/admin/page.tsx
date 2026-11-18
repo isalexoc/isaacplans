@@ -33,6 +33,7 @@ import {
   AudioLines,
   MessageSquare,
   PieChart,
+  Bot,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import {
@@ -206,6 +207,12 @@ const CALL_CENTER_TOOLS: ToolCard[] = [
     description: "Contact rate, disposition mix, and line-of-business breakdown for a date range.",
     href: "/en/admin/call-metrics",
     icon: BarChart3,
+  },
+  {
+    title: "Asistente de Citas (IA)",
+    description: "Bandeja de aprobación, leads y ajustes del asistente que responde y agenda.",
+    href: "/en/admin/ai-setter",
+    icon: Bot,
   },
 ];
 
