@@ -20,6 +20,7 @@ import { ingestTranscript } from "@/lib/call-study/ingest";
 import { reconcilePhoneFinderRuns } from "@/lib/phone-finder/process";
 import { reconcileAcaConfirmations } from "@/lib/aca-confirmation/finalize";
 import { reconcileAiSetter } from "@/lib/ai-setter/process";
+import { reconcileAgentPurges } from "@/lib/tenancy/agent-jobs";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -208,6 +209,17 @@ export async function GET(req: NextRequest) {
     console.error("[AI_SETTER] Reconcile failed", err instanceof Error ? err.name : "unknown");
   }
 
+  // -- Agent platform: the 30-day purge's backstop. An agent's application completed 30+ days ago
+  //    that still holds an SSN/ITIN, ID or bank number (its QStash job never queued, or died after
+  //    its retries) is erased here, inline: retention, like the AI Setter's purge above. Never
+  //    Isaac's applications. Guarded. --
+  let agentPurges = { found: 0, purged: 0 };
+  try {
+    agentPurges = await reconcileAgentPurges();
+  } catch (err) {
+    console.error("[agent-jobs] Purge reconcile failed", err instanceof Error ? err.message : "unknown");
+  }
+
   return NextResponse.json({
     ok: true,
     kixieProcessed,
@@ -240,5 +252,7 @@ export async function GET(req: NextRequest) {
     aiSetterTextPurged: aiSetter.purged,
     aiSetterTurnsRepublished: aiSetter.turns,
     aiSetterSendsRepublished: aiSetter.sends,
+    agentPurgesDue: agentPurges.found,
+    agentPurgesErased: agentPurges.purged,
   });
 }

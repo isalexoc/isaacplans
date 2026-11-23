@@ -408,6 +408,44 @@ export const UI = {
   } as Dict,
   secureLooksGood: { en: "Looks good", es: "Se ve bien" } as Dict,
   secureDigitsLeft: { en: "{n} more digit(s) to go", es: "Faltan {n} dígito(s)" } as Dict,
+
+  // An agent's own view of a client's application (the agent area): the numbers show masked until
+  // the agent asks for one, the link goes out from the agent's own phone, and "Entered in Impact".
+  showValue: { en: "Show", es: "Mostrar" } as Dict,
+  showValueFailed: { en: "Couldn't show it. Try again.", es: "No se pudo mostrar. Intente de nuevo." } as Dict,
+  sendApplicationTitle: { en: "Send the application to your client", es: "Envíe la solicitud a su cliente" } as Dict,
+  sendApplicationHelp: {
+    en: "The message carries your name and goes in the client's language.",
+    es: "El mensaje lleva su nombre y va en el idioma del cliente.",
+  } as Dict,
+  enteredTitle: { en: "Entered in Impact?", es: "¿Ya la ingresó en Impact?" } as Dict,
+  enteredBody: {
+    en: "Once this application is in Impact, erase its SSN or ITIN, ID number and bank details from here. They're erased automatically 30 days after completion anyway.",
+    es: "Cuando esta solicitud ya esté en Impact, borre de aquí su SSN o ITIN, número de identificación y datos bancarios. De todos modos se borran automáticamente 30 días después de completarla.",
+  } as Dict,
+  enteredButton: { en: "Entered in Impact", es: "Ya la ingresé en Impact" } as Dict,
+  enteredConfirm: {
+    en: "Erase this application's SSN or ITIN, ID number and bank details? This can't be undone.",
+    es: "¿Borrar el SSN o ITIN, el número de identificación y los datos bancarios de esta solicitud? Esto no se puede deshacer.",
+  } as Dict,
+  enteredDone: {
+    en: "Entered in Impact on {date}. Its SSN or ITIN, ID number and bank details were erased from here.",
+    es: "Ingresada en Impact el {date}. Su SSN o ITIN, número de identificación y datos bancarios se borraron de aquí.",
+  } as Dict,
+  purgedOn: {
+    en: "Its SSN or ITIN, ID number and bank details were erased on {date}.",
+    es: "Su SSN o ITIN, número de identificación y datos bancarios se borraron el {date}.",
+  } as Dict,
+  enteredFailed: { en: "They couldn't be erased. Try again.", es: "No se pudieron borrar. Intente de nuevo." } as Dict,
+  stateUnavailable: {
+    en: "Impact Health Sharing isn't available in {state}, so this application can't be submitted with a home address there.",
+    es: "Impact Health Sharing no está disponible en {state}, así que esta solicitud no se puede enviar con una dirección en ese estado.",
+  } as Dict,
+  stateNoticeTitle: { en: "State notice", es: "Aviso estatal" } as Dict,
+  stateNoticeEnglishOnly: {
+    en: "Impact publishes this notice in English only.",
+    es: "Impact publica este aviso solo en inglés.",
+  } as Dict,
 } as const;
 
 export function tr(dict: Dict, locale: IntakeLocale): string {

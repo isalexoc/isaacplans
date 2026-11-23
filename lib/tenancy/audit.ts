@@ -2,7 +2,8 @@
  * The sensitive-data access log (`sensitive_access_log`, migration 0046). Server-only.
  *
  * Best-effort by design: `logSensitiveAccess` never throws, and before 0046 is applied it does
- * nothing (silently, since that is expected). It records field NAMES only; anything that doesn't
+ * nothing (silently, since that is expected); it says whether the row was written, so a reveal can
+ * refuse rather than happen unlogged. It records field NAMES only; anything that doesn't
  * look like a field key is dropped, so a value can't be logged by mistake. The IP is stored as an
  * HMAC keyed from `INTAKE_ENCRYPTION_KEY` (no key, no hash), so the table can be read without
  * revealing where anyone was.
@@ -70,7 +71,11 @@ async function requestMeta(): Promise<{ ip: string | null; userAgent: string | n
   }
 }
 
-export async function logSensitiveAccess(entry: SensitiveAccessEntry): Promise<void> {
+/**
+ * Write one row. True when it was written; false when it wasn't (before 0046, or a failed insert),
+ * so a caller that must not act unlogged (a reveal) can refuse instead.
+ */
+export async function logSensitiveAccess(entry: SensitiveAccessEntry): Promise<boolean> {
   try {
     const { ip, userAgent } = await requestMeta();
     await db.insert(sensitiveAccessLog).values({
@@ -85,9 +90,11 @@ export async function logSensitiveAccess(entry: SensitiveAccessEntry): Promise<v
       ipHash: hashIp(ip),
       userAgent,
     });
+    return true;
   } catch (error) {
     if (!isMissingTableError(error)) {
       console.warn("[tenancy] access log write failed:", error instanceof Error ? error.message : error);
     }
+    return false;
   }
 }

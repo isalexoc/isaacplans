@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { AlertCircle, Check, CheckCircle2, Copy, Loader2, Lock, Send } from "lucide-react";
 import { ChoiceCard, OUTLINE_BTN } from "@/components/intake-ui";
 import { UI, tr, type IntakeLocale } from "@/lib/intake-core/ui-strings";
@@ -39,6 +39,7 @@ export default function SecureCapturePanel({
   onCreate,
   onCancel,
   onSend,
+  delivery,
 }: {
   locale: IntakeLocale;
   /** The current step, so the default ticks follow it. */
@@ -56,6 +57,8 @@ export default function SecureCapturePanel({
   onCreate: (groups: string[]) => void;
   onCancel: () => void;
   onSend: () => Promise<boolean>;
+  /** The agent area: WhatsApp / SMS / share buttons for the live link (it has no CRM to send it). */
+  delivery?: (url: string) => ReactNode;
 }) {
   const [selected, setSelected] = useState<string[]>([]);
   const [fresh, setFresh] = useState(false);
@@ -127,6 +130,7 @@ export default function SecureCapturePanel({
             )}
           </div>
         </div>
+        {delivery && url ? <div className="mt-2">{delivery(url)}</div> : null}
         {!canSend && (
           <p className="mt-2 text-xs text-muted-foreground">{tr(noCrm ? UI.captureSendYourself : UI.captureNoContact, locale)}</p>
         )}

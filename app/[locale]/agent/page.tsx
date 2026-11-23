@@ -27,6 +27,7 @@ import {
 import { requestIdentity } from "@/lib/tenancy/context";
 import { readTenancyGates } from "@/lib/tenancy/gates";
 import { agentPagePath } from "@/lib/tenancy/product-routes";
+import { agentPublicProfile } from "@/lib/tenancy/profile";
 import { productPublicOrigin } from "@/lib/tenancy/site-urls";
 import { publicOriginForOwner } from "@/lib/tenancy/urls";
 
@@ -69,6 +70,8 @@ export default async function AgentDashboardPage({ params, searchParams }: { par
   // Without one configured there is no working link to give out (isaacplans.com answers 404 to an
   // agent's client): null hides Copy link and says why.
   const shareOrigin = origin ? await publicOriginForOwner(gate.userId) : null;
+  // The messages the agent sends a client (WhatsApp, SMS) carry the agent's name.
+  const agentName = agentPublicProfile(gate.agent).displayName;
 
   return (
     <IntakeDashboard
@@ -76,8 +79,14 @@ export default async function AgentDashboardPage({ params, searchParams }: { par
       mode="agent"
       shareOrigin={shareOrigin}
       hrefs={{ form: agentApplicationTemplate(locale), summary: agentApplicationTemplate(locale, "summary") }}
+      agentName={agentName}
       topSlot={
-        <GuideLinkCard locale={locale} url={guideUrl} note={readTenancyGates().publicPages ? null : PILOT_NOTE[locale]} />
+        <GuideLinkCard
+          locale={locale}
+          url={guideUrl}
+          agentName={agentName}
+          note={readTenancyGates().publicPages ? null : PILOT_NOTE[locale]}
+        />
       }
     />
   );

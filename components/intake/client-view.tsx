@@ -10,6 +10,14 @@ import { fetchIntake, reopenIntake } from "@/lib/intake-core/api-client";
 import { formatMoneyDisplay } from "@/lib/iul-intake/money";
 import IntakeBreadcrumb from "@/components/intake/intake-breadcrumb";
 import FilePreview from "@/components/intake/file-preview";
+import {
+  RevealToggle,
+  RevealedValue,
+  useSensitiveReveal,
+  type RevealPath,
+  type SensitiveReveal,
+} from "@/components/intake/sensitive-reveal";
+import { isMaskedValue } from "@/lib/intake-shared/masking";
 import { isFieldVisible, isRowFilled } from "@/lib/intake-core/fields";
 import { formatIsoLong } from "@/lib/intake-core/month-start";
 import { requireIntakeConfig } from "@/lib/intake-configs";
@@ -87,6 +95,33 @@ function CopyableValue({
 }
 
 /**
+ * A masked number in an agent's own summary: the mask, "Show" (one audited reveal), and the value
+ * with Copy once shown. Anything that isn't a mask shows as a plain copyable value.
+ */
+function SecretValue({
+  reveal,
+  path,
+  shown,
+  locale,
+}: {
+  reveal: SensitiveReveal;
+  path: RevealPath;
+  shown: string;
+  locale: IntakeLocale;
+}) {
+  if (!isMaskedValue(shown)) return <CopyableValue value={shown} display={shown} locale={locale} />;
+  return (
+    <span className="inline-flex max-w-full flex-col items-start">
+      <span className="inline-flex flex-wrap items-center gap-2">
+        <span className="break-words">{shown}</span>
+        <RevealToggle reveal={reveal} path={path} shown={shown} locale={locale} />
+      </span>
+      <RevealedValue reveal={reveal} path={path} shown={shown} locale={locale} />
+    </span>
+  );
+}
+
+/**
  * Files attached to a top-level field or a repeater sub-field.
  * Thumbnails matter most here — scanning a household's ID documents is far quicker from
  * pictures than from a list of filenames.
@@ -141,6 +176,8 @@ export default function IntakeClientView({
   const [state, setState] = useState<"loading" | "ready" | "error">("loading");
   const [reveal, setReveal] = useState(false);
   const [reopening, setReopening] = useState(false);
+  // The agent area: the server sends the agent masks, and "Show" asks for one value (audited).
+  const secretReveal = useSensitiveReveal(lob, token, agentArea && session?.role === "owner");
 
   useEffect(() => {
     let active = true;
@@ -205,7 +242,7 @@ export default function IntakeClientView({
         />
         <div className="mb-4 flex items-center justify-end gap-3">
           <div className="flex items-center gap-2">
-            {isOwner && (
+            {isOwner && !secretReveal && (
               <Button variant="outline" size="sm" onClick={() => setReveal((r) => !r)}>
                 {reveal ? <EyeOff className="mr-1 h-4 w-4" /> : <Eye className="mr-1 h-4 w-4" />}
                 {reveal ? tr(UI.hide, locale) : tr(UI.reveal, locale)}
@@ -270,7 +307,10 @@ export default function IntakeClientView({
                     const rows: RepeaterRow[] = Array.isArray(data[field.key])
                       ? (data[field.key] as RepeaterRow[])
                       : [];
-                    const filled = rows.filter((r) => isRowFilled(field, r ?? {}));
+                    // Each row keeps its index on file, which a reveal names.
+                    const filled = rows
+                      .map((row, index) => ({ row, index }))
+                      .filter(({ row }) => isRowFilled(field, row ?? {}));
                     if (filled.length === 0) {
                       return (
                         <p key={field.key} className="text-sm text-muted-foreground">
@@ -280,8 +320,8 @@ export default function IntakeClientView({
                     }
                     return (
                       <ul key={field.key} className="space-y-3">
-                        {filled.map((row, i) => (
-                          <li key={i} className="rounded-md border p-3">
+                        {filled.map(({ row, index }, i) => (
+                          <li key={index} className="rounded-md border p-3">
                             <div className="mb-2 text-sm font-medium">
                               {rowLabel(field, locale)} {i + 1}
                             </div>
@@ -315,10 +355,17 @@ export default function IntakeClientView({
                                   <div key={sub.key} className="min-w-0">
                                     <dt className="text-xs text-muted-foreground">{fieldLabel(sub, locale)}</dt>
                                     <dd className="text-sm">
-                                      {value ? (
-                                        <CopyableValue value={copyText} display={display} locale={locale} />
-                                      ) : (
+                                      {!value ? (
                                         tr(UI.empty, locale)
+                                      ) : secretReveal && sub.sensitive ? (
+                                        <SecretValue
+                                          reveal={secretReveal}
+                                          path={{ field: `${field.key}.${sub.key}`, rowIndex: index }}
+                                          shown={raw}
+                                          locale={locale}
+                                        />
+                                      ) : (
+                                        <CopyableValue value={copyText} display={display} locale={locale} />
                                       )}
                                     </dd>
                                   </div>
@@ -365,10 +412,12 @@ export default function IntakeClientView({
                           <div key={field.key} className="min-w-0">
                             <dt className="text-xs text-muted-foreground">{fieldLabel(field, locale)}</dt>
                             <dd className="text-sm">
-                              {value ? (
-                                <CopyableValue value={copyText} display={display} locale={locale} />
-                              ) : (
+                              {!value ? (
                                 tr(UI.empty, locale)
+                              ) : secretReveal && field.sensitive ? (
+                                <SecretValue reveal={secretReveal} path={{ field: field.key }} shown={raw} locale={locale} />
+                              ) : (
+                                <CopyableValue value={copyText} display={display} locale={locale} />
                               )}
                             </dd>
                           </div>

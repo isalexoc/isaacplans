@@ -229,14 +229,53 @@ export async function removeIntakeFile(
 export async function completeIntake(
   lob: string,
   token: string
-): Promise<{ success: boolean; missing?: string[]; message?: string }> {
+): Promise<{ success: boolean; missing?: string[]; message?: string; code?: string }> {
   const res = await fetch(`${base(lob)}/${token}/complete`, {
     method: "POST",
     credentials: "same-origin",
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    return { success: false, missing: data?.missing, message: data?.error ?? "Failed to complete." };
+    return {
+      success: false,
+      missing: data?.missing,
+      message: data?.error ?? "Failed to complete.",
+      code: typeof data?.code === "string" ? data.code : undefined,
+    };
   }
   return { success: true };
+}
+
+/**
+ * One sensitive value of an agent's application, in full, for the agent who owns it (audited on the
+ * server). `field` is "ssn" or "dependents.ssn" with `rowIndex`. Never cached.
+ */
+export async function revealIntakeValue(
+  lob: string,
+  token: string,
+  target: { field: string; rowIndex?: number }
+): Promise<string> {
+  const data = await parseJson<{ success: boolean; value: string }>(
+    await fetch(`${base(lob)}/${token}/reveal`, {
+      method: "POST",
+      credentials: "same-origin",
+      cache: "no-store",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(target),
+    })
+  );
+  return typeof data.value === "string" ? data.value : "";
+}
+
+/** The agent's "Entered in Impact": erases the application's sensitive values (completed only). */
+export async function markEnteredInImpact(lob: string, token: string): Promise<{ enteredInImpactAt: string }> {
+  const data = await parseJson<{ success: boolean; enteredInImpactAt: string }>(
+    await fetch(`${base(lob)}/${token}/purge`, {
+      method: "POST",
+      credentials: "same-origin",
+      headers: { "Content-Type": "application/json" },
+      body: "{}",
+    })
+  );
+  return { enteredInImpactAt: data.enteredInImpactAt };
 }

@@ -139,7 +139,8 @@ export default async function HealthAlternativeIntakeFormPage({
       >
         <div className="min-h-full flex-1 bg-gradient-to-b from-gray-50 to-white dark:from-gray-950 dark:to-gray-950">
           {/* A pick on this agent's guide (`guide:<slug>`) fills the application it started. */}
-          <IntakeForm lob={LOB} token={token} guideScope={guideScopeFor(agent.slug)} />
+          {/* An agent's application: Impact's state notice, and no submitting from RI or WA. */}
+          <IntakeForm lob={LOB} token={token} guideScope={guideScopeFor(agent.slug)} agentOwned />
         </div>
       </TenantShell>
     );

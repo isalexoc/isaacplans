@@ -12,11 +12,13 @@
 import "server-only";
 import { NextResponse } from "next/server";
 import { getIntakeConfig } from "@/lib/intake-configs";
+import type { AgentRow } from "@/lib/tenancy/agents";
 import {
   classifySignedInCaller,
   logDeniedAccess,
   ownerAgentOf,
   requestIdentity,
+  type ImpersonationActor,
 } from "@/lib/tenancy/context";
 import { agentAgreementsAccepted } from "@/lib/tenancy/agreements-store";
 import { readTenancyGates } from "@/lib/tenancy/gates";
@@ -82,6 +84,12 @@ export type AuthorizedSession = {
   row: IntakeSessionRow;
   access: IntakeAccess;
   deviceId: string | null;
+  /** The owner's `agents` row when this is an agent's application; null for Isaac's. */
+  ownerAgent: AgentRow | null;
+  /** The signed-in caller (null for an anonymous client). */
+  userId: string | null;
+  /** The Clerk impersonation actor, when the session is impersonated. */
+  actor: ImpersonationActor | null;
 };
 
 /**
@@ -175,7 +183,7 @@ export async function loadAuthorizedSession(
     row.clientDeviceId = deviceId;
   }
 
-  return { config, row, access, deviceId };
+  return { config, row, access, deviceId, ownerAgent, userId, actor };
 }
 
 export function isResponse(value: unknown): value is NextResponse {

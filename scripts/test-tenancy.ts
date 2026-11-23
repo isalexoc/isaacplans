@@ -1053,6 +1053,10 @@ console.log("\nGuard: Isaac's CRM credentials only through lib/tenancy/crm.ts");
     "components/agent",
     "app/api/agent",
     "app/api/admin/agents",
+    // The agent platform's jobs (alerts, the 30-day purge). Its email sender, lib/email/transactional.ts,
+    // is checked on its own by scripts/test-agent-data.ts (lib/email also holds Isaac's own mailers).
+    "app/api/queue/agent-notify",
+    "app/api/queue/agent-purge",
   ];
   // Reading Isaac's GHL credentials: the base-credentials helper, the env vars themselves, and the
   // call-summary config that carries his Private Integration token (`piToken`).

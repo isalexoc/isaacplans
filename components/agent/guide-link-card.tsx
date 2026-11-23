@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Check, Copy, ExternalLink, Globe } from "lucide-react";
 import type { AgentAreaLocale } from "@/lib/tenancy/agent-area-routes";
+import DeliveryButtons from "./delivery-buttons";
 
 const WORDS = {
   en: {
@@ -23,17 +24,23 @@ const WORDS = {
   },
 } as const;
 
-/** The agent's public guide (PRODUCT_PUBLIC_URL/{l}/{slug}) with a copy button. */
+/**
+ * The agent's public guide (PRODUCT_PUBLIC_URL/{l}/{slug}) with a copy button, and WhatsApp, SMS and
+ * the phone's share sheet to send it from the agent's own phone (a contact the agent picks).
+ */
 export default function GuideLinkCard({
   locale,
   url,
   note,
+  agentName = "",
 }: {
   locale: AgentAreaLocale;
   /** Null without a product domain configured. */
   url: string | null;
   /** A line under the link (e.g. the pilot's state). */
   note?: string | null;
+  /** The agent's name, which the message carries. */
+  agentName?: string;
 }) {
   const w = WORDS[locale];
   const [copied, setCopied] = useState(false);
@@ -81,6 +88,11 @@ export default function GuideLinkCard({
       ) : (
         <p className="mt-3 text-sm text-muted-foreground">{w.missing}</p>
       )}
+      {url ? (
+        <div className="mt-2">
+          <DeliveryButtons kind="guide" url={url} uiLocale={locale} messageLocale={locale} agentName={agentName} anyRecipient showCopy={false} />
+        </div>
+      ) : null}
       {note ? <p className="mt-2 text-xs text-muted-foreground">{note}</p> : null}
     </div>
   );

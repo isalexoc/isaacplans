@@ -28,6 +28,8 @@ import { UI, pickLocale, tr } from "@/lib/intake-core/ui-strings";
 import { dashboardFeatures, type DashboardMode } from "@/lib/intake-core/dashboard-mode";
 import { fillTokenTemplate } from "@/lib/tenancy/agent-area-routes";
 import IntakeBreadcrumb from "@/components/intake/intake-breadcrumb";
+import DeliveryButtons from "@/components/agent/delivery-buttons";
+import { firstNameOf } from "@/lib/tenancy/delivery";
 import ImpactEnrollmentButton, { useImpactStatuses } from "@/components/intake/impact-enrollment-dialog";
 
 const STATUS_VARIANT: Record<IntakeStatus, "secondary" | "default" | "outline"> = {
@@ -42,6 +44,7 @@ export default function IntakeDashboard({
   mode = "site",
   hrefs,
   topSlot,
+  agentName = null,
 }: {
   lob: string;
   /**
@@ -59,6 +62,8 @@ export default function IntakeDashboard({
   hrefs?: { form: string; summary: string };
   /** Drawn under the title (the agent area's guide link). */
   topSlot?: ReactNode;
+  /** Agent mode: the agent's name, which the WhatsApp / SMS messages to a client carry. */
+  agentName?: string | null;
 }) {
   const config = requireIntakeConfig(lob);
   const intakeRoute = LOBS[lob as LobSlug].intakeRoute;
@@ -557,6 +562,19 @@ export default function IntakeDashboard({
                           </>
                         )}
                       </Button>
+                    )}
+                    {/* The agent area: the client's link from the agent's own phone (no CRM). */}
+                    {agentMode && clientLinks && (s.status !== "completed" || s.reopenedForClient) && (
+                      <DeliveryButtons
+                        kind="application"
+                        url={shareUrl(s.token, s.locale)}
+                        uiLocale={locale}
+                        messageLocale={s.locale === "es" ? "es" : "en"}
+                        agentName={agentName ?? ""}
+                        clientFirstName={firstNameOf(s.contactName)}
+                        phone={s.contactPhone}
+                        showCopy={false}
+                      />
                     )}
                     {features.crmSendLink && s.crmContactId && (
                       <Button

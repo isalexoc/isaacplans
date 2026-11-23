@@ -8,8 +8,8 @@ import {
 } from "@/lib/intake-core/route-helpers";
 import { operatorOwns, requireIntakeOperator } from "@/lib/tenancy/context";
 import { deleteIntakeSession, getIntakeByToken, toIntakeSession } from "@/lib/intake-core/server";
-import { saveIntakeAnswers } from "@/lib/intake-core/save";
-import { decryptIntakeData, maskSensitiveForClient } from "@/lib/intake-core/sensitive";
+import { saveIntakeAnswers, sessionDataForCaller } from "@/lib/intake-core/save";
+import { decryptIntakeData } from "@/lib/intake-core/sensitive";
 import type { IntakeData } from "@/lib/intake-core/types";
 
 type RouteContext = { params: Promise<{ lob: string; token: string }> };
@@ -23,14 +23,18 @@ export async function GET(_request: NextRequest, context: RouteContext) {
     const { config, row, access } = loaded;
 
     const decrypted = decryptIntakeData(config, (row.data ?? {}) as IntakeData);
-    // The agent needs real values to work an application; the client's own browser only needs to
-    // see that a value is on file, so a stolen link can never surface an SSN.
-    const forClient =
-      access.role === "owner" ? decrypted : maskSensitiveForClient(config, decrypted);
+    // Isaac works his applications with the real values; the client's own browser only needs to see
+    // that a value is on file, so a stolen link can never surface an SSN; and an agent sees masks
+    // too, revealing one value at a time through the audited `…/reveal`.
+    const shown = sessionDataForCaller(
+      config,
+      { role: access.role, ownerIsAgent: loaded.ownerAgent !== null },
+      decrypted
+    );
 
     return NextResponse.json({
       success: true,
-      session: toIntakeSession(row, access.role, forClient),
+      session: toIntakeSession(row, access.role, shown),
     });
   } catch (error) {
     console.error(`[intake/${lob}/:token] GET`, error);

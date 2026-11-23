@@ -16,7 +16,10 @@ import {
 import type { IntakeData } from "@/lib/intake-core/types";
 import { isMaskedValue } from "@/lib/intake-shared/masking";
 import { lookupBankByRouting } from "@/lib/iul-intake/ach-directory";
-import { ownerAcceptsClientData } from "@/lib/tenancy/context";
+import { alertEventKey } from "@/lib/tenancy/agent-data";
+import { publishAgentAlert } from "@/lib/tenancy/agent-jobs";
+import { logSensitiveAccess } from "@/lib/tenancy/audit";
+import { ownerClientDataFlow } from "@/lib/tenancy/context";
 import { crmCredsForOwner } from "@/lib/tenancy/crm";
 
 /**
@@ -59,13 +62,13 @@ async function loadUsable(captureToken: string) {
   if (!config || !session) return { error: notFound() };
   // An agent's link stops working while that agent is paused or the launch gates are closed, and
   // Isaac's links don't work on the product domain. A failed owner lookup fails closed.
-  const flow = await ownerAcceptsClientData(config.lob, session.ownerUserId);
+  const { verdict: flow, ownerAgent } = await ownerClientDataFlow(config.lob, session.ownerUserId);
   if (flow === "retry") return { error: retryLater() };
   if (flow === "closed") return { error: notFound() };
   if (session.status === "completed") {
     return { error: gone("completed", "This application is already finished. Nothing more is needed.") };
   }
-  return { capture, config, session };
+  return { capture, config, session, ownerAgent };
 }
 
 /**
@@ -134,7 +137,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     const { captureToken } = await context.params;
     const loaded = await loadUsable(captureToken);
     if (loaded.error) return loaded.error;
-    const { capture, config, session } = loaded;
+    const { capture, config, session, ownerAgent } = loaded;
 
     // The frozen snapshot is the whitelist, never the live config: a link already in someone's
     // text messages must not gain new powers because the code changed.
@@ -175,6 +178,25 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
       .filter((g) => groupsForKeys(config, capture.fieldKeys ?? []).includes(g.key))
       .map((g) => g.labelEn);
     await noteReceived(updated.ownerUserId, updated.crmContactId, labels, config.label);
+
+    // An agent's application: on record (field names only) and an alert to the agent, with no
+    // client details. Isaac's secure links are unchanged (his CRM note above).
+    if (ownerAgent) {
+      await logSensitiveAccess({
+        action: "secure_submit",
+        actorUserId: null,
+        actorRole: "client",
+        ownerUserId: updated.ownerUserId,
+        sessionId: updated.id,
+        fields: Object.keys(write),
+      });
+      await publishAgentAlert({
+        kind: "secure_submit",
+        lob: config.lob,
+        sessionId: updated.id,
+        event: alertEventKey("secure_submit", capture.id),
+      }).catch((error) => console.warn("[intake-capture] agent alert failed:", error));
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {

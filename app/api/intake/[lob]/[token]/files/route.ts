@@ -19,11 +19,8 @@ import {
   rowFieldByKey,
 } from "@/lib/intake-core/fields";
 import { crmFieldId } from "@/lib/intake-core/ghl-field-ids";
-import {
-  decryptIntakeData,
-  encryptIntakeData,
-  maskSensitiveForClient,
-} from "@/lib/intake-core/sensitive";
+import { decryptIntakeData, encryptIntakeData } from "@/lib/intake-core/sensitive";
+import { sessionDataForCaller } from "@/lib/intake-core/save";
 import { agentCrmUploadCustomFieldFile, agentCrmSetFileField } from "@/lib/agent-crm-contacts";
 import { crmCredsForOwner } from "@/lib/tenancy/crm";
 import type {
@@ -168,20 +165,20 @@ async function persist(
 }
 
 /**
- * The session as stored after the change, for the caller's role: real values for the agent, masks
- * for the client's browser, like every other intake route. Falls back to what this request read
- * when the row is gone.
+ * The session as stored after the change, as the caller may see it (lib/intake-core/save.ts
+ * `sessionDataForCaller`): real values for Isaac, masks for the client's browser and for an agent,
+ * like every other intake route. Falls back to what this request read when the row is gone.
  */
 function sessionView(
   config: IntakeLobConfig,
-  role: IntakeSession["role"],
+  caller: { role: IntakeSession["role"]; ownerIsAgent: boolean },
   updated: IntakeSessionRow | null,
   row: IntakeSessionRow,
   decrypted: IntakeData
 ): IntakeSession {
   const view = updated ?? { ...row, status: row.status === "completed" ? "completed" : "in_progress" };
   const data = updated ? decryptIntakeData(config, (updated.data ?? {}) as IntakeData) : decrypted;
-  return toIntakeSession(view, role, role === "owner" ? data : maskSensitiveForClient(config, data));
+  return toIntakeSession(view, caller.role, sessionDataForCaller(config, caller, data));
 }
 
 const str = (v: unknown): string => (typeof v === "string" ? v.trim() : "");
@@ -296,7 +293,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
       repeaterKey: target.repeaterKey ?? null,
       rowIndex: target.rowIndex ?? null,
       files: next,
-      session: sessionView(config, access.role, updated, row, current),
+      session: sessionView(config, { role: access.role, ownerIsAgent: loaded.ownerAgent !== null }, updated, row, current),
     });
   } catch (error) {
     console.error(`[intake/${lob}/:token/files] POST`, error);
@@ -354,7 +351,7 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
       repeaterKey: target.repeaterKey ?? null,
       rowIndex: target.rowIndex ?? null,
       files: next,
-      session: sessionView(config, access.role, updated, row, decrypted),
+      session: sessionView(config, { role: access.role, ownerIsAgent: loaded.ownerAgent !== null }, updated, row, decrypted),
     });
   } catch (error) {
     console.error(`[intake/${lob}/:token/files] DELETE`, error);

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useLocale } from "next-intl";
 import { Button } from "@/components/ui/button";
@@ -39,10 +40,24 @@ import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import {
   fetchIntake,
   completeIntake,
+  markEnteredInImpact,
   uploadIntakeFile,
   removeIntakeFile,
   type FileTargetRef,
 } from "@/lib/intake-core/api-client";
+import DeliveryButtons from "@/components/agent/delivery-buttons";
+import {
+  RevealToggle,
+  RevealedValue,
+  useSensitiveReveal,
+  type RevealPath,
+  type SensitiveReveal,
+} from "@/components/intake/sensitive-reveal";
+import { impactStateName, impactUnavailableIn } from "@/lib/impact-disclosures/availability";
+import { sensitiveValuesHeld } from "@/lib/intake-core/purge";
+import { buildIntakeShareUrl } from "@/lib/intake-core/share-url";
+import { ENTERED_IN_IMPACT_KEY, SENSITIVE_PURGED_KEY } from "@/lib/tenancy/agent-data";
+import { firstNameOf } from "@/lib/tenancy/delivery";
 import {
   intakeSavesSettled,
   subscribeIntakeSaved,
@@ -126,6 +141,17 @@ import {
 } from "@/lib/intake-core/ui-strings";
 
 /* ------------------------------- helpers ------------------------------- */
+
+// Impact's state notices (~55 KB of text) load only when an agent's application renders them, so
+// they never ship with Isaac's intakes, which share this form.
+const ImpactStateNotice = dynamic(
+  () => import("@/components/intake/impact-state-notice").then((m) => m.ImpactStateNotice),
+  { ssr: false }
+);
+const ImpactStateBlocked = dynamic(
+  () => import("@/components/intake/impact-state-notice").then((m) => m.ImpactStateBlocked),
+  { ssr: false }
+);
 
 const str = (v: unknown): string => (typeof v === "string" ? v : "");
 
@@ -211,6 +237,9 @@ export default function IntakeForm({
   dashboardHref,
   agentArea = false,
   clientLinks = true,
+  agentOwned = false,
+  shareOrigin = null,
+  agentName = null,
 }: {
   lob: string;
   token: string;
@@ -242,6 +271,19 @@ export default function IntakeForm({
    * configured, which hides the secure-link panel. Isaac's pages: always.
    */
   clientLinks?: boolean;
+  /**
+   * The application belongs to an agent (the client's own form on the product domain; implied by
+   * `agentArea`): Impact's state notice near the submit step, and no submitting from Rhode Island or
+   * Washington. Isaac's forms: neither.
+   */
+  agentOwned?: boolean;
+  /**
+   * The agent area: the product domain's origin, for the client's link in the "send it to your
+   * client" buttons (WhatsApp, SMS, share). Null hides them.
+   */
+  shareOrigin?: string | null;
+  /** The agent area: the agent's name, which the messages to the client carry. */
+  agentName?: string | null;
 }) {
   const locale = pickLocale(useLocale());
   const config = requireIntakeConfig(lob);
@@ -380,6 +422,13 @@ export default function IntakeForm({
   const isOwner = session?.role === "owner";
   // Agent-only chrome and questions. Off while presenting: the client is watching this screen.
   const agentChrome = Boolean(isOwner) && !presenting;
+  // An agent's application (never Isaac's): Impact's state notice, and no Rhode Island/Washington.
+  const agentRules = agentArea || agentOwned;
+  // The agent's own view: the server sends masks, and "Show" asks for one value (audited). Never
+  // while presenting (the client is watching) and never on Isaac's pages (his view is unmasked).
+  const secretReveal = useSensitiveReveal(lob, token, agentArea && agentChrome);
+  const [entering, setEntering] = useState(false);
+  const [enterFailed, setEnterFailed] = useState(false);
   const sections = useMemo(
     () => visibleSections(config.sections, agentChrome),
     [config.sections, agentChrome]
@@ -759,6 +808,10 @@ export default function IntakeForm({
         return;
       }
       const result = await completeIntake(lob, token);
+      if (!result.success && result.code === "state_unavailable") {
+        setCompleteError(tr(UI.stateUnavailable, locale).replace("{state}", impactStateName(data.state)));
+        return;
+      }
       if (result.success) {
         setCompleted(true);
         setMissing(new Set());
@@ -778,6 +831,24 @@ export default function IntakeForm({
       setCompleteError(tr(UI.missingFields, locale));
     } finally {
       setCompleting(false);
+    }
+  }
+
+  /**
+   * The agent's "Entered in Impact": the server erases the SSN/ITIN, ID and bank numbers (and every
+   * added person's SSN) and records the date; the page then reloads what is stored.
+   */
+  async function handleEnteredInImpact() {
+    if (!window.confirm(tr(UI.enteredConfirm, locale))) return;
+    setEntering(true);
+    setEnterFailed(false);
+    try {
+      await flush();
+      await markEnteredInImpact(lob, token);
+      window.location.reload();
+    } catch {
+      setEnterFailed(true);
+      setEntering(false);
     }
   }
 
@@ -832,6 +903,26 @@ export default function IntakeForm({
 
   const pct = Math.round(((step + 1) / sections.length) * 100);
   const StepIcon = SECTION_ICONS[current.key] ?? FileText;
+  // An agent's application can't go in with a home address where Impact isn't available.
+  const stateBlocked = agentRules && impactUnavailableIn(data.state);
+  const longDate = (iso: string) => {
+    const date = new Date(iso);
+    return Number.isNaN(date.getTime())
+      ? iso
+      : date.toLocaleDateString(locale === "es" ? "es-US" : "en-US", { year: "numeric", month: "long", day: "numeric" });
+  };
+  const enteredAt = str(data[ENTERED_IN_IMPACT_KEY]);
+  const purgedAt = str(data[SENSITIVE_PURGED_KEY]);
+  // A number typed again after "Entered in Impact" (the masks are back): the button comes back too.
+  const enteredAndClear = Boolean(enteredAt) && !sensitiveValuesHeld(config.sections, data);
+  // The client's own link, for the agent to send from their phone (the agent area only).
+  const clientUrl =
+    agentArea && agentChrome && shareOrigin && session && (!completed || session.reopenedForClient)
+      ? buildIntakeShareUrl(config, token, session.locale ?? "en", shareOrigin)
+      : null;
+  const messageLocale = session?.locale === "es" ? "es" : "en";
+  const clientFirstName = str(data.firstName).trim() || firstNameOf(session?.contactName);
+  const clientPhone = str(data.phone) || session?.contactPhone || null;
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-8">
@@ -883,9 +974,50 @@ export default function IntakeForm({
         />
       )}
 
+      {clientUrl && (
+        <div className="mb-4 rounded-xl border bg-white p-3 shadow-sm dark:bg-gray-950">
+          <p className="text-sm font-semibold">{tr(UI.sendApplicationTitle, locale)}</p>
+          <p className="mb-2 text-xs text-muted-foreground">{tr(UI.sendApplicationHelp, locale)}</p>
+          <DeliveryButtons
+            kind="application"
+            url={clientUrl}
+            uiLocale={locale}
+            messageLocale={messageLocale}
+            agentName={agentName ?? ""}
+            clientFirstName={clientFirstName}
+            phone={clientPhone}
+          />
+        </div>
+      )}
+
       {completed && isOwner && (
         <div className="mb-4 flex items-center gap-2 rounded-xl border border-green-200 bg-green-50 p-3 text-sm text-green-800 dark:border-green-900 dark:bg-green-950 dark:text-green-300">
           <PartyPopper className="h-4 w-4" /> {tr(agentArea ? UI.completedNoCrm : UI.completed, locale)}
+        </div>
+      )}
+
+      {/* The agent's "Entered in Impact": the sensitive numbers leave this platform. */}
+      {completed && agentArea && agentChrome && (
+        <div className="mb-4 rounded-xl border bg-white p-3 text-sm shadow-sm dark:bg-gray-950">
+          {enteredAndClear ? (
+            <p className="flex items-start gap-2">
+              <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-green-600" />
+              {tr(UI.enteredDone, locale).replace("{date}", longDate(enteredAt))}
+            </p>
+          ) : (
+            <>
+              <p className="font-semibold">{tr(UI.enteredTitle, locale)}</p>
+              <p className="mt-0.5 text-muted-foreground">{tr(UI.enteredBody, locale)}</p>
+              {purgedAt && (
+                <p className="mt-1 text-xs text-muted-foreground">{tr(UI.purgedOn, locale).replace("{date}", longDate(purgedAt))}</p>
+              )}
+              <Button type="button" size="sm" className="mt-2" disabled={entering} onClick={handleEnteredInImpact}>
+                {entering ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <ShieldCheck className="mr-1 h-4 w-4" />}
+                {tr(UI.enteredButton, locale)}
+              </Button>
+              {enterFailed && <p className="mt-1 text-xs text-red-600">{tr(UI.enteredFailed, locale)}</p>}
+            </>
+          )}
         </div>
       )}
 
@@ -938,6 +1070,22 @@ export default function IntakeForm({
                 onCreate={secureCapture.create}
                 onCancel={secureCapture.cancel}
                 onSend={secureCapture.send}
+                delivery={
+                  agentArea
+                    ? (url) => (
+                        <DeliveryButtons
+                          kind="secure"
+                          url={url}
+                          uiLocale={locale}
+                          messageLocale={messageLocale}
+                          agentName={agentName ?? ""}
+                          clientFirstName={clientFirstName}
+                          phone={clientPhone}
+                          showCopy={false}
+                        />
+                      )
+                    : undefined
+                }
               />
             </div>
           )}
@@ -972,6 +1120,7 @@ export default function IntakeForm({
                       isOwner={!!isOwner}
                       reveal={reveal || !isOwner}
                       addLabel={addLabelFor(field, locale)}
+                      secretReveal={secretReveal}
                     />
                   );
                 }
@@ -1064,8 +1213,12 @@ export default function IntakeForm({
                       reveal={reveal}
                       isOwner={!!isOwner}
                       onToggleReveal={() => setReveal((r) => !r)}
+                      secret={secretReveal && field.sensitive ? { reveal: secretReveal, path: { field: field.key } } : undefined}
                     />
                     {note && <NoteBox note={note} className="mt-2" live />}
+                    {field.key === "state" && stateBlocked && (
+                      <ImpactStateBlocked state={data.state} locale={locale} className="mt-2" />
+                    )}
                   </div>
                 );
               })}
@@ -1073,6 +1226,16 @@ export default function IntakeForm({
           </AnimatePresence>
         </div>
       </div>
+
+      {/* An agent's application, at the submit step: Impact's notice for the home state, word for
+          word, or why it can't go in (Rhode Island, Washington). */}
+      {agentRules && step === sections.length - 1 && (
+        stateBlocked ? (
+          <ImpactStateBlocked state={data.state} locale={locale} className="mt-4" />
+        ) : (
+          <ImpactStateNotice state={data.state} locale={locale} className="mt-4" />
+        )
+      )}
 
       {completeError && (
         <div className="mt-3 rounded-xl border border-red-200 bg-red-50 p-3 dark:border-red-900 dark:bg-red-950/40">
@@ -1120,7 +1283,7 @@ export default function IntakeForm({
           <Button
             size="lg"
             onClick={handleFinish}
-            disabled={completing}
+            disabled={completing || stateBlocked}
             className="flex-1 gap-2 bg-gradient-to-r from-brand to-accent text-white shadow-md shadow-brand/30 transition active:scale-[0.98] hover:opacity-95 sm:flex-none"
           >
             {completing ? (
@@ -1279,6 +1442,7 @@ function FieldInput({
   reveal,
   isOwner,
   onToggleReveal,
+  secret,
   idPrefix = "f",
   disabled,
   compact,
@@ -1294,6 +1458,8 @@ function FieldInput({
   reveal: boolean;
   isOwner: boolean;
   onToggleReveal?: () => void;
+  /** The agent's own (masked) view: "Show" beside a masked value asks the server for it. */
+  secret?: { reveal: SensitiveReveal; path: RevealPath };
   /** Keeps DOM ids unique when the same field renders inside several repeater rows. */
   idPrefix?: string;
   disabled?: boolean;
@@ -1321,15 +1487,21 @@ function FieldInput({
           {label}
           {field.required && <span className="ml-0.5 text-red-500">*</span>}
         </Label>
-        {field.sensitive && isOwner && onToggleReveal && (
-          <button
-            type="button"
-            onClick={onToggleReveal}
-            className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
-          >
-            {reveal ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-            {reveal ? tr(UI.hide, locale) : tr(UI.reveal, locale)}
-          </button>
+        {field.sensitive && secret && isMaskedValue(value) ? (
+          <RevealToggle reveal={secret.reveal} path={secret.path} shown={value} locale={locale} />
+        ) : (
+          field.sensitive &&
+          isOwner &&
+          onToggleReveal && (
+            <button
+              type="button"
+              onClick={onToggleReveal}
+              className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
+            >
+              {reveal ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+              {reveal ? tr(UI.hide, locale) : tr(UI.reveal, locale)}
+            </button>
+          )
         )}
       </div>
 
@@ -1474,6 +1646,10 @@ function FieldInput({
           onBlur={(e) => onBlur(e.target.value)}
           className={`${inputBase} ${invalidCls} ${disabledCls}`}
         />
+      )}
+
+      {field.sensitive && secret && (
+        <RevealedValue reveal={secret.reveal} path={secret.path} shown={value} locale={locale} />
       )}
 
       {errorKey ? (
@@ -1776,6 +1952,7 @@ function RepeaterEditor({
   isOwner,
   reveal,
   addLabel,
+  secretReveal = null,
 }: {
   field: IntakeField;
   lob: string;
@@ -1790,6 +1967,8 @@ function RepeaterEditor({
   isOwner: boolean;
   reveal: boolean;
   addLabel: string;
+  /** The agent's own (masked) view: "Show" beside each person's masked number. */
+  secretReveal?: SensitiveReveal | null;
 }) {
   const minRows = field.minRows ?? 1;
   const maxRows = field.maxRows ?? 8;
@@ -1876,6 +2055,11 @@ function RepeaterEditor({
                       errorKey={errors[path]}
                       reveal={reveal}
                       isOwner={isOwner}
+                      secret={
+                        secretReveal && sub.sensitive
+                          ? { reveal: secretReveal, path: { field: `${field.key}.${sub.key}`, rowIndex: index } }
+                          : undefined
+                      }
                     />
                   </div>
                 );

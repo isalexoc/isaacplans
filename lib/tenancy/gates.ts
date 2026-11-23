@@ -10,10 +10,11 @@
  * While a gate is off, only `is_test` agents (fake data, preview deployment) get through it. They stay
  * off in production until ACN approves in writing. The ToS/DPA click-through is in place (the
  * operator gate and the owner's token routes require the current versions, lib/tenancy/operator.ts),
- * but `TENANT_CLIENT_DATA` must not go on before masked-by-default sensitive values (with an audited
- * reveal) land for agent owners, and counsel has replaced the draft agreements. Until then an agent
- * owner sees their own clients' values in full, which is acceptable only for test agents with fake
- * data.
+ * and so are an agent's masked-by-default view of their clients' numbers with an audited reveal, the
+ * purge ("Entered in Impact", or 30 days after completion) and Impact's state notices
+ * (lib/tenancy/agent-data.ts). `TENANT_CLIENT_DATA` still must not go on before counsel has
+ * replaced the draft agreements and reviewed the notices, and QStash is on for both projects (the
+ * agents' alerts, and the purge's exact-time job; the daily reconcile is only its backstop).
  *
  * Pure (env reads only, no server-only import) so the offline tests can import it.
  */

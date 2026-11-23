@@ -16,7 +16,15 @@
 
 import "server-only";
 import { NextResponse, type NextRequest } from "next/server";
-import { alreadySubmitted, isResponse, loadAuthorizedSession, notFound } from "./route-helpers";
+import { sensitiveMasked, withoutPlatformKeys } from "@/lib/tenancy/agent-data";
+import { alertAgentOnFirstClientSave } from "@/lib/tenancy/agent-jobs";
+import {
+  alreadySubmitted,
+  isResponse,
+  loadAuthorizedSession,
+  notFound,
+  type AuthorizedSession,
+} from "./route-helpers";
 import {
   clientCanEdit,
   patchIntakeData,
@@ -62,14 +70,30 @@ async function keepFreshCapture(
   }
 }
 
-/** The agent gets real values; the client's browser only ever gets masks. */
+/**
+ * The answers as this caller may see them (lib/tenancy/agent-data.ts `sensitiveMasked`): Isaac's
+ * owner view gets the real values, as always; the client's browser gets masks, and so does an agent
+ * working their own client's application, who reveals one value at a time (`POST …/reveal`,
+ * audited). The client's browser never gets the platform's own keys either.
+ */
+export function sessionDataForCaller(
+  config: IntakeLobConfig,
+  caller: { role: IntakeRole; ownerIsAgent: boolean },
+  decrypted: IntakeData
+): IntakeData {
+  const shown = caller.role === "client" ? withoutPlatformKeys(decrypted) : decrypted;
+  return sensitiveMasked(caller) ? maskSensitiveForClient(config, shown) : shown;
+}
+
+/** The session as the caller may see it (see `sessionDataForCaller`). */
 function sessionResponse(
   config: IntakeLobConfig,
+  loaded: Pick<AuthorizedSession, "access" | "ownerAgent">,
   row: IntakeSessionRow,
-  role: IntakeRole,
   decrypted: IntakeData
 ): NextResponse {
-  const data = role === "owner" ? decrypted : maskSensitiveForClient(config, decrypted);
+  const role = loaded.access.role;
+  const data = sessionDataForCaller(config, { role, ownerIsAgent: loaded.ownerAgent !== null }, decrypted);
   return NextResponse.json({ success: true, session: toIntakeSession(row, role, data) });
 }
 
@@ -99,7 +123,8 @@ export async function saveIntakeAnswers(
   if (access.role === "client" && !clientCanEdit(row)) return alreadySubmitted();
 
   const body = await request.json().catch(() => ({}));
-  const incoming = sanitizeIntakeData(config.sections, body?.[field]);
+  // The platform's own keys (alerts sent, "entered in Impact", erased) are the server's to write.
+  const incoming = withoutPlatformKeys(sanitizeIntakeData(config.sections, body?.[field]));
   const stored = decryptIntakeData(config, (row.data ?? {}) as IntakeData);
   // Values equal to what is stored change nothing (a mask the planner turned back into the number on
   // file, the untouched answers of a legacy whole-form save), so they are left out.
@@ -107,7 +132,7 @@ export async function saveIntakeAnswers(
   if (access.role === "owner") await keepFreshCapture(config, row.id, patch, stored);
 
   // Nothing to write: answer with the session as stored, with no write and no CRM push.
-  if (Object.keys(patch).length === 0) return sessionResponse(config, row, access.role, stored);
+  if (Object.keys(patch).length === 0) return sessionResponse(config, loaded, row, stored);
 
   const updated = await patchIntakeData(token, encryptIntakeData(config, patch));
   if (!updated) return notFound();
@@ -115,5 +140,7 @@ export async function saveIntakeAnswers(
   const decrypted = decryptIntakeData(config, (updated.data ?? {}) as IntakeData);
   // Progressive CRM sync of the whole merged record (best-effort — never blocks the save).
   await syncIntakeToCrm(config, updated, decrypted);
-  return sessionResponse(config, updated, access.role, decrypted);
+  // An agent's application: the client's first save that identifies them tells the agent, once.
+  if (loaded.ownerAgent) await alertAgentOnFirstClientSave(updated, access.role, decrypted);
+  return sessionResponse(config, loaded, updated, decrypted);
 }

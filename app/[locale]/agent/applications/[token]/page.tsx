@@ -18,6 +18,7 @@ import { getIntakeByToken } from "@/lib/intake-core/server";
 import { AGENT_AREA_LOB, agentOperatorPage } from "@/lib/tenancy/agent-area";
 import { agentApplicationPath, agentAreaLocale, agentAreaPath } from "@/lib/tenancy/agent-area-routes";
 import { operatorOwns } from "@/lib/tenancy/context";
+import { agentPublicProfile } from "@/lib/tenancy/profile";
 import { productPublicOrigin } from "@/lib/tenancy/site-urls";
 
 export const dynamic = "force-dynamic";
@@ -55,6 +56,9 @@ export default async function AgentApplicationPage({ params }: { params: Params 
         deckHref={`${agentApplicationPath(locale, token, "presentation")}?lang=client`}
         // A secure link opens on the product domain; without one configured it would be a 404.
         clientLinks={productPublicOrigin() !== null}
+        // The client's own link, sent from the agent's phone (WhatsApp, SMS, share), naming the agent.
+        shareOrigin={productPublicOrigin()}
+        agentName={agentPublicProfile(gate.agent).displayName}
       />
     </div>
   );

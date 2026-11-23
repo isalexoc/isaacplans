@@ -256,10 +256,18 @@ export async function classifySignedInCaller(
  * that isn't an agent's; on the product domain only for an agent's. See `decideClientDataFlow`.
  */
 export async function ownerAcceptsClientData(lob: string, ownerUserId: string): Promise<ClientDataVerdict> {
-  return decideClientDataFlow({
-    lob,
-    ownerAgent: await ownerAgentOf(ownerUserId),
-    surface: appSurface(),
-    gates: readTenancyGates(),
-  });
+  return (await ownerClientDataFlow(lob, ownerUserId)).verdict;
+}
+
+/**
+ * `ownerAcceptsClientData`, plus the owner's `agents` row when the application is an agent's (null
+ * for Isaac's, and whenever the verdict isn't "accept" for want of an answer).
+ */
+export async function ownerClientDataFlow(
+  lob: string,
+  ownerUserId: string
+): Promise<{ verdict: ClientDataVerdict; ownerAgent: AgentRow | null }> {
+  const ownerAgent = await ownerAgentOf(ownerUserId);
+  const verdict = decideClientDataFlow({ lob, ownerAgent, surface: appSurface(), gates: readTenancyGates() });
+  return { verdict, ownerAgent: ownerAgent === "unknown" ? null : ownerAgent };
 }

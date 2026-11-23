@@ -18,6 +18,8 @@ import { validateForCompletion } from "@/lib/intake-core/schema";
 import { decryptIntakeData, purgeIntakeSensitiveData } from "@/lib/intake-core/sensitive";
 import { agentCrmUpdateContact, agentCrmAddContactTags } from "@/lib/agent-crm-contacts";
 import { crmCredsForOwner } from "@/lib/tenancy/crm";
+import { agentApplicationBlocked } from "@/lib/tenancy/agent-data";
+import { afterAgentCompletion } from "@/lib/tenancy/agent-jobs";
 import { createContactNote } from "@/lib/agent-crm-call-summary";
 import { allRepeaterFields, isRowFilled, sensitiveScalarKeys } from "@/lib/intake-core/fields";
 import { diffIntakeData } from "@/lib/intake-core/diff";
@@ -47,12 +49,24 @@ export async function POST(_request: NextRequest, context: RouteContext) {
     // would let a fresh browser with the link claim a session at the last moment.
     const loaded = await loadAuthorizedSession(lob, token, { claim: false });
     if (isResponse(loaded)) return loaded;
-    const { config, row, access } = loaded;
+    const { config, row, access, ownerAgent } = loaded;
 
     // A client cannot re-submit a locked (already-completed) form; the admin re-opens it first.
     if (access.role === "client" && !clientCanEdit(row)) return alreadySubmitted();
 
     const decrypted = decryptIntakeData(config, (row.data ?? {}) as IntakeData);
+    // Impact isn't available in Rhode Island or Washington: an agent's application with a home
+    // address there doesn't go in (lib/impact-disclosures/notices.ts). Isaac's are unchanged.
+    if (agentApplicationBlocked({ ownerIsAgent: ownerAgent !== null, state: decrypted.state })) {
+      return NextResponse.json(
+        {
+          success: false,
+          code: "state_unavailable",
+          error: "Impact Health Sharing isn't available in this state, so this application can't be submitted.",
+        },
+        { status: 400 }
+      );
+    }
     const check = validateForCompletion(config.sections, decrypted);
     if (!check.ok) {
       return NextResponse.json(
@@ -131,6 +145,10 @@ export async function POST(_request: NextRequest, context: RouteContext) {
 
     const updated = await markIntakeCompleted(token, purge);
     if (!updated) return notFound();
+
+    // An agent's application: the agent hears the client completed it (no client details), and its
+    // sensitive values are erased 30 days from now unless the agent marks it entered in Impact first.
+    if (ownerAgent) await afterAgentCompletion(updated, access.role);
 
     return NextResponse.json({ success: true, crmSynced, session: toIntakeSummary(updated) });
   } catch (error) {

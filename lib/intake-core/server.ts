@@ -10,7 +10,7 @@
  */
 
 import "server-only";
-import { and, count, desc, eq, inArray, isNull, or, ilike, sql, type SQL } from "drizzle-orm";
+import { and, asc, count, desc, eq, inArray, isNull, lt, notInArray, or, ilike, sql, type SQL } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { db } from "@/lib/db";
 import { agents, intakeSessions } from "@/lib/db/schema";
@@ -31,7 +31,7 @@ import {
 import { isMissingTableError } from "@/lib/tenancy/db-errors";
 import { publicOriginForOwner } from "@/lib/tenancy/urls";
 import { isIntakeExpired, intakeLinkExpiry } from "@/lib/intake-shared/access";
-import { isFieldVisible, isRowFilled, allRepeaterFields } from "./fields";
+import { isFieldVisible, isRowFilled, allRepeaterFields, sensitiveRowKeys, sensitiveScalarKeys } from "./fields";
 import { crmFieldId, intakeLinkSlug } from "./ghl-field-ids";
 import { buildIntakeShareUrl } from "./share-url";
 import type {
@@ -481,6 +481,98 @@ export async function patchIntakeData(
     .where(eq(intakeSessions.token, token))
     .returning();
   return row ?? null;
+}
+
+/** `data -> group` when it is an object, else an empty one (so a merge never builds an array). */
+function flagGroup(group: string): SQL {
+  return sql`case when jsonb_typeof(${intakeSessions.data} -> ${group}::text) = 'object' then ${intakeSessions.data} -> ${group}::text else '{}'::jsonb end`;
+}
+
+/**
+ * Set a flag inside one of the platform's hidden objects in `data` (`data.agentAlerts.started`, …;
+ * lib/tenancy/agent-data.ts) only if it isn't set yet, in ONE statement, so exactly one of any
+ * number of concurrent callers gets true. `updated_at` is left alone: the dashboard orders by edits.
+ */
+export async function claimSessionDataFlag(
+  sessionId: string,
+  group: string,
+  flag: string,
+  value: string
+): Promise<boolean> {
+  const rows = await db
+    .update(intakeSessions)
+    .set({
+      data: sql`jsonb_set(coalesce(${intakeSessions.data}, '{}'::jsonb), array[${group}::text], ${flagGroup(group)} || jsonb_build_object(${flag}::text, ${value}::text), true)`,
+    })
+    .where(
+      and(eq(intakeSessions.id, sessionId), sql`(${intakeSessions.data} -> ${group}::text -> ${flag}::text) is null`)
+    )
+    .returning({ id: intakeSessions.id });
+  return rows.length > 0;
+}
+
+/** Undo `claimSessionDataFlag` (the work it guarded failed and should be tried again). */
+export async function releaseSessionDataFlag(sessionId: string, group: string, flag: string): Promise<void> {
+  await db
+    .update(intakeSessions)
+    .set({
+      data: sql`jsonb_set(${intakeSessions.data}, array[${group}::text], (${intakeSessions.data} -> ${group}::text) - ${flag}::text)`,
+    })
+    .where(
+      and(eq(intakeSessions.id, sessionId), sql`jsonb_typeof(${intakeSessions.data} -> ${group}::text) = 'object'`)
+    );
+}
+
+/**
+ * The 30-day purge's daily backstop (lib/tenancy/agent-jobs.ts `reconcileAgentPurges`): an AGENT's
+ * applications completed before `completedBefore` that still hold a sensitive value (a non-empty
+ * string in a sensitive field, or in a sensitive sub-field of a repeater row; the keys come from the
+ * config, like encryption and masking), oldest first. Never Isaac's: the owner needs an `agents`
+ * row and isn't one of the ids listed in env as his (the same rule as `findSessionByDevice`).
+ * Before migration 0046 there is no `agents` table, so no application is an agent's: none.
+ */
+export async function listAgentSessionsHoldingSensitive(
+  config: IntakeLobConfig,
+  completedBefore: Date,
+  limit: number
+): Promise<IntakeSessionRow[]> {
+  const nonEmpty = (value: SQL, key: string) =>
+    sql`(jsonb_typeof(${value} -> ${key}::text) = 'string' and ${value} ->> ${key}::text <> '')`;
+  const held: SQL[] = [
+    ...sensitiveScalarKeys(config.sections).map((key) => nonEmpty(sql`${intakeSessions.data}`, key)),
+    ...sensitiveRowKeys(config.sections).map(([repeaterKey, subKeys]) => {
+      const rows = sql`case when jsonb_typeof(${intakeSessions.data} -> ${repeaterKey}::text) = 'array' then ${intakeSessions.data} -> ${repeaterKey}::text else '[]'::jsonb end`;
+      const anySub = sql.join(
+        subKeys.map((sub) => nonEmpty(sql.raw("purge_row.item"), sub)),
+        sql` or `
+      );
+      return sql`exists (select 1 from jsonb_array_elements(${rows}) as purge_row(item) where ${anySub})`;
+    }),
+  ];
+  if (held.length === 0) return [];
+
+  const ownerIsAgent = sql`exists (select 1 from ${agents} where ${agents.clerkUserId} = ${intakeSessions.ownerUserId})`;
+  const listed = listedPlatformOwnerIds();
+  try {
+    return await db
+      .select()
+      .from(intakeSessions)
+      .where(
+        and(
+          eq(intakeSessions.lob, config.lob),
+          eq(intakeSessions.status, "completed"),
+          lt(intakeSessions.completedAt, completedBefore),
+          ownerIsAgent,
+          ...(listed.length ? [notInArray(intakeSessions.ownerUserId, listed)] : []),
+          or(...held)
+        )
+      )
+      .orderBy(asc(intakeSessions.completedAt))
+      .limit(limit);
+  } catch (error) {
+    if (isMissingTableError(error)) return [];
+    throw error;
+  }
 }
 
 /**

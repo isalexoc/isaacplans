@@ -27,6 +27,7 @@ import {
   type SensitiveRowKeys,
 } from "@/lib/intake-shared/masking";
 import { sensitiveScalarKeys, sensitiveRowKeys } from "./fields";
+import { blankSensitiveValues } from "./purge";
 import type { IntakeData, IntakeLobConfig, RepeaterRow } from "./types";
 
 type Keys = { scalars: string[]; rows: SensitiveRowKeys };
@@ -92,18 +93,12 @@ export function decryptIntakeData(config: IntakeLobConfig, data: IntakeData): In
   return out;
 }
 
-/** Replace sensitive values with null/empty (used by purge-after-sync). */
+/**
+ * Replace sensitive values with null/empty: purge-after-sync, and (through
+ * lib/intake-core/purge.ts `planSensitivePurge`, the same transform) an agent's purges.
+ */
 export function purgeIntakeSensitiveData(config: IntakeLobConfig, data: IntakeData): IntakeData {
-  const { scalars, rows: rowKeys } = keysFor(config);
-  const out: IntakeData = { ...data };
-  for (const key of scalars) {
-    if (out[key]) out[key] = null;
-  }
-  for (const [repeaterKey, subKeys] of rowKeys) {
-    const rows = mapRows(out[repeaterKey], subKeys, () => "");
-    if (rows) out[repeaterKey] = rows;
-  }
-  return out;
+  return blankSensitiveValues(config.sections, data);
 }
 
 /** Replace every sensitive value with a mask before sending data to a client browser. */
