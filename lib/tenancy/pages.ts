@@ -3,9 +3,10 @@
  * Server-only (database, and Clerk on isaacplans.com only).
  *
  *  - `publicAgentForSlug`: the agent behind /{l}/{slug}[/apply|/privacy] on the product domain, or
- *    null (a 404): a valid slug, an active agent linked to a sign-in that isn't one of Isaac's, and
- *    open by the launch gates (`agentPublicPagesOpen`: TENANT_PUBLIC_PAGES, or a test agent on a
- *    preview deployment with PLATFORM_PREVIEW=1). Never on isaacplans.com.
+ *    null (a 404): a valid slug, an active agent linked to a sign-in that isn't one of Isaac's, open
+ *    by the launch gates (`agentPublicPagesOpen`: TENANT_PUBLIC_PAGES, or a test agent on a
+ *    preview deployment with PLATFORM_PREVIEW=1), who has accepted the terms and DPA. Never on
+ *    isaacplans.com.
  *  - `intakeTokenOwner` / `captureTokenOwner`: whose session a client's token page belongs to, which
  *    decides the surface it is served from (lib/tenancy/product-routes.ts `decideTokenPage`). One
  *    narrow query each (the owner column only, never the client's answers), plus the `agents`
@@ -23,6 +24,7 @@ import { getIntakeConfig } from "@/lib/intake-configs";
 import { getIntakeOwnerByToken } from "@/lib/intake-core/server";
 import { getCaptureOwnerByToken } from "@/lib/intake-core/secure-capture";
 import { getAgentBySlug, type AgentRow } from "./agents";
+import { agentAgreementsOnRecord } from "./agreements-store";
 import { classifySignedInCaller, ownerAgentOf, requestIdentity } from "./context";
 import { isListedPlatformOwner } from "./crm";
 import { agentPublicPagesOpen, readPlatformPreview, readTenancyGates } from "./gates";
@@ -79,7 +81,10 @@ export const publicAgentForSlug = cache(async (slug: string): Promise<AgentRow |
   if (!agent?.clerkUserId || agent.slug !== check.slug) return null;
   // A row linked to one of Isaac's own ids is a misconfiguration (the start route refuses it too).
   if (isListedPlatformOwner(agent.clerkUserId)) return null;
-  return agentPublicPagesOpen(agent, readTenancyGates(), readPlatformPreview()) ? agent : null;
+  if (!agentPublicPagesOpen(agent, readTenancyGates(), readPlatformPreview())) return null;
+  // No client data for an agent who never accepted the terms and DPA (any version: a newer one
+  // waiting for them doesn't take the guide down). The start route asks the same.
+  return (await agentAgreementsOnRecord(agent.id)) ? agent : null;
 });
 
 export type TokenOwner =

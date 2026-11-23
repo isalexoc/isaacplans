@@ -3,13 +3,15 @@
  * walk the whole table: lib/tenancy/context.ts gathers the facts, these decide.
  *
  * Operators are admins (Clerk `role: "admin"`, i.e. Isaac and his team) and agents (a row in
- * `agents`). Agents work the Health Coverage line only, only while active, and only as test agents
- * until `TENANT_CLIENT_DATA` is on; an impersonated agent session is refused, so Clerk
- * impersonation can't be used to act as an agent on their clients.
+ * `agents`). Agents work the Health Coverage line only, only while active, only as test agents
+ * until `TENANT_CLIENT_DATA` is on, and only once they have accepted the current terms and DPA
+ * (lib/tenancy/agreements.ts); an impersonated agent session is refused, so Clerk impersonation
+ * can't be used to act as an agent on their clients.
  *
  * On a token route a signed-in operator who isn't the session's owner is denied, audited, and never
  * claims the session. Everyone else who isn't the owner keeps the token + device-cookie rule of
- * lib/intake-shared/access.ts.
+ * lib/intake-shared/access.ts, on the owner's own surface only: an agent's clients use their
+ * application on the product domain, and on isaacplans.com it is a 404 for them.
  *
  * Whatever couldn't be established (an `agents` lookup that failed for a reason other than the
  * table not existing yet) fails closed as "retry" (503): never as "not an agent", which would open
@@ -30,9 +32,11 @@ export type OperatorFacts = {
   agent: AgentGateFields | null;
   /** The request comes from a Clerk impersonation session (`actor` claim). */
   impersonated: boolean;
+  /** The agent has accepted the current terms and DPA. Never asked of an admin. */
+  agreementsAccepted: boolean;
 };
 
-export type OperatorDenial = "signed_out" | "not_operator" | "impersonated" | "line" | "inactive";
+export type OperatorDenial = "signed_out" | "not_operator" | "impersonated" | "line" | "inactive" | "agreements";
 
 export type OperatorDecision =
   | { ok: true; kind: OperatorKind }
@@ -50,6 +54,7 @@ export function decideIntakeOperator(
   if (facts.impersonated) return { ok: false, status: 403, reason: "impersonated" };
   if (!isAgentLob(lob)) return { ok: false, status: 403, reason: "line" };
   if (!agentMayOperate(facts.agent, gates)) return { ok: false, status: 403, reason: "inactive" };
+  if (!facts.agreementsAccepted) return { ok: false, status: 403, reason: "agreements" };
   return { ok: true, kind: "agent" };
 }
 
@@ -61,8 +66,10 @@ export type OwnerAgentFact = AgentGateFields | null | "unknown";
 
 /**
  * When the session's owner is an agent: "ok" (carry on with the usual rules), "deny" (403 and an
- * audit row: the agent themself, while paused, gated off, impersonated or on another line), or
- * "unavailable" (404 for anyone else: that agent's applications are closed right now).
+ * audit row: the agent themself, while paused, gated off, impersonated, on another line, or before
+ * accepting the current terms and DPA), or "unavailable" (404 for anyone else: that agent's
+ * applications are closed right now). The agreements bind the agent only: their clients' links
+ * keep working while a new version waits for the agent's acceptance.
  */
 export type AgentSessionVerdict = "ok" | "deny" | "unavailable";
 
@@ -72,11 +79,13 @@ export function decideAgentSessionAccess(input: {
   ownerAgent: AgentGateFields | null;
   callerIsOwner: boolean;
   impersonated: boolean;
+  /** The agent owner has accepted the current agreements. Read only when the caller is the owner. */
+  ownerAgreementsAccepted: boolean;
   gates: TenancyGates;
 }): AgentSessionVerdict {
   if (!input.ownerAgent) return "ok";
   const open = isAgentLob(input.lob) && agentMayOperate(input.ownerAgent, input.gates);
-  if (input.callerIsOwner) return open && !input.impersonated ? "ok" : "deny";
+  if (input.callerIsOwner) return open && !input.impersonated && input.ownerAgreementsAccepted ? "ok" : "deny";
   return open ? "ok" : "unavailable";
 }
 
@@ -101,7 +110,15 @@ export type TokenAccessInput = {
   /** How a signed-in non-owner was classified. Ignored for the owner and for anonymous callers. */
   callerKind: SignedInCallerKind;
   ownerAgent: OwnerAgentFact;
-  /** The product domain serves agents' applications only; Isaac's are a 404 there. */
+  /**
+   * The agent owner has accepted the current terms and DPA. Read only when the caller is the
+   * owner and the owner is an agent (lib/intake-core/route-helpers.ts looks it up only then).
+   */
+  ownerAgreementsAccepted: boolean;
+  /**
+   * The product domain serves agents' applications only; Isaac's are a 404 there. On isaacplans.com
+   * an agent's application answers its owner (and the audited denial to other operators) only.
+   */
   surface: AppSurface;
   gates: TenancyGates;
 };
@@ -129,6 +146,7 @@ export function decideTokenAccess(input: TokenAccessInput): TokenAccessDecision 
     ownerAgent: input.ownerAgent,
     callerIsOwner,
     impersonated: input.impersonated,
+    ownerAgreementsAccepted: input.ownerAgreementsAccepted,
     gates: input.gates,
   });
   if (verdict === "deny") return AUDITED_DENIAL;
@@ -145,9 +163,11 @@ export function decideTokenAccess(input: TokenAccessInput): TokenAccessDecision 
   const operatorDenial: TokenAccessDecision =
     input.callerKind === "unknown" && !input.impersonated ? { outcome: "retry" } : AUDITED_DENIAL;
 
-  // A closed agent session is a 404 for its clients; an operator reaching it still gets the
-  // audited denial every other operator gets.
-  if (verdict === "unavailable") {
+  // A closed agent session is a 404 for its clients; so is an open one on isaacplans.com, where an
+  // agent's clients never work (their pages are sent to the product domain with a 307, and these
+  // API routes must not let a client claim or use the link on the wrong host). An operator reaching
+  // it still gets the audited denial every other operator gets.
+  if (verdict === "unavailable" || (input.surface === "main" && input.ownerAgent && !callerIsOwner)) {
     return access.operatorDenied ? operatorDenial : { outcome: "unavailable" };
   }
   if (access.allowed) return { outcome: "allow", access };
@@ -157,8 +177,9 @@ export function decideTokenAccess(input: TokenAccessInput): TokenAccessDecision 
 
 /**
  * The secure link (no session token, no sign-in): may the client's data flow into this owner's
- * application here? "accept"; "closed" (404: an agent paused or gated off, or one of Isaac's
- * applications on the product domain); "retry" (503: the owner lookup failed).
+ * application here? "accept"; "closed" (404: an agent paused or gated off, an agent's application
+ * on isaacplans.com, or one of Isaac's on the product domain); "retry" (503: the owner lookup
+ * failed). Each owner's clients use one surface: Isaac's his site, an agent's the product domain.
  */
 export type ClientDataVerdict = "accept" | "closed" | "retry";
 
@@ -170,5 +191,6 @@ export function decideClientDataFlow(input: {
 }): ClientDataVerdict {
   if (input.ownerAgent === "unknown") return "retry";
   if (!input.ownerAgent) return input.surface === "product" ? "closed" : "accept";
+  if (input.surface !== "product") return "closed";
   return isAgentLob(input.lob) && agentMayOperate(input.ownerAgent, input.gates) ? "accept" : "closed";
 }

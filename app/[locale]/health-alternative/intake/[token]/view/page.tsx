@@ -9,7 +9,8 @@ import { getLocale } from "next-intl/server";
 import IntakeClientView from "@/components/intake/client-view";
 import { requireIntakeConfig } from "@/lib/intake-configs";
 import { getIntakeByToken } from "@/lib/intake-core/server";
-import { getIntakeOperator, operatorOwns } from "@/lib/tenancy/context";
+import { agentApplicationPath, agentAreaLocale } from "@/lib/tenancy/agent-area-routes";
+import { getAgentContext, getIntakeOperator, operatorOwns } from "@/lib/tenancy/context";
 
 export const metadata: Metadata = {
   title: "Client Summary",
@@ -23,6 +24,10 @@ export default async function HealthAlternativeIntakeViewPage({
 }) {
   const { token } = await params;
   const locale = await getLocale();
+  // An agent's summary lives in their own area, with their own frame.
+  if ((await getAgentContext()).agent) {
+    redirect(agentApplicationPath(agentAreaLocale(locale), token, "summary"));
+  }
   const gate = await getIntakeOperator("health-alternative");
   if (!gate.ok) {
     if (gate.status === 401) {

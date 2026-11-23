@@ -10,9 +10,17 @@
  *  - the operator gate and the token-route decision table: admin owner / admin non-owner / agent
  *    owner / agent non-owner / client / impersonated / paused or gated agent / failed lookups /
  *    product surface; and the secure link's own rule;
- *  - a GUARD over the source tree: no intake, secure-link or CrankWheel path may read Isaac's CRM
- *    credentials except through lib/tenancy/crm.ts, neither itself nor through a module it imports
- *    (one hop; a short allowlist of exports that take the token from their caller).
+ *  - a GUARD over the source tree: no intake, secure-link, CrankWheel or agent-area path may read
+ *    Isaac's CRM credentials except through lib/tenancy/crm.ts, neither itself nor through a module
+ *    it imports (one hop; a short allowlist of exports that take the token from their caller);
+ *  - the agent area (chunk C1): the versioned ToS + DPA (pinned hashes, current-version check, and
+ *    no guide or Apply for an agent who never accepted), the invite/link refusal rules (never an
+ *    admin or one of Isaac's ids, verified email only), the agent marker outranking the admin role,
+ *    the Clerk webhook's agent skip (503 on a failed check), the /agent routes against
+ *    i18n/routing.ts, the `x-shell` frame header (always overwritten by middleware), the agent
+ *    dashboard's no-CRM mode, the profile's bilingual errors, no server fetch of an agent's photo,
+ *    an agent's clients getting 404s on isaacplans.com, and a client form bundle without a route
+ *    table.
  *
  * No network, no database, no API keys. Run with: pnpm test:tenancy
  */
@@ -21,6 +29,7 @@ import { readdirSync, readFileSync, statSync } from "fs";
 import { join, relative, sep } from "path";
 import { parseAppSurface, type AppSurface } from "../lib/tenancy/surface";
 import {
+  AGENT_LOBS,
   agentMayOperate,
   agentPublicPagesOpen,
   agentTakesApplications,
@@ -71,6 +80,7 @@ import {
   normalizeE164,
   safeImpactReferralUrl,
   safePhotoUrl,
+  serverFetchablePhotoUrl,
   whatsappHref,
   type AgentProfileSource,
 } from "../lib/tenancy/profile";
@@ -91,6 +101,45 @@ import { GUIDE_SCOPE, guideScopeFor, isGuideScope, planChoiceUsable } from "../l
 import { resolveIntakeAccess, type IntakeAccessRow } from "../lib/intake-shared/access";
 import { ENGINE_INTAKE_CONFIGS } from "../lib/intake-configs";
 import { routing } from "../i18n/routing";
+import {
+  AGENT_AREA_PATH_RE,
+  AGENT_AREA_SEGMENTS,
+  agentAreaAlternate,
+  agentApplicationPath,
+  agentApplicationTemplate,
+  agentAreaPath,
+  fillTokenTemplate,
+  isAgentAreaPath,
+  isAgentInvitationLanding,
+  parseAgentAreaPath,
+  parseShellHeader,
+  SHELL_ALTERNATE_HEADER,
+  SHELL_HEADER,
+  shellHeadersForPath,
+  shellKindForPath,
+} from "../lib/tenancy/agent-area-routes";
+import {
+  acceptanceMatchesCurrent,
+  AGREEMENT_DOC_IDS,
+  AGREEMENTS,
+  agreementSha256,
+  agreementsOnRecord,
+  agreementsSatisfied,
+  currentAgreementRefs,
+  missingAgreements,
+} from "../lib/tenancy/agreements";
+import {
+  decideAgentInvite,
+  decideClerkCrmSync,
+  decideFirstUseLink,
+  isPlatformAdminMetadata,
+  type ClerkAccountFact,
+  type FirstUseFacts,
+} from "../lib/tenancy/agent-linking";
+import { parseAgentProfilePatch, profileErrorMessages } from "../lib/tenancy/agent-profile-input";
+import { PROFILE_ERROR_CODES, PROFILE_ERROR_TEXT, profileErrorsText } from "../lib/tenancy/agent-profile-errors";
+import { dashboardFeatures } from "../lib/intake-core/dashboard-mode";
+import { isPrivatePagePath } from "../lib/private-pages";
 
 let passed = 0;
 let failed = 0;
@@ -267,6 +316,7 @@ console.log("\nOperator gate (dashboard, create, reset, reopen, send-link, secur
     isAdmin: false,
     agent: null,
     impersonated: false,
+    agreementsAccepted: true,
     ...over,
   });
   const d = (f: Parameters<typeof decideIntakeOperator>[0], lob = HA, gates = OFF) => decideIntakeOperator(f, lob, gates);
@@ -293,6 +343,15 @@ console.log("\nOperator gate (dashboard, create, reset, reopen, send-link, secur
   check("invited agent → 403", !invited.ok && invited.reason === "inactive");
   const impersonated = d(facts({ agent: testAgent, impersonated: true }));
   check("impersonated agent → 403", !impersonated.ok && impersonated.reason === "impersonated");
+  const noAgreements = d(facts({ agent: testAgent, agreementsAccepted: false }));
+  check(
+    "active agent who hasn't accepted the current ToS + DPA → 403 (agreements)",
+    !noAgreements.ok && noAgreements.status === 403 && noAgreements.reason === "agreements"
+  );
+  const adminNoAgreements = d(facts({ userId: ISAAC, isAdmin: true, agreementsAccepted: false }), "life-insurance");
+  check("admins are never asked for the agreements", adminNoAgreements.ok && adminNoAgreements.kind === "admin");
+  const pausedNoAgreements = d(facts({ agent: pausedAgent, agreementsAccepted: false }), HA, ON);
+  check("a paused agent is refused as inactive first", !pausedNoAgreements.ok && pausedNoAgreements.reason === "inactive");
 }
 
 console.log("\nToken routes (load, save, files, complete): the access table");
@@ -310,6 +369,7 @@ console.log("\nToken routes (load, save, files, complete): the access table");
     impersonated?: boolean;
     callerKind?: SignedInCallerKind;
     ownerAgent?: OwnerAgentFact;
+    ownerAgreementsAccepted?: boolean;
     surface?: AppSurface;
     gates?: TenancyGates;
     lob?: string;
@@ -322,6 +382,7 @@ console.log("\nToken routes (load, save, files, complete): the access table");
       impersonated: input.impersonated ?? false,
       callerKind: input.callerKind ?? "client",
       ownerAgent: input.ownerAgent === undefined ? null : input.ownerAgent,
+      ownerAgreementsAccepted: input.ownerAgreementsAccepted ?? true,
       surface: input.surface ?? "main",
       gates: input.gates ?? OFF,
     });
@@ -417,22 +478,58 @@ console.log("\nToken routes (load, save, files, complete): the access table");
     deniedAudited(decide({ row: row(AGENT_A), userId: AGENT_A, ownerAgent: testAgent, lob: "life-insurance" }))
   );
 
-  // Clients of agents.
   check(
-    "client of an active test agent → claims as today",
-    allowed(decide({ row: row(AGENT_A), deviceId: "dc", ownerAgent: testAgent }), "client", true)
+    "agent owner who hasn't accepted the current ToS + DPA → 403 + audit (their own requests only)",
+    deniedAudited(decide({ row: row(AGENT_A), userId: AGENT_A, ownerAgent: testAgent, ownerAgreementsAccepted: false }))
+  );
+  check(
+    "…while their client keeps working on the product domain",
+    allowed(
+      decide({ row: row(AGENT_A, { clientDeviceId: "dc" }), deviceId: "dc", ownerAgent: testAgent, ownerAgreementsAccepted: false, surface: "product" }),
+      "client"
+    )
+  );
+
+  // Clients of agents: only on the product domain.
+  check(
+    "client of an active test agent on the product domain → claims as on Isaac's site",
+    allowed(decide({ row: row(AGENT_A), deviceId: "dc", ownerAgent: testAgent, surface: "product" }), "client", true)
+  );
+  check(
+    "client of an active test agent on isaacplans.com → 404, no claim (the API side of the 307)",
+    decide({ row: row(AGENT_A), deviceId: "dc", ownerAgent: testAgent }).outcome === "unavailable"
+  );
+  check(
+    "…and so for the client already bound to it",
+    decide({ row: row(AGENT_A, { clientDeviceId: "dc" }), deviceId: "dc", ownerAgent: testAgent }).outcome === "unavailable"
+  );
+  check(
+    "…and for a signed-in plain client",
+    decide({ row: row(AGENT_A), userId: CLIENT, deviceId: "dc", ownerAgent: testAgent, callerKind: "client" }).outcome === "unavailable"
+  );
+  check(
+    "…while the agent owner keeps their access there",
+    allowed(decide({ row: row(AGENT_A), userId: AGENT_A, deviceId: "dA", ownerAgent: testAgent }), "owner")
+  );
+  check(
+    "…and another operator still gets the audited 403, not a quiet 404",
+    deniedAudited(decide({ row: row(AGENT_A, { clientDeviceId: "dc" }), userId: ISAAC, deviceId: "dI", callerKind: "admin", ownerAgent: testAgent }))
   );
   check(
     "client of a paused agent → 404",
-    decide({ row: row(AGENT_A, { clientDeviceId: "dc" }), deviceId: "dc", ownerAgent: pausedAgent, gates: ON }).outcome === "unavailable"
+    decide({ row: row(AGENT_A, { clientDeviceId: "dc" }), deviceId: "dc", ownerAgent: pausedAgent, gates: ON, surface: "product" }).outcome === "unavailable"
   );
   check(
     "client of a real agent while the gates are off → 404",
-    decide({ row: row(AGENT_A, { clientDeviceId: "dc" }), deviceId: "dc", ownerAgent: realAgent }).outcome === "unavailable"
+    decide({ row: row(AGENT_A, { clientDeviceId: "dc" }), deviceId: "dc", ownerAgent: realAgent, surface: "product" }).outcome === "unavailable"
   );
   check(
-    "client of a real agent once TENANT_CLIENT_DATA is on → client",
-    allowed(decide({ row: row(AGENT_A, { clientDeviceId: "dc" }), deviceId: "dc", ownerAgent: realAgent, gates: ON }), "client")
+    "client of a real agent once TENANT_CLIENT_DATA is on → client (product domain)",
+    allowed(decide({ row: row(AGENT_A, { clientDeviceId: "dc" }), deviceId: "dc", ownerAgent: realAgent, gates: ON, surface: "product" }), "client")
+  );
+  check(
+    "…and still a 404 for them on isaacplans.com",
+    decide({ row: row(AGENT_A, { clientDeviceId: "dc" }), deviceId: "dc", ownerAgent: realAgent, gates: ON }).outcome === "unavailable"
   );
   check(
     "an operator on a paused agent's session still gets the audited 403, not a quiet 404",
@@ -467,7 +564,7 @@ console.log("\nToken routes (load, save, files, complete): the access table");
     decide({ row: row(ISAAC), deviceId: "d1", surface: "product" }).outcome === "unavailable"
   );
   check(
-    "an active test agent's token on the product domain → its client, as on main",
+    "an active test agent's token on the product domain → its client (claims there)",
     allowed(decide({ row: row(AGENT_A), deviceId: "dc", ownerAgent: testAgent, surface: "product" }), "client", true)
   );
   check(
@@ -488,10 +585,12 @@ console.log("\nSecure link (no token, no sign-in): may client data flow into the
     decideClientDataFlow({ lob: over.lob ?? HA, ownerAgent, surface: over.surface ?? "main", gates: over.gates ?? OFF });
   check("Isaac's link on isaacplans.com → accept (today)", flow(null) === "accept");
   check("Isaac's link on the product domain → closed (404)", flow(null, { surface: "product" }) === "closed");
-  check("an active test agent's link → accept", flow(testAgent) === "accept" && flow(testAgent, { surface: "product" }) === "accept");
-  check("a paused agent's link → closed", flow(pausedAgent, { gates: ON }) === "closed");
-  check("a real agent's link while TENANT_CLIENT_DATA is off → closed", flow(realAgent) === "closed");
-  check("an agent's link on an insurance line → closed", flow(testAgent, { lob: "life-insurance" }) === "closed");
+  check("an active test agent's link on the product domain → accept", flow(testAgent, { surface: "product" }) === "accept");
+  check("an active test agent's link on isaacplans.com → closed (404): an agent's clients use the product domain", flow(testAgent) === "closed");
+  check("a real agent's link once TENANT_CLIENT_DATA is on → accept there, closed on isaacplans.com", flow(realAgent, { surface: "product", gates: ON }) === "accept" && flow(realAgent, { gates: ON }) === "closed");
+  check("a paused agent's link → closed", flow(pausedAgent, { gates: ON, surface: "product" }) === "closed");
+  check("a real agent's link while TENANT_CLIENT_DATA is off → closed", flow(realAgent, { surface: "product" }) === "closed");
+  check("an agent's link on an insurance line → closed", flow(testAgent, { lob: "life-insurance", surface: "product" }) === "closed");
   check("the owner lookup failed → retry (503), never accept", flow("unknown") === "retry" && flow("unknown", { surface: "product" }) === "retry");
 }
 
@@ -878,6 +977,20 @@ console.log("\nAgent profiles (lib/tenancy/profile.ts)");
   check("an agent has no pronoun yet: the English message is worded without one", maria.pronoun === null && DECK_COPY.en.quote.error(maria.firstName, maria.pronoun) === "We couldn't get the prices right now. Message María on WhatsApp for your quote.");
   check("no product domain: no site line", agentPublicProfile(row, {}).siteLabel === null);
   check("an agent's photo is an outside https URL, never the app's own path", maria.photoUrl === row.photoUrl && maria.photoPath === null);
+  check(
+    "the server never fetches an agent's photo (the quote image draws initials): no SSRF through a profile",
+    serverFetchablePhotoUrl(maria, "https://www.isaacplans.com") === null
+  );
+  check(
+    "…while Isaac's photo, which ships with the app, still comes from the request's origin",
+    serverFetchablePhotoUrl(buildIsaacProfile({ licensedStateCount: 0, siteUrl: "https://www.isaacplans.com" }), "https://preview.example/") ===
+      `https://preview.example${ISAAC_AGENT.photo}`
+  );
+  check(
+    "the quote image takes its photo only from serverFetchablePhotoUrl",
+    /const photo = serverFetchablePhotoUrl\(agent, input\.origin\);/.test(readSource("lib/impact-quote/quote-image.tsx")) &&
+      !/agent\.photoUrl/.test(readSource("lib/impact-quote/quote-image.tsx"))
+  );
   for (const bad of ["http://res.cloudinary.com/x.jpg", "https://127.0.0.1/x.jpg", "https://2130706433/x.jpg", "https://[::1]/x.jpg", "https://localhost/x.jpg", "https://intranet/x.jpg", "https://files.local/x.jpg", "/images/x.jpg", "javascript:alert(1)"]) {
     check(`photo ${bad} is dropped`, safePhotoUrl(bad) === null);
   }
@@ -935,6 +1048,11 @@ console.log("\nGuard: Isaac's CRM credentials only through lib/tenancy/crm.ts");
     "app/[locale]/a",
     "app/[locale]/secure",
     "components/tenant",
+    // The agent area (its pages, components and API) and Isaac's agents admin.
+    "app/[locale]/agent",
+    "components/agent",
+    "app/api/agent",
+    "app/api/admin/agents",
   ];
   // Reading Isaac's GHL credentials: the base-credentials helper, the env vars themselves, and the
   // call-summary config that carries his Private Integration token (`piToken`).
@@ -1149,6 +1267,580 @@ console.log("\nGuard: nothing of Isaac's in the product domain's browser code");
   check("active-shell is Isaac's frame by default (his build, and what TypeScript checks)", /from "\.\/main-shell"/.test(read("components/site-shell/active-shell.ts")));
 }
 
+console.log("\nAgreements (lib/tenancy/agreements.ts): the versioned ToS + DPA the agent area requires");
+{
+  check("two documents, the terms and the DPA", AGREEMENT_DOC_IDS.join(",") === "tos,dpa");
+  for (const id of AGREEMENT_DOC_IDS) {
+    const doc = AGREEMENTS[id];
+    const computed = agreementSha256(doc);
+    check(
+      `${id}: the declared sha256 is its text's (a changed text needs a new version AND hash)`,
+      computed === doc.sha256,
+      `the text now hashes to ${computed}: bump \`version\` and paste this as \`sha256\``
+    );
+    check(`${id}: versioned`, /^\d{4}-\d{2}-\d{2}/.test(doc.version));
+    check(
+      `${id}: in English and Spanish, each marked as a draft pending legal review`,
+      doc.body.en.length > 800 && doc.body.es.length > 800 && /DRAFT/.test(doc.body.en) && /BORRADOR/.test(doc.body.es)
+    );
+  }
+  const dpa = AGREEMENTS.dpa.body.en;
+  check(
+    "the DPA: processor, support only at the agent's request, 48 h breach notice, deletion on leaving",
+    /processor/i.test(dpa) && /support when you ask/i.test(dpa) && /48 hours/.test(dpa) && /When you leave the platform/.test(dpa)
+  );
+  check(
+    "the DPA lists the sub-processors (Vercel, Neon, Clerk, QStash, Google's address suggestions, the email provider)",
+    ["Vercel", "Neon", "Clerk", "QStash", "Google", "email provider"].every((name) => dpa.includes(name)) &&
+      ["Google", "proveedor de correo"].every((name) => AGREEMENTS.dpa.body.es.includes(name))
+  );
+  check("the DPA discloses that impersonation is refused for client data", /impersonation/i.test(dpa) && /refused/i.test(dpa));
+  check(
+    "the DPA keeps clients out of the Operator's CRM, and says what joining does (and doesn't) do to an agent's own record",
+    /never adds them to its own CRM/.test(dpa) &&
+      /Joining the platform doesn't add you to them either/.test(dpa) &&
+      /before you joined[^.]*no longer updated/.test(dpa) &&
+      !/never adds them, or you/.test(dpa)
+  );
+  check(
+    "the Spanish DPA says the same about 48 hours and impersonation",
+    /48 horas/.test(AGREEMENTS.dpa.body.es) && /suplantación/.test(AGREEMENTS.dpa.body.es)
+  );
+
+  const current = currentAgreementRefs();
+  check("nothing accepted → both missing", !agreementsSatisfied([]) && missingAgreements([]).join(",") === "tos,dpa");
+  check("the current version of both → satisfied", agreementsSatisfied(current));
+  check("one of the two → the other is missing", missingAgreements([current[0]]).join(",") === "dpa");
+  check(
+    "an older version doesn't count",
+    !agreementsSatisfied(current.map((r) => (r.doc === "dpa" ? { ...r, version: "2020-01-01-draft" } : r)))
+  );
+  check(
+    "the same version with another text (hash) doesn't count",
+    !agreementsSatisfied(current.map((r) => (r.doc === "tos" ? { ...r, sha256: "0".repeat(64) } : r)))
+  );
+  const edited = { ...AGREEMENTS, tos: { ...AGREEMENTS.tos, body: { ...AGREEMENTS.tos.body, en: `${AGREEMENTS.tos.body.en} ` } } };
+  check("any change to a text asks every agent again", !agreementsSatisfied(current, currentAgreementRefs(edited)));
+  check(
+    "the accept request must name exactly the current versions and hashes",
+    acceptanceMatchesCurrent(current) &&
+      acceptanceMatchesCurrent([...current].reverse()) &&
+      !acceptanceMatchesCurrent([current[0]]) &&
+      !acceptanceMatchesCurrent([...current, current[0]]) &&
+      !acceptanceMatchesCurrent(current.map((r) => ({ ...r, version: "old" }))) &&
+      !acceptanceMatchesCurrent(null) &&
+      !acceptanceMatchesCurrent("tos,dpa")
+  );
+
+  // The public pages' bar (the guide, Apply, new applications): both documents at some version.
+  check("public pages: nothing accepted → no guide, no Apply", !agreementsOnRecord([]));
+  check("public pages: only the terms → still none (the DPA is what binds client data)", !agreementsOnRecord([current[0]]));
+  check("public pages: both, current → open", agreementsOnRecord(current));
+  const older = current.map((r) => ({ ...r, version: "2020-01-01-draft", sha256: "a".repeat(64) }));
+  check(
+    "public pages: both at an older version → open (a new version waiting doesn't take the guide down)",
+    agreementsOnRecord(older) && !agreementsSatisfied(older)
+  );
+  check("public pages: a malformed row doesn't count", !agreementsOnRecord(current.map((r) => ({ ...r, sha256: "" }))));
+  const pagesSrc = readSource("lib/tenancy/pages.ts");
+  const startSrc = readSource("app/api/intake/[lob]/start/route.ts");
+  check(
+    "the guide (publicAgentForSlug) and its Apply (the start route) both require the agreements on record",
+    /return \(await agentAgreementsOnRecord\(agent\.id\)\) \? agent : null;/.test(pagesSrc) &&
+      /if \(!\(await agentAgreementsOnRecord\(agent\.id\)\)\) return "none";/.test(startSrc)
+  );
+}
+
+console.log("\nAgent linking (lib/tenancy/agent-linking.ts): Isaac's Invite button");
+{
+  const row = { id: "agt_1", clerkUserId: null };
+  const account = (over: Partial<ClerkAccountFact> = {}): ClerkAccountFact => ({
+    id: "user_new",
+    isAdmin: false,
+    listedOwner: false,
+    agentId: null,
+    emailVerified: true,
+    linkedToOtherAgent: false,
+    ...over,
+  });
+  const refused = (d: ReturnType<typeof decideAgentInvite>, reason: string) => d.action === "refuse" && d.reason === reason;
+  check("no Clerk account has the email → a Clerk invitation", decideAgentInvite(row, []).action === "invite");
+  const link = decideAgentInvite(row, [account()]);
+  check(
+    "one account with the email, verified → link it (invitations fail for existing accounts)",
+    link.action === "link" && link.userId === "user_new"
+  );
+  check("…also when it already carries this agent's own marker", decideAgentInvite(row, [account({ agentId: "agt_1" })]).action === "link");
+  check("an admin account → refused, never linked", refused(decideAgentInvite(row, [account({ isAdmin: true })]), "admin"));
+  check("one of Isaac's listed ids → refused", refused(decideAgentInvite(row, [account({ listedOwner: true })]), "platform_owner"));
+  check(
+    "the email isn't verified on that account → refused",
+    refused(decideAgentInvite(row, [account({ emailVerified: false })]), "unverified_email")
+  );
+  check(
+    "the account carries another agent's marker → refused",
+    refused(decideAgentInvite(row, [account({ agentId: "agt_2" })]), "other_agent")
+  );
+  check(
+    "the account is already linked to another agent row → refused",
+    refused(decideAgentInvite(row, [account({ linkedToOtherAgent: true })]), "other_agent")
+  );
+  check("two accounts with the email → refused", refused(decideAgentInvite(row, [account(), account({ id: "user_two" })]), "not_unique"));
+  check(
+    "an agent already linked → refused (nothing to send)",
+    refused(decideAgentInvite({ id: "agt_1", clerkUserId: "user_old" }, []), "already_linked")
+  );
+  check(
+    "an admin is refused before anything else is looked at",
+    refused(decideAgentInvite(row, [account({ isAdmin: true, listedOwner: true, emailVerified: false })]), "admin")
+  );
+}
+
+console.log("\nAgent linking: first use (getAgentContext) and the Clerk webhook");
+{
+  const facts = (over: Partial<FirstUseFacts> = {}): FirstUseFacts => ({
+    userId: "user_new",
+    isAdmin: false,
+    listedOwner: false,
+    impersonated: false,
+    agentIdMarker: null,
+    verifiedEmails: ["maria@example.com"],
+    ...over,
+  });
+  const candidate = { id: "agt_1", email: "Maria@Example.com", clerkUserId: null };
+  const linked = decideFirstUseLink(facts(), candidate);
+  check("a verified email matching an unlinked agent row → linked (case-insensitive)", linked.link && linked.agentId === "agt_1");
+  check("the invitation's marker pointing at that row → linked", decideFirstUseLink(facts({ agentIdMarker: "agt_1" }), candidate).link);
+  const no = (d: ReturnType<typeof decideFirstUseLink>, reason: string) => !d.link && d.reason === reason;
+  check("an admin is never linked", no(decideFirstUseLink(facts({ isAdmin: true }), candidate), "admin"));
+  check("one of Isaac's listed ids is never linked", no(decideFirstUseLink(facts({ listedOwner: true }), candidate), "platform_owner"));
+  check("an impersonated session never links", no(decideFirstUseLink(facts({ impersonated: true }), candidate), "impersonated"));
+  check("no row → nothing", no(decideFirstUseLink(facts(), null), "no_candidate"));
+  check(
+    "a row another account holds → nothing",
+    no(decideFirstUseLink(facts(), { ...candidate, clerkUserId: "user_other" }), "already_linked")
+  );
+  check("a marker for another row → nothing", no(decideFirstUseLink(facts({ agentIdMarker: "agt_2" }), candidate), "marker_mismatch"));
+  check(
+    "the row's email must be one the account VERIFIED (a marker alone isn't enough)",
+    no(decideFirstUseLink(facts({ agentIdMarker: "agt_1", verifiedEmails: ["other@example.com"] }), candidate), "email_mismatch")
+  );
+  check("an account with no verified email → nothing", no(decideFirstUseLink(facts({ verifiedEmails: [] }), candidate), "email_mismatch"));
+
+  check("webhook: the agent marker → never synced to Isaac's CRM", decideClerkCrmSync({ agentIdMarker: "agt_1", agentRow: "no" }) === "skip");
+  check("webhook: an agents row with its id or email → never synced", decideClerkCrmSync({ agentIdMarker: null, agentRow: "yes" }) === "skip");
+  check(
+    "webhook: the agent check failed → retry (503, Clerk resends), never a silent skip or a sync",
+    decideClerkCrmSync({ agentIdMarker: null, agentRow: "unknown" }) === "retry" &&
+      decideClerkCrmSync({ agentIdMarker: "agt_1", agentRow: "unknown" }) === "skip"
+  );
+  check("webhook: an ordinary visitor → synced as today", decideClerkCrmSync({ agentIdMarker: null, agentRow: "no" }) === "sync");
+  const hook = readSource("app/api/webhooks/clerk/route.ts");
+  const answered = hook.indexOf("return NextResponse.json({ received: true });");
+  const decided = hook.indexOf("await clerkCrmSyncDecisionFor(data)");
+  check(
+    "the Clerk webhook decides before it answers: 503 on a failed check, its one CRM sync only on \"sync\"",
+    decided > 0 &&
+      decided < answered &&
+      /if \(decision === "retry"\) \{\s*return NextResponse\.json\([^\n]*\{ status: 503 \}\);/.test(hook) &&
+      /if \(decision === "sync"\) after\(\(\) => syncClerkUserToAgentCrm\(data\)\);/.test(hook) &&
+      (hook.match(/syncClerkUserToAgentCrm\(/g) ?? []).length === 1
+  );
+  check(
+    "…and asks nothing when the sync is off on this deployment",
+    /clerkCrmSyncConfigured\(\) \? await clerkCrmSyncDecisionFor\(data\) : "sync"/.test(hook)
+  );
+}
+
+console.log("\nThe agent marker outranks the admin role (middleware, getIsAdmin, getAgentContext, the CRM)");
+{
+  check("Isaac's admin account (role, no marker) → admin, as before", isPlatformAdminMetadata({ role: "admin" }));
+  check("an agent given the admin role by mistake → never an admin", !isPlatformAdminMetadata({ role: "admin", agentId: "agt_1" }));
+  check(
+    "no role, another role, or nothing → not an admin",
+    !isPlatformAdminMetadata({ agentId: "agt_1" }) &&
+      !isPlatformAdminMetadata({ role: "agent" }) &&
+      !isPlatformAdminMetadata({}) &&
+      !isPlatformAdminMetadata(null) &&
+      !isPlatformAdminMetadata(undefined)
+  );
+  check("a blank marker is no marker", isPlatformAdminMetadata({ role: "admin", agentId: "  " }));
+  const middleware = readSource("middleware.ts");
+  check(
+    "middleware's admin gate (/admin, /api/admin, Studio) reads the shared rule",
+    /const isAdmin = isPlatformAdminMetadata\(user\.publicMetadata\);/.test(middleware) &&
+      !/publicMetadata\?\.role === "admin"/.test(middleware)
+  );
+  check(
+    "getIsAdmin (every admin-only route and page) reads the shared rule",
+    /return isPlatformAdminMetadata\(user\?\.publicMetadata\);/.test(readSource("lib/auth/admin.ts"))
+  );
+  const ctx = readSource("lib/tenancy/context.ts");
+  check(
+    "getAgentContext: only a LISTED admin skips the agents lookup; an unlisted admin linked to a row is that agent",
+    /const adminRole = isPlatformAdminMetadata\(account\?\.publicMetadata\);/.test(ctx) &&
+      /if \(adminRole && isListedPlatformOwner\(userId\)\) \{/.test(ctx) &&
+      /if \(adminRole && !agent\) \{/.test(ctx) &&
+      /return \{ userId, isAdmin: false, agent, actor, agreementsAccepted \};/.test(ctx)
+  );
+  // Guard: nobody reads the role on their own (a new page that did would let a marked agent in).
+  const roleReaders = ["app", "components", "lib", "hooks", "actions"]
+    .flatMap((dir) => sourceFiles(join(ROOT, dir)))
+    .concat([join(ROOT, "middleware.ts")])
+    .filter((f) => rel(f) !== "lib/tenancy/agent-linking.ts")
+    .filter((f) =>
+      readFileSync(f, "utf8")
+        .split("\n")
+        .some((line) => !/^\s*(\*|\/\/|\/\*)/.test(line) && /\.role\s*===\s*["']admin["']/.test(line))
+    )
+    .map(rel);
+  check(
+    "no file reads `role === \"admin\"` itself: every admin check goes through the shared rule",
+    roleReaders.length === 0,
+    roleReaders.join(", ")
+  );
+  const clerkAdmin = readSource("lib/tenancy/clerk-admin.ts");
+  check(
+    "the CRM's Clerk-admin step: no platform admin with the marker, or with an agents row (a failed lookup: none, uncached)",
+    /if \(!isPlatformAdminMetadata\(metadata\)\) return remember\(id, \{ admin, platformAdmin: false \}\);/.test(clerkAdmin) &&
+      /if \(found\.kind === "unknown"\) return \{ admin, platformAdmin: false \};/.test(clerkAdmin) &&
+      /platformAdmin: found\.kind === "none"/.test(clerkAdmin)
+  );
+}
+
+console.log("\nAgent area routes (lib/tenancy/agent-area-routes.ts)");
+{
+  const T = "AbCdEfGhIjKlMnOpQrStUvWx";
+  check("the dashboard: /en/agent, /es/agente", agentAreaPath("en") === "/en/agent" && agentAreaPath("es") === "/es/agente");
+  check(
+    "profile and agreements in each language",
+    agentAreaPath("es", "profile") === "/es/agente/perfil" && agentAreaPath("en", "agreements") === "/en/agent/agreements"
+  );
+  check(
+    "an application's form, deck and summary",
+    agentApplicationPath("en", T) === `/en/agent/applications/${T}` &&
+      agentApplicationPath("es", T, "presentation") === `/es/agente/solicitudes/${T}/presentacion` &&
+      agentApplicationPath("en", T, "summary") === `/en/agent/applications/${T}/summary`
+  );
+  check(
+    "the dashboard's link templates fill to the same paths",
+    fillTokenTemplate(agentApplicationTemplate("es", "summary"), T) === agentApplicationPath("es", T, "summary") &&
+      fillTokenTemplate(agentApplicationTemplate("en"), T) === agentApplicationPath("en", T)
+  );
+  const pathnames = routing.pathnames as unknown as Record<string, Record<"en" | "es", string>>;
+  const mirrored: [string, (l: "en" | "es") => string][] = [
+    ["/agent", (l) => agentAreaPath(l)],
+    ["/agent/profile", (l) => agentAreaPath(l, "profile")],
+    ["/agent/agreements", (l) => agentAreaPath(l, "agreements")],
+    ["/agent/applications/[token]", (l) => agentApplicationPath(l, T)],
+    ["/agent/applications/[token]/presentation", (l) => agentApplicationPath(l, T, "presentation")],
+    ["/agent/applications/[token]/summary", (l) => agentApplicationPath(l, T, "summary")],
+  ];
+  for (const [key, build] of mirrored) {
+    for (const l of ["en", "es"] as const) {
+      const expected = pathnames[key] ? `/${l}${pathnames[key][l].replace("[token]", T)}` : "(missing from i18n/routing.ts)";
+      check(`${key} (${l}) is spelled as in i18n/routing.ts`, build(l) === expected, `${build(l)} vs ${expected}`);
+    }
+  }
+  check(
+    "the segment words are the routing's",
+    AGENT_AREA_SEGMENTS.root.es === "agente" && AGENT_AREA_SEGMENTS.applications.es === "solicitudes"
+  );
+  for (const p of ["/en/agent", "/es/agente", "/agent", "/agente", "/en/agent/", "/es/agente/perfil", `/en/agent/applications/${T}/presentation`, "/es/agent/profile", "/EN/Agent", "/en/agente"]) {
+    check(`${p} is in the agent area (signed in, private, own frame)`, isAgentAreaPath(p));
+  }
+  for (const p of ["/en/agent-crm", "/es/agent-crm", "/agent-crm", "/en/agents", "/en/admin/agents", "/en/agentes", "/", "/en", "/en/health-alternative/intake", "/es/agentex"]) {
+    check(`${p} is not`, !isAgentAreaPath(p));
+  }
+  check(
+    "Isaac's public /agent-crm stays public and keeps his frame",
+    !AGENT_AREA_PATH_RE.test("/en/agent-crm") && !isPrivatePagePath("/en/agent-crm") && !isPrivatePagePath("/es/agent-crm")
+  );
+  check(
+    "the agent area is a private page (no trackers, no framing, noindex)",
+    isPrivatePagePath("/en/agent") && isPrivatePagePath("/agente") && isPrivatePagePath(`/es/agente/solicitudes/${T}/resumen`)
+  );
+  const parsed = parseAgentAreaPath(`/es/agente/solicitudes/${T}/presentacion`);
+  check(
+    "a deck path parses to its token and view",
+    parsed !== null && "token" in parsed && parsed.token === T && parsed.view === "presentation"
+  );
+  check("the other language's words don't parse (next-intl redirects them)", parseAgentAreaPath("/es/agent/profile") === null);
+  check("a bad token doesn't parse", parseAgentAreaPath("/en/agent/applications/x y") === null);
+  check(
+    "the language link: the same page in the other language",
+    agentAreaAlternate("/es/agente/perfil") === "/en/agent/profile" &&
+      agentAreaAlternate(`/en/agent/applications/${T}/summary`) === `/es/agente/solicitudes/${T}/resumen` &&
+      agentAreaAlternate("/en/agent") === "/es/agente"
+  );
+  check(
+    "…the other dashboard when the page can't be read, nothing outside the area",
+    agentAreaAlternate("/es/agente/nada") === "/en/agent" && agentAreaAlternate("/en/blog") === null
+  );
+  const q = (s: string) => new URLSearchParams(s);
+  check(
+    "a Clerk invitation landing (dashboard + ticket) skips the sign-in wall",
+    isAgentInvitationLanding("/en/agent", q("__clerk_ticket=t1&__clerk_status=sign_up")) &&
+      isAgentInvitationLanding("/es/agente", q("__clerk_ticket=t1"))
+  );
+  check(
+    "…and nothing else does",
+    !isAgentInvitationLanding("/en/agent", q("")) &&
+      !isAgentInvitationLanding("/en/agent/profile", q("__clerk_ticket=t1")) &&
+      !isAgentInvitationLanding(`/en/agent/applications/${T}`, q("__clerk_ticket=t1")) &&
+      !isAgentInvitationLanding("/en/agent-crm", q("__clerk_ticket=t1")) &&
+      !isAgentInvitationLanding("/en/admin", q("__clerk_ticket=t1"))
+  );
+}
+
+console.log("\nPage frame header (x-shell): middleware sets it on every page, so a browser can't choose");
+{
+  const T = "AbCdEfGhIjKlMnOpQrStUvWx";
+  check("the agent area → the agent frame", shellKindForPath("/en/agent") === "agent" && shellKindForPath("/es/agente/perfil") === "agent");
+  check("the deck a client watches → the frame without nav", shellKindForPath(`/es/agente/solicitudes/${T}/presentacion`) === "agent-present");
+  for (const p of ["/", "/en", "/en/blog", "/en/agent-crm", "/en/admin/agents", "/en/health-alternative/intake", `/en/health-alternative/intake/${T}/presentation`, "/es/impacto"]) {
+    check(`${p} → Isaac's frame`, shellKindForPath(p) === "site");
+  }
+  // What Next.js does with a middleware response header: it overwrites the request's.
+  const spoofed = (path: string) => {
+    const request = new Headers({ [SHELL_HEADER]: "agent", [SHELL_ALTERNATE_HEADER]: "https://evil.example/" });
+    for (const [key, value] of Object.entries(shellHeadersForPath(path))) request.set(key, value);
+    return request;
+  };
+  check("a browser sending x-shell: agent to Isaac's page gets his frame", parseShellHeader(spoofed("/en/blog").get(SHELL_HEADER)) === "site");
+  check(
+    "…and on an agent page the language link is always the platform's own",
+    spoofed("/es/agente").get(SHELL_ALTERNATE_HEADER) === "/en/agent" &&
+      spoofed(`/en/agent/applications/${T}`).get(SHELL_ALTERNATE_HEADER) === `/es/agente/solicitudes/${T}`
+  );
+  check(
+    "every page response carries x-shell (never empty: Next.js wouldn't copy an empty one)",
+    ["/", "/en/blog", "/en/agent", "/xyz"].every((p) => (shellHeadersForPath(p)[SHELL_HEADER] ?? "").length > 0)
+  );
+  check(
+    "anything but the two agent values reads as Isaac's frame",
+    parseShellHeader(null) === "site" &&
+      parseShellHeader("AGENT") === "site" &&
+      parseShellHeader("tenant") === "site" &&
+      parseShellHeader("agent") === "agent"
+  );
+  const middleware = readSource("middleware.ts");
+  const main = middleware.slice(middleware.indexOf("async function mainMiddleware"), middleware.indexOf("/** Every product-domain answer"));
+  check(
+    "middleware writes the frame headers on the page response, last thing before returning it",
+    /for \(const \[key, value\] of Object\.entries\(shellHeadersForPath\(pathname\)\)\) \{\s*response\.headers\.set\(key, value\);\s*\}\s*return response;\s*\}\s*$/.test(main.trim())
+  );
+  check(
+    "middleware protects the agent area with the tested expression, minus the invitation landing",
+    /AGENT_AREA_PATH_RE,\s*\]\);/.test(middleware) &&
+      /isProtectedRoute\(req\) && !isAgentInvitationLanding\(req\.nextUrl\.pathname, req\.nextUrl\.searchParams\)/.test(middleware)
+  );
+  check(
+    "middleware gives /api/agent Clerk context (and never next-intl)",
+    /"\/api\/agent\/:path\*"/.test(middleware) && /pathname\.startsWith\('\/api\/agent\/'\)/.test(middleware)
+  );
+  const shell = readSource("components/site-shell/main-shell.tsx");
+  check(
+    "Isaac's frame hands the page to the agent frame on the header alone, before drawing anything of his",
+    /const shell = parseShellHeader\(requestHeaders\.get\(SHELL_HEADER\)\);\s*if \(shell !== "site"\) \{\s*return AgentAppFrame\(/.test(shell) &&
+      shell.indexOf("return AgentAppFrame(") < shell.indexOf("<Header />")
+  );
+  const frame = importsOf(readSource("components/site-shell/agent-app-shell.tsx")).map((i) => i.spec);
+  const trackers = [
+    "@/components/header",
+    "@/components/footer",
+    "@/components/admin-fab",
+    "@/components/meta-pixel-wrapper",
+    "@/components/agent-crm-chat",
+    "@/components/agent-crm-external-tracking",
+    "@next/third-parties/google",
+    "@/sanity/lib/live",
+    "@/lib/seo/jsonld",
+  ];
+  const drawn = frame.filter((spec) => trackers.includes(spec));
+  check("the agent frame imports none of Isaac's chrome, trackers or JSON-LD", frame.length > 5 && drawn.length === 0, drawn.join(", "));
+}
+
+console.log("\nAgent area: no CRM, no other line (the dashboard in agent mode, the pages)");
+{
+  const agent = dashboardFeatures("agent");
+  check(
+    "the agent dashboard has no CRM search, no Impact welcome panel, no CRM send-link",
+    !agent.crmSearch && !agent.impactEnrollment && !agent.crmSendLink
+  );
+  const site = dashboardFeatures("site");
+  check("Isaac's dashboards keep all three", site.crmSearch && site.impactEnrollment && site.crmSendLink);
+  const page = readSource("app/[locale]/agent/page.tsx");
+  check("the agent dashboard page draws the shared dashboard in agent mode", /<IntakeDashboard[\s\S]*?mode="agent"/.test(page));
+  const dash = readSource("components/intake/intake-dashboard.tsx");
+  check(
+    "the dashboard's search never asks the CRM in a mode without it",
+    /async function handleSearch\(\) \{[^\n]*\n(?:\s*\/\/[^\n]*\n)*\s*if \(!features\.crmSearch \|\| !crmQuery\.trim\(\)\) return;/.test(dash)
+  );
+  check(
+    "…draws the search box only where it exists",
+    /\{features\.crmSearch && \(/.test(dash) && (dash.match(/searchCrmContacts\(/g) ?? []).length === 1
+  );
+  check(
+    "…and the Impact welcome panel and CRM send-link only where they're on",
+    !/\{config\.impactEnrollment && /.test(dash) && /features\.crmSendLink && s\.crmContactId/.test(dash)
+  );
+  check(
+    "…no CRM wording either: the delete confirmation and the secure link's hint have no-CRM versions",
+    /tr\(agentMode \? UI\.deleteConfirmNoCrm : UI\.deleteConfirm, locale\)/.test(dash) &&
+      /noCrm=\{agentArea\}/.test(readSource("components/intake/intake-form.tsx")) &&
+      /tr\(noCrm \? UI\.captureSendYourself : UI\.captureNoContact, locale\)/.test(readSource("components/intake/secure-capture-panel.tsx"))
+  );
+  check(
+    "the agent's copied link opens in the client's language (the session's), Isaac's in the page's as before",
+    /copyLink\(s\.token, agentMode \? s\.locale : undefined\)/.test(dash) &&
+      /function shareUrl\(token: string, linkLocale: string = locale\)/.test(dash)
+  );
+  check(
+    "without a product domain the agent area copies no client link (it would be a 404) and says why",
+    /const shareOrigin = origin \? await publicOriginForOwner\(gate\.userId\) : null;/.test(page) &&
+      /const clientLinks = shareOrigin !== null;/.test(dash) &&
+      /\{clientLinks && \(\s*<Button size="sm" variant="ghost" onClick=\{\(\) => copyLink\(/.test(dash) &&
+      /clientLinks=\{productPublicOrigin\(\) !== null\}/.test(readSource("app/[locale]/agent/applications/[token]/page.tsx"))
+  );
+  const api = readSource("app/api/intake/[lob]/route.ts");
+  check("the API itself runs the CRM search for admins only", /op\.kind === "admin" \? await crmCredsForOwner\(/.test(api));
+  const areaFiles = [...sourceFiles(join(ROOT, "app", "[locale]", "agent")), ...sourceFiles(join(ROOT, "components", "agent"))];
+  const OTHER_LINES = ["life-insurance", "short-term-medical", "dental-vision", "hospital-indemnity", "final-expense", "/aca/", "/iul/"];
+  const named = areaFiles.filter((f) => OTHER_LINES.some((line) => readFileSync(f, "utf8").includes(line))).map(rel);
+  check(
+    `no page or component of the agent area (${areaFiles.length} files) names another line`,
+    areaFiles.length >= 10 && named.length === 0,
+    named.join(", ")
+  );
+  const appPages = sourceFiles(join(ROOT, "app", "[locale]", "agent", "applications"));
+  check(
+    "every application page loads its row on the agent line and checks the owner",
+    appPages.length === 3 &&
+      appPages.every((f) => {
+        const s = readFileSync(f, "utf8");
+        return (
+          /requireIntakeConfig\(AGENT_AREA_LOB\)/.test(s) &&
+          /operatorOwns\(gate\.operator, row\)/.test(s) &&
+          /agentOperatorPage\(locale\)/.test(s)
+        );
+      })
+  );
+  check("agents are refused the other lines by the gate itself", AGENT_LOBS.length === 1 && AGENT_LOBS[0] === "health-alternative");
+}
+
+console.log("\nThe client form's browser code carries no route table");
+{
+  const reach = reachableModules(["components/intake/intake-form.tsx"]);
+  const tables = reach.filter((f) => f === "i18n/navigation.ts" || f === "i18n/routing.ts");
+  check(
+    `the Health Coverage form (${reach.length} modules) reaches neither i18n/navigation nor i18n/routing`,
+    reach.length > 20 && tables.length === 0,
+    tables.join(", ")
+  );
+  check(
+    "its owner-only parts take their links from the page",
+    !/@\/i18n\//.test(readSource("components/intake/intake-breadcrumb.tsx")) &&
+      !/@\/i18n\//.test(readSource("components/intake/impact-presentation-bar.tsx"))
+  );
+  for (const lob of ["short-term-medical", "dental-vision", "hospital-indemnity", "life-insurance", "health-alternative"]) {
+    const s = readSource(`app/[locale]/${lob}/intake/[token]/page.tsx`);
+    check(
+      `${lob}: Isaac's form page builds the breadcrumb's link on the server`,
+      s.includes(`dashboardHref={getPathname({ href: "/${lob}/intake", locale })}`)
+    );
+  }
+  check(
+    "Isaac's Health Coverage page builds the deck's link (lang=client) on the server",
+    /pathname: "\/health-alternative\/intake\/\[token\]\/presentation",\s*params: \{ token \},\s*query: \{ lang: "client" \}/.test(
+      readSource("app/[locale]/health-alternative/intake/[token]/page.tsx")
+    )
+  );
+}
+
+console.log("\nAgent profile input (lib/tenancy/agent-profile-input.ts)");
+{
+  const env = { NEXT_PUBLIC_SITE_URL: "https://www.isaacplans.com" };
+  const ok = parseAgentProfilePatch(
+    {
+      firstName: "  María  ",
+      whatsapp: "(540) 555-0100",
+      languages: ["ES", "en", "fr"],
+      licensed: true,
+      licensedStates: ["tx", "FL", "tx"],
+      impactReferralUrl: "https://www.impacthealthsharing.com/r/123",
+      photoUrl: "https://images.example.com/me.jpg",
+      iboNumber: "A123-45",
+      defaultLocale: "es",
+      contactEmail: " Maria@Example.com ",
+      alertEmail: "",
+    },
+    env
+  );
+  check(
+    "a good profile is normalized (E.164 with +1, en/es only, state codes, lowercased email, blank clears)",
+    ok.ok &&
+      ok.patch.firstName === "María" &&
+      ok.patch.whatsappE164 === "+15405550100" &&
+      ok.patch.languages?.join(",") === "es,en" &&
+      ok.patch.licensedStates?.join(",") === "FL,TX" &&
+      ok.patch.contactEmail === "maria@example.com" &&
+      ok.patch.alertEmail === null &&
+      ok.patch.defaultLocale === "es",
+    JSON.stringify(ok)
+  );
+  const bad = parseAgentProfilePatch(
+    {
+      photoUrl: "http://images.example.com/me.jpg",
+      whatsapp: "123",
+      impactReferralUrl: "https://impacthealthsharing.com.evil.example/x",
+      licensedStates: ["XX"],
+      iboNumber: "<script>",
+      defaultLocale: "fr",
+      contactEmail: "nope",
+      firstName: "<b>Maria</b>",
+      licensed: "yes",
+    },
+    env
+  );
+  const errorKeys = bad.ok ? "" : Object.keys(bad.errors).sort().join(",");
+  check(
+    "each bad field is refused with its own reason",
+    errorKeys === "contactEmail,defaultLocale,firstName,iboNumber,impactReferralUrl,licensed,licensedStates,photoUrl,whatsapp",
+    errorKeys
+  );
+  const codes = bad.ok ? {} : bad.errors;
+  check(
+    "…as a code the form words in its own language (never English-only text)",
+    Object.values(codes).every((code) => (PROFILE_ERROR_CODES as readonly string[]).includes(String(code))) &&
+      codes.photoUrl === "photo" &&
+      codes.whatsapp === "whatsapp"
+  );
+  check(
+    "every code has English and Spanish words, and they differ",
+    PROFILE_ERROR_CODES.every(
+      (code) => PROFILE_ERROR_TEXT.en[code].length > 3 && PROFILE_ERROR_TEXT.es[code].length > 3 && PROFILE_ERROR_TEXT.en[code] !== PROFILE_ERROR_TEXT.es[code]
+    )
+  );
+  check(
+    "the agent's Spanish form shows Spanish; Isaac's admin keeps English; unknown codes are dropped",
+    profileErrorsText(codes, "es").photoUrl === PROFILE_ERROR_TEXT.es.photo &&
+      profileErrorMessages(codes, "en").whatsapp === PROFILE_ERROR_TEXT.en.whatsapp &&
+      Object.keys(profileErrorsText({ photoUrl: "<b>x</b>", whatsapp: 3 }, "es")).length === 0
+  );
+  const form = readSource("components/agent/agent-profile-form.tsx");
+  check(
+    "the agent's profile form words the API's codes in the page's language",
+    /setErrors\(profileErrorsText\(json\.fields, locale\) as ProfileErrors\);/.test(form)
+  );
+  check(
+    "Isaac's own photo (his Cloudinary account) is refused",
+    !parseAgentProfilePatch({ photoUrl: "https://res.cloudinary.com/isaacdev/image/upload/a.jpg" }, env).ok
+  );
+  const one = parseAgentProfilePatch({ iboNumber: "" }, env);
+  check("only the fields sent are touched", one.ok && Object.keys(one.patch).join(",") === "iboNumber" && one.patch.iboNumber === null);
+}
+
 console.log("\nPublic origins: the real publicOriginForOwner core (async)");
 void (async () => {
   try {
@@ -1186,6 +1878,27 @@ void (async () => {
 })();
 
 // ── helpers ──────────────────────────────────────────────────────────────────
+
+/** A repo file's text, by its path from the repo root ("app/[locale]/agent/page.tsx"). */
+function readSource(path: string): string {
+  return readFileSync(join(ROOT, ...path.split("/")), "utf8");
+}
+
+/** Every repo module these files reach through value imports (type-only imports never ship). */
+function reachableModules(roots: readonly string[]): string[] {
+  const seen = new Set<string>();
+  const queue = roots.map((r) => join(ROOT, ...r.split("/")));
+  while (queue.length > 0) {
+    const file = queue.pop() as string;
+    if (seen.has(file)) continue;
+    seen.add(file);
+    for (const imp of importsOf(readFileSync(file, "utf8"))) {
+      const target = resolveModule(file, imp.spec);
+      if (target) queue.push(target);
+    }
+  }
+  return Array.from(seen).map(rel).sort();
+}
 
 function exists(path: string): boolean {
   try {

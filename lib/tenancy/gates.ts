@@ -8,10 +8,12 @@
  *  - `LEAD_STORE`: the paid lead store (Phase 2; nothing reads it yet).
  *
  * While a gate is off, only `is_test` agents (fake data, preview deployment) get through it. They stay
- * off in production until ACN approves in writing, and `TENANT_CLIENT_DATA` must not go on before
- * two later pieces land: the ToS/DPA click-through check in `agentMayOperate` and masked-by-default
- * sensitive values (with an audited reveal) for agent owners. Until then an agent owner sees their
- * own clients' values in full, which is acceptable only for test agents with fake data.
+ * off in production until ACN approves in writing. The ToS/DPA click-through is in place (the
+ * operator gate and the owner's token routes require the current versions, lib/tenancy/operator.ts),
+ * but `TENANT_CLIENT_DATA` must not go on before masked-by-default sensitive values (with an audited
+ * reveal) land for agent owners, and counsel has replaced the draft agreements. Until then an agent
+ * owner sees their own clients' values in full, which is acceptable only for test agents with fake
+ * data.
  *
  * Pure (env reads only, no server-only import) so the offline tests can import it.
  */

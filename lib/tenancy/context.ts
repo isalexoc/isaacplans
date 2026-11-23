@@ -2,17 +2,21 @@
  * Who is calling, as the agent platform sees it, and the operator gate for the intake engine.
  * Server-only (Clerk + database).
  *
- * Isaac's own requests cost nothing new here: an admin is never looked up in `agents`, and a
- * session owner listed in env (lib/tenancy/crm-allowlist.ts) is never looked up either. Every read
- * of the new tables tolerates 0046 not being applied yet ("no agent"); any other failed read is
- * "unknown", which the decisions in lib/tenancy/operator.ts fail closed.
+ * Isaac's own requests cost nothing new here: an admin listed in env (lib/tenancy/crm-allowlist.ts)
+ * is never looked up in `agents` (an admin who isn't listed is, once per request, so an agent given
+ * the role by mistake stays an agent), and a session owner listed in env is never looked up either.
+ * Every read of the new tables tolerates 0046 not being applied yet ("no agent"); any other failed
+ * read is "unknown", which the decisions in lib/tenancy/operator.ts fail closed.
  */
 
 import "server-only";
+import { cache } from "react";
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
-import { getIsAdmin } from "@/lib/auth/admin";
+import { auth, currentUser, type User } from "@clerk/nextjs/server";
+import { linkAgentOnFirstUse, markClerkAccount } from "./agent-accounts";
+import { agentIdMarker, isPlatformAdminMetadata } from "./agent-linking";
 import { getAgentByClerkUserId, lookupAgentByClerkUserId, type AgentRow } from "./agents";
+import { agentAgreementsAccepted } from "./agreements-store";
 import { logSensitiveAccess, type SensitiveAccessActorRole } from "./audit";
 import { clerkAdminStatus } from "./clerk-admin";
 import { isListedPlatformOwner, type CrmOwnerOptions } from "./crm";
@@ -21,6 +25,7 @@ import {
   decideClientDataFlow,
   decideIntakeOperator,
   type ClientDataVerdict,
+  type OperatorDenial,
   type OperatorKind,
   type SignedInCallerKind,
 } from "./operator";
@@ -47,27 +52,77 @@ export type AgentContext = {
   isAdmin: boolean;
   agent: AgentRow | null;
   actor: ImpersonationActor | null;
+  /**
+   * The agent has accepted the current terms and DPA (lib/tenancy/agreements.ts). Admins are not
+   * asked (true); false for anyone without an agent row, and when the read failed.
+   */
+  agreementsAccepted: boolean;
 };
 
-/**
- * The caller: Clerk id, admin role (the live check every admin route already used), their `agents`
- * row if they have one, and the impersonation actor. A failed agent lookup counts as no agent, so
- * it can only take access away.
- */
-export async function getAgentContext(): Promise<AgentContext> {
-  const { userId, actor } = await requestIdentity();
-  if (!userId) return { userId: null, isAdmin: false, agent: null, actor: null };
-  const isAdmin = await getIsAdmin();
-  let agent: AgentRow | null = null;
-  if (!isAdmin) {
-    try {
-      agent = await getAgentByClerkUserId(userId);
-    } catch (error) {
-      console.warn("[tenancy] agent lookup failed:", error instanceof Error ? error.message : error);
-    }
+/** The signed-in account, from Clerk's API (one call), or null if it can't be read. */
+async function signedInAccount(): Promise<User | null> {
+  try {
+    return await currentUser();
+  } catch {
+    return null;
   }
-  return { userId, isAdmin, agent, actor };
 }
+
+/**
+ * The caller: Clerk id, admin role (`publicMetadata.role === "admin"`, the live check every admin
+ * route already used), their `agents` row if they have one, the impersonation actor, and whether
+ * they accepted the agreements. A failed agent lookup counts as no agent, so it can only take access
+ * away.
+ *
+ * The agent link outranks the admin role, both ways it can show: an account carrying the agent
+ * marker is never an admin (`isPlatformAdminMetadata`, as middleware and `getIsAdmin` read it), and
+ * an admin-role account that isn't one of Isaac's listed ids is looked up in `agents` first: linked
+ * to a row (a marker that never stuck, then the role given by mistake), it is that agent, never an
+ * admin, so it never gets an admin's operator rights or vouches for Isaac's CRM. If that lookup
+ * fails, the account is neither for this request. Isaac's listed ids are never looked up (linking
+ * refuses them), so his requests cost nothing new.
+ *
+ * A signed-in account with no agent row is linked here on first use when it was invited, or has
+ * the verified email of an agent row nobody holds yet (lib/tenancy/agent-accounts.ts). Never for an
+ * admin, one of Isaac's listed ids, or an impersonated session.
+ *
+ * One answer per request (React's per-render cache): the agent area's frame and its page share it.
+ */
+export const getAgentContext = cache(async (): Promise<AgentContext> => {
+  const { userId, actor } = await requestIdentity();
+  if (!userId) return { userId: null, isAdmin: false, agent: null, actor: null, agreementsAccepted: false };
+  const account = await signedInAccount();
+  const adminRole = isPlatformAdminMetadata(account?.publicMetadata);
+  if (adminRole && isListedPlatformOwner(userId)) {
+    return { userId, isAdmin: true, agent: null, actor, agreementsAccepted: true };
+  }
+  let agent: AgentRow | null = null;
+  let lookupFailed = false;
+  try {
+    agent = await getAgentByClerkUserId(userId);
+    if (!agent && !adminRole && account && account.id === userId) {
+      agent = await linkAgentOnFirstUse(account, { impersonated: Boolean(actor) });
+    } else if (agent && account && account.id === userId && !actor && agentIdMarker(account.publicMetadata) !== agent.id) {
+      // Linked, but the account lost (or never got) its marker, e.g. Clerk refused the write when
+      // Isaac linked it: add it back (merged, never touching `role`). Best effort, once it sticks.
+      await markClerkAccount(userId, agent.id);
+    }
+  } catch (error) {
+    lookupFailed = true;
+    console.warn("[tenancy] agent lookup failed:", error instanceof Error ? error.message : error);
+  }
+  if (adminRole && !agent) {
+    // An admin who is no agent; or, when the lookup failed, nothing this request (fails closed).
+    return lookupFailed
+      ? { userId, isAdmin: false, agent: null, actor, agreementsAccepted: false }
+      : { userId, isAdmin: true, agent: null, actor, agreementsAccepted: true };
+  }
+  if (adminRole && agent) {
+    console.error(`[tenancy] the Clerk account linked to agent ${agent.id} has the admin role: it is treated as that agent. Remove the role in Clerk.`);
+  }
+  const agreementsAccepted = agent ? await agentAgreementsAccepted(agent.id) : false;
+  return { userId, isAdmin: false, agent, actor, agreementsAccepted };
+});
 
 export type IntakeOperator = {
   userId: string;
@@ -79,20 +134,28 @@ export type IntakeOperator = {
 
 export type IntakeOperatorResult =
   | { ok: true; operator: IntakeOperator }
-  | { ok: false; status: 401 | 403 };
+  | { ok: false; status: 401 | 403; reason: OperatorDenial };
 
 /**
  * The operator gate for pages (which redirect rather than answer JSON): an admin, or an active agent
- * (a test agent while `TENANT_CLIENT_DATA` is off) on the Health Coverage line, not impersonated.
+ * (a test agent while `TENANT_CLIENT_DATA` is off) on the Health Coverage line, not impersonated,
+ * who has accepted the current terms and DPA.
  */
 export async function getIntakeOperator(lob: string): Promise<IntakeOperatorResult> {
   const ctx = await getAgentContext();
   const decision = decideIntakeOperator(
-    { userId: ctx.userId, isAdmin: ctx.isAdmin, agent: ctx.agent, impersonated: Boolean(ctx.actor) },
+    {
+      userId: ctx.userId,
+      isAdmin: ctx.isAdmin,
+      agent: ctx.agent,
+      impersonated: Boolean(ctx.actor),
+      agreementsAccepted: ctx.agreementsAccepted,
+    },
     lob,
     readTenancyGates()
   );
-  if (!decision.ok || !ctx.userId) return { ok: false, status: decision.ok ? 401 : decision.status };
+  if (!decision.ok) return { ok: false, status: decision.status, reason: decision.reason };
+  if (!ctx.userId) return { ok: false, status: 401, reason: "signed_out" };
   return {
     ok: true,
     operator: {
@@ -116,8 +179,8 @@ export async function requireIntakeOperator(lob: string): Promise<IntakeOperator
 
 /**
  * CRM options for a route where the operator acts on their own session: an admin vouches for
- * themself (lib/tenancy/crm.ts step 3). That is safe only because agents are never Clerk admins;
- * the agent-linking flow must refuse to link an admin or a listed id (a later chunk).
+ * themself (lib/tenancy/crm.ts step 3). That is safe only because agents are never Clerk admins:
+ * the agent-linking flow refuses to link an admin or a listed id (lib/tenancy/agent-linking.ts).
  */
 export function operatorCrmOptions(op: IntakeOperator): CrmOwnerOptions {
   return { adminCaller: op.kind === "admin" ? op.userId : null };

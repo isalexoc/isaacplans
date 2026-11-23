@@ -15,6 +15,7 @@ export default function AdminBackNav() {
   ];
 
   const LABELS: Record<string, string> = {
+    agents: "Agent Platform",
     "agent-licenses": "Agent Licenses",
     "ai-setter": "Asistente de Citas",
     "blog-generator": "Blog Generator",

@@ -16,3 +16,18 @@ export function isMissingTableError(error: unknown): boolean {
   }
   return false;
 }
+
+/**
+ * Postgres "unique_violation" (SQLSTATE 23505): a write ran into one of the `agents` unique
+ * indexes (email, slug, Clerk id), e.g. two requests racing to claim the same value.
+ */
+export function isUniqueViolationError(error: unknown): boolean {
+  let current: unknown = error;
+  for (let depth = 0; current && typeof current === "object" && depth < 4; depth++) {
+    const { code, message, cause } = current as { code?: unknown; message?: unknown; cause?: unknown };
+    if (code === "23505") return true;
+    if (typeof message === "string" && /duplicate key value violates unique constraint/i.test(message)) return true;
+    current = cause;
+  }
+  return false;
+}

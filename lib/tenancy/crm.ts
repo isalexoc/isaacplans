@@ -12,12 +12,15 @@
  *     (`{ adminCaller }` equal to the owner): credentials.
  *  4. Clerk says the owner has `role: "admin"` (cached a minute): credentials. A Clerk error, or
  *     any other answer: null. Logged both ways, so an unlisted admin shows up in the logs.
- * No database read anywhere: a missing table, a paused agent or a failed query can't open it.
+ * No database read can open it: a missing table, a paused agent or a failed query never does. The
+ * one read, in step 4 for an admin-role owner (lib/tenancy/clerk-admin.ts: is that account linked
+ * to an agent row?), can only take the credentials away.
  *
  * Steps 3 and 4 trust the Clerk admin role, so they are safe only while agents are never Clerk
- * admins (the plan's rule). Nothing enforces that yet: the agent-linking flow (a later chunk) must
- * refuse an admin or a listed id, and set `publicMetadata.agentId`, which step 4 already honors
- * (lib/tenancy/clerk-admin.ts). Until then no agent account exists to be mislinked.
+ * admins (the plan's rule). The agent-linking flow (lib/tenancy/agent-linking.ts) enforces it: it
+ * refuses an admin or a listed id, and sets `publicMetadata.agentId`, which step 4 honors
+ * (lib/tenancy/clerk-admin.ts), as it honors an `agents` row linked to the account. Step 3's
+ * vouching comes from lib/tenancy/context.ts, where an agent's account is never an admin.
  *
  * Env, for the setup docs:
  *  - `CRM_OWNER_USER_IDS` (new; set it before deploying): every admin Clerk id that owns intakes

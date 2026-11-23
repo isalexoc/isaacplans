@@ -18,6 +18,7 @@ import {
   ownerAgentOf,
   requestIdentity,
 } from "@/lib/tenancy/context";
+import { agentAgreementsAccepted } from "@/lib/tenancy/agreements-store";
 import { readTenancyGates } from "@/lib/tenancy/gates";
 import { callerIsOperator, decideTokenAccess, type SignedInCallerKind } from "@/lib/tenancy/operator";
 import { appSurface } from "@/lib/tenancy/surface";
@@ -94,10 +95,13 @@ export type AuthorizedSession = {
  * owner only while that agent may operate. A signed-in operator (admin or agent) who is NOT the
  * owner is denied with 403, audited, and never claims or binds this browser; the only exception is
  * an application they started themselves as a visitor, which is already bound to them. Everyone
- * else keeps the token + device-cookie rule. An agent's application is a 404 to its client while
- * that agent is paused or the launch gates are closed, and Isaac's are a 404 on the product domain.
- * A failed `agents` lookup is a 503, never "not an agent". For Isaac's sessions (owner listed in
- * env), his anonymous clients and any caller already bound to the session this costs no lookup.
+ * else keeps the token + device-cookie rule, on the owner's surface: an agent's application is a
+ * 404 to anyone but its owner on isaacplans.com (its clients use the product domain), and to its
+ * client while that agent is paused or the launch gates are closed; Isaac's are a 404 on the
+ * product domain. The agent owner also needs the current terms and DPA accepted (one more read, for
+ * the owner's own requests only). A failed `agents` lookup is a 503, never "not an agent". For
+ * Isaac's sessions (owner listed in env), his anonymous clients and any caller already bound to the
+ * session this costs no lookup.
  */
 export async function loadAuthorizedSession(
   lob: string,
@@ -127,10 +131,16 @@ export async function loadAuthorizedSession(
     userId && !callerIsOwner && !boundCaller
       ? await classifySignedInCaller(userId, { ownerIsAgent: ownerAgent !== null })
       : "client";
+  const surface = appSurface();
   // An operator who isn't the owner gets no cookie minted: they can't claim, so there is nothing
-  // to bind it to.
-  const mayMint = !userId || callerIsOwner || !callerIsOperator(callerKind, impersonated);
+  // to bind it to. Nor does anyone but the owner on the surface that doesn't serve this session's
+  // clients (an agent's application on isaacplans.com): the answer there is a 404.
+  const clientSurface = ownerAgent === null || surface === "product";
+  const mayMint =
+    (!userId || callerIsOwner || !callerIsOperator(callerKind, impersonated)) && (callerIsOwner || clientSurface);
   const deviceId = opts.claim && mayMint ? await ensureIntakeDeviceId(config) : existingDeviceId;
+  // The agent owner's own requests need the current terms and DPA accepted; nobody else is asked.
+  const ownerAgreementsAccepted = callerIsOwner && ownerAgent ? await agentAgreementsAccepted(ownerAgent.id) : true;
 
   const decision = decideTokenAccess({
     lob: config.lob,
@@ -140,7 +150,8 @@ export async function loadAuthorizedSession(
     impersonated,
     callerKind,
     ownerAgent,
-    surface: appSurface(),
+    ownerAgreementsAccepted,
+    surface,
     gates: readTenancyGates(),
   });
   if (decision.outcome === "retry") return retryLater();

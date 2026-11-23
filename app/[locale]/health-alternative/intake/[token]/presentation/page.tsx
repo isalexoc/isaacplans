@@ -13,30 +13,11 @@ import { notFound, redirect as redirectTo } from "next/navigation";
 import { getLocale } from "next-intl/server";
 import { redirect } from "@/i18n/navigation";
 import { requireIntakeConfig } from "@/lib/intake-configs";
-import { IMPACT_LAST_PAYMENT_DAY } from "@/lib/intake-configs/impact-schedule";
 import { getIntakeByToken, type IntakeSessionRow } from "@/lib/intake-core/server";
-import {
-  businessToday,
-  earliestMonthStart,
-  formatIsoLong,
-  isValidMonthStart,
-  toIso,
-} from "@/lib/intake-core/month-start";
 import { resolveCrmContactLocale } from "@/lib/iul-intake/server";
-import { decryptIntakeData } from "@/lib/intake-core/sensitive";
-import type { IntakeData } from "@/lib/intake-core/types";
-import {
-  ageOn,
-  householdFromIntake,
-  householdSize,
-  pricedMembers,
-  TIERS,
-  type HouseholdSize,
-  type ImpactQuote,
-  type ImpactTierKey,
-} from "@/lib/impact-quote/plans";
-import { fetchImpactPlans } from "@/lib/impact-quote/server";
-import { getIntakeOperator, operatorCrmOptions, operatorOwns } from "@/lib/tenancy/context";
+import { deckCoverageStart, deckFirstName, deckInitialQuote } from "@/lib/impact-quote/deck-data";
+import { agentApplicationPath } from "@/lib/tenancy/agent-area-routes";
+import { getAgentContext, getIntakeOperator, operatorCrmOptions, operatorOwns } from "@/lib/tenancy/context";
 import { crmCredsForOwner, type CrmOwnerOptions } from "@/lib/tenancy/crm";
 import { isaacProfile } from "@/lib/tenancy/isaac-profile";
 import { agentPublicProfile } from "@/lib/tenancy/profile";
@@ -51,8 +32,6 @@ export const metadata: Metadata = {
   referrer: "no-referrer",
 };
 
-const str = (v: unknown): string => (typeof v === "string" ? v.trim() : "");
-
 /** The client's language: their CRM `spanish` tag, else the session's (the meeting link's rule). */
 async function clientLocale(row: IntakeSessionRow, crm: CrmOwnerOptions): Promise<DeckLocale> {
   const fallback: DeckLocale = row.locale === "es" ? "es" : "en";
@@ -60,39 +39,6 @@ async function clientLocale(row: IntakeSessionRow, crm: CrmOwnerOptions): Promis
   const creds = await crmCredsForOwner(row.ownerUserId, crm);
   if (!creds) return fallback;
   return resolveCrmContactLocale(row.crmContactId, fallback, creds.token);
-}
-
-/** The start date the client picked, or Impact's earliest 1st when there is no valid pick yet. */
-function coverageStart(row: IntakeSessionRow, locale: DeckLocale): string {
-  const picked = str(row.data?.requestedEffectiveDate);
-  const iso = isValidMonthStart(picked, IMPACT_LAST_PAYMENT_DAY)
-    ? picked
-    : toIso(earliestMonthStart(businessToday(), IMPACT_LAST_PAYMENT_DAY));
-  return formatIsoLong(iso, locale);
-}
-
-/**
- * Impact's prices for the household the intake describes (how many people, the oldest birth
- * date), or null when the form doesn't say yet or Impact's service is down. The agent's quote
- * panel can always supply prices afterwards. Also what the slide's questions start from (the size
- * as asked, not the 1 Impact prices from 65) and the plan already on the form.
- */
-async function initialQuote(row: IntakeSessionRow): Promise<{
-  quote: ImpactQuote | null;
-  household: { members: HouseholdSize; oldestDob: string | null };
-  initialTier: ImpactTierKey | null;
-}> {
-  const config = requireIntakeConfig("health-alternative");
-  const data = decryptIntakeData(config, (row.data ?? {}) as IntakeData);
-  const { people, oldestDob } = householdFromIntake(data);
-  const asked = householdSize(people);
-  const household = { members: asked, oldestDob };
-  const initialTier = TIERS.find((t) => t.key === data.impactPlan)?.key ?? null;
-  if (!oldestDob) return { quote: null, household, initialTier };
-  const oldestAge = ageOn(oldestDob);
-  const members = pricedMembers(asked, oldestAge);
-  const plans = await fetchImpactPlans(oldestDob, members);
-  return { quote: plans ? { plans, members, oldestAge, source: "impact" } : null, household, initialTier };
 }
 
 export default async function ImpactPresentationPage({
@@ -105,6 +51,9 @@ export default async function ImpactPresentationPage({
   const { token } = await params;
   const { lang } = await searchParams;
   const locale: DeckLocale = (await getLocale()) === "es" ? "es" : "en";
+
+  // An agent's deck lives in their own area, with their own frame.
+  if ((await getAgentContext()).agent) redirectTo(agentApplicationPath(locale, token, "presentation"));
 
   // An operator of this line (an admin, or an agent on Health Coverage) who owns this intake.
   const gate = await getIntakeOperator("health-alternative");
@@ -132,17 +81,17 @@ export default async function ImpactPresentationPage({
     }
   }
 
-  const firstName = str(row.data?.firstName) || (row.contactName ?? "").trim().split(/\s+/)[0] || "";
+  const firstName = deckFirstName(row);
   // The owner's deck (checked above): Isaac's, or the agent's own name, photo, number, IBO # and
   // licenses (ACN P&P §I.6: each IBO shows only their own Business ID).
   const agent = op.kind === "agent" && op.agent ? agentPublicProfile(op.agent) : await isaacProfile();
   const slides = buildImpactSlides({
     locale,
     firstName,
-    startDate: coverageStart(row, locale),
+    startDate: deckCoverageStart(row, locale),
     agent,
     token,
-    ...(await initialQuote(row)),
+    ...(await deckInitialQuote(row)),
   });
 
   return <ImpactPresentation token={token} locale={locale} slides={slides} />;

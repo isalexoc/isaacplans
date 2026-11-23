@@ -3,6 +3,7 @@
 import { getLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { auth, currentUser } from "@clerk/nextjs/server";
+import { isPlatformAdminMetadata } from "@/lib/tenancy/agent-linking";
 import { Link } from "@/i18n/navigation";
 import type { Metadata } from "next";
 import { ClipboardList } from "lucide-react";
@@ -90,7 +91,7 @@ export default async function IULPresentationPage() {
   // real gate is the /api/admin/license-image middleware check.
   const { userId } = await auth();
   const isAdmin = userId
-    ? (await currentUser())?.publicMetadata?.role === "admin"
+    ? isPlatformAdminMetadata((await currentUser())?.publicMetadata)
     : false;
 
   const steps = [

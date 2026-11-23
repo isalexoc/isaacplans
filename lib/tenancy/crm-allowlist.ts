@@ -18,7 +18,7 @@
  * than the one Isaac signs in with, his dashboard-created applications are still synced when the
  * CLIENT saves them (that request has no admin caller to vouch for the owner). Steps 2 and 3 trust
  * the Clerk admin role, which is safe because agents are never Clerk admins; the agent-linking flow
- * (a later chunk) must enforce that.
+ * (lib/tenancy/agent-linking.ts) enforces that: it never links an admin or a listed id.
  */
 
 import type { AppSurface } from "./surface";

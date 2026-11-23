@@ -286,6 +286,11 @@ export type IntakeSummary = {
   createdAt: string | null;
   updatedAt: string | null;
   completedAt: string | null;
+  /**
+   * The client's language as the session stores it ("en"/"es"; the "Preferred language" chosen at
+   * creation). The agent area's dashboard copies client links in it.
+   */
+  locale?: string;
 };
 
 /** Full session payload returned to an authorized caller (sensitive fields decrypted or masked). */

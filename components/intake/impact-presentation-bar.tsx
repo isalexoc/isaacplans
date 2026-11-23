@@ -1,13 +1,32 @@
 "use client";
 
 import { CheckCircle2, ExternalLink, Presentation } from "lucide-react";
-import { Link } from "@/i18n/navigation";
 import MeetingPanel from "@/components/crankwheel/meeting-panel";
 import ImpactQuotePanel from "@/components/intake/impact-quote-panel";
 import { OUTLINE_BTN } from "@/components/intake-ui";
-import { useCrankwheelMeeting } from "@/hooks/use-crankwheel-meeting";
+import { useCrankwheelMeeting, type MeetingState } from "@/hooks/use-crankwheel-meeting";
 import { UI, tr, type IntakeLocale } from "@/lib/intake-core/ui-strings";
 import type { IntakeSession } from "@/lib/intake-core/types";
+
+type BarProps = {
+  lob: string;
+  token: string;
+  session: IntakeSession;
+  /** The live answers: the quote reads the household from them. */
+  data: Record<string, unknown>;
+  locale: IntakeLocale;
+  /**
+   * The deck's address (`?lang=client` included), built by the page on the server: Isaac's
+   * /health-alternative/intake/[token]/presentation, or the agent area's own. Opened in a new tab
+   * as a plain link; without it there is no button.
+   */
+  deckHref?: string;
+  /**
+   * The CrankWheel screen share (Isaac's). Off in the agent area: pilot agents share their screen
+   * with any tool, and CrankWheel is Isaac's account.
+   */
+  meetings?: boolean;
+};
 
 /**
  * The agent's controls for an Impact sale, above the intake form's steps: the CrankWheel screen
@@ -17,28 +36,18 @@ import type { IntakeSession } from "@/lib/intake-core/types";
  * `crankwheel_meetings.session_id` points at IUL sessions, and the contact is what the
  * post-meeting note is written to anyway.
  *
- * `lang=client` asks the deck's page to open in the client's language (their CRM `spanish` tag),
- * whatever language the agent's form happens to be in.
+ * `lang=client` asks the deck's page to open in the client's language (their CRM `spanish` tag,
+ * else the application's), whatever language the agent's form happens to be in.
  *
- * `deckHref`: where the deck lives when it isn't Isaac's /health-alternative/intake/[token]/
- * presentation (the agent area), opened as a plain link since it may be another app shell.
+ * No next-intl navigation here: this file ships with the client form's bundle (see
+ * intake-breadcrumb.tsx), so every link comes from the server.
  */
-export default function ImpactPresentationBar({
-  lob,
-  token,
-  session,
-  data,
-  locale,
-  deckHref,
-}: {
-  lob: string;
-  token: string;
-  session: IntakeSession;
-  /** The live answers: the quote reads the household from them. */
-  data: Record<string, unknown>;
-  locale: IntakeLocale;
-  deckHref?: string;
-}) {
+export default function ImpactPresentationBar({ meetings = true, ...props }: BarProps) {
+  return meetings ? <WithMeeting {...props} /> : <BarBody {...props} meeting={null} meetings={false} />;
+}
+
+function WithMeeting(props: Omit<BarProps, "meetings">) {
+  const { session, locale } = props;
   const meeting = useCrankwheelMeeting({
     target: {
       crmContactId: session.crmContactId ?? undefined,
@@ -49,18 +58,12 @@ export default function ImpactPresentationBar({
     },
   });
 
-  const live = meeting.meeting;
-  const joined = Boolean(live?.viewerJoinedAt) && live?.status === "active";
-  const openClass = joined
-    ? "flex shrink-0 items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-brand to-accent px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-brand/30 transition hover:opacity-95"
-    : `${OUTLINE_BTN} w-auto shrink-0 whitespace-nowrap px-4 py-2.5 text-sm`;
-
   return (
     <>
       <MeetingPanel
         locale={locale}
         compact
-        meeting={live}
+        meeting={meeting.meeting}
         busy={meeting.busy}
         error={meeting.error}
         canSend={Boolean(session.crmContactId)}
@@ -69,7 +72,28 @@ export default function ImpactPresentationBar({
         onSend={meeting.send}
         onReset={meeting.reset}
       />
+      <BarBody {...props} meeting={meeting.meeting} meetings />
+    </>
+  );
+}
 
+function BarBody({
+  lob,
+  token,
+  session,
+  data,
+  locale,
+  deckHref,
+  meeting,
+  meetings,
+}: Omit<BarProps, "meetings"> & { meeting: MeetingState | null; meetings: boolean }) {
+  const joined = Boolean(meeting?.viewerJoinedAt) && meeting?.status === "active";
+  const openClass = joined
+    ? "flex shrink-0 items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-brand to-accent px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-brand/30 transition hover:opacity-95"
+    : `${OUTLINE_BTN} w-auto shrink-0 whitespace-nowrap px-4 py-2.5 text-sm`;
+
+  return (
+    <>
       <div
         className={`mb-4 flex flex-col gap-3 rounded-2xl border-2 p-3 sm:flex-row sm:items-center sm:justify-between ${
           joined
@@ -91,28 +115,14 @@ export default function ImpactPresentationBar({
               joined ? "font-medium text-green-800 dark:text-green-300" : "text-muted-foreground"
             }`}
           >
-            {tr(joined ? UI.presentationJoined : UI.presentationBody, locale)}
+            {tr(joined ? UI.presentationJoined : meetings ? UI.presentationBody : UI.presentationBodyAnyShare, locale)}
           </p>
         </div>
-        {deckHref ? (
+        {deckHref && (
           <a href={deckHref} target="_blank" rel="noopener" className={openClass}>
             <ExternalLink className="h-4 w-4" />
             {tr(UI.presentationOpen, locale)}
           </a>
-        ) : (
-          <Link
-            href={{
-              pathname: "/health-alternative/intake/[token]/presentation",
-              params: { token },
-              query: { lang: "client" },
-            }}
-            target="_blank"
-            rel="noopener"
-            className={openClass}
-          >
-            <ExternalLink className="h-4 w-4" />
-            {tr(UI.presentationOpen, locale)}
-          </Link>
         )}
       </div>
 

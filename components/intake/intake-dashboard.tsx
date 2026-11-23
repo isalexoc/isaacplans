@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { useLocale } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
@@ -25,6 +25,8 @@ import { buildIntakeShareUrl } from "@/lib/intake-core/share-url";
 import { LOBS, type LobSlug } from "@/lib/lob/registry";
 import { titleCaseName, isValidEmail, isValidPhone } from "@/lib/intake-core/validation";
 import { UI, pickLocale, tr } from "@/lib/intake-core/ui-strings";
+import { dashboardFeatures, type DashboardMode } from "@/lib/intake-core/dashboard-mode";
+import { fillTokenTemplate } from "@/lib/tenancy/agent-area-routes";
 import IntakeBreadcrumb from "@/components/intake/intake-breadcrumb";
 import ImpactEnrollmentButton, { useImpactStatuses } from "@/components/intake/impact-enrollment-dialog";
 
@@ -37,18 +39,35 @@ const STATUS_VARIANT: Record<IntakeStatus, "secondary" | "default" | "outline"> 
 export default function IntakeDashboard({
   lob,
   shareOrigin,
+  mode = "site",
+  hrefs,
+  topSlot,
 }: {
   lob: string;
   /**
    * Where the client links point (lib/tenancy/urls.ts): an agent's clients open theirs on the
-   * product domain. Absent (Isaac's dashboard): the address he is on, as always.
+   * product domain. Absent (Isaac's dashboard): the address he is on, as always. Null (the agent
+   * area with no product domain configured): no client link would work, so none is copied.
    */
-  shareOrigin?: string;
+  shareOrigin?: string | null;
+  /**
+   * "agent": the agent area's dashboard (lib/intake-core/dashboard-mode.ts): no CRM search, no
+   * Impact welcome panel, no CRM "Send link"; a new application starts from a name, email or phone.
+   */
+  mode?: DashboardMode;
+  /** Agent mode: an application's form and summary in the agent area, with "{token}" for the token. */
+  hrefs?: { form: string; summary: string };
+  /** Drawn under the title (the agent area's guide link). */
+  topSlot?: ReactNode;
 }) {
   const config = requireIntakeConfig(lob);
   const intakeRoute = LOBS[lob as LobSlug].intakeRoute;
   const locale = pickLocale(useLocale());
   const router = useRouter();
+  const features = dashboardFeatures(mode);
+  const agentMode = mode === "agent";
+  const showImpactEnrollment = features.impactEnrollment && Boolean(config.impactEnrollment);
+  const clientLinks = shareOrigin !== null;
 
   const [sessions, setSessions] = useState<IntakeSummary[]>([]);
   const [loading, setLoading] = useState(true);
@@ -78,7 +97,7 @@ export default function IntakeDashboard({
   const [sentId, setSentId] = useState<string | null>(null);
 
   const impact = useImpactStatuses(
-    config.impactEnrollment
+    showImpactEnrollment
       ? [...sessions.flatMap((s) => (s.crmContactId ? [s.crmContactId] : [])), ...matches.map((c) => c.id)]
       : []
   );
@@ -128,7 +147,8 @@ export default function IntakeDashboard({
   }, [pagination, page]);
 
   async function handleSearch() {
-    if (!crmQuery.trim()) return;
+    // The search runs in Isaac's CRM: never from the agent area.
+    if (!features.crmSearch || !crmQuery.trim()) return;
     setSearching(true);
     setSearched(false);
     setError(null);
@@ -144,6 +164,11 @@ export default function IntakeDashboard({
   }
 
   function goToForm(token: string) {
+    // The agent area changes pages with full loads (its frame is drawn per page load).
+    if (agentMode && hrefs) {
+      window.location.assign(fillTokenTemplate(hrefs.form, token));
+      return;
+    }
     router.push({ pathname: `${intakeRoute}/[token]` as never, params: { token } });
   }
 
@@ -194,9 +219,14 @@ export default function IntakeDashboard({
     }
   }
 
-  function shareUrl(token: string): string {
+  /**
+   * The client's link. In the agent area it opens in the client's language (the session's, chosen
+   * at creation), since copying is the agent's only way to deliver it; Isaac's dashboards use the
+   * page's language, as always.
+   */
+  function shareUrl(token: string, linkLocale: string = locale): string {
     const origin = shareOrigin ?? (typeof window !== "undefined" ? window.location.origin : undefined);
-    return buildIntakeShareUrl(config, token, locale, origin);
+    return buildIntakeShareUrl(config, token, linkLocale, origin);
   }
 
   async function handleSendLink(s: IntakeSummary) {
@@ -213,9 +243,10 @@ export default function IntakeDashboard({
     }
   }
 
-  async function copyLink(token: string) {
+  async function copyLink(token: string, linkLocale?: string) {
+    if (!clientLinks) return;
     try {
-      await navigator.clipboard.writeText(shareUrl(token));
+      await navigator.clipboard.writeText(shareUrl(token, linkLocale));
       setCopiedToken(token);
       setTimeout(() => setCopiedToken((t) => (t === token ? null : t)), 2000);
     } catch {
@@ -237,7 +268,7 @@ export default function IntakeDashboard({
   }
 
   async function handleDelete(s: IntakeSummary) {
-    if (!window.confirm(tr(UI.deleteConfirm, locale))) return;
+    if (!window.confirm(tr(agentMode ? UI.deleteConfirmNoCrm : UI.deleteConfirm, locale))) return;
     setDeletingId(s.id);
     setError(null);
     try {
@@ -259,7 +290,7 @@ export default function IntakeDashboard({
     try {
       const updated = await resetIntakeLink(lob, s.token);
       setSessions((prev) => prev.map((row) => (row.id === s.id ? updated : row)));
-      await copyLink(updated.token);
+      await copyLink(updated.token, agentMode ? updated.locale ?? s.locale : undefined);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Error");
     } finally {
@@ -267,17 +298,94 @@ export default function IntakeDashboard({
     }
   }
 
+  // The new contact's fields: under "Not in CRM?" on Isaac's dashboards, on their own in the agent area.
+  const createFields = (
+    <div className="grid gap-3 sm:grid-cols-2">
+      <div>
+        <Label htmlFor="ni-first">{tr(UI.firstName, locale)}</Label>
+        <Input
+          id="ni-first"
+          value={newFirstName}
+          onChange={(e) => setNewFirstName(e.target.value)}
+          onBlur={(e) => setNewFirstName(titleCaseName(e.target.value))}
+        />
+      </div>
+      <div>
+        <Label htmlFor="ni-last">{tr(UI.lastName, locale)}</Label>
+        <Input
+          id="ni-last"
+          value={newLastName}
+          onChange={(e) => setNewLastName(e.target.value)}
+          onBlur={(e) => setNewLastName(titleCaseName(e.target.value))}
+        />
+      </div>
+      <div>
+        <Label htmlFor="ni-email">{tr(UI.email, locale)}</Label>
+        <Input
+          id="ni-email"
+          type="email"
+          inputMode="email"
+          value={newEmail}
+          onChange={(e) => setNewEmail(e.target.value.toLowerCase())}
+        />
+      </div>
+      <div>
+        <Label htmlFor="ni-phone">{tr(UI.phone, locale)}</Label>
+        <Input
+          id="ni-phone"
+          type="tel"
+          inputMode="tel"
+          value={newPhone}
+          onChange={(e) => setNewPhone(e.target.value.replace(/\D/g, "").slice(0, 11))}
+        />
+      </div>
+      <div>
+        <Label htmlFor="ni-lang">{tr(UI.preferredLanguage, locale)}</Label>
+        <select
+          id="ni-lang"
+          value={newLang}
+          onChange={(e) => setNewLang(e.target.value as "en" | "es")}
+          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        >
+          <option value="en">English</option>
+          <option value="es">Español</option>
+        </select>
+      </div>
+    </div>
+  );
+
   return (
     <main className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-950 dark:to-gray-950">
       <div className="container mx-auto max-w-5xl px-4 py-8">
-        <IntakeBreadcrumb lob={lob} />
+        {!agentMode && <IntakeBreadcrumb lob={lob} />}
 
         <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 sm:text-3xl">
-          {tr(UI.dashboardTitle, locale)}
+          {tr(agentMode ? UI.navApplications : UI.dashboardTitle, locale)}
         </h1>
-        <p className="mt-1 text-sm text-muted-foreground">{tr(UI.dashboardSubtitle, locale)}</p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {tr(agentMode ? UI.agentDashboardSubtitle : UI.dashboardSubtitle, locale)}
+        </p>
+
+        {topSlot ? <div className="mt-6">{topSlot}</div> : null}
+
+        {/* The agent area: a new application from a name, email or phone (no CRM anywhere). */}
+        {!features.crmSearch && (
+          <div className="mt-6 rounded-lg border bg-white p-5 shadow-sm dark:bg-gray-950">
+            <h2 className="mb-1 flex items-center gap-2 text-lg font-semibold">
+              <UserPlus className="h-5 w-5" /> {tr(UI.newApplication, locale)}
+            </h2>
+            <p className="mb-3 text-sm text-muted-foreground">{tr(UI.newApplicationHelp, locale)}</p>
+            {createFields}
+            <Button className="mt-3" disabled={busy} onClick={createAndStart}>
+              {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <UserPlus className="mr-2 h-4 w-4" />}
+              {tr(UI.startApplication, locale)}
+            </Button>
+            {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+          </div>
+        )}
 
         {/* Find or add a client */}
+        {features.crmSearch && (
         <div className="mt-6 rounded-lg border bg-white p-5 shadow-sm dark:bg-gray-950">
           <h2 className="mb-3 flex items-center gap-2 text-lg font-semibold">
             <Search className="h-5 w-5" /> {tr(UI.findClient, locale)}
@@ -312,7 +420,7 @@ export default function IntakeDashboard({
                         </div>
                       </div>
                       <div className="flex flex-wrap items-center gap-2">
-                        {config.impactEnrollment && (
+                        {showImpactEnrollment && (
                           <ImpactEnrollmentButton
                             contactId={c.id}
                             locale={locale}
@@ -344,58 +452,7 @@ export default function IntakeDashboard({
             </button>
             {showCreate && (
               <div className="mt-3">
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <div>
-                    <Label htmlFor="ni-first">{tr(UI.firstName, locale)}</Label>
-                    <Input
-                      id="ni-first"
-                      value={newFirstName}
-                      onChange={(e) => setNewFirstName(e.target.value)}
-                      onBlur={(e) => setNewFirstName(titleCaseName(e.target.value))}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="ni-last">{tr(UI.lastName, locale)}</Label>
-                    <Input
-                      id="ni-last"
-                      value={newLastName}
-                      onChange={(e) => setNewLastName(e.target.value)}
-                      onBlur={(e) => setNewLastName(titleCaseName(e.target.value))}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="ni-email">{tr(UI.email, locale)}</Label>
-                    <Input
-                      id="ni-email"
-                      type="email"
-                      inputMode="email"
-                      value={newEmail}
-                      onChange={(e) => setNewEmail(e.target.value.toLowerCase())}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="ni-phone">{tr(UI.phone, locale)}</Label>
-                    <Input
-                      id="ni-phone"
-                      type="tel"
-                      inputMode="tel"
-                      value={newPhone}
-                      onChange={(e) => setNewPhone(e.target.value.replace(/\D/g, "").slice(0, 11))}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="ni-lang">{tr(UI.preferredLanguage, locale)}</Label>
-                    <select
-                      id="ni-lang"
-                      value={newLang}
-                      onChange={(e) => setNewLang(e.target.value as "en" | "es")}
-                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                    >
-                      <option value="en">English</option>
-                      <option value="es">Español</option>
-                    </select>
-                  </div>
-                </div>
+                {createFields}
                 <Button className="mt-3" disabled={busy} onClick={createAndStart}>
                   {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <UserPlus className="mr-2 h-4 w-4" />}
                   {tr(UI.createAndStart, locale)}
@@ -406,6 +463,14 @@ export default function IntakeDashboard({
 
           {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
         </div>
+        )}
+
+        {/* The agent area without a product domain: a copied link would answer 404 for the client. */}
+        {!clientLinks && (
+          <p className="mt-6 rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-200">
+            {tr(UI.clientLinksOff, locale)}
+          </p>
+        )}
 
         {/* Existing intakes */}
         <div className="mt-6 flex flex-wrap items-end gap-3">
@@ -430,7 +495,9 @@ export default function IntakeDashboard({
               <Loader2 className="mr-2 h-5 w-5 animate-spin" /> {tr(UI.loading, locale)}
             </div>
           ) : sessions.length === 0 ? (
-            <div className="p-10 text-center text-sm text-muted-foreground">{tr(UI.noSessions, locale)}</div>
+            <div className="p-10 text-center text-sm text-muted-foreground">
+              {tr(agentMode ? UI.noApplications : UI.noSessions, locale)}
+            </div>
           ) : (
             <ul className="divide-y">
               {sessions.map((s) => (
@@ -451,31 +518,47 @@ export default function IntakeDashboard({
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
                     <Button asChild size="sm" variant="secondary">
-                      <Link href={{ pathname: `${intakeRoute}/[token]` as never, params: { token: s.token } }}>
-                        <Pencil className="mr-1 h-4 w-4" />
-                        {tr(UI.edit, locale)}
-                      </Link>
-                    </Button>
-                    <Button asChild size="sm" variant="outline">
-                      <Link href={{ pathname: `${intakeRoute}/[token]/view` as never, params: { token: s.token } }}>
-                        <Eye className="mr-1 h-4 w-4" />
-                        {tr(UI.view, locale)}
-                      </Link>
-                    </Button>
-                    <Button size="sm" variant="ghost" onClick={() => copyLink(s.token)}>
-                      {copiedToken === s.token ? (
-                        <>
-                          <Check className="mr-1 h-4 w-4 text-green-600" />
-                          {tr(UI.linkCopied, locale)}
-                        </>
+                      {agentMode && hrefs ? (
+                        <a href={fillTokenTemplate(hrefs.form, s.token)}>
+                          <Pencil className="mr-1 h-4 w-4" />
+                          {tr(UI.edit, locale)}
+                        </a>
                       ) : (
-                        <>
-                          <Copy className="mr-1 h-4 w-4" />
-                          {tr(UI.copyLink, locale)}
-                        </>
+                        <Link href={{ pathname: `${intakeRoute}/[token]` as never, params: { token: s.token } }}>
+                          <Pencil className="mr-1 h-4 w-4" />
+                          {tr(UI.edit, locale)}
+                        </Link>
                       )}
                     </Button>
-                    {s.crmContactId && (
+                    <Button asChild size="sm" variant="outline">
+                      {agentMode && hrefs ? (
+                        <a href={fillTokenTemplate(hrefs.summary, s.token)}>
+                          <Eye className="mr-1 h-4 w-4" />
+                          {tr(UI.view, locale)}
+                        </a>
+                      ) : (
+                        <Link href={{ pathname: `${intakeRoute}/[token]/view` as never, params: { token: s.token } }}>
+                          <Eye className="mr-1 h-4 w-4" />
+                          {tr(UI.view, locale)}
+                        </Link>
+                      )}
+                    </Button>
+                    {clientLinks && (
+                      <Button size="sm" variant="ghost" onClick={() => copyLink(s.token, agentMode ? s.locale : undefined)}>
+                        {copiedToken === s.token ? (
+                          <>
+                            <Check className="mr-1 h-4 w-4 text-green-600" />
+                            {tr(UI.linkCopied, locale)}
+                          </>
+                        ) : (
+                          <>
+                            <Copy className="mr-1 h-4 w-4" />
+                            {tr(UI.copyLink, locale)}
+                          </>
+                        )}
+                      </Button>
+                    )}
+                    {features.crmSendLink && s.crmContactId && (
                       <Button
                         size="sm"
                         variant="ghost"
@@ -493,7 +576,7 @@ export default function IntakeDashboard({
                         {sentId === s.id ? tr(UI.linkSent, locale) : tr(UI.sendLink, locale)}
                       </Button>
                     )}
-                    {config.impactEnrollment && s.crmContactId && (
+                    {showImpactEnrollment && s.crmContactId && (
                       <ImpactEnrollmentButton
                         contactId={s.crmContactId}
                         locale={locale}
@@ -501,20 +584,22 @@ export default function IntakeDashboard({
                         onSent={impact.markSent}
                       />
                     )}
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="text-amber-600 hover:text-amber-700"
-                      disabled={resettingId === s.id}
-                      onClick={() => handleReset(s)}
-                    >
-                      {resettingId === s.id ? (
-                        <Loader2 className="mr-1 h-4 w-4 animate-spin" />
-                      ) : (
-                        <RotateCcw className="mr-1 h-4 w-4" />
-                      )}
-                      {tr(UI.resetLink, locale)}
-                    </Button>
+                    {clientLinks && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="text-amber-600 hover:text-amber-700"
+                        disabled={resettingId === s.id}
+                        onClick={() => handleReset(s)}
+                      >
+                        {resettingId === s.id ? (
+                          <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+                        ) : (
+                          <RotateCcw className="mr-1 h-4 w-4" />
+                        )}
+                        {tr(UI.resetLink, locale)}
+                      </Button>
+                    )}
                     {s.status === "completed" && (
                       <Button
                         size="sm"

@@ -87,6 +87,11 @@ export const UI = {
     en: "Delete this intake form? This permanently removes the saved form data. The CRM contact is not affected. This cannot be undone.",
     es: "¿Eliminar este formulario? Esto elimina permanentemente los datos guardados del formulario. El contacto del CRM no se ve afectado. Esta acción no se puede deshacer.",
   } as Dict,
+  /** The agent area's (no CRM there). */
+  deleteConfirmNoCrm: {
+    en: "Delete this application? This permanently removes everything saved in it. This cannot be undone.",
+    es: "¿Eliminar esta solicitud? Esto elimina permanentemente todo lo guardado en ella. Esta acción no se puede deshacer.",
+  } as Dict,
   prevPage: { en: "Previous", es: "Anterior" } as Dict,
   nextPage: { en: "Next", es: "Siguiente" } as Dict,
   pageOf: { en: "Page {page} of {total}", es: "Página {page} de {total}" } as Dict,
@@ -127,6 +132,8 @@ export const UI = {
   step: { en: "Step", es: "Paso" } as Dict,
   of: { en: "of", es: "de" } as Dict,
   finish: { en: "Finish & sync to CRM", es: "Finalizar y enviar al CRM" } as Dict,
+  /** The agent area: an agent's applications never go to a CRM. */
+  finishNoCrm: { en: "Finish", es: "Finalizar" } as Dict,
   submitApplication: { en: "Submit my information", es: "Enviar mi información" } as Dict,
   finishing: { en: "Finishing…", es: "Finalizando…" } as Dict,
   submitting: { en: "Submitting…", es: "Enviando…" } as Dict,
@@ -138,6 +145,24 @@ export const UI = {
   completed: {
     en: "Completed and synced to the CRM contact.",
     es: "Completado y sincronizado con el contacto del CRM.",
+  } as Dict,
+  completedNoCrm: { en: "Completed.", es: "Completado." } as Dict,
+  /** The agent area's name for its dashboard. */
+  navApplications: { en: "Applications", es: "Solicitudes" } as Dict,
+  agentDashboardSubtitle: {
+    en: "Your clients' Health Coverage applications. Only you can see them.",
+    es: "Las solicitudes de Cobertura de Salud de sus clientes. Solo usted puede verlas.",
+  } as Dict,
+  newApplication: { en: "New application", es: "Nueva solicitud" } as Dict,
+  newApplicationHelp: {
+    en: "Type the client's name, email or phone. Then fill in the form with them, or copy the link and send it.",
+    es: "Escriba el nombre, correo o teléfono del cliente. Luego llene el formulario con él, o copie el enlace y envíelo.",
+  } as Dict,
+  startApplication: { en: "Start application", es: "Iniciar solicitud" } as Dict,
+  noApplications: { en: "No applications yet. Start one above.", es: "Aún no hay solicitudes. Inicie una arriba." } as Dict,
+  clientLinksOff: {
+    en: "Client links aren't switched on yet, so there's no link to copy or send. You can still fill in an application with your client here.",
+    es: "Los enlaces para clientes aún no están activados, así que no hay enlace para copiar ni enviar. Puede llenar la solicitud con su cliente aquí.",
   } as Dict,
   // Client thank-you (shown after a client submits and is locked out of editing)
   thankYouTitle: { en: "Thank you!", es: "¡Gracias!" } as Dict,
@@ -251,6 +276,10 @@ export const UI = {
     en: "Opens in a new tab, in the client's language. Share that tab in CrankWheel.",
     es: "Se abre en una pestaña nueva, en el idioma del cliente. Comparta esa pestaña en CrankWheel.",
   } as Dict,
+  presentationBodyAnyShare: {
+    en: "Opens in a new tab, in the client's language. Share that tab with your screen-sharing tool.",
+    es: "Se abre en una pestaña nueva, en el idioma del cliente. Comparta esa pestaña con su herramienta para compartir pantalla.",
+  } as Dict,
   presentationJoined: {
     en: "The client is connected. Start the presentation.",
     es: "El cliente está conectado. Comience la presentación.",
@@ -338,6 +367,11 @@ export const UI = {
   captureNoContact: {
     en: "No CRM contact on this intake, so copy the link and send it yourself.",
     es: "Esta solicitud no tiene contacto en el CRM: copie el enlace y envíelo usted.",
+  } as Dict,
+  /** The agent area's (no CRM there). */
+  captureSendYourself: {
+    en: "Copy the link and send it to your client yourself.",
+    es: "Copie el enlace y envíeselo usted a su cliente.",
   } as Dict,
   captureError: {
     en: "Something went wrong with the link. Try again.",

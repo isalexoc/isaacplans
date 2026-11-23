@@ -34,6 +34,7 @@ export default function SecureCapturePanel({
   busy,
   error,
   canSend,
+  noCrm = false,
   replacedExisting,
   onCreate,
   onCancel,
@@ -49,6 +50,8 @@ export default function SecureCapturePanel({
   busy: boolean;
   error: string | null;
   canSend: boolean;
+  /** The agent area: there is no CRM at all, so the hint never mentions one. */
+  noCrm?: boolean;
   replacedExisting: boolean;
   onCreate: (groups: string[]) => void;
   onCancel: () => void;
@@ -124,7 +127,9 @@ export default function SecureCapturePanel({
             )}
           </div>
         </div>
-        {!canSend && <p className="mt-2 text-xs text-muted-foreground">{tr(UI.captureNoContact, locale)}</p>}
+        {!canSend && (
+          <p className="mt-2 text-xs text-muted-foreground">{tr(noCrm ? UI.captureSendYourself : UI.captureNoContact, locale)}</p>
+        )}
         <button
           type="button"
           onClick={onCancel}

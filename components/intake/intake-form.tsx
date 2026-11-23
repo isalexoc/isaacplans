@@ -208,6 +208,9 @@ export default function IntakeForm({
   presenting = false,
   guideScope = GUIDE_SCOPE,
   deckHref,
+  dashboardHref,
+  agentArea = false,
+  clientLinks = true,
 }: {
   lob: string;
   token: string;
@@ -222,8 +225,23 @@ export default function IntakeForm({
    * under `guide:<slug>`.
    */
   guideScope?: string;
-  /** The deck's address for the presentation bar, when it isn't Isaac's (the agent area). */
+  /**
+   * The owner's links, built by the page on the server (this form ships to every client, so it
+   * carries no route table): the deck for the presentation bar (`?lang=client` included) and the
+   * dashboard for the breadcrumb. Without one, that link isn't shown.
+   */
   deckHref?: string;
+  dashboardHref?: string;
+  /**
+   * The agent area (/agent): its own dashboard name, plain links (it changes pages with full
+   * loads), no CrankWheel panel, and no CRM wording (an agent's applications never reach one).
+   */
+  agentArea?: boolean;
+  /**
+   * Whether a client link made here can work: false in the agent area while no product domain is
+   * configured, which hides the secure-link panel. Isaac's pages: always.
+   */
+  clientLinks?: boolean;
 }) {
   const locale = pickLocale(useLocale());
   const config = requireIntakeConfig(lob);
@@ -504,7 +522,7 @@ export default function IntakeForm({
   const secureCapture = useIntakeSecureCapture({
     lob,
     token,
-    enabled: agentChrome && Boolean(config.secureCapture) && !completed,
+    enabled: agentChrome && clientLinks && Boolean(config.secureCapture) && !completed,
     onValues: (values) =>
       setData((prev) => {
         let changed = false;
@@ -817,7 +835,15 @@ export default function IntakeForm({
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-8">
-      {agentChrome && <IntakeBreadcrumb lob={lob} current={tr(UI.navForm, locale)} />}
+      {agentChrome && (
+        <IntakeBreadcrumb
+          lob={lob}
+          current={tr(UI.navForm, locale)}
+          dashboardHref={dashboardHref}
+          rootLabel={agentArea ? tr(UI.navApplications, locale) : undefined}
+          hardNav={agentArea}
+        />
+      )}
       {/* Out-of-flow save status — fixed so it never shifts the page layout. */}
       <SaveIndicator status={saveStatus} locale={locale} />
       {config.brandLogo && <BrandLogo logo={config.brandLogo} className="mb-4" />}
@@ -846,12 +872,20 @@ export default function IntakeForm({
       </div>
 
       {agentChrome && config.impactPresentation && session && !completed && (
-        <ImpactPresentationBar lob={lob} token={token} session={session} data={data} locale={locale} deckHref={deckHref} />
+        <ImpactPresentationBar
+          lob={lob}
+          token={token}
+          session={session}
+          data={data}
+          locale={locale}
+          deckHref={deckHref}
+          meetings={!agentArea}
+        />
       )}
 
       {completed && isOwner && (
         <div className="mb-4 flex items-center gap-2 rounded-xl border border-green-200 bg-green-50 p-3 text-sm text-green-800 dark:border-green-900 dark:bg-green-950 dark:text-green-300">
-          <PartyPopper className="h-4 w-4" /> {tr(UI.completed, locale)}
+          <PartyPopper className="h-4 w-4" /> {tr(agentArea ? UI.completedNoCrm : UI.completed, locale)}
         </div>
       )}
 
@@ -887,7 +921,7 @@ export default function IntakeForm({
             />
           )}
           {/* Offered, never imposed: most clients read their numbers out. Agent only. */}
-          {agentChrome && !completed && groupsForSection(config, current.key).length > 0 && (
+          {agentChrome && clientLinks && !completed && groupsForSection(config, current.key).length > 0 && (
             <div className="mt-4">
               <SecureCapturePanel
                 locale={locale}
@@ -899,6 +933,7 @@ export default function IntakeForm({
                 busy={secureCapture.busy}
                 error={secureCapture.error}
                 canSend={Boolean(session?.crmContactId)}
+                noCrm={agentArea}
                 replacedExisting={captureReplaced}
                 onCreate={secureCapture.create}
                 onCancel={secureCapture.cancel}
@@ -1094,7 +1129,8 @@ export default function IntakeForm({
               </>
             ) : (
               <>
-                <Send className="h-4 w-4" /> {tr(isOwner ? UI.finish : UI.submitApplication, locale)}
+                <Send className="h-4 w-4" />{" "}
+                {tr(isOwner ? (agentArea ? UI.finishNoCrm : UI.finish) : UI.submitApplication, locale)}
               </>
             )}
           </Button>

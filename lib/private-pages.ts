@@ -7,9 +7,11 @@
  * events, so nothing is lost. They also refuse to be framed by another site (clickjacking).
  *
  * Covers every line of business's intake (dashboard, client form, summary, the Impact deck), the
- * secure and document links, the ACA signing page and /admin. One pattern, used by middleware
- * (server) and by the tracking components (client-side navigation). Pathnames may carry the
- * locale prefix or not, and may be next-intl templates (`/aca/intake/[token]`).
+ * secure and document links, the ACA signing page, /admin, and the agent platform's agent area
+ * (/agent, es /agente: agents' clients' applications; never /agent-crm, a public page). One
+ * pattern, used by middleware (server) and by the tracking components (client-side navigation).
+ * Pathnames may carry the locale prefix or not, and may be next-intl templates
+ * (`/aca/intake/[token]`).
  */
 const PRIVATE_PAGE_RE = new RegExp(
   "^(?:/(?:en|es))?/(?:" +
@@ -19,6 +21,8 @@ const PRIVATE_PAGE_RE = new RegExp(
     "|(?:iul/)?(?:secure|seguro|documents|documentos)/[^/]+" +
     "|aca/(?:confirmation|confirmacion)/[^/]+" +
     "|admin(?:/.*)?" +
+    // The agent area: /agent, /agente and everything under them.
+    "|agente?(?:/.*)?" +
     ")/?$",
   "i"
 );

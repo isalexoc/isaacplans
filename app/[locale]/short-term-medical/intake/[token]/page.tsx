@@ -10,6 +10,7 @@
 import type { Metadata } from "next";
 import { getLocale } from "next-intl/server";
 import IntakeForm from "@/components/intake/intake-form";
+import { getPathname } from "@/i18n/navigation";
 import { ogLocaleOf } from "@/lib/seo/i18n";
 
 type SupportedLocale = "en" | "es";
@@ -51,9 +52,11 @@ export default async function ShortTermMedicalIntakeFormPage({
   params: Promise<{ token: string }>;
 }) {
   const { token } = await params;
+  const locale = (await getLocale()) === "es" ? "es" : "en";
   return (
     <main className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-950 dark:to-gray-950">
-      <IntakeForm lob="short-term-medical" token={token} />
+      {/* The breadcrumb's link is built here: the form ships to clients without a route table. */}
+      <IntakeForm lob="short-term-medical" token={token} dashboardHref={getPathname({ href: "/short-term-medical/intake", locale })} />
     </main>
   );
 }

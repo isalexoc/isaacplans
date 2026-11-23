@@ -1,4 +1,5 @@
 import { auth, currentUser } from "@clerk/nextjs/server";
+import { isPlatformAdminMetadata } from "@/lib/tenancy/agent-linking";
 import { redirect } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
@@ -71,9 +72,9 @@ export default async function PresentationsPage() {
     redirect(`/${locale}/sign-in?redirect_url=/${locale}/presentations`);
   }
 
-  // Check if user is admin via publicMetadata
+  // Check if user is admin via publicMetadata (an agent platform account never is)
   const user = await currentUser();
-  const isAdmin = user?.publicMetadata?.role === "admin";
+  const isAdmin = isPlatformAdminMetadata(user?.publicMetadata);
 
   if (!isAdmin) {
     redirect(`/${locale}/unauthorized`);

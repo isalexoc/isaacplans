@@ -100,6 +100,7 @@ export default function ImpactPresentation({
   locale,
   slides,
   otherLocaleHref,
+  agentArea = false,
 }: {
   token: string;
   locale: DeckLocale;
@@ -110,6 +111,8 @@ export default function ImpactPresentation({
    * may cross into another app shell. Absent: today's localized route.
    */
   otherLocaleHref?: string;
+  /** The agent area's deck: its "Confirm my details" form has no CRM wording. */
+  agentArea?: boolean;
 }) {
   const router = useRouter();
   const frameRef = useRef<HTMLDivElement | null>(null);
@@ -189,7 +192,7 @@ export default function ImpactPresentation({
             <ArrowLeft className="h-4 w-4" /> {tr(UI.backToPresentation, locale)}
           </button>
         </div>
-        <IntakeForm lob="health-alternative" token={token} presenting />
+        <IntakeForm lob="health-alternative" token={token} presenting agentArea={agentArea} />
       </div>
     );
   }

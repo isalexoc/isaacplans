@@ -158,8 +158,9 @@ function isMainSiteMedia(url: URL, host: string, env: Record<string, string | un
 
 /**
  * An agent's photo: an absolute https URL on a public host name, never an IP address or a local
- * name (the quote image fetches it from the server), and never Isaac's own media. Anything else is
- * dropped and initials show.
+ * name, and never Isaac's own media. Anything else is dropped and initials show. Only browsers
+ * fetch it (the guide, the deck, the agent area): the server never does (`serverFetchablePhotoUrl`),
+ * because a host name can still resolve, or redirect, to an internal address.
  */
 export function safePhotoUrl(
   value: string | null | undefined,
@@ -178,6 +179,16 @@ export function safePhotoUrl(
   } catch {
     return null;
   }
+}
+
+/**
+ * The photo a server-side renderer (the quote image: Satori fetches every <img> by URL) may draw:
+ * only one that ships with this app (Isaac's, under public/), from the request's own origin. An
+ * agent's photo is an outside URL the agent typed, which the server never fetches (no SSRF through
+ * a profile), so their quote image shows initials until photos live in the platform's own storage.
+ */
+export function serverFetchablePhotoUrl(profile: Pick<AgentPublicProfile, "photoPath">, origin: string): string | null {
+  return profile.photoPath ? `${origin.replace(/\/+$/, "")}${profile.photoPath}` : null;
 }
 
 /** Up to two initials for a photo-less avatar ("María López" → "ML"). */

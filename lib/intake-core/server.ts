@@ -81,6 +81,7 @@ export function toIntakeSummary(row: IntakeSessionRow): IntakeSummary {
     createdAt: row.createdAt?.toISOString() ?? null,
     updatedAt: row.updatedAt?.toISOString() ?? null,
     completedAt: row.completedAt?.toISOString() ?? null,
+    locale: row.locale ?? "en",
   };
 }
 
@@ -412,6 +413,21 @@ export async function countIntakeSessionsForOwner(
     .from(intakeSessions)
     .where(and(...ownerListConditions(config, ownerUserId, opts)));
   return row?.value ?? 0;
+}
+
+/**
+ * How many applications each of these owners has, on every line: a count per owner id and nothing
+ * else (Isaac's /admin/agents shows agents' numbers, never their clients).
+ */
+export async function countIntakeSessionsByOwners(ownerUserIds: readonly string[]): Promise<Map<string, number>> {
+  const ids = Array.from(new Set(ownerUserIds.filter(Boolean)));
+  if (ids.length === 0) return new Map();
+  const rows = await db
+    .select({ owner: intakeSessions.ownerUserId, value: count() })
+    .from(intakeSessions)
+    .where(inArray(intakeSessions.ownerUserId, ids))
+    .groupBy(intakeSessions.ownerUserId);
+  return new Map(rows.map((row) => [row.owner, Number(row.value)]));
 }
 
 /** Permanently delete a session. Owner-scoped: only the creating agent can delete. */

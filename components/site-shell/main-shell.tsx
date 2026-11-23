@@ -32,6 +32,8 @@ import { GoogleAnalytics } from '@next/third-parties/google'
 import { getLicensedStateCount } from "@/lib/licensed-states";
 import { cloudinaryOgImageUrl } from "@/lib/blog-featured-image";
 import { BlogModalProvider } from "@/components/blog-modal-context";
+import { parseShellHeader, SHELL_ALTERNATE_HEADER, SHELL_HEADER } from "@/lib/tenancy/agent-area-routes";
+import { AgentAppFrame, agentShellMetadata } from "./agent-app-shell";
 import {
   STRIP_EXTENSION_ATTRS,
   type ShellMetadata,
@@ -42,6 +44,10 @@ import {
 export const SHELL_SURFACE: ShellSurface = "main";
 
 export const shellMetadata: ShellMetadata = async (): Promise<Metadata> => {
+  // The agent area has its own frame and none of Isaac's site metadata (middleware sets the header
+  // on every page, so a browser can't choose it).
+  if (parseShellHeader((await headers()).get(SHELL_HEADER)) !== "site") return agentShellMetadata();
+
   const locale = await getLocale();
 
   const states = String(await getLicensedStateCount());
@@ -90,6 +96,21 @@ export const shellMetadata: ShellMetadata = async (): Promise<Metadata> => {
 
 const MainShell: SiteShellComponent = async ({ locale, fontClassName, children }) => {
   const requestHeaders = await headers();
+
+  // The agent area (/agent, es /agente) draws its own frame instead of Isaac's: none of his
+  // header, footer, admin button or trackers. Middleware sets this header on every page response,
+  // overwriting anything a browser sent (lib/tenancy/agent-area-routes.ts).
+  const shell = parseShellHeader(requestHeaders.get(SHELL_HEADER));
+  if (shell !== "site") {
+    return AgentAppFrame({
+      locale,
+      fontClassName,
+      shell,
+      alternateHref: requestHeaders.get(SHELL_ALTERNATE_HEADER),
+      children,
+    });
+  }
+
   const isAdsLanding = requestHeaders.get("x-is-ads-landing") === "1";
   // Pages whose URL is a credential and that show a client's personal data (middleware sets this
   // for the ACA confirmation signing link). No third-party trackers there: Meta Pixel, GA and the

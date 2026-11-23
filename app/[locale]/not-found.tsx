@@ -1,8 +1,10 @@
 // app/[locale]/not-found.tsx
-import { getTranslations } from "next-intl/server";
+import { headers } from "next/headers";
+import { getLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Home } from "lucide-react";
+import { agentAreaLocale, agentAreaPath, parseShellHeader, SHELL_HEADER } from "@/lib/tenancy/agent-area-routes";
 import { isProductSurface } from "@/lib/tenancy/surface";
 
 export default async function NotFoundPage() {
@@ -17,6 +19,23 @@ export default async function NotFoundPage() {
           <p className="text-6xl font-extrabold text-[#0b2a4a] dark:text-white">404</p>
           <h1 className="text-2xl font-semibold">{t("title")}</h1>
           <p className="text-muted-foreground">{t("description")}</p>
+        </div>
+      </main>
+    );
+  }
+
+  // Inside the agent area's own frame: back to the agent's applications, never to Isaac's pages.
+  if (parseShellHeader((await headers()).get(SHELL_HEADER)) !== "site") {
+    const locale = agentAreaLocale(await getLocale());
+    return (
+      <main className="flex min-h-[70vh] items-center justify-center px-4">
+        <div className="mx-auto w-full max-w-md space-y-4 text-center">
+          <p className="text-6xl font-extrabold text-[#0b2a4a] dark:text-white">404</p>
+          <h1 className="text-2xl font-semibold">{t("title")}</h1>
+          <p className="text-muted-foreground">{t("description")}</p>
+          <a href={agentAreaPath(locale)} className="inline-flex font-semibold text-brand underline underline-offset-2">
+            {locale === "es" ? "Volver a sus solicitudes" : "Back to your applications"}
+          </a>
         </div>
       </main>
     );

@@ -5,6 +5,12 @@ import createMiddleware from "next-intl/middleware";
 import { routing } from "./i18n/routing";
 import { isPrivatePagePath } from "./lib/private-pages";
 import {
+  AGENT_AREA_PATH_RE,
+  isAgentInvitationLanding,
+  shellHeadersForPath,
+} from "./lib/tenancy/agent-area-routes";
+import { isPlatformAdminMetadata } from "./lib/tenancy/agent-linking";
+import {
   PRODUCT_RESPONSE_HEADERS,
   productNotFoundHtml,
   productRoute,
@@ -102,6 +108,11 @@ const isProtectedRoute = createRouteMatcher([
   '/alternativa-de-salud/admision/:token/view',
   '/en/health-alternative/intake/:token/view',
   '/es/alternativa-de-salud/admision/:token/view',
+  // The agent platform's agent area: /agent (es /agente) and every page under it, in any spelling
+  // that reaches here. One expression (lib/tenancy/agent-area-routes.ts, tested offline) so that
+  // Isaac's public /agent-crm page is never caught by a loose "/agent(.*)" pattern. Its one
+  // signed-out request, a Clerk invitation landing with its ticket, is let through below.
+  AGENT_AREA_PATH_RE,
 ]);
 // NOTE: /partner and /socio are deliberately NOT protected. The page is the partner portal: it
 // renders a public marketing landing with a sign-in button when signed out, and the dashboard
@@ -121,7 +132,9 @@ const isAdminPageRoute = createRouteMatcher([
 
 // Role lives in Clerk publicMetadata (same convention as /presentations), which is
 // not in the session token — fetch the user, with a short in-memory cache so admin
-// page navs and API bursts don't re-hit Clerk's API on every request.
+// page navs and API bursts don't re-hit Clerk's API on every request. An account that
+// carries the agent platform's marker is never an admin, whatever its role says
+// (lib/tenancy/agent-linking.ts `isPlatformAdminMetadata`; agents are never admins).
 const ADMIN_CACHE_TTL_MS = 60_000;
 const adminCache = new Map<string, { isAdmin: boolean; expires: number }>();
 
@@ -130,7 +143,7 @@ async function userIsAdmin(userId: string): Promise<boolean> {
   if (cached && cached.expires > Date.now()) return cached.isAdmin;
   const client = await clerkClient();
   const user = await client.users.getUser(userId);
-  const isAdmin = user.publicMetadata?.role === "admin";
+  const isAdmin = isPlatformAdminMetadata(user.publicMetadata);
   adminCache.set(userId, { isAdmin, expires: Date.now() + ADMIN_CACHE_TTL_MS });
   return isAdmin;
 }
@@ -182,7 +195,10 @@ async function mainMiddleware(auth: ClerkMiddlewareAuth, req: NextRequest) {
     req.nextUrl.pathname.startsWith('/api/fe-intake') ||
     req.nextUrl.pathname.startsWith('/api/intake') ||
     req.nextUrl.pathname.startsWith('/api/crankwheel') ||
-    req.nextUrl.pathname.startsWith('/api/newsletter')
+    req.nextUrl.pathname.startsWith('/api/newsletter') ||
+    // The agent area's own API (profile, agreements): each route checks the signed-in agent.
+    req.nextUrl.pathname === '/api/agent' ||
+    req.nextUrl.pathname.startsWith('/api/agent/')
   ) {
     return;
   }
@@ -197,8 +213,10 @@ async function mainMiddleware(auth: ClerkMiddlewareAuth, req: NextRequest) {
     return NextResponse.next();
   }
 
-  // Protected agent tools — requires authentication
-  if (isProtectedRoute(req)) {
+  // Protected agent tools — requires authentication. The exception: a Clerk invitation to the agent
+  // platform lands on the agent dashboard with its ticket before the invited person has an account;
+  // that page then shows only Clerk's sign-up for the ticket (app/[locale]/agent/page.tsx).
+  if (isProtectedRoute(req) && !isAgentInvitationLanding(req.nextUrl.pathname, req.nextUrl.searchParams)) {
     await auth.protect();
   }
 
@@ -323,6 +341,13 @@ async function mainMiddleware(auth: ClerkMiddlewareAuth, req: NextRequest) {
   ) {
     response.headers.set("x-ads-landing-variant", "iul-bare");
   }
+
+  // The page frame: the agent area's own ("agent", "agent-present" for the deck a client watches)
+  // or Isaac's ("site"). Set on EVERY page response, so the value a browser sends under the same
+  // name is always overwritten (Next.js copies these onto the request the layout reads).
+  for (const [key, value] of Object.entries(shellHeadersForPath(pathname))) {
+    response.headers.set(key, value);
+  }
   return response;
 }
 
@@ -395,6 +420,8 @@ export const config = {
     "/api/crankwheel/meetings/:path*",
     "/api/admin/:path*",
     "/api/newsletter/:path*",
+    // The agent area's API (Clerk context for the signed-in agent).
+    "/api/agent/:path*",
     "/studio/:path*",
     "/studio",
     "/((?!api|trpc|_next|_vercel|studio|.*\\..*).*)"

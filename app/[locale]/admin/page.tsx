@@ -34,6 +34,7 @@ import {
   MessageSquare,
   PieChart,
   Bot,
+  Users,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import {
@@ -120,6 +121,13 @@ const OPERATIONS_TOOLS: ToolCard[] = [
       "Manage referral partners, their co-branded landing pages, and the commissions you owe them.",
     href: "/en/admin/referral-partners",
     icon: Handshake,
+  },
+  {
+    title: "Agent Platform",
+    description:
+      "Pilot agents of the Impact platform: invite them, activate or pause them, and edit their profiles.",
+    href: "/en/admin/agents",
+    icon: Users,
   },
 ];
 

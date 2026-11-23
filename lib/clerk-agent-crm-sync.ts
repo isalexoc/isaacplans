@@ -25,6 +25,15 @@ function getCredentials(): { token: string; locationId: string } | null {
   return agentCrmGetBaseCredentials();
 }
 
+/**
+ * Would `syncClerkUserToAgentCrm` do anything on this deployment? False with
+ * AGENT_CRM_SYNC_CLERK=false or without the CRM env, so the webhook skips its agent check
+ * (a database read) when there is nothing to sync.
+ */
+export function clerkCrmSyncConfigured(): boolean {
+  return getCredentials() !== null;
+}
+
 type ClerkEmailAddr = { id: string; email_address: string };
 type ClerkPhone = { id: string; phone_number: string };
 

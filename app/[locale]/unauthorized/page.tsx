@@ -1,4 +1,5 @@
 import { auth, currentUser } from "@clerk/nextjs/server";
+import { isPlatformAdminMetadata } from "@/lib/tenancy/agent-linking";
 import { redirect } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import Link from "next/link";
@@ -55,7 +56,7 @@ export default async function UnauthorizedPage() {
   // If user is authenticated, check if they're admin
   if (userId) {
     const user = await currentUser();
-    const isAdmin = user?.publicMetadata?.role === "admin";
+    const isAdmin = isPlatformAdminMetadata(user?.publicMetadata);
     
     // If admin, redirect to presentations page
     if (isAdmin) {

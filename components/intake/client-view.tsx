@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useLocale } from "next-intl";
-import { Link } from "@/i18n/navigation";
+import { Link, getPathname } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, AlertCircle, Pencil, Eye, EyeOff, Copy, Check, Unlock, Lock } from "lucide-react";
@@ -116,10 +116,27 @@ function FileList({ files, locale }: { files: FileRef[]; locale: IntakeLocale })
   );
 }
 
-export default function IntakeClientView({ lob, token }: { lob: string; token: string }) {
+export default function IntakeClientView({
+  lob,
+  token,
+  dashboardHref,
+  formHref,
+  agentArea = false,
+}: {
+  lob: string;
+  token: string;
+  /**
+   * The agent area's own links (/agent…), followed with full page loads. Absent: Isaac's intake
+   * dashboard and form for this line, as always.
+   */
+  dashboardHref?: string;
+  formHref?: string;
+  agentArea?: boolean;
+}) {
   const locale = pickLocale(useLocale());
   const config = requireIntakeConfig(lob);
   const intakeRoute = LOBS[lob as LobSlug].intakeRoute;
+  const breadcrumbHref = dashboardHref ?? getPathname({ href: intakeRoute, locale });
   const [session, setSession] = useState<IntakeSession | null>(null);
   const [state, setState] = useState<"loading" | "ready" | "error">("loading");
   const [reveal, setReveal] = useState(false);
@@ -179,7 +196,13 @@ export default function IntakeClientView({ lob, token }: { lob: string; token: s
   return (
     <main className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-950 dark:to-gray-950">
       <div className="container mx-auto max-w-3xl px-4 py-8">
-        <IntakeBreadcrumb lob={lob} current={tr(UI.navSummary, locale)} />
+        <IntakeBreadcrumb
+          lob={lob}
+          current={tr(UI.navSummary, locale)}
+          dashboardHref={breadcrumbHref}
+          rootLabel={agentArea ? tr(UI.navApplications, locale) : undefined}
+          hardNav={agentArea}
+        />
         <div className="mb-4 flex items-center justify-end gap-3">
           <div className="flex items-center gap-2">
             {isOwner && (
@@ -207,10 +230,17 @@ export default function IntakeClientView({ lob, token }: { lob: string; token: s
               </Button>
             )}
             <Button asChild size="sm">
-              <Link href={{ pathname: `${intakeRoute}/[token]` as never, params: { token } }}>
-                <Pencil className="mr-1 h-4 w-4" />
-                {tr(UI.editForm, locale)}
-              </Link>
+              {formHref ? (
+                <a href={formHref}>
+                  <Pencil className="mr-1 h-4 w-4" />
+                  {tr(UI.editForm, locale)}
+                </a>
+              ) : (
+                <Link href={{ pathname: `${intakeRoute}/[token]` as never, params: { token } }}>
+                  <Pencil className="mr-1 h-4 w-4" />
+                  {tr(UI.editForm, locale)}
+                </Link>
+              )}
             </Button>
           </div>
         </div>

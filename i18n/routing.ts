@@ -513,6 +513,32 @@ export const routing = defineRouting({
       en: "/agent-crm",
       es: "/agent-crm",
     },
+    // The agent platform's agent area (agents' own sign-in, never Isaac's chrome): see
+    // lib/tenancy/agent-area-routes.ts, which spells the same words and is tested against these.
+    "/agent": {
+      en: "/agent",
+      es: "/agente",
+    },
+    "/agent/profile": {
+      en: "/agent/profile",
+      es: "/agente/perfil",
+    },
+    "/agent/agreements": {
+      en: "/agent/agreements",
+      es: "/agente/acuerdos",
+    },
+    "/agent/applications/[token]": {
+      en: "/agent/applications/[token]",
+      es: "/agente/solicitudes/[token]",
+    },
+    "/agent/applications/[token]/presentation": {
+      en: "/agent/applications/[token]/presentation",
+      es: "/agente/solicitudes/[token]/presentacion",
+    },
+    "/agent/applications/[token]/summary": {
+      en: "/agent/applications/[token]/summary",
+      es: "/agente/solicitudes/[token]/resumen",
+    },
     // LegalShield funnel — Spanish only. The slug is identical in both locales because there is no
     // English version to point at: next.config redirects /en/legal-shield/* to /es/, so there is
     // exactly one canonical destination for the ads. Entries still have to exist for both locales

@@ -6,6 +6,7 @@ import { ensureIntakeDeviceId } from "@/lib/intake-core/device";
 import { selfStartIntakeForClient } from "@/lib/intake-core/server";
 import { buildIntakeShareUrl } from "@/lib/intake-core/share-url";
 import { getAgentBySlug } from "@/lib/tenancy/agents";
+import { agentAgreementsOnRecord } from "@/lib/tenancy/agreements-store";
 import { isListedPlatformOwner } from "@/lib/tenancy/crm";
 import {
   agentPublicPagesOpen,
@@ -29,8 +30,9 @@ import { isProductSurface } from "@/lib/tenancy/surface";
  *
  * Agents' "Apply" (`?agent=<slug>`) exists only on the product surface (`APP_SURFACE=product`):
  * there the slug must name an agent who takes applications right now (active, and a test agent
- * while the launch gates are off) and whose public pages are open (the same rule as their guide:
- * a test agent only on a preview deployment while TENANT_PUBLIC_PAGES is off), that agent owns the
+ * while the launch gates are off), whose public pages are open (the same rule as their guide:
+ * a test agent only on a preview deployment while TENANT_PUBLIC_PAGES is off) and who has accepted
+ * the terms and DPA (lib/tenancy/agreements.ts `agreementsOnRecord`), that agent owns the
  * new application, and anything else is a 404 that never falls back to Isaac. Agents work the
  * Health Coverage line only. On isaacplans.com the parameter is refused with a 400, so an
  * application can't be claimed on the wrong host.
@@ -54,6 +56,8 @@ async function agentOwner(lob: string, param: string | null): Promise<AgentOwner
     // A row linked to one of Isaac's own ids is a misconfiguration: never start his applications
     // here (everything else treats a listed id as his, never as an agent).
     if (isListedPlatformOwner(agent.clerkUserId)) return "none";
+    // No client data for an agent who never accepted the terms and DPA (the guide asks the same).
+    if (!(await agentAgreementsOnRecord(agent.id))) return "none";
     return { ownerUserId: agent.clerkUserId, slug };
   } catch (error) {
     console.error(`[intake/${lob}/start] agent lookup failed:`, error);

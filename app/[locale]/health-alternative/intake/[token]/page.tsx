@@ -9,7 +9,8 @@
  * Which domain serves it follows the application's owner (lib/tenancy/product-routes.ts
  * `decideTokenPage`): Isaac's applications only on isaacplans.com, exactly as before; an agent's
  * only on the product domain, inside that agent's shell. On isaacplans.com an agent's client is sent
- * there (307, same path); the agent and any other signed-in operator stay, and the API answers them.
+ * there (307, same path); the agent is sent to the same application in the agent area
+ * (/agent/applications/[token]); any other signed-in operator stays, and the API answers them.
  */
 
 import type { Metadata } from "next";
@@ -18,10 +19,13 @@ import { notFound, redirect } from "next/navigation";
 import { getLocale } from "next-intl/server";
 import IntakeForm from "@/components/intake/intake-form";
 import TenantShell from "@/components/tenant/tenant-shell";
+import { getPathname } from "@/i18n/navigation";
 import { requireIntakeConfig } from "@/lib/intake-configs";
 import { buildIntakeShareUrl } from "@/lib/intake-core/share-url";
 import { guideScopeFor } from "@/lib/impact-quote/sync";
 import { ogLocaleOf } from "@/lib/seo/i18n";
+import { agentApplicationPath } from "@/lib/tenancy/agent-area-routes";
+import { requestIdentity } from "@/lib/tenancy/context";
 import { readTenancyGates } from "@/lib/tenancy/gates";
 import { callerKeepsMainView, intakeTokenOwner, tokenOwnerFact, type TokenOwner } from "@/lib/tenancy/pages";
 import { agentPagePath, decideTokenPage } from "@/lib/tenancy/product-routes";
@@ -141,9 +145,27 @@ export default async function HealthAlternativeIntakeFormPage({
     );
   }
 
+  // The agent who owns this application works on it in their own area, never in Isaac's frame.
+  if (owner.kind === "agent" && (await requestIdentity()).userId === owner.ownerUserId) {
+    redirect(agentApplicationPath(locale, token));
+  }
+
   return (
     <main className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-950 dark:to-gray-950">
-      <IntakeForm lob={LOB} token={token} />
+      {/* The owner's links are built here: the form ships to clients without a route table. */}
+      <IntakeForm
+        lob={LOB}
+        token={token}
+        dashboardHref={getPathname({ href: "/health-alternative/intake", locale })}
+        deckHref={getPathname({
+          href: {
+            pathname: "/health-alternative/intake/[token]/presentation",
+            params: { token },
+            query: { lang: "client" },
+          },
+          locale,
+        })}
+      />
     </main>
   );
 }

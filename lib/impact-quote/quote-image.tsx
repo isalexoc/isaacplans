@@ -15,7 +15,7 @@
 import { ImageResponse } from "next/og";
 import { Children, Fragment, isValidElement, type CSSProperties, type ReactNode } from "react";
 import { DECK_COPY, type DeckLocale } from "@/components/impact-presentation/copy";
-import { formatWhatsapp, profileInitials, type AgentPublicProfile } from "@/lib/tenancy/profile";
+import { formatWhatsapp, profileInitials, serverFetchablePhotoUrl, type AgentPublicProfile } from "@/lib/tenancy/profile";
 import { GLYPHS, type GlyphName } from "@/components/impact-presentation/icons";
 import { loadGoogleFont } from "@/lib/og/google-font";
 import { loadInterFont } from "@/lib/og/inter-font";
@@ -333,8 +333,9 @@ function Row({ children, style }: { children: ReactNode; style?: CSSProperties }
 function QuoteCard(input: QuoteImageInput) {
   const w = WORDS[input.locale];
   const agent = input.agent;
-  // A photo that ships with the app is fetched from this request's origin, as it always was.
-  const photo = agent.photoPath ? `${input.origin}${agent.photoPath}` : agent.photoUrl;
+  // A photo that ships with the app is fetched from this request's origin, as it always was. An
+  // agent's outside photo URL is never fetched by the server: initials instead.
+  const photo = serverFetchablePhotoUrl(agent, input.origin);
   const whatsapp = formatWhatsapp(agent.whatsappE164);
   const contact = [whatsapp ? `WhatsApp ${whatsapp}` : null, agent.siteLabel].filter(Boolean).join(" · ");
   const q = DECK_COPY[input.locale].quote;
