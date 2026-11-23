@@ -1,9 +1,5 @@
 import "server-only";
-import {
-  AGENT_CRM_API_BASE,
-  agentCrmAuthHeaders,
-  agentCrmGetBaseCredentials,
-} from "@/lib/agent-crm-contacts";
+import { AGENT_CRM_API_BASE, agentCrmAuthHeaders } from "@/lib/agent-crm-contacts";
 
 /**
  * Read a contact's notes from Agent CRM (GHL). The write side already lives in
@@ -12,6 +8,9 @@ import {
  *
  * Non-throwing by design: a letter is still useful without call history, so every failure path
  * returns an empty list rather than blowing up the request.
+ *
+ * The token is required: there is no fallback to Isaac's credentials, so a caller can't read a
+ * contact's notes in his CRM without having chosen to.
  */
 
 export type AgentCrmNote = {
@@ -46,12 +45,12 @@ function toIso(value: unknown): string | null {
 
 export async function agentCrmFetchContactNotes(
   contactId: string,
-  token?: string
+  token: string
 ): Promise<AgentCrmNote[]> {
   const trimmed = contactId?.trim();
   if (!trimmed) return [];
 
-  const authToken = token ?? agentCrmGetBaseCredentials()?.token;
+  const authToken = token?.trim();
   if (!authToken) return [];
 
   try {

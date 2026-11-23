@@ -1,42 +1,40 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
-import { getIsAdmin } from "@/lib/auth/admin";
-import { forbidden, notFound, resolveConfig, unauthorized } from "@/lib/intake-core/route-helpers";
+import { forbidden, isResponse, notFound, resolveConfig } from "@/lib/intake-core/route-helpers";
 import {
   getIntakeByToken,
   intakeTags,
   syncIntakeLinkToCrm,
   toIntakeSummary,
 } from "@/lib/intake-core/server";
-import {
-  agentCrmGetBaseCredentials,
-  agentCrmAddContactTags,
-  agentCrmRemoveContactTags,
-} from "@/lib/agent-crm-contacts";
+import { agentCrmAddContactTags, agentCrmRemoveContactTags } from "@/lib/agent-crm-contacts";
+import { operatorCrmOptions, operatorOwns, requireIntakeOperator } from "@/lib/tenancy/context";
+import { crmCredsForOwner } from "@/lib/tenancy/crm";
 
 type RouteContext = { params: Promise<{ lob: string; token: string }> };
 
-// POST /api/intake/[lob]/[token]/send-link — admin only: refresh the CRM link field + add the
-// trigger tag so a GHL workflow sends the client their link.
+// POST /api/intake/[lob]/[token]/send-link — the owner only: refresh the CRM link field + add the
+// trigger tag so a GHL workflow sends the client their link. Only for sessions that may use
+// Isaac's CRM (lib/tenancy/crm.ts); an agent's session has no CRM contact.
 export async function POST(_request: NextRequest, context: RouteContext) {
   const { lob, token } = await context.params;
   try {
-    const { userId } = await auth();
-    if (!userId) return unauthorized();
-    if (!(await getIsAdmin())) return forbidden();
+    const op = await requireIntakeOperator(lob);
+    if (isResponse(op)) return op;
 
     const config = resolveConfig(lob);
     if (!config) return notFound();
 
     const row = await getIntakeByToken(config, token);
     if (!row) return notFound();
+    if (!(await operatorOwns(op, row))) return forbidden();
     if (!row.crmContactId) {
       return NextResponse.json(
         { success: false, error: "This session has no linked CRM contact." },
         { status: 400 }
       );
     }
-    const creds = agentCrmGetBaseCredentials();
+    const crm = operatorCrmOptions(op);
+    const creds = await crmCredsForOwner(row.ownerUserId, crm);
     if (!creds) {
       return NextResponse.json({ success: false, error: "CRM is not configured." }, { status: 400 });
     }
@@ -45,7 +43,7 @@ export async function POST(_request: NextRequest, context: RouteContext) {
     const linkSentTag = intakeTags(config).linkSent;
 
     // 1) Guarantee the link field is current.
-    const linkSynced = await syncIntakeLinkToCrm(config, row);
+    const linkSynced = await syncIntakeLinkToCrm(config, row, undefined, crm);
     if (!linkSynced) {
       return NextResponse.json(
         {

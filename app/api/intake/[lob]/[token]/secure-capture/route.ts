@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
-import { getIsAdmin } from "@/lib/auth/admin";
-import { resolveConfig } from "@/lib/intake-core/route-helpers";
+import { isResponse, resolveConfig } from "@/lib/intake-core/route-helpers";
 import { getIntakeByToken } from "@/lib/intake-core/server";
 import { decryptIntakeData, maskSensitiveForClient } from "@/lib/intake-core/sensitive";
 import { buildSecureCaptureUrl } from "@/lib/intake-core/share-url";
@@ -13,10 +11,12 @@ import {
   toSecureCaptureView,
 } from "@/lib/intake-core/secure-capture";
 import type { IntakeData, IntakeLobConfig } from "@/lib/intake-core/types";
+import { operatorOwns, requireIntakeOperator } from "@/lib/tenancy/context";
 
 /**
- * The agent's side of the secure link: issue one, poll it, cancel it. Admin-only and owner-scoped;
- * the client's phone talks to `/api/intake-capture/[captureToken]`, a different credential.
+ * The agent's side of the secure link: issue one, poll it, cancel it. Operators only (an admin, or
+ * an agent on their line) and owner-scoped; the client's phone talks to
+ * `/api/intake-capture/[captureToken]`, a different credential.
  */
 
 type RouteContext = { params: Promise<{ lob: string; token: string }> };
@@ -24,16 +24,15 @@ type RouteContext = { params: Promise<{ lob: string; token: string }> };
 const fail = (status: number, error: string, code?: string) =>
   NextResponse.json({ success: false, error, ...(code ? { code } : {}) }, { status });
 
-/** Clerk admin, a line with secure capture, and the caller owns this intake. */
+/** An operator of this line, a line with secure capture, and the caller owns this intake. */
 async function requireOwner(lob: string, token: string) {
-  const { userId } = await auth();
-  if (!userId) return { error: fail(401, "Unauthorized") };
-  if (!(await getIsAdmin())) return { error: fail(403, "Forbidden") };
+  const op = await requireIntakeOperator(lob);
+  if (isResponse(op)) return { error: op };
   const config = resolveConfig(lob);
   if (!config?.secureCapture) return { error: fail(404, "Not found") };
   const row = await getIntakeByToken(config, token);
   if (!row) return { error: fail(404, "Not found") };
-  if (row.ownerUserId !== userId) return { error: fail(403, "Forbidden") };
+  if (!(await operatorOwns(op, row))) return { error: fail(403, "Forbidden") };
   return { config, row };
 }
 

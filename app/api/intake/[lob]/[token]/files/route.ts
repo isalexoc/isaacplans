@@ -24,11 +24,8 @@ import {
   encryptIntakeData,
   maskSensitiveForClient,
 } from "@/lib/intake-core/sensitive";
-import {
-  agentCrmGetBaseCredentials,
-  agentCrmUploadCustomFieldFile,
-  agentCrmSetFileField,
-} from "@/lib/agent-crm-contacts";
+import { agentCrmUploadCustomFieldFile, agentCrmSetFileField } from "@/lib/agent-crm-contacts";
+import { crmCredsForOwner } from "@/lib/tenancy/crm";
 import type {
   FileRef,
   IntakeData,
@@ -243,7 +240,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
 
     const decrypted = decryptIntakeData(config, (row.data ?? {}) as IntakeData);
 
-    const creds = agentCrmGetBaseCredentials();
+    const creds = await crmCredsForOwner(row.ownerUserId);
     // A session started anonymously has no CRM contact until the client supplies an email or
     // phone. Uploads attach to a contact's file field, so make sure one exists rather than failing
     // a document upload the client can't do anything about.
@@ -338,7 +335,7 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
     const updated = await persist(config, row, decrypted, target);
 
     // Best-effort: rewrite the shared CRM bucket to everything still referenced for this slug.
-    const creds = agentCrmGetBaseCredentials();
+    const creds = await crmCredsForOwner(row.ownerUserId);
     const slug = target.field.crm?.kind === "custom" ? target.field.crm.slug : "";
     if (creds && row.crmContactId && slug) {
       const remaining = Array.from(knownUrlsForSlug(config, decrypted, slug));

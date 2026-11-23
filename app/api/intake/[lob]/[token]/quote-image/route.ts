@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
-import { getIsAdmin } from "@/lib/auth/admin";
-import { agentCrmGetBaseCredentials } from "@/lib/agent-crm-contacts";
 import { IMPACT_LAST_PAYMENT_DAY } from "@/lib/intake-configs/impact-schedule";
 import { formatIsoLong, isValidMonthStart } from "@/lib/intake-core/month-start";
-import { resolveConfig } from "@/lib/intake-core/route-helpers";
+import { isResponse, resolveConfig } from "@/lib/intake-core/route-helpers";
 import { decryptIntakeData } from "@/lib/intake-core/sensitive";
 import { getIntakeByToken } from "@/lib/intake-core/server";
 import type { IntakeData, RepeaterRow } from "@/lib/intake-core/types";
@@ -20,11 +17,14 @@ import {
 import { quoteImageFileSlug, renderQuoteImage } from "@/lib/impact-quote/quote-image";
 import { fetchImpactPlans } from "@/lib/impact-quote/server";
 import { resolveCrmContactLocale } from "@/lib/iul-intake/server";
+import { operatorCrmOptions, operatorOwns, requireIntakeOperator } from "@/lib/tenancy/context";
+import { crmCredsForOwner } from "@/lib/tenancy/crm";
 
 /**
  * GET …/quote-image?tier=esencial&monthly=306&lang=es — the shareable Impact quote as a PNG.
  *
- * Agent only (admin + owner of the intake): it carries the client's and their family's names.
+ * The intake's owner only (an admin, or an agent on their line): it carries the client's and their
+ * family's names.
  * Names come from the form; the plan and price from the agent's panel (what's on screen there),
  * else from the form's "Your plan", else Esencial at Impact's price for the household. The
  * language is the panel's choice, else the client's (CRM `spanish` tag, then the session).
@@ -54,14 +54,13 @@ async function monthlyFor(tier: ImpactTierKey, asked: number, data: IntakeData):
 export async function GET(request: NextRequest, context: RouteContext) {
   const { lob, token } = await context.params;
   try {
-    const { userId } = await auth();
-    if (!userId) return fail(401, "Unauthorized");
-    if (!(await getIsAdmin())) return fail(403, "Forbidden");
+    const op = await requireIntakeOperator(lob);
+    if (isResponse(op)) return op;
     const config = resolveConfig(lob);
     if (!config?.impactPresentation) return fail(404, "Not found");
     const row = await getIntakeByToken(config, token);
     if (!row) return fail(404, "Not found");
-    if (row.ownerUserId !== userId) return fail(403, "Forbidden");
+    if (!(await operatorOwns(op, row))) return fail(403, "Forbidden");
 
     const params = request.nextUrl.searchParams;
     const data = decryptIntakeData(config, (row.data ?? {}) as IntakeData);
@@ -71,7 +70,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
 
     const lang = params.get("lang");
     let locale: "en" | "es" = lang === "es" || lang === "en" ? lang : row.locale === "es" ? "es" : "en";
-    const creds = agentCrmGetBaseCredentials();
+    const creds = await crmCredsForOwner(row.ownerUserId, operatorCrmOptions(op));
     if (!lang && row.crmContactId && creds) locale = await resolveCrmContactLocale(row.crmContactId, locale, creds.token);
 
     const applicant = fullName(data.firstName, data.lastName) || str(row.contactName) || "—";

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { getIsAdmin } from "@/lib/auth/admin";
 import { getIntakeByToken, resolveCrmContactLocale } from "@/lib/iul-intake/server";
-import { agentCrmGetBaseCredentials } from "@/lib/agent-crm-contacts";
+import { crmCredsForOwner } from "@/lib/tenancy/crm";
 import {
   buildCrankwheelHookUrl,
   getCrankwheelConfig,
@@ -104,7 +104,8 @@ export async function POST(request: NextRequest) {
     // The contact's own language beats whatever the session was created with — see
     // `resolveCrmContactLocale`. Best-effort: a CRM miss just leaves the fallback in place.
     if (crmContactId) {
-      const creds = agentCrmGetBaseCredentials();
+      // The caller is a verified admin and will own this meeting (lib/tenancy/crm.ts).
+      const creds = await crmCredsForOwner(userId, { adminCaller: userId });
       if (creds) locale = await resolveCrmContactLocale(crmContactId, locale, creds.token);
     }
 

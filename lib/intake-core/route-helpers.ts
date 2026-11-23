@@ -11,10 +11,18 @@
 
 import "server-only";
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
 import { getIntakeConfig } from "@/lib/intake-configs";
+import {
+  classifySignedInCaller,
+  logDeniedAccess,
+  ownerAgentOf,
+  requestIdentity,
+} from "@/lib/tenancy/context";
+import { readTenancyGates } from "@/lib/tenancy/gates";
+import { callerIsOperator, decideTokenAccess, type SignedInCallerKind } from "@/lib/tenancy/operator";
+import { appSurface } from "@/lib/tenancy/surface";
 import { ensureIntakeDeviceId, readIntakeDeviceId } from "./device";
-import { bindClientDevice, canAccessIntake, getIntakeByToken, isIntakeExpired } from "./server";
+import { bindClientDevice, getIntakeByToken, isIntakeExpired } from "./server";
 import type { IntakeSessionRow } from "./server";
 import type { IntakeLobConfig } from "./types";
 import type { IntakeAccess } from "@/lib/intake-shared/access";
@@ -48,6 +56,14 @@ export function expired() {
   );
 }
 
+/** A fact the access decision needs couldn't be read (a failed lookup): nothing was decided. */
+export function retryLater() {
+  return NextResponse.json(
+    { success: false, error: "Please try again in a moment.", code: "retry" },
+    { status: 503, headers: { "Retry-After": "5" } }
+  );
+}
+
 export function alreadySubmitted() {
   return NextResponse.json(
     { success: false, error: "This form has already been submitted." },
@@ -73,6 +89,15 @@ export type AuthorizedSession = {
  * `claim: true` mints a device cookie when the caller has none, which is what lets the first
  * browser to open an unclaimed link take ownership of it. Read-only endpoints that must not claim
  * (completion, for instance, where the client already holds the cookie) pass false.
+ *
+ * The rule (lib/tenancy/operator.ts `decideTokenAccess`): the owner gets in, as before; an agent
+ * owner only while that agent may operate. A signed-in operator (admin or agent) who is NOT the
+ * owner is denied with 403, audited, and never claims or binds this browser; the only exception is
+ * an application they started themselves as a visitor, which is already bound to them. Everyone
+ * else keeps the token + device-cookie rule. An agent's application is a 404 to its client while
+ * that agent is paused or the launch gates are closed, and Isaac's are a 404 on the product domain.
+ * A failed `agents` lookup is a 503, never "not an agent". For Isaac's sessions (owner listed in
+ * env), his anonymous clients and any caller already bound to the session this costs no lookup.
  */
 export async function loadAuthorizedSession(
   lob: string,
@@ -85,13 +110,53 @@ export async function loadAuthorizedSession(
   const row = await getIntakeByToken(config, token);
   if (!row) return notFound();
 
-  const { userId } = await auth();
-  const deviceId = opts.claim
-    ? await ensureIntakeDeviceId(config)
-    : await readIntakeDeviceId(config);
+  const { userId, actor } = await requestIdentity();
+  const impersonated = Boolean(actor);
+  const callerIsOwner = Boolean(userId) && userId === row.ownerUserId;
+  const ownerAgent = await ownerAgentOf(row.ownerUserId);
+  // Can't tell whether this is an agent's application (`decideTokenAccess` says the same): stop
+  // before classifying anyone or minting a cookie.
+  if (ownerAgent === "unknown") return retryLater();
+  const existingDeviceId = await readIntakeDeviceId(config);
+  // The session's bound client gets in whatever else they are (lib/intake-shared/access.ts), so
+  // their saves never pay for, or fail on, the classification below.
+  const boundCaller =
+    Boolean(existingDeviceId && row.clientDeviceId === existingDeviceId) ||
+    Boolean(userId && row.clientUserId === userId);
+  const callerKind: SignedInCallerKind =
+    userId && !callerIsOwner && !boundCaller
+      ? await classifySignedInCaller(userId, { ownerIsAgent: ownerAgent !== null })
+      : "client";
+  // An operator who isn't the owner gets no cookie minted: they can't claim, so there is nothing
+  // to bind it to.
+  const mayMint = !userId || callerIsOwner || !callerIsOperator(callerKind, impersonated);
+  const deviceId = opts.claim && mayMint ? await ensureIntakeDeviceId(config) : existingDeviceId;
 
-  const access = canAccessIntake(row, { userId, deviceId });
-  if (!access.allowed) return forbidden(access.claimedByOtherDevice);
+  const decision = decideTokenAccess({
+    lob: config.lob,
+    row,
+    userId,
+    deviceId,
+    impersonated,
+    callerKind,
+    ownerAgent,
+    surface: appSurface(),
+    gates: readTenancyGates(),
+  });
+  if (decision.outcome === "retry") return retryLater();
+  if (decision.outcome === "unavailable") return notFound();
+  if (decision.outcome === "deny") {
+    if (decision.audit && userId) {
+      await logDeniedAccess({
+        actorUserId: userId,
+        actorRole: callerIsOwner ? "agent" : callerKind,
+        actor,
+        row,
+      });
+    }
+    return forbidden(decision.claimedByOtherDevice);
+  }
+  const { access } = decision;
   if (access.role === "client" && isIntakeExpired(row)) return expired();
 
   if (opts.claim && access.shouldClaim && deviceId) {

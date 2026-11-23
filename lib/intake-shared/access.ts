@@ -16,6 +16,14 @@ export type IntakeCaller = {
   userId?: string | null;
   /** Device id from the httpOnly cookie — how an anonymous client proves continuity. */
   deviceId?: string | null;
+  /**
+   * A signed-in operator (an admin or an agent) who is NOT this session's owner. They never claim a
+   * session, not even an unclaimed one, so opening someone else's link can't lock its client out.
+   * They get in only where they already are its bound client: an application they started
+   * themselves, as a visitor, on another owner's page. Set by the shared engine
+   * (lib/intake-core/route-helpers.ts); the older intakes never pass it, so their rule is unchanged.
+   */
+  operator?: boolean;
 };
 
 export type IntakeRole = "owner" | "client";
@@ -27,6 +35,8 @@ export type IntakeAccess = {
   role: IntakeRole;
   /** Denied because a different browser already claimed the link (vs. simply not found). */
   claimedByOtherDevice: boolean;
+  /** Denied because the caller is an operator who doesn't own the session (the engine audits it). */
+  operatorDenied?: boolean;
 };
 
 /** The subset of an intake session row that access control needs. */
@@ -58,6 +68,9 @@ export function resolveIntakeAccess(row: IntakeAccessRow, caller: IntakeCaller):
   if (deviceId && row.clientDeviceId === deviceId) {
     return { allowed: true, shouldClaim: false, role: "client", claimedByOtherDevice: false };
   }
+  // An operator who isn't the owner stops here: no claim, and no hint about whether a client
+  // already holds the link.
+  if (caller.operator) return { ...DENIED, operatorDenied: true };
   // Unclaimed by any browser — including a legacy Clerk-bound session — so this device claims it.
   if (!row.clientDeviceId && deviceId) {
     return { allowed: true, shouldClaim: true, role: "client", claimedByOtherDevice: false };

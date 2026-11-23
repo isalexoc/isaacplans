@@ -10,8 +10,8 @@
  */
 
 import "server-only";
-import { agentCrmGetBaseCredentials } from "@/lib/agent-crm-contacts";
 import { createContactNote } from "@/lib/agent-crm-call-summary";
+import { crmCredsForOwner } from "@/lib/tenancy/crm";
 import { listUsage } from "./client";
 import { getCrankwheelConfig } from "./config";
 import { formatMeetingNote, MEETING_NOTE_TITLE } from "./note";
@@ -38,7 +38,8 @@ export async function postMeetingNote(meetingIdOrRow: string | MeetingRow): Prom
   if (meeting.notePostedAt) return { posted: false, reason: "already_posted" };
   if (!meeting.crmContactId) return { posted: false, reason: "no_contact" };
 
-  const creds = agentCrmGetBaseCredentials();
+  // The meeting owner's CRM, never Isaac's for someone else's meeting (lib/tenancy/crm.ts).
+  const creds = await crmCredsForOwner(meeting.ownerUserId);
   if (!creds) return { posted: false, reason: "crm_failed" };
 
   const config = getCrankwheelConfig();

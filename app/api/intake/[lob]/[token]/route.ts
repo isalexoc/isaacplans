@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
 import {
   forbidden,
   isResponse,
   loadAuthorizedSession,
   notFound,
   resolveConfig,
-  unauthorized,
 } from "@/lib/intake-core/route-helpers";
+import { operatorOwns, requireIntakeOperator } from "@/lib/tenancy/context";
 import { deleteIntakeSession, getIntakeByToken, toIntakeSession } from "@/lib/intake-core/server";
 import { saveIntakeAnswers } from "@/lib/intake-core/save";
 import { decryptIntakeData, maskSensitiveForClient } from "@/lib/intake-core/sensitive";
@@ -56,8 +55,8 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
 export async function DELETE(_request: NextRequest, context: RouteContext) {
   const { lob, token } = await context.params;
   try {
-    const { userId } = await auth();
-    if (!userId) return unauthorized();
+    const op = await requireIntakeOperator(lob);
+    if (isResponse(op)) return op;
 
     const config = resolveConfig(lob);
     if (!config) return notFound();
@@ -65,9 +64,9 @@ export async function DELETE(_request: NextRequest, context: RouteContext) {
     const row = await getIntakeByToken(config, token);
     if (!row) return notFound();
     // Only the agent who created the intake may delete it.
-    if (row.ownerUserId !== userId) return forbidden();
+    if (!(await operatorOwns(op, row))) return forbidden();
 
-    const deleted = await deleteIntakeSession(config, token, userId);
+    const deleted = await deleteIntakeSession(config, token, op.userId);
     if (!deleted) return notFound();
     return NextResponse.json({ success: true });
   } catch (error) {

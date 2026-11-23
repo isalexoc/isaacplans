@@ -3,6 +3,7 @@ import { and, desc, eq, isNotNull } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { callSummaryProcessed, feIntakeSessions } from "@/lib/db/schema";
 import { agentCrmFetchContactNotes } from "@/lib/agent-crm-notes";
+import { agentCrmGetBaseCredentials } from "@/lib/agent-crm-contacts";
 import { maskSensitiveNumbers } from "@/lib/call-summary-structured";
 import type { StructuredCallSummary } from "@/lib/call-summary-structured";
 import type { MailingLabelRecord } from "./types";
@@ -185,7 +186,9 @@ export async function buildLetterContext(record: MailingLabelRecord): Promise<Le
 
     // Raw notes fill the gap when the structured extraction is thin, which it often is.
     if (conversations.length < 2) {
-      const notes = await agentCrmFetchContactNotes(record.crmContactId);
+      // Isaac's own mailing labels (an admin tool), so his CRM, passed explicitly.
+      const crmToken = agentCrmGetBaseCredentials()?.token;
+      const notes = crmToken ? await agentCrmFetchContactNotes(record.crmContactId, crmToken) : [];
       for (const note of notes.slice(0, MAX_NOTES)) {
         conversations.push(note.body.slice(0, MAX_NOTE_CHARS));
       }

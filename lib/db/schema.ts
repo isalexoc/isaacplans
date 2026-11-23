@@ -1531,3 +1531,95 @@ export const aiSetterDailyUsage = pgTable("ai_setter_daily_usage", {
   sends: integer("sends").notNull().default(0),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
+
+// ─── Agent platform (pilot, gated off: lib/tenancy/) ──────────────────────────
+//
+// Migration 0046 adds these three tables and nothing else. Every read of them goes through
+// lib/tenancy/, which treats a missing table as "no agent", so code that ships before
+// `pnpm db:migrate 0046` behaves exactly as the single-tenant app did. Nothing was added to
+// `intake_sessions`: `owner_user_id` already scopes it (see the note on `intakeSecureCaptures`).
+
+/**
+ * One row per agent (an Impact IBO using the platform): one agent = one Clerk user. Agents are
+ * never Clerk `role: "admin"`; what they may do comes from this row (status, is_test) and the launch
+ * gates in lib/tenancy/gates.ts.
+ *
+ * `clerk_user_id` is null while an invitation is pending and filled when the account is linked.
+ * Postgres allows any number of NULLs under a unique index. `email` is stored lowercased (the app
+ * normalizes it). `slug` follows lib/tenancy/slugs.ts.
+ */
+export const agents = pgTable("agents", {
+  id: text("id").primaryKey(), // nanoid
+  clerkUserId: text("clerk_user_id"),
+  email: text("email").notNull(), // login email, lowercased
+  slug: text("slug").notNull(), // the guide's address on the product domain
+  status: text("status").notNull().default("invited"), // invited | active | paused
+  /** Test agents use fake data and may operate while the launch gates are off. */
+  isTest: boolean("is_test").notNull().default(false),
+  firstName: text("first_name"),
+  lastName: text("last_name"),
+  photoUrl: text("photo_url"),
+  whatsappE164: text("whatsapp_e164"),
+  contactEmail: text("contact_email"), // shown to clients; may differ from the login email
+  languages: text("languages").array().notNull().default(sql`'{}'::text[]`), // en | es
+  licensed: boolean("licensed").notNull().default(false),
+  licensedStates: text("licensed_states").array().notNull().default(sql`'{}'::text[]`), // 2-letter codes
+  iboNumber: text("ibo_number"), // the agent's own ACN Business ID, never Isaac's
+  impactReferralUrl: text("impact_referral_url"),
+  defaultLocale: text("default_locale").notNull().default("en"), // en | es
+  alertEmail: text("alert_email"), // where alerts go; carries no client details
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (t) => ({
+  clerkUserIdUniqueIdx: uniqueIndex("agents_clerk_user_id_unique_idx").on(t.clerkUserId),
+  emailUniqueIdx: uniqueIndex("agents_email_unique_idx").on(t.email),
+  slugUniqueIdx: uniqueIndex("agents_slug_unique_idx").on(t.slug),
+}));
+
+/**
+ * The agreements an agent accepted (terms of service, data processing agreement), one row per
+ * document version: the exact text's sha256 plus when, from where and in which browser. Evidence,
+ * so deleting an agent who accepted anything is refused rather than cascading.
+ */
+export const agentAgreements = pgTable("agent_agreements", {
+  id: text("id").primaryKey(), // nanoid
+  agentId: text("agent_id").notNull().references(() => agents.id, { onDelete: "restrict" }),
+  doc: text("doc").notNull(), // tos | dpa
+  version: text("version").notNull(),
+  sha256: text("sha256").notNull(), // of the exact text accepted
+  acceptedAt: timestamp("accepted_at").defaultNow().notNull(),
+  ip: text("ip"),
+  userAgent: text("user_agent"),
+}, (t) => ({
+  agentDocVersionUniqueIdx: uniqueIndex("agent_agreements_agent_doc_version_unique_idx").on(
+    t.agentId,
+    t.doc,
+    t.version
+  ),
+}));
+
+/**
+ * Who touched a client's sensitive data, or tried to: reveals, decrypted views, secure-link submits,
+ * exports, purges, and denials (a signed-in operator who is not the session's owner). Append-only,
+ * written best-effort by lib/tenancy/audit.ts.
+ *
+ * Field NAMES only, never values. `session_id` is `intake_sessions.id`, not its token: the token is
+ * a live credential and "Reset link" rotates it, while the id stays the same. The IP is stored as a
+ * keyed hash. `impersonator_user_id` is the Clerk impersonation actor, so an impersonated session
+ * is never recorded as the agent's own action.
+ */
+export const sensitiveAccessLog = pgTable("sensitive_access_log", {
+  id: text("id").primaryKey(), // nanoid
+  at: timestamp("at").defaultNow().notNull(),
+  actorUserId: text("actor_user_id"), // Clerk id; null for an anonymous client
+  actorRole: text("actor_role").notNull(), // admin | agent | client | system | unknown
+  impersonatorUserId: text("impersonator_user_id"),
+  ownerUserId: text("owner_user_id").notNull(), // the session owner's Clerk id
+  sessionId: text("session_id"),
+  action: text("action").notNull(), // reveal | view_decrypted | secure_submit | export | purge | denied
+  fields: text("fields").array().notNull().default(sql`'{}'::text[]`), // names only
+  ipHash: text("ip_hash"),
+  userAgent: text("user_agent"),
+}, (t) => ({
+  ownerAtIdx: index("sensitive_access_log_owner_at_idx").on(t.ownerUserId, t.at),
+}));

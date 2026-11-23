@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createContactNote } from "@/lib/agent-crm-call-summary";
-import { agentCrmGetBaseCredentials } from "@/lib/agent-crm-contacts";
 import { getIntakeConfig } from "@/lib/intake-configs";
 import { sanitizeIntakeData } from "@/lib/intake-core/schema";
 import { planIntakePatch } from "@/lib/intake-core/patch";
@@ -17,6 +16,8 @@ import {
 import type { IntakeData } from "@/lib/intake-core/types";
 import { isMaskedValue } from "@/lib/intake-shared/masking";
 import { lookupBankByRouting } from "@/lib/iul-intake/ach-directory";
+import { ownerAcceptsClientData } from "@/lib/tenancy/context";
+import { crmCredsForOwner } from "@/lib/tenancy/crm";
 
 /**
  * The client's side of a secure link — the only intake endpoint an unauthenticated stranger can
@@ -33,6 +34,13 @@ type RouteContext = { params: Promise<{ captureToken: string }> };
 
 const gone = (code: string, error: string) => NextResponse.json({ success: false, code, error }, { status: 410 });
 const notFound = () => NextResponse.json({ success: false, error: "Not found" }, { status: 404 });
+// No `code`: the page treats a coded error as a dead link and drops what the client typed, while
+// this one is worth another tap of the button.
+const retryLater = () =>
+  NextResponse.json(
+    { success: false, error: "Please try again in a moment." },
+    { status: 503, headers: { "Retry-After": "5" } }
+  );
 
 /** The capture, its line and its session, or the reason the link can't be used. */
 async function loadUsable(captureToken: string) {
@@ -49,6 +57,11 @@ async function loadUsable(captureToken: string) {
   const config = getIntakeConfig(capture.lob);
   const session = config ? await getIntakeSessionById(capture.lob, capture.sessionId) : null;
   if (!config || !session) return { error: notFound() };
+  // An agent's link stops working while that agent is paused or the launch gates are closed, and
+  // Isaac's links don't work on the product domain. A failed owner lookup fails closed.
+  const flow = await ownerAcceptsClientData(config.lob, session.ownerUserId);
+  if (flow === "retry") return { error: retryLater() };
+  if (flow === "closed") return { error: notFound() };
   if (session.status === "completed") {
     return { error: gone("completed", "This application is already finished. Nothing more is needed.") };
   }
@@ -88,10 +101,19 @@ export async function GET(_request: NextRequest, context: RouteContext) {
   }
 }
 
-/** A plain-text CRM note naming what arrived, so the agent hears about it even with the form closed. */
-async function noteReceived(contactId: string | null, labels: string[], lineLabel: string) {
-  const creds = agentCrmGetBaseCredentials();
-  if (!creds || !contactId) return;
+/**
+ * A plain-text CRM note naming what arrived, so the agent hears about it even with the form closed.
+ * Only in Isaac's CRM, for a session it may serve (lib/tenancy/crm.ts).
+ */
+async function noteReceived(
+  ownerUserId: string,
+  contactId: string | null,
+  labels: string[],
+  lineLabel: string
+) {
+  if (!contactId) return;
+  const creds = await crmCredsForOwner(ownerUserId);
+  if (!creds) return;
   try {
     await createContactNote({
       contactId,
@@ -152,7 +174,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     const labels = captureGroups(config)
       .filter((g) => groupsForKeys(config, capture.fieldKeys ?? []).includes(g.key))
       .map((g) => g.labelEn);
-    await noteReceived(updated.crmContactId, labels, config.label);
+    await noteReceived(updated.ownerUserId, updated.crmContactId, labels, config.label);
 
     return NextResponse.json({ success: true });
   } catch (error) {

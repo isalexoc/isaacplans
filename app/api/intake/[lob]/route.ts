@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
-import { getIsAdmin } from "@/lib/auth/admin";
-import { forbidden, notFound, resolveConfig, unauthorized } from "@/lib/intake-core/route-helpers";
+import { isResponse, notFound, resolveConfig } from "@/lib/intake-core/route-helpers";
 import {
   createIntakeSession,
   listIntakeSessionsForOwner,
@@ -14,11 +12,12 @@ import {
 } from "@/lib/intake-core/server";
 import {
   agentCrmEnsureContact,
-  agentCrmGetBaseCredentials,
   agentCrmGetContactNative,
   agentCrmAddContactTags,
   agentCrmSearchContacts,
 } from "@/lib/agent-crm-contacts";
+import { operatorCrmOptions, requireIntakeOperator } from "@/lib/tenancy/context";
+import { crmCredsForOwner } from "@/lib/tenancy/crm";
 import { titleCaseName, isValidEmail, isValidPhone } from "@/lib/intake-core/validation";
 import type { IntakeData, IntakeStatus } from "@/lib/intake-core/types";
 
@@ -30,13 +29,14 @@ function parseStatus(value: string | null): IntakeStatus | undefined {
   return STATUSES.find((s) => s === value);
 }
 
-// GET /api/intake/[lob] — dashboard list, OR ?contactSearch=… to search the CRM for contacts
+// GET /api/intake/[lob] — dashboard list, OR ?contactSearch=… to search the CRM for contacts.
+// Operators only (an admin, or an agent on their line); the list is always the caller's own.
 export async function GET(request: NextRequest, context: RouteContext) {
   const { lob } = await context.params;
   try {
-    const { userId } = await auth();
-    if (!userId) return unauthorized();
-    if (!(await getIsAdmin())) return forbidden();
+    const op = await requireIntakeOperator(lob);
+    if (isResponse(op)) return op;
+    const userId = op.userId;
 
     const config = resolveConfig(lob);
     if (!config) return notFound();
@@ -46,7 +46,8 @@ export async function GET(request: NextRequest, context: RouteContext) {
 
     const contactSearch = searchParams.get("contactSearch");
     if (contactSearch !== null) {
-      const creds = agentCrmGetBaseCredentials();
+      // The search runs in Isaac's GHL, so agents never get it (they start by name/email/phone).
+      const creds = op.kind === "admin" ? await crmCredsForOwner(userId, operatorCrmOptions(op)) : null;
       if (!creds) return NextResponse.json({ success: true, contacts: [] });
       const contacts = await agentCrmSearchContacts(
         contactSearch,
@@ -86,13 +87,14 @@ export async function GET(request: NextRequest, context: RouteContext) {
   }
 }
 
-// POST /api/intake/[lob] — create a session from an existing CRM contact id, or a new contact
+// POST /api/intake/[lob] — create a session from an existing CRM contact id, or a new contact.
+// The caller (an operator) owns it.
 export async function POST(request: NextRequest, context: RouteContext) {
   const { lob } = await context.params;
   try {
-    const { userId } = await auth();
-    if (!userId) return unauthorized();
-    if (!(await getIsAdmin())) return forbidden();
+    const op = await requireIntakeOperator(lob);
+    if (isResponse(op)) return op;
+    const userId = op.userId;
 
     const config = resolveConfig(lob);
     if (!config) return notFound();
@@ -125,7 +127,17 @@ export async function POST(request: NextRequest, context: RouteContext) {
       }
     }
 
-    const creds = agentCrmGetBaseCredentials();
+    // Null for anyone whose sessions may not use Isaac's CRM (every agent): lib/tenancy/crm.ts.
+    const creds = await crmCredsForOwner(userId, operatorCrmOptions(op));
+    // A contact id names a contact in Isaac's CRM. Without access to it, the id can't be checked,
+    // and a stored one would tie this session to one of his contacts (the AI Setter, for one,
+    // treats a contact with a live application as a client).
+    if (crmContactIdInput && !creds) {
+      return NextResponse.json(
+        { success: false, error: "Start this application with a name, email or phone." },
+        { status: 400 }
+      );
+    }
     let crmContactId: string | null = null;
     let contactName = name || null;
     let contactEmail = email || null;
@@ -210,7 +222,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
     });
 
     // Seed the CRM link field so it's ready for the "Send link" workflow.
-    await syncIntakeLinkToCrm(config, row, linkLocaleOverride);
+    await syncIntakeLinkToCrm(config, row, linkLocaleOverride, operatorCrmOptions(op));
 
     return NextResponse.json({ success: true, session: toIntakeSummary(row) });
   } catch (error) {

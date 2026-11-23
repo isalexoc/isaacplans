@@ -10,12 +10,11 @@
  */
 
 import "server-only";
-import { and, count, desc, eq, isNull, or, ilike, sql, type SQL } from "drizzle-orm";
+import { and, count, desc, eq, inArray, isNull, or, ilike, sql, type SQL } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { db } from "@/lib/db";
-import { intakeSessions } from "@/lib/db/schema";
+import { agents, intakeSessions } from "@/lib/db/schema";
 import {
-  agentCrmGetBaseCredentials,
   agentCrmUpdateContact,
   agentCrmGetContactTags,
   agentCrmEnsureContact,
@@ -24,12 +23,13 @@ import {
   type AgentCrmNativeFields,
 } from "@/lib/agent-crm-contacts";
 import {
-  resolveIntakeAccess,
-  isIntakeExpired,
-  intakeLinkExpiry,
-  type IntakeAccess,
-  type IntakeCaller,
-} from "@/lib/intake-shared/access";
+  crmCredsForOwner,
+  isListedPlatformOwner,
+  listedPlatformOwnerIds,
+  type CrmOwnerOptions,
+} from "@/lib/tenancy/crm";
+import { isMissingTableError } from "@/lib/tenancy/db-errors";
+import { isIntakeExpired, intakeLinkExpiry } from "@/lib/intake-shared/access";
 import { isFieldVisible, isRowFilled, allRepeaterFields } from "./fields";
 import { crmFieldId, intakeLinkSlug } from "./ghl-field-ids";
 import { buildIntakeShareUrl } from "./share-url";
@@ -155,18 +155,47 @@ export async function getIntakeByToken(
   return row ?? null;
 }
 
+/**
+ * Whose applications a device may resume: exactly one owner's (an agent's "Apply", so one agent's
+ * guide never reopens another agent's application on the shared product domain), or "platform"
+ * (Isaac's own pages: any session owned by an id listed in env, or by anyone without an `agents`
+ * row, which is every session until agents exist).
+ */
+export type DeviceResumeScope = { ownerUserId: string } | "platform";
+
 /** Find a session already claimed by this browser, so "Apply" resumes instead of duplicating. */
 export async function findSessionByDevice(
   config: IntakeLobConfig,
-  deviceId: string
+  deviceId: string,
+  scope: DeviceResumeScope
 ): Promise<IntakeSessionRow | null> {
-  const [row] = await db
-    .select()
-    .from(intakeSessions)
-    .where(and(eq(intakeSessions.lob, config.lob), eq(intakeSessions.clientDeviceId, deviceId)))
-    .orderBy(desc(intakeSessions.updatedAt))
-    .limit(1);
-  return row ?? null;
+  const byDevice = [eq(intakeSessions.lob, config.lob), eq(intakeSessions.clientDeviceId, deviceId)];
+  const latest = async (extra?: SQL) => {
+    const [row] = await db
+      .select()
+      .from(intakeSessions)
+      .where(and(...byDevice, ...(extra ? [extra] : [])))
+      .orderBy(desc(intakeSessions.updatedAt))
+      .limit(1);
+    return row ?? null;
+  };
+
+  if (scope !== "platform") return latest(eq(intakeSessions.ownerUserId, scope.ownerUserId));
+  const ownerHasNoAgentRow = sql`not exists (select 1 from ${agents} where ${agents.clerkUserId} = ${intakeSessions.ownerUserId})`;
+  // Isaac's own ids stay his even if an `agents` row were ever linked to one of them, the same way
+  // lib/tenancy/context.ts never looks a listed owner up.
+  const listed = listedPlatformOwnerIds();
+  const platform = listed.length
+    ? or(inArray(intakeSessions.ownerUserId, listed), ownerHasNoAgentRow)
+    : ownerHasNoAgentRow;
+  try {
+    return await latest(platform);
+  } catch (error) {
+    // Before migration 0046 there is no `agents` table, so no session can be an agent's: the
+    // query without the filter is exactly today's.
+    if (!isMissingTableError(error)) throw error;
+    return latest();
+  }
 }
 
 /** An agent-created session for this email that no browser has claimed yet. */
@@ -204,6 +233,10 @@ export async function bindClientDevice(token: string, deviceId: string): Promise
  * one the agent already created for their email, or create a fresh one. The agent is always the
  * owner so it lands in their dashboard.
  *
+ * `ownerUserId` is the agent whose "Apply" this is (an agent's guide on the product domain); left
+ * out, it is today's owner, `intakeOwnerUserId(config)`. A device only resumes that owner's
+ * application, and with the default only a session that isn't an agent's.
+ *
  * No account required — the caller is identified by their device cookie.
  */
 export async function selfStartIntakeForClient(
@@ -216,13 +249,19 @@ export async function selfStartIntakeForClient(
     lastName?: string | null;
     phone?: string | null;
     locale?: string;
+    ownerUserId?: string | null;
   }
 ): Promise<IntakeSessionRow> {
-  const ownerUserId = intakeOwnerUserId(config);
+  const explicitOwner = input.ownerUserId?.trim() || null;
+  const ownerUserId = explicitOwner ?? intakeOwnerUserId(config);
   const tags = intakeTags(config);
 
-  // 1. Resume the application this browser already started.
-  const byDevice = await findSessionByDevice(config, input.clientDeviceId);
+  // 1. Resume the application this browser already started (for this owner).
+  const byDevice = await findSessionByDevice(
+    config,
+    input.clientDeviceId,
+    explicitOwner ? { ownerUserId: explicitOwner } : "platform"
+  );
   if (byDevice && !isIntakeExpired(byDevice)) return byDevice;
 
   const email = (input.email ?? "").trim().toLowerCase();
@@ -244,7 +283,8 @@ export async function selfStartIntakeForClient(
   const contactName = [firstName, lastName].filter(Boolean).join(" ") || null;
 
   let crmContactId: string | null = null;
-  const creds = agentCrmGetBaseCredentials();
+  // Isaac's CRM for his own applications only; an agent's gets none (lib/tenancy/crm.ts).
+  const creds = await crmCredsForOwner(ownerUserId);
   // Without an account there is nothing to identify an anonymous starter by, and creating a
   // contact from nothing would litter the CRM with blank records on every "Apply" tap. The contact
   // is created lazily instead, on the first autosave carrying an email or phone — see
@@ -275,7 +315,7 @@ export async function selfStartIntakeForClient(
     } catch (e) {
       console.warn(`[${config.lob}-intake] self-apply CRM ensure failed:`, e);
     }
-  } else if (!creds) {
+  } else if (!creds && isListedPlatformOwner(ownerUserId)) {
     console.warn(`[${config.lob}-intake] Agent CRM credentials missing; session is unlinked.`);
   }
 
@@ -413,7 +453,7 @@ export async function patchIntakeData(
 /**
  * Reset a share link: rotate the token (old link dies immediately) and clear the bound client so
  * the next person to open the new link claims it. Also the recovery path when a client loses the
- * browser they started on. Admin-only at the route layer.
+ * browser they started on. Owner-only at the route layer (lib/tenancy/context.ts `operatorOwns`).
  */
 export async function resetIntakeLink(token: string): Promise<IntakeSessionRow | null> {
   const now = new Date();
@@ -459,7 +499,7 @@ export async function markIntakeCompleted(
   return row ?? null;
 }
 
-/** Admin grants (or revokes) the client's ability to edit an already-submitted form. */
+/** The owner grants (or revokes) the client's ability to edit an already-submitted form. */
 export async function setClientReopened(
   token: string,
   allow: boolean
@@ -477,13 +517,9 @@ export function clientCanEdit(row: IntakeSessionRow): boolean {
   return row.status !== "completed" || row.reopenedForClient === true;
 }
 
-/**
- * Access rule for a token-scoped session — see lib/intake-shared/access.ts. The agent always gets
- * in; otherwise the unguessable token plus the device cookie that claimed the session.
- */
-export function canAccessIntake(row: IntakeSessionRow, caller: IntakeCaller): IntakeAccess {
-  return resolveIntakeAccess(row, caller);
-}
+// Token-route access lives in lib/intake-core/route-helpers.ts `loadAuthorizedSession` (the
+// operator and agent rules of lib/tenancy/operator.ts on top of lib/intake-shared/access.ts); there
+// is deliberately no bare access helper here that a new route could call instead.
 
 export { isIntakeExpired };
 
@@ -492,17 +528,19 @@ export { isIntakeExpired };
 /**
  * Write the session's current share link to the line's `<prefix>_intake_link` custom field so a
  * GHL workflow can text/email it. The link locale follows the contact's Spanish tag (tag present
- * → /es, else /en); pass `localeOverride` to skip the tag lookup. Never throws.
+ * → /es, else /en); pass `localeOverride` to skip the tag lookup. Never throws. Only for sessions
+ * whose owner may use Isaac's CRM; `crm` lets an operator route vouch for its admin caller.
  */
 export async function syncIntakeLinkToCrm(
   config: IntakeLobConfig,
   row: IntakeSessionRow,
-  localeOverride?: "en" | "es"
+  localeOverride?: "en" | "es",
+  crm?: CrmOwnerOptions
 ): Promise<boolean> {
   if (!row.crmContactId) return false;
   const fieldId = crmFieldId(config.lob, intakeLinkSlug(config.slugPrefix));
   if (!fieldId) return false;
-  const creds = agentCrmGetBaseCredentials();
+  const creds = await crmCredsForOwner(row.ownerUserId, crm);
   if (!creds) return false;
   try {
     let locale: "en" | "es";
@@ -656,7 +694,7 @@ export async function ensureCrmContactForSession(
   const phone = str(decrypted.phone).replace(/[^\d+]/g, "");
   if (!email && !phone) return null;
 
-  const creds = agentCrmGetBaseCredentials();
+  const creds = await crmCredsForOwner(row.ownerUserId);
   if (!creds) return null;
 
   const logTag = `[${config.slugPrefix.toUpperCase()}_INTAKE]`;
@@ -718,7 +756,7 @@ export async function syncIntakeToCrm(
 ): Promise<boolean> {
   const contactId = await ensureCrmContactForSession(config, row, decrypted);
   if (!contactId) return false;
-  const creds = agentCrmGetBaseCredentials();
+  const creds = await crmCredsForOwner(row.ownerUserId);
   if (!creds) return false;
   try {
     const { native, customFields, skippedSlugs } = buildCrmPayloadFromData(config, decrypted);

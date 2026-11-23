@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { getIsAdmin } from "@/lib/auth/admin";
-import { agentCrmGetBaseCredentials } from "@/lib/agent-crm-contacts";
 import { fireMeetingWorkflow, syncMeetingLinkToCrm } from "@/lib/crankwheel/crm";
+import { crmCredsForOwner } from "@/lib/tenancy/crm";
 import { getMeetingById, markMeetingSent, toMeetingView } from "@/lib/crankwheel/meetings";
 
 /**
@@ -45,11 +45,13 @@ export async function POST(_request: NextRequest, context: RouteContext) {
         { status: 400 }
       );
     }
-    if (!agentCrmGetBaseCredentials()) {
+    // The caller is a verified admin who owns this meeting (checked above): lib/tenancy/crm.ts.
+    const crm = { adminCaller: userId };
+    if (!(await crmCredsForOwner(row.ownerUserId, crm))) {
       return NextResponse.json({ success: false, error: "CRM is not configured." }, { status: 400 });
     }
 
-    const synced = await syncMeetingLinkToCrm(row);
+    const synced = await syncMeetingLinkToCrm(row, crm);
     if (!synced) {
       return NextResponse.json(
         {
@@ -61,7 +63,7 @@ export async function POST(_request: NextRequest, context: RouteContext) {
       );
     }
 
-    const tagged = await fireMeetingWorkflow(row);
+    const tagged = await fireMeetingWorkflow(row, crm);
     if (!tagged) {
       return NextResponse.json({ success: false, error: "Could not tag the contact." }, { status: 502 });
     }

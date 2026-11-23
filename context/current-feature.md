@@ -2,8 +2,28 @@
 
 ## Status
 
-In progress: **The Impact quote fills the application + quote image for anyone on /impact** (branch
-`feature/impact-quote-to-application`, no migration). Isaac's ask (2026-11-22): whatever was quoted on the deck's
+In progress: **Agent platform pilot: Isaac's Impact system for other IBOs** (branch `feature/agent-platform-pilot`,
+migration `0046`, launch gates off). Isaac's decisions (2026-11-22):
+- Colleagues (Impact IBOs) get his deck, `/impact` guide, quote and application, with SSN/bank like his.
+- Their client pages run on a new neutral domain, served by a second Vercel project (`APP_SURFACE=product`) with
+  no CRM key or trackers.
+- The app is free; revenue is leads they choose to buy.
+- Only the owning agent can see their clients' SSN/bank.
+- Real client data and lead sales stay off until ACN replies in writing.
+
+Chunks:
+- **A, tenancy foundation:** `0046` creates `agents`, `agent_agreements` and `sensitive_access_log` (NOT applied).
+  `lib/tenancy/*` adds a fail-closed CRM allowlist, owner-checked operator routes, and owner-scoped self-start/resume.
+  `pnpm test:tenancy`.
+- **B:** product surface + agent identity + `/a/[slug]` pages.
+- **C:** `/agent` area, `/admin/agents`, masking + logged reveal, ToS/DPA, delivery buttons, alerts, state notices,
+  purge.
+
+Before chunk A deploys: set `CRM_OWNER_USER_IDS` (Isaac's admin Clerk ids) and confirm every
+`*_DEFAULT_OWNER_USER_ID` is his login.
+
+Done (merged `ca2a53a`, 2026-11-23): **The Impact quote fills the application + quote image for anyone on /impact**
+(branch `feature/impact-quote-to-application`, no migration). Isaac's ask (2026-11-22): whatever was quoted on the deck's
 slide 10 or on `/impact` (how many people, the oldest person's birth date, the plan) must already be in the
 application, and on `/impact` he wants to type a friend's name and download the quote image.
 - **1a, lost answers between tabs (root cause, `e37b605`):** autosave sent the whole form and the server replaced

@@ -1,11 +1,13 @@
-/* app/[locale]/health-alternative/intake/page.tsx — agent dashboard for Health Coverage intakes (admin only). */
+/*
+ * app/[locale]/health-alternative/intake/page.tsx — agent dashboard for Health Coverage intakes:
+ * operators only (an admin, or an agent on this line). The list is always the caller's own.
+ */
 
 import type { Metadata } from "next";
-import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { getLocale } from "next-intl/server";
-import { getIsAdmin } from "@/lib/auth/admin";
 import IntakeDashboard from "@/components/intake/intake-dashboard";
+import { getIntakeOperator } from "@/lib/tenancy/context";
 
 export const metadata: Metadata = {
   title: "Health Coverage Client Intake",
@@ -14,8 +16,12 @@ export const metadata: Metadata = {
 
 export default async function HealthAlternativeIntakeDashboardPage() {
   const locale = await getLocale();
-  const { userId } = await auth();
-  if (!userId) redirect(`/${locale}/sign-in?redirect_url=/${locale}/health-alternative/intake`);
-  if (!(await getIsAdmin())) redirect(`/${locale}/unauthorized`);
+  const gate = await getIntakeOperator("health-alternative");
+  if (!gate.ok) {
+    if (gate.status === 401) {
+      redirect(`/${locale}/sign-in?redirect_url=/${locale}/health-alternative/intake`);
+    }
+    redirect(`/${locale}/unauthorized`);
+  }
   return <IntakeDashboard lob="health-alternative" />;
 }

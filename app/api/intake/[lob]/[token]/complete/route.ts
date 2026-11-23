@@ -16,11 +16,8 @@ import {
 } from "@/lib/intake-core/server";
 import { validateForCompletion } from "@/lib/intake-core/schema";
 import { decryptIntakeData, purgeIntakeSensitiveData } from "@/lib/intake-core/sensitive";
-import {
-  agentCrmGetBaseCredentials,
-  agentCrmUpdateContact,
-  agentCrmAddContactTags,
-} from "@/lib/agent-crm-contacts";
+import { agentCrmUpdateContact, agentCrmAddContactTags } from "@/lib/agent-crm-contacts";
+import { crmCredsForOwner } from "@/lib/tenancy/crm";
 import { createContactNote } from "@/lib/agent-crm-call-summary";
 import { allRepeaterFields, isRowFilled, sensitiveScalarKeys } from "@/lib/intake-core/fields";
 import { diffIntakeData } from "@/lib/intake-core/diff";
@@ -65,7 +62,8 @@ export async function POST(_request: NextRequest, context: RouteContext) {
     }
 
     const logTag = `[${config.slugPrefix.toUpperCase()}_INTAKE]`;
-    const creds = agentCrmGetBaseCredentials();
+    // Isaac's CRM only for sessions it may serve; an agent's session syncs nowhere (lib/tenancy/crm.ts).
+    const creds = await crmCredsForOwner(row.ownerUserId);
     // A session that started anonymously has no contact until the client supplies an email or
     // phone — by submission time they have, so create it now if the autosaves somehow missed it.
     await ensureCrmContactForSession(config, row, decrypted);

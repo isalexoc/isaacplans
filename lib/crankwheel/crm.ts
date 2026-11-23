@@ -12,11 +12,11 @@
 import "server-only";
 import {
   agentCrmAddContactTags,
-  agentCrmGetBaseCredentials,
   agentCrmRemoveContactTags,
   agentCrmUpdateContact,
 } from "@/lib/agent-crm-contacts";
 import { ghlFieldIds } from "@/lib/iul-intake/ghl-field-ids";
+import { crmCredsForOwner, type CrmOwnerOptions } from "@/lib/tenancy/crm";
 import type { MeetingRow } from "./meetings";
 
 const LOG = "[CRANKWHEEL]";
@@ -35,12 +35,15 @@ export function meetingSentTag(kind: string): string {
   return kind === "scheduled" ? MEETING_SCHEDULED_SENT_TAG : MEETING_NOW_SENT_TAG;
 }
 
-/** Write the link to the contact's `meeting_link` field. False when it could not be written. */
-export async function syncMeetingLinkToCrm(row: MeetingRow): Promise<boolean> {
+/**
+ * Write the link to the contact's `meeting_link` field. False when it could not be written, or when
+ * the meeting's owner may not use Isaac's CRM (lib/tenancy/crm.ts).
+ */
+export async function syncMeetingLinkToCrm(row: MeetingRow, crm?: CrmOwnerOptions): Promise<boolean> {
   if (!row.crmContactId) return false;
   const fieldId = ghlFieldIds.meeting_link;
   if (!fieldId) return false;
-  const creds = agentCrmGetBaseCredentials();
+  const creds = await crmCredsForOwner(row.ownerUserId, crm);
   if (!creds) return false;
   try {
     return await agentCrmUpdateContact(
@@ -56,9 +59,9 @@ export async function syncMeetingLinkToCrm(row: MeetingRow): Promise<boolean> {
 }
 
 /** Toggle the trigger tag so the workflow fires, even on a repeat send. */
-export async function fireMeetingWorkflow(row: MeetingRow): Promise<boolean> {
+export async function fireMeetingWorkflow(row: MeetingRow, crm?: CrmOwnerOptions): Promise<boolean> {
   if (!row.crmContactId) return false;
-  const creds = agentCrmGetBaseCredentials();
+  const creds = await crmCredsForOwner(row.ownerUserId, crm);
   if (!creds) return false;
   const tag = meetingSentTag(row.kind);
   await agentCrmRemoveContactTags(row.crmContactId, [tag], creds.token, LOG);
