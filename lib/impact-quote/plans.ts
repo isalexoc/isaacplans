@@ -24,6 +24,11 @@ export type ImpactPlan = {
 };
 
 export type ImpactQuote = {
+  /**
+   * Set only on a quote a person made by answering the two questions on a quote screen: the id of
+   * the `QuoteBlock` behind it. A quote the page or the agent's panel made from the form has none.
+   */
+  id?: string;
   /** Cheapest first. */
   plans: ImpactPlan[];
   members: HouseholdSize;
@@ -31,6 +36,26 @@ export type ImpactQuote = {
   oldestAge: number | null;
   /** "impact" = Impact's price service; "manual" = typed by Isaac from Impact's quote page. */
   source: "impact" | "manual";
+};
+
+/**
+ * What a person told a quote screen (the deck's quote slide, or /impact's), on its way to the
+ * application so nobody types it twice (lib/impact-quote/prefill.ts). Only a quote a person made
+ * by answering the two questions has one.
+ */
+export type QuoteBlock = {
+  id: string;
+  /** When the quote was made (ISO). */
+  at: string;
+  source: "deck" | "guide";
+  /** How many people the person said: 1, 2, or 3 = "3 or more". */
+  asked: HouseholdSize;
+  /** The size Impact priced: 1 from 65 (`pricedMembers`). */
+  priced: HouseholdSize;
+  /** The oldest person's date of birth, YYYY-MM-DD. */
+  oldestDob: string;
+  senior: boolean;
+  under18: boolean;
 };
 
 /** The four programs by PRA, cheapest monthly share first. */
@@ -80,6 +105,61 @@ export function manualPlans(prices: Partial<Record<ImpactTierKey, number>>): Imp
 export function householdSize(people: number): HouseholdSize {
   if (people <= 1) return 1;
   return people === 2 ? 2 : 3;
+}
+
+/** The household size Impact prices: from 65 its Senior Program is one person per membership. */
+export function pricedMembers(asked: HouseholdSize, age: number | null): HouseholdSize {
+  return age !== null && age >= SENIOR_AGE ? 1 : asked;
+}
+
+const isHouseholdSize = (v: unknown): v is HouseholdSize => v === 1 || v === 2 || v === 3;
+
+/** A quote block as stored or sent by another page, checked: anything else is not one. */
+export function isQuoteBlock(value: unknown): value is QuoteBlock {
+  if (!value || typeof value !== "object") return false;
+  const v = value as Record<string, unknown>;
+  return (
+    typeof v.id === "string" &&
+    v.id.length > 0 &&
+    v.id.length <= 100 &&
+    typeof v.at === "string" &&
+    Number.isFinite(Date.parse(v.at)) &&
+    (v.source === "deck" || v.source === "guide") &&
+    isHouseholdSize(v.asked) &&
+    isHouseholdSize(v.priced) &&
+    typeof v.oldestDob === "string" &&
+    ageOn(v.oldestDob) !== null &&
+    typeof v.senior === "boolean" &&
+    typeof v.under18 === "boolean"
+  );
+}
+
+function newQuoteId(): string {
+  try {
+    return crypto.randomUUID();
+  } catch {
+    return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`;
+  }
+}
+
+/** The block for a quote just made from the two answers; `answer` is what /api/impact/quote said. */
+export function makeQuoteBlock(
+  source: QuoteBlock["source"],
+  asked: HouseholdSize,
+  oldestDob: string,
+  answer: { members: HouseholdSize; senior: boolean; under18: boolean },
+  now: Date = new Date()
+): QuoteBlock {
+  return {
+    id: newQuoteId(),
+    at: now.toISOString(),
+    source,
+    asked,
+    priced: answer.members,
+    oldestDob,
+    senior: answer.senior,
+    under18: answer.under18,
+  };
 }
 
 /** Whole years on `today`, or null for anything that isn't a real YYYY-MM-DD. */

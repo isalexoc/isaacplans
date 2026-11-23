@@ -279,6 +279,24 @@ export const UI = {
     es: "Los precios aparecen cuando estén las fechas de nacimiento.",
   } as Dict,
   planMonthly: { en: "Monthly price:", es: "Precio mensual:" } as Dict,
+  // The Impact quote's oldest birth date, asked above the applicant's (client and shared screen)
+  quoteDobQuestion: {
+    en: "Your quote used the oldest person's date of birth: {date}. Is this your date of birth?",
+    es: "Su cotización usó la fecha de nacimiento de la persona mayor: {date}. ¿Es su fecha de nacimiento?",
+  } as Dict,
+  quoteDobYes: { en: "Yes, it's mine", es: "Sí, es la mía" } as Dict,
+  quoteDobNo: { en: "No, it's someone else's", es: "No, es de otra persona" } as Dict,
+  // …and in the agent's own tab
+  quoteDobQuestionAgent: {
+    en: "The quote used the oldest person's date of birth: {date}. Is it the applicant's?",
+    es: "La cotización usó la fecha de nacimiento de la persona mayor: {date}. ¿Es la del solicitante?",
+  } as Dict,
+  quoteDobYesAgent: { en: "Yes, the applicant's", es: "Sí, del solicitante" } as Dict,
+  quoteDobNoAgent: { en: "No, someone else's", es: "No, de otra persona" } as Dict,
+  quoteDobAdded: {
+    en: "We added that date to 'Who else to cover.'",
+    es: "Agregamos esa fecha en «A quién más cubrir».",
+  } as Dict,
   quoteImageTitle: { en: "Image to share", es: "Imagen para compartir" } as Dict,
   quoteImageCreate: { en: "Create image", es: "Crear imagen" } as Dict,
   quoteImageCreating: { en: "Creating…", es: "Creando…" } as Dict,

@@ -7,7 +7,7 @@ import { useRouter } from "@/i18n/navigation";
 import IntakeForm from "@/components/intake/intake-form";
 import { UI, tr } from "@/lib/intake-core/ui-strings";
 import { cn } from "@/lib/utils";
-import { DeckContext } from "./deck-context";
+import { DeckContext, SlideActiveContext } from "./deck-context";
 import type { DeckLocale } from "./copy";
 
 const poppins = Poppins({ subsets: ["latin"], weight: ["400", "500", "600", "700", "800"], display: "swap" });
@@ -218,7 +218,7 @@ export default function ImpactPresentation({
                 i === slide ? "visible opacity-100" : "invisible opacity-0"
               )}
             >
-              {content}
+              <SlideActiveContext.Provider value={restored && i === slide}>{content}</SlideActiveContext.Provider>
             </div>
           ))}
         </div>

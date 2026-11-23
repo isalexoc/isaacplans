@@ -46,6 +46,7 @@
     "test:aca-confirmation": "tsx scripts/test-aca-confirmation.ts",
     "test:ai-setter": "tsx scripts/test-ai-setter.ts",
     "test:intake-autosave": "tsx scripts/test-intake-autosave.ts",
+    "test:quote-prefill": "tsx scripts/test-quote-prefill.ts",
     "ai-setter:try": "tsx --conditions=react-server scripts/ai-setter-try.ts"
   },
   "dependencies": {

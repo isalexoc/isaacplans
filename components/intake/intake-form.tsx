@@ -52,7 +52,25 @@ import IntakeBreadcrumb from "@/components/intake/intake-breadcrumb";
 import ImpactPresentationBar from "@/components/intake/impact-presentation-bar";
 import SecureCapturePanel, { type CaptureOption } from "@/components/intake/secure-capture-panel";
 import ImpactPlanPicker from "@/components/intake/impact-plan-picker";
-import { readPlanChoice, subscribePlanChoice, type PlanChoice } from "@/lib/impact-quote/sync";
+import ImpactQuoteDobPrompt from "@/components/intake/impact-quote-dob-prompt";
+import {
+  GUIDE_SCOPE,
+  clearQuoteBlock,
+  markPlanChoiceApplied,
+  readPlanChoice,
+  readQuoteBlock,
+  subscribePlanChoice,
+} from "@/lib/impact-quote/sync";
+import {
+  answerDobQuestion,
+  applyQuotePrefill,
+  choiceWithQuote,
+  dobQuestion,
+  settleTypedDob,
+  storedQuote,
+  type DobOwner,
+} from "@/lib/impact-quote/prefill";
+import type { QuoteBlock } from "@/lib/impact-quote/plans";
 import { useIntakeSecureCapture } from "@/hooks/use-intake-secure-capture";
 import {
   captureFieldKeys,
@@ -212,6 +230,12 @@ export default function IntakeForm({
   // Sensitive fields (SSN, routing/account, card) show their value by default so users can
   // see what they type; owners can still toggle Hide.
   const [reveal, setReveal] = useState(true);
+  // The quote's oldest birth date just went into "Who else to cover" (shown until the step changes).
+  const [dobAdded, setDobAdded] = useState(false);
+  // The applicant's date was typed while the quote's question was open: it answers the question
+  // once focus leaves the date (`settleDob`), so the years the selects pass through never count.
+  const dobTypedRef = useRef(false);
+  const dobFieldRef = useRef<HTMLDivElement | null>(null);
   const cardRef = useRef<HTMLDivElement | null>(null);
   const reduceMotion = useReducedMotion();
 
@@ -246,6 +270,50 @@ export default function IntakeForm({
     [presenting, config.sections]
   );
 
+  /*
+   * The Impact quote (Health Coverage only, lib/impact-quote/prefill.ts). What a quote screen left
+   * for this intake fills its blanks: the plan, and once per quote the household (how many people,
+   * the oldest birth date). Only ever on answers just read from the server (the load, an owner
+   * reload, a new quote from the deck), and it goes out with the normal autosave. Where it comes
+   * from:
+   *  - the client's own form: this intake's stored pick, then a fresh pick from /impact with the
+   *    answers that tab kept ("Apply now" opens the form in the same tab);
+   *  - the presentation tab's form: this intake's pick, with the answers the deck kept in this tab;
+   *  - the agent's own tab: this intake's pick, with the answers the deck last broadcast.
+   */
+  const quotePrefill = useMemo(
+    () => config.sections.some((s) => s.fields.some((f) => f.type === "impactPlan")),
+    [config.sections]
+  );
+  /** The quote the deck last broadcast to this tab, until its household has gone in. */
+  const liveQuoteRef = useRef<QuoteBlock | null>(null);
+  /** A deck pick came with a new quote: the reload it triggers applies the pick as a live one. */
+  const livePickRef = useRef(false);
+  const dataRef = useRef(data);
+  dataRef.current = data;
+  const completedRef = useRef(completed);
+  completedRef.current = completed;
+
+  const withQuote = useCallback(
+    (fresh: IntakeData, role: IntakeSession["role"], isCompleted: boolean, live = false) => {
+      const result = { data: fresh, usedGuide: false };
+      if (!quotePrefill) return result;
+      const ctx = { sections: config.sections, completed: isCompleted };
+      const block = role === "owner" ? (readQuoteBlock(token) ?? liveQuoteRef.current) : null;
+      result.data = applyQuotePrefill(fresh, choiceWithQuote(readPlanChoice(token), block), { ...ctx, live });
+      if (role === "client" && !isCompleted) {
+        // Owners never read /impact's pick: Isaac's own quotes there must not reach a client's form.
+        const guide = readPlanChoice(GUIDE_SCOPE, { token });
+        if (guide) {
+          result.data = applyQuotePrefill(result.data, choiceWithQuote(guide, readQuoteBlock(GUIDE_SCOPE)), ctx);
+          result.usedGuide = true;
+        }
+      }
+      return result;
+    },
+    [quotePrefill, config.sections, token]
+  );
+
   useEffect(() => {
     let active = true;
     (async () => {
@@ -255,12 +323,23 @@ export default function IntakeForm({
         const s = await fetchIntake(lob, token);
         if (!active) return;
         setSession(s);
-        // The answers as loaded are the saved state: opening the form writes nothing back.
+        // The answers as loaded are the saved state: opening the form writes nothing back, except
+        // what a quote filled in, which saves like any edit.
         const shown = forScreen(s.data ?? {});
+        const isCompleted = s.status === "completed";
+        const quoted = withQuote(shown, s.role, isCompleted);
         adoptSaved(shown);
-        setData({ ...shown });
-        setCompleted(s.status === "completed");
+        setData({ ...quoted.data });
+        setCompleted(isCompleted);
         setLoadState("ready");
+        // A pick from /impact went into this application: it's spent for any other one. Answers
+        // this tab kept for a pick that can't apply (stale, or spent elsewhere) go too.
+        if (quoted.usedGuide) {
+          markPlanChoiceApplied(GUIDE_SCOPE, token);
+          clearQuoteBlock(GUIDE_SCOPE);
+        } else if (s.role === "client" && !readPlanChoice(GUIDE_SCOPE, { token })) {
+          clearQuoteBlock(GUIDE_SCOPE);
+        }
       } catch {
         if (active) setLoadState("error");
       }
@@ -268,7 +347,7 @@ export default function IntakeForm({
     return () => {
       active = false;
     };
-  }, [lob, token, adoptSaved, forScreen]);
+  }, [lob, token, adoptSaved, forScreen, withQuote]);
 
   const isOwner = session?.role === "owner";
   // Agent-only chrome and questions. Off while presenting: the client is watching this screen.
@@ -284,7 +363,7 @@ export default function IntakeForm({
    * neither can erase the other's; this keeps what each tab SHOWS current. Reload the saved
    * answers when another tab saves this intake, when this window gets focus, and when the tab comes
    * back into view. Never over an edit that isn't saved yet: then the reload waits until that edit
-   * has saved.
+   * has saved. What a quote left for this intake is filled in on the reloaded answers (above).
    * Agent only: a client's reload would swap the SSN they just typed for its masked form.
    */
   useEffect(() => {
@@ -292,27 +371,55 @@ export default function IntakeForm({
     let active = true;
     let running = false;
     let again = false;
+    // A deck pick with a new quote that can't wait for a reload (an edit here isn't saved yet): the
+    // plan goes in now, live. Its household waits for the reload that runs once this tab is saved;
+    // the quote isn't recorded until then.
+    const applyLivePickNow = () => {
+      if (!livePickRef.current) return;
+      livePickRef.current = false;
+      const choice = readPlanChoice(token);
+      setData((prev) =>
+        applyQuotePrefill(prev, choice, {
+          sections: config.sections,
+          completed: completedRef.current,
+          live: true,
+          planOnly: true,
+        })
+      );
+    };
     const reload = async () => {
       if (running) {
         again = true;
         return;
       }
       reloadWantedRef.current = !isSynced();
-      if (reloadWantedRef.current) return;
+      if (reloadWantedRef.current) {
+        applyLivePickNow();
+        return;
+      }
       running = true;
       try {
         const s = await fetchIntake(lob, token);
         if (!active) return;
         if (!isSynced()) {
           reloadWantedRef.current = true;
+          applyLivePickNow();
           return;
         }
         const shown = forScreen(s.data ?? {});
+        const isCompleted = s.status === "completed";
+        // The pick is read now, after the reload: a tap that came in meanwhile is the one applied.
+        const live = livePickRef.current;
+        livePickRef.current = false;
         adoptSaved(shown);
-        setData({ ...shown });
-        setCompleted(s.status === "completed");
+        setData({ ...withQuote(shown, "owner", isCompleted, live).data });
+        setCompleted(isCompleted);
+        // The deck's last quote has had its turn on saved answers (filled, or not new): done.
+        liveQuoteRef.current = null;
       } catch {
-        /* keep what's on screen; the next save elsewhere, focus or return to this tab tries again */
+        // Keep what's on screen; the next save elsewhere, focus or return to this tab tries again.
+        // A live pick doesn't wait for that: it would come back later as a stale override.
+        if (active) applyLivePickNow();
       } finally {
         running = false;
         if (again && active) {
@@ -336,7 +443,7 @@ export default function IntakeForm({
       window.removeEventListener("focus", onFocus);
       unsubscribe();
     };
-  }, [loadState, isOwner, lob, token, isSynced, adoptSaved, forScreen]);
+  }, [loadState, isOwner, lob, token, isSynced, adoptSaved, forScreen, withQuote, config.sections]);
   // A client who has submitted can't edit until an admin re-opens the form.
   const lockedForClient = !isOwner && completed && !session?.reopenedForClient;
 
@@ -348,6 +455,7 @@ export default function IntakeForm({
   // On step change, bring the step's content (title + first field) into view.
   useEffect(() => {
     cardRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    setDobAdded(false);
   }, [step]);
 
   function clearFlags(key: string) {
@@ -404,34 +512,37 @@ export default function IntakeForm({
       }),
   });
   /*
-   * "Your plan" (Impact): a plan picked on a quote screen lands here. From the CrankWheel deck it
-   * arrives live in the agent's open form (same browser, keyed by this intake's token); from the
-   * self-serve page, the client's new application reads it on load. Never over a plan already on
-   * the form, except a live pick from the deck, which is the agent and client deciding now.
+   * "Your plan" (Impact), live: a pick on the CrankWheel deck lands in the agent's open form at once
+   * (same browser, keyed by this intake's token). A tap replaces the form's plan, which is the agent
+   * and client deciding now; a pick the deck sent on its own (`auto`) only fills a blank one. A pick
+   * that brings a new quote (the slide's two questions answered) reloads first, so its household is
+   * filled on the saved answers and the pick applied is the latest one (see the reload above).
+   * Picks on the self-serve page are read on load instead (`withQuote`).
    */
-  const planField = useMemo(
-    () => config.sections.flatMap((s) => s.fields).find((f) => f.type === "impactPlan"),
-    [config.sections]
-  );
   const pairedKeys = useMemo(
     () => new Set(config.sections.flatMap((s) => s.fields).map((f) => f.pairedKey).filter(Boolean)),
     [config.sections]
   );
   useEffect(() => {
-    if (loadState !== "ready" || !planField) return;
-    const apply = (choice: PlanChoice) =>
-      setData((prev) => ({
-        ...prev,
-        [planField.key]: choice.tier,
-        ...(planField.pairedKey && choice.monthly != null ? { [planField.pairedKey]: choice.monthly.toFixed(2) } : {}),
-      }));
-    if (!str(data[planField.key])) {
-      const saved = readPlanChoice(token) ?? (isOwner ? null : readPlanChoice("guide"));
-      if (saved) apply(saved);
-    }
-    return subscribePlanChoice(token, apply);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loadState, token, planField, isOwner]);
+    if (loadState !== "ready" || !quotePrefill) return;
+    return subscribePlanChoice(token, (choice) => {
+      const newQuote = Boolean(choice.quote) && choice.quote?.id !== storedQuote(dataRef.current)?.id;
+      if (newQuote && isOwner) {
+        liveQuoteRef.current = choice.quote ?? null;
+        livePickRef.current = true;
+        reloadRef.current();
+        return;
+      }
+      setData((prev) =>
+        applyQuotePrefill(prev, choice, {
+          sections: config.sections,
+          completed: completedRef.current,
+          live: true,
+          planOnly: true,
+        })
+      );
+    });
+  }, [loadState, token, quotePrefill, isOwner, config.sections]);
 
   const captureOptions: CaptureOption[] = useMemo(
     () =>
@@ -448,9 +559,47 @@ export default function IntakeForm({
   );
 
   function setField(key: string, value: unknown) {
+    // The applicant's date typed while the quote's question is open answers it, once the person
+    // leaves the date (`settleDob`, lib/impact-quote/prefill.ts). Never on a submitted intake.
+    if (key === "dateOfBirth" && quotePrefill && !completed && dobQuestion(dataRef.current)) {
+      dobTypedRef.current = true;
+    }
     setData((prev) => ({ ...prev, [key]: value }));
     clearFlags(key);
     crossChecked.forEach((k) => k !== key && clearFlags(k));
+  }
+
+  /**
+   * Put in the answers `next` changed from `before`, leaving any other update in flight alone, and
+   * clear their flags as an edit would.
+   */
+  function mergeChanged(before: IntakeData, next: IntakeData) {
+    const changed: IntakeData = {};
+    for (const key of Object.keys(next)) if (next[key] !== before[key]) changed[key] = next[key];
+    const keys = Object.keys(changed);
+    if (!keys.length) return;
+    setData((prev) => ({ ...prev, ...changed }));
+    for (const k of new Set([...keys, ...crossChecked])) clearFlags(k);
+  }
+
+  /** The quote's question above the applicant's date of birth: whose date the quote used. */
+  function answerDob(owner: DobOwner) {
+    dobTypedRef.current = false;
+    const before = dataRef.current;
+    const result = answerDobQuestion(before, owner, config.sections);
+    mergeChanged(before, result.data);
+    setDobAdded(result.added);
+  }
+
+  /** Focus left the applicant's date: a date typed while the quote's question was open answers it. */
+  function settleDob() {
+    if (!dobTypedRef.current) return;
+    dobTypedRef.current = false;
+    if (completed) return;
+    const before = dataRef.current;
+    const result = settleTypedDob(before, config.sections);
+    mergeChanged(before, result.data);
+    if (result.added) setDobAdded(true);
   }
 
   /** Update one sub-field of one repeater row, keyed by path for validation flags. */
@@ -826,13 +975,27 @@ export default function IntakeForm({
                 return (
                   <div
                     key={field.key}
+                    ref={field.key === "dateOfBirth" ? dobFieldRef : undefined}
                     onFocusCapture={() => {
                       focusedKeyRef.current = field.key;
                     }}
-                    onBlurCapture={() => {
+                    onBlurCapture={(e) => {
                       focusedKeyRef.current = null;
+                      // Leaving the date altogether (not just moving between its selects).
+                      if (field.key === "dateOfBirth" && !e.currentTarget.contains(e.relatedTarget)) settleDob();
                     }}
                   >
+                    {quotePrefill && field.key === "dateOfBirth" && (
+                      <ImpactQuoteDobPrompt
+                        className="mb-3"
+                        oldestDob={completed ? null : (dobQuestion(data)?.oldestDob ?? null)}
+                        added={dobAdded}
+                        locale={locale}
+                        agent={agentChrome}
+                        onAnswer={answerDob}
+                        focusDob={() => dobFieldRef.current?.querySelector<HTMLSelectElement>("select")?.focus()}
+                      />
+                    )}
                     <FieldInput
                       field={field}
                       locale={locale}

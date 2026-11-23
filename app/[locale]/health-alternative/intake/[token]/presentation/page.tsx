@@ -32,9 +32,11 @@ import {
   ageOn,
   householdFromIntake,
   householdSize,
-  SENIOR_AGE,
+  pricedMembers,
+  TIERS,
   type HouseholdSize,
   type ImpactQuote,
+  type ImpactTierKey,
 } from "@/lib/impact-quote/plans";
 import { fetchImpactPlans } from "@/lib/impact-quote/server";
 import { getLicensedStateCount } from "@/lib/licensed-states";
@@ -71,21 +73,25 @@ function coverageStart(row: IntakeSessionRow, locale: DeckLocale): string {
 /**
  * Impact's prices for the household the intake describes (how many people, the oldest birth
  * date), or null when the form doesn't say yet or Impact's service is down. The agent's quote
- * panel can always supply prices afterwards.
+ * panel can always supply prices afterwards. Also what the slide's questions start from (the size
+ * as asked, not the 1 Impact prices from 65) and the plan already on the form.
  */
 async function initialQuote(row: IntakeSessionRow): Promise<{
   quote: ImpactQuote | null;
   household: { members: HouseholdSize; oldestDob: string | null };
+  initialTier: ImpactTierKey | null;
 }> {
   const config = requireIntakeConfig("health-alternative");
   const data = decryptIntakeData(config, (row.data ?? {}) as IntakeData);
   const { people, oldestDob } = householdFromIntake(data);
-  const oldestAge = oldestDob ? ageOn(oldestDob) : null;
-  const members = oldestAge !== null && oldestAge >= SENIOR_AGE ? 1 : householdSize(people);
-  const household = { members, oldestDob };
-  if (!oldestDob) return { quote: null, household };
+  const asked = householdSize(people);
+  const household = { members: asked, oldestDob };
+  const initialTier = TIERS.find((t) => t.key === data.impactPlan)?.key ?? null;
+  if (!oldestDob) return { quote: null, household, initialTier };
+  const oldestAge = ageOn(oldestDob);
+  const members = pricedMembers(asked, oldestAge);
   const plans = await fetchImpactPlans(oldestDob, members);
-  return { quote: plans ? { plans, members, oldestAge, source: "impact" } : null, household };
+  return { quote: plans ? { plans, members, oldestAge, source: "impact" } : null, household, initialTier };
 }
 
 async function licensedStates(): Promise<number> {

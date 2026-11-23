@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { ageOn, SENIOR_AGE, type HouseholdSize } from "@/lib/impact-quote/plans";
+import { ageOn, pricedMembers, SENIOR_AGE, type HouseholdSize } from "@/lib/impact-quote/plans";
 import { fetchImpactPlans } from "@/lib/impact-quote/server";
 
 /**
@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
 
   // Impact's own rule: from 65 the Senior Program is one person per membership.
   const senior = age >= SENIOR_AGE;
-  const members = (senior ? 1 : asked) as HouseholdSize;
+  const members = pricedMembers(asked as HouseholdSize, age);
   const plans = await fetchImpactPlans(dob, members);
   if (!plans) return NextResponse.json({ success: false, error: "Impact's prices are not available right now." }, { status: 502 });
 

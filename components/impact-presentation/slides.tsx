@@ -10,7 +10,7 @@
 import Image from "next/image";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
-import type { HouseholdSize, ImpactQuote } from "@/lib/impact-quote/plans";
+import type { HouseholdSize, ImpactQuote, ImpactTierKey } from "@/lib/impact-quote/plans";
 import { AGENT, DECK_COPY, TELEHEALTH_NAME, type DeckCopy, type DeckLocale } from "./copy";
 import { Brandbar, IMG, Kicker, Lead, LOGO_WHITE, Slide, Title } from "./deck-parts";
 import { Glyph, PORTAL_ICONS, type GlyphName } from "./icons";
@@ -32,8 +32,13 @@ export type DeckData = {
   token: string;
   /** Impact's prices for this household at render time, or null (the slide asks and quotes). */
   quote: ImpactQuote | null;
-  /** What the intake says about the household, to pre-fill the slide's quote questions. */
+  /**
+   * What the intake says about the household, to pre-fill the slide's quote questions: how many
+   * people (as asked, not the 1 Impact prices from 65) and the oldest birth date.
+   */
   household: { members: HouseholdSize; oldestDob: string | null };
+  /** The plan on the intake when the deck opened, shown as picked until the deck has a pick of its own. */
+  initialTier: ImpactTierKey | null;
 };
 /* ─── 1. Welcome ────────────────────────────────────────────────────────────── */
 
@@ -549,6 +554,7 @@ export function buildImpactSlides(data: DeckData): ReactNode[] {
         token={data.token}
         initial={data.quote}
         household={data.household}
+        initialTier={data.initialTier}
         page={page}
       />
     ),
