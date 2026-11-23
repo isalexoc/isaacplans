@@ -1,7 +1,45 @@
 /** @type {import('next').NextConfig} */
+import { fileURLToPath } from "node:url";
 import createNextIntlPlugin from "next-intl/plugin";
 
 const withNextIntl = createNextIntlPlugin();
+
+// The product domain's deployment (APP_SURFACE=product, the second Vercel project; see
+// lib/tenancy/surface.ts): agents' client pages only. Same parsing as surface.ts, so a typo keeps
+// Isaac's site as it is. Read at BUILD time too (the page frame below), so the product project
+// needs it for its builds as well as at runtime.
+const PRODUCT_SURFACE = (process.env.APP_SURFACE ?? "").trim().toLowerCase() === "product";
+
+// The product build's page frame (components/site-shell/active-shell.ts): every import of Isaac's
+// frame becomes the product's, so nothing his layout imports is in that build.
+const ACTIVE_SHELL_REQUEST = /^@\/components\/site-shell\/active-shell$/;
+const PRODUCT_SHELL_FILE = fileURLToPath(new URL("./components/site-shell/product-shell.tsx", import.meta.url));
+
+// The only files with a dot in their path that the product domain serves (its middleware never sees
+// such paths: the matcher skips "files"). Next's own assets, Vercel's, the application's API calls
+// (checked by the /api rule above it), the neutral icon, robots and the sitemap, and Impact's art by
+// name: never the rest of public/ (Isaac's photo, logo, vCard).
+const PRODUCT_DOTTED_PATHS_ALLOWED = [
+  "_next/",
+  "_vercel/",
+  "api/",
+  "platform-icon\\.svg$",
+  "favicon\\.ico$",
+  "robots\\.txt$",
+  "sitemap\\.xml$",
+  "images/impact/impact-health-sharing-logo\\.png$",
+  "images/impact/presentation/(?:logo-white\\.png|logo-color\\.png|member-card-front\\.jpg|member-card-back\\.jpg|og-impact\\.jpg|people-helping-people\\.jpg|welcome-mother-daughter\\.jpg)$",
+];
+
+// On the product domain every response is unindexed, unframeable and sends no Referer (middleware
+// sets the same on the pages it handles: lib/tenancy/product-routes.ts PRODUCT_RESPONSE_HEADERS).
+const PRODUCT_HEADERS = [
+  { key: "x-private-page", value: "1" },
+  { key: "X-Robots-Tag", value: "noindex, nofollow" },
+  { key: "Content-Security-Policy", value: "frame-ancestors 'none'" },
+  { key: "X-Frame-Options", value: "DENY" },
+];
+
 const nextConfig = {
   // Keep native-binary packages out of the server bundle so their binary paths
   // (computed from __dirname in node_modules) resolve correctly in dev and prod.
@@ -66,13 +104,57 @@ const nextConfig = {
         source: "/:path*",
         headers: [
           { key: "X-Content-Type-Options", value: "nosniff" },
-          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          { key: "Referrer-Policy", value: PRODUCT_SURFACE ? "no-referrer" : "strict-origin-when-cross-origin" },
           { key: "Permissions-Policy", value: "camera=(self), microphone=(self), geolocation=(), payment=(), usb=()" },
+          ...(PRODUCT_SURFACE ? PRODUCT_HEADERS : []),
         ],
       },
     ];
   },
+  // The product domain:
+  //  - its tab icon is a neutral one (public/platform-icon.svg), also for browsers that ask for
+  //    /favicon.ico, which is Isaac's on his site (app/favicon.ico);
+  //  - only the client pages' own APIs exist there: the application's (/api/intake/health-alternative/…,
+  //    which middleware also checks), the secure link's (/api/intake-capture/…) and the guide's
+  //    prices (/api/impact/quote). Every other API route answers 404, including the ones outside the
+  //    middleware matcher (webhooks, crons, queues, forms that write to Isaac's CRM);
+  //  - any other path with a dot in it is a 404 unless PRODUCT_DOTTED_PATHS_ALLOWED lists it: the
+  //    middleware matcher skips such paths, so without this /en/iul/intake/a.b would draw Isaac's
+  //    IUL page and /isaac-orraiz.vcf would serve his card.
+  async rewrites() {
+    return PRODUCT_SURFACE
+      ? {
+          beforeFiles: [
+            { source: "/favicon.ico", destination: "/platform-icon.svg" },
+            {
+              source: "/api/:path((?!intake/health-alternative/|intake-capture/|impact/quote$).*)",
+              destination: "/api/product-not-found",
+            },
+            {
+              source: `/:path((?!${PRODUCT_DOTTED_PATHS_ALLOWED.join("|")}).*\\..*)`,
+              destination: "/api/product-not-found",
+            },
+          ],
+          afterFiles: [],
+          fallback: [],
+        }
+      : [];
+  },
+  // The page frame is picked when the app is built (components/site-shell/active-shell.ts). Isaac's
+  // build is untouched; the product build swaps in the product's frame, under its own webpack cache
+  // version so it never reuses modules a main build cached on the same machine (and vice versa).
+  webpack(config, { webpack }) {
+    if (PRODUCT_SURFACE) {
+      config.plugins.push(new webpack.NormalModuleReplacementPlugin(ACTIVE_SHELL_REQUEST, PRODUCT_SHELL_FILE));
+      if (config.cache && typeof config.cache === "object") {
+        config.cache.version = `${config.cache.version ?? ""}|app-surface=product`;
+      }
+    }
+    return config;
+  },
   async redirects() {
+    // Isaac's old addresses mean nothing on the product domain.
+    if (PRODUCT_SURFACE) return [];
     return [
       {
         source: "/:locale/consumer-guides",

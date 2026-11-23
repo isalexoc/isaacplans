@@ -11,7 +11,10 @@ import Image from "next/image";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { Link } from "@/i18n/navigation";
-import { AGENT, DECK_COPY, TELEHEALTH_NAME, type DeckCopy, type DeckLocale } from "./copy";
+import { GUIDE_SCOPE } from "@/lib/impact-quote/sync";
+import { agentContact, formatWhatsapp, languagesLabel, type AgentPublicProfile } from "@/lib/tenancy/profile";
+import AgentPhoto from "@/components/tenant/agent-photo";
+import { DECK_COPY, TELEHEALTH_NAME, type DeckCopy, type DeckLocale } from "./copy";
 import { Glyph, PORTAL_ICONS, type GlyphName } from "./icons";
 import GuideQuote from "./guide-quote";
 import PortalMockup from "./portal-mockup";
@@ -22,10 +25,17 @@ export type GuideData = {
   locale: DeckLocale;
   /** Impact's earliest start date, formatted ("1 de diciembre de 2026"). */
   startDate: string;
-  licensedStates: number;
-  agentIbo: string | null;
+  /** Whose guide: Isaac's profile on /impact, the agent's on their page of the product domain. */
+  agent: AgentPublicProfile;
   /** Isaac, signed in as admin: the quote screen adds his quote image box for anyone he quotes. */
   admin: boolean;
+  /**
+   * Where "Apply now" goes, as a plain link (an agent's /{l}/{slug}/apply). Absent: Isaac's
+   * /health-alternative/apply/start, through the localized next-intl link as always.
+   */
+  applyHref?: string;
+  /** The quote's plan scope (lib/impact-quote/sync.ts): `guideScopeFor(slug)` for an agent. */
+  planScope?: string;
 };
 
 /* ─── building blocks ───────────────────────────────────────────────────────── */
@@ -108,16 +118,19 @@ function Welcome({ t }: { t: DeckCopy }) {
 /* ─── 2. The agent ──────────────────────────────────────────────────────────── */
 
 function Agent({ t, data }: { t: DeckCopy; data: GuideData }) {
+  const agent = data.agent;
+  const service = t.agent.facts.service(agent.languages);
   const cells: [string, ReactNode][] = [
-    ["IBO #", data.agentIbo ?? "—"],
+    ["IBO #", agent.iboNumber ?? "—"],
     [t.agent.status, <span key="s" className="text-[#2f97a0]">{t.agent.active}</span>],
-    ["WhatsApp", AGENT.whatsapp],
-    [t.agent.languages, AGENT.languages],
+    ["WhatsApp", formatWhatsapp(agent.whatsappE164) ?? "—"],
+    [t.agent.languages, languagesLabel(agent.languages) || "—"],
   ];
+  // "Licensed" only for a licensed agent; the service line only for the languages they speak.
   const facts: [GlyphName, string][] = [
     ["shieldCheck", t.agent.facts.representative],
-    ["mapPin", t.agent.facts.licensed(data.licensedStates)],
-    ["chat", t.agent.facts.bilingual],
+    ...(agent.licensed ? [["mapPin", t.agent.facts.licensed(agent.licensedStateCount)] as [GlyphName, string]] : []),
+    ...(service ? [["chat", service] as [GlyphName, string]] : []),
     ["heart", t.agent.facts.support],
   ];
   return (
@@ -133,14 +146,14 @@ function Agent({ t, data }: { t: DeckCopy; data: GuideData }) {
         </div>
         <div className="relative mx-auto -mt-12 h-28 w-28 rounded-full border-[5px] border-white bg-[#dfe7ef] shadow-md">
           <div className="absolute inset-0 overflow-hidden rounded-full">
-            <Image src={AGENT.photo} alt={AGENT.name} fill sizes="112px" className="object-cover" />
+            <AgentPhoto agent={agent} sizes="112px" initialsClassName="text-4xl" />
           </div>
           <span className="absolute -right-1 bottom-1 flex h-8 w-8 items-center justify-center rounded-full border-[3px] border-white bg-[#2f97a0]">
             <Glyph name="check" strokeWidth={3.4} className="h-3.5 w-3.5 text-white" />
           </span>
         </div>
         <div className="px-5 pb-5 pt-3 text-center">
-          <p className="text-2xl font-extrabold text-[#0b2a4a]">{AGENT.name}</p>
+          <p className="text-2xl font-extrabold text-[#0b2a4a]">{agent.displayName}</p>
           <p className="mt-1 text-xs font-bold uppercase tracking-[.08em] text-[#f2735a]">{t.agent.role}</p>
           <div className="mt-4 grid grid-cols-2 gap-2 text-left">
             {cells.map(([label, value]) => (
@@ -380,7 +393,16 @@ function Portal({ t, locale }: { t: DeckCopy; locale: DeckLocale }) {
 
 /* ─── 9. Next steps + Apply ─────────────────────────────────────────────────── */
 
-function NextSteps({ t, startDate }: { t: DeckCopy; startDate: string }) {
+const APPLY_CLASS =
+  "mt-6 flex w-full items-center justify-center gap-3 rounded-2xl bg-[#f2735a] px-6 py-5 text-xl font-extrabold text-white shadow-[0_14px_30px_rgba(242,115,90,.35)] transition hover:bg-[#e8644b]";
+
+function NextSteps({ t, startDate, applyHref }: { t: DeckCopy; startDate: string; applyHref?: string }) {
+  const apply = (
+    <>
+      {t.guide.apply}
+      <Glyph name="arrowRight" className="h-6 w-6" />
+    </>
+  );
   return (
     <div>
       <Kicker>{t.next.kicker}</Kicker>
@@ -397,13 +419,15 @@ function NextSteps({ t, startDate }: { t: DeckCopy; startDate: string }) {
           </li>
         ))}
       </ol>
-      <Link
-        href="/health-alternative/apply/start"
-        className="mt-6 flex w-full items-center justify-center gap-3 rounded-2xl bg-[#f2735a] px-6 py-5 text-xl font-extrabold text-white shadow-[0_14px_30px_rgba(242,115,90,.35)] transition hover:bg-[#e8644b]"
-      >
-        {t.guide.apply}
-        <Glyph name="arrowRight" className="h-6 w-6" />
-      </Link>
+      {applyHref ? (
+        <a href={applyHref} className={APPLY_CLASS}>
+          {apply}
+        </a>
+      ) : (
+        <Link href="/health-alternative/apply/start" className={APPLY_CLASS}>
+          {apply}
+        </Link>
+      )}
       <p className="mt-3 text-center text-sm text-[#56657a]">{t.guide.applyNote}</p>
       <p className="mt-6 text-xs leading-relaxed text-[#56657a]">{t.next.disclaimer}</p>
     </div>
@@ -423,8 +447,14 @@ export function buildGuideSteps(data: GuideData): { steps: ReactNode[]; quoteSte
     <Fees key="fees" t={t} />,
     <MemberCard key="card" t={t} />,
     <Portal key="portal" t={t} locale={data.locale} />,
-    <GuideQuote key="quote" locale={data.locale} admin={data.admin} />,
-    <NextSteps key="next" t={t} startDate={data.startDate} />,
+    <GuideQuote
+      key="quote"
+      locale={data.locale}
+      admin={data.admin}
+      agent={agentContact(data.agent)}
+      scope={data.planScope ?? GUIDE_SCOPE}
+    />,
+    <NextSteps key="next" t={t} startDate={data.startDate} applyHref={data.applyHref} />,
   ];
   return { steps, quoteStep: steps.findIndex((step) => (step as { key?: string }).key === "quote") };
 }

@@ -7,6 +7,7 @@ import { ageOn, pricedMembers, SENIOR_AGE, TIERS } from "@/lib/impact-quote/plan
 import { quoteImageFileSlug, renderQuoteImage } from "@/lib/impact-quote/quote-image";
 import { quoteImageRequestSchema } from "@/lib/impact-quote/quote-image-request";
 import { fetchImpactPlans } from "@/lib/impact-quote/server";
+import { isaacQuoteImageProfile } from "@/lib/tenancy/isaac-profile";
 
 /**
  * POST /api/admin/impact-quote-image — the shareable Impact quote for anyone Isaac quotes on
@@ -52,6 +53,7 @@ export async function POST(request: NextRequest) {
       startLabel: "earliest",
       household: { asked, senior: age >= SENIOR_AGE },
       origin: request.nextUrl.origin,
+      agent: isaacQuoteImageProfile(),
     });
 
     return new NextResponse(png, {

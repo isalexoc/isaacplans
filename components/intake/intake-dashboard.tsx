@@ -34,7 +34,17 @@ const STATUS_VARIANT: Record<IntakeStatus, "secondary" | "default" | "outline"> 
   completed: "default",
 };
 
-export default function IntakeDashboard({ lob }: { lob: string }) {
+export default function IntakeDashboard({
+  lob,
+  shareOrigin,
+}: {
+  lob: string;
+  /**
+   * Where the client links point (lib/tenancy/urls.ts): an agent's clients open theirs on the
+   * product domain. Absent (Isaac's dashboard): the address he is on, as always.
+   */
+  shareOrigin?: string;
+}) {
   const config = requireIntakeConfig(lob);
   const intakeRoute = LOBS[lob as LobSlug].intakeRoute;
   const locale = pickLocale(useLocale());
@@ -185,7 +195,7 @@ export default function IntakeDashboard({ lob }: { lob: string }) {
   }
 
   function shareUrl(token: string): string {
-    const origin = typeof window !== "undefined" ? window.location.origin : undefined;
+    const origin = shareOrigin ?? (typeof window !== "undefined" ? window.location.origin : undefined);
     return buildIntakeShareUrl(config, token, locale, origin);
   }
 

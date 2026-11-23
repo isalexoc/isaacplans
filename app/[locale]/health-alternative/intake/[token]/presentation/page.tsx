@@ -36,9 +36,10 @@ import {
   type ImpactTierKey,
 } from "@/lib/impact-quote/plans";
 import { fetchImpactPlans } from "@/lib/impact-quote/server";
-import { getLicensedStateCount } from "@/lib/licensed-states";
 import { getIntakeOperator, operatorCrmOptions, operatorOwns } from "@/lib/tenancy/context";
 import { crmCredsForOwner, type CrmOwnerOptions } from "@/lib/tenancy/crm";
+import { isaacProfile } from "@/lib/tenancy/isaac-profile";
+import { agentPublicProfile } from "@/lib/tenancy/profile";
 import ImpactPresentation from "@/components/impact-presentation/impact-presentation";
 import { buildImpactSlides } from "@/components/impact-presentation/slides";
 import type { DeckLocale } from "@/components/impact-presentation/copy";
@@ -94,14 +95,6 @@ async function initialQuote(row: IntakeSessionRow): Promise<{
   return { quote: plans ? { plans, members, oldestAge, source: "impact" } : null, household, initialTier };
 }
 
-async function licensedStates(): Promise<number> {
-  try {
-    return await getLicensedStateCount();
-  } catch {
-    return 0;
-  }
-}
-
 export default async function ImpactPresentationPage({
   params,
   searchParams,
@@ -140,15 +133,14 @@ export default async function ImpactPresentationPage({
   }
 
   const firstName = str(row.data?.firstName) || (row.contactName ?? "").trim().split(/\s+/)[0] || "";
-  // Isaac's IBO number and licenses are his alone (ACN P&P §I.6): an agent's deck shows the
-  // agent's own, from their row. The rest of the agent's identity comes with the profile work.
-  const agent = op.kind === "agent" ? op.agent : null;
+  // The owner's deck (checked above): Isaac's, or the agent's own name, photo, number, IBO # and
+  // licenses (ACN P&P §I.6: each IBO shows only their own Business ID).
+  const agent = op.kind === "agent" && op.agent ? agentPublicProfile(op.agent) : await isaacProfile();
   const slides = buildImpactSlides({
     locale,
     firstName,
     startDate: coverageStart(row, locale),
-    licensedStates: agent ? (agent.licensed ? agent.licensedStates.length : 0) : await licensedStates(),
-    agentIbo: agent ? agent.iboNumber?.trim() || null : process.env.IMPACT_AGENT_IBO?.trim() || null,
+    agent,
     token,
     ...(await initialQuote(row)),
   });

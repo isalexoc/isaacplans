@@ -67,3 +67,21 @@ export function agentMayOperate(agent: AgentGateFields, gates: TenancyGates): bo
 export function agentTakesApplications(agent: AgentGateFields, gates: TenancyGates): boolean {
   return agent.status === "active" && (agent.isTest || (gates.publicPages && gates.clientData));
 }
+
+/**
+ * `PLATFORM_PREVIEW`: this deployment is a preview of the product domain (set it only on preview
+ * deployments). There, test agents' public pages show while `TENANT_PUBLIC_PAGES` is off. Same
+ * parsing as the gates: off unless exactly on.
+ */
+export function readPlatformPreview(env: Record<string, string | undefined> = process.env): boolean {
+  return parseGateFlag(env.PLATFORM_PREVIEW);
+}
+
+/**
+ * May this agent's public pages (the guide, Apply, the privacy page) be served? Active, and either
+ * `TENANT_PUBLIC_PAGES` on, or a test agent on a preview deployment. A real agent always needs the
+ * gate; a test agent never shows on a production product domain while it is off.
+ */
+export function agentPublicPagesOpen(agent: AgentGateFields, gates: TenancyGates, preview: boolean): boolean {
+  return agent.status === "active" && (gates.publicPages || (agent.isTest && preview));
+}

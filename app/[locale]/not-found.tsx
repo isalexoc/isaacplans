@@ -3,9 +3,24 @@ import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Home } from "lucide-react";
+import { isProductSurface } from "@/lib/tenancy/surface";
 
 export default async function NotFoundPage() {
   const t = await getTranslations("NotFoundPage");
+
+  // The product domain has no home or contact page of its own to send anyone to (and none of
+  // Isaac's): just say so.
+  if (isProductSurface()) {
+    return (
+      <main className="flex min-h-[70vh] items-center justify-center px-4">
+        <div className="mx-auto w-full max-w-md space-y-4 text-center">
+          <p className="text-6xl font-extrabold text-[#0b2a4a] dark:text-white">404</p>
+          <h1 className="text-2xl font-semibold">{t("title")}</h1>
+          <p className="text-muted-foreground">{t("description")}</p>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="flex min-h-[70vh] items-center justify-center px-4">

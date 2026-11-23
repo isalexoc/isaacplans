@@ -19,6 +19,9 @@ import type { IntakeSession } from "@/lib/intake-core/types";
  *
  * `lang=client` asks the deck's page to open in the client's language (their CRM `spanish` tag),
  * whatever language the agent's form happens to be in.
+ *
+ * `deckHref`: where the deck lives when it isn't Isaac's /health-alternative/intake/[token]/
+ * presentation (the agent area), opened as a plain link since it may be another app shell.
  */
 export default function ImpactPresentationBar({
   lob,
@@ -26,6 +29,7 @@ export default function ImpactPresentationBar({
   session,
   data,
   locale,
+  deckHref,
 }: {
   lob: string;
   token: string;
@@ -33,6 +37,7 @@ export default function ImpactPresentationBar({
   /** The live answers: the quote reads the household from them. */
   data: Record<string, unknown>;
   locale: IntakeLocale;
+  deckHref?: string;
 }) {
   const meeting = useCrankwheelMeeting({
     target: {
@@ -46,6 +51,9 @@ export default function ImpactPresentationBar({
 
   const live = meeting.meeting;
   const joined = Boolean(live?.viewerJoinedAt) && live?.status === "active";
+  const openClass = joined
+    ? "flex shrink-0 items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-brand to-accent px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-brand/30 transition hover:opacity-95"
+    : `${OUTLINE_BTN} w-auto shrink-0 whitespace-nowrap px-4 py-2.5 text-sm`;
 
   return (
     <>
@@ -86,23 +94,26 @@ export default function ImpactPresentationBar({
             {tr(joined ? UI.presentationJoined : UI.presentationBody, locale)}
           </p>
         </div>
-        <Link
-          href={{
-            pathname: "/health-alternative/intake/[token]/presentation",
-            params: { token },
-            query: { lang: "client" },
-          }}
-          target="_blank"
-          rel="noopener"
-          className={
-            joined
-              ? "flex shrink-0 items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-brand to-accent px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-brand/30 transition hover:opacity-95"
-              : `${OUTLINE_BTN} w-auto shrink-0 whitespace-nowrap px-4 py-2.5 text-sm`
-          }
-        >
-          <ExternalLink className="h-4 w-4" />
-          {tr(UI.presentationOpen, locale)}
-        </Link>
+        {deckHref ? (
+          <a href={deckHref} target="_blank" rel="noopener" className={openClass}>
+            <ExternalLink className="h-4 w-4" />
+            {tr(UI.presentationOpen, locale)}
+          </a>
+        ) : (
+          <Link
+            href={{
+              pathname: "/health-alternative/intake/[token]/presentation",
+              params: { token },
+              query: { lang: "client" },
+            }}
+            target="_blank"
+            rel="noopener"
+            className={openClass}
+          >
+            <ExternalLink className="h-4 w-4" />
+            {tr(UI.presentationOpen, locale)}
+          </Link>
+        )}
       </div>
 
       <ImpactQuotePanel lob={lob} token={token} data={data} locale={locale} clientLocale={session.locale} />

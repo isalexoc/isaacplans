@@ -1,11 +1,18 @@
 // app/robots.ts
 import type { MetadataRoute } from "next";
+import { isProductSurface } from "@/lib/tenancy/surface";
 
 const HOST = (
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.isaacplans.com"
 ).replace(/\/$/, "");
 
 export default function robots(): MetadataRoute.Robots {
+  // The product domain (APP_SURFACE=product): crawlers may fetch its pages, so they can read the
+  // noindex every response carries; nothing there is listed, and nothing of Isaac's is named.
+  if (isProductSurface()) {
+    return { rules: [{ userAgent: "*", allow: "/" }] };
+  }
+
   const isProd = process.env.NODE_ENV === "production";
 
   return {

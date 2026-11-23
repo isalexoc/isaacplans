@@ -8,6 +8,7 @@ import { redirect } from "next/navigation";
 import { getLocale } from "next-intl/server";
 import IntakeDashboard from "@/components/intake/intake-dashboard";
 import { getIntakeOperator } from "@/lib/tenancy/context";
+import { publicOriginForOwner } from "@/lib/tenancy/urls";
 
 export const metadata: Metadata = {
   title: "Health Coverage Client Intake",
@@ -23,5 +24,9 @@ export default async function HealthAlternativeIntakeDashboardPage() {
     }
     redirect(`/${locale}/unauthorized`);
   }
-  return <IntakeDashboard lob="health-alternative" />;
+  // An agent's client links point at the product domain; Isaac's dashboard keeps using the address
+  // he is on, as always.
+  const shareOrigin =
+    gate.operator.kind === "agent" ? await publicOriginForOwner(gate.operator.userId) : undefined;
+  return <IntakeDashboard lob="health-alternative" shareOrigin={shareOrigin} />;
 }

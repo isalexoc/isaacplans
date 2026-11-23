@@ -206,6 +206,8 @@ export default function IntakeForm({
   lob,
   token,
   presenting = false,
+  guideScope = GUIDE_SCOPE,
+  deckHref,
 }: {
   lob: string;
   token: string;
@@ -214,6 +216,14 @@ export default function IntakeForm({
    * "Confirm my details"): no breadcrumb, meeting panel or owner-only questions.
    */
   presenting?: boolean;
+  /**
+   * Where a client's guide pick comes from (lib/impact-quote/sync.ts): "guide" (Isaac's /impact)
+   * unless the application belongs to an agent, whose guide on the product domain stores its pick
+   * under `guide:<slug>`.
+   */
+  guideScope?: string;
+  /** The deck's address for the presentation bar, when it isn't Isaac's (the agent area). */
+  deckHref?: string;
 }) {
   const locale = pickLocale(useLocale());
   const config = requireIntakeConfig(lob);
@@ -303,15 +313,15 @@ export default function IntakeForm({
       result.data = applyQuotePrefill(fresh, choiceWithQuote(readPlanChoice(token), block), { ...ctx, live });
       if (role === "client" && !isCompleted) {
         // Owners never read /impact's pick: Isaac's own quotes there must not reach a client's form.
-        const guide = readPlanChoice(GUIDE_SCOPE, { token });
+        const guide = readPlanChoice(guideScope, { token });
         if (guide) {
-          result.data = applyQuotePrefill(result.data, choiceWithQuote(guide, readQuoteBlock(GUIDE_SCOPE)), ctx);
+          result.data = applyQuotePrefill(result.data, choiceWithQuote(guide, readQuoteBlock(guideScope)), ctx);
           result.usedGuide = true;
         }
       }
       return result;
     },
-    [quotePrefill, config.sections, token]
+    [quotePrefill, config.sections, token, guideScope]
   );
 
   useEffect(() => {
@@ -335,10 +345,10 @@ export default function IntakeForm({
         // A pick from /impact went into this application: it's spent for any other one. Answers
         // this tab kept for a pick that can't apply (stale, or spent elsewhere) go too.
         if (quoted.usedGuide) {
-          markPlanChoiceApplied(GUIDE_SCOPE, token);
-          clearQuoteBlock(GUIDE_SCOPE);
-        } else if (s.role === "client" && !readPlanChoice(GUIDE_SCOPE, { token })) {
-          clearQuoteBlock(GUIDE_SCOPE);
+          markPlanChoiceApplied(guideScope, token);
+          clearQuoteBlock(guideScope);
+        } else if (s.role === "client" && !readPlanChoice(guideScope, { token })) {
+          clearQuoteBlock(guideScope);
         }
       } catch {
         if (active) setLoadState("error");
@@ -347,7 +357,7 @@ export default function IntakeForm({
     return () => {
       active = false;
     };
-  }, [lob, token, adoptSaved, forScreen, withQuote]);
+  }, [lob, token, adoptSaved, forScreen, withQuote, guideScope]);
 
   const isOwner = session?.role === "owner";
   // Agent-only chrome and questions. Off while presenting: the client is watching this screen.
@@ -836,7 +846,7 @@ export default function IntakeForm({
       </div>
 
       {agentChrome && config.impactPresentation && session && !completed && (
-        <ImpactPresentationBar lob={lob} token={token} session={session} data={data} locale={locale} />
+        <ImpactPresentationBar lob={lob} token={token} session={session} data={data} locale={locale} deckHref={deckHref} />
       )}
 
       {completed && isOwner && (

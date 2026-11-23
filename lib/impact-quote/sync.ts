@@ -36,6 +36,21 @@ export type PlanChoice = {
 export const GUIDE_SCOPE = "guide";
 
 /**
+ * The scope of one agent's guide on the product domain (`guide:<slug>`), where every agent shares
+ * one origin: a pick on agent A's guide must never fill an application started from agent B's.
+ * Isaac's /impact keeps `GUIDE_SCOPE`. No slug: Isaac's.
+ */
+export function guideScopeFor(slug: string | null | undefined): string {
+  const value = typeof slug === "string" ? slug.trim().toLowerCase() : "";
+  return value ? `${GUIDE_SCOPE}:${value}` : GUIDE_SCOPE;
+}
+
+/** Isaac's guide or an agent's: picks there expire (`GUIDE_CHOICE_TTL_MS`). */
+export function isGuideScope(scope: string): boolean {
+  return scope === GUIDE_SCOPE || scope.startsWith(`${GUIDE_SCOPE}:`);
+}
+
+/**
  * A "guide" choice older than this is not the visit that led to "Apply now" (another day, or
  * someone else on a shared device): it never applies.
  */
@@ -117,7 +132,7 @@ export function planChoiceUsable(
   scope: string,
   { maxAgeMs, token, now = Date.now() }: { maxAgeMs?: number; token?: string; now?: number } = {}
 ): boolean {
-  const ttl = maxAgeMs ?? (scope === GUIDE_SCOPE ? GUIDE_CHOICE_TTL_MS : undefined);
+  const ttl = maxAgeMs ?? (isGuideScope(scope) ? GUIDE_CHOICE_TTL_MS : undefined);
   if (ttl !== undefined) {
     const at = choice.at ? Date.parse(choice.at) : NaN;
     if (!Number.isFinite(at) || now - at > ttl) return false;

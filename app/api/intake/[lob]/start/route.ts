@@ -7,7 +7,13 @@ import { selfStartIntakeForClient } from "@/lib/intake-core/server";
 import { buildIntakeShareUrl } from "@/lib/intake-core/share-url";
 import { getAgentBySlug } from "@/lib/tenancy/agents";
 import { isListedPlatformOwner } from "@/lib/tenancy/crm";
-import { agentTakesApplications, isAgentLob, readTenancyGates } from "@/lib/tenancy/gates";
+import {
+  agentPublicPagesOpen,
+  agentTakesApplications,
+  isAgentLob,
+  readPlatformPreview,
+  readTenancyGates,
+} from "@/lib/tenancy/gates";
 import { normalizeAgentSlug, SLUG_PATTERN } from "@/lib/tenancy/slug-format";
 import { isProductSurface } from "@/lib/tenancy/surface";
 
@@ -23,9 +29,11 @@ import { isProductSurface } from "@/lib/tenancy/surface";
  *
  * Agents' "Apply" (`?agent=<slug>`) exists only on the product surface (`APP_SURFACE=product`):
  * there the slug must name an agent who takes applications right now (active, and a test agent
- * while the launch gates are off), that agent owns the new application, and anything else is a
- * 404 that never falls back to Isaac. Agents work the Health Coverage line only. On isaacplans.com
- * the parameter is refused with a 400, so an application can't be claimed on the wrong host.
+ * while the launch gates are off) and whose public pages are open (the same rule as their guide:
+ * a test agent only on a preview deployment while TENANT_PUBLIC_PAGES is off), that agent owns the
+ * new application, and anything else is a 404 that never falls back to Isaac. Agents work the
+ * Health Coverage line only. On isaacplans.com the parameter is refused with a 400, so an
+ * application can't be claimed on the wrong host.
  */
 
 const notFound = () => NextResponse.json({ success: false, error: "Not found" }, { status: 404 });
@@ -39,7 +47,10 @@ async function agentOwner(lob: string, param: string | null): Promise<AgentOwner
   if (!SLUG_PATTERN.test(slug)) return "none";
   try {
     const agent = await getAgentBySlug(slug);
-    if (!agent?.clerkUserId || !agentTakesApplications(agent, readTenancyGates())) return "none";
+    const gates = readTenancyGates();
+    if (!agent?.clerkUserId || !agentTakesApplications(agent, gates)) return "none";
+    // No "Apply" without the guide it belongs to (lib/tenancy/pages.ts `publicAgentForSlug`).
+    if (!agentPublicPagesOpen(agent, gates, readPlatformPreview())) return "none";
     // A row linked to one of Isaac's own ids is a misconfiguration: never start his applications
     // here (everything else treats a listed id as his, never as an agent).
     if (isListedPlatformOwner(agent.clerkUserId)) return "none";

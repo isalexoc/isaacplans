@@ -22,9 +22,11 @@ import { join, relative, sep } from "path";
 import { parseAppSurface, type AppSurface } from "../lib/tenancy/surface";
 import {
   agentMayOperate,
+  agentPublicPagesOpen,
   agentTakesApplications,
   isAgentLob,
   parseGateFlag,
+  readPlatformPreview,
   readTenancyGates,
   type AgentGateFields,
   type TenancyGates,
@@ -52,6 +54,40 @@ import {
   type TokenAccessDecision,
 } from "../lib/tenancy/operator";
 import { isMissingTableError } from "../lib/tenancy/db-errors";
+import {
+  agentPageAlternates,
+  agentPagePath,
+  decideTokenPage,
+  PRODUCT_RESPONSE_HEADERS,
+  productNotFoundHtml,
+  productRoute,
+  type ProductRoute,
+  type TokenPageOwnerFact,
+} from "../lib/tenancy/product-routes";
+import {
+  agentPublicProfile,
+  formatWhatsapp,
+  languagesLabel,
+  normalizeE164,
+  safeImpactReferralUrl,
+  safePhotoUrl,
+  whatsappHref,
+  type AgentProfileSource,
+} from "../lib/tenancy/profile";
+import { buildIsaacProfile, ISAAC_AGENT } from "../lib/tenancy/isaac-agent";
+import {
+  DEFAULT_PLATFORM_NAME,
+  mainSiteUrl,
+  platformName,
+  productHostLabel,
+  productPublicOrigin,
+  productRedirectOrigin,
+  publicOriginFor,
+  publicOriginForOwnerWith,
+} from "../lib/tenancy/site-urls";
+import { buildIntakeShareUrl, buildSecureCaptureUrl } from "../lib/intake-core/share-url";
+import { DECK_COPY } from "../components/impact-presentation/copy";
+import { GUIDE_SCOPE, guideScopeFor, isGuideScope, planChoiceUsable } from "../lib/impact-quote/sync";
 import { resolveIntakeAccess, type IntakeAccessRow } from "../lib/intake-shared/access";
 import { ENGINE_INTAKE_CONFIGS } from "../lib/intake-configs";
 import { routing } from "../i18n/routing";
@@ -469,6 +505,422 @@ console.log("\nMissing-table detection (migration 0046 not applied yet)");
   check("null is not", !isMissingTableError(null));
 }
 
+console.log("\nProduct domain: the address book (lib/tenancy/product-routes.ts)");
+{
+  const TOKEN = "AbCdEfGhIjKlMnOpQrStUvWx"; // nanoid(24)-shaped
+  const same = (a: ProductRoute, b: ProductRoute) => JSON.stringify(a) === JSON.stringify(b);
+  const rewrites: [string, string][] = [
+    ["/en/maria-lopez", "/en/a/maria-lopez"],
+    ["/es/maria-lopez", "/es/a/maria-lopez"],
+    ["/en/maria-lopez/apply", "/en/a/maria-lopez/apply"],
+    ["/es/maria-lopez/aplicar", "/es/a/maria-lopez/apply"],
+    ["/es/maria-lopez/apply", "/es/a/maria-lopez/apply"],
+    ["/en/maria-lopez/aplicar", "/en/a/maria-lopez/apply"],
+    ["/en/maria-lopez/privacy", "/en/a/maria-lopez/privacy"],
+    ["/es/maria-lopez/privacidad", "/es/a/maria-lopez/privacy"],
+    ["/en/Maria-Lopez", "/en/a/maria-lopez"],
+    ["/en/maria-lopez/", "/en/a/maria-lopez"],
+    ["/es/juan23/Aplicar", "/es/a/juan23/apply"],
+  ];
+  for (const [path, to] of rewrites) {
+    const route = productRoute(path);
+    check(`${path} → ${to}`, route.kind === "rewrite" && route.to === to, JSON.stringify(route));
+  }
+  const passes: [string, "en" | "es"][] = [
+    [`/en/health-alternative/intake/${TOKEN}`, "en"],
+    [`/es/alternativa-de-salud/admision/${TOKEN}`, "es"],
+    [`/en/secure/${TOKEN}`, "en"],
+    [`/es/seguro/${TOKEN}`, "es"],
+  ];
+  for (const [path, locale] of passes) {
+    check(`${path.replace(TOKEN, "<token>")} passes through (the client's own link)`, same(productRoute(path), { kind: "pass", locale }));
+  }
+  // A token page in the other language's words goes to next-intl, which redirects it to the
+  // locale's own (/es/secure/… → /es/seguro/…): those names are the client's own links anyway.
+  const crossLocale: [string, "en" | "es"][] = [
+    [`/es/secure/${TOKEN}`, "es"],
+    [`/en/seguro/${TOKEN}`, "en"],
+    [`/es/health-alternative/intake/${TOKEN}`, "es"],
+    [`/en/alternativa-de-salud/admision/${TOKEN}`, "en"],
+  ];
+  for (const [path, locale] of crossLocale) {
+    check(`${path.replace(TOKEN, "<token>")} → next-intl (its redirect to the locale's words)`, same(productRoute(path), { kind: "pass", locale }));
+  }
+  const notFound = [
+    // The agent's views of a token, and the dashboard: they live on isaacplans.com.
+    `/en/health-alternative/intake/${TOKEN}/view`,
+    `/en/health-alternative/intake/${TOKEN}/presentation`,
+    `/es/alternativa-de-salud/admision/${TOKEN}/presentacion`,
+    "/en/health-alternative/intake",
+    "/es/alternativa-de-salud/admision",
+    // Isaac's page names in the other language: a 404 straight away, never next-intl's redirect to
+    // his other spelling (/es/about → /es/sobre-mi would map his site on this domain).
+    "/es/about",
+    "/en/sobre-mi",
+    "/es/contact-me",
+    "/en/gastos-finales/admision",
+    `/es/iul/secure/${TOKEN}`,
+    // Not a token.
+    "/en/secure/short",
+    "/en/secure/has%20space",
+    // Isaac's other lines and pages.
+    `/en/life-insurance/intake/${TOKEN}`,
+    `/en/iul/secure/${TOKEN}`,
+    "/en/impact",
+    "/es/impacto",
+    "/en/contact-me",
+    "/es/contacto",
+    "/en/blog",
+    "/es/preguntas-frecuentes",
+    "/en/admin",
+    "/en/admin/agents",
+    "/es/agente",
+    "/en/presentations/x",
+    // Reserved and provider-name slugs, the internal route itself, the bare locale.
+    "/en/apply",
+    "/es/privacidad",
+    "/en/a",
+    "/en/a/maria-lopez",
+    "/es/a/maria-lopez/apply",
+    "/en/impact-maria",
+    "/en/maria-acn",
+    "/en",
+    "/es",
+    // Shapes that aren't an agent's page.
+    "/en/maria-lopez/apply/now",
+    "/en/maria-lopez/blog",
+    "/en/ma",
+    "/en/maria_lopez",
+  ];
+  for (const path of notFound) {
+    const route = productRoute(path);
+    check(`${path.replace(TOKEN, "<token>")} → 404`, route.kind === "not_found" && !route.api, JSON.stringify(route));
+  }
+  // Every top-level page of i18n/routing.ts, in both languages, is a 404 as /{l}/{segment}: no agent
+  // can be given a slug next-intl would localize or redirect first.
+  const segments = topLevelPathSegments(routing.pathnames as unknown as Record<string, string | Record<string, string>>);
+  const reached = segments.flatMap((s) => ["en", "es"].map((l) => `/${l}/${s}`)).filter((p) => productRoute(p).kind !== "not_found");
+  check(`every localized top-level path (${segments.length}, both locales) is a 404 there`, reached.length === 0, reached.join(", "));
+
+  const apis: [string, boolean][] = [
+    ["/api/intake/health-alternative/start", true],
+    [`/api/intake/health-alternative/${TOKEN}`, true],
+    [`/api/intake/health-alternative/${TOKEN}/patch`, true],
+    [`/api/intake/health-alternative/${TOKEN}/complete`, true],
+    ["/api/intake/health-alternative", false],
+    ["/api/intake/health-alternative-x/y", false],
+    ["/api/intake/life-insurance/start", false],
+    ["/api/intake/dental-vision/x", false],
+    ["/api/admin/impact-quote-image", false],
+    ["/api/admin/agents", false],
+    ["/api/blog/search", false],
+    ["/api/crankwheel/meetings", false],
+    ["/api/iul-intake/x", false],
+    ["/api", false],
+  ];
+  for (const [path, allowed] of apis) {
+    const route = productRoute(path);
+    check(
+      `${path.replace(TOKEN, "<token>")} → ${allowed ? "through" : "404 (JSON)"}`,
+      allowed ? route.kind === "api" : route.kind === "not_found" && route.api,
+      JSON.stringify(route)
+    );
+  }
+  for (const path of ["/studio", "/studio/structure", "/studio/x/y"]) {
+    const route = productRoute(path);
+    check(`${path} → 404`, route.kind === "not_found" && !route.api);
+  }
+  // Without a locale prefix (or with a miscased one), next-intl only sees a path it would send to a
+  // page that exists; anything else is a 404 straight away.
+  for (const path of ["/maria-lopez", "/maria-lopez/aplicar", `/secure/${TOKEN}`, `/alternativa-de-salud/admision/${TOKEN}`, "/ES/maria-lopez", `/En/secure/${TOKEN}`]) {
+    check(`${path.replace(TOKEN, "<token>")} → next-intl's redirect to the locale's page`, productRoute(path).kind === "intl", JSON.stringify(productRoute(path)));
+  }
+  for (const path of ["/", "/blog", "/about", "/sobre-mi", "/contacto", "/impacto", "/a/maria-lopez", "/ES/about", "/EN", "/fr/maria-lopez"]) {
+    const route = productRoute(path);
+    check(`${path} → 404 without next-intl`, route.kind === "not_found" && !route.api, JSON.stringify(route));
+  }
+
+  check(
+    "agent page links use the locale's own words",
+    agentPagePath("en", "maria-lopez") === "/en/maria-lopez" &&
+      agentPagePath("es", "maria-lopez", "apply") === "/es/maria-lopez/aplicar" &&
+      agentPagePath("en", "maria-lopez", "apply") === "/en/maria-lopez/apply" &&
+      agentPagePath("es", "maria-lopez", "privacy") === "/es/maria-lopez/privacidad" &&
+      JSON.stringify(agentPageAlternates("maria-lopez", "privacy")) ===
+        JSON.stringify({ en: "/en/maria-lopez/privacy", es: "/es/maria-lopez/privacidad" })
+  );
+  check(
+    "…and every one of them comes back through the table to the same internal page",
+    (["guide", "apply", "privacy"] as const).every((page) =>
+      (["en", "es"] as const).every((l) => {
+        const route = productRoute(agentPagePath(l, "maria-lopez", page));
+        return route.kind === "rewrite" && route.to === `/${l}/a/maria-lopez${page === "guide" ? "" : `/${page}`}`;
+      })
+    )
+  );
+  check(
+    "every product response is private, unindexed, unframeable and sends no Referer",
+    PRODUCT_RESPONSE_HEADERS["x-private-page"] === "1" &&
+      PRODUCT_RESPONSE_HEADERS["X-Robots-Tag"] === "noindex, nofollow" &&
+      PRODUCT_RESPONSE_HEADERS["Content-Security-Policy"] === "frame-ancestors 'none'" &&
+      PRODUCT_RESPONSE_HEADERS["Referrer-Policy"] === "no-referrer"
+  );
+  const html = productNotFoundHtml("es") + productNotFoundHtml(null);
+  check("the product 404 page names nobody and is noindex", !/isaac/i.test(html) && html.includes('content="noindex'));
+}
+
+console.log("\nToken pages: which domain serves a client's link");
+{
+  const decide = (
+    surface: AppSurface,
+    owner: TokenPageOwnerFact,
+    over: { gates?: TenancyGates; keepsMainView?: boolean; productConfigured?: boolean; lob?: string } = {}
+  ) =>
+    decideTokenPage({
+      surface,
+      lob: over.lob ?? HA,
+      owner,
+      gates: over.gates ?? OFF,
+      keepsMainView: over.keepsMainView ?? false,
+      productConfigured: over.productConfigured ?? true,
+    });
+  check("main: Isaac's token renders as always", decide("main", "platform") === "render");
+  check("main: an unknown token renders as always (the API says not found)", decide("main", "missing") === "render");
+  check("main: a failed lookup renders as always (the API answers 503)", decide("main", "unknown") === "render");
+  check("main: an agent's client is sent to the product domain", decide("main", testAgent) === "redirect");
+  check("main: the owner or an operator keeps the page (the API decides)", decide("main", testAgent, { keepsMainView: true }) === "render");
+  check("main: …even for a paused agent (they get the audited answer)", decide("main", pausedAgent, { keepsMainView: true }) === "render");
+  check("main: a paused agent's client → 404, not a redirect", decide("main", pausedAgent) === "not_found");
+  check("main: a real agent's client while TENANT_CLIENT_DATA is off → 404", decide("main", realAgent) === "not_found");
+  check("main: a real agent's client once it is on → redirect", decide("main", realAgent, { gates: ON }) === "redirect");
+  check("main: no product domain configured → 404, never Isaac's page", decide("main", testAgent, { productConfigured: false }) === "not_found");
+  check("product: Isaac's token → 404", decide("product", "platform") === "not_found");
+  check("product: an unknown token → 404", decide("product", "missing") === "not_found");
+  check("product: a failed lookup → retry (500), never a 404 that sticks", decide("product", "unknown") === "retry");
+  check("product: an open agent's token → the agent's shell", decide("product", testAgent) === "tenant");
+  check("product: a paused agent's token → 404", decide("product", pausedAgent) === "not_found");
+  check("product: a real agent's token while TENANT_CLIENT_DATA is off → 404", decide("product", realAgent) === "not_found");
+  check("product: an agent's token on another line → 404", decide("product", testAgent, { lob: "life-insurance" }) === "not_found");
+}
+
+console.log("\nPublic pages gate (guide, Apply, privacy)");
+{
+  check("PLATFORM_PREVIEW is off unless exactly on", !readPlatformPreview({}) && readPlatformPreview({ PLATFORM_PREVIEW: "1" }) && !readPlatformPreview({ PLATFORM_PREVIEW: "preview" }));
+  check("a real agent needs TENANT_PUBLIC_PAGES", !agentPublicPagesOpen(realAgent, OFF, true) && agentPublicPagesOpen(realAgent, { ...OFF, publicPages: true }, false));
+  check("a test agent shows on a preview deployment with the gate off", agentPublicPagesOpen(testAgent, OFF, true));
+  check("a test agent never shows on a production product domain with the gate off", !agentPublicPagesOpen(testAgent, OFF, false));
+  check("a test agent shows once the gate is on", agentPublicPagesOpen(testAgent, { ...OFF, publicPages: true }, false));
+  check("a paused or invited agent never shows", !agentPublicPagesOpen(pausedAgent, ON, true) && !agentPublicPagesOpen(invitedAgent, ON, true));
+}
+
+console.log("\nPublic origins (lib/tenancy/site-urls.ts; urls.ts publicOriginForOwner)");
+{
+  const env = { NEXT_PUBLIC_SITE_URL: "https://www.isaacplans.com/", PRODUCT_PUBLIC_URL: "https://guide.example.com/ignored/path" };
+  check("Isaac's site defaults to www.isaacplans.com", mainSiteUrl({}) === "https://www.isaacplans.com");
+  check("NEXT_PUBLIC_SITE_URL wins, without a trailing slash", mainSiteUrl({ NEXT_PUBLIC_SITE_URL: "https://staging.example/" }) === "https://staging.example");
+  check("PRODUCT_PUBLIC_URL is read as its origin", productPublicOrigin(env) === "https://guide.example.com");
+  check(
+    "a missing or malformed product URL is null",
+    productPublicOrigin({}) === null &&
+      productPublicOrigin({ PRODUCT_PUBLIC_URL: "guide.example.com" }) === null &&
+      productPublicOrigin({ PRODUCT_PUBLIC_URL: "ftp://guide.example.com" }) === null &&
+      productPublicOrigin({ PRODUCT_PUBLIC_URL: "https://u:p@guide.example.com" }) === null
+  );
+  check(
+    "a local preview host works over http (localhost, *.local), any other only over https",
+    productPublicOrigin({ PRODUCT_PUBLIC_URL: "http://pilot.local:3001" }) === "http://pilot.local:3001" &&
+      productPublicOrigin({ PRODUCT_PUBLIC_URL: "http://localhost:3001" }) === "http://localhost:3001" &&
+      productPublicOrigin({ PRODUCT_PUBLIC_URL: "http://guide.example.com" }) === null &&
+      productPublicOrigin({ PRODUCT_PUBLIC_URL: "http://localhost.example.com" }) === null
+  );
+  check("platform owner → Isaac's site", publicOriginFor(true, env) === "https://www.isaacplans.com");
+  check("anyone else → the product domain", publicOriginFor(false, env) === "https://guide.example.com");
+  check("no product domain → Isaac's site (whose token pages then 404 for an agent)", publicOriginFor(false, { NEXT_PUBLIC_SITE_URL: env.NEXT_PUBLIC_SITE_URL }) === "https://www.isaacplans.com");
+
+  // isaacplans.com's 307 for an agent's client: never to the site answering, never to Isaac's own.
+  const redirectTo = (product: string, requestHost: string | null, site = "https://www.isaacplans.com") =>
+    productRedirectOrigin({ requestHost, env: { NEXT_PUBLIC_SITE_URL: site, PRODUCT_PUBLIC_URL: product } });
+  check("the 307 goes to the product domain", redirectTo("https://guide.example.com", "www.isaacplans.com") === "https://guide.example.com");
+  check("…never to the site answering (a loop)", redirectTo("https://guide.example.com", "guide.example.com") === null && redirectTo("https://www.guide.example.com", "guide.example.com") === null);
+  check("…never to Isaac's own site, www or not", redirectTo("https://isaacplans.com", "preview.vercel.app") === null && redirectTo("https://www.isaacplans.com", null) === null);
+  check("…never to the default site either, whatever NEXT_PUBLIC_SITE_URL says", redirectTo("https://isaacplans.com", null, "https://staging.example") === null);
+  check("…never in plain http to a public host, and nowhere without a product domain", redirectTo("http://guide.example.com", "www.isaacplans.com") === null && redirectTo("", "www.isaacplans.com") === null);
+  check("…two local ports are two sites", redirectTo("http://localhost:3001", "localhost:3000") === "http://localhost:3001");
+
+  // Isaac's links are the ones the share-link builder always made: its old default was
+  // NEXT_PUBLIC_SITE_URL ?? https://www.isaacplans.com, trailing slashes trimmed.
+  const ha = ENGINE_INTAKE_CONFIGS.find((c) => c.lob === HA);
+  const T = "AbCdEfGhIjKlMnOp";
+  const oldBase = (value: string | undefined) => value ?? "https://www.isaacplans.com";
+  check(
+    "Isaac's application and secure links are unchanged (env unset, or with a trailing slash)",
+    ha !== undefined &&
+      [undefined, "https://www.isaacplans.com/", "https://staging.example//"].every((value) => {
+        const site = mainSiteUrl({ NEXT_PUBLIC_SITE_URL: value });
+        return (["en", "es"] as const).every(
+          (l) =>
+            buildIntakeShareUrl(ha, T, l, site) === buildIntakeShareUrl(ha, T, l, oldBase(value)) &&
+            buildSecureCaptureUrl(T, l, site) === buildSecureCaptureUrl(T, l, oldBase(value))
+        );
+      }) &&
+      buildIntakeShareUrl(ha, T, "es", mainSiteUrl({})) === `https://www.isaacplans.com/es/alternativa-de-salud/admision/${T}`
+  );
+
+  check("the platform's name defaults", platformName({}) === DEFAULT_PLATFORM_NAME && platformName({ PLATFORM_NAME: "  Guía Salud " }) === "Guía Salud");
+  check("the product host label drops the scheme and www", productHostLabel({ PRODUCT_PUBLIC_URL: "https://www.guide.example.com" }) === "guide.example.com" && productHostLabel({}) === null);
+}
+
+console.log("\nImpact referral links: Impact's own https hosts only");
+{
+  for (const ok of [
+    "https://impacthealthsharing.com/enroll",
+    "https://www.impacthealthsharing.com/enroll?ref=AB12",
+    "https://IMPACTHEALTHSHARING.COM/x",
+    "https://mysharable.com",
+    "https://impact.mysharable.com/r/abc",
+  ]) {
+    check(`accepts ${ok}`, safeImpactReferralUrl(ok) !== null);
+  }
+  for (const bad of [
+    "http://impacthealthsharing.com/enroll",
+    "https://impacthealthsharing.com.evil.com/",
+    "https://evilimpacthealthsharing.com/",
+    "https://evil.com/impacthealthsharing.com",
+    "https://evil.com/?u=https://impacthealthsharing.com",
+    "https://user@impacthealthsharing.com/",
+    "https://impacthealthsharing.com:8443/",
+    "https://mysharable.co/",
+    "https://impacthealthsharing.co/",
+    "impacthealthsharing.com/enroll",
+    "javascript:alert(1)",
+    "//impacthealthsharing.com",
+    "",
+  ]) {
+    check(`refuses ${bad || "(empty)"}`, safeImpactReferralUrl(bad) === null);
+  }
+  check("refuses nothing at all", safeImpactReferralUrl(null) === null && safeImpactReferralUrl(undefined) === null);
+}
+
+console.log("\nAgent profiles (lib/tenancy/profile.ts)");
+{
+  // The card his screens drew before the platform (the AGENT constant once in
+  // components/impact-presentation/copy.ts), field for field.
+  const OLD_CARD = {
+    name: "Isaac Orraiz",
+    whatsapp: "(540) 681-3507",
+    whatsappDigits: "15406813507",
+    site: "isaacplans.com",
+    photo: "/images/impact/presentation/agent-isaac.jpg",
+    languages: "Español · English",
+  };
+  check(
+    "ISAAC_AGENT is the old card, unchanged",
+    (Object.keys(OLD_CARD) as (keyof typeof OLD_CARD)[]).every((key) => ISAAC_AGENT[key] === OLD_CARD[key])
+  );
+  const isaac = buildIsaacProfile({ licensedStateCount: 14, iboNumber: " IBO-1 ", siteUrl: "https://www.isaacplans.com/" });
+  check("Isaac's name is the old card's", isaac.displayName === OLD_CARD.name && `${isaac.firstName} ${isaac.lastName}` === OLD_CARD.name);
+  check("…his WhatsApp prints exactly as before", formatWhatsapp(isaac.whatsappE164) === OLD_CARD.whatsapp && isaac.whatsappDigits === OLD_CARD.whatsappDigits);
+  check("…his languages print exactly as before", languagesLabel(isaac.languages) === OLD_CARD.languages);
+  check("…his site line is the same", isaac.siteLabel === OLD_CARD.site);
+  check("…his photo stays the app's own file (optimized as before) and has an absolute URL", isaac.photoPath === OLD_CARD.photo && isaac.photoUrl === `https://www.isaacplans.com${OLD_CARD.photo}`);
+  check("…licensed, in the Sanity count of states", isaac.licensed && isaac.licensedStateCount === 14);
+  check("…IBO # from env, trimmed; none → a dash on the card", isaac.iboNumber === "IBO-1" && buildIsaacProfile({ licensedStateCount: 0, siteUrl: "x" }).iboNumber === null);
+  check("…his pages have no slug and his pronoun is kept", isaac.slug === null && isaac.pronoun === "he");
+  check(
+    "…his wa.me link is the same as before",
+    whatsappHref(isaac.whatsappDigits, DECK_COPY.es.guide.whatsappText(isaac.firstName)) ===
+      `https://wa.me/${OLD_CARD.whatsappDigits}?text=${encodeURIComponent("Hola Isaac, vi la presentación de Impact y tengo una pregunta.")}`
+  );
+  // The copy that used to say "Isaac" says exactly the same for him.
+  check("es WhatsApp message", DECK_COPY.es.guide.whatsappText(isaac.firstName) === "Hola Isaac, vi la presentación de Impact y tengo una pregunta.");
+  check("en WhatsApp message", DECK_COPY.en.guide.whatsappText(isaac.firstName) === "Hi Isaac, I saw the Impact presentation and I have a question.");
+  check(
+    "es no-prices message",
+    DECK_COPY.es.quote.error(isaac.firstName, isaac.pronoun) ===
+      "No pudimos traer los precios ahora. Escríbale a Isaac por WhatsApp y le envía su cotización."
+  );
+  check(
+    "en no-prices message",
+    DECK_COPY.en.quote.error(isaac.firstName, isaac.pronoun) ===
+      "We couldn't get the prices right now. Message Isaac on WhatsApp and he'll send your quote."
+  );
+  check(
+    "the service line for Isaac's two languages",
+    DECK_COPY.es.agent.facts.service(isaac.languages) === "Atención personalizada en español y en inglés" &&
+      DECK_COPY.en.agent.facts.service(isaac.languages) === "Personal service in English and Spanish"
+  );
+  check(
+    "the licensed line is unchanged",
+    DECK_COPY.en.agent.facts.licensed(14) === "Licensed health agent in 14 states" &&
+      DECK_COPY.es.agent.facts.licensed(0) === "Agente de salud licenciado"
+  );
+
+  const row: AgentProfileSource = {
+    slug: "maria-lopez",
+    firstName: " María ",
+    lastName: "López",
+    photoUrl: "https://res.cloudinary.com/demo/image/upload/maria.jpg",
+    whatsappE164: "+1 (555) 010-2000",
+    languages: ["es", "fr", "EN", "es"],
+    licensed: false,
+    licensedStates: ["VA", "md"],
+    iboNumber: " 7788 ",
+    impactReferralUrl: "https://impacthealthsharing.com.evil.com/x",
+  };
+  const maria = agentPublicProfile(row, { PRODUCT_PUBLIC_URL: "https://www.guide.example.com" });
+  check("an agent's name, slug and site line are their own", maria.displayName === "María López" && maria.firstName === "María" && maria.slug === "maria-lopez" && maria.siteLabel === "guide.example.com/maria-lopez");
+  check("an agent's WhatsApp is normalized to E.164", maria.whatsappE164 === "+15550102000" && maria.whatsappDigits === "15550102000" && formatWhatsapp(maria.whatsappE164) === "(555) 010-2000");
+  check("only en/es, once each, in their order", JSON.stringify(maria.languages) === JSON.stringify(["es", "en"]));
+  check("not licensed: no states counted, so no 'licensed' line", !maria.licensed && maria.licensedStateCount === 0);
+  check("licensed: unique two-letter states counted", agentPublicProfile({ ...row, licensed: true, licensedStates: ["va", "VA", "md", "x1", ""] }, {}).licensedStateCount === 2);
+  check("their own IBO #, never Isaac's", maria.iboNumber === "7788");
+  check("a look-alike Impact link is dropped", maria.impactReferralUrl === null);
+  check("an agent has no pronoun yet: the English message is worded without one", maria.pronoun === null && DECK_COPY.en.quote.error(maria.firstName, maria.pronoun) === "We couldn't get the prices right now. Message María on WhatsApp for your quote.");
+  check("no product domain: no site line", agentPublicProfile(row, {}).siteLabel === null);
+  check("an agent's photo is an outside https URL, never the app's own path", maria.photoUrl === row.photoUrl && maria.photoPath === null);
+  for (const bad of ["http://res.cloudinary.com/x.jpg", "https://127.0.0.1/x.jpg", "https://2130706433/x.jpg", "https://[::1]/x.jpg", "https://localhost/x.jpg", "https://intranet/x.jpg", "https://files.local/x.jpg", "/images/x.jpg", "javascript:alert(1)"]) {
+    check(`photo ${bad} is dropped`, safePhotoUrl(bad) === null);
+  }
+  // Never Isaac's own media: his Cloudinary account (by name, or the one in env) or his site.
+  for (const bad of [
+    "https://res.cloudinary.com/isaacdev/image/upload/v1/agents/maria.jpg",
+    "https://res.cloudinary.com/IsaacDev/image/upload/maria.jpg",
+    "https://isaacdev-res.cloudinary.com/image/upload/maria.jpg",
+    "https://res.cloudinary.com/main-cloud/image/upload/maria.jpg",
+    "https://www.isaacplans.com/images/maria.jpg",
+    "https://cdn.isaacplans.com/maria.jpg",
+    "https://staging.example/maria.jpg",
+  ]) {
+    const env = { NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: "main-cloud", NEXT_PUBLIC_SITE_URL: "https://staging.example" };
+    check(`photo ${bad} (Isaac's media) is dropped`, safePhotoUrl(bad, env) === null);
+  }
+  check(
+    "another Cloudinary account is fine",
+    safePhotoUrl("https://res.cloudinary.com/agents-media/image/upload/maria.jpg", { NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME: "main-cloud" }) !== null &&
+      agentPublicProfile({ ...row, photoUrl: "https://res.cloudinary.com/isaacdev/image/upload/m.jpg" }, {}).photoUrl === null
+  );
+  check("a number that isn't E.164 is dropped", normalizeE164("555-0102") === null && normalizeE164("+0123456789") === null && normalizeE164(null) === null);
+  check("no number: no wa.me link", whatsappHref(null) === null && whatsappHref("12") === null);
+  check(
+    "the service line follows the agent's languages",
+    DECK_COPY.es.agent.facts.service(["es"]) === "Atención personalizada en español" &&
+      DECK_COPY.en.agent.facts.service(["es"]) === "Personal service in Spanish" &&
+      DECK_COPY.en.agent.facts.service([]) === null
+  );
+  check("no name at all: the slug stands in", agentPublicProfile({ ...row, firstName: null, lastName: null }, {}).displayName === "maria-lopez");
+}
+
+console.log("\nGuide plan key per agent (lib/impact-quote/sync.ts)");
+{
+  check("Isaac's /impact keeps \"guide\"", guideScopeFor(null) === GUIDE_SCOPE && guideScopeFor("") === "guide");
+  check("an agent's guide is guide:<slug>", guideScopeFor(" Maria-Lopez ") === "guide:maria-lopez");
+  check("two agents never share a key", guideScopeFor("maria-lopez") !== guideScopeFor("juan-perez"));
+  check("both are guide scopes; a token isn't", isGuideScope("guide") && isGuideScope("guide:maria-lopez") && !isGuideScope("AbCdEfGh"));
+  const now = Date.parse("2026-11-23T12:00:00Z");
+  const pick = (hoursAgo: number) => ({ tier: "esencial" as const, monthly: 300, at: new Date(now - hoursAgo * 3600_000).toISOString() });
+  check("an agent's guide pick expires after 12 hours, like Isaac's", planChoiceUsable(pick(1), "guide:maria-lopez", { now }) && !planChoiceUsable(pick(13), "guide:maria-lopez", { now }));
+}
+
 console.log("\nGuard: Isaac's CRM credentials only through lib/tenancy/crm.ts");
 {
   const GUARDED = [
@@ -479,6 +931,10 @@ console.log("\nGuard: Isaac's CRM credentials only through lib/tenancy/crm.ts");
     "app/[locale]/health-alternative",
     "app/api/crankwheel",
     "lib/crankwheel",
+    // The product domain's pages and shell.
+    "app/[locale]/a",
+    "app/[locale]/secure",
+    "components/tenant",
   ];
   // Reading Isaac's GHL credentials: the base-credentials helper, the env vars themselves, and the
   // call-summary config that carries his Private Integration token (`piToken`).
@@ -613,8 +1069,121 @@ console.log("\nGuard: Isaac's CRM credentials only through lib/tenancy/crm.ts");
   check("in lib/tenancy only crm.ts uses the base credentials", tenancyHits.join(",") === "lib/tenancy/crm.ts", tenancyHits.join(","));
 }
 
-console.log(`\n${passed} passed, ${failed} failed\n`);
-process.exit(failed === 0 ? 0 : 1);
+console.log("\nGuard: nothing of Isaac's in the product domain's browser code");
+{
+  const read = (path: string) => readFileSync(join(ROOT, ...path.split("/")), "utf8");
+  /** Every repo module a file reaches through value imports (type-only imports never ship). */
+  const reachable = (roots: readonly string[]): string[] => {
+    const seen = new Set<string>();
+    const queue = roots.map((r) => join(ROOT, ...r.split("/")));
+    while (queue.length > 0) {
+      const file = queue.pop() as string;
+      if (seen.has(file)) continue;
+      seen.add(file);
+      for (const imp of importsOf(readFileSync(file, "utf8"))) {
+        const target = resolveModule(file, imp.spec);
+        if (target) queue.push(target);
+      }
+    }
+    return Array.from(seen).map(rel).sort();
+  };
+  /** Code without its comments (block comments and whole comment lines; strings are left alone). */
+  const code = (source: string) =>
+    source
+      .replace(/\/\*[\s\S]*?\*\//g, "")
+      .split(/\r?\n/)
+      .filter((line) => !/^\s*\/\//.test(line))
+      .join("\n");
+  const IDENTITY = [/5406813507/, /681-3507/, /Orraiz/i, /isaacplans/i, /agent-isaac/i];
+
+  // The client components an agent's guide page draws: the product frame's two, and the guide's.
+  const guideClient = reachable([
+    "components/theme-provider.tsx",
+    "components/ui/toaster.tsx",
+    "components/impact-presentation/impact-guide.tsx",
+    "components/impact-presentation/guide-quote.tsx",
+  ]);
+  const SERVER_SIDE_ONLY = [
+    "i18n/navigation.ts", // next-intl's navigation: its browser code carries Isaac's whole route table
+    "i18n/routing.ts",
+    "lib/tenancy/isaac-agent.ts",
+    "lib/tenancy/isaac-profile.ts",
+    "lib/tenancy/profile.ts",
+    "lib/tenancy/site-urls.ts",
+    "components/site-shell/main-shell.tsx",
+  ];
+  const wrong = guideClient.filter((f) => SERVER_SIDE_ONLY.includes(f));
+  check(`the guide's browser code (${guideClient.length} modules) reaches no route table, profile builder or Isaac's frame`, guideClient.length > 4 && wrong.length === 0, wrong.join(", "));
+  const spelled = guideClient.filter((f) => IDENTITY.some((re) => re.test(code(read(f)))));
+  check("…and none of it spells out Isaac's name, number, site or photo", spelled.length === 0, spelled.join(", "));
+  check("copy.ts, which every client page ships, carries no agent's identity", !IDENTITY.some((re) => re.test(code(read("components/impact-presentation/copy.ts")))));
+
+  // The page frame: chosen at build time, and the product's imports nothing of Isaac's.
+  const layoutImports = importsOf(read("app/[locale]/layout.tsx")).map((i) => i.spec).sort();
+  check(
+    "the [locale] layout imports its frame only through active-shell (nothing of Isaac's itself)",
+    JSON.stringify(layoutImports) ===
+      JSON.stringify(
+        ["@/app/globals.css", "@/components/site-shell/active-shell", "@/i18n/routing", "@/lib/tenancy/surface", "next-intl", "next/font/google", "next/navigation"].sort()
+      ),
+    layoutImports.join(", ")
+  );
+  const productFrame = importsOf(read("components/site-shell/product-shell.tsx")).map((i) => i.spec).sort();
+  check(
+    "the product frame imports only the theme, toasts, next-intl's provider and the platform's own settings",
+    JSON.stringify(productFrame) ===
+      JSON.stringify(["./shared", "@/components/theme-provider", "@/components/ui/toaster", "@/lib/tenancy/site-urls", "next-intl", "next/script", "next/server"].sort()),
+    productFrame.join(", ")
+  );
+  check("the shared frame module imports nothing that runs", importsOf(read("components/site-shell/shared.ts")).length === 0);
+  const config = read("next.config.mjs");
+  const swap = config.match(/const ACTIVE_SHELL_REQUEST = \/(.+)\/;/);
+  check(
+    "next.config.mjs swaps exactly the layout's frame import for the product's on the product build",
+    swap !== null &&
+      new RegExp(swap[1]).test("@/components/site-shell/active-shell") &&
+      !new RegExp(swap[1]).test("@/components/site-shell/active-shell-x") &&
+      config.includes('new URL("./components/site-shell/product-shell.tsx", import.meta.url)') &&
+      exists(join(ROOT, "components", "site-shell", "product-shell.tsx"))
+  );
+  check("active-shell is Isaac's frame by default (his build, and what TypeScript checks)", /from "\.\/main-shell"/.test(read("components/site-shell/active-shell.ts")));
+}
+
+console.log("\nPublic origins: the real publicOriginForOwner core (async)");
+void (async () => {
+  try {
+    const env = { NEXT_PUBLIC_SITE_URL: "https://www.isaacplans.com/", PRODUCT_PUBLIC_URL: "https://guide.example.com" };
+    // lib/tenancy/urls.ts is publicOriginForOwnerWith(owner, opts, isPlatformOwner); this stand-in
+    // follows crm.ts's isPlatformOwner: crmOwnerDecision, and Clerk only for "ask_clerk".
+    const seenOpts: unknown[] = [];
+    const fakeIsPlatformOwner =
+      (surface: AppSurface, clerkAdmins: readonly string[] = []) =>
+      async (owner: string | null | undefined, opts: { adminCaller?: string | null }): Promise<boolean> => {
+        seenOpts.push(opts);
+        const decision = crmOwnerDecision(owner, {
+          allowlist: buildCrmOwnerAllowlist({ CRM_OWNER_USER_IDS: ISAAC }),
+          surface,
+          adminCaller: opts.adminCaller ?? null,
+        });
+        return decision === "allow" || (decision === "ask_clerk" && clerkAdmins.includes(String(owner)));
+      };
+    const origin = async (owner: string, surface: AppSurface, opts: { adminCaller?: string | null } = {}, clerkAdmins: string[] = []) =>
+      (await publicOriginForOwnerWith(owner, opts, fakeIsPlatformOwner(surface, clerkAdmins), env)).origin;
+    check("Isaac (listed) → his site", (await origin(ISAAC, "main")) === "https://www.isaacplans.com");
+    check("an unlisted admin vouching for himself → his site", (await origin(ADMIN2, "main", { adminCaller: ADMIN2 })) === "https://www.isaacplans.com");
+    check("…the caller's options reach the CRM rule untouched", seenOpts.some((o) => (o as { adminCaller?: string }).adminCaller === ADMIN2));
+    check("an unlisted Clerk admin → his site", (await origin(ADMIN2, "main", {}, [ADMIN2])) === "https://www.isaacplans.com");
+    check("an agent → the product domain", (await origin(AGENT_A, "main")) === "https://guide.example.com");
+    check("an admin vouching for someone else's session → the product domain", (await origin(AGENT_A, "main", { adminCaller: ADMIN2 })) === "https://guide.example.com");
+    check("on the product domain, even Isaac's id → the product domain", (await origin(ISAAC, "product")) === "https://guide.example.com");
+    const both = await publicOriginForOwnerWith(AGENT_A, {}, fakeIsPlatformOwner("main"), env);
+    check("it reports whether the owner is Isaac's side (urls.ts warns once without a product domain)", both.platformOwner === false);
+  } catch (error) {
+    check("the async checks ran", false, error instanceof Error ? error.message : String(error));
+  }
+  console.log(`\n${passed} passed, ${failed} failed\n`);
+  process.exit(failed === 0 ? 0 : 1);
+})();
 
 // ── helpers ──────────────────────────────────────────────────────────────────
 

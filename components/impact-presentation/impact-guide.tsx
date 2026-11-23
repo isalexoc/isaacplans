@@ -4,9 +4,10 @@ import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } fro
 import { Poppins } from "next/font/google";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ArrowLeft, ArrowRight, MessageCircle } from "lucide-react";
-import { Link } from "@/i18n/navigation";
+import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { AGENT, DECK_COPY, type DeckLocale } from "./copy";
+import { whatsappHref, type AgentContact } from "@/lib/tenancy/agent-contact";
+import { DECK_COPY, type DeckLocale } from "./copy";
 import { GuideGateContext, readQuoteGate, writeQuoteGate } from "./guide-gate";
 
 const poppins = Poppins({ subsets: ["latin"], weight: ["400", "500", "600", "700", "800"], display: "swap" });
@@ -35,6 +36,9 @@ export default function ImpactGuide({
   steps,
   quoteStep,
   canSkipQuote,
+  agent,
+  applyHref,
+  plainApplyLink = false,
 }: {
   locale: DeckLocale;
   steps: ReactNode[];
@@ -42,6 +46,19 @@ export default function ImpactGuide({
   quoteStep: number;
   /** A signed-in admin (Isaac) walks straight through. */
   canSkipQuote: boolean;
+  /** Whose guide: the "Questions?" button writes to them on WhatsApp (hidden without a number). */
+  agent: AgentContact;
+  /**
+   * Where "Apply now" goes, already localized by the page: Isaac's /health-alternative/apply/start
+   * (its next-intl `getPathname`), or an agent's /{l}/{slug}/apply on the product domain. This file
+   * never imports next-intl's navigation, whose browser code carries Isaac's whole route table.
+   */
+  applyHref: string;
+  /**
+   * A plain <a> (an agent's page: the address crosses into a Route Handler on the product domain).
+   * Otherwise next/link, the app's own navigation, exactly as next-intl's Link drew it.
+   */
+  plainApplyLink?: boolean;
 }) {
   const t = DECK_COPY[locale];
   const g = t.guide;
@@ -137,7 +154,7 @@ export default function ImpactGuide({
     return () => window.removeEventListener("keydown", onKey);
   }, [go, step]);
 
-  const whatsappHref = `https://wa.me/${AGENT.whatsappDigits}?text=${encodeURIComponent(g.whatsappText)}`;
+  const whatsapp = whatsappHref(agent.whatsappDigits, g.whatsappText(agent.firstName));
   /** On the quote screen with no prices yet: Next only nudges toward "See my prices". */
   const waitingForQuote = step === quoteStep && !gateOpen;
   const primary = cn(
@@ -214,20 +231,28 @@ export default function ImpactGuide({
               <span className="hidden min-[400px]:inline">{g.back}</span>
             </button>
           ) : null}
-          <a
-            href={whatsappHref}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label={`${g.questions} WhatsApp`}
-            className="flex h-14 flex-none items-center gap-1.5 rounded-2xl border-2 border-[#25d366]/40 px-3 text-sm font-semibold text-[#128c4a] hover:bg-[#25d366]/10"
-          >
-            <MessageCircle className="h-5 w-5" />
-            <span className="hidden sm:inline">{g.questions}</span>
-          </a>
+          {whatsapp && (
+            <a
+              href={whatsapp}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`${g.questions} WhatsApp`}
+              className="flex h-14 flex-none items-center gap-1.5 rounded-2xl border-2 border-[#25d366]/40 px-3 text-sm font-semibold text-[#128c4a] hover:bg-[#25d366]/10"
+            >
+              <MessageCircle className="h-5 w-5" />
+              <span className="hidden sm:inline">{g.questions}</span>
+            </a>
+          )}
           {last ? (
-            <Link href="/health-alternative/apply/start" className={primary}>
-              {g.apply} <ArrowRight className="h-5 w-5" />
-            </Link>
+            plainApplyLink ? (
+              <a href={applyHref} className={primary}>
+                {g.apply} <ArrowRight className="h-5 w-5" />
+              </a>
+            ) : (
+              <Link href={applyHref} className={primary}>
+                {g.apply} <ArrowRight className="h-5 w-5" />
+              </Link>
+            )
           ) : (
             <button
               type="button"

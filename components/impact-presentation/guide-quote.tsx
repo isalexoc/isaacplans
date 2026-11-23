@@ -16,7 +16,8 @@ import {
   type QuoteBlock,
 } from "@/lib/impact-quote/plans";
 import { GUIDE_SCOPE, publishPlanChoice, stashQuoteBlock } from "@/lib/impact-quote/sync";
-import { AGENT, DECK_COPY, type DeckCopy, type DeckLocale } from "./copy";
+import { whatsappHref, type AgentContact } from "@/lib/tenancy/agent-contact";
+import { DECK_COPY, type DeckCopy, type DeckLocale } from "./copy";
 import { useGuideGate } from "./guide-gate";
 import { Glyph } from "./icons";
 
@@ -74,15 +75,27 @@ function blockOf(result: Result): QuoteBlock | null {
  * people, the oldest one's birth date), then this household's four Impact prices, the cheapest
  * recommended. Kept across a language switch. If Impact's prices can't be fetched, WhatsApp.
  *
- * The pick goes to the application "Apply now" starts (lib/impact-quote/sync.ts, scope "guide"):
- * the plan in localStorage, the two answers in this tab's sessionStorage only, so no birth date is
- * left in localStorage on this public page. Sent only when the visitor quotes or taps a plan, never
- * when the screen merely shows again.
+ * The pick goes to the application "Apply now" starts (lib/impact-quote/sync.ts, `scope`: "guide"
+ * on Isaac's /impact, `guide:<slug>` on an agent's page): the plan in localStorage, the two answers
+ * in this tab's sessionStorage only, so no birth date is left in localStorage on this public page.
+ * Sent only when the visitor quotes or taps a plan, never when the screen merely shows again. If
+ * Impact's prices can't be fetched, the agent's WhatsApp (or "try again" without one).
  *
  * `admin` (Isaac, signed in): under the plans, a box that makes the shareable quote image for
  * whoever he just quoted, from the selected plan and a name he types.
  */
-export default function GuideQuote({ locale, admin = false }: { locale: DeckLocale; admin?: boolean }) {
+export default function GuideQuote({
+  locale,
+  admin = false,
+  agent,
+  scope = GUIDE_SCOPE,
+}: {
+  locale: DeckLocale;
+  admin?: boolean;
+  /** Whose guide: the WhatsApp the visitor is sent to when the prices don't come. */
+  agent: AgentContact;
+  scope?: string;
+}) {
   const t = DECK_COPY[locale];
   const q = t.quote;
   const [members, setMembers] = useState<HouseholdSize | null>(null);
@@ -143,9 +156,9 @@ export default function GuideQuote({ locale, admin = false }: { locale: DeckLoca
   function publish(next: Result, key: string) {
     const plan = next.plans.find((p) => cardKey(p) === key);
     const block = blockOf(next);
-    if (block) stashQuoteBlock(GUIDE_SCOPE, block);
+    if (block) stashQuoteBlock(scope, block);
     if (!plan?.tier && !block) return;
-    publishPlanChoice(GUIDE_SCOPE, {
+    publishPlanChoice(scope, {
       tier: plan?.tier ?? null,
       monthly: plan?.tier ? plan.monthly : null,
       at: new Date().toISOString(),
@@ -183,6 +196,7 @@ export default function GuideQuote({ locale, admin = false }: { locale: DeckLoca
   // The admin box needs one of the four plans selected and the answers behind the quote.
   const imageBlock = admin && result ? blockOf(result) : null;
   const imagePlan = imageBlock ? result?.plans.find((p) => cardKey(p) === selected) : undefined;
+  const whatsapp = whatsappHref(agent.whatsappDigits, t.guide.whatsappText(agent.firstName));
 
   return (
     <div>
@@ -281,16 +295,21 @@ export default function GuideQuote({ locale, admin = false }: { locale: DeckLoca
             {phase === "loading" && <Loader2 className="h-5 w-5 animate-spin" />}
             {q.see}
           </button>
-          {phase === "error" && (
-            <a
-              href={`https://wa.me/${AGENT.whatsappDigits}?text=${encodeURIComponent(t.guide.whatsappText)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block rounded-2xl bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800"
-            >
-              {q.error}
-            </a>
-          )}
+          {phase === "error" &&
+            (whatsapp ? (
+              <a
+                href={whatsapp}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block rounded-2xl bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800"
+              >
+                {q.error(agent.firstName, agent.pronoun)}
+              </a>
+            ) : (
+              <p role="alert" className="block rounded-2xl bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800">
+                {q.retry}
+              </p>
+            ))}
         </div>
       )}
     </div>

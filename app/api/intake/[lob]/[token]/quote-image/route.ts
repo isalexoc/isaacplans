@@ -19,6 +19,8 @@ import { fetchImpactPlans } from "@/lib/impact-quote/server";
 import { resolveCrmContactLocale } from "@/lib/iul-intake/server";
 import { operatorCrmOptions, operatorOwns, requireIntakeOperator } from "@/lib/tenancy/context";
 import { crmCredsForOwner } from "@/lib/tenancy/crm";
+import { isaacQuoteImageProfile } from "@/lib/tenancy/isaac-profile";
+import { agentPublicProfile } from "@/lib/tenancy/profile";
 
 /**
  * GET …/quote-image?tier=esencial&monthly=306&lang=es — the shareable Impact quote as a PNG.
@@ -27,7 +29,8 @@ import { crmCredsForOwner } from "@/lib/tenancy/crm";
  * family's names.
  * Names come from the form; the plan and price from the agent's panel (what's on screen there),
  * else from the form's "Your plan", else Esencial at Impact's price for the household. The
- * language is the panel's choice, else the client's (CRM `spanish` tag, then the session).
+ * language is the panel's choice, else the client's (CRM `spanish` tag, then the session). The
+ * advisor on it is the owner: Isaac, or the agent with their own name, photo and number.
  */
 
 type RouteContext = { params: Promise<{ lob: string; token: string }> };
@@ -79,6 +82,8 @@ export async function GET(request: NextRequest, context: RouteContext) {
         ? (data.dependents as RepeaterRow[]).map((r) => fullName(r.firstName, r.lastName)).filter(Boolean)
         : [];
     const start = str(data.requestedEffectiveDate);
+    // The caller owns this application (checked above), so the advisor is the caller.
+    const agent = op.kind === "agent" && op.agent ? agentPublicProfile(op.agent) : isaacQuoteImageProfile();
 
     const png = await renderQuoteImage({
       locale,
@@ -89,6 +94,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
       monthly,
       startDate: isValidMonthStart(start, IMPACT_LAST_PAYMENT_DAY) ? formatIsoLong(start, locale) : null,
       origin: request.nextUrl.origin,
+      agent,
     });
 
     return new NextResponse(png, {

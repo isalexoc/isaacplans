@@ -99,10 +99,17 @@ export default function ImpactPresentation({
   token,
   locale,
   slides,
+  otherLocaleHref,
 }: {
   token: string;
   locale: DeckLocale;
   slides: ReactNode[];
+  /**
+   * This deck in the other language, for the L key, when it lives somewhere other than Isaac's
+   * /health-alternative/intake/[token]/presentation (the agent area): a plain navigation, since it
+   * may cross into another app shell. Absent: today's localized route.
+   */
+  otherLocaleHref?: string;
 }) {
   const router = useRouter();
   const frameRef = useRef<HTMLDivElement | null>(null);
@@ -118,11 +125,15 @@ export default function ImpactPresentation({
   );
 
   const switchLanguage = useCallback(() => {
+    if (otherLocaleHref) {
+      window.location.replace(otherLocaleHref);
+      return;
+    }
     router.replace(
       { pathname: "/health-alternative/intake/[token]/presentation", params: { token } },
       { locale: locale === "es" ? "en" : "es" }
     );
-  }, [router, token, locale]);
+  }, [router, token, locale, otherLocaleHref]);
 
   const toggleFullscreen = useCallback(() => {
     if (document.fullscreenElement) void document.exitFullscreen();

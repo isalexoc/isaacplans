@@ -14,8 +14,10 @@ import { buildGuideSteps } from "@/components/impact-presentation/guide-steps";
 import { DECK_COPY, type DeckLocale } from "@/components/impact-presentation/copy";
 import { IMPACT_LAST_PAYMENT_DAY } from "@/lib/intake-configs/impact-schedule";
 import { businessToday, earliestMonthStart, formatLongDate } from "@/lib/intake-core/month-start";
-import { getLicensedStateCount } from "@/lib/licensed-states";
 import { getIsAdmin } from "@/lib/auth/admin";
+import { getPathname } from "@/i18n/navigation";
+import { isaacProfile } from "@/lib/tenancy/isaac-profile";
+import { agentContact } from "@/lib/tenancy/profile";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.isaacplans.com";
 
@@ -35,26 +37,29 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-async function licensedStates(): Promise<number> {
-  try {
-    return await getLicensedStateCount();
-  } catch {
-    return 0;
-  }
-}
-
 export default async function ImpactGuidePage() {
   const locale: DeckLocale = (await getLocale()) === "es" ? "es" : "en";
   // Isaac, signed in as admin: he can walk past the quote, and make a quote image for anyone he quotes.
   const isAdmin = await getIsAdmin();
+  // His own guide: his name, photo, number, IBO # (env) and licensed states (Sanity).
+  const agent = await isaacProfile();
   const { steps, quoteStep } = buildGuideSteps({
     locale,
     // Nobody has picked a date yet, so the earliest 1st Impact allows today.
     startDate: formatLongDate(earliestMonthStart(businessToday(), IMPACT_LAST_PAYMENT_DAY), locale),
-    licensedStates: await licensedStates(),
-    agentIbo: process.env.IMPACT_AGENT_IBO?.trim() || null,
+    agent,
     admin: isAdmin,
   });
-  // A visitor must quote before "Apply now"; Isaac can walk straight through.
-  return <ImpactGuide locale={locale} steps={steps} quoteStep={quoteStep} canSkipQuote={isAdmin} />;
+  // A visitor must quote before "Apply now"; Isaac can walk straight through. "Apply now" is the
+  // same localized address next-intl's Link always drew, worked out here on the server.
+  return (
+    <ImpactGuide
+      locale={locale}
+      steps={steps}
+      quoteStep={quoteStep}
+      canSkipQuote={isAdmin}
+      agent={agentContact(agent)}
+      applyHref={getPathname({ href: "/health-alternative/apply/start", locale })}
+    />
+  );
 }

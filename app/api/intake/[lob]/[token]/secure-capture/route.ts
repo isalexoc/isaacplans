@@ -11,7 +11,13 @@ import {
   toSecureCaptureView,
 } from "@/lib/intake-core/secure-capture";
 import type { IntakeData, IntakeLobConfig } from "@/lib/intake-core/types";
-import { operatorOwns, requireIntakeOperator } from "@/lib/tenancy/context";
+import {
+  operatorCrmOptions,
+  operatorOwns,
+  requireIntakeOperator,
+  type IntakeOperator,
+} from "@/lib/tenancy/context";
+import { publicOriginForOwner } from "@/lib/tenancy/urls";
 
 /**
  * The agent's side of the secure link: issue one, poll it, cancel it. Operators only (an admin, or
@@ -33,7 +39,12 @@ async function requireOwner(lob: string, token: string) {
   const row = await getIntakeByToken(config, token);
   if (!row) return { error: fail(404, "Not found") };
   if (!(await operatorOwns(op, row))) return { error: fail(403, "Forbidden") };
-  return { config, row };
+  return { config, row, op };
+}
+
+/** The secure link's origin: Isaac's site for his sessions, the product domain for an agent's. */
+function captureOrigin(guard: { row: { ownerUserId: string }; op: IntakeOperator }): Promise<string> {
+  return publicOriginForOwner(guard.row.ownerUserId, operatorCrmOptions(guard.op));
 }
 
 /**
@@ -82,7 +93,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
     return NextResponse.json({
       success: true,
       capture: toSecureCaptureView(config, capture),
-      url: buildSecureCaptureUrl(capture.token, row.locale ?? "en"),
+      url: buildSecureCaptureUrl(capture.token, row.locale ?? "en", await captureOrigin(guard)),
     });
   } catch (error) {
     console.error(`[intake/${lob}/:token/secure-capture] POST`, error);
@@ -103,7 +114,10 @@ export async function GET(_request: NextRequest, context: RouteContext) {
     return NextResponse.json({
       success: true,
       capture: capture ? toSecureCaptureView(config, capture) : null,
-      url: capture?.status === "pending" ? buildSecureCaptureUrl(capture.token, row.locale ?? "en") : null,
+      url:
+        capture?.status === "pending"
+          ? buildSecureCaptureUrl(capture.token, row.locale ?? "en", await captureOrigin(guard))
+          : null,
       // Only what the client actually sent; before that the agent's own typing stays on screen.
       values: submitted ? maskedValues(config, (row.data ?? {}) as IntakeData, capture.fieldKeys ?? []) : {},
     });

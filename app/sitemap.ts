@@ -8,6 +8,7 @@ import { UHONE_PRODUCT_PAGE_SLUGS } from "@/lib/uhone-product-slugs";
 import { getStatesWithPages } from "@/lib/licensed-states";
 import { sanityFetch } from "@/sanity/lib/live";
 import type { SanityDocument } from "next-sanity";
+import { isProductSurface } from "@/lib/tenancy/surface";
 
 /**
  * Keep this in one place so it's easy to change for staging, etc.
@@ -174,6 +175,8 @@ const BLOG_CATEGORIES_QUERY = `*[
 const options = { next: { revalidate: 3600 } }; // Revalidate every hour
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  // The product domain lists nothing: its pages are never indexed, and these are Isaac's.
+  if (isProductSurface()) return [];
   const now = new Date();
 
   // Fetch blog posts and categories from Sanity

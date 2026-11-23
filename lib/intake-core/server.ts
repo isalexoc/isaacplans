@@ -29,6 +29,7 @@ import {
   type CrmOwnerOptions,
 } from "@/lib/tenancy/crm";
 import { isMissingTableError } from "@/lib/tenancy/db-errors";
+import { publicOriginForOwner } from "@/lib/tenancy/urls";
 import { isIntakeExpired, intakeLinkExpiry } from "@/lib/intake-shared/access";
 import { isFieldVisible, isRowFilled, allRepeaterFields } from "./fields";
 import { crmFieldId, intakeLinkSlug } from "./ghl-field-ids";
@@ -149,6 +150,22 @@ export async function getIntakeByToken(
 ): Promise<IntakeSessionRow | null> {
   const [row] = await db
     .select()
+    .from(intakeSessions)
+    .where(and(eq(intakeSessions.lob, config.lob), eq(intakeSessions.token, token)))
+    .limit(1);
+  return row ?? null;
+}
+
+/**
+ * Only the owner of the session behind a token, for a page that must know whose it is before it
+ * renders (lib/tenancy/pages.ts): one column, never the client's answers.
+ */
+export async function getIntakeOwnerByToken(
+  config: IntakeLobConfig,
+  token: string
+): Promise<{ ownerUserId: string } | null> {
+  const [row] = await db
+    .select({ ownerUserId: intakeSessions.ownerUserId })
     .from(intakeSessions)
     .where(and(eq(intakeSessions.lob, config.lob), eq(intakeSessions.token, token)))
     .limit(1);
@@ -555,7 +572,7 @@ export async function syncIntakeLinkToCrm(
         locale = tags.some((t) => t.trim().toLowerCase() === INTAKE_SPANISH_TAG) ? "es" : "en";
       }
     }
-    const url = buildIntakeShareUrl(config, row.token, locale);
+    const url = buildIntakeShareUrl(config, row.token, locale, await publicOriginForOwner(row.ownerUserId, crm));
     return await agentCrmUpdateContact(
       row.crmContactId,
       { customFields: [{ id: fieldId, field_value: url }] },

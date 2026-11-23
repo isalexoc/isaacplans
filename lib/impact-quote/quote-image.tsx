@@ -1,7 +1,8 @@
 /**
  * The shareable Impact quote: one vertical 1080×1920 PNG Isaac sends a client who wants time to
  * think. Their name and everyone covered, the plan and its monthly price, what's included (icons,
- * few words), the provider fees, the $79 fee, the start date and how to reach Isaac.
+ * few words), the provider fees, the $79 fee, the start date and how to reach the agent (Isaac, or
+ * the agent who owns the application: `agent`).
  *
  * Rendered server-side with next/og (Satori), like the IUL credentials card. Satori draws flexbox
  * and plain SVG only, so every box is `display: flex` and the styles are inline objects.
@@ -13,7 +14,8 @@
 
 import { ImageResponse } from "next/og";
 import { Children, Fragment, isValidElement, type CSSProperties, type ReactNode } from "react";
-import { AGENT, DECK_COPY, type DeckLocale } from "@/components/impact-presentation/copy";
+import { DECK_COPY, type DeckLocale } from "@/components/impact-presentation/copy";
+import { formatWhatsapp, profileInitials, type AgentPublicProfile } from "@/lib/tenancy/profile";
 import { GLYPHS, type GlyphName } from "@/components/impact-presentation/icons";
 import { loadGoogleFont } from "@/lib/og/google-font";
 import { loadInterFont } from "@/lib/og/inter-font";
@@ -52,8 +54,10 @@ export type QuoteImageInput = {
    * the Senior Program, that the price is per person. Absent: no line (the intake's image).
    */
   household?: { asked: HouseholdSize; senior: boolean } | null;
-  /** Absolute origin for the logo and Isaac's photo (Satori fetches images by URL). */
+  /** Absolute origin for the logo, and for a photo that ships with the app (Satori fetches by URL). */
   origin: string;
+  /** The advisor in the footer: Isaac's profile, or the agent who owns the application. */
+  agent: AgentPublicProfile;
 };
 
 const WORDS = {
@@ -328,6 +332,11 @@ function Row({ children, style }: { children: ReactNode; style?: CSSProperties }
 
 function QuoteCard(input: QuoteImageInput) {
   const w = WORDS[input.locale];
+  const agent = input.agent;
+  // A photo that ships with the app is fetched from this request's origin, as it always was.
+  const photo = agent.photoPath ? `${input.origin}${agent.photoPath}` : agent.photoUrl;
+  const whatsapp = formatWhatsapp(agent.whatsappE164);
+  const contact = [whatsapp ? `WhatsApp ${whatsapp}` : null, agent.siteLabel].filter(Boolean).join(" · ");
   const q = DECK_COPY[input.locale].quote;
   const name = q.names[input.tier];
   const everyone = [input.applicant, ...input.members].filter(Boolean);
@@ -477,13 +486,23 @@ function QuoteCard(input: QuoteImageInput) {
       {/* Footer: the advisor and the not-insurance line, always on the image. */}
       <div style={{ display: "flex", flexDirection: "column", padding: "0 56px" }}>
         <Row style={{ marginBottom: 18, alignItems: "center", paddingTop: 18, borderTop: "2px dashed #e6e9ef" }}>
-          <img src={`${input.origin}${AGENT.photo}`} width={96} height={96} style={{ borderRadius: 999, objectFit: "cover" }} alt="" />
+          {photo ? (
+            <img src={photo} width={96} height={96} style={{ borderRadius: 999, objectFit: "cover" }} alt="" />
+          ) : (
+            <div style={{ display: "flex", width: 96, height: 96, borderRadius: 999, background: NAVY, color: "white", alignItems: "center", justifyContent: "center", fontSize: 38, fontWeight: 800 }}>
+              {profileInitials(agent)}
+            </div>
+          )}
           <div style={{ display: "flex", flexDirection: "column", marginLeft: 20 }}>
             <div style={{ display: "flex", fontSize: 20, color: MUTED }}>{w.agent}</div>
-            <div style={{ display: "flex", fontSize: 30, fontWeight: 800, color: NAVY }}>{AGENT.name}</div>
-            <div style={{ display: "flex", fontSize: 22, color: NAVY }}>
-              WhatsApp {AGENT.whatsapp} · {AGENT.site}
-            </div>
+            <div style={{ display: "flex", fontSize: 30, fontWeight: 800, color: NAVY }}>{agent.displayName}</div>
+            {whatsapp && agent.siteLabel ? (
+              <div style={{ display: "flex", fontSize: 22, color: NAVY }}>
+                WhatsApp {whatsapp} · {agent.siteLabel}
+              </div>
+            ) : contact ? (
+              <div style={{ display: "flex", fontSize: 22, color: NAVY }}>{contact}</div>
+            ) : null}
           </div>
         </Row>
         <div style={{ display: "flex", marginBottom: 30, fontSize: 18, color: MUTED }}>{w.disclaimer}</div>

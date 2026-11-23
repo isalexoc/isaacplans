@@ -1,9 +1,16 @@
 // middleware.ts
-import { NextResponse } from "next/server";
-import { clerkMiddleware, clerkClient, createRouteMatcher } from "@clerk/nextjs/server";
+import { NextResponse, type NextRequest } from "next/server";
+import { clerkMiddleware, clerkClient, createRouteMatcher, type ClerkMiddlewareAuth } from "@clerk/nextjs/server";
 import createMiddleware from "next-intl/middleware";
 import { routing } from "./i18n/routing";
 import { isPrivatePagePath } from "./lib/private-pages";
+import {
+  PRODUCT_RESPONSE_HEADERS,
+  productNotFoundHtml,
+  productRoute,
+  type ProductLocale,
+} from "./lib/tenancy/product-routes";
+import { appSurface } from "./lib/tenancy/surface";
 
 // Create the next-intl middleware
 const intlMiddleware = createMiddleware(routing);
@@ -128,7 +135,11 @@ async function userIsAdmin(userId: string): Promise<boolean> {
   return isAdmin;
 }
 
-export default clerkMiddleware(async (auth, req) => {
+/**
+ * isaacplans.com (APP_SURFACE unset): Clerk, next-intl, the admin gates and the page flags below,
+ * exactly as before the agent platform.
+ */
+async function mainMiddleware(auth: ClerkMiddlewareAuth, req: NextRequest) {
   // Legacy blog category slug → renamed category
   const legacyCategory = req.nextUrl.pathname.match(
     /^\/(en|es)\/blog\/category\/short-term-medical\/?$/
@@ -313,12 +324,61 @@ export default clerkMiddleware(async (auth, req) => {
     response.headers.set("x-ads-landing-variant", "iul-bare");
   }
   return response;
-});
+}
+
+/** Every product-domain answer is private, unindexed, unframeable and sends no Referer. */
+function withProductHeaders<T extends NextResponse>(response: T): T {
+  for (const [key, value] of Object.entries(PRODUCT_RESPONSE_HEADERS)) response.headers.set(key, value);
+  return response;
+}
+
+function productNotFound(api: boolean, locale: ProductLocale | null): NextResponse {
+  const response = api
+    ? NextResponse.json({ success: false, error: "Not found" }, { status: 404 })
+    : new NextResponse(productNotFoundHtml(locale), {
+        status: 404,
+        headers: { "Content-Type": "text/html; charset=utf-8" },
+      });
+  return withProductHeaders(response);
+}
+
+/**
+ * The product domain (APP_SURFACE=product): agents' client pages only, and no Clerk at all — no
+ * clerkMiddleware, no auth() — so nothing here can reach Isaac's sign-in or his session cookies.
+ * The address book is lib/tenancy/product-routes.ts: anything it doesn't serve is a 404 straight
+ * away (next-intl never sees it: its redirects would spell out Isaac's page names); next-intl runs
+ * for the rest (locale prefix and its redirects), then an agent's /{l}/{slug}[/apply|/privacy] is
+ * rewritten to /{l}/a/{slug}… (next-intl's documented rewrite-after-routing pattern), the client's
+ * token pages pass through, and the application's own API calls go straight through.
+ */
+function productMiddleware(req: NextRequest): NextResponse {
+  const route = productRoute(req.nextUrl.pathname);
+  if (route.kind === "api") return withProductHeaders(NextResponse.next());
+  if (route.kind === "not_found") return productNotFound(route.api, route.locale);
+
+  const response = intlMiddleware(req);
+  // next-intl's own redirects (a missing or miscased locale prefix, a token page in the other
+  // language's words, e.g. /es/secure/… → /es/seguro/…) stand as they are; their target comes
+  // back here.
+  if (!response.ok) return withProductHeaders(response);
+  if (route.kind === "rewrite") {
+    const target = new URL(`${route.to}${req.nextUrl.search}`, req.url);
+    return withProductHeaders(NextResponse.rewrite(target, { headers: response.headers }));
+  }
+  if (route.kind === "pass") return withProductHeaders(response);
+  // "intl": next-intl was expected to redirect it to a page that exists.
+  return productNotFound(false, null);
+}
+
+// Chosen once, from the deployment's env: the product project never even creates Clerk's
+// middleware. (APP_SURFACE is server config, set per Vercel project.)
+export default appSurface() === "product" ? productMiddleware : clerkMiddleware(mainMiddleware);
 
 export const config = {
   // Match all pathnames except for
   // - … if they start with `/trpc`, `/_next` or `/_vercel`
-  // - … the ones containing a dot (e.g. `favicon.ico`)
+  // - … the ones containing a dot (e.g. `favicon.ico`); on the product domain, next.config.mjs
+  //   answers those with a 404 unless they are files its pages use
   // Include /api/blog routes for Clerk auth (but exclude other /api routes)
   // /studio documents are matched so the Studio can be admin-gated.
   matcher: [

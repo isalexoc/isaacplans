@@ -11,7 +11,9 @@ import Image from "next/image";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import type { HouseholdSize, ImpactQuote, ImpactTierKey } from "@/lib/impact-quote/plans";
-import { AGENT, DECK_COPY, TELEHEALTH_NAME, type DeckCopy, type DeckLocale } from "./copy";
+import { formatWhatsapp, languagesLabel, type AgentPublicProfile } from "@/lib/tenancy/profile";
+import AgentPhoto from "@/components/tenant/agent-photo";
+import { DECK_COPY, TELEHEALTH_NAME, type DeckCopy, type DeckLocale } from "./copy";
 import { Brandbar, IMG, Kicker, Lead, LOGO_WHITE, Slide, Title } from "./deck-parts";
 import { Glyph, PORTAL_ICONS, type GlyphName } from "./icons";
 import ConfirmDetailsButton from "./confirm-details-button";
@@ -24,10 +26,11 @@ export type DeckData = {
   firstName: string;
   /** Coverage start, already formatted in the deck's language ("1 de diciembre de 2026"). */
   startDate: string;
-  /** Active licensed states from Sanity; 0 drops the number from the sentence. */
-  licensedStates: number;
-  /** Impact IBO number (env `IMPACT_AGENT_IBO`); null shows a dash. */
-  agentIbo: string | null;
+  /**
+   * Whose deck this is: Isaac's profile (his IBO number from env, his Sanity state count) or the
+   * agent's own (lib/tenancy/profile.ts). A missing IBO number shows a dash.
+   */
+  agent: AgentPublicProfile;
   /** The intake's token, for the live quote the agent pushes from the form. */
   token: string;
   /** Impact's prices for this household at render time, or null (the slide asks and quotes). */
@@ -109,6 +112,8 @@ function Fact({ icon, children }: { icon: GlyphName; children: ReactNode }) {
 
 function AgentSlide({ t, data, page }: { t: DeckCopy; data: DeckData; page: string }) {
   const value = "text-[24px] font-bold text-[#0b2a4a]";
+  const agent = data.agent;
+  const service = t.agent.facts.service(agent.languages);
   return (
     <Slide
       dark
@@ -131,34 +136,34 @@ function AgentSlide({ t, data, page }: { t: DeckCopy; data: DeckData; page: stri
           </div>
           <div className="relative mx-auto -mt-[130px] h-[250px] w-[250px] rounded-full border-[9px] border-white bg-[#dfe7ef] shadow-[0_10px_30px_rgba(11,42,74,.25)]">
             <div className="absolute inset-0 overflow-hidden rounded-full">
-              <Image src={AGENT.photo} alt={AGENT.name} fill sizes="250px" className="object-cover" />
+              <AgentPhoto agent={agent} sizes="250px" initialsClassName="text-[96px]" />
             </div>
             <div className="absolute bottom-[14px] right-[6px] flex h-[60px] w-[60px] items-center justify-center rounded-full border-[6px] border-white bg-[#2f97a0]">
               <Glyph name="check" strokeWidth={3.4} className="h-[22px] w-[22px] text-white" />
             </div>
           </div>
           <div className="px-[40px] pb-[32px] pt-[24px] text-center">
-            <div className="text-[46px] font-extrabold leading-[1.12] text-[#0b2a4a]">{AGENT.name}</div>
+            <div className="text-[46px] font-extrabold leading-[1.12] text-[#0b2a4a]">{agent.displayName}</div>
             <div className="mt-[10px] text-[22px] font-bold uppercase tracking-[.06em] text-[#f2735a]">
               {t.agent.role}
             </div>
             <div className="mt-[28px] grid grid-cols-2 gap-[14px] text-left">
               <BadgeCell label="IBO #">
-                <span className={value}>{data.agentIbo ?? "—"}</span>
+                <span className={value}>{agent.iboNumber ?? "—"}</span>
               </BadgeCell>
               <BadgeCell label={t.agent.status}>
                 <span className="text-[24px] font-bold text-[#2f97a0]">{t.agent.active}</span>
               </BadgeCell>
               <BadgeCell label="WhatsApp">
-                <span className={value}>{AGENT.whatsapp}</span>
+                <span className={value}>{formatWhatsapp(agent.whatsappE164) ?? "—"}</span>
               </BadgeCell>
               <BadgeCell label={t.agent.languages}>
-                <span className={value}>{AGENT.languages}</span>
+                <span className={value}>{languagesLabel(agent.languages) || "—"}</span>
               </BadgeCell>
             </div>
           </div>
           <div className="flex items-center justify-between border-t-2 border-dashed border-[#e6e9ef] px-[40px] py-[18px] text-[19px] text-[#56657a]">
-            <span>{AGENT.site}</span>
+            <span>{agent.siteLabel}</span>
             <div className="h-[36px] w-[200px] bg-[repeating-linear-gradient(90deg,#0b2a4a_0_2px,transparent_2px_4px,#0b2a4a_4px_7px,transparent_7px_9px,#0b2a4a_9px_10px,transparent_10px_13px)]" />
           </div>
         </div>
@@ -168,8 +173,9 @@ function AgentSlide({ t, data, page }: { t: DeckCopy; data: DeckData; page: stri
           <Title dark>{t.agent.title}</Title>
           <div className="mt-[44px] grid gap-[22px]">
             <Fact icon="shieldCheck">{t.agent.facts.representative}</Fact>
-            <Fact icon="mapPin">{t.agent.facts.licensed(data.licensedStates)}</Fact>
-            <Fact icon="chat">{t.agent.facts.bilingual}</Fact>
+            {/* "Licensed" only for a licensed agent. */}
+            {agent.licensed && <Fact icon="mapPin">{t.agent.facts.licensed(agent.licensedStateCount)}</Fact>}
+            {service && <Fact icon="chat">{service}</Fact>}
             <Fact icon="heart">{t.agent.facts.support}</Fact>
           </div>
         </div>

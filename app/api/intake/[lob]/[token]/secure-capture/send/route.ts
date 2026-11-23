@@ -12,6 +12,7 @@ import { ghlFieldIds } from "@/lib/iul-intake/ghl-field-ids";
 import { resolveCrmContactLocale } from "@/lib/iul-intake/server";
 import { operatorCrmOptions, operatorOwns, requireIntakeOperator } from "@/lib/tenancy/context";
 import { crmCredsForOwner } from "@/lib/tenancy/crm";
+import { publicOriginForOwner } from "@/lib/tenancy/urls";
 
 /**
  * POST — hand the live secure link to the CRM so a GHL workflow texts it.
@@ -44,7 +45,8 @@ export async function POST(_request: NextRequest, context: RouteContext) {
     const capture = await getPendingCapture(row.id);
     if (!capture) return fail(400, "There is no active secure link to send.");
 
-    const creds = await crmCredsForOwner(row.ownerUserId, operatorCrmOptions(op));
+    const crm = operatorCrmOptions(op);
+    const creds = await crmCredsForOwner(row.ownerUserId, crm);
     const fieldId = ghlFieldIds.iul_secure_capture_link;
     if (!creds || !fieldId) return fail(400, "CRM is not configured.");
 
@@ -52,7 +54,14 @@ export async function POST(_request: NextRequest, context: RouteContext) {
     const locale = await resolveCrmContactLocale(row.crmContactId, row.locale, creds.token);
     const written = await agentCrmUpdateContact(
       row.crmContactId,
-      { customFields: [{ id: fieldId, field_value: buildSecureCaptureUrl(capture.token, locale) }] },
+      {
+        customFields: [
+          {
+            id: fieldId,
+            field_value: buildSecureCaptureUrl(capture.token, locale, await publicOriginForOwner(row.ownerUserId, crm)),
+          },
+        ],
+      },
       creds.token,
       "[INTAKE_SECURE_CAPTURE]"
     );

@@ -11,16 +11,17 @@
 
 export type DeckLocale = "en" | "es";
 
-/** The agent on the credential slide. The IBO number is not here: it comes from env (public repo). */
-export const AGENT = {
-  name: "Isaac Orraiz",
-  whatsapp: "(540) 681-3507",
-  /** The same number for wa.me links. */
-  whatsappDigits: "15406813507",
-  site: "isaacplans.com",
-  photo: "/images/impact/presentation/agent-isaac.jpg",
-  languages: "Español · English",
-} as const;
+/*
+ * No agent's identity lives here: the browser code of every client page (the product domain's
+ * included) imports this file. Every screen takes an `AgentPublicProfile` (lib/tenancy/profile.ts);
+ * Isaac's own comes from `ISAAC_AGENT` in lib/tenancy/isaac-agent.ts, which only server code imports.
+ */
+
+/** A language an agent serves clients in. */
+export type AgentLanguage = "en" | "es";
+
+/** The English pronoun copy may use for an agent; without one the sentence is worded around it. */
+export type AgentPronoun = "he" | "she";
 
 /** Impact's telehealth partner, named on the benefits slide. */
 export const TELEHEALTH_NAME = "Doctegrity";
@@ -43,7 +44,14 @@ export type DeckCopy = {
     languages: string;
     kicker: string;
     title: string;
-    facts: { representative: string; licensed: (states: number) => string; bilingual: string; support: string };
+    facts: {
+      representative: string;
+      /** Shown only for a licensed agent. 0 states drops the number. */
+      licensed: (states: number) => string;
+      /** The languages the agent serves clients in; null (no line) when none are set. */
+      service: (languages: readonly AgentLanguage[]) => string | null;
+      support: string;
+    };
   };
   what: {
     kicker: string;
@@ -121,7 +129,8 @@ export type DeckCopy = {
     dobQuestion: string;
     see: string;
     change: string;
-    error: string;
+    /** Impact's prices didn't come: write to the agent on WhatsApp instead. */
+    error: (firstName: string, pronoun: AgentPronoun | null) => string;
   };
   /** The self-serve guide (`/impact`): the same story, walked alone, ending in "Apply now". */
   guide: {
@@ -133,7 +142,7 @@ export type DeckCopy = {
     apply: string;
     applyNote: string;
     questions: string;
-    whatsappText: string;
+    whatsappText: (firstName: string) => string;
     /** Under the Next button while the quote screen still has no prices. */
     quoteFirst: string;
     steps: [
@@ -163,7 +172,14 @@ const ES: DeckCopy = {
     facts: {
       representative: "Representante autorizado de Impact Health Sharing",
       licensed: (n) => (n > 0 ? `Agente de salud licenciado en ${n} estados` : "Agente de salud licenciado"),
-      bilingual: "Atención personalizada en español y en inglés",
+      service: (languages) =>
+        languages.includes("es") && languages.includes("en")
+          ? "Atención personalizada en español y en inglés"
+          : languages.includes("es")
+            ? "Atención personalizada en español"
+            : languages.includes("en")
+              ? "Atención personalizada en inglés"
+              : null,
       support: "Le ayudo antes, durante y después de su inscripción",
     },
   },
@@ -322,7 +338,7 @@ const ES: DeckCopy = {
     dobQuestion: "Fecha de nacimiento de la persona mayor",
     see: "Ver mis precios",
     change: "Cambiar mis datos",
-    error: "No pudimos traer los precios ahora. Escríbale a Isaac por WhatsApp y le envía su cotización.",
+    error: (name) => `No pudimos traer los precios ahora. Escríbale a ${name} por WhatsApp y le envía su cotización.`,
   },
   guide: {
     intro: "Una presentación de 2 minutos. Toque «Comenzar» y avance a su ritmo.",
@@ -333,7 +349,7 @@ const ES: DeckCopy = {
     apply: "Aplicar ahora",
     applyNote: "Toma unos minutos desde su teléfono o computadora. Su progreso se guarda solo.",
     questions: "¿Preguntas?",
-    whatsappText: "Hola Isaac, vi la presentación de Impact y tengo una pregunta.",
+    whatsappText: (name) => `Hola ${name}, vi la presentación de Impact y tengo una pregunta.`,
     quoteFirst: "Primero toque «Ver mis precios» para continuar.",
     steps: [
       {
@@ -374,7 +390,14 @@ const EN: DeckCopy = {
     facts: {
       representative: "Authorized Impact Health Sharing representative",
       licensed: (n) => (n > 0 ? `Licensed health agent in ${n} states` : "Licensed health agent"),
-      bilingual: "Personal service in English and Spanish",
+      service: (languages) =>
+        languages.includes("en") && languages.includes("es")
+          ? "Personal service in English and Spanish"
+          : languages.includes("en")
+            ? "Personal service in English"
+            : languages.includes("es")
+              ? "Personal service in Spanish"
+              : null,
       support: "Support before, during and after enrollment",
     },
   },
@@ -526,7 +549,10 @@ const EN: DeckCopy = {
     dobQuestion: "Date of birth of the oldest person",
     see: "See my prices",
     change: "Change my answers",
-    error: "We couldn't get the prices right now. Message Isaac on WhatsApp and he'll send your quote.",
+    error: (name, pronoun) =>
+      pronoun
+        ? `We couldn't get the prices right now. Message ${name} on WhatsApp and ${pronoun}'ll send your quote.`
+        : `We couldn't get the prices right now. Message ${name} on WhatsApp for your quote.`,
   },
   guide: {
     intro: "A 2-minute presentation. Tap “Start” and go at your own pace.",
@@ -537,7 +563,7 @@ const EN: DeckCopy = {
     apply: "Apply now",
     applyNote: "Takes a few minutes from your phone or computer. Your progress saves on its own.",
     questions: "Questions?",
-    whatsappText: "Hi Isaac, I saw the Impact presentation and I have a question.",
+    whatsappText: (name) => `Hi ${name}, I saw the Impact presentation and I have a question.`,
     quoteFirst: "First tap “See my prices” to continue.",
     steps: [
       {

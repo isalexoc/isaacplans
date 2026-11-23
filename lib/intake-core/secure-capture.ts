@@ -68,6 +68,23 @@ export async function getCaptureByToken(token: string): Promise<SecureCaptureRow
   return row ?? null;
 }
 
+/**
+ * Only the line and the session owner behind a secure link (one query), for a page that must know
+ * whose it is before it renders (lib/tenancy/pages.ts). Null when the link or its session is gone.
+ */
+export async function getCaptureOwnerByToken(token: string): Promise<{ lob: string; ownerUserId: string } | null> {
+  const [row] = await db
+    .select({ lob: intakeSecureCaptures.lob, ownerUserId: intakeSessions.ownerUserId })
+    .from(intakeSecureCaptures)
+    .innerJoin(
+      intakeSessions,
+      and(eq(intakeSessions.id, intakeSecureCaptures.sessionId), eq(intakeSessions.lob, intakeSecureCaptures.lob))
+    )
+    .where(eq(intakeSecureCaptures.token, token))
+    .limit(1);
+  return row ?? null;
+}
+
 export async function getPendingCapture(sessionId: string): Promise<SecureCaptureRow | null> {
   const [row] = await db
     .select()
