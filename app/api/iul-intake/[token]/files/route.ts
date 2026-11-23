@@ -16,6 +16,7 @@ import { fieldByKey, type FileRef } from "@/lib/iul-intake/fields";
 import { ghlFieldIds } from "@/lib/iul-intake/ghl-field-ids";
 import type { IntakeData } from "@/lib/iul-intake/schema";
 import { encryptIntakeData, decryptIntakeData } from "@/lib/crypto/field-encryption";
+import { maskIulSensitiveForClient } from "@/lib/iul-intake/masking";
 import {
   agentCrmGetBaseCredentials,
   agentCrmSetFileField,
@@ -146,12 +147,14 @@ export async function POST(request: NextRequest, context: RouteContext) {
       return NextResponse.json({ success: false, error: "Upload failed" }, { status: 502 });
     }
     const decrypted = await persistFiles(row, fieldKey, next);
+    // The client's browser only ever gets masks, as the main token route does; the agent gets real values.
+    const forClient = access.role === "owner" ? decrypted : maskIulSensitiveForClient(decrypted);
 
     return NextResponse.json({
       success: true,
       field: fieldKey,
       files: next,
-      session: toIntakeSession({ ...row, status: row.status === "completed" ? "completed" : "in_progress" }, access.role, decrypted),
+      session: toIntakeSession({ ...row, status: row.status === "completed" ? "completed" : "in_progress" }, access.role, forClient),
     });
   } catch (error) {
     console.error("[iul-intake/:token/files] POST", error);
@@ -195,11 +198,12 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
       await destroyStoredDocument(removed);
     }
 
+    const forClient = access.role === "owner" ? decrypted : maskIulSensitiveForClient(decrypted);
     return NextResponse.json({
       success: true,
       field: fieldKey,
       files: next,
-      session: toIntakeSession(row, access.role, decrypted),
+      session: toIntakeSession(row, access.role, forClient),
     });
   } catch (error) {
     console.error("[iul-intake/:token/files] DELETE", error);
