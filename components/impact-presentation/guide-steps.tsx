@@ -24,6 +24,8 @@ export type GuideData = {
   startDate: string;
   licensedStates: number;
   agentIbo: string | null;
+  /** Isaac, signed in as admin: the quote screen adds his quote image box for anyone he quotes. */
+  admin: boolean;
 };
 
 /* ─── building blocks ───────────────────────────────────────────────────────── */
@@ -421,7 +423,7 @@ export function buildGuideSteps(data: GuideData): { steps: ReactNode[]; quoteSte
     <Fees key="fees" t={t} />,
     <MemberCard key="card" t={t} />,
     <Portal key="portal" t={t} locale={data.locale} />,
-    <GuideQuote key="quote" locale={data.locale} />,
+    <GuideQuote key="quote" locale={data.locale} admin={data.admin} />,
     <NextSteps key="next" t={t} startDate={data.startDate} />,
   ];
   return { steps, quoteStep: steps.findIndex((step) => (step as { key?: string }).key === "quote") };

@@ -6,18 +6,62 @@ import { cn } from "@/lib/utils";
 import {
   CO_SHARE_MAX,
   RECOMMENDED_TIER,
+  makeQuoteBlock,
   money,
   perDay,
   type HouseholdSize,
   type ImpactPlan,
   type ImpactQuote,
+  type ImpactTierKey,
+  type QuoteBlock,
 } from "@/lib/impact-quote/plans";
-import { publishPlanChoice, publishQuote, readStoredQuote, subscribeQuote } from "@/lib/impact-quote/sync";
+import {
+  publishPlanChoice,
+  publishQuote,
+  readPlanChoice,
+  readQuoteBlock,
+  readStoredQuote,
+  stashQuoteBlock,
+  subscribeQuote,
+} from "@/lib/impact-quote/sync";
 import { dobFromParts, requestImpactQuote } from "@/lib/impact-quote/client";
 import { splitDobIso } from "@/lib/intake-shared/format";
 import { DECK_COPY, type DeckCopy, type DeckLocale } from "./copy";
+import { useSlideActive } from "./deck-context";
 import { Brandbar, Kicker, Slide, Title } from "./deck-parts";
 import { Glyph } from "./icons";
+
+/** The slide's two answers: how many people, and the oldest one's birth date (YYYY-MM-DD). */
+type DeckAnswers = { asked: HouseholdSize; dob: string };
+
+/*
+ * The answers last typed on the slide, per intake, for this tab only: "Change my answers" starts
+ * from them after a trip to the form or a language switch (the slides remount either way).
+ */
+const answersKey = (token: string) => `impact-deck-answers:${token}`;
+
+function readDeckAnswers(token: string): DeckAnswers | null {
+  try {
+    const saved = JSON.parse(sessionStorage.getItem(answersKey(token)) ?? "null") as Partial<DeckAnswers> | null;
+    const asked = saved?.asked;
+    return (asked === 1 || asked === 2 || asked === 3) && typeof saved?.dob === "string"
+      ? { asked, dob: saved.dob }
+      : null;
+  } catch {
+    return null;
+  }
+}
+
+function saveDeckAnswers(token: string, answers: DeckAnswers): void {
+  try {
+    sessionStorage.setItem(answersKey(token), JSON.stringify(answers));
+  } catch {
+    /* "Change my answers" then starts from the intake's household */
+  }
+}
+
+const cardKey = (plan: ImpactPlan) => plan.tier ?? String(plan.pra);
+const nowIso = () => new Date().toISOString();
 
 /**
  * "Choose your plan" on the CrankWheel deck: this household's four Impact prices, sold the way
@@ -28,12 +72,22 @@ import { Glyph } from "./icons";
  * birth dates. Usually it doesn't — the deck opens right after the client is found — so the slide
  * asks the same two questions as the self-serve page, pre-filled from the intake when it can, and
  * quotes in place. It also follows whatever the agent publishes from the form's quote panel.
+ *
+ * What the form gets: a quote made here sends its recommended plan with the two answers
+ * (`QuoteBlock`), and so does every tap on one of its cards, so the application fills in the
+ * household (lib/impact-quote/prefill.ts): live in the agent's open form, and from this tab's
+ * sessionStorage once "Confirm my details" turns the tab into the form. A quote made elsewhere (the
+ * page's own, the agent's panel) has no answers to send: its taps send the plan only. The page's own
+ * (made at render from the intake's household) also sends the plan it shows picked, as `auto`,
+ * which fills a blank plan and never replaces one. The panel's never does: its prices arrive a
+ * keystroke at a time.
  */
 export default function QuoteSlide({
   locale,
   token,
   initial,
   household,
+  initialTier,
   page,
 }: {
   locale: DeckLocale;
@@ -41,34 +95,85 @@ export default function QuoteSlide({
   initial: ImpactQuote | null;
   /** What the intake says about the household when the deck opened, to pre-fill the questions. */
   household: { members: HouseholdSize; oldestDob: string | null };
+  /** The intake's plan when the deck opened: picked until this tab has a pick of its own. */
+  initialTier: ImpactTierKey | null;
   page: string;
 }) {
   const t = DECK_COPY[locale];
   const q = t.quote;
+  const active = useSlideActive();
   const [quote, setQuote] = useState<ImpactQuote | null>(initial);
+  /** The answers behind the last quote made here; they travel with `quote` while the ids match. */
+  const [block, setBlock] = useState<QuoteBlock | null>(null);
+  const [answers, setAnswers] = useState<DeckAnswers | null>(null);
   const [editing, setEditing] = useState(false);
-  const [selected, setSelected] = useState<string>(RECOMMENDED_TIER);
+  const [selected, setSelected] = useState<string>(initialTier ?? RECOMMENDED_TIER);
+  const [restored, setRestored] = useState(false);
 
+  // What this tab already had for this intake: the latest quote, the pick, the answers behind it.
   useEffect(() => {
     const stored = readStoredQuote(token);
     if (stored) setQuote(stored);
-    return subscribeQuote(token, (next) => {
-      setQuote(next ?? initial);
-      if (next) setEditing(false);
-    });
-  }, [token, initial]);
+    const pick = readPlanChoice(token);
+    if (pick?.tier) setSelected(pick.tier);
+    setBlock(readQuoteBlock(token));
+    setAnswers(readDeckAnswers(token));
+    setRestored(true);
+  }, [token]);
 
-  /** A quote made on the slide: shown, shared with the agent's panel, and its plan sent to the form. */
-  function quoted(next: ImpactQuote) {
-    setQuote(next);
-    setEditing(false);
-    setSelected(RECOMMENDED_TIER);
-    publishQuote(token, next);
-    const plan = next.plans.find((p) => p.tier === RECOMMENDED_TIER);
-    if (plan?.tier) publishPlanChoice(token, { tier: plan.tier, monthly: plan.monthly });
-  }
+  useEffect(
+    () =>
+      subscribeQuote(token, (next) => {
+        setQuote(next ?? initial);
+        if (next) setEditing(false);
+      }),
+    [token, initial]
+  );
 
   const asking = !quote?.plans.length || editing;
+  const carried = quote?.id && block?.id === quote.id ? block : null;
+
+  // The page's own quote (made at render, nobody picked from it): the plan shown picked still goes
+  // to the form, as `auto`. Only from the slide in view, and only when it differs from the pick
+  // already stored. Never for the agent's panel: it sends a quote on every keystroke of a typed
+  // price, and the first one ("4") would become the plan's price.
+  useEffect(() => {
+    if (!active || !restored || asking || !quote || quote !== initial) return;
+    const plan = quote.plans.find((p) => cardKey(p) === selected);
+    if (!plan?.tier) return;
+    const stored = readPlanChoice(token);
+    if (stored?.tier === plan.tier && stored.monthly === plan.monthly) return;
+    publishPlanChoice(token, { tier: plan.tier, monthly: plan.monthly, at: nowIso(), auto: true });
+  }, [active, restored, asking, quote, initial, selected, token]);
+
+  /** A quote made on the slide: shown, shared with the agent's panel, and sent to the form with its answers. */
+  function quoted(next: ImpactQuote, made: QuoteBlock, typed: DeckAnswers) {
+    setQuote(next);
+    setBlock(made);
+    setAnswers(typed);
+    setEditing(false);
+    setSelected(RECOMMENDED_TIER);
+    saveDeckAnswers(token, typed);
+    stashQuoteBlock(token, made);
+    publishQuote(token, next);
+    const plan = next.plans.find((p) => p.tier === RECOMMENDED_TIER);
+    publishPlanChoice(token, { tier: plan?.tier ?? null, monthly: plan?.monthly ?? null, at: made.at, quote: made });
+  }
+
+  /** The client's pick goes straight into the agent's open form ("Your plan"). */
+  function pick(plan: ImpactPlan) {
+    setSelected(cardKey(plan));
+    if (!plan.tier) return;
+    if (carried) stashQuoteBlock(token, carried);
+    publishPlanChoice(token, {
+      tier: plan.tier,
+      monthly: plan.monthly,
+      at: nowIso(),
+      ...(carried ? { quote: carried } : {}),
+    });
+  }
+
+  const start: DeckAnswers = answers ?? { asked: household.members, dob: household.oldestDob ?? "" };
 
   return (
     <Slide>
@@ -106,7 +211,14 @@ export default function QuoteSlide({
       </div>
 
       {asking ? (
-        <QuickQuote t={t} locale={locale} household={household} onQuoted={quoted} />
+        <QuickQuote
+          // Remounts when the answers typed earlier turn up, so the questions start from them.
+          key={answers ? `typed-${answers.asked}-${answers.dob}` : "intake"}
+          t={t}
+          locale={locale}
+          start={start}
+          onQuoted={quoted}
+        />
       ) : (
         <div className="mt-[24px] grid gap-[12px]">
           {(quote?.plans ?? []).map((plan) => (
@@ -114,12 +226,8 @@ export default function QuoteSlide({
               key={plan.pra}
               plan={plan}
               t={t}
-              selected={selected === (plan.tier ?? String(plan.pra))}
-              onSelect={() => {
-                setSelected(plan.tier ?? String(plan.pra));
-                // The client's pick goes straight into the agent's open form ("Your plan").
-                if (plan.tier) publishPlanChoice(token, { tier: plan.tier, monthly: plan.monthly });
-              }}
+              selected={selected === cardKey(plan)}
+              onSelect={() => pick(plan)}
             />
           ))}
         </div>
@@ -137,25 +245,25 @@ export default function QuoteSlide({
 
 /**
  * The two questions Impact prices on, at canvas size, so the agent can quote on the shared screen
- * mid-presentation. Pre-filled from the intake when it already knows the household.
+ * mid-presentation. Starts from the answers last typed here, else from the intake's household.
  */
 function QuickQuote({
   t,
   locale,
-  household,
+  start,
   onQuoted,
 }: {
   t: DeckCopy;
   locale: DeckLocale;
-  household: { members: HouseholdSize; oldestDob: string | null };
-  onQuoted: (quote: ImpactQuote) => void;
+  start: DeckAnswers;
+  onQuoted: (quote: ImpactQuote, block: QuoteBlock, answers: DeckAnswers) => void;
 }) {
   const q = t.quote;
-  const start = splitDobIso(household.oldestDob ?? "");
-  const [members, setMembers] = useState<HouseholdSize>(household.members);
-  const [month, setMonth] = useState(start.month);
-  const [day, setDay] = useState(start.day);
-  const [year, setYear] = useState(start.year);
+  const parts = splitDobIso(start.dob);
+  const [members, setMembers] = useState<HouseholdSize>(start.asked);
+  const [month, setMonth] = useState(parts.month);
+  const [day, setDay] = useState(parts.day);
+  const [year, setYear] = useState(parts.year);
   const [phase, setPhase] = useState<"idle" | "loading" | "failed">("idle");
   const months = useMemo(
     () =>
@@ -178,7 +286,12 @@ function QuickQuote({
       return;
     }
     setPhase("idle");
-    onQuoted({ plans: answer.plans, members: answer.members, oldestAge: answer.age, source: "impact" });
+    const block = makeQuoteBlock("deck", members, dob, answer);
+    onQuoted(
+      { id: block.id, plans: answer.plans, members: answer.members, oldestAge: answer.age, source: "impact" },
+      block,
+      { asked: members, dob }
+    );
   }
 
   const select = "h-[76px] w-full rounded-[18px] border-[3px] border-[#e6e9ef] bg-white px-[16px] text-[24px] text-[#14243a]";

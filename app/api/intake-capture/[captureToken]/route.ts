@@ -3,8 +3,9 @@ import { createContactNote } from "@/lib/agent-crm-call-summary";
 import { agentCrmGetBaseCredentials } from "@/lib/agent-crm-contacts";
 import { getIntakeConfig } from "@/lib/intake-configs";
 import { sanitizeIntakeData } from "@/lib/intake-core/schema";
-import { decryptIntakeData, encryptIntakeData, mergePreservedSensitive } from "@/lib/intake-core/sensitive";
-import { syncIntakeToCrm, updateIntakeData } from "@/lib/intake-core/server";
+import { planIntakePatch } from "@/lib/intake-core/patch";
+import { decryptIntakeData, encryptIntakeData } from "@/lib/intake-core/sensitive";
+import { patchIntakeData, syncIntakeToCrm } from "@/lib/intake-core/server";
 import { captureGroups, groupsForKeys } from "@/lib/intake-core/secure-capture-groups";
 import {
   getCaptureByToken,
@@ -134,15 +135,16 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
 
     const stored = decryptIntakeData(config, (session.data ?? {}) as IntakeData);
     // The client is the authority on their own numbers, so their values win over the agent's.
-    const merged = mergePreservedSensitive(config, { ...stored, ...patch }, stored);
+    // Only the keys this link wrote (plus a looked-up bank name) are merged into the session, so an
+    // answer the agent saved meanwhile is kept.
+    const write = planIntakePatch(config.sections, patch, stored);
     // A routing number from the phone names its bank, so the agent isn't left asking for it.
     if (typeof patch.routingNumber === "string" && !String(stored.bankName ?? "").trim()) {
       const bank = lookupBankByRouting(patch.routingNumber);
-      if (bank) merged.bankName = bank.bankName;
+      if (bank) write.bankName = bank.bankName;
     }
 
-    const status = session.status === "completed" ? "completed" : "in_progress";
-    const updated = await updateIntakeData(session.token, encryptIntakeData(config, merged), status);
+    const updated = await patchIntakeData(session.token, encryptIntakeData(config, write));
     if (!updated) return notFound();
     await markCaptureSubmitted(capture.id);
 

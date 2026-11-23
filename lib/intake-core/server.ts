@@ -10,7 +10,7 @@
  */
 
 import "server-only";
-import { and, count, desc, eq, isNull, or, ilike, type SQL } from "drizzle-orm";
+import { and, count, desc, eq, isNull, or, ilike, sql, type SQL } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { db } from "@/lib/db";
 import { intakeSessions } from "@/lib/db/schema";
@@ -378,14 +378,33 @@ export async function deleteIntakeSession(
 
 // ── Mutations ────────────────────────────────────────────────────────────────
 
-export async function updateIntakeData(
+/** `data || patch`: the patch's keys replace stored ones, and every other stored key stays. */
+function mergedData(patch: IntakeData): SQL {
+  return sql`coalesce(${intakeSessions.data}, '{}'::jsonb) || ${JSON.stringify(patch)}::jsonb`;
+}
+
+/**
+ * Merge a save into the stored answers, in ONE statement.
+ *
+ * Writes only the keys in `patch`, so two tabs (or the form and a secure link) saving different
+ * answers can't erase each other. It has to be a single statement: the neon-http driver can't hold
+ * a lock across two, so a read-modify-write in code would reopen exactly that race. A completed
+ * session stays completed; anything else becomes in_progress.
+ *
+ * `patch` must already be encrypted (`encryptIntakeData`) and hold at least one key. There is no
+ * "unset": a key can be set to null or "", never removed.
+ */
+export async function patchIntakeData(
   token: string,
-  data: IntakeData,
-  status: IntakeStatus
+  patch: IntakeData
 ): Promise<IntakeSessionRow | null> {
   const [row] = await db
     .update(intakeSessions)
-    .set({ data, status, updatedAt: new Date() })
+    .set({
+      data: mergedData(patch),
+      status: sql`CASE WHEN ${intakeSessions.status} = 'completed' THEN 'completed' ELSE 'in_progress' END`,
+      updatedAt: new Date(),
+    })
     .where(eq(intakeSessions.token, token))
     .returning();
   return row ?? null;
@@ -412,15 +431,29 @@ export async function resetIntakeLink(token: string): Promise<IntakeSessionRow |
   return row ?? null;
 }
 
+/**
+ * Mark a submission completed: status and timestamps only.
+ *
+ * The answers were validated and synced as stored and are not written back. Completion makes
+ * several CRM calls, so a copy read at its start can be seconds old by now, and writing it would
+ * undo a save that landed in between. With purge-after-sync on, `purge` holds just the sensitive
+ * keys to blank, merged in the same statement like any other patch.
+ */
 export async function markIntakeCompleted(
   token: string,
-  data: IntakeData
+  purge?: IntakeData | null
 ): Promise<IntakeSessionRow | null> {
   const now = new Date();
   const [row] = await db
     .update(intakeSessions)
-    // Re-lock the client on every submission; admin re-opens explicitly if needed.
-    .set({ data, status: "completed", reopenedForClient: false, completedAt: now, updatedAt: now })
+    .set({
+      ...(purge && Object.keys(purge).length > 0 ? { data: mergedData(purge) } : {}),
+      // Re-lock the client on every submission; admin re-opens explicitly if needed.
+      status: "completed",
+      reopenedForClient: false,
+      completedAt: now,
+      updatedAt: now,
+    })
     .where(eq(intakeSessions.token, token))
     .returning();
   return row ?? null;

@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { isPrivatePagePath } from "@/lib/private-pages";
+import { GA_HOLD_FLAG } from "@/lib/analytics/ga-id";
 
 /**
  * Switches Google Analytics off while the visitor is on a private page (a client's form, a secure
@@ -15,7 +16,9 @@ import { isPrivatePagePath } from "@/lib/private-pages";
 export default function AnalyticsPrivacyGuard({ gaId }: { gaId: string }) {
   const pathname = usePathname();
   useEffect(() => {
-    (window as unknown as Record<string, boolean>)[`ga-disable-${gaId}`] = isPrivatePagePath(pathname);
+    const w = window as unknown as Record<string, boolean>;
+    // A page that called holdGaOff() (the admin's quote-image box on /impact) keeps GA off.
+    w[`ga-disable-${gaId}`] = isPrivatePagePath(pathname) || w[GA_HOLD_FLAG] === true;
   }, [gaId, pathname]);
   return null;
 }

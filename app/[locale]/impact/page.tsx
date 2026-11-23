@@ -45,13 +45,16 @@ async function licensedStates(): Promise<number> {
 
 export default async function ImpactGuidePage() {
   const locale: DeckLocale = (await getLocale()) === "es" ? "es" : "en";
+  // Isaac, signed in as admin: he can walk past the quote, and make a quote image for anyone he quotes.
+  const isAdmin = await getIsAdmin();
   const { steps, quoteStep } = buildGuideSteps({
     locale,
     // Nobody has picked a date yet, so the earliest 1st Impact allows today.
     startDate: formatLongDate(earliestMonthStart(businessToday(), IMPACT_LAST_PAYMENT_DAY), locale),
     licensedStates: await licensedStates(),
     agentIbo: process.env.IMPACT_AGENT_IBO?.trim() || null,
+    admin: isAdmin,
   });
-  // A visitor must quote before "Apply now"; Isaac, signed in as admin, can walk straight through.
-  return <ImpactGuide locale={locale} steps={steps} quoteStep={quoteStep} canSkipQuote={await getIsAdmin()} />;
+  // A visitor must quote before "Apply now"; Isaac can walk straight through.
+  return <ImpactGuide locale={locale} steps={steps} quoteStep={quoteStep} canSkipQuote={isAdmin} />;
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Download, ImageIcon, Loader2, Share2 } from "lucide-react";
 import { OUTLINE_BTN } from "@/components/intake-ui";
 import { DECK_COPY } from "@/components/impact-presentation/copy";
@@ -9,10 +9,20 @@ import { UI, tr, type IntakeLocale } from "@/lib/intake-core/ui-strings";
 
 type Made = { url: string; file: File };
 
+/** The file name the server gave the image (`Content-Disposition`), without ".png". */
+function serverFileName(res: Response): string | null {
+  return /filename="([^"]+)\.png"/i.exec(res.headers.get("Content-Disposition") ?? "")?.[1] ?? null;
+}
+
 /**
- * "Image to share": the vertical quote image for a client who wants time to think, made from the
- * form (names) and the quote (plan, price). One click to create, then download it or hand it to the
- * device's share sheet (WhatsApp on a phone, and on Chrome for Windows).
+ * "Image to share": the vertical quote image for a client who wants time to think. One click to
+ * create, then download it or hand it to the device's share sheet (WhatsApp on a phone, and on
+ * Chrome for Windows).
+ *
+ * The intake's panel asks with a GET (names from the form, plan and price from the panel). Isaac's
+ * box on /impact POSTs what he typed (`extra`) and no price: its server asks Impact again. Any
+ * change to what goes into the image clears the one on screen, and an answer to an older request
+ * is dropped.
  */
 export default function ImpactQuoteImage({
   endpoint,
@@ -21,49 +31,90 @@ export default function ImpactQuoteImage({
   fileName,
   locale,
   clientLocale,
+  method = "GET",
+  extra,
+  disabled = false,
 }: {
   endpoint: string;
   tier: ImpactTierKey;
-  /** 0 when unknown: the server then prices it from the form's household. */
+  /** 0 when unknown: the server then prices it from the form's household. Never sent by a POST. */
   monthly: number;
-  fileName: string;
+  /** Without ".png". Absent: the name the server gives it. */
+  fileName?: string;
   locale: IntakeLocale;
   clientLocale: string;
+  /** POST sends `{...extra, tier, lang}` as JSON, so nothing private lands in a URL. */
+  method?: "GET" | "POST";
+  /** More of what goes into the image (POST only); a change clears the image on screen. */
+  extra?: Record<string, unknown>;
+  /** "Create image" stays off, say until a name is typed. */
+  disabled?: boolean;
 }) {
   const { names, perMonth } = DECK_COPY[locale].quote;
   const [lang, setLang] = useState<"es" | "en">(clientLocale === "es" ? "es" : "en");
   const [made, setMade] = useState<Made | null>(null);
   const [state, setState] = useState<"idle" | "loading" | "noPrice" | "error">("idle");
   const [canShare, setCanShare] = useState(false);
+  /** Bumped whenever the inputs change: an answer to an older request must not show. */
+  const generation = useRef(0);
+  const extraKey = extra === undefined ? "" : JSON.stringify(extra);
 
-  // A plan, price or language change makes the image on screen stale.
+  // A plan, price, language or any other input change makes the image on screen stale.
   useEffect(() => {
-    setMade((prev) => {
-      if (prev) URL.revokeObjectURL(prev.url);
-      return null;
-    });
-  }, [tier, monthly, lang]);
+    generation.current += 1;
+    setMade(null);
+  }, [tier, monthly, lang, extraKey]);
+
+  // The preview's blob URL lives as long as the preview: freed once it is replaced, cleared or unmounted.
+  useEffect(() => {
+    if (!made) return;
+    return () => URL.revokeObjectURL(made.url);
+  }, [made]);
+
+  // Unmounted: an answer still on its way is for nobody, so it never becomes a blob URL.
+  useEffect(
+    () => () => {
+      generation.current += 1;
+    },
+    []
+  );
 
   async function create() {
+    const asked = generation.current;
+    /** The inputs changed while this request was out: its answer is for an image no longer wanted. */
+    const stale = () => asked !== generation.current;
     setState("loading");
     try {
-      const params = new URLSearchParams({ tier, lang, ...(monthly > 0 ? { monthly: String(monthly) } : {}) });
-      const res = await fetch(`${endpoint}?${params}`, { credentials: "same-origin" });
-      if (res.status === 400) {
+      const res =
+        method === "POST"
+          ? await fetch(endpoint, {
+              method: "POST",
+              credentials: "same-origin",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ ...extra, tier, lang }),
+            })
+          : await fetch(
+              `${endpoint}?${new URLSearchParams({ tier, lang, ...(monthly > 0 ? { monthly: String(monthly) } : {}) })}`,
+              { credentials: "same-origin" }
+            );
+      const blob = res.ok ? await res.blob() : null;
+      if (stale()) {
+        setState("idle");
+        return;
+      }
+      // A GET's 400 means the intake has no price yet. A POST's means its body was refused, which
+      // the box's own checks rule out: a plain failure, not "quote first".
+      if (res.status === 400 && method === "GET") {
         setState("noPrice");
         return;
       }
-      if (!res.ok) throw new Error("failed");
-      const blob = await res.blob();
-      const file = new File([blob], `${fileName}.png`, { type: "image/png" });
-      setMade((prev) => {
-        if (prev) URL.revokeObjectURL(prev.url);
-        return { url: URL.createObjectURL(blob), file };
-      });
+      if (!blob) throw new Error("failed");
+      const file = new File([blob], `${fileName ?? serverFileName(res) ?? "impact"}.png`, { type: "image/png" });
+      setMade({ url: URL.createObjectURL(blob), file });
       setCanShare(typeof navigator.canShare === "function" && navigator.canShare({ files: [file] }));
       setState("idle");
     } catch {
-      setState("error");
+      setState(stale() ? "idle" : "error");
     }
   }
 
@@ -96,7 +147,7 @@ export default function ImpactQuoteImage({
         <button
           type="button"
           onClick={create}
-          disabled={state === "loading"}
+          disabled={disabled || state === "loading"}
           className={`${OUTLINE_BTN} w-auto px-4 py-2 text-sm disabled:opacity-50`}
         >
           {state === "loading" ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImageIcon className="h-4 w-4" />}

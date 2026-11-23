@@ -2,7 +2,30 @@
 
 ## Status
 
-In progress: **Impact deck quotes on the slide + shareable quote image** (branch `feature/impact-deck-quote-image`, no
+In progress: **The Impact quote fills the application + quote image for anyone on /impact** (branch
+`feature/impact-quote-to-application`, no migration). Isaac's ask (2026-11-22): whatever was quoted on the deck's
+slide 10 or on `/impact` (how many people, the oldest person's birth date, the plan) must already be in the
+application, and on `/impact` he wants to type a friend's name and download the quote image.
+- **1a, lost answers between tabs (root cause, `e37b605`):** autosave sent the whole form and the server replaced
+  it (last write wins), so a hidden, stale tab erased answers typed in the presenting tab. Now the form sends only
+  the keys it changed to `POST /api/intake/[lob]/[token]/patch`, merged in one SQL statement. The legacy `PATCH`
+  only merges. Submit flushes first and completion no longer writes a stale copy. The files route stopped
+  returning decrypted values to clients.
+- **1b, the quote fills the application (`8ab22b0`):** 1 person fills the applicant DOB, "no" dependents and
+  Individual. 2 or more set "yes" and ask "Is this your date of birth?" (No puts the date in "Who else to cover").
+  Blanks only, once per quote. The DOB travels only in the same tab's sessionStorage, never localStorage.
+- **2, quote image for anyone on /impact (admin):** a name box under the plan cards, then
+  `POST /api/admin/impact-quote-image` (re-priced server-side), then preview, Download and Share. Once the box opens,
+  Meta Pixel stays off until reload and GA until the path changes. Names are Latin script only, so next/og never
+  sends them to Google Fonts.
+- Verified so far: tsc and build pass; 55 + 145 offline checks pass. Dev server: an opened form sends no save;
+  typing sends only the changed keys; a concurrent patch plus a stale legacy save keeps both values. `/impact` →
+  Apply pre-fills both households correctly, with no DOB in localStorage. The deck path needs Isaac's signed-in
+  browser.
+- **Next, planned:** the free agent platform for other IBOs (plan Part 3; Phase 1 gated off until ACN replies in
+  writing). Plan file: `~/.claude/plans/continue-cuddly-bear-of-b89df904-2868-44d3-85cd-50c375955b77.md`.
+
+Done (merged `a290e72`): **Impact deck quotes on the slide + shareable quote image** (branch `feature/impact-deck-quote-image`, no
 migration).
 - **Bug:** the CrankWheel deck's quote slide only priced the household the intake already described when the deck
   opened; Isaac opens it right after finding the client, before any birth date is on the form, so it sat on "Your

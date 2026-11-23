@@ -1,31 +1,88 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import dynamic from "next/dynamic";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   CO_SHARE_MAX,
   RECOMMENDED_TIER,
+  isQuoteBlock,
+  makeQuoteBlock,
   money,
   perDay,
   type HouseholdSize,
   type ImpactPlan,
+  type QuoteBlock,
 } from "@/lib/impact-quote/plans";
-import { publishPlanChoice } from "@/lib/impact-quote/sync";
+import { GUIDE_SCOPE, publishPlanChoice, stashQuoteBlock } from "@/lib/impact-quote/sync";
 import { AGENT, DECK_COPY, type DeckCopy, type DeckLocale } from "./copy";
 import { useGuideGate } from "./guide-gate";
 import { Glyph } from "./icons";
 
-type Result = { plans: ImpactPlan[]; members: HouseholdSize; age: number; senior: boolean; under18: boolean };
-type Saved = { members: HouseholdSize | null; month: string; day: string; year: string; result: Result | null };
+/**
+ * Impact's answer for the visitor's household, with what they told it pinned on when they quoted:
+ * how many people (`asked`), the oldest birth date (`dob`, YYYY-MM-DD), the quote's id and time.
+ */
+type Result = {
+  plans: ImpactPlan[];
+  members: HouseholdSize;
+  age: number;
+  senior: boolean;
+  under18: boolean;
+  asked: HouseholdSize;
+  dob: string;
+  id: string;
+  at: string;
+};
+/** Kept per tab, across a language switch and a step away and back: answers, prices and the pick. */
+type Saved = {
+  members: HouseholdSize | null;
+  month: string;
+  day: string;
+  year: string;
+  result: Result | null;
+  selected?: string;
+};
 const STORAGE_KEY = "impact-guide-quote";
+
+/**
+ * Isaac's "quote image for someone" box. Fetched only when it renders, which is only for an admin:
+ * a visitor's page never carries its code or its words.
+ */
+const GuideQuoteImage = dynamic(() => import("./guide-quote-image"), { ssr: false });
+
+const cardKey = (plan: ImpactPlan) => plan.tier ?? String(plan.pra);
+
+/** The answers behind a result, as the application takes them; null for one saved before they were pinned. */
+function blockOf(result: Result): QuoteBlock | null {
+  const block: QuoteBlock = {
+    id: result.id,
+    at: result.at,
+    source: "guide",
+    asked: result.asked,
+    priced: result.members,
+    oldestDob: result.dob,
+    senior: result.senior,
+    under18: result.under18,
+  };
+  return isQuoteBlock(block) ? block : null;
+}
 
 /**
  * The guide's "Choose your plan" screen: two questions a visitor can answer without help (how many
  * people, the oldest one's birth date), then this household's four Impact prices, the cheapest
  * recommended. Kept across a language switch. If Impact's prices can't be fetched, WhatsApp.
+ *
+ * The pick goes to the application "Apply now" starts (lib/impact-quote/sync.ts, scope "guide"):
+ * the plan in localStorage, the two answers in this tab's sessionStorage only, so no birth date is
+ * left in localStorage on this public page. Sent only when the visitor quotes or taps a plan, never
+ * when the screen merely shows again.
+ *
+ * `admin` (Isaac, signed in): under the plans, a box that makes the shareable quote image for
+ * whoever he just quoted, from the selected plan and a name he types.
  */
-export default function GuideQuote({ locale }: { locale: DeckLocale }) {
+export default function GuideQuote({ locale, admin = false }: { locale: DeckLocale; admin?: boolean }) {
   const t = DECK_COPY[locale];
   const q = t.quote;
   const [members, setMembers] = useState<HouseholdSize | null>(null);
@@ -33,6 +90,7 @@ export default function GuideQuote({ locale }: { locale: DeckLocale }) {
   const [day, setDay] = useState("");
   const [year, setYear] = useState("");
   const [result, setResult] = useState<Result | null>(null);
+  const [selected, setSelected] = useState<string>(RECOMMENDED_TIER);
   const [phase, setPhase] = useState<"form" | "loading" | "error">("form");
   const gate = useGuideGate();
 
@@ -51,6 +109,7 @@ export default function GuideQuote({ locale }: { locale: DeckLocale }) {
       setDay(saved.day);
       setYear(saved.year);
       setResult(saved.result);
+      setSelected(saved.selected ?? RECOMMENDED_TIER);
     } catch {
       /* start empty */
     }
@@ -58,11 +117,14 @@ export default function GuideQuote({ locale }: { locale: DeckLocale }) {
 
   useEffect(() => {
     try {
-      sessionStorage.setItem(STORAGE_KEY, JSON.stringify({ members, month, day, year, result } satisfies Saved));
+      sessionStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({ members, month, day, year, result, selected } satisfies Saved)
+      );
     } catch {
       /* answers just won't survive a language switch */
     }
-  }, [members, month, day, year, result]);
+  }, [members, month, day, year, result, selected]);
 
   const months = useMemo(
     () =>
@@ -77,21 +139,50 @@ export default function GuideQuote({ locale }: { locale: DeckLocale }) {
   const dob = month && day && year ? `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}` : "";
   const ready = Boolean(members && dob);
 
+  /** The pick, on its way to the application, with the answers behind it. */
+  function publish(next: Result, key: string) {
+    const plan = next.plans.find((p) => cardKey(p) === key);
+    const block = blockOf(next);
+    if (block) stashQuoteBlock(GUIDE_SCOPE, block);
+    if (!plan?.tier && !block) return;
+    publishPlanChoice(GUIDE_SCOPE, {
+      tier: plan?.tier ?? null,
+      monthly: plan?.tier ? plan.monthly : null,
+      at: new Date().toISOString(),
+      ...(block ? { quote: block } : {}),
+    });
+  }
+
   async function quote() {
-    if (!ready) return;
+    if (!ready || !members) return;
     setPhase("loading");
     try {
       const res = await fetch(`/api/impact/quote?dob=${dob}&members=${members}`);
       const json = await res.json().catch(() => ({}));
       if (!res.ok || !json?.success) throw new Error("no quote");
-      setResult({ plans: json.plans, members: json.members, age: json.age, senior: json.senior, under18: json.under18 });
+      const answer = { plans: json.plans, members: json.members, age: json.age, senior: json.senior, under18: json.under18 };
+      const block = makeQuoteBlock("guide", members, dob, answer);
+      const next: Result = { ...answer, asked: members, dob, id: block.id, at: block.at };
+      setResult(next);
+      setSelected(RECOMMENDED_TIER);
+      // What shows as chosen arrives chosen on the application ("Your plan"), where it can still be
+      // changed: the highlighted plan counts from the start, not only after a tap.
+      publish(next, RECOMMENDED_TIER);
       setPhase("form");
     } catch {
       setPhase("error");
     }
   }
 
+  function choose(key: string) {
+    setSelected(key);
+    if (result) publish(result, key);
+  }
+
   const select = "h-14 w-full rounded-2xl border-2 border-[#e6e9ef] bg-white px-3 text-base text-[#14243a] focus:border-[#0b2a4a] focus:outline-none";
+  // The admin box needs one of the four plans selected and the answers behind the quote.
+  const imageBlock = admin && result ? blockOf(result) : null;
+  const imagePlan = imageBlock ? result?.plans.find((p) => cardKey(p) === selected) : undefined;
 
   return (
     <div>
@@ -115,7 +206,19 @@ export default function GuideQuote({ locale }: { locale: DeckLocale }) {
       </div>
 
       {result ? (
-        <Plans t={t} result={result} onChange={() => setResult(null)} />
+        <>
+          <Plans t={t} result={result} selected={selected} onSelect={choose} onChange={() => setResult(null)} />
+          {imageBlock && imagePlan?.tier && (
+            <GuideQuoteImage
+              locale={locale}
+              tier={imagePlan.tier}
+              monthly={imagePlan.monthly}
+              asked={imageBlock.asked}
+              oldestDob={imageBlock.oldestDob}
+              senior={imageBlock.senior}
+            />
+          )}
+        </>
       ) : (
         <div className="mt-6 space-y-5">
           <fieldset>
@@ -194,18 +297,20 @@ export default function GuideQuote({ locale }: { locale: DeckLocale }) {
   );
 }
 
-function Plans({ t, result, onChange }: { t: DeckCopy; result: Result; onChange: () => void }) {
+function Plans({
+  t,
+  result,
+  selected,
+  onSelect,
+  onChange,
+}: {
+  t: DeckCopy;
+  result: Result;
+  selected: string;
+  onSelect: (key: string) => void;
+  onChange: () => void;
+}) {
   const q = t.quote;
-  const [selected, setSelected] = useState<string>(RECOMMENDED_TIER);
-
-  /**
-   * What shows as chosen here arrives chosen on the application ("Your plan"), where it can still
-   * be changed: the highlighted plan counts from the start, not only after a tap.
-   */
-  useEffect(() => {
-    const plan = result.plans.find((p) => (p.tier ?? String(p.pra)) === selected);
-    if (plan?.tier) publishPlanChoice("guide", { tier: plan.tier, monthly: plan.monthly });
-  }, [result, selected]);
   return (
     <div className="mt-5">
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -220,7 +325,7 @@ function Plans({ t, result, onChange }: { t: DeckCopy; result: Result; onChange:
       {result.senior && <p className="mt-3 rounded-2xl bg-white px-4 py-3 text-sm text-[#56657a]">{q.senior}</p>}
       <div className="mt-5 space-y-4">
         {result.plans.map((plan) => {
-          const key = plan.tier ?? String(plan.pra);
+          const key = cardKey(plan);
           const on = selected === key;
           const recommended = plan.tier === RECOMMENDED_TIER;
           const label = plan.tier ? q.names[plan.tier] : { name: `PRA ${money(plan.pra)}`, tagline: "" };
@@ -228,7 +333,7 @@ function Plans({ t, result, onChange }: { t: DeckCopy; result: Result; onChange:
             <button
               key={key}
               type="button"
-              onClick={() => setSelected(key)}
+              onClick={() => onSelect(key)}
               aria-pressed={on}
               className={cn(
                 "relative w-full rounded-3xl border-2 px-5 text-left transition",

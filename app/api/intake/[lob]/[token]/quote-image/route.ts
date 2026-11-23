@@ -17,7 +17,7 @@ import {
   TIERS,
   type ImpactTierKey,
 } from "@/lib/impact-quote/plans";
-import { renderQuoteImage } from "@/lib/impact-quote/quote-image";
+import { quoteImageFileSlug, renderQuoteImage } from "@/lib/impact-quote/quote-image";
 import { fetchImpactPlans } from "@/lib/impact-quote/server";
 import { resolveCrmContactLocale } from "@/lib/iul-intake/server";
 
@@ -92,11 +92,10 @@ export async function GET(request: NextRequest, context: RouteContext) {
       origin: request.nextUrl.origin,
     });
 
-    const slug = applicant.normalize("NFD").replace(/[^\w\s-]/g, "").trim().replace(/\s+/g, "-").toLowerCase() || "cliente";
     return new NextResponse(png, {
       headers: {
         "Content-Type": "image/png",
-        "Content-Disposition": `inline; filename="impact-${slug}.png"`,
+        "Content-Disposition": `inline; filename="impact-${quoteImageFileSlug(applicant)}.png"`,
         "Cache-Control": "private, no-store",
       },
     });

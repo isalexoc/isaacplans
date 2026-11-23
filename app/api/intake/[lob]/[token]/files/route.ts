@@ -7,8 +7,9 @@ import {
 import {
   clientCanEdit,
   ensureCrmContactForSession,
+  getIntakeByToken,
+  patchIntakeData,
   toIntakeSession,
-  updateIntakeData,
   type IntakeSessionRow,
 } from "@/lib/intake-core/server";
 import {
@@ -18,7 +19,11 @@ import {
   rowFieldByKey,
 } from "@/lib/intake-core/fields";
 import { crmFieldId } from "@/lib/intake-core/ghl-field-ids";
-import { decryptIntakeData, encryptIntakeData } from "@/lib/intake-core/sensitive";
+import {
+  decryptIntakeData,
+  encryptIntakeData,
+  maskSensitiveForClient,
+} from "@/lib/intake-core/sensitive";
 import {
   agentCrmGetBaseCredentials,
   agentCrmUploadCustomFieldFile,
@@ -29,6 +34,7 @@ import type {
   IntakeData,
   IntakeField,
   IntakeLobConfig,
+  IntakeSession,
   RepeaterRow,
 } from "@/lib/intake-core/types";
 
@@ -149,15 +155,36 @@ function knownUrlsForSlug(config: IntakeLobConfig, data: IntakeData, slug: strin
   return urls;
 }
 
-/** Persist the whole decrypted payload back to the DB (re-encrypting sensitive fields). */
+/**
+ * Persist only the key this change touched: the file field, or the repeater holding the row
+ * (re-encrypting its sensitive sub-fields). Merged in one statement, so answers saved while the
+ * upload ran are kept. Returns the updated row, or null if the session went away meanwhile.
+ */
 async function persist(
   config: IntakeLobConfig,
   row: IntakeSessionRow,
+  decrypted: IntakeData,
+  target: FileTarget
+): Promise<IntakeSessionRow | null> {
+  const key = target.repeaterKey ?? target.field.key;
+  return patchIntakeData(row.token, encryptIntakeData(config, { [key]: decrypted[key] }));
+}
+
+/**
+ * The session as stored after the change, for the caller's role: real values for the agent, masks
+ * for the client's browser, like every other intake route. Falls back to what this request read
+ * when the row is gone.
+ */
+function sessionView(
+  config: IntakeLobConfig,
+  role: IntakeSession["role"],
+  updated: IntakeSessionRow | null,
+  row: IntakeSessionRow,
   decrypted: IntakeData
-): Promise<void> {
-  const encrypted = encryptIntakeData(config, decrypted);
-  const nextStatus = row.status === "completed" ? "completed" : "in_progress";
-  await updateIntakeData(row.token, encrypted, nextStatus);
+): IntakeSession {
+  const view = updated ?? { ...row, status: row.status === "completed" ? "completed" : "in_progress" };
+  const data = updated ? decryptIntakeData(config, (updated.data ?? {}) as IntakeData) : decrypted;
+  return toIntakeSession(view, role, role === "owner" ? data : maskSensitiveForClient(config, data));
 }
 
 const str = (v: unknown): string => (typeof v === "string" ? v.trim() : "");
@@ -247,16 +274,24 @@ export async function POST(request: NextRequest, context: RouteContext) {
       return NextResponse.json({ success: false, error: "Upload failed" }, { status: 502 });
     }
 
+    // The upload took seconds. Record it on the answers as stored NOW, not the copy read above: a
+    // per-row file rewrites its whole repeater, so an answer saved meanwhile (another person's row,
+    // a dependent's SSN) would otherwise be written back over. A file another upload recorded
+    // meanwhile is known too, so it isn't taken for this one's.
+    const latest = await getIntakeByToken(config, token);
+    const current = latest ? decryptIntakeData(config, (latest.data ?? {}) as IntakeData) : decrypted;
+    for (const url of knownUrlsForSlug(config, current, slug)) before.add(url);
+
     // GHL returns the whole shared bucket — keep only what is new and attach it to THIS row.
     const added = fieldFiles.filter((f) => f.url && !before.has(f.url));
-    const existing = filesAt(decrypted, target);
+    const existing = filesAt(current, target);
     const next: FileRef[] =
       added.length > 0
         ? [...existing, ...added.map((f) => ({ url: f.url, name: f.name }))]
         : [...existing, { url: "", name: file.name || "file" }];
 
-    setFilesAt(decrypted, target, next);
-    await persist(config, row, decrypted);
+    setFilesAt(current, target, next);
+    const updated = await persist(config, row, current, target);
 
     return NextResponse.json({
       success: true,
@@ -264,11 +299,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
       repeaterKey: target.repeaterKey ?? null,
       rowIndex: target.rowIndex ?? null,
       files: next,
-      session: toIntakeSession(
-        { ...row, status: row.status === "completed" ? "completed" : "in_progress" },
-        access.role,
-        decrypted
-      ),
+      session: sessionView(config, access.role, updated, row, current),
     });
   } catch (error) {
     console.error(`[intake/${lob}/:token/files] POST`, error);
@@ -304,7 +335,7 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
     const decrypted = decryptIntakeData(config, (row.data ?? {}) as IntakeData);
     const next = filesAt(decrypted, target).filter((f) => f.url !== url);
     setFilesAt(decrypted, target, next);
-    await persist(config, row, decrypted);
+    const updated = await persist(config, row, decrypted, target);
 
     // Best-effort: rewrite the shared CRM bucket to everything still referenced for this slug.
     const creds = agentCrmGetBaseCredentials();
@@ -326,7 +357,7 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
       repeaterKey: target.repeaterKey ?? null,
       rowIndex: target.rowIndex ?? null,
       files: next,
-      session: toIntakeSession(row, access.role, decrypted),
+      session: sessionView(config, access.role, updated, row, decrypted),
     });
   } catch (error) {
     console.error(`[intake/${lob}/:token/files] DELETE`, error);
