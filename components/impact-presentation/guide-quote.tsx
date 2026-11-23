@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import dynamic from "next/dynamic";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -45,6 +46,12 @@ type Saved = {
 };
 const STORAGE_KEY = "impact-guide-quote";
 
+/**
+ * Isaac's "quote image for someone" box. Fetched only when it renders, which is only for an admin:
+ * a visitor's page never carries its code or its words.
+ */
+const GuideQuoteImage = dynamic(() => import("./guide-quote-image"), { ssr: false });
+
 const cardKey = (plan: ImpactPlan) => plan.tier ?? String(plan.pra);
 
 /** The answers behind a result, as the application takes them; null for one saved before they were pinned. */
@@ -71,8 +78,11 @@ function blockOf(result: Result): QuoteBlock | null {
  * the plan in localStorage, the two answers in this tab's sessionStorage only, so no birth date is
  * left in localStorage on this public page. Sent only when the visitor quotes or taps a plan, never
  * when the screen merely shows again.
+ *
+ * `admin` (Isaac, signed in): under the plans, a box that makes the shareable quote image for
+ * whoever he just quoted, from the selected plan and a name he types.
  */
-export default function GuideQuote({ locale }: { locale: DeckLocale }) {
+export default function GuideQuote({ locale, admin = false }: { locale: DeckLocale; admin?: boolean }) {
   const t = DECK_COPY[locale];
   const q = t.quote;
   const [members, setMembers] = useState<HouseholdSize | null>(null);
@@ -170,6 +180,9 @@ export default function GuideQuote({ locale }: { locale: DeckLocale }) {
   }
 
   const select = "h-14 w-full rounded-2xl border-2 border-[#e6e9ef] bg-white px-3 text-base text-[#14243a] focus:border-[#0b2a4a] focus:outline-none";
+  // The admin box needs one of the four plans selected and the answers behind the quote.
+  const imageBlock = admin && result ? blockOf(result) : null;
+  const imagePlan = imageBlock ? result?.plans.find((p) => cardKey(p) === selected) : undefined;
 
   return (
     <div>
@@ -193,7 +206,19 @@ export default function GuideQuote({ locale }: { locale: DeckLocale }) {
       </div>
 
       {result ? (
-        <Plans t={t} result={result} selected={selected} onSelect={choose} onChange={() => setResult(null)} />
+        <>
+          <Plans t={t} result={result} selected={selected} onSelect={choose} onChange={() => setResult(null)} />
+          {imageBlock && imagePlan?.tier && (
+            <GuideQuoteImage
+              locale={locale}
+              tier={imagePlan.tier}
+              monthly={imagePlan.monthly}
+              asked={imageBlock.asked}
+              oldestDob={imageBlock.oldestDob}
+              senior={imageBlock.senior}
+            />
+          )}
+        </>
       ) : (
         <div className="mt-6 space-y-5">
           <fieldset>

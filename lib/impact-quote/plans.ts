@@ -174,6 +174,42 @@ export function ageOn(dobIso: string, today: Date = new Date()): number | null {
   return age >= 0 && age <= 120 ? age : null;
 }
 
+/** The quote image Isaac makes for anyone on /impact: the longest name, and how many others. */
+export const QUOTE_IMAGE_NAME_MAX = 80;
+export const QUOTE_IMAGE_OTHERS_MAX = 8;
+
+/**
+ * A typed name as the quote image takes it: composed Unicode (an "é" pasted as "e" + accent
+ * becomes one letter), and every run of spaces, tabs or line breaks one space, trimmed.
+ */
+export function cleanQuoteImageName(name: string): string {
+  return name.normalize("NFC").replace(/\s+/g, " ").trim();
+}
+
+/**
+ * What the image's font (Poppins) draws: Latin letters with or without accents (Latin-1 and the
+ * Latin Extended-A letters it has), digits, spaces and . , ' ’ ‘ ( ) -. Any other character
+ * (another script, an emoji, an invisible mark) makes the renderer fetch a fallback font from
+ * Google with that text in the URL, so a name with one is refused instead.
+ */
+const QUOTE_IMAGE_NAME_CHARS =
+  /^[A-Za-z0-9À-ÖØ-öø-ćĊ-ěĞ-ģĨ-ıĶķĹ-ňŌ-śŞ-ťŨ-ž .,'‘’()-]+$/;
+const HAS_A_LETTER = /[A-Za-zÀ-ž]/;
+
+/** A cleaned name the image can carry: at most 80 characters, a letter, and nothing its font lacks. */
+export function isQuoteImageName(name: string): boolean {
+  return name.length <= QUOTE_IMAGE_NAME_MAX && QUOTE_IMAGE_NAME_CHARS.test(name) && HAS_A_LETTER.test(name);
+}
+
+/**
+ * Whether this many names fit the household a quote priced, so the image never shows more people
+ * under a price than it was for. "3 or more" has no upper bound, and the Senior Program prices
+ * each person on their own.
+ */
+export function namesFitQuote(names: number, asked: HouseholdSize, senior: boolean): boolean {
+  return names >= 1 && (asked === 3 || senior || names <= asked);
+}
+
 /** "≈ $10.06 a day" maths. */
 export function perDay(monthly: number): number {
   return Math.round(((monthly * 12) / 365) * 100) / 100;

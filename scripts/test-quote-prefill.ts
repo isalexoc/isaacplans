@@ -5,7 +5,8 @@
  * One case per row of the pre-fill table, the one-tap question's answers, a date typed while it is
  * open, once per quote, a cleared date never filled back in, stale and spent /impact picks, picks
  * the deck sent on its own (`auto`), under-18 and 65+ households, and a submitted intake left alone.
- * Storage is an in-memory stand-in, so the sync helpers run as they do in a browser tab.
+ * Storage is an in-memory stand-in, so the sync helpers run as they do in a browser tab. Also the
+ * admin quote image on /impact: its request schema and the names-vs-people rule.
  *
  * No network, no database, no API keys. Run with: pnpm test:quote-prefill
  */
@@ -24,7 +25,16 @@ import {
   type PrefillContext,
 } from "../lib/impact-quote/prefill";
 import { diffIntakeData } from "../lib/intake-core/diff";
-import { isQuoteBlock, makeQuoteBlock, pricedMembers, type QuoteBlock } from "../lib/impact-quote/plans";
+import {
+  isQuoteBlock,
+  makeQuoteBlock,
+  namesFitQuote,
+  pricedMembers,
+  QUOTE_IMAGE_NAME_MAX,
+  QUOTE_IMAGE_OTHERS_MAX,
+  type QuoteBlock,
+} from "../lib/impact-quote/plans";
+import { quoteImageRequestSchema } from "../lib/impact-quote/quote-image-request";
 import {
   GUIDE_CHOICE_TTL_MS,
   GUIDE_SCOPE,
@@ -569,6 +579,81 @@ console.log("\nQuote blocks and Impact's priced size");
   check("a new block is well formed", isQuoteBlock(made) && made.at === NOW.toISOString() && made.id.length > 0, show(made));
   check("two blocks never share an id", makeQuoteBlock("deck", 1, OLDEST, { members: 1, senior: false, under18: false }).id !== made.id);
   check("junk is not a block", !isQuoteBlock({ ...made, asked: 4 }) && !isQuoteBlock({ ...made, oldestDob: "1970-13-40" }) && !isQuoteBlock(null));
+}
+
+console.log("\nThe admin quote image on /impact: names vs people");
+{
+  check("one name for one person", namesFitQuote(1, 1, false));
+  check("a second name for 'just me' waits", !namesFitQuote(2, 1, false));
+  check("two names for two people", namesFitQuote(2, 2, false) && !namesFitQuote(3, 2, false));
+  check("fewer names than people is fine", namesFitQuote(1, 2, false) && namesFitQuote(1, 3, false));
+  check("'3 or more' takes every name", namesFitQuote(1 + QUOTE_IMAGE_OTHERS_MAX, 3, false));
+  check("the Senior Program prices each person", namesFitQuote(4, 1, true) && namesFitQuote(3, 2, true));
+  check("no name, no image", !namesFitQuote(0, 3, false));
+}
+
+console.log("\nThe admin quote image on /impact: the request");
+{
+  const SENIOR_DOB = "1950-01-01";
+  const good = { applicant: "Ana Gómez", others: ["Luis Gómez"], tier: "plus", lang: "es", asked: 2, oldestDob: "1985-06-15" };
+  const parse = (body: unknown) => quoteImageRequestSchema.safeParse(body);
+  const ok = (body: unknown) => parse(body).success;
+
+  const parsed = parse({ ...good, applicant: "  Ana Gómez  ", others: [" Luis Gómez "], monthly: 1 });
+  check(
+    "a good one passes, names trimmed, any price dropped",
+    parsed.success &&
+      parsed.data.applicant === "Ana Gómez" &&
+      parsed.data.others[0] === "Luis Gómez" &&
+      !("monthly" in parsed.data),
+    show(parsed)
+  );
+  const alone = parse({ ...good, others: undefined, asked: 1 });
+  check("no other people: an empty list", alone.success && alone.data.others.length === 0, show(alone));
+
+  check("a name is required", !ok({ ...good, applicant: "" }) && !ok({ ...good, applicant: "   " }) && !ok({ ...good, applicant: undefined }));
+  check(
+    "names up to 80 characters",
+    ok({ ...good, applicant: "a".repeat(QUOTE_IMAGE_NAME_MAX) }) && !ok({ ...good, applicant: "a".repeat(QUOTE_IMAGE_NAME_MAX + 1) })
+  );
+  check("an empty other name is refused", !ok({ ...good, others: [""] }));
+  check("an other name over 80 is refused", !ok({ ...good, asked: 3, others: ["b".repeat(QUOTE_IMAGE_NAME_MAX + 1)] }));
+  check(
+    "up to 8 other people",
+    ok({ ...good, asked: 3, others: Array(QUOTE_IMAGE_OTHERS_MAX).fill("Luis") }) &&
+      !ok({ ...good, asked: 3, others: Array(QUOTE_IMAGE_OTHERS_MAX + 1).fill("Luis") })
+  );
+  const oneLine = parse({ ...good, applicant: "Ana\tGómez", others: ["Luis\n  Gómez"] });
+  check(
+    "tabs and line breaks inside a name become one space",
+    oneLine.success && oneLine.data.applicant === "Ana Gómez" && oneLine.data.others[0] === "Luis Gómez",
+    show(oneLine)
+  );
+  const composed = parse({ ...good, applicant: "Jose\u0301 Pe\u0301rez" });
+  check("an accent pasted apart joins its letter", composed.success && composed.data.applicant === "José Pérez", show(composed));
+  check(
+    "invisible and control characters are refused",
+    !ok({ ...good, others: ["Luis\u202EGómez"] }) && !ok({ ...good, applicant: "Ana\u200BGómez" }) && !ok({ ...good, applicant: "Ana\u0000" })
+  );
+  check(
+    "only characters the image's font draws (nothing for a fallback font to fetch)",
+    !ok({ ...good, applicant: "Иван Петров" }) && !ok({ ...good, others: ["Ana \u{1F600}"] }) && !ok({ ...good, applicant: "Ĉu Ŝi" })
+  );
+  check(
+    "Latin names in full",
+    ok({ ...good, applicant: "María-José O'Neil Peña", others: ["Łukasz Żółć (hijo)"] }) && !ok({ ...good, applicant: "..." })
+  );
+  check("one of the four plans", ok({ ...good, tier: "esencial" }) && !ok({ ...good, tier: "gold" }) && !ok({ ...good, tier: null }));
+  check("English or Spanish", ok({ ...good, lang: "en" }) && !ok({ ...good, lang: "fr" }));
+  check("1, 2 or 3 people", ok({ ...good, asked: 3 }) && !ok({ ...good, asked: 4 }) && !ok({ ...good, asked: "2" }) && !ok({ ...good, asked: 0 }));
+  check(
+    "a real YYYY-MM-DD birth date",
+    !ok({ ...good, oldestDob: "1985-02-30" }) && !ok({ ...good, oldestDob: "1985-6-15" }) && !ok({ ...good, oldestDob: "15/06/1985" }) && !ok({ ...good, oldestDob: undefined })
+  );
+  check("more names than people quoted is refused", !ok({ ...good, others: ["Luis", "Sofía"] }) && !ok({ ...good, asked: 1 }));
+  check("…except '3 or more'", ok({ ...good, asked: 3, others: ["Luis", "Sofía", "Pedro"] }));
+  check("…and 65+ (the Senior Program, per person)", ok({ ...good, asked: 1, oldestDob: SENIOR_DOB, others: ["Luis", "Sofía"] }));
+  check("not an object: refused", !ok(null) && !ok("Ana") && !ok([]));
 }
 
 /** The broadcast: the quote rides along; a pick with no plan only counts with one. */
