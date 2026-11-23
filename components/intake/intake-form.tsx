@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { useLocale } from "next-intl";
 import { Button } from "@/components/ui/button";
@@ -43,7 +43,11 @@ import {
   removeIntakeFile,
   type FileTargetRef,
 } from "@/lib/intake-core/api-client";
-import { useIntakeAutosave } from "@/hooks/use-intake-autosave";
+import {
+  intakeSavesSettled,
+  subscribeIntakeSaved,
+  useIntakeAutosave,
+} from "@/hooks/use-intake-autosave";
 import IntakeBreadcrumb from "@/components/intake/intake-breadcrumb";
 import ImpactPresentationBar from "@/components/intake/impact-presentation-bar";
 import SecureCapturePanel, { type CaptureOption } from "@/components/intake/secure-capture-panel";
@@ -63,11 +67,13 @@ import {
   isFieldVisible,
   fieldByKey,
   emptyRow,
+  sensitiveRowKeys,
+  sensitiveScalarKeys,
 } from "@/lib/intake-core/fields";
 import { fieldFormatError, type FieldErrorKey } from "@/lib/intake-core/validation";
 import { digitsToStored, formatMoneyDisplay } from "@/lib/iul-intake/money";
 import { sectionMissingFields } from "@/lib/intake-core/schema";
-import { isMaskedValue } from "@/lib/intake-shared/masking";
+import { isMaskedValue, maskSensitive } from "@/lib/intake-shared/masking";
 import { requireIntakeConfig } from "@/lib/intake-configs";
 import { businessToday, formatIsoLong, monthStartOptions } from "@/lib/intake-core/month-start";
 import type {
@@ -209,14 +215,50 @@ export default function IntakeForm({
   const cardRef = useRef<HTMLDivElement | null>(null);
   const reduceMotion = useReducedMotion();
 
+  // A reload of the saved answers that had to wait for this tab's own unsaved edit (see below).
+  const reloadWantedRef = useRef(false);
+  const reloadRef = useRef<() => void>(() => {});
+  const {
+    status: saveStatus,
+    flush,
+    isSynced,
+    adoptSaved,
+  } = useIntakeAutosave({
+    lob,
+    token,
+    data,
+    onSynced: () => {
+      if (reloadWantedRef.current) reloadRef.current();
+    },
+  });
+
+  /*
+   * Saved answers as this screen shows them. Presenting, the client is watching: their numbers
+   * show masked, the way the secure link's poll shows them, never in full. A mask that goes back
+   * with a save is matched to the number on file (lib/intake-core/patch.ts), so nothing stored
+   * changes.
+   */
+  const forScreen = useCallback(
+    (saved: IntakeData): IntakeData =>
+      presenting
+        ? maskSensitive(saved, sensitiveScalarKeys(config.sections), sensitiveRowKeys(config.sections))
+        : saved,
+    [presenting, config.sections]
+  );
+
   useEffect(() => {
     let active = true;
     (async () => {
       try {
+        // A form this page just closed (the presentation's "Back") may still be saving.
+        await intakeSavesSettled(token);
         const s = await fetchIntake(lob, token);
         if (!active) return;
         setSession(s);
-        setData({ ...(s.data ?? {}) });
+        // The answers as loaded are the saved state: opening the form writes nothing back.
+        const shown = forScreen(s.data ?? {});
+        adoptSaved(shown);
+        setData({ ...shown });
         setCompleted(s.status === "completed");
         setLoadState("ready");
       } catch {
@@ -226,9 +268,7 @@ export default function IntakeForm({
     return () => {
       active = false;
     };
-  }, [lob, token]);
-
-  const { status: saveStatus, isSynced, adoptSaved } = useIntakeAutosave({ lob, token, data });
+  }, [lob, token, adoptSaved, forScreen]);
 
   const isOwner = session?.role === "owner";
   // Agent-only chrome and questions. Off while presenting: the client is watching this screen.
@@ -239,34 +279,64 @@ export default function IntakeForm({
   );
 
   /*
-   * The agent can have this intake open in two tabs: the form, and the presentation tab after
-   * "Confirm my details". Autosave writes the whole answer set, so a tab still holding answers from
-   * before the other tab's edits would overwrite them on its next save. When the tab comes back
-   * into view, reload the saved answers, unless this tab has an edit that isn't saved yet.
+   * The agent can have this intake open in two tabs, often side by side: the form, and the
+   * presentation tab after "Confirm my details". Saves carry only the answers a tab changed, so
+   * neither can erase the other's; this keeps what each tab SHOWS current. Reload the saved
+   * answers when another tab saves this intake, when this window gets focus, and when the tab comes
+   * back into view. Never over an edit that isn't saved yet: then the reload waits until that edit
+   * has saved.
    * Agent only: a client's reload would swap the SSN they just typed for its masked form.
    */
   useEffect(() => {
     if (loadState !== "ready" || !isOwner) return;
     let active = true;
-    const onVisible = async () => {
-      if (document.visibilityState !== "visible" || !isSynced()) return;
+    let running = false;
+    let again = false;
+    const reload = async () => {
+      if (running) {
+        again = true;
+        return;
+      }
+      reloadWantedRef.current = !isSynced();
+      if (reloadWantedRef.current) return;
+      running = true;
       try {
         const s = await fetchIntake(lob, token);
-        if (!active || !isSynced()) return;
-        const saved = s.data ?? {};
-        adoptSaved(saved);
-        setData({ ...saved });
+        if (!active) return;
+        if (!isSynced()) {
+          reloadWantedRef.current = true;
+          return;
+        }
+        const shown = forScreen(s.data ?? {});
+        adoptSaved(shown);
+        setData({ ...shown });
         setCompleted(s.status === "completed");
       } catch {
-        /* keep what's on screen; the next return to this tab tries again */
+        /* keep what's on screen; the next save elsewhere, focus or return to this tab tries again */
+      } finally {
+        running = false;
+        if (again && active) {
+          again = false;
+          void reload();
+        }
       }
     };
+    reloadRef.current = () => void reload();
+    const onVisible = () => {
+      if (document.visibilityState === "visible") void reload();
+    };
+    const onFocus = () => void reload();
     document.addEventListener("visibilitychange", onVisible);
+    window.addEventListener("focus", onFocus);
+    const unsubscribe = subscribeIntakeSaved(token, () => void reload());
     return () => {
       active = false;
+      reloadRef.current = () => {};
       document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("focus", onFocus);
+      unsubscribe();
     };
-  }, [loadState, isOwner, lob, token, isSynced, adoptSaved]);
+  }, [loadState, isOwner, lob, token, isSynced, adoptSaved, forScreen]);
   // A client who has submitted can't edit until an admin re-opens the form.
   const lockedForClient = !isOwner && completed && !session?.reopenedForClient;
 
@@ -506,6 +576,11 @@ export default function IntakeForm({
     setCompleting(true);
     setCompleteError(null);
     try {
+      // The server validates and syncs what is stored, so every answer on screen must be saved first.
+      if (!(await flush())) {
+        setCompleteError(tr(UI.saveError, locale));
+        return;
+      }
       const result = await completeIntake(lob, token);
       if (result.success) {
         setCompleted(true);

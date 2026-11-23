@@ -148,17 +148,24 @@ export async function fetchIntake(lob: string, token: string): Promise<IntakeSes
   return data.session;
 }
 
-export async function saveIntakeData(
+/**
+ * Autosave: send only the answers that changed (`{ key: value }`, top-level keys). The server
+ * merges them into the stored answers, so keys left out are kept. `keepalive` lets the request
+ * outlive the page (tab hidden or closing).
+ */
+export async function saveIntakePatch(
   lob: string,
   token: string,
-  formData: IntakeData
+  patch: IntakeData,
+  opts: { keepalive?: boolean } = {}
 ): Promise<IntakeSession> {
   const data = await parseJson<{ success: boolean; session: IntakeSession }>(
-    await fetch(`${base(lob)}/${token}`, {
-      method: "PATCH",
+    await fetch(`${base(lob)}/${token}/patch`, {
+      method: "POST",
       credentials: "same-origin",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ data: formData }),
+      body: JSON.stringify({ patch }),
+      keepalive: opts.keepalive ?? false,
     })
   );
   return data.session;

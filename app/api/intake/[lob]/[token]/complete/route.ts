@@ -9,6 +9,7 @@ import {
   buildCrmPayloadFromData,
   clientCanEdit,
   ensureCrmContactForSession,
+  getIntakeByToken,
   intakeTags,
   markIntakeCompleted,
   toIntakeSummary,
@@ -21,7 +22,8 @@ import {
   agentCrmAddContactTags,
 } from "@/lib/agent-crm-contacts";
 import { createContactNote } from "@/lib/agent-crm-call-summary";
-import { allRepeaterFields, isRowFilled } from "@/lib/intake-core/fields";
+import { allRepeaterFields, isRowFilled, sensitiveScalarKeys } from "@/lib/intake-core/fields";
+import { diffIntakeData } from "@/lib/intake-core/diff";
 import type { IntakeData, IntakeLobConfig, RepeaterRow } from "@/lib/intake-core/types";
 
 type RouteContext = { params: Promise<{ lob: string; token: string }> };
@@ -117,12 +119,19 @@ export async function POST(_request: NextRequest, context: RouteContext) {
       console.warn(`[${config.lob}-intake] Session has no linked CRM contact; skipping sync.`);
     }
 
-    const dataToStore =
-      PURGE_AFTER_SYNC && crmSynced
-        ? purgeIntakeSensitiveData(config, (row.data ?? {}) as IntakeData)
-        : ((row.data ?? {}) as IntakeData);
+    // The answers stay as stored: writing back the copy read above would undo any save that landed
+    // during the CRM calls. A purge writes only the sensitive values it blanks, worked out from the
+    // row as stored now so an edit made during those calls isn't reverted; and it nulls every
+    // sensitive scalar, so one saved after even that read doesn't stay at rest (null merges safely).
+    let purge: IntakeData | null = null;
+    if (PURGE_AFTER_SYNC && crmSynced) {
+      const latest = await getIntakeByToken(config, token);
+      const storedNow = ((latest ?? row).data ?? {}) as IntakeData;
+      purge = diffIntakeData(storedNow, purgeIntakeSensitiveData(config, storedNow));
+      for (const key of sensitiveScalarKeys(config.sections)) purge[key] = null;
+    }
 
-    const updated = await markIntakeCompleted(token, dataToStore);
+    const updated = await markIntakeCompleted(token, purge);
     if (!updated) return notFound();
 
     return NextResponse.json({ success: true, crmSynced, session: toIntakeSummary(updated) });
