@@ -2,8 +2,8 @@
 
 ## Status
 
-In progress: **Lead Guard — stop bot leads without slowing real clients** (branch `feature/lead-guard`,
-migration `0047_lead_guard`). Isaac's ask (2026-11-24): 20–60 spam leads a day were landing in the CRM from the
+Done (merged `9e240fb`, live 2026-11-24 13:00 UTC; migration `0047_lead_guard` applied): **Lead Guard — stop bot
+leads without slowing real clients**. Isaac's ask (2026-11-24): 20–60 spam leads a day were landing in the CRM from the
 website. Audit (read-only CRM export, 3,219 contacts): 83 bot contacts since 2026-11-21 13:55 UTC, all from the general
 contact form (Faker names, real strangers' emails, random phones, both consents ticked), posted WITHOUT JavaScript
 straight to React's server-rendered form; every one got the contact workflow (115 quote emails, ~105 texts, 12
@@ -25,10 +25,14 @@ delivered to strangers, 83 opportunities). Only 1 real contact-form lead existed
   tagged `web_verified`; an invalid phone asks once, then holds with the normal thank-you screen; direct JSON posts
   are blocked (script, two blobs), held (no token from a browser, server-only blob) or allowed (valid token); step-2
   routes accept stand-in ids. Not verified: the admin page (needs Isaac's signed-in browser) and a real Release.
-- **Needs Isaac:** OK to quarantine the 83 existing bot contacts in GHL (tag, DND, out of the contact workflow);
-  `pnpm db:migrate 0047`; merge + deploy; GHL: turn OFF external-tracking form capture on lead-form pages, gate the
-  contact workflow on `web_verified`, Number Intelligence on, workflow time window. Later, only if a JavaScript bot
-  appears: BotID / Trestle (see LEAD_GUARD_SETUP.md).
+- **Live checks (production):** the contact page serves no `$ACTION_` fields and carries the body token; a scripted
+  no-token, no-Origin post to `/api/create-contact` got a fake success and created nothing; 0 new bot contacts after
+  the deploy. At Isaac's request all 92 bot contacts and their 92 opportunities were deleted (~12:50 UTC; GHL can
+  restore deleted contacts for 60 days).
+- **Still on Isaac (GHL UI):** turn OFF external-tracking form capture on lead-form pages (required); Number
+  Intelligence on; workflow time window; optional `web_verified` gate on the contact workflow only. Later, only if a
+  JavaScript bot appears: BotID / Trestle (see LEAD_GUARD_SETUP.md). Not yet exercised live: the admin page and a
+  real Release (need Isaac's signed-in browser and a held lead).
 
 In progress: **The Impact quote fills the application + quote image for anyone on /impact** (branch
 `feature/impact-quote-to-application`, no migration). Isaac's ask (2026-11-22): whatever was quoted on the deck's
