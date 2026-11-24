@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
+import { getIsAdmin } from "@/lib/auth/admin";
 import { db } from "@/lib/db";
 import { newsletterSubscribers } from "@/lib/db/schema";
 import { eq, and, count } from "drizzle-orm";
@@ -13,6 +14,11 @@ export async function GET() {
   const { userId } = await auth();
   if (!userId) {
     return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+  }
+  // Any Clerk user can sign up from the blog, so signed-in is not enough: only the admin, from
+  // Sanity Studio, may count subscribers or send a post to all of them.
+  if (!(await getIsAdmin())) {
+    return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 });
   }
 
   try {
