@@ -13,7 +13,7 @@ import FilePreview from "@/components/intake/file-preview";
 import { isFieldVisible, isRowFilled } from "@/lib/intake-core/fields";
 import { formatIsoLong } from "@/lib/intake-core/month-start";
 import { requireIntakeConfig } from "@/lib/intake-configs";
-import { LOBS, type LobSlug } from "@/lib/lob/registry";
+import { intakeRouteOf } from "@/lib/intake-core/routes";
 import type {
   FileRef,
   IntakeData,
@@ -32,10 +32,22 @@ import {
   type IntakeLocale,
 } from "@/lib/intake-core/ui-strings";
 
-function displayValue(field: IntakeField, raw: unknown, locale: IntakeLocale): string {
+const DATE_TYPES: IntakeField["type"][] = ["dob", "date", "dateParts"];
+
+function displayValue(
+  field: IntakeField,
+  raw: unknown,
+  locale: IntakeLocale,
+  dateFormat: "iso" | "mdy" = "iso"
+): string {
   if (raw == null || raw === "") return "";
   const value = String(raw);
   if (field.type === "monthStart") return formatIsoLong(value, locale);
+  // Some agents copy dates into forms that want MM/DD/YYYY (LegalShield's enrollment does).
+  if (dateFormat === "mdy" && DATE_TYPES.includes(field.type)) {
+    const m = value.match(/^(d{4})-(d{2})-(d{2})$/);
+    if (m) return `${m[2]}/${m[3]}/${m[1]}`;
+  }
   if ((field.type === "select" || field.type === "impactPlan") && field.options) {
     const opt = field.options.find((o) => o.value === value);
     return opt ? optionLabel(opt, locale) : value;
@@ -45,6 +57,8 @@ function displayValue(field: IntakeField, raw: unknown, locale: IntakeLocale): s
 
 function maskValue(value: string): string {
   if (!value) return "";
+  // A CVV or an SSN's last four IS the whole secret: showing "the last 4" would show all of it.
+  if (value.length <= 4) return "••••";
   const last = value.slice(-4);
   return `••••${last}`;
 }
@@ -119,7 +133,8 @@ function FileList({ files, locale }: { files: FileRef[]; locale: IntakeLocale })
 export default function IntakeClientView({ lob, token }: { lob: string; token: string }) {
   const locale = pickLocale(useLocale());
   const config = requireIntakeConfig(lob);
-  const intakeRoute = LOBS[lob as LobSlug].intakeRoute;
+  const intakeRoute = intakeRouteOf(config);
+  const dateFormat = config.summaryDateFormat ?? "iso";
   const [session, setSession] = useState<IntakeSession | null>(null);
   const [state, setState] = useState<"loading" | "ready" | "error">("loading");
   const [reveal, setReveal] = useState(false);
@@ -274,7 +289,7 @@ export default function IntakeClientView({ lob, token }: { lob: string; token: s
                                 }
 
                                 const raw = String(row[sub.key] ?? "");
-                                const value = displayValue(sub, raw, locale);
+                                const value = displayValue(sub, raw, locale, dateFormat);
                                 let display = value;
                                 let copyText = value;
                                 if (sub.sensitive) {
@@ -320,7 +335,7 @@ export default function IntakeClientView({ lob, token }: { lob: string; token: s
                           );
                         }
                         const raw = String(data[field.key] ?? "");
-                        const value = displayValue(field, raw, locale);
+                        const value = displayValue(field, raw, locale, dateFormat);
                         let display = value;
                         let copyText = value;
                         if (field.type === "money" && raw) {

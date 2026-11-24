@@ -38,6 +38,8 @@ export async function POST(_request: NextRequest, context: RouteContext) {
     if (!(await getIsAdmin())) return fail(403, "Forbidden");
     const config = resolveConfig(lob);
     if (!config?.secureCapture) return fail(404, "Not found");
+    // A line whose agent sends links from their own phone has no CRM workflow to text this.
+    if (config.linkDelivery?.kind === "whatsapp") return fail(400, "This line sends links by WhatsApp.");
     const row = await getIntakeByToken(config, token);
     if (!row) return fail(404, "Not found");
     if (row.ownerUserId !== userId) return fail(403, "Forbidden");
@@ -54,7 +56,7 @@ export async function POST(_request: NextRequest, context: RouteContext) {
     const locale = await resolveCrmContactLocale(row.crmContactId, row.locale, creds.token);
     const written = await agentCrmUpdateContact(
       row.crmContactId,
-      { customFields: [{ id: fieldId, field_value: buildSecureCaptureUrl(capture.token, locale) }] },
+      { customFields: [{ id: fieldId, field_value: buildSecureCaptureUrl(capture.token, locale, undefined, config.secureSlug) }] },
       creds.token,
       "[INTAKE_SECURE_CAPTURE]"
     );

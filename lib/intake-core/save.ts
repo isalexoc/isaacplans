@@ -25,6 +25,7 @@ import {
   type IntakeSessionRow,
 } from "./server";
 import { sanitizeIntakeData } from "./schema";
+import { ownerOnlyKeys } from "./fields";
 import { decryptIntakeData, encryptIntakeData, maskSensitiveForClient } from "./sensitive";
 import { planIntakePatch, withoutUnchanged } from "./patch";
 import { captureFieldKeys } from "./secure-capture-groups";
@@ -100,6 +101,8 @@ export async function saveIntakeAnswers(
 
   const body = await request.json().catch(() => ({}));
   const incoming = sanitizeIntakeData(config.sections, body?.[field]);
+  // Only the agent writes the agent's answers (notes, status, a package switch).
+  if (access.role === "client") for (const key of ownerOnlyKeys(config.sections)) delete incoming[key];
   const stored = decryptIntakeData(config, (row.data ?? {}) as IntakeData);
   // Values equal to what is stored change nothing (a mask the planner turned back into the number on
   // file, the untouched answers of a legacy whole-form save), so they are left out.

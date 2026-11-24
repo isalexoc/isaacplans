@@ -26,7 +26,7 @@ import {
   mergePreservedSensitive as mergePreserved,
   type SensitiveRowKeys,
 } from "@/lib/intake-shared/masking";
-import { sensitiveScalarKeys, sensitiveRowKeys } from "./fields";
+import { ownerOnlySectionKeys, sensitiveScalarKeys, sensitiveRowKeys } from "./fields";
 import type { IntakeData, IntakeLobConfig, RepeaterRow } from "./types";
 
 type Keys = { scalars: string[]; rows: SensitiveRowKeys };
@@ -106,10 +106,16 @@ export function purgeIntakeSensitiveData(config: IntakeLobConfig, data: IntakeDa
   return out;
 }
 
-/** Replace every sensitive value with a mask before sending data to a client browser. */
+/**
+ * What a client's browser may see: every sensitive value replaced with a mask, and the agent's own
+ * section (notes, member number, status) left out entirely. The form never shows that section to a
+ * client, but the API used to send it.
+ */
 export function maskSensitiveForClient(config: IntakeLobConfig, data: IntakeData): IntakeData {
   const { scalars, rows } = keysFor(config);
-  return maskSensitive(data, scalars, rows);
+  const masked = maskSensitive(data, scalars, rows);
+  for (const key of ownerOnlySectionKeys(config.sections)) delete masked[key];
+  return masked;
 }
 
 /** Keep stored values whenever the client echoes back a mask, so nothing is silently wiped. */

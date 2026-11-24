@@ -83,7 +83,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
     return NextResponse.json({
       success: true,
       capture: toSecureCaptureView(config, capture),
-      url: buildSecureCaptureUrl(capture.token, row.locale ?? "en"),
+      url: buildSecureCaptureUrl(capture.token, row.locale ?? "en", undefined, config.secureSlug),
     });
   } catch (error) {
     console.error(`[intake/${lob}/:token/secure-capture] POST`, error);
@@ -104,7 +104,7 @@ export async function GET(_request: NextRequest, context: RouteContext) {
     return NextResponse.json({
       success: true,
       capture: capture ? toSecureCaptureView(config, capture) : null,
-      url: capture?.status === "pending" ? buildSecureCaptureUrl(capture.token, row.locale ?? "en") : null,
+      url: capture?.status === "pending" ? buildSecureCaptureUrl(capture.token, row.locale ?? "en", undefined, config.secureSlug) : null,
       // Only what the client actually sent; before that the agent's own typing stays on screen.
       values: submitted ? maskedValues(config, (row.data ?? {}) as IntakeData, capture.fieldKeys ?? []) : {},
     });

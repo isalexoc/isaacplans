@@ -23,7 +23,9 @@ export async function GET(request: NextRequest, context: { params: Promise<{ lob
   const origin = new URL(request.url).origin;
 
   const config = resolveConfig(lob);
-  if (!config) {
+  // A line with no public "apply" (Legal Shield: only its associate starts an application) has
+  // no self-start either, so nobody can create sessions or CRM contacts through this URL.
+  if (!config || config.selfStart === false) {
     return NextResponse.json({ success: false, error: "Not found" }, { status: 404 });
   }
 

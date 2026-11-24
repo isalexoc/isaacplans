@@ -129,6 +129,12 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
       patch[key] = typeof value === "string" ? value.trim() : value;
     }
     if (typeof patch.idDocNumber === "string") patch.idDocNumber = patch.idDocNumber.toUpperCase();
+    // Cards are stored the way the agent's form keeps them: bare digits, and MM/YY.
+    if (typeof patch.cardNumber === "string") patch.cardNumber = patch.cardNumber.replace(/\D/g, "");
+    if (typeof patch.cardExpiration === "string") {
+      const d = patch.cardExpiration.replace(/\D/g, "");
+      if (d.length === 4) patch.cardExpiration = `${d.slice(0, 2)}/${d.slice(2)}`;
+    }
 
     const errors = validateCapture(patch, allowed);
     if (Object.keys(errors).length) return NextResponse.json({ success: false, errors }, { status: 400 });

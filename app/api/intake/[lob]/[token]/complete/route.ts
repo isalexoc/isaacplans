@@ -124,7 +124,9 @@ export async function POST(_request: NextRequest, context: RouteContext) {
     // row as stored now so an edit made during those calls isn't reverted; and it nulls every
     // sensitive scalar, so one saved after even that read doesn't stay at rest (null merges safely).
     let purge: IntakeData | null = null;
-    if (PURGE_AFTER_SYNC && crmSynced) {
+    // A line whose numbers never go to the CRM keeps them: the database is the only copy the agent
+    // enrolls the client from.
+    if (PURGE_AFTER_SYNC && crmSynced && !config.keepSensitiveAfterSync) {
       const latest = await getIntakeByToken(config, token);
       const storedNow = ((latest ?? row).data ?? {}) as IntakeData;
       purge = diffIntakeData(storedNow, purgeIntakeSensitiveData(config, storedNow));

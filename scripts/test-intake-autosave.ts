@@ -17,6 +17,7 @@ import { planIntakePatch, withoutUnchanged } from "../lib/intake-core/patch";
 import { sanitizeIntakeData } from "../lib/intake-core/schema";
 import { fieldByKey, sensitiveRowKeys, sensitiveScalarKeys } from "../lib/intake-core/fields";
 import { healthAlternativeIntake } from "../lib/intake-configs/health-alternative";
+import { buildCrmPayloadFromData } from "../lib/intake-core/crm-payload";
 import type { IntakeData } from "../lib/intake-core/types";
 
 let passed = 0;
@@ -320,6 +321,31 @@ console.log("\nPatches are still sanitized");
     `a repeater in a patch is clamped to its ${max} rows`,
     Array.isArray(patch.dependents) && (patch.dependents as unknown[]).length === max
   );
+}
+
+console.log("\nNo SSN, card or bank number ever reaches the CRM");
+{
+  // Pretend every slug is provisioned, so nothing is hidden by a missing GHL id.
+  const everyId = (_lob: string, slug: string) => `id-${slug}`;
+  const data: IntakeData = {
+    firstName: "Ana",
+    lastName: "Ruiz",
+    taxIdType: "SSN",
+    ssn: SSN,
+    bankName: "Chase",
+    routingNumber: "021000021",
+    accountNumber: "000123456789",
+    accountType: "Checking",
+    hasDependents: "yes",
+    dependents: [{ firstName: "Leo", lastName: "Ruiz", relationship: "Son", idType: "SSN", ssn: "987654321" }],
+  };
+  const payload = buildCrmPayloadFromData(healthAlternativeIntake, data, everyId);
+  const values = payload.customFields.map((f) => String(f.field_value)).join("\n");
+  check("the applicant's SSN is never a custom field", !payload.customFields.some((f) => f.id === "id-ha_ssn"));
+  check("bank numbers are never custom fields", !/021000021|000123456789/.test(values), values);
+  check("a dependent's SSN is blanked inside the row text", !/987654321/.test(values), values);
+  check("the dependent row itself still syncs", /Leo Ruiz/.test(values), values);
+  check("non-sensitive answers still sync (bank name)", values.includes("Chase"), values);
 }
 
 console.log(`\n${passed} passed, ${failed} failed\n`);

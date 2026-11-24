@@ -27,6 +27,10 @@ export async function POST(_request: NextRequest, context: RouteContext) {
 
     const config = resolveConfig(lob);
     if (!config) return notFound();
+    // A line whose agent sends links from their own phone has no CRM workflow to text this.
+    if (config.linkDelivery?.kind === "whatsapp") {
+      return NextResponse.json({ success: false, error: "This line sends links by WhatsApp." }, { status: 400 });
+    }
 
     const row = await getIntakeByToken(config, token);
     if (!row) return notFound();

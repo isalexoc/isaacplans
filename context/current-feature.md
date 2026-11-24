@@ -2,6 +2,25 @@
 
 ## Status
 
+In progress: **Legal Shield intake + sales deck for Ysmael** (branch `feature/legal-shield-intake`; migration
+`0048_crankwheel_presenter` in chunk C). Isaac's ask (2026-11-24): his dad **Ysmael Orraiz** (LegalShield Independent
+Associate, WhatsApp (540) 376-1831) gets the Impact flow — dashboard → client form → CrankWheel → 9:16 deck →
+"Confirmar mis datos" → form — for LegalShield, in Spanish, under `/es/legal-shield/intake`.
+- **Isaac's decisions:** new Clerk role `legal_shield` (only the LS area; `/es/admin` shows him only an LS section);
+  Isaac (admin) can open all of Ysmael's LS clients; SSN last 4 only; card + CVV kept encrypted (Isaac accepted the
+  PCI caveat); Ysmael's own CrankWheel account, never Isaac's presenter; links via his own WhatsApp, no new GHL custom
+  fields or workflows; Spanish only; "Orraiz" without accent.
+- **One offer:** Plan Legal Preferencial $39.95 + IDShield Familiar 3B $34.95 = $74.90/mes; annual $431.46 + $419.40 =
+  $850.86/año (saves $47.94; IDShield has no annual discount). Never Básico/Premium.
+- **Deck:** the 6 slides of `Plan_Preferencial_IDShield.pdf` verbatim + a price slide (huge total, small breakdown,
+  Mensual/Anual switch) + "3 pasos" → form. A hidden control drops IDShield on a budget objection (switch in Ysmael's
+  unshared form tab + Shift+I in the deck).
+- **Chunks:** A1 engine generalization (no behavior change) · A2 LS line + role + CRM scoping · B deck · C CrankWheel
+  per account · D owner email + docs. Plan of record:
+  `C:\Users\isale\.claude\plans\presentaci-n-impact-para-intak-enchanted-mitten-of-1f565ec0-1a39-42c0-b333-60ecad4e3a80.md`.
+- **Done first:** `fix/newsletter-admin-gate` (merged `14d185a`): `/api/newsletter/send-post` and `subscriber-counts`
+  only checked sign-in, so any signed-up visitor could send a newsletter to every subscriber.
+
 Done (merged `9e240fb`, live 2026-11-24 13:00 UTC; migration `0047_lead_guard` applied): **Lead Guard — stop bot
 leads without slowing real clients**. Isaac's ask (2026-11-24): 20–60 spam leads a day were landing in the CRM from the
 website. Audit (read-only CRM export, 3,219 contacts): 83 bot contacts since 2026-11-21 13:55 UTC, all from the general

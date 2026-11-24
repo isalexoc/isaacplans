@@ -108,6 +108,9 @@ function buildSpecs(config: IntakeLobConfig): FieldSpec[] {
 
   const push = (field: IntakeField) => {
     if (!field.crm || field.crm.kind !== "custom") return;
+    // SSNs, card and bank numbers never get a CRM field: the sync skips them (lib/intake-core/server.ts),
+    // so a field for them would only ever sit empty, or invite someone to fill it by hand.
+    if (field.sensitive) return;
     if (seen.has(field.crm.slug)) return;
     seen.add(field.crm.slug);
     specs.push({
@@ -234,8 +237,15 @@ async function provision(config: IntakeLobConfig, ids: IdsFile): Promise<void> {
 
   let created = 0;
   let reused = 0;
+  let retired = 0;
   for (const spec of specs) {
     if (resolved[spec.slug]) continue;
+    // A slug present with an empty id is a field Isaac deleted from GHL on purpose (commit 3b9aab4
+    // blanked 361 of them). Never re-create it.
+    if (Object.prototype.hasOwnProperty.call(resolved, spec.slug)) {
+      retired += 1;
+      continue;
+    }
 
     const match = existing.get(spec.name.trim().toLowerCase());
     if (match) {
@@ -253,9 +263,9 @@ async function provision(config: IntakeLobConfig, ids: IdsFile): Promise<void> {
   }
 
   ids[config.lob] = resolved;
-  const missing = specs.filter((s) => !resolved[s.slug]);
+  const missing = specs.filter((s) => !resolved[s.slug] && !Object.prototype.hasOwnProperty.call(resolved, s.slug));
   console.log(
-    `  ${specs.length} fields — ${created} created, ${reused} reused, ${missing.length} unresolved.`
+    `  ${specs.length} fields — ${created} created, ${reused} reused, ${retired} retired (kept deleted), ${missing.length} unresolved.`
   );
   if (missing.length) {
     console.warn(`  ! Unresolved: ${missing.map((m) => m.slug).join(", ")}`);
@@ -269,7 +279,8 @@ async function main() {
 
   let targets: IntakeLobConfig[];
   if (all) {
-    targets = ENGINE_INTAKE_CONFIGS;
+    // A line that keeps its answers out of GHL custom fields (Legal Shield) is never provisioned.
+    targets = ENGINE_INTAKE_CONFIGS.filter((c) => c.crmCustomFields !== false);
   } else if (requested.length) {
     targets = [];
     for (const slug of requested) {
@@ -278,6 +289,10 @@ async function main() {
         console.error(
           `Unknown line of business "${slug}". Known: ${ENGINE_INTAKE_CONFIGS.map((c) => c.lob).join(", ")}`
         );
+        process.exit(1);
+      }
+      if (config.crmCustomFields === false) {
+        console.error(`"${slug}" keeps its answers out of GHL custom fields; there is nothing to provision.`);
         process.exit(1);
       }
       targets.push(config);

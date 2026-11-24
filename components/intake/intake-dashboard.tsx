@@ -22,10 +22,11 @@ import {
 import type { IntakeSummary, IntakeStatus } from "@/lib/intake-core/types";
 import { requireIntakeConfig } from "@/lib/intake-configs";
 import { buildIntakeShareUrl } from "@/lib/intake-core/share-url";
-import { LOBS, type LobSlug } from "@/lib/lob/registry";
+import { intakeRouteOf } from "@/lib/intake-core/routes";
 import { titleCaseName, isValidEmail, isValidPhone } from "@/lib/intake-core/validation";
-import { UI, pickLocale, tr } from "@/lib/intake-core/ui-strings";
+import { UI, pickLocale, tr, uiFor } from "@/lib/intake-core/ui-strings";
 import IntakeBreadcrumb from "@/components/intake/intake-breadcrumb";
+import DeliveryButtons from "@/components/intake/delivery-buttons";
 import ImpactEnrollmentButton, { useImpactStatuses } from "@/components/intake/impact-enrollment-dialog";
 
 const STATUS_VARIANT: Record<IntakeStatus, "secondary" | "default" | "outline"> = {
@@ -36,7 +37,7 @@ const STATUS_VARIANT: Record<IntakeStatus, "secondary" | "default" | "outline"> 
 
 export default function IntakeDashboard({ lob }: { lob: string }) {
   const config = requireIntakeConfig(lob);
-  const intakeRoute = LOBS[lob as LobSlug].intakeRoute;
+  const intakeRoute = intakeRouteOf(config);
   const locale = pickLocale(useLocale());
   const router = useRouter();
 
@@ -58,7 +59,7 @@ export default function IntakeDashboard({ lob }: { lob: string }) {
   const [newLastName, setNewLastName] = useState("");
   const [newEmail, setNewEmail] = useState("");
   const [newPhone, setNewPhone] = useState("");
-  const [newLang, setNewLang] = useState<"en" | "es">("en");
+  const [newLang, setNewLang] = useState<"en" | "es">(config.fixedLocale ?? "en");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copiedToken, setCopiedToken] = useState<string | null>(null);
@@ -227,7 +228,7 @@ export default function IntakeDashboard({ lob }: { lob: string }) {
   }
 
   async function handleDelete(s: IntakeSummary) {
-    if (!window.confirm(tr(UI.deleteConfirm, locale))) return;
+    if (!window.confirm(tr(uiFor("deleteConfirm", config.noCrmWording), locale))) return;
     setDeletingId(s.id);
     setError(null);
     try {
@@ -274,7 +275,7 @@ export default function IntakeDashboard({ lob }: { lob: string }) {
           </h2>
           <div className="flex flex-col gap-2 sm:flex-row">
             <Input
-              placeholder={tr(UI.searchCrm, locale)}
+              placeholder={tr(uiFor("searchCrm", config.noCrmWording), locale)}
               value={crmQuery}
               onChange={(e) => setCrmQuery(e.target.value)}
               onKeyDown={(e) => {
@@ -290,7 +291,7 @@ export default function IntakeDashboard({ lob }: { lob: string }) {
           {searched && (
             <div className="mt-3">
               {matches.length === 0 ? (
-                <p className="text-sm text-muted-foreground">{tr(UI.noMatches, locale)}</p>
+                <p className="text-sm text-muted-foreground">{tr(uiFor("noMatches", config.noCrmWording), locale)}</p>
               ) : (
                 <ul className="divide-y rounded-md border">
                   {matches.map((c) => (
@@ -329,7 +330,7 @@ export default function IntakeDashboard({ lob }: { lob: string }) {
               className="flex items-center gap-1.5 text-sm font-medium text-blue-600 hover:underline"
             >
               <UserPlus className="h-4 w-4" />
-              {tr(UI.createNew, locale)}
+              {tr(uiFor("createNew", config.noCrmWording), locale)}
               <ChevronDown className={`h-4 w-4 transition-transform ${showCreate ? "rotate-180" : ""}`} />
             </button>
             {showCreate && (
@@ -373,6 +374,8 @@ export default function IntakeDashboard({ lob }: { lob: string }) {
                       onChange={(e) => setNewPhone(e.target.value.replace(/\D/g, "").slice(0, 11))}
                     />
                   </div>
+                  {/* A one-language line has nothing to choose. */}
+                  {!config.fixedLocale && (
                   <div>
                     <Label htmlFor="ni-lang">{tr(UI.preferredLanguage, locale)}</Label>
                     <select
@@ -385,10 +388,11 @@ export default function IntakeDashboard({ lob }: { lob: string }) {
                       <option value="es">Español</option>
                     </select>
                   </div>
+                  )}
                 </div>
                 <Button className="mt-3" disabled={busy} onClick={createAndStart}>
                   {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <UserPlus className="mr-2 h-4 w-4" />}
-                  {tr(UI.createAndStart, locale)}
+                  {tr(uiFor("createAndStart", config.noCrmWording), locale)}
                 </Button>
               </div>
             )}
@@ -431,6 +435,12 @@ export default function IntakeDashboard({ lob }: { lob: string }) {
                         {s.contactName || s.contactEmail || s.contactPhone || s.token}
                       </span>
                       <Badge variant={STATUS_VARIANT[s.status]}>{statusLabel(s.status)}</Badge>
+                      {/* An admin's oversight list: whose client this is. */}
+                      {s.ownedByCaller === false && (
+                        <Badge variant="outline" className="shrink-0">
+                          {s.ownerName || tr(UI.otherOwner, locale)}
+                        </Badge>
+                      )}
                     </div>
                     <div className="truncate text-xs text-muted-foreground">
                       {[s.contactEmail, s.contactPhone].filter(Boolean).join(" · ")}
@@ -465,7 +475,19 @@ export default function IntakeDashboard({ lob }: { lob: string }) {
                         </>
                       )}
                     </Button>
-                    {s.crmContactId && (
+                    {config.linkDelivery?.kind === "whatsapp" && (
+                      <DeliveryButtons
+                        kind="application"
+                        url={shareUrl(s.token)}
+                        locale={locale}
+                        agentName={config.linkDelivery.agentName}
+                        product={config.linkDelivery.product[locale]}
+                        clientName={s.contactName}
+                        phone={s.contactPhone}
+                        showCopy={false}
+                      />
+                    )}
+                    {!config.linkDelivery && s.crmContactId && (
                       <Button
                         size="sm"
                         variant="ghost"
@@ -523,6 +545,8 @@ export default function IntakeDashboard({ lob }: { lob: string }) {
                         {s.reopenedForClient ? tr(UI.lockClientEdit, locale) : tr(UI.allowClientEdit, locale)}
                       </Button>
                     )}
+                    {/* Only the owner deletes; an admin overseeing someone else's client can't. */}
+                    {s.ownedByCaller !== false && (
                     <Button
                       size="sm"
                       variant="ghost"
@@ -537,6 +561,7 @@ export default function IntakeDashboard({ lob }: { lob: string }) {
                       )}
                       {tr(UI.deleteForm, locale)}
                     </Button>
+                    )}
                   </div>
                 </li>
               ))}

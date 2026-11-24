@@ -7,8 +7,7 @@
  * Client-safe — the generic form component resolves its config from here in the browser.
  */
 
-import type { LobSlug } from "@/lib/lob/registry";
-import type { IntakeLobConfig } from "@/lib/intake-core/types";
+import type { EngineLobSlug, IntakeLobConfig } from "@/lib/intake-core/types";
 import { shortTermMedicalIntake } from "./short-term-medical";
 import { dentalVisionIntake } from "./dental-vision";
 import { hospitalIndemnityIntake } from "./hospital-indemnity";
@@ -27,7 +26,7 @@ export const ENGINE_INTAKE_CONFIGS: IntakeLobConfig[] = [
 const BY_LOB = new Map<string, IntakeLobConfig>(ENGINE_INTAKE_CONFIGS.map((c) => [c.lob, c]));
 
 /** Slugs the engine handles — the valid values of the `[lob]` route segment. */
-export const ENGINE_INTAKE_LOBS: LobSlug[] = ENGINE_INTAKE_CONFIGS.map((c) => c.lob);
+export const ENGINE_INTAKE_LOBS: EngineLobSlug[] = ENGINE_INTAKE_CONFIGS.map((c) => c.lob);
 
 /** Config for a line of business, or undefined for an unknown/legacy slug (route → 404). */
 export function getIntakeConfig(lob: string): IntakeLobConfig | undefined {
