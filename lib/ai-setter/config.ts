@@ -73,7 +73,14 @@ export const AI_ALERT_TAG = "ai_setter_alert";
 export const AI_OFF_TAG = "ai_setter_off";
 
 /** Contacts with any of these tags are never answered by the AI. */
-export const EXCLUSION_TAGS = ["legal_shield", "agent_crm_affiliate", "tcpa_litigator_risk", AI_OFF_TAG] as const;
+export const EXCLUSION_TAGS = [
+  "legal_shield",
+  // A Legal Shield client of Isaac's dad, from the LS intake: not an insurance lead.
+  "legal_shield_intake",
+  "agent_crm_affiliate",
+  "tcpa_litigator_risk",
+  AI_OFF_TAG,
+] as const;
 
 /**
  * Never more than this many Claude API calls in one turn: up to two tool steps (e.g. set the

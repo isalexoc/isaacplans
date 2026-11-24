@@ -81,7 +81,7 @@ export function passesLuhn(v: string): boolean {
 
 /** The last four digits of a Social Security number, exactly. */
 export function isValidSsnLast4(v: string): boolean {
-  return /^d{4}$/.test((v ?? "").trim());
+  return /^\d{4}$/.test((v ?? "").trim());
 }
 
 export function isValidCvv(v: string): boolean {

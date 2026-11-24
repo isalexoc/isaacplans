@@ -13,6 +13,7 @@ import { dentalVisionIntake } from "./dental-vision";
 import { hospitalIndemnityIntake } from "./hospital-indemnity";
 import { lifeInsuranceIntake } from "./life-insurance";
 import { healthAlternativeIntake } from "./health-alternative";
+import { legalShieldIntake } from "./legal-shield";
 
 /** Lines of business the engine serves, in dashboard order. */
 export const ENGINE_INTAKE_CONFIGS: IntakeLobConfig[] = [
@@ -21,6 +22,8 @@ export const ENGINE_INTAKE_CONFIGS: IntakeLobConfig[] = [
   hospitalIndemnityIntake,
   lifeInsuranceIntake,
   healthAlternativeIntake,
+  // Not insurance and not in the line-of-business registry: Isaac's dad's LegalShield sales.
+  legalShieldIntake,
 ];
 
 const BY_LOB = new Map<string, IntakeLobConfig>(ENGINE_INTAKE_CONFIGS.map((c) => [c.lob, c]));
@@ -46,4 +49,5 @@ export {
   hospitalIndemnityIntake,
   lifeInsuranceIntake,
   healthAlternativeIntake,
+  legalShieldIntake,
 };

@@ -1,5 +1,5 @@
-import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+import { getStaffAccess, LEGAL_SHIELD_HOME } from "@/lib/auth/access";
 import type { Metadata } from "next";
 import {
   FileText,
@@ -34,6 +34,7 @@ import {
   MessageSquare,
   PieChart,
   Bot,
+  Scale,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import {
@@ -56,6 +57,8 @@ type ToolCard = {
   description: string;
   href: string;
   icon: LucideIcon;
+  /** The card's link text (default "Open →"). */
+  cta?: string;
 };
 
 const CONTENT_TOOLS: ToolCard[] = [
@@ -188,6 +191,29 @@ const INTAKE_TOOLS: ToolCard[] = [
   },
 ];
 
+/** Isaac's dad's LegalShield sales (the only section the legal_shield role sees). */
+const LEGAL_SHIELD_TOOLS: ToolCard[] = [
+  {
+    title: "Legal Shield",
+    description:
+      "Ysmael's LegalShield clients: start an application, present the plan over CrankWheel, review what came back.",
+    href: LEGAL_SHIELD_HOME,
+    icon: Scale,
+  },
+];
+
+/** The same card, in Spanish, for Ysmael. */
+const LEGAL_SHIELD_TOOLS_ES: ToolCard[] = [
+  {
+    title: "Solicitudes de clientes",
+    description:
+      "Cree la solicitud de un cliente, preséntele el plan por CrankWheel y revise lo que envió.",
+    href: LEGAL_SHIELD_HOME,
+    icon: Scale,
+    cta: "Abrir →",
+  },
+];
+
 const CALL_CENTER_TOOLS: ToolCard[] = [
   {
     title: "Start a Meeting",
@@ -303,7 +329,7 @@ function ToolCardItem({ tool }: { tool: ToolCard }) {
         </CardHeader>
         <CardContent className="pt-0">
           <span className="text-sm font-medium text-primary group-hover:underline">
-            Open →
+            {tool.cta ?? "Open →"}
           </span>
         </CardContent>
       </Card>
@@ -312,8 +338,12 @@ function ToolCardItem({ tool }: { tool: ToolCard }) {
 }
 
 export default async function AdminDashboardPage() {
-  const { userId } = await auth();
-  if (!userId) redirect("/sign-in");
+  // Middleware already admits only staff here; the page still decides what each role may see,
+  // because the legal_shield role reaches this root (and nothing else under /admin).
+  const access = await getStaffAccess();
+  if (!access.userId) redirect("/sign-in");
+  if (access.role === "legal_shield") return <LegalShieldHome />;
+  if (!access.isAdmin) redirect("/es/unauthorized");
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
@@ -368,6 +398,17 @@ export default async function AdminDashboardPage() {
 
         <section>
           <h2 className="mb-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            Legal Shield
+          </h2>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {LEGAL_SHIELD_TOOLS.map((tool) => (
+              <ToolCardItem key={tool.href} tool={tool} />
+            ))}
+          </div>
+        </section>
+
+        <section>
+          <h2 className="mb-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             Call Center
           </h2>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -409,6 +450,31 @@ export default async function AdminDashboardPage() {
             ))}
           </div>
         </section>
+      </div>
+    </div>
+  );
+}
+
+/** Ysmael's whole dashboard: one section, in Spanish, nothing else of Isaac's. */
+function LegalShieldHome() {
+  return (
+    <div className="max-w-5xl mx-auto px-4 py-8">
+      <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+            <Scale className="h-5 w-5 text-primary" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">Legal Shield</h1>
+            <p className="text-sm text-muted-foreground">Sus clientes, sus solicitudes y su presentación</p>
+          </div>
+        </div>
+        <BlogUserAuth />
+      </div>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {LEGAL_SHIELD_TOOLS_ES.map((tool) => (
+          <ToolCardItem key={tool.href} tool={tool} />
+        ))}
       </div>
     </div>
   );

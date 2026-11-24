@@ -140,10 +140,24 @@ export function isIntakeSecureCapturePath(pathname: string | null | undefined): 
   return INTAKE_SECURE_CAPTURE_RE.test(pathname);
 }
 
+/**
+ * Ysmael's Legal Shield intake pages: his dashboard, a client's form and summary, the client's
+ * private link and the 9:16 deck (`/legal-shield/intake/**`). They get their own slim header with
+ * the "Red de Apoyo Latino USA" brand and Ysmael's phone, never the Isaac Plans logo, nav or
+ * phone, and no CRM chat bubble.
+ */
+const LEGAL_SHIELD_INTAKE_RE = /^(?:\/(?:en|es))?\/legal-shield\/intake(?:\/.*)?$/i;
+
+export function isLegalShieldIntakePath(pathname: string | null | undefined): boolean {
+  if (!pathname) return false;
+  return LEGAL_SHIELD_INTAKE_RE.test(pathname);
+}
+
 export function isAdsLandingPath(pathname: string | null | undefined): boolean {
   if (!pathname) return false;
   return (
     (ADS_LANDING_PATHNAMES as readonly string[]).includes(pathname) ||
+    isLegalShieldIntakePath(pathname) ||
     isAcaIntakeFormPath(pathname) ||
     isFeIntakeFormPath(pathname) ||
     isAcaConfirmationPath(pathname) ||

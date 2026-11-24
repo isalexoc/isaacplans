@@ -48,6 +48,7 @@
     "test:intake-autosave": "tsx scripts/test-intake-autosave.ts",
     "test:quote-prefill": "tsx scripts/test-quote-prefill.ts",
     "test:lead-guard": "tsx scripts/test-lead-guard.ts",
+    "test:staff-access": "tsx scripts/test-staff-access.ts",
     "ai-setter:try": "tsx --conditions=react-server scripts/ai-setter-try.ts"
   },
   "dependencies": {

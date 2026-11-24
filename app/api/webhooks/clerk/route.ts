@@ -1,6 +1,7 @@
 import { NextResponse, after, type NextRequest } from "next/server";
 import { verifyWebhook } from "@clerk/nextjs/webhooks";
 import { syncClerkUserToAgentCrm } from "@/lib/clerk-agent-crm-sync";
+import { shouldSyncClerkUserToCrm } from "@/lib/auth/staff-roles";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -25,7 +26,8 @@ export async function POST(req: NextRequest) {
 
     if (evt.type === "user.created" || evt.type === "user.updated") {
       const data = evt.data as unknown as Record<string, unknown>;
-      after(() => syncClerkUserToAgentCrm(data));
+      // A Legal Shield staff login (Isaac's dad) is not a lead: no contact, tags or workflows.
+      if (shouldSyncClerkUserToCrm(data)) after(() => syncClerkUserToAgentCrm(data));
     }
 
     return NextResponse.json({ received: true });

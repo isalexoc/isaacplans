@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
-import { getIsAdmin } from "@/lib/auth/admin";
+import { canOperateSession, requireLineOperator } from "@/lib/auth/access";
 import { resolveConfig } from "@/lib/intake-core/route-helpers";
 import { getIntakeByToken } from "@/lib/intake-core/server";
 import { decryptIntakeData, maskSensitiveForClient } from "@/lib/intake-core/sensitive";
@@ -24,16 +23,18 @@ type RouteContext = { params: Promise<{ lob: string; token: string }> };
 const fail = (status: number, error: string, code?: string) =>
   NextResponse.json({ success: false, error, ...(code ? { code } : {}) }, { status });
 
-/** Clerk admin, a line with secure capture, and the caller owns this intake. */
+/**
+ * An operator of this line (admin, or the line's own role), a line with secure capture, and the
+ * caller owns this intake (or is an admin on a line with oversight).
+ */
 async function requireOwner(lob: string, token: string) {
-  const { userId } = await auth();
-  if (!userId) return { error: fail(401, "Unauthorized") };
-  if (!(await getIsAdmin())) return { error: fail(403, "Forbidden") };
+  const gate = await requireLineOperator(lob);
+  if ("error" in gate) return { error: gate.error };
   const config = resolveConfig(lob);
   if (!config?.secureCapture) return { error: fail(404, "Not found") };
   const row = await getIntakeByToken(config, token);
   if (!row) return { error: fail(404, "Not found") };
-  if (row.ownerUserId !== userId) return { error: fail(403, "Forbidden") };
+  if (!canOperateSession(gate.access, config, row)) return { error: fail(403, "Forbidden") };
   return { config, row };
 }
 

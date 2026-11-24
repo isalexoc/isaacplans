@@ -16,9 +16,11 @@ import { cn } from "@/lib/utils";
 import {
   isAdsLandingPath,
   isIulBareLandingPath,
+  isLegalShieldIntakePath,
   isLegalShieldLandingPath,
 } from "@/lib/ads-landing";
 import LegalShieldBrand from "@/components/legal-shield/legal-shield-brand";
+import RedDeApoyoBrand from "@/components/legal-shield/red-de-apoyo-brand";
 import { LS_PHONE_DISPLAY, LS_PHONE_TEL } from "@/lib/legal-shield/constants";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -126,6 +128,30 @@ const Header = () => {
    *
    *  The phone is Ysmael's, read from constants — nav("phone") is Isaac's 540-426-1804 and would
    *  send a legal-plan prospect to an insurance line. */
+  /** Ysmael's Legal Shield intake pages (dashboard, client form, summary, private link, deck):
+   *  his "Red de Apoyo Latino USA" brand and his phone, never anything of Isaac Plans'. A fixed
+   *  h-16 / md:h-20 row, because the deck's frame is sized to exactly that height. No language
+   *  switch: the line is Spanish only. */
+  if (isLegalShieldIntakePath(pathname)) {
+    return (
+      <header className="border-b border-border bg-background">
+        <div className="container mx-auto px-4 sm:px-6">
+          <div className="flex h-16 items-center justify-between gap-3 md:h-20">
+            <RedDeApoyoBrand size="header" />
+            <a
+              href={LS_PHONE_TEL}
+              className="flex shrink-0 items-center gap-1.5 rounded-md px-2 py-1.5 text-sm font-semibold text-foreground/90 transition-colors hover:bg-muted"
+              aria-label={`Llame al ${LS_PHONE_DISPLAY}`}
+            >
+              <Lucide.Phone className="h-4 w-4 shrink-0" aria-hidden="true" />
+              <span className="hidden sm:inline">{LS_PHONE_DISPLAY}</span>
+            </a>
+          </div>
+        </div>
+      </header>
+    );
+  }
+
   if (isLegalShieldLandingPath(pathname)) {
     return (
       <Headroom style={{ zIndex: 50 }}>

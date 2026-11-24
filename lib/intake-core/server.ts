@@ -20,6 +20,8 @@ import {
   agentCrmGetContactTags,
   agentCrmEnsureContact,
   agentCrmAddContactTags,
+  agentCrmGetContactNative,
+  type AgentCrmNativeFields,
 } from "@/lib/agent-crm-contacts";
 import {
   resolveIntakeAccess,
@@ -31,6 +33,7 @@ import {
 import { crmFieldId, intakeLinkSlug } from "./ghl-field-ids";
 import { buildIntakeShareUrl } from "./share-url";
 import { buildCrmPayloadFromData } from "./crm-payload";
+import { ensureScopedContact } from "./contact-scope";
 import type {
   IntakeData,
   IntakeLobConfig,
@@ -305,15 +308,17 @@ export async function selfStartIntakeForClient(
 
 export const INTAKE_PAGE_SIZE = 20;
 
+/**
+ * `ownerUserId: null` lists every owner's sessions of the line: only for an admin on a line with
+ * `adminOversight` (Isaac seeing his dad's Legal Shield clients); the route decides that.
+ */
 function ownerListConditions(
   config: IntakeLobConfig,
-  ownerUserId: string,
+  ownerUserId: string | null,
   opts: { search?: string; status?: IntakeStatus }
 ): SQL[] {
-  const conditions: SQL[] = [
-    eq(intakeSessions.lob, config.lob),
-    eq(intakeSessions.ownerUserId, ownerUserId),
-  ];
+  const conditions: SQL[] = [eq(intakeSessions.lob, config.lob)];
+  if (ownerUserId !== null) conditions.push(eq(intakeSessions.ownerUserId, ownerUserId));
   if (opts.status) conditions.push(eq(intakeSessions.status, opts.status));
   if (opts.search?.trim()) {
     const q = `%${opts.search.trim()}%`;
@@ -329,7 +334,7 @@ function ownerListConditions(
 
 export async function listIntakeSessionsForOwner(
   config: IntakeLobConfig,
-  ownerUserId: string,
+  ownerUserId: string | null,
   opts: { search?: string; status?: IntakeStatus; page?: number; limit?: number } = {}
 ): Promise<IntakeSessionRow[]> {
   const limit = Math.max(1, Math.min(opts.limit ?? INTAKE_PAGE_SIZE, 100));
@@ -345,7 +350,7 @@ export async function listIntakeSessionsForOwner(
 
 export async function countIntakeSessionsForOwner(
   config: IntakeLobConfig,
-  ownerUserId: string,
+  ownerUserId: string | null,
   opts: { search?: string; status?: IntakeStatus } = {}
 ): Promise<number> {
   const [row] = await db
@@ -555,6 +560,35 @@ export async function ensureCrmContactForSession(
   const firstName = str(decrypted.firstName);
   const lastName = str(decrypted.lastName);
   try {
+    if (config.contactSearchTags?.length) {
+      // A scoped line (Legal Shield): an exact match or a new contact, its own tags, and the
+      // language tag only on a contact it created. Never the self-apply tag: its sessions are
+      // started by its associate, and that tag would fire a self-apply workflow.
+      const result = await ensureScopedContact(
+        { email: email || undefined, phone: phone || undefined, firstName, lastName, source: crmSource(config) },
+        creds.locationId,
+        creds.token,
+        logTag
+      );
+      if (!result.id) return null;
+      const locale = row.locale === "es" ? "es" : "en";
+      const tags = [...(config.contactTags ?? [])];
+      if (result.created) tags.push(locale === "es" ? INTAKE_SPANISH_TAG : INTAKE_ENGLISH_TAG);
+      if (tags.length) await agentCrmAddContactTags(result.id, tags, creds.token, logTag);
+      await db
+        .update(intakeSessions)
+        .set({
+          crmContactId: result.id,
+          contactName: [firstName, lastName].filter(Boolean).join(" ") || row.contactName,
+          contactEmail: email || row.contactEmail,
+          contactPhone: phone || row.contactPhone,
+          updatedAt: new Date(),
+        })
+        .where(eq(intakeSessions.token, row.token));
+      row.crmContactId = result.id;
+      return result.id;
+    }
+
     const contactId = await agentCrmEnsureContact(
       {
         email: email || undefined,
@@ -599,6 +633,27 @@ export async function ensureCrmContactForSession(
 }
 
 /**
+ * The native fields that are still EMPTY on the contact. A completion-only line never overwrites a
+ * contact (often one of Isaac's own, matched by email or phone): it only fills what's missing.
+ * When the contact can't be read, nothing is written.
+ */
+export async function fillBlanksOnly(
+  contactId: string,
+  native: AgentCrmNativeFields,
+  token: string
+): Promise<AgentCrmNativeFields> {
+  const current = await agentCrmGetContactNative(contactId, token);
+  if (!current) return {};
+  const out: AgentCrmNativeFields = {};
+  for (const [key, value] of Object.entries(native) as [keyof AgentCrmNativeFields, string][]) {
+    const existing = (current as unknown as Record<string, unknown>)[key];
+    if (typeof existing === "string" && existing.trim()) continue;
+    out[key] = value;
+  }
+  return out;
+}
+
+/**
  * Push the current (decrypted) intake data to the linked CRM contact. Best-effort: returns false
  * and logs on any miss (missing creds/contact, API error) without throwing, so it can run on every
  * autosave without breaking the save.
@@ -608,6 +663,9 @@ export async function syncIntakeToCrm(
   row: IntakeSessionRow,
   decrypted: IntakeData
 ): Promise<boolean> {
+  // A completion-only line (Legal Shield) writes nothing to the CRM while the form is being
+  // filled: the completion route does it once, filling blanks only.
+  if (config.crmSync === "completion-fill-blanks") return false;
   const contactId = await ensureCrmContactForSession(config, row, decrypted);
   if (!contactId) return false;
   const creds = agentCrmGetBaseCredentials();

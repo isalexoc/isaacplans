@@ -508,7 +508,7 @@ export default function IntakeForm({
           const current = typeof prev[key] === "string" ? (prev[key] as string) : "";
           if (current === incoming) continue;
           // A short secret (CVV, SSN last 4) comes back as bullets only: no digits to compare.
-          if (current && !isMaskedValue(current) && /d/.test(incoming) && lastFour(current) !== lastFour(incoming)) {
+          if (current && !isMaskedValue(current) && /\d/.test(incoming) && lastFour(current) !== lastFour(incoming)) {
             setCaptureReplaced(true);
           }
           next[key] = incoming;

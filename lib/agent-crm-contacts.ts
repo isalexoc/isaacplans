@@ -302,6 +302,8 @@ export type AgentCrmContactSummary = {
   lastName: string;
   email: string;
   phone: string;
+  /** For a server-side scope check (a Legal Shield search only shows LS-tagged contacts). */
+  tags: string[];
 };
 
 /** Free-text search across name/email/phone for the intake "find or create" flow. */
@@ -345,6 +347,7 @@ export async function agentCrmSearchContacts(
         lastName,
         email: c.email ?? "",
         phone: c.phone ?? "",
+        tags: agentCrmNormalizeContactTags(c.tags),
       };
     });
 }

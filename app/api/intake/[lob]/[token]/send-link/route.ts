@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
-import { getIsAdmin } from "@/lib/auth/admin";
-import { forbidden, notFound, resolveConfig, unauthorized } from "@/lib/intake-core/route-helpers";
+import { requireLineOperator } from "@/lib/auth/access";
+import { forbidden, notFound, resolveConfig } from "@/lib/intake-core/route-helpers";
 import {
   getIntakeByToken,
   intakeTags,
@@ -21,9 +20,9 @@ type RouteContext = { params: Promise<{ lob: string; token: string }> };
 export async function POST(_request: NextRequest, context: RouteContext) {
   const { lob, token } = await context.params;
   try {
-    const { userId } = await auth();
-    if (!userId) return unauthorized();
-    if (!(await getIsAdmin())) return forbidden();
+    const gate = await requireLineOperator(lob);
+    if ("error" in gate) return gate.error;
+    const { access } = gate;
 
     const config = resolveConfig(lob);
     if (!config) return notFound();
@@ -34,6 +33,8 @@ export async function POST(_request: NextRequest, context: RouteContext) {
 
     const row = await getIntakeByToken(config, token);
     if (!row) return notFound();
+    // Only the owner sends a link (an admin, as before, may on any line).
+    if (!access.isAdmin && row.ownerUserId !== access.userId) return forbidden();
     if (!row.crmContactId) {
       return NextResponse.json(
         { success: false, error: "This session has no linked CRM contact." },

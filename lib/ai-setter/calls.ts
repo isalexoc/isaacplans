@@ -11,7 +11,7 @@
 
 import "server-only";
 
-import { and, desc, eq, sql } from "drizzle-orm";
+import { and, desc, eq, ne, sql } from "drizzle-orm";
 
 import type { CallDisposition, LineOfBusiness } from "@/lib/call-summary-structured";
 import { db } from "@/lib/db";
@@ -165,7 +165,14 @@ const CLIENT_CHECKS: ClientCheck[] = [
       db
         .select({ id: intakeSessions.id })
         .from(intakeSessions)
-        .where(and(eq(intakeSessions.crmContactId, id), eq(intakeSessions.status, "completed")))
+        .where(
+          and(
+            eq(intakeSessions.crmContactId, id),
+            eq(intakeSessions.status, "completed"),
+            // A finished LegalShield membership application is not an insurance client.
+            ne(intakeSessions.lob, "legal-shield")
+          )
+        )
         .limit(1),
   },
 ];

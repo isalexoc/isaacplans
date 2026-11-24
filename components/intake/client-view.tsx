@@ -45,7 +45,7 @@ function displayValue(
   if (field.type === "monthStart") return formatIsoLong(value, locale);
   // Some agents copy dates into forms that want MM/DD/YYYY (LegalShield's enrollment does).
   if (dateFormat === "mdy" && DATE_TYPES.includes(field.type)) {
-    const m = value.match(/^(d{4})-(d{2})-(d{2})$/);
+    const m = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
     if (m) return `${m[2]}/${m[3]}/${m[1]}`;
   }
   if ((field.type === "select" || field.type === "impactPlan") && field.options) {

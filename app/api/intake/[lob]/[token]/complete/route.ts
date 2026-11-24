@@ -7,6 +7,7 @@ import {
 } from "@/lib/intake-core/route-helpers";
 import {
   buildCrmPayloadFromData,
+  fillBlanksOnly,
   clientCanEdit,
   ensureCrmContactForSession,
   getIntakeByToken,
@@ -72,7 +73,13 @@ export async function POST(_request: NextRequest, context: RouteContext) {
 
     let crmSynced = false;
     if (creds && row.crmContactId) {
-      const { native, customFields, skippedSlugs } = buildCrmPayloadFromData(config, decrypted);
+      const payload = buildCrmPayloadFromData(config, decrypted);
+      const { customFields, skippedSlugs } = payload;
+      // A completion-only line fills the contact's blanks and never overwrites what's there.
+      const native =
+        config.crmSync === "completion-fill-blanks"
+          ? await fillBlanksOnly(row.crmContactId, payload.native, creds.token)
+          : payload.native;
       if (skippedSlugs.length > 0) {
         console.warn(
           `[${config.lob}-intake] Custom fields not provisioned yet (run pnpm intake:fields ${config.lob}):`,

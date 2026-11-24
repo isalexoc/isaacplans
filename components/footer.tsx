@@ -27,6 +27,7 @@ import Image from "next/image";
 import { Link } from "@/i18n/navigation"; // locale‑aware wrappers
 import Logo from "@/components/logo";
 import LegalShieldBrand from "@/components/legal-shield/legal-shield-brand";
+import RedDeApoyoBrand from "@/components/legal-shield/red-de-apoyo-brand";
 import { LEGAL_SHIELD_DISCLAIMER_ES } from "@/lib/legal-shield/constants";
 import { getTranslations } from "next-intl/server";
 import { Separator } from "@/components/ui/separator";
@@ -78,7 +79,7 @@ async function BareIulFooter() {
  * namespace would mean maintaining an English translation nobody will ever be served, plus a
  * hand-registered entry in i18n/request.ts.
  */
-async function LegalShieldBareFooter() {
+async function LegalShieldBareFooter({ brand = "escudo" }: { brand?: "escudo" | "red-de-apoyo" } = {}) {
   const year = new Date().getFullYear();
   return (
     <footer
@@ -86,7 +87,8 @@ async function LegalShieldBareFooter() {
       aria-label="Pie de página"
     >
       <div className="container mx-auto flex max-w-3xl flex-col items-center gap-5 px-4 text-center sm:px-6">
-        <LegalShieldBrand size="footer" />
+        {/* The funnel is "Escudo Legal"; Ysmael's intake pages and deck are "Red de Apoyo Latino USA". */}
+        {brand === "red-de-apoyo" ? <RedDeApoyoBrand size="footer" /> : <LegalShieldBrand size="footer" />}
         <div className="space-y-3">
           {LEGAL_SHIELD_DISCLAIMER_ES.map((paragraph) => (
             <p
@@ -145,6 +147,9 @@ export default async function Footer() {
     const variant = headerList.get("x-ads-landing-variant");
     if (variant === "legal-shield-bare") {
       return await LegalShieldBareFooter();
+    }
+    if (variant === "legal-shield-intake") {
+      return await LegalShieldBareFooter({ brand: "red-de-apoyo" });
     }
     if (variant === "iul-bare") {
       return await BareIulFooter();
