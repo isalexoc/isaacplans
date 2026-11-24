@@ -2,6 +2,34 @@
 
 ## Status
 
+In progress: **Lead Guard — stop bot leads without slowing real clients** (branch `feature/lead-guard`,
+migration `0047_lead_guard`). Isaac's ask (2026-11-24): 20–60 spam leads a day were landing in the CRM from the
+website. Audit (read-only CRM export, 3,219 contacts): 83 bot contacts since 2026-11-21 13:55 UTC, all from the general
+contact form (Faker names, real strangers' emails, random phones, both consents ticked), posted WITHOUT JavaScript
+straight to React's server-rendered form; every one got the contact workflow (115 quote emails, ~105 texts, 12
+delivered to strangers, 83 opportunities). Only 1 real contact-form lead existed before the attack.
+- **Built:** `lib/lead-guard/` judges every website lead before the CRM: allow (normal flow + `web_verified` tag),
+  hold (kept out of the CRM, encrypted in Neon, Telegram line, one-click release at `/es/admin/lead-holds`), block
+  (bot certainty only: a no-JS server-action post, several lead types at once, a JSON post with no token and no
+  Origin). The 10 `useActionState` lead forms are client-wrapped (no no-JS post; crash-proof), form token on
+  `<body data-lgt>` (+ `/api/form-session` for old tabs), honeypot, phone validity (libphonenumber-js max) with a
+  "double-check" prompt once, rate limits that never wait on Neon, create-contact moved in-process
+  (`lib/create-contact/core.ts`, also called by lead magnets, referral partners and Release), stand-in contact ids for
+  the 5 step-2 routes, CRM-quarantine fallback, names/email on existing contacts only fill blanks. A 4-lens design
+  review reshaped v1 (blocks narrowed to bot certainties, HTTP self-hop dropped, key ring, 0046 → 0047 collision).
+  Also: create-contact stops logging/returning PII and caps bodies at 64 KB, referral attribution only from our
+  server, guide emails only to the address on file, newsletter resend/hourly limits, daily "N held" Telegram digest.
+- **Verified:** tsc; `pnpm test:lead-guard` (153 offline checks; a 3-lens code review found 12 defects, all fixed — incl. Release buttons that rejected every hold id); sandboxed dev server (dummy CRM/Telegram/Meta
+  credentials): the contact page renders no `$ACTION_` fields and carries the body token; the bot's exact no-JS post
+  is blocked before any CRM call; a real Chrome submit is allowed (token 9 s old) and runs create-contact in-process
+  tagged `web_verified`; an invalid phone asks once, then holds with the normal thank-you screen; direct JSON posts
+  are blocked (script, two blobs), held (no token from a browser, server-only blob) or allowed (valid token); step-2
+  routes accept stand-in ids. Not verified: the admin page (needs Isaac's signed-in browser) and a real Release.
+- **Needs Isaac:** OK to quarantine the 83 existing bot contacts in GHL (tag, DND, out of the contact workflow);
+  `pnpm db:migrate 0047`; merge + deploy; GHL: turn OFF external-tracking form capture on lead-form pages, gate the
+  contact workflow on `web_verified`, Number Intelligence on, workflow time window. Later, only if a JavaScript bot
+  appears: BotID / Trestle (see LEAD_GUARD_SETUP.md).
+
 In progress: **The Impact quote fills the application + quote image for anyone on /impact** (branch
 `feature/impact-quote-to-application`, no migration). Isaac's ask (2026-11-22): whatever was quoted on the deck's
 slide 10 or on `/impact` (how many people, the oldest person's birth date, the plan) must already be in the

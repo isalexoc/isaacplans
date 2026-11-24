@@ -6,6 +6,7 @@ import {
   capitalizeName,
 } from "@/lib/validation/shortTermMedicalSchema";
 import { parseServerActionResponse } from "@/lib/utils";
+import { submitGuardedActionLead } from "@/lib/lead-guard/server";
 
 export type FormValues = {
   firstName: string;
@@ -100,17 +101,25 @@ export async function submitShortTermMedicalForm(
         : `+1${phoneDigits}`;
 
     // Use localhost in development so API runs locally and logs are visible; use production URL otherwise
-    const baseUrl =
-      process.env.NODE_ENV === "development"
-        ? `http://localhost:${process.env.PORT || 3000}`
-        : process.env.NEXT_PUBLIC_SITE_URL ||
-          (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null) ||
-          "http://localhost:3000";
-
-    const response = await fetch(`${baseUrl}/api/create-contact`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
+    // Lead Guard (lib/lead-guard): judged here, where the visitor's request landed. A held or
+    // blocked lead gets the normal success screen and never reaches the CRM.
+    const outcome = await submitGuardedActionLead({
+      formData,
+      surface: "short_term_medical_form",
+      locale: isES ? "es" : "en",
+      leadType: "shortTermMedicalData",
+      contact: {
+        firstName: capitalizedFirstName,
+        lastName: capitalizedLastName,
+        email,
+        phone,
+        language: isES ? "es" : "en",
+      },
+      consents: {
+        smsConsent: formData.get("smsConsent") === "on",
+        marketingConsent: formData.get("marketingConsent") === "on",
+      },
+      body: {
         firstName: capitalizedFirstName,
         lastName: capitalizedLastName,
         email,
@@ -121,46 +130,32 @@ export async function submitShortTermMedicalForm(
           smsConsent: formData.get("smsConsent") === "on",
           marketingConsent: formData.get("marketingConsent") === "on",
         },
-      }),
+      },
     });
 
-    if (!response.ok) {
-      let errorData: { error?: string } = {};
-      try {
-        errorData = await response.json();
-      } catch {
-        errorData = {};
-      }
-      const message =
-        errorData?.error || (isES ? "Error al procesar." : "Error processing.");
-      console.error(`${logPrefix} API error:`, message);
+    if (outcome.kind === "phone_recheck") {
       return parseServerActionResponse({
-        status: "ERROR",
-        error: message,
+        status: "VALIDATION_ERROR",
+        errors: outcome.errors,
         values: raw,
       });
     }
 
-    let data: { success?: boolean; isExisting?: boolean } = {};
-    try {
-      data = await response.json();
-    } catch {
-      data = {};
+    if (outcome.kind === "error") {
+      console.error(`${logPrefix} API error:`, outcome.message);
+      return parseServerActionResponse({
+        status: "ERROR",
+        error: outcome.message,
+        values: raw,
+      });
     }
 
-    if (data.success) {
-      console.log(
-        `${logPrefix} Lead submitted successfully:`,
-        capitalizedFirstName,
-        capitalizedLastName,
-        data.isExisting ? "(existing contact)" : "(new contact)",
-        isES ? "- Español" : "- English"
-      );
-    }
+    // No names in logs (PII).
+    console.log(`${logPrefix} Lead submitted`, isES ? "- Español" : "- English");
 
     return parseServerActionResponse({
       status: "SUCCESS",
-      isNewContact: !data.isExisting,
+      isNewContact: outcome.isNewContact,
     });
   } catch (error) {
     const message =

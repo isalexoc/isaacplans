@@ -1,5 +1,7 @@
 "use client";
 
+import { getLeadGuardPayload, useLeadGuardPrefetch } from "@/lib/lead-guard/client";
+
 import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import PhoneInput from "react-phone-number-input";
@@ -34,6 +36,7 @@ type Props = {
 };
 
 export default function PartnerLeadForm({ partnerSlug, accentColor }: Props) {
+  useLeadGuardPrefetch();
   const locale = useLocale();
   const isES = locale.startsWith("es");
   const t = useTranslations("partnerReferral.form");
@@ -102,6 +105,7 @@ export default function PartnerLeadForm({ partnerSlug, accentColor }: Props) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          leadGuard: await getLeadGuardPayload(),
           slug: partnerSlug,
           ...parsed.data,
           locale: isES ? "es" : "en",

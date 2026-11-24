@@ -1,5 +1,7 @@
 "use client";
 
+import { getLeadGuardPayload, useLeadGuardPrefetch } from "@/lib/lead-guard/client";
+
 import { useState } from "react";
 import { useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
@@ -24,6 +26,7 @@ interface LeadMagnetFormProps {
 }
 
 export function LeadMagnetForm({ slug, category, leadFormSettings }: LeadMagnetFormProps) {
+  useLeadGuardPrefetch();
   const locale = useLocale();
   const isES = locale.startsWith("es");
 
@@ -86,6 +89,7 @@ export function LeadMagnetForm({ slug, category, leadFormSettings }: LeadMagnetF
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          leadGuard: await getLeadGuardPayload(),
           firstName: formData.firstName.trim(),
           lastName: formData.lastName.trim(),
           email: formData.email.trim().toLowerCase(),

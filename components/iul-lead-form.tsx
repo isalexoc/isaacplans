@@ -7,6 +7,8 @@ import {
   type ActionResult,
   type FormValues,
 } from "@/app/actions/iul";
+import { useLeadGuardPrefetch, withLeadGuardAction } from "@/lib/lead-guard/client";
+import { LeadGuardHoneypot } from "@/lib/lead-guard/honeypot";
 import PhoneInput, { parsePhoneNumber } from "react-phone-number-input";
 import "react-phone-number-input/style.css";
 import { Link } from "@/i18n/navigation";
@@ -27,6 +29,9 @@ const initialFormValues: FormValues = {
 
 const initialState: ActionResult = { status: null };
 
+/** Lead Guard: adds the form token and removes React's no-JavaScript form post (how the spam bot submitted). */
+const guardedSubmit = withLeadGuardAction(submitIulLeadForm);
+
 type Props = {
   onSubmitSuccess?: () => void;
   onCloseModal?: () => void;
@@ -34,12 +39,10 @@ type Props = {
 
 export default function IulLeadForm({ onSubmitSuccess, onCloseModal }: Props) {
   const locale = useLocale();
+  useLeadGuardPrefetch();
   const isES = locale.startsWith("es");
   const t = useTranslations("iulPage.leadForm");
-  const [state, formAction, isPending] = useActionState(
-    submitIulLeadForm,
-    initialState
-  );
+  const [state, formAction, isPending] = useActionState(guardedSubmit, initialState);
 
   const [formValues, setFormValues] = useState<FormValues>(initialFormValues);
   const [smsConsent, setSmsConsent] = useState(false);
@@ -127,6 +130,7 @@ export default function IulLeadForm({ onSubmitSuccess, onCloseModal }: Props) {
 
   return (
     <form id="iul-lead-form" action={formAction} className="space-y-4">
+      <LeadGuardHoneypot locale={locale} />
       <input type="hidden" name="locale" value={locale} />
 
       {state.status === "ERROR" && state.error && (

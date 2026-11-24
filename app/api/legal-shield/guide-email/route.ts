@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { interceptGuardPseudoId } from "@/lib/lead-guard/server";
 
 import {
   AGENT_CRM_API_BASE,
@@ -48,11 +49,18 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { contactId, email, phone, firstName } = body as {
+
+    // Lead Guard: a stand-in contact id of a held or blocked lead. Still held: the step-2 data is
+    // filed with the hold (replayed on release); already released: continue with the real contact.
+    const guardIntercept = await interceptGuardPseudoId(body?.contactId, "/api/legal-shield/guide-email", body);
+    if (guardIntercept?.action === "respond") {
+      return NextResponse.json({ success: true, sent: false });
+    }
+    if (guardIntercept?.action === "continue") body.contactId = guardIntercept.contactId;
+    const { contactId, email, phone } = body as {
       contactId?: string;
       email?: string;
       phone?: string;
-      firstName?: string;
     };
 
     const emailTrimmed = (email ?? "").trim().toLowerCase();
@@ -112,9 +120,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Never an arbitrary inbox (Lead Guard): a phone match alone used to email the guide to
+    // whatever address was typed — exactly what form-bombing bots look for. The guide goes to the
+    // address on file: the typed one when they match (a new lead's step 1 saved it), else the
+    // contact's own email (a returning lead whose different email went to a note). No email on
+    // file → nothing is sent. The greeting uses the CRM's first name, never text from the request.
+    const to = emailOk ? emailTrimmed : phoneOk && crmEmail ? crmEmail : null;
+    if (!to) {
+      console.warn(`${LOG} No email on file for this contact — not sending`, { contactId });
+      return NextResponse.json({ success: true, sent: false, reason: "email_not_on_file" });
+    }
+    const crmFirstName = typeof contact.firstName === "string" ? contact.firstName.trim() : "";
     const sent = await sendLegalShieldGuideEmail({
-      to: emailTrimmed,
-      firstName: (firstName ?? "").trim(),
+      to,
+      firstName: crmFirstName,
       pdfUrl: LEGAL_SHIELD_GUIDE_PDF_URL,
     });
 

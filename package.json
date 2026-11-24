@@ -47,6 +47,7 @@
     "test:ai-setter": "tsx scripts/test-ai-setter.ts",
     "test:intake-autosave": "tsx scripts/test-intake-autosave.ts",
     "test:quote-prefill": "tsx scripts/test-quote-prefill.ts",
+    "test:lead-guard": "tsx scripts/test-lead-guard.ts",
     "ai-setter:try": "tsx --conditions=react-server scripts/ai-setter-try.ts"
   },
   "dependencies": {
@@ -111,6 +112,7 @@
     "html2canvas": "^1.4.1",
     "input-otp": "1.4.1",
     "jspdf": "^3.0.3",
+    "libphonenumber-js": "1.13.16",
     "lucide-react": "^0.454.0",
     "nanoid": "^5.1.6",
     "next": "15.5.9",

@@ -10,6 +10,8 @@ import {
   type ActionResult,
   type FormValues,
 } from "@/app/actions/agent-crm-affiliate";
+import { useLeadGuardPrefetch, withLeadGuardAction } from "@/lib/lead-guard/client";
+import { LeadGuardHoneypot } from "@/lib/lead-guard/honeypot";
 import AgentCrmCta from "@/components/agent-crm/agent-crm-cta";
 
 /** PhoneInput expects E.164; the server may hand back a formatted value like "(544) 841-5655". */
@@ -29,6 +31,9 @@ const initialFormValues: FormValues = {
 
 const initialState: ActionResult = { status: null };
 
+/** Lead Guard: adds the form token and removes React's no-JavaScript form post (how the spam bot submitted). */
+const guardedSubmit = withLeadGuardAction(submitAgentCrmLead);
+
 /**
  * The soft CTA on /agent-crm — for the agent who read the whole page and still isn't buying
  * software today.
@@ -45,9 +50,10 @@ const initialState: ActionResult = { status: null };
  */
 export default function AgentCrmLeadForm() {
   const locale = useLocale();
+  useLeadGuardPrefetch();
   const isES = locale.startsWith("es");
   const t = useTranslations("agentCrm.form");
-  const [state, formAction, isPending] = useActionState(submitAgentCrmLead, initialState);
+  const [state, formAction, isPending] = useActionState(guardedSubmit, initialState);
 
   const [formValues, setFormValues] = useState<FormValues>(initialFormValues);
   const [smsConsent, setSmsConsent] = useState(false);
@@ -103,6 +109,14 @@ export default function AgentCrmLeadForm() {
 
   return (
     <form id="agent-crm-lead-form" action={formAction} className="space-y-4">
+      <LeadGuardHoneypot locale={locale} />
+      <noscript>
+        <p className="rounded-lg border-2 border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+          {isES
+            ? "Para enviar este formulario active JavaScript, o llámenos o escríbanos por WhatsApp con los datos de esta página."
+            : "To send this form, please turn on JavaScript, or call or WhatsApp us using the details on this page."}
+        </p>
+      </noscript>
       <input type="hidden" name="locale" value={locale} />
 
       {state.status === "ERROR" && state.error && (

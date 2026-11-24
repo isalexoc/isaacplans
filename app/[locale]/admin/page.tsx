@@ -88,6 +88,13 @@ const CONTENT_TOOLS: ToolCard[] = [
 
 const OPERATIONS_TOOLS: ToolCard[] = [
   {
+    title: "Held Website Leads",
+    description:
+      "Website leads Lead Guard kept out of the CRM (no form token, invalid phone, bursts). Release the real ones; bots never reach this list.",
+    href: "/es/admin/lead-holds",
+    icon: Shield,
+  },
+  {
     title: "Telegram Leads",
     description:
       "Review Empiregrowth IUL leads that arrived over Telegram and couldn't be read automatically.",

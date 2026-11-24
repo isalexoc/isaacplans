@@ -7,6 +7,8 @@ import {
   type ActionResult,
   type FormValues,
 } from "@/app/actions/contact";
+import { useLeadGuardPrefetch, withLeadGuardAction } from "@/lib/lead-guard/client";
+import { LeadGuardHoneypot } from "@/lib/lead-guard/honeypot";
 import PhoneInput, { parsePhoneNumber } from "react-phone-number-input";
 import "react-phone-number-input/style.css";
 
@@ -28,6 +30,9 @@ const initialFormValues: FormValues = {
 
 const initialState: ActionResult = { status: null };
 
+/** Lead Guard: adds the form token and removes React's no-JavaScript form post (how the spam bot submitted). */
+const guardedSubmit = withLeadGuardAction(submitContactForm);
+
 type ContactLeadFormProps = {
   /** When set (e.g. inside a modal), show a close control on success */
   onCloseModal?: () => void;
@@ -43,12 +48,10 @@ export default function ContactLeadForm({
   iulApply = false,
 }: ContactLeadFormProps = {}) {
   const locale = useLocale();
+  useLeadGuardPrefetch();
   const isES = locale.startsWith("es");
   const t = useTranslations("contactPage.info.form");
-  const [state, formAction, isPending] = useActionState(
-    submitContactForm,
-    initialState
-  );
+  const [state, formAction, isPending] = useActionState(guardedSubmit, initialState);
 
   const [formValues, setFormValues] = useState<FormValues>(initialFormValues);
   const [smsConsent, setSmsConsent] = useState(false);
@@ -134,6 +137,14 @@ export default function ContactLeadForm({
       action={formAction}
       className="space-y-4"
     >
+      <LeadGuardHoneypot locale={locale} />
+      <noscript>
+        <p className="rounded-lg border-2 border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+          {isES
+            ? "Para enviar este formulario active JavaScript, o llámenos o escríbanos por WhatsApp con los datos de esta página."
+            : "To send this form, please turn on JavaScript, or call or WhatsApp us using the details on this page."}
+        </p>
+      </noscript>
       <input type="hidden" name="locale" value={locale} />
       <input type="hidden" name="source" value={source} />
 
