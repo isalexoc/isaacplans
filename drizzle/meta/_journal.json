@@ -323,6 +323,13 @@
       "when": 1794958066061,
       "tag": "0045_ai_setter",
       "breakpoints": true
+    },
+    {
+      "idx": 47,
+      "version": "5",
+      "when": 1795503455448,
+      "tag": "0047_lead_guard",
+      "breakpoints": true
     }
   ]
 }

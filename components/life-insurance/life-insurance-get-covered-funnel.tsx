@@ -1,5 +1,7 @@
 "use client";
 
+import { getLeadGuardPayload, useLeadGuardPrefetch } from "@/lib/lead-guard/client";
+
 import { useRef, useState } from "react";
 import HeroMedia from "@/components/media/hero-media";
 import type { HeroMedia as HeroMediaValue } from "@/lib/page-media/shared";
@@ -47,6 +49,7 @@ export default function LifeInsuranceGetCoveredFunnel({
    */
   heroMedia?: HeroMediaValue;
 }) {
+  useLeadGuardPrefetch();
   const locale = useLocale();
   const isES = locale.startsWith("es");
   const t = useTranslations("lifeInsuranceGetCoveredPage.funnel");
@@ -161,6 +164,7 @@ export default function LifeInsuranceGetCoveredFunnel({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          leadGuard: await getLeadGuardPayload(),
           firstName: capFirst,
           lastName: capLast,
           email: emailNorm,

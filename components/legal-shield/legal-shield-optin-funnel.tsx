@@ -1,5 +1,8 @@
 "use client";
 
+import { getLeadGuardPayload, useLeadGuardPrefetch } from "@/lib/lead-guard/client";
+import { LeadGuardHoneypot } from "@/lib/lead-guard/honeypot";
+
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
@@ -53,8 +56,6 @@ import {
 /** Matches the other get-covered funnels so Meta optimises against a comparable number. */
 const LEAD_VALUE = 100;
 
-/** Anything faster than this was not typed by a person. */
-const MIN_DWELL_MS = 2000;
 
 const GUIDE_VERSION = "guia_legal_shield_gt48jt";
 
@@ -92,13 +93,13 @@ export default function LegalShieldOptinFunnel({
    */
   children?: ReactNode;
 }) {
+  useLeadGuardPrefetch();
   const [phase, setPhase] = useState<Phase>("contact");
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
-  const [honeypot, setHoneypot] = useState("");
 
   const [areas, setAreas] = useState<AreaSlug[]>([]);
   const [urgency, setUrgency] = useState<UrgencySlug | null>(null);
@@ -202,9 +203,8 @@ export default function LegalShieldOptinFunnel({
     e.preventDefault();
     setSubmitError(null);
 
-    // Bot guards. Both fail silently rather than explaining themselves.
-    if (honeypot.trim()) return;
-    if (Date.now() - renderedAtRef.current < MIN_DWELL_MS) return;
+    // Bot checks live on the server now (Lead Guard): a filled honeypot or an instant submit is
+    // HELD for review there, never silently dropped here (autofill could fill a hidden field).
 
     const phoneE164 = toE164OrUndefined(phone) ?? phone;
     const parsed = shortTermMedicalFormSchema.safeParse({
@@ -249,6 +249,7 @@ export default function LegalShieldOptinFunnel({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          leadGuard: await getLeadGuardPayload(),
           firstName: capFirst,
           lastName: capLast,
           email: emailNorm,
@@ -423,19 +424,7 @@ export default function LegalShieldOptinFunnel({
               </p>
 
               <form onSubmit={handleContactSubmit} className="mt-6 space-y-4" noValidate>
-                {/* Honeypot — visually and programmatically hidden, only bots fill it. */}
-                <div className="absolute left-[-9999px]" aria-hidden>
-                  <label htmlFor="ls-website">No llenar</label>
-                  <input
-                    id="ls-website"
-                    name="website"
-                    type="text"
-                    tabIndex={-1}
-                    autoComplete="off"
-                    value={honeypot}
-                    onChange={(e) => setHoneypot(e.target.value)}
-                  />
-                </div>
+                <LeadGuardHoneypot locale="es" />
 
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>

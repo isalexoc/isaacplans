@@ -1,5 +1,7 @@
 "use client";
 
+import { getLeadGuardPayload, useLeadGuardPrefetch } from "@/lib/lead-guard/client";
+
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslations, useLocale } from "next-intl";
@@ -137,6 +139,7 @@ function generateStepScreenId(step: number): string {
 }
 
 export default function IULLeadGenForm() {
+  useLeadGuardPrefetch();
   const t = useTranslations("iulQuote.form");
   const tFooter = useTranslations("footer.links");
   const locale = useLocale();
@@ -682,6 +685,7 @@ export default function IULLeadGenForm() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          leadGuard: await getLeadGuardPayload(),
           firstName: formData.firstName,
           lastName: formData.lastName,
           email: formData.email,

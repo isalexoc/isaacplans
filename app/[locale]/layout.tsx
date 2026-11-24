@@ -26,6 +26,8 @@ import { GoogleAnalytics } from '@next/third-parties/google'
 import { getLicensedStateCount } from "@/lib/licensed-states";
 import { cloudinaryOgImageUrl } from "@/lib/blog-featured-image";
 import { BlogModalProvider } from "@/components/blog-modal-context";
+import { getLeadGuardMode } from "@/lib/lead-guard/config";
+import { mintLeadToken } from "@/lib/lead-guard/token";
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
@@ -112,6 +114,10 @@ export default async function LocaleLayout({
   const agentCrmTrackingDebug =
     process.env.NEXT_PUBLIC_AGENT_CRM_TRACKING_DEBUG === "true";
 
+  // Lead Guard form token (lib/lead-guard/token.ts): every lead form sends it back, so a real
+  // browser always has one — no network call — and its timestamp is this render.
+  const leadToken = getLeadGuardMode() === "off" ? null : mintLeadToken();
+
   // Map your locale to Clerk's localization
   const clerkLocale = locale === "es" ? esES : enUS;
   const messages = await getMessages();
@@ -126,6 +132,7 @@ export default async function LocaleLayout({
       <body
         className={`${inter.className} flex min-h-screen flex-col bg-background text-foreground antialiased overflow-x-hidden`}
         suppressHydrationWarning
+        data-lgt={leadToken ?? undefined}
       >
         {/* Strip extension-injected attrs (e.g. fdprocessedid) — must run synchronously on mutation so React hydration does not see mismatched attrs */}
         <Script

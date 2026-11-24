@@ -1,5 +1,8 @@
 import "server-only";
 import { createLead, updateLead } from "./server";
+import { createContactCore } from "@/lib/create-contact/core";
+import { WEB_RELEASED_TAG, WEB_VERIFIED_TAG } from "@/lib/lead-guard/tags";
+import type { CreateContactContext } from "@/lib/create-contact/core";
 import type {
   ReferralLeadRecord,
   ReferralLeadStatus,
@@ -40,6 +43,10 @@ export type ReferralIntakeInput = {
   notes?: string;
   /** Meta dedup payload; only the public form has one. */
   meta?: { eventId?: string; eventSourceUrl?: string; fbp?: string; fbc?: string };
+  /** The visitor behind a public-form submission (for CAPI), passed on through Lead Guard. */
+  visitor?: { ip?: string; ua?: string };
+  /** Set by Lead Guard's Release: the consent record keeps the original submit time. */
+  released?: CreateContactContext["released"];
 };
 
 export type ReferralIntakeResult = {
@@ -48,17 +55,6 @@ export type ReferralIntakeResult = {
   /** Non-null when the CRM push failed — the lead still exists and is recoverable. */
   crmError: string | null;
 };
-
-function resolveBaseUrl(): string {
-  if (process.env.NODE_ENV === "development") {
-    return `http://localhost:${process.env.PORT || 3000}`;
-  }
-  return (
-    process.env.NEXT_PUBLIC_SITE_URL ||
-    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null) ||
-    "http://localhost:3000"
-  );
-}
 
 /** E.164 for the US. Accepts the digits a partner would text over in any shape. */
 export function normalizePhoneToE164(raw: string): string {
@@ -102,10 +98,10 @@ export async function intakeReferralLead(
   let crmError: string | null = null;
 
   try {
-    const response = await fetch(`${resolveBaseUrl()}/api/create-contact`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
+    // In-process (no HTTP hop): the public form was judged by Lead Guard in /api/partners/lead
+    // and a manual entry comes from an admin.
+    const result = await createContactCore(
+      {
         firstName: input.firstName,
         lastName: input.lastName,
         // Omitted entirely rather than sent empty — create-contact treats email as optional.
@@ -127,22 +123,22 @@ export async function intakeReferralLead(
             .join(", "),
         },
         ...(input.meta ? { meta: input.meta } : {}),
-      }),
-    });
+      },
+      {
+        visitor: input.visitor ?? null,
+        extraTags: input.released ? [WEB_VERIFIED_TAG, WEB_RELEASED_TAG] : [WEB_VERIFIED_TAG],
+        released: input.released ?? null,
+      }
+    );
+    const data = result.body as { success?: boolean; contactId?: string; error?: string };
 
-    const data = (await response.json().catch(() => ({}))) as {
-      success?: boolean;
-      contactId?: string;
-      error?: string;
-    };
-
-    if (response.ok && data.success) {
+    if (result.status < 400 && data.success) {
       crmContactId = data.contactId ?? null;
       if (crmContactId) {
         await updateLead(lead.id, partner.id, { crmContactId });
       }
     } else {
-      crmError = data.error || `CRM responded ${response.status}`;
+      crmError = data.error || `CRM responded ${result.status}`;
       console.error(`${LOG} CRM push failed for lead ${lead.id} (${partner.slug}):`, crmError);
     }
   } catch (error) {
@@ -151,7 +147,7 @@ export async function intakeReferralLead(
   }
 
   console.log(
-    `${LOG} ${origin} · ${partner.slug} → ${input.firstName} ${input.lastName} (${input.locale})`,
+    `${LOG} ${origin} · ${partner.slug} (${input.locale})`,
     crmContactId ? `crm:${crmContactId}` : "crm:FAILED — recover from /admin/referral-partners"
   );
 

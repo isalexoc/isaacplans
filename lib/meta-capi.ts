@@ -50,6 +50,8 @@ export interface MetaCapiEventOptions {
   lastName?: string;
   customData?: Record<string, unknown>;
   testEventCode?: string; // Only for testing in Events Manager
+  /** When the event happened (unix seconds); defaults to now. Meta rejects events older than 7 days. */
+  eventTime?: number;
 }
 
 /**
@@ -72,9 +74,10 @@ export async function sendMetaCapiEvent(options: MetaCapiEventOptions): Promise<
     lastName,
     customData = {},
     testEventCode,
+    eventTime,
   } = options;
 
-  const event_time = Math.floor(Date.now() / 1000);
+  const event_time = eventTime ?? Math.floor(Date.now() / 1000);
 
   // Build user_data object (Meta requires hashed PII)
   const user_data: Record<string, any> = {

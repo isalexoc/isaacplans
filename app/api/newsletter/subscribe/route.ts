@@ -2,9 +2,24 @@ import { NextRequest, NextResponse } from "next/server";
 import { after } from "next/server";
 import { db } from "@/lib/db";
 import { newsletterSubscribers } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
+import { count, eq, gte } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { sendNewsletterEmail } from "@/lib/email/notifications";
+
+/**
+ * Form-bombing bots push victims' addresses into any form that sends an email. Two limits, neither
+ * felt by a real subscriber: a pending address gets a confirmation at most every 15 minutes, and the
+ * whole site sends at most 20 first-time confirmations an hour (real sign-ups are a few a week).
+ */
+const RESEND_COOLDOWN_MS = 15 * 60 * 1000;
+const NEW_CONFIRMATIONS_PER_HOUR = 20;
+
+/** "jo***@gmail.com": enough to follow a log line, not enough to identify the person. */
+function maskEmail(value: string): string {
+  const at = value.lastIndexOf("@");
+  if (at <= 0) return "***";
+  return `${value.slice(0, Math.min(2, at))}***${value.slice(at)}`;
+}
 
 // Configure max duration for Vercel serverless functions
 export const maxDuration = 30; // 30 seconds should be enough for email connection
@@ -19,7 +34,7 @@ export async function POST(request: NextRequest) {
     const { email, locale = "en", source = "newsletter-page" } = body;
 
     console.log("[NEWSLETTER] Request data:", {
-      email: email?.toLowerCase().trim(),
+      email: typeof email === "string" ? maskEmail(email.toLowerCase().trim()) : undefined,
       locale,
       source,
     });
@@ -44,7 +59,7 @@ export async function POST(request: NextRequest) {
     }
 
     const normalizedEmail = email.toLowerCase().trim();
-    console.log(`[NEWSLETTER] Checking for existing subscriber: ${normalizedEmail}`);
+    console.log(`[NEWSLETTER] Checking for existing subscriber: ${maskEmail(normalizedEmail)}`);
 
     // Check if email already exists
     const existing = await db.query.newsletterSubscribers.findFirst({
@@ -67,9 +82,20 @@ export async function POST(request: NextRequest) {
       }
 
       if (existing.status === "pending") {
-        console.log(`[NEWSLETTER] Resending confirmation email to ${normalizedEmail}`);
+        const lastSentAt = existing.updatedAt ?? existing.createdAt;
+        const coolingDown = lastSentAt ? Date.now() - new Date(lastSentAt).getTime() < RESEND_COOLDOWN_MS : false;
+        if (coolingDown) {
+          // The inbox gets nothing new; the visitor is pointed at the earlier email (and spam folder).
+          console.log(`[NEWSLETTER] Pending subscriber within resend cooldown: ${maskEmail(normalizedEmail)}`);
+        } else if (existing.confirmationToken) {
+          console.log(`[NEWSLETTER] Resending confirmation email to ${maskEmail(normalizedEmail)}`);
+          await db
+            .update(newsletterSubscribers)
+            .set({ updatedAt: new Date() })
+            .where(eq(newsletterSubscribers.id, existing.id));
+        }
         // Resend confirmation email using after() to prevent Vercel timeouts
-        if (existing.confirmationToken) {
+        if (!coolingDown && existing.confirmationToken) {
           after(async () => {
             try {
               await sendNewsletterEmail({
@@ -78,27 +104,30 @@ export async function POST(request: NextRequest) {
                 token: existing.confirmationToken!,
                 type: "confirmation",
               });
-              console.log(`[NEWSLETTER] Confirmation email resent successfully to ${normalizedEmail}`);
+              console.log(`[NEWSLETTER] Confirmation email resent successfully to ${maskEmail(normalizedEmail)}`);
             } catch (error) {
-              console.error(`[NEWSLETTER] Error resending confirmation email to ${normalizedEmail}:`, error);
+              console.error(`[NEWSLETTER] Error resending confirmation email to ${maskEmail(normalizedEmail)}:`, error);
             }
           });
-        } else {
-          console.warn(`[NEWSLETTER] No confirmation token found for pending subscriber: ${normalizedEmail}`);
+        } else if (!existing.confirmationToken) {
+          console.warn(`[NEWSLETTER] No confirmation token found for pending subscriber: ${maskEmail(normalizedEmail)}`);
         }
 
         return NextResponse.json({
           success: true,
           status: "confirmation_resent",
-          message:
-            locale === "es"
+          message: coolingDown
+            ? locale === "es"
+              ? "Ya te enviamos un correo de confirmación. Revisa tu bandeja de entrada y la carpeta de spam."
+              : "We already sent you a confirmation email. Please check your inbox and spam folder."
+            : locale === "es"
               ? "Te hemos enviado un nuevo correo de confirmación. Por favor revisa tu bandeja de entrada."
               : "We've sent you a new confirmation email. Please check your inbox.",
         });
       }
 
       if (existing.status === "unsubscribed") {
-        console.log(`[NEWSLETTER] Re-subscribing user: ${normalizedEmail}`);
+        console.log(`[NEWSLETTER] Re-subscribing user: ${maskEmail(normalizedEmail)}`);
         // Re-subscribe (treat as new, require confirmation)
         const confirmationToken = nanoid(32);
         await db
@@ -114,7 +143,7 @@ export async function POST(request: NextRequest) {
           })
           .where(eq(newsletterSubscribers.id, existing.id));
 
-        console.log(`[NEWSLETTER] Sending confirmation email for re-subscription to ${normalizedEmail}`);
+        console.log(`[NEWSLETTER] Sending confirmation email for re-subscription to ${maskEmail(normalizedEmail)}`);
         // Send confirmation email using after() to prevent Vercel timeouts
         after(async () => {
           try {
@@ -124,9 +153,9 @@ export async function POST(request: NextRequest) {
               token: confirmationToken,
               type: "confirmation",
             });
-            console.log(`[NEWSLETTER] Re-subscription confirmation email sent successfully to ${normalizedEmail}`);
+            console.log(`[NEWSLETTER] Re-subscription confirmation email sent successfully to ${maskEmail(normalizedEmail)}`);
           } catch (error) {
-            console.error(`[NEWSLETTER] Error sending re-subscription confirmation email to ${normalizedEmail}:`, error);
+            console.error(`[NEWSLETTER] Error sending re-subscription confirmation email to ${maskEmail(normalizedEmail)}:`, error);
           }
         });
 
@@ -141,8 +170,15 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Site-wide cap on first-time confirmation emails (counted from rows created this hour).
+    const [recent] = await db
+      .select({ n: count() })
+      .from(newsletterSubscribers)
+      .where(gte(newsletterSubscribers.createdAt, new Date(Date.now() - 60 * 60 * 1000)));
+    const overHourlyCap = Number(recent?.n ?? 0) >= NEW_CONFIRMATIONS_PER_HOUR;
+
     // New subscriber - create pending record
-    console.log(`[NEWSLETTER] Creating new subscriber record for: ${normalizedEmail}`);
+    console.log(`[NEWSLETTER] Creating new subscriber record for: ${maskEmail(normalizedEmail)}`);
     const confirmationToken = nanoid(32);
     const unsubscribeToken = nanoid(32);
 
@@ -156,9 +192,13 @@ export async function POST(request: NextRequest) {
       locale,
     });
 
-    console.log(`[NEWSLETTER] Subscriber record created, sending confirmation email to ${normalizedEmail}`);
+    if (overHourlyCap) {
+      // Same answer to the visitor; the row stays pending, and a later sign-up resends.
+      console.warn(`[NEWSLETTER] Hourly confirmation cap reached; not emailing ${maskEmail(normalizedEmail)}`);
+    }
+    console.log(`[NEWSLETTER] Subscriber record created for ${maskEmail(normalizedEmail)}`);
     // Send confirmation email using after() to prevent Vercel timeouts
-    after(async () => {
+    if (!overHourlyCap) after(async () => {
       try {
         await sendNewsletterEmail({
           email: normalizedEmail,
@@ -166,9 +206,9 @@ export async function POST(request: NextRequest) {
           token: confirmationToken,
           type: "confirmation",
         });
-        console.log(`[NEWSLETTER] Confirmation email sent successfully to ${normalizedEmail}`);
+        console.log(`[NEWSLETTER] Confirmation email sent successfully to ${maskEmail(normalizedEmail)}`);
       } catch (error) {
-        console.error(`[NEWSLETTER] Error sending newsletter confirmation email to ${normalizedEmail}:`, error);
+        console.error(`[NEWSLETTER] Error sending newsletter confirmation email to ${maskEmail(normalizedEmail)}:`, error);
       }
     });
 

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { interceptGuardPseudoId } from "@/lib/lead-guard/server";
 
 import { ianaTimezoneFromUsPostalCode } from "@/lib/iana-timezone-from-us-postal";
 import { upsertMailingLabelFromLead } from "@/lib/mailing-labels/server";
@@ -322,6 +323,14 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
+
+    // Lead Guard: a stand-in contact id of a held or blocked lead. Still held: the step-2 data is
+    // filed with the hold (replayed on release); already released: continue with the real contact.
+    const guardIntercept = await interceptGuardPseudoId(body?.contactId, "/api/contact-append-address", body);
+    if (guardIntercept?.action === "respond") {
+      return NextResponse.json({ success: true });
+    }
+    if (guardIntercept?.action === "continue") body.contactId = guardIntercept.contactId;
     const {
       contactId,
       email,

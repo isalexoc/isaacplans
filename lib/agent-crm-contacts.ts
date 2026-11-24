@@ -81,7 +81,14 @@ export async function agentCrmFetchContactById(
   contactId: string,
   locationId: string,
   token: string
-): Promise<{ id: string; tags: string[]; phone: string | null } | null> {
+): Promise<{
+  id: string;
+  tags: string[];
+  phone: string | null;
+  firstName: string | null;
+  lastName: string | null;
+  email: string | null;
+} | null> {
   const q = new URLSearchParams({ locationId });
   const res = await fetch(`${AGENT_CRM_API_BASE}/contacts/${contactId}?${q}`, {
     method: "GET",
@@ -92,12 +99,16 @@ export async function agentCrmFetchContactById(
     return null;
   }
   const data = await res.json();
-  const c = (data.contact ?? data) as LcContact;
+  const c = (data.contact ?? data) as LcContact & { firstName?: unknown; lastName?: unknown };
   if (!c?.id) return null;
+  const text = (v: unknown) => (typeof v === "string" && v.trim() ? v.trim() : null);
   return {
     id: c.id,
     tags: agentCrmNormalizeContactTags(c.tags),
-    phone: typeof c.phone === "string" && c.phone.trim() ? c.phone.trim() : null,
+    phone: text(c.phone),
+    firstName: text(c.firstName),
+    lastName: text(c.lastName),
+    email: text(c.email),
   };
 }
 

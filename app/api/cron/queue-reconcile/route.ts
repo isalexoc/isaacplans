@@ -20,6 +20,8 @@ import { ingestTranscript } from "@/lib/call-study/ingest";
 import { reconcilePhoneFinderRuns } from "@/lib/phone-finder/process";
 import { reconcileAcaConfirmations } from "@/lib/aca-confirmation/finalize";
 import { reconcileAiSetter } from "@/lib/ai-setter/process";
+import { sendHeldLeadsDigest } from "@/lib/lead-guard/notify";
+import { purgeLeadGuardData } from "@/lib/lead-guard/store";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -64,6 +66,19 @@ export async function GET(req: NextRequest) {
   const secret = req.headers.get("authorization")?.replace("Bearer ", "");
   if (!process.env.CRON_SECRET || secret !== process.env.CRON_SECRET) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  // ── Lead Guard, first and guarded (a later block throwing must not skip it): return releases
+  //    stuck mid-way to "held", delete holds 30 days after review and events after 180, then one
+  //    Telegram line if website leads are still waiting for review. A missing table (migration
+  //    0047 not applied yet) never breaks the reconcile. ──
+  let leadGuard = { holds: 0, events: 0, unstuck: 0, held: 0 };
+  try {
+    const purge = await purgeLeadGuardData();
+    const { held } = await sendHeldLeadsDigest();
+    leadGuard = { ...purge, held };
+  } catch (err) {
+    console.error("[lead-guard] Reconcile failed", err instanceof Error ? err.message : "unknown");
   }
 
   // ── Kixie: drain any unprocessed/failed-with-backoff call jobs ──
@@ -240,5 +255,9 @@ export async function GET(req: NextRequest) {
     aiSetterTextPurged: aiSetter.purged,
     aiSetterTurnsRepublished: aiSetter.turns,
     aiSetterSendsRepublished: aiSetter.sends,
+    leadGuardHoldsPurged: leadGuard.holds,
+    leadGuardEventsPurged: leadGuard.events,
+    leadGuardReleasesUnstuck: leadGuard.unstuck,
+    leadGuardHeldWaiting: leadGuard.held,
   });
 }

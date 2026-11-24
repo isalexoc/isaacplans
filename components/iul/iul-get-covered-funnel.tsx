@@ -1,5 +1,7 @@
 "use client";
 
+import { getLeadGuardPayload, useLeadGuardPrefetch } from "@/lib/lead-guard/client";
+
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import HeroMedia from "@/components/media/hero-media";
 import TimeOfDayPicker from "@/components/iul/time-of-day-picker";
@@ -125,6 +127,7 @@ export default function IulGetCoveredFunnel({
    */
   heroMedia?: HeroMediaValue;
 }) {
+  useLeadGuardPrefetch();
   const locale = useLocale();
   const isES = locale.startsWith("es");
   const t = useTranslations("iulGetCoveredPage.funnel");
@@ -355,6 +358,7 @@ export default function IulGetCoveredFunnel({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          leadGuard: await getLeadGuardPayload(),
           firstName: capFirst,
           lastName: capLast,
           // No email yet — it is the last quiz question and is appended to this contact by

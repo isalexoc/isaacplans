@@ -1531,3 +1531,80 @@ export const aiSetterDailyUsage = pgTable("ai_setter_daily_usage", {
   sends: integer("sends").notNull().default(0),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
+
+/**
+ * Lead Guard (lib/lead-guard/): website lead submissions kept OUT of the CRM until Isaac releases
+ * them at /admin/lead-holds. A hold is a doubtful submission (no form token, invalid phone, honeypot,
+ * too fast, a burst on the general contact form…); the visitor saw the normal success screen.
+ *
+ * `payload_enc` is encryptString(JSON {body, ctx}) of exactly what the route would have received;
+ * Release replays it through the internal hop, then replays `lead_hold_appends` (step-2 data a
+ * funnel sent with the hold's stand-in contact id) in order. Cleared on release and discard; rows
+ * a held row is never deleted unreviewed: the daily digest reminds Isaac, and released/discarded rows
+ * are deleted at `expires_at` (30 days after review) by the daily reconcile cron.
+ *
+ * PII outside the encrypted payload: `preview` keeps only the first name, the phone's last 4 digits
+ * and the email domain, for the list and the Telegram alert.
+ */
+export const leadHolds = pgTable("lead_holds", {
+  id: text("id").primaryKey(), // 11-char base62; the stand-in contact id is "L" + id + 8-char HMAC tag
+  surface: text("surface").notNull(), // LeadGuardSurface
+  leadType: text("lead_type"), // contactPageData | finalExpenseData | … (null for front-door routes)
+  route: text("route").notNull(), // replayed on release, e.g. "/api/create-contact"
+  reasons: jsonb("reasons").notNull().$type<string[]>().default([]),
+  status: text("status").notNull().default("held"), // held | releasing | released | discarded
+  payloadEnc: text("payload_enc"),
+  preview: jsonb("preview").$type<{
+    firstName: string | null;
+    phoneLast4: string | null;
+    emailDomain: string | null;
+    language: string | null;
+  }>(),
+  notifiedAt: timestamp("notified_at"),
+  releasedAt: timestamp("released_at"),
+  releasedBy: text("released_by"),
+  releasedContactId: text("released_contact_id"),
+  releaseError: text("release_error"),
+  /** When the current release attempt started; the daily cron returns attempts stuck > 15 min to held. */
+  releaseStartedAt: timestamp("release_started_at"),
+  discardedAt: timestamp("discarded_at"),
+  /** Set when reviewed (released / discarded): the row and its PII-free audit go 30 days later. */
+  expiresAt: timestamp("expires_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (t) => ({
+  statusIdx: index("lead_holds_status_idx").on(t.status, t.createdAt),
+  expiresIdx: index("lead_holds_expires_idx").on(t.expiresAt),
+  notifiedIdx: index("lead_holds_notified_idx").on(t.notifiedAt),
+}));
+
+/** Step-2 data a funnel sent for a held lead (insert-only, so concurrent saves never collide). */
+export const leadHoldAppends = pgTable("lead_hold_appends", {
+  id: text("id").primaryKey(),
+  holdId: text("hold_id")
+    .notNull()
+    .references(() => leadHolds.id, { onDelete: "cascade" }),
+  route: text("route").notNull(), // e.g. "/api/contact-append-address"
+  bodyEnc: text("body_enc").notNull(), // encryptString(JSON body)
+  createdAt: timestamp("created_at").defaultNow().notNull(), // DB clock only: it orders the replay
+}, (t) => ({
+  holdIdx: index("lead_hold_appends_hold_idx").on(t.holdId, t.createdAt),
+}));
+
+/**
+ * One row per ALLOWED or HELD website lead (blocked bot posts are never written, so they never wake
+ * the database). No PII. Feeds the strict-form rate limit and the admin counts; 180-day retention.
+ */
+export const leadGuardEvents = pgTable("lead_guard_events", {
+  id: text("id").primaryKey(),
+  surface: text("surface").notNull(),
+  verdict: text("verdict").notNull(), // allow | hold (block only in shadow mode)
+  reasons: jsonb("reasons").notNull().$type<string[]>().default([]),
+  /** HMAC of the phone digits (never the phone): rate limits count people, not resubmits. */
+  subject: text("subject"),
+  shadow: boolean("shadow").notNull().default(false), // decided in shadow mode (let through)
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (t) => ({
+  surfaceIdx: index("lead_guard_events_surface_idx").on(t.surface, t.verdict, t.createdAt),
+  createdIdx: index("lead_guard_events_created_idx").on(t.createdAt),
+}));

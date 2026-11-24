@@ -1,5 +1,7 @@
 "use client";
 
+import { getLeadGuardPayload, useLeadGuardPrefetch } from "@/lib/lead-guard/client";
+
 import { useState, useEffect } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Card, CardContent } from "@/components/ui/card";
@@ -33,6 +35,7 @@ interface GuideDetailClientProps {
 }
 
 export default function GuideDetailClient({ guide }: GuideDetailClientProps) {
+  useLeadGuardPrefetch();
   const locale = useLocale();
   const isES = locale.startsWith("es");
   const t = useTranslations("guideDetailPage");
@@ -131,8 +134,8 @@ export default function GuideDetailClient({ guide }: GuideDetailClientProps) {
       const agentCrmResponse = await fetch('/api/create-contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(
-          buildGuideLeadCrmBody({
+        body: JSON.stringify({
+          ...buildGuideLeadCrmBody({
             firstName: formData.firstName,
             lastName: formData.lastName,
             email: formData.email,
@@ -150,8 +153,9 @@ export default function GuideDetailClient({ guide }: GuideDetailClientProps) {
               eventSourceUrl:
                 typeof window !== "undefined" ? window.location.href : "",
             },
-          })
-        ),
+          }),
+          leadGuard: await getLeadGuardPayload(),
+        }),
       });
 
       if (!agentCrmResponse.ok) {
