@@ -525,6 +525,12 @@ export const routing = defineRouting({
       en: "/legal-shield/apply",
       es: "/legal-shield/apply",
     },
+    // The self-serve presentation Ysmael sends by WhatsApp; ends by starting the client's own
+    // application. Public, Spanish only (/en 308s to /es like every /legal-shield page).
+    "/legal-shield/plan": {
+      en: "/legal-shield/plan",
+      es: "/legal-shield/plan",
+    },
     // Ysmael's own clients (the intake engine's "legal-shield" line): the associate's dashboard,
     // a client's form, its summary, the 9:16 deck and the client's private link. Spanish only too,
     // so the same slug again. "privado" is a static segment, so it wins over [token].

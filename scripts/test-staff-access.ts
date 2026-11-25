@@ -19,7 +19,14 @@ import {
   shouldSyncClerkUserToCrm,
 } from "../lib/auth/staff-roles";
 import { isPrivatePagePath } from "../lib/private-pages";
-import { isAdsLandingPath, isLegalShieldIntakePath, isLegalShieldLandingPath } from "../lib/ads-landing";
+import {
+  isAdsLandingPath,
+  isLegalShieldIntakePath,
+  isLegalShieldLandingPath,
+  isLegalShieldPlanPath,
+  isRedDeApoyoPath,
+} from "../lib/ads-landing";
+import { resolveIntakeOwner, selfStartPresetsFrom } from "../lib/intake-core/self-start";
 import { deliveryMessage, deliveryPhoneDigits, whatsappDeliveryHref } from "../lib/intake-core/link-delivery";
 import { asPackage, lsQuote, lsQuoteSentence, usd } from "../lib/legal-shield/plans";
 import { legalShieldIntake } from "../lib/intake-configs/legal-shield";
@@ -159,7 +166,8 @@ check("the summary sentence", lsQuoteSentence("preferido_idshield", "mensual") =
 console.log("\nThe Legal Shield form");
 check("legal-shield is not an insurance line (stays out of LobSlug)", !isLobSlug("legal-shield"));
 check("the engine serves it", getIntakeConfig("legal-shield") === legalShieldIntake);
-check("no public self-start", legalShieldIntake.selfStart === false);
+// Isaac, 2026-11-24: a public start from /es/legal-shield/plan, but only ever on Ysmael's own id.
+check("a public self-start only on its own owner", legalShieldIntake.selfStart === true && legalShieldIntake.ownerEnvRequired === true);
 check("Spanish only", legalShieldIntake.fixedLocale === "es");
 check("no GHL custom fields", legalShieldIntake.crmCustomFields === false);
 check("new sessions start with the full package", legalShieldIntake.initialData?.lsPackage === "preferido_idshield");
@@ -309,6 +317,47 @@ console.log("\nThe associate's email when a client finishes on their own");
   );
   const capture = fs.readFileSync(path.join(process.cwd(), "app/api/intake-capture/[captureToken]/route.ts"), "utf8");
   check("the private link emails after it saves", /notifyIntakeOwner\(config, updated, \{\s*kind: "secure"/.test(capture));
+}
+
+console.log("\nThe public presentation (/es/legal-shield/plan) and its self-start");
+{
+  for (const p of ["/legal-shield/plan", "/es/legal-shield/plan", "/en/legal-shield/plan/"]) {
+    check(`Ysmael's chrome, no chat bubble: ${p}`, isLegalShieldPlanPath(p) && isRedDeApoyoPath(p) && isAdsLandingPath(p));
+    check(`public, not a client-data page: ${p}`, !isPrivatePagePath(p));
+  }
+  check("only the page itself, not a subpath", !isLegalShieldPlanPath("/es/legal-shield/plan/x"));
+  check("the funnel keeps its own chrome", !isRedDeApoyoPath("/legal-shield/proteccion-legal"));
+
+  check("Legal Shield now has a public start", legalShieldIntake.selfStart === true);
+  check("its sessions start with the bundle", legalShieldIntake.initialData?.lsPackage === "preferido_idshield");
+  check("a failed start goes back to the presentation", legalShieldIntake.selfStartFallbackPath?.es === "/legal-shield/plan");
+
+  const ysmaelEnv = { LEGAL_SHIELD_DEFAULT_OWNER_USER_ID: "user_ysmael", INTAKE_DEFAULT_OWNER_USER_ID: "user_isaac" };
+  check("a self-started Legal Shield application belongs to Ysmael", resolveIntakeOwner(legalShieldIntake, ysmaelEnv) === "user_ysmael");
+  let threw = false;
+  try {
+    resolveIntakeOwner(legalShieldIntake, { INTAKE_DEFAULT_OWNER_USER_ID: "user_isaac" });
+  } catch {
+    threw = true;
+  }
+  check("without Ysmael's id it fails, never Isaac's default owner", threw);
+  const impact = getIntakeConfig("health-alternative")!;
+  check(
+    "other lines still fall back to the default owner",
+    resolveIntakeOwner(impact, { INTAKE_DEFAULT_OWNER_USER_ID: "user_isaac" }) === "user_isaac"
+  );
+
+  const presets = (qs: string) => selfStartPresetsFrom(legalShieldIntake, new URLSearchParams(qs));
+  check("the start link carries the yearly choice", presets("lsBilling=anual").lsBilling === "anual");
+  check("…and the monthly one", presets("lsBilling=mensual").lsBilling === "mensual");
+  check("an unknown billing value is dropped", !("lsBilling" in presets("lsBilling=gratis")));
+  check("the link can't choose the package", !("lsPackage" in presets("lsPackage=solo_preferido&lsBilling=anual")));
+  check("other lines take no presets", Object.keys(selfStartPresetsFrom(impact, new URLSearchParams("lsBilling=anual"))).length === 0);
+
+  const price = fs.readFileSync(path.join(process.cwd(), "components/legal-shield-presentation/guide-price.tsx"), "utf8");
+  check("the public price is the bundle only", /lsQuote\("preferido_idshield", billing\)/.test(price) && !/solo_preferido/.test(price));
+  const guide = fs.readFileSync(path.join(process.cwd(), "components/legal-shield-presentation/guide.tsx"), "utf8");
+  check("the final button starts the application with the billing", /\/api\/intake\/legal-shield\/start\?lsBilling=\$\{billing\}/.test(guide));
 }
 
 console.log(`\n${passed} passed, ${failed} failed\n`);

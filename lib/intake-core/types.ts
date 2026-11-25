@@ -285,6 +285,19 @@ export type IntakeLobConfig = {
   /** `false`: no public self-start (`/api/intake/<lob>/start` 404s). Default true. */
   selfStart?: boolean;
   /**
+   * `ownerEnvVar` must be set: a self-started session never falls back to
+   * `INTAKE_DEFAULT_OWNER_USER_ID` (Isaac). Legal Shield's belong to Ysmael or to nobody.
+   */
+  ownerEnvRequired?: boolean;
+  /**
+   * Answers a public start link may preset (`/api/intake/<lob>/start?key=value`), each with its
+   * allowed values; anything else in the URL is ignored. Legal Shield: the billing the client
+   * picked on the public presentation.
+   */
+  selfStartPresets?: Record<string, readonly string[]>;
+  /** Where a failed public start sends the client back to, for a line outside the LOB registry. */
+  selfStartFallbackPath?: Record<"en" | "es", string>;
+  /**
    * An admin (Isaac) acts as the owner on every session of this line, including another agent's:
    * sees the list, opens the form, summary and deck. Never claims the client's link.
    */

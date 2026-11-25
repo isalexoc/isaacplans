@@ -493,7 +493,15 @@ export const legalShieldIntake: IntakeLobConfig = {
     agentName: LS_ADVISOR_NAME,
     product: { en: "your LegalShield membership application", es: "su solicitud de membresía de LegalShield" },
   },
-  selfStart: false,
+  // The public presentation (/es/legal-shield/plan) ends on "Llenar mi solicitud", which starts the
+  // client's own application (Isaac, 2026-11-24). It belongs to Ysmael: LEGAL_SHIELD_DEFAULT_OWNER_USER_ID
+  // must be his Clerk id, and there is no fallback to Isaac's default owner.
+  selfStart: true,
+  ownerEnvRequired: true,
+  // The billing the client picked on the presentation. The package is never a choice there: it
+  // comes from initialData (the bundle), and the client can't write it.
+  selfStartPresets: { lsBilling: ["mensual", "anual"] },
+  selfStartFallbackPath: { en: "/legal-shield/plan", es: "/legal-shield/plan" },
   adminOversight: true,
   // `legal_shield_guide_funnel` is the tag Isaac's GHL setup for Ysmael's leads runs on (funnel leads
   // enter with it), so every client Ysmael works carries it too, and his search finds them by it

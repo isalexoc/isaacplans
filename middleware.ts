@@ -313,7 +313,8 @@ export default clerkMiddleware(async (auth, req) => {
   }
   // The associate's intake pages (dashboard, client form, summary, private link, deck) carry the
   // "Red de Apoyo Latino USA" footer and disclosure instead of the funnel's "Escudo Legal" one.
-  if (/^(?:\/(?:en|es))?\/legal-shield\/intake(?:\/|$)/i.test(pathname)) {
+  // Also the public presentation Ysmael shares (/legal-shield/plan): same brand, not private.
+  if (/^(?:\/(?:en|es))?\/legal-shield\/(?:intake(?:\/|$)|plan\/?$)/i.test(pathname)) {
     response.headers.set("x-ads-landing-variant", "legal-shield-intake");
   }
   // "Bare" funnels (IUL + final expense + ACA get-covered, ACA/FE intake forms) get an even
