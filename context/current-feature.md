@@ -2,7 +2,7 @@
 
 ## Status
 
-In progress: **Legal Shield intake + sales deck for Ysmael** (branch `feature/legal-shield-intake`; migration
+Built, pending Isaac's setup: **Legal Shield intake + sales deck for Ysmael** (branch `feature/legal-shield-intake`; migration
 `0048_crankwheel_presenter` in chunk C). Isaac's ask (2026-11-24): his dad **Ysmael Orraiz** (LegalShield Independent
 Associate, WhatsApp (540) 376-1831) gets the Impact flow — dashboard → client form → CrankWheel → 9:16 deck →
 "Confirmar mis datos" → form — for LegalShield, in Spanish, under `/es/legal-shield/intake`.
@@ -18,8 +18,16 @@ Associate, WhatsApp (540) 376-1831) gets the Impact flow — dashboard → clien
 - **Chunks:** A1 engine generalization (no behavior change) · A2 LS line + role + CRM scoping · B deck · C CrankWheel
   per account · D owner email + docs. Plan of record:
   `C:\Users\isale\.claude\plans\presentaci-n-impact-para-intak-enchanted-mitten-of-1f565ec0-1a39-42c0-b333-60ecad4e3a80.md`.
-- **Done:** A1 (`3a5b63a`), A2 (`e0d9c71`), B (`3db3250`, the deck), C (CrankWheel per account). Next: D (owner
-  email + docs).
+- **Done:** A1 (`3a5b63a`), A2 (`e0d9c71`), B (`3db3250`, the deck), C (`3fe2725`, CrankWheel per account), D (owner
+  email + docs). Code complete; waiting on Isaac's setup (`LEGAL_SHIELD_INTAKE_SETUP.md`) and the preview test.
+- **D, owner email + docs:** a client who submits the form on their own, or sends the private link, triggers an email
+  to the session owner's Clerk address (`notifyOwnerByEmail`, in `after()`, via the site SMTP): "Ana Prueba completó su
+  solicitud" / "… le envió sus datos privados" + a link to `/view`; never an answer, the name is escaped and kept to
+  one line. Not sent when the agent submits (e.g. from the deck). Completed rows on every line's dashboard get a green
+  tint. `LEGAL_SHIELD_INTAKE_SETUP.md` (Isaac's setup: Clerk invitation with the role, CrankWheel, migration 0048,
+  CRM footprint, data rules, troubleshooting) and the CLAUDE.md env + doc lines.
+  Verified: tsc; `test:staff-access` 119 (10 new: notice content, escaping, header safety, client-only trigger); the
+  notice HTML rendered locally (nothing sent). Not seen in a browser: the dashboard tint (Clerk-gated page).
 - **C, CrankWheel on Ysmael's own account:** `CRANKWHEEL_PRESENTERS` (JSON `[{userId, email, writeKey, readKey?}]`)
   gives an agent their own account; the admin without an entry keeps Isaac's env keys; a scoped agent without one
   gets "CrankWheel todavía no está configurado para su cuenta", never Isaac's account. `config` is required on every

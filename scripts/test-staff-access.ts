@@ -29,7 +29,8 @@ import { groupExcluded, groupReady } from "../lib/intake-core/secure-capture-gro
 import { isValidCardExpiration, isValidCvv, isValidSsnLast4, passesLuhn } from "../lib/intake-core/validation";
 import { buildCrmPayloadFromData } from "../lib/intake-core/crm-payload";
 import { maskSensitive } from "../lib/intake-shared/masking";
-import { buildIntakeShareUrl, buildSecureCaptureUrl } from "../lib/intake-core/share-url";
+import { buildIntakeShareUrl, buildIntakeViewUrl, buildSecureCaptureUrl } from "../lib/intake-core/share-url";
+import { ownerNoticeContent } from "../lib/intake-core/owner-notice";
 import { EXCLUSION_TAGS } from "../lib/ai-setter/config";
 import { isLobSlug } from "../lib/lob/registry";
 import { NOT_INSURANCE_LINE_ES } from "../lib/legal-shield/constants";
@@ -251,6 +252,47 @@ console.log("\nThe newsletter routes require the admin (found during this work)"
 for (const route of ["app/api/newsletter/send-post/route.ts", "app/api/newsletter/subscriber-counts/route.ts"]) {
   const text = fs.readFileSync(path.join(process.cwd(), route), "utf8");
   check(`${route} calls getIsAdmin()`, text.includes("getIsAdmin()"));
+}
+
+console.log("\nThe associate's email when a client finishes on their own");
+{
+  const viewUrl = buildIntakeViewUrl(legalShieldIntake, "tok123", "en", "https://example.test");
+  check("view link is the Spanish summary", viewUrl === "https://example.test/es/legal-shield/intake/tok123/view", viewUrl);
+
+  const done = ownerNoticeContent({ config: legalShieldIntake, event: { kind: "completed" }, clientName: "Ana Prueba", viewUrl });
+  check("completed: Spanish subject with the name", done.subject === "Ana Prueba completó su solicitud", done.subject);
+  check("completed: links the summary", done.text.includes(viewUrl) && done.html.includes(viewUrl));
+
+  const secure = ownerNoticeContent({
+    config: legalShieldIntake,
+    event: { kind: "secure", groups: ["Tarjeta"] },
+    clientName: "Ana Prueba",
+    viewUrl,
+  });
+  check("secure link: says what arrived, by label", secure.text.includes("Tarjeta") && /datos privados/.test(secure.subject), secure.text);
+
+  const evil = ownerNoticeContent({
+    config: legalShieldIntake,
+    event: { kind: "completed" },
+    clientName: "<img src=x onerror=alert(1)>\r\nBcc: x@evil.test",
+    viewUrl,
+  });
+  check("a typed name can't inject HTML", !evil.html.includes("<img"));
+  check("a typed name can't add mail headers", !/[\r\n]/.test(evil.subject), JSON.stringify(evil.subject));
+  check(
+    "no name: a neutral word",
+    ownerNoticeContent({ config: legalShieldIntake, event: { kind: "completed" }, clientName: null, viewUrl }).subject.startsWith("Su cliente")
+  );
+
+  const owner = fs.readFileSync(path.join(process.cwd(), "lib/intake-core/owner-notify.ts"), "utf8");
+  check("the notice never reads the answers", !/\.data\b|decrypt/.test(owner));
+  const complete = fs.readFileSync(path.join(process.cwd(), "app/api/intake/[lob]/[token]/complete/route.ts"), "utf8");
+  check(
+    "completion emails only when the client submitted it",
+    /if \(access\.role === "client"\) after\(\(\) => notifyIntakeOwner/.test(complete)
+  );
+  const capture = fs.readFileSync(path.join(process.cwd(), "app/api/intake-capture/[captureToken]/route.ts"), "utf8");
+  check("the private link emails after it saves", /notifyIntakeOwner\(config, updated, \{\s*kind: "secure"/.test(capture));
 }
 
 console.log(`\n${passed} passed, ${failed} failed\n`);

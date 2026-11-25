@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { after, NextRequest, NextResponse } from "next/server";
 import {
   alreadySubmitted,
   isResponse,
@@ -23,6 +23,7 @@ import {
   agentCrmAddContactTags,
 } from "@/lib/agent-crm-contacts";
 import { createContactNote } from "@/lib/agent-crm-call-summary";
+import { notifyIntakeOwner } from "@/lib/intake-core/owner-notify";
 import { allRepeaterFields, isRowFilled, sensitiveScalarKeys } from "@/lib/intake-core/fields";
 import { diffIntakeData } from "@/lib/intake-core/diff";
 import type { IntakeData, IntakeLobConfig, RepeaterRow } from "@/lib/intake-core/types";
@@ -142,6 +143,10 @@ export async function POST(_request: NextRequest, context: RouteContext) {
 
     const updated = await markIntakeCompleted(token, purge);
     if (!updated) return notFound();
+
+    // The client finished on their own: tell the agent (lines with notifyOwnerByEmail). Not when the
+    // agent submitted it, e.g. from the deck's "Confirmar mis datos" with the client watching.
+    if (access.role === "client") after(() => notifyIntakeOwner(config, updated, { kind: "completed" }));
 
     return NextResponse.json({ success: true, crmSynced, session: toIntakeSummary(updated) });
   } catch (error) {

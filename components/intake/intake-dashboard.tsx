@@ -23,6 +23,7 @@ import type { IntakeSummary, IntakeStatus } from "@/lib/intake-core/types";
 import { requireIntakeConfig } from "@/lib/intake-configs";
 import { buildIntakeShareUrl } from "@/lib/intake-core/share-url";
 import { intakeRouteOf } from "@/lib/intake-core/routes";
+import { cn } from "@/lib/utils";
 import { titleCaseName, isValidEmail, isValidPhone } from "@/lib/intake-core/validation";
 import { UI, pickLocale, tr, uiFor } from "@/lib/intake-core/ui-strings";
 import IntakeBreadcrumb from "@/components/intake/intake-breadcrumb";
@@ -428,7 +429,16 @@ export default function IntakeDashboard({ lob }: { lob: string }) {
           ) : (
             <ul className="divide-y">
               {sessions.map((s) => (
-                <li key={s.id} className="flex flex-wrap items-center justify-between gap-3 p-4">
+                <li
+                  key={s.id}
+                  className={cn(
+                    "flex flex-wrap items-center justify-between gap-3 border-l-4 p-4",
+                    // A finished application stands out: it's the one to act on (enroll, review).
+                    s.status === "completed"
+                      ? "border-l-green-500 bg-green-50/70 dark:bg-green-950/20"
+                      : "border-l-transparent"
+                  )}
+                >
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
                       <span className="truncate font-medium">

@@ -20,6 +20,14 @@ export function buildIntakeShareUrl(
 }
 
 /**
+ * The agent's summary of a session (`…/<token>/view`; the `view` segment is the same in every
+ * language). Needs the agent's sign-in, so it is safe in the owner's notice email.
+ */
+export function buildIntakeViewUrl(config: IntakeLobConfig, token: string, locale: string, origin?: string): string {
+  return `${buildIntakeShareUrl(config, token, locale, origin)}/view`;
+}
+
+/**
  * The client's secure-capture link (`/en/secure/<token>`, `/es/seguro/<token>`, mirroring
  * i18n/routing.ts). Deliberately free of any product name: it sits in a text message.
  *

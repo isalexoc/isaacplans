@@ -43,6 +43,37 @@ function createTransporter() {
   return transporter;
 }
 
+/**
+ * A short automatic notice to a staff member (an agent's "your client finished" email). Sent from
+ * the site's SMTP mailbox; never throws, since the action it reports has already succeeded.
+ */
+export async function sendStaffNotice(data: {
+  to: string;
+  fromName: string;
+  subject: string;
+  text: string;
+  html: string;
+}): Promise<boolean> {
+  try {
+    if (!process.env.EMAIL_USER_INFO) {
+      console.warn("[EMAIL] EMAIL_USER_INFO not set, skipping staff notice");
+      return false;
+    }
+    const transporter = createTransporter();
+    await transporter.sendMail({
+      from: `"${data.fromName.replace(/["\r\n]/g, "")}" <${process.env.EMAIL_USER_INFO}>`,
+      to: data.to,
+      subject: data.subject.replace(/[\r\n]+/g, " "),
+      text: data.text,
+      html: data.html,
+    });
+    return true;
+  } catch (error) {
+    console.error("[EMAIL] Staff notice failed:", error);
+    return false;
+  }
+}
+
 interface CommentNotificationData {
   postTitle: string;
   postSlug: string;
