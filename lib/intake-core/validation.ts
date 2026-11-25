@@ -59,6 +59,31 @@ export function isValidCardExpiration(v: string): boolean {
   return true;
 }
 
+/**
+ * The Luhn check every major card network's numbers pass. Kept separate from isValidCardNumber
+ * (length only) so lines that already collect cards keep their exact behavior; a line opts in
+ * through a field's `isValid`.
+ */
+export function passesLuhn(v: string): boolean {
+  const d = digits(v);
+  if (d.length < 13 || d.length > 19) return false;
+  let sum = 0;
+  for (let i = 0; i < d.length; i++) {
+    let n = Number(d[d.length - 1 - i]);
+    if (i % 2 === 1) {
+      n *= 2;
+      if (n > 9) n -= 9;
+    }
+    sum += n;
+  }
+  return sum % 10 === 0;
+}
+
+/** The last four digits of a Social Security number, exactly. */
+export function isValidSsnLast4(v: string): boolean {
+  return /^\d{4}$/.test((v ?? "").trim());
+}
+
 export function isValidCvv(v: string): boolean {
   const d = digits(v);
   return d.length === 3 || d.length === 4;

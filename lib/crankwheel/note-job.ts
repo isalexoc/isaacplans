@@ -13,7 +13,7 @@ import "server-only";
 import { agentCrmGetBaseCredentials } from "@/lib/agent-crm-contacts";
 import { createContactNote } from "@/lib/agent-crm-call-summary";
 import { listUsage } from "./client";
-import { getCrankwheelConfig } from "./config";
+import { crankwheelConfigForPresenter } from "./config";
 import { formatMeetingNote, MEETING_NOTE_TITLE } from "./note";
 import { getMeetingById, markNotePosted, type MeetingRow } from "./meetings";
 import { matchUsageSession } from "./matching";
@@ -22,7 +22,15 @@ import type { CrankwheelUsageSession } from "./types";
 export type NoteJobResult = {
   posted: boolean;
   /** Why not, when not. `pending` means "try again later"; anything else is terminal for now. */
-  reason?: "already_posted" | "not_found" | "no_contact" | "no_session_yet" | "crm_failed" | "pending";
+  reason?:
+    | "already_posted"
+    | "not_found"
+    | "no_contact"
+    | "no_session_yet"
+    | "crm_failed"
+    | "pending"
+    /** The row's CrankWheel account is no longer in `CRANKWHEEL_PRESENTERS`. */
+    | "no_presenter";
 };
 
 /** Did anyone actually watch? CrankWheel reports both a live and a high-water count. */
@@ -41,7 +49,10 @@ export async function postMeetingNote(meetingIdOrRow: string | MeetingRow): Prom
   const creds = agentCrmGetBaseCredentials();
   if (!creds) return { posted: false, reason: "crm_failed" };
 
-  const config = getCrankwheelConfig();
+  // The account the link was minted on; never Isaac's for an agent's row (it would read the wrong
+  // presenter's sessions and could match one of Isaac's own calls).
+  const config = crankwheelConfigForPresenter(meeting.presenterEmail);
+  if (!config) return { posted: false, reason: "no_presenter" };
   const anchor = meeting.sessionStartedAt ?? meeting.createdAt;
 
   const sessions = await listUsage({

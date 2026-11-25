@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
-import { getIsAdmin } from "@/lib/auth/admin";
+import { canOperateLine, canOperateSession, getStaffAccess, type StaffAccess } from "@/lib/auth/access";
 import { getIntakeByToken, resolveCrmContactLocale } from "@/lib/iul-intake/server";
+import { getIntakeConfig } from "@/lib/intake-configs";
+import { getIntakeByToken as getEngineIntakeByToken } from "@/lib/intake-core/server";
 import { agentCrmGetBaseCredentials } from "@/lib/agent-crm-contacts";
 import {
   buildCrankwheelHookUrl,
-  getCrankwheelConfig,
+  crankwheelConfigForUser,
   isCrankwheelConfigured,
+  sameAccountPresenters,
 } from "@/lib/crankwheel/config";
 import {
   createNoauthLink,
@@ -28,9 +30,13 @@ import type { CrankwheelMeetingKind } from "@/lib/crankwheel/types";
 /**
  * Mint a CrankWheel meeting link, and list the ones minted recently.
  *
- * Admin-only. The link can be anchored to an IUL intake session (`intakeToken`) or to a bare CRM
- * contact (`crmContactId`) — the second is what the standalone launcher uses, and is the whole
- * reason this is not a route under `/api/iul-intake`.
+ * The admin can anchor a link to an IUL intake session (`intakeToken`), a bare CRM contact
+ * (`crmContactId`, the standalone launcher) or an intake-engine session (`engineLob` +
+ * `engineToken`). A scoped agent (Legal Shield's `legal_shield` role) only the last, and only on a
+ * session they may operate: the contact, name and phone come from that session, never the body.
+ *
+ * Each agent mints on their OWN CrankWheel account (`crankwheelConfigForUser`). An agent without
+ * one gets `no_presenter`, never Isaac's account.
  */
 
 const KINDS: CrankwheelMeetingKind[] = ["now", "scheduled"];
@@ -45,31 +51,65 @@ const str = (v: unknown): string | null => {
   return t ? t : null;
 };
 
-async function requireAdmin() {
-  const { userId } = await auth();
-  if (!userId) {
+type Staff = StaffAccess & { userId: string };
+
+/** Any staff role; what each may anchor to is decided per request below. */
+async function requireStaff(): Promise<{ access: Staff; error?: undefined } | { error: NextResponse }> {
+  const access = await getStaffAccess();
+  if (!access.userId) {
     return { error: NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 }) };
   }
-  if (!(await getIsAdmin())) {
+  if (!access.role) {
     return { error: NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 }) };
   }
-  return { userId };
+  return { access: access as Staff };
+}
+
+const forbidden = () => NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 });
+const notFound = () => NextResponse.json({ success: false, error: "Not found" }, { status: 404 });
+
+/**
+ * The intake-engine session a link is for, when the caller may operate it. Null for "no such line,
+ * no such session, or not yours" alike.
+ */
+async function operableEngineSession(access: Staff, lob: string | null, token: string | null) {
+  if (!lob || !token) return null;
+  const config = getIntakeConfig(lob);
+  if (!config || !canOperateLine(access, lob)) return null;
+  const row = await getEngineIntakeByToken(config, token);
+  if (!row || !canOperateSession(access, config, row)) return null;
+  return { config, row };
 }
 
 export async function POST(request: NextRequest) {
   try {
-    const guard = await requireAdmin();
+    const guard = await requireStaff();
     if (guard.error) return guard.error;
-    const userId = guard.userId!;
+    const access = guard.access;
+    const userId = access.userId;
 
-    if (!isCrankwheelConfigured()) {
+    const body = await request.json().catch(() => ({}));
+    const engineLob = str(body?.engineLob);
+    const engineToken = str(body?.engineToken);
+    // A scoped agent may only start a meeting from one of their own engine sessions: never an IUL
+    // token or a bare CRM contact (those would let them meet with any of Isaac's contacts).
+    if (!access.isAdmin && !engineToken) return forbidden();
+
+    // Their own account, or Isaac's for the admin; never Isaac's for anyone else.
+    const config = crankwheelConfigForUser(access);
+    if (!config) {
+      return NextResponse.json(
+        { success: false, code: "no_presenter", error: "CrankWheel is not set up for this account." },
+        { status: 400 }
+      );
+    }
+    if (!isCrankwheelConfigured(config)) {
       return NextResponse.json(
         { success: false, error: "CrankWheel is not configured." },
         { status: 400 }
       );
     }
 
-    const body = await request.json().catch(() => ({}));
     if (!isKind(body?.kind)) {
       return NextResponse.json({ success: false, error: "Unknown meeting kind." }, { status: 400 });
     }
@@ -84,8 +124,22 @@ export async function POST(request: NextRequest) {
     let contactPhone = str(body?.contactPhone);
     let locale: "en" | "es" = body?.locale === "es" ? "es" : "en";
 
+    let fixedLocale: "en" | "es" | null = null;
+    let engineLine = false;
     const intakeToken = str(body?.intakeToken);
-    if (intakeToken) {
+    if (engineToken) {
+      const engine = await operableEngineSession(access, engineLob, engineToken);
+      if (!engine) return notFound();
+      engineLine = true;
+      // Everything about who the meeting is with comes from the session, nothing from the body.
+      sessionId = engine.row.id;
+      crmContactId = engine.row.crmContactId;
+      contactName = engine.row.contactName;
+      contactEmail = engine.row.contactEmail;
+      contactPhone = engine.row.contactPhone;
+      fixedLocale = engine.config.fixedLocale ?? null;
+      locale = (fixedLocale ?? engine.row.locale) === "es" ? "es" : "en";
+    } else if (intakeToken) {
       const row = await getIntakeByToken(intakeToken);
       if (!row) {
         return NextResponse.json({ success: false, error: "Not found" }, { status: 404 });
@@ -102,13 +156,13 @@ export async function POST(request: NextRequest) {
     }
 
     // The contact's own language beats whatever the session was created with — see
-    // `resolveCrmContactLocale`. Best-effort: a CRM miss just leaves the fallback in place.
-    if (crmContactId) {
+    // `resolveCrmContactLocale`. Best-effort: a CRM miss just leaves the fallback in place. A
+    // one-language line (Legal Shield: Spanish) keeps its language.
+    if (crmContactId && !fixedLocale) {
       const creds = agentCrmGetBaseCredentials();
       if (creds) locale = await resolveCrmContactLocale(crmContactId, locale, creds.token);
     }
 
-    const config = getCrankwheelConfig();
     const hookSecret = newHookSecret();
 
     let rawUrl: string | null = null;
@@ -133,8 +187,10 @@ export async function POST(request: NextRequest) {
       uid = uidFromUrl(created.url);
       expiresAt = new Date(Date.now() + config.noauthWindowSeconds * 1000);
     } else {
+      // An agent's own line never names Isaac Plans (the name can show on the join page).
+      const fallbackName = engineLine ? (locale === "es" ? "Reunión" : "Meeting") : "Isaac Plans meeting";
       const scheduled = await createScheduledMeeting({
-        name: contactName || contactEmail || "Isaac Plans meeting",
+        name: contactName || contactEmail || fallbackName,
         config,
       });
       if (!scheduled?.url) {
@@ -152,6 +208,7 @@ export async function POST(request: NextRequest) {
       sessionId,
       crmContactId,
       ownerUserId: userId,
+      presenterEmail: config.storedPresenter,
       contactName,
       contactEmail,
       contactPhone,
@@ -164,9 +221,10 @@ export async function POST(request: NextRequest) {
       expiresAt,
     });
 
-    // CrankWheel has already invalidated every older noauth link (truncate_older_links). Mirror
-    // that here so no other panel keeps advertising a link that quietly stopped working.
-    if (kind === "now") await supersedeActiveNowLinks(meeting.id);
+    // CrankWheel has already invalidated every older noauth link on this account
+    // (truncate_older_links). Mirror that here, for this account only, so no other panel keeps
+    // advertising a link that quietly stopped working.
+    if (kind === "now") await supersedeActiveNowLinks(meeting.id, sameAccountPresenters(config));
 
     return NextResponse.json({ success: true, meeting: toMeetingView(meeting) });
   } catch (error) {
@@ -184,13 +242,27 @@ export async function POST(request: NextRequest) {
  */
 export async function GET(request: NextRequest) {
   try {
-    const guard = await requireAdmin();
+    const guard = await requireStaff();
     if (guard.error) return guard.error;
-    const userId = guard.userId!;
+    const access = guard.access;
+    const userId = access.userId;
 
     const params = request.nextUrl.searchParams;
     const intakeToken = params.get("intakeToken");
     const crmContactId = params.get("crmContactId");
+    const engineToken = params.get("engineToken");
+
+    if (engineToken) {
+      const engine = await operableEngineSession(access, params.get("engineLob"), engineToken);
+      // Same quiet answer for "no such session" and "not yours", as below.
+      if (!engine) return NextResponse.json({ success: true, meeting: null });
+      const row = await getActiveMeetingForSession(engine.row.id);
+      const mine = row && row.ownerUserId === userId ? row : null;
+      return NextResponse.json({ success: true, meeting: mine ? toMeetingView(mine) : null });
+    }
+
+    // The IUL intake, a bare contact and the launcher's list are Isaac's tools only.
+    if (!access.isAdmin) return forbidden();
 
     if (intakeToken) {
       const session = await getIntakeByToken(intakeToken);

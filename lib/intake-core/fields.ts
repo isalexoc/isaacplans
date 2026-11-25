@@ -97,6 +97,23 @@ export function sensitiveRowKeys(sections: IntakeSection[]): Array<[string, stri
     .filter(([, subKeys]) => subKeys.length > 0);
 }
 
+/**
+ * Keys only the agent may write: every field of an owner-only section (the agent's notes) and any
+ * owner-only field (Legal Shield's package switch). A client's save never carries them.
+ */
+export function ownerOnlyKeys(sections: IntakeSection[]): string[] {
+  return sections.flatMap((s) => s.fields.filter((f) => s.ownerOnly || f.ownerOnly).map((f) => f.key));
+}
+
+/**
+ * Keys the client's browser never receives: the fields of owner-only sections. An owner-only field
+ * outside such a section is still sent (read-only), because client-visible notes can depend on it
+ * (the plan summary shows the package the agent chose).
+ */
+export function ownerOnlySectionKeys(sections: IntakeSection[]): string[] {
+  return sections.filter((s) => s.ownerOnly).flatMap((s) => s.fields.map((f) => f.key));
+}
+
 /** Top-level sensitive scalar field keys. */
 export function sensitiveScalarKeys(sections: IntakeSection[]): string[] {
   return allScalarFields(sections)

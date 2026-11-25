@@ -13,6 +13,7 @@ import "server-only";
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { getIntakeConfig } from "@/lib/intake-configs";
+import { getStaffAccess } from "@/lib/auth/access";
 import { ensureIntakeDeviceId, readIntakeDeviceId } from "./device";
 import { bindClientDevice, canAccessIntake, getIntakeByToken, isIntakeExpired } from "./server";
 import type { IntakeSessionRow } from "./server";
@@ -86,6 +87,24 @@ export async function loadAuthorizedSession(
   if (!row) return notFound();
 
   const { userId } = await auth();
+
+  // A signed-in staff member who isn't the owner. Isaac (admin) on a line with oversight works the
+  // session as its owner. A scoped role (Legal Shield's associate) opening someone else's link gets
+  // nothing, and above all never claims it: claiming would lock the real client out. An admin on
+  // Isaac's other lines keeps today's behavior.
+  if (userId && userId !== row.ownerUserId) {
+    const staff = await getStaffAccess();
+    if (staff.isAdmin && config.adminOversight) {
+      return {
+        config,
+        row,
+        access: { allowed: true, shouldClaim: false, role: "owner", claimedByOtherDevice: false },
+        deviceId: null,
+      };
+    }
+    if (staff.role && !staff.isAdmin) return forbidden();
+  }
+
   const deviceId = opts.claim
     ? await ensureIntakeDeviceId(config)
     : await readIntakeDeviceId(config);

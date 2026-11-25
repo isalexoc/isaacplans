@@ -4,7 +4,8 @@ import { useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { ChevronRight } from "lucide-react";
 import { UI, pickLocale, tr } from "@/lib/intake-core/ui-strings";
-import { LOBS, type LobSlug } from "@/lib/lob/registry";
+import { requireIntakeConfig } from "@/lib/intake-configs";
+import { intakeRouteOf } from "@/lib/intake-core/routes";
 
 /**
  * Breadcrumb: "<Line of business> Client Intake › [current]".
@@ -16,13 +17,14 @@ import { LOBS, type LobSlug } from "@/lib/lob/registry";
  */
 export default function IntakeBreadcrumb({ lob, current }: { lob: string; current?: string }) {
   const locale = pickLocale(useLocale());
-  const definition = LOBS[lob as LobSlug];
-  const root = `${definition.label} ${tr(UI.navIntake, locale)}`;
+  // Each config's label matches its registry label, so the insurance lines read the same as before.
+  const config = requireIntakeConfig(lob);
+  const root = `${config.label} ${tr(UI.navIntake, locale)}`;
 
   return (
     <nav className="mb-4 flex flex-wrap items-center gap-1 text-sm text-muted-foreground">
       {current ? (
-        <Link href={definition.intakeRoute} className="hover:text-foreground hover:underline">
+        <Link href={intakeRouteOf(config)} className="hover:text-foreground hover:underline">
           {root}
         </Link>
       ) : (

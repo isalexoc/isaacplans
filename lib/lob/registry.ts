@@ -46,7 +46,9 @@ export type IntakeRoute =
   | "/iul/intake"
   | "/life-insurance/intake"
   | "/health-alternative/intake"
-  | "/final-expense/intake";
+  | "/final-expense/intake"
+  // Not a LobSlug (Legal Shield isn't insurance), but its dashboard runs on the same engine.
+  | "/legal-shield/intake";
 
 export interface LobDefinition {
   slug: LobSlug;

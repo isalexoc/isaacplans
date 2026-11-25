@@ -374,7 +374,43 @@ export const UI = {
   } as Dict,
   secureLooksGood: { en: "Looks good", es: "Se ve bien" } as Dict,
   secureDigitsLeft: { en: "{n} more digit(s) to go", es: "Faltan {n} dígito(s)" } as Dict,
+
+  // ── Lines whose agent has no CRM login (config.noCrmWording): the same chrome without "CRM". ──
+  // Read through uiFor(); the client also sees some of these on a shared screen.
+  deleteConfirmNoCrm: {
+    en: "Delete this application? This permanently removes the saved answers. This cannot be undone.",
+    es: "¿Eliminar esta solicitud? Esto elimina permanentemente las respuestas guardadas. Esta acción no se puede deshacer.",
+  } as Dict,
+  searchCrmNoCrm: {
+    en: "Search your clients by name, email, or phone",
+    es: "Busque entre sus clientes por nombre, correo o teléfono",
+  } as Dict,
+  noMatchesNoCrm: { en: "No matching clients.", es: "No hay clientes que coincidan." } as Dict,
+  createNewNoCrm: { en: "Not on the list? Add a new client", es: "¿No está en la lista? Agregar un cliente nuevo" } as Dict,
+  createAndStartNoCrm: { en: "Add client & start", es: "Agregar cliente e iniciar" } as Dict,
+  finishNoCrm: { en: "Finish & submit", es: "Finalizar y enviar" } as Dict,
+  completedNoCrm: { en: "Completed.", es: "Completado." } as Dict,
+  /** An oversight list's badge when the owner's name is unknown. */
+  otherOwner: { en: "Another agent's client", es: "Cliente de otro agente" } as Dict,
+  captureNoContactNoCrm: {
+    en: "Copy the link or send it by WhatsApp.",
+    es: "Copie el enlace o envíelo por WhatsApp.",
+  } as Dict,
 } as const;
+
+type UiKey = keyof typeof UI;
+
+/**
+ * The string for `key`, or its "NoCrm" variant on a line whose agent has no CRM login, so a
+ * Legal Shield client never reads "Finalizar y enviar al CRM" on the shared screen.
+ */
+export function uiFor(key: UiKey, noCrm: boolean | undefined): Dict {
+  if (noCrm) {
+    const alt = (UI as Record<string, Dict>)[`${key}NoCrm`];
+    if (alt) return alt;
+  }
+  return UI[key];
+}
 
 export function tr(dict: Dict, locale: IntakeLocale): string {
   return dict[locale];

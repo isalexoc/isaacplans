@@ -190,3 +190,20 @@ export const LEGAL_SHIELD_DISCLAIMER_ES: readonly string[] = [
 /** The short version, shown above the submit button and in the FAQ. */
 export const NOT_INSURANCE_LINE_ES =
   "Esto no es un seguro. Es una membresía de servicios legales.";
+
+// ---------------------------------------------------------------------------
+// Ysmael's own sales flow: the intake at /legal-shield/intake and its 9:16 deck
+// ---------------------------------------------------------------------------
+
+/** The brand on the intake pages and the deck (the funnel keeps "Escudo Legal"). */
+export const LS_BRAND_NAME = "Red de Apoyo Latino USA";
+
+/** The associate's dashboard (Spanish only; /en 308s to /es). */
+export const LS_INTAKE_PATH = "/legal-shield/intake";
+
+/**
+ * The line under every slide, from Isaac's deck, with "servicios" for "coberturas" (insurance
+ * wording) and the not-insurance sentence the associate rules ask for.
+ */
+export const LS_DECK_DISCLAIMER_ES =
+  "Ysmael Orraiz, asociado independiente de LegalShield. Descripción general del Plan Preferencial y de IDShield; consulta el contrato de tu estado para términos, servicios y limitaciones. No es asesoría legal. No es un seguro.";

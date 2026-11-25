@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
-import { getIsAdmin } from "@/lib/auth/admin";
+import { canOperateSession, requireLineOperator } from "@/lib/auth/access";
 import {
   agentCrmAddContactTags,
   agentCrmGetBaseCredentials,
@@ -33,14 +32,15 @@ const fail = (status: number, error: string) => NextResponse.json({ success: fal
 export async function POST(_request: NextRequest, context: RouteContext) {
   const { lob, token } = await context.params;
   try {
-    const { userId } = await auth();
-    if (!userId) return fail(401, "Unauthorized");
-    if (!(await getIsAdmin())) return fail(403, "Forbidden");
+    const gate = await requireLineOperator(lob);
+    if ("error" in gate) return gate.error;
     const config = resolveConfig(lob);
     if (!config?.secureCapture) return fail(404, "Not found");
+    // A line whose agent sends links from their own phone has no CRM workflow to text this.
+    if (config.linkDelivery?.kind === "whatsapp") return fail(400, "This line sends links by WhatsApp.");
     const row = await getIntakeByToken(config, token);
     if (!row) return fail(404, "Not found");
-    if (row.ownerUserId !== userId) return fail(403, "Forbidden");
+    if (!canOperateSession(gate.access, config, row)) return fail(403, "Forbidden");
     if (!row.crmContactId) return fail(400, "This intake has no linked CRM contact.");
 
     const capture = await getPendingCapture(row.id);
@@ -54,7 +54,7 @@ export async function POST(_request: NextRequest, context: RouteContext) {
     const locale = await resolveCrmContactLocale(row.crmContactId, row.locale, creds.token);
     const written = await agentCrmUpdateContact(
       row.crmContactId,
-      { customFields: [{ id: fieldId, field_value: buildSecureCaptureUrl(capture.token, locale) }] },
+      { customFields: [{ id: fieldId, field_value: buildSecureCaptureUrl(capture.token, locale, undefined, config.secureSlug) }] },
       creds.token,
       "[INTAKE_SECURE_CAPTURE]"
     );

@@ -76,6 +76,10 @@ export const MEET = {
   } as Dict,
 
   error: { en: "Something went wrong. Try again.", es: "Algo salió mal. Inténtelo de nuevo." } as Dict,
+  noPresenter: {
+    en: "CrankWheel isn't set up for your account yet. Ask Isaac to add it.",
+    es: "CrankWheel todavía no está configurado para su cuenta. Pídale a Isaac que lo active.",
+  } as Dict,
   noContact: {
     en: "No CRM contact linked, so this cannot be texted — copy the link instead.",
     es: "Sin contacto en el CRM, no se puede enviar por mensaje — copie el enlace.",

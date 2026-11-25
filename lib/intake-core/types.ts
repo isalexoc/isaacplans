@@ -13,7 +13,14 @@
  * Client-safe: no `server-only`, no DB. The form component imports this from the browser bundle.
  */
 
-import type { LobSlug } from "@/lib/lob/registry";
+import type { IntakeRoute, LobSlug } from "@/lib/lob/registry";
+
+/**
+ * Every line the engine serves. The insurance lines are `LobSlug`s (they have marketing pages, apply
+ * pages and Page Media); Legal Shield is not insurance and deliberately stays out of that registry
+ * (see app/[locale]/legal-shield/apply/page.tsx), so the engine's own slug type is wider.
+ */
+export type EngineLobSlug = LobSlug | "legal-shield";
 
 /** GHL contact fields that exist natively, so they don't need a custom field. */
 export type NativeContactField =
@@ -79,6 +86,9 @@ export type IntakeOption = {
   labelEs: string;
   /** Hidden from clients; only the admin (owner) filling the form sees this option. */
   ownerOnly?: boolean;
+  /** A second, smaller line under the label when the select renders as cards. */
+  descriptionEn?: string;
+  descriptionEs?: string;
 };
 
 /** Where an `address` field writes the resolved city/state/zip/county from autocomplete. */
@@ -117,6 +127,11 @@ export type IntakeField = {
    */
   crmLabel?: string;
   options?: IntakeOption[];
+  /**
+   * `select` only: draw every option as a tappable card, whatever the count. Without it only
+   * two-option selects are cards (Yes/No, Sex); longer lists are a dropdown.
+   */
+  display?: "cards";
   placeholderEn?: string;
   placeholderEs?: string;
   /**
@@ -210,7 +225,7 @@ export type IntakeSection = {
 
 /** Everything the engine needs to run one line of business's intake. */
 export type IntakeLobConfig = {
-  lob: LobSlug;
+  lob: EngineLobSlug;
   /** English display name — dashboard headings, CRM folder, note titles. */
   label: string;
   /**
@@ -248,6 +263,93 @@ export type IntakeLobConfig = {
    * them out on the call. The agent's panel offers these groups; see lib/intake-core/secure-capture.ts.
    */
   secureCapture?: { groups: SecureCaptureGroup[] };
+
+  // ── Options for lines that don't work like Isaac's insurance lines. Absent = today's behavior. ──
+
+  /**
+   * The agent dashboard's route key. Defaults to `LOBS[lob].intakeRoute`; a line outside the
+   * insurance registry (Legal Shield) must set it.
+   */
+  intakeRoute?: IntakeRoute;
+  /**
+   * The agent's form gets the meeting panel and a card that opens this line's sales deck in a new
+   * tab. Generic version of `impactPresentation` (which also turns on Impact's quote panel and
+   * quote image, so it stays Impact's).
+   */
+  presentation?: IntakePresentationConfig;
+  /**
+   * How the agent hands links to the client. `whatsapp`: Copy + WhatsApp buttons that open the
+   * agent's own phone (nothing is sent through Isaac's CRM). Default: the CRM "send by text" tags.
+   */
+  linkDelivery?: { kind: "whatsapp"; agentName: string; product: Record<"en" | "es", string> };
+  /** `false`: no public self-start (`/api/intake/<lob>/start` 404s). Default true. */
+  selfStart?: boolean;
+  /**
+   * An admin (Isaac) acts as the owner on every session of this line, including another agent's:
+   * sees the list, opens the form, summary and deck. Never claims the client's link.
+   */
+  adminOversight?: boolean;
+  /** Extra tags on a contact this line creates (beside the language tag). */
+  contactTags?: string[];
+  /**
+   * A non-admin operator's contact search and start-from-contact only see contacts carrying one of
+   * these tags. Unset = admins only (the search covers the whole CRM location).
+   */
+  contactSearchTags?: string[];
+  /**
+   * `autosave` (default): native fields sync to the contact on every save. `completion-fill-blanks`:
+   * only at completion, and only into fields that are empty on the contact (never overwrites).
+   */
+  crmSync?: "autosave" | "completion-fill-blanks";
+  /** `false`: `pnpm intake:fields` refuses this line and `--all` skips it (no GHL custom fields). */
+  crmCustomFields?: boolean;
+  /**
+   * Keep sensitive answers after completion even when INTAKE_PURGE_AFTER_SYNC is on: this line's
+   * numbers never go to the CRM, so the database holds the only copy the agent enrolls from.
+   */
+  keepSensitiveAfterSync?: boolean;
+  /** Path segments of this line's secure link (default `secure` / `seguro`). */
+  secureSlug?: Record<"en" | "es", string>;
+  /** Every session and link of this line is in this language. */
+  fixedLocale?: "en" | "es";
+  /** The agent has no CRM login: buttons and messages never mention "the CRM". */
+  noCrmWording?: boolean;
+  /** Email the session's owner (their Clerk address) when a client finishes the form or a secure link. */
+  notifyOwnerByEmail?: boolean;
+  /** How the agent's summary shows and copies dates: `mdy` = MM/DD/YYYY. Default ISO. */
+  summaryDateFormat?: "iso" | "mdy";
+  /** Answers every new session starts with (non-sensitive keys only). */
+  initialData?: IntakeData;
+};
+
+/** A switch in the agent's presentation bar that writes one answer, e.g. "IDShield included". */
+export type PresentationToggle = {
+  fieldKey: string;
+  onValue: string;
+  offValue: string;
+  labelEn: string;
+  labelEs: string;
+  hintEn?: string;
+  hintEs?: string;
+};
+
+export type IntakePresentationConfig = {
+  /** next-intl pathname of the deck, with `[token]`. */
+  pathname: string;
+  query?: Record<string, string>;
+  /** Show the CrankWheel meeting panel (default true). */
+  meetings?: boolean;
+  /** The bar's card copy. */
+  titleEn: string;
+  titleEs: string;
+  bodyEn: string;
+  bodyEs: string;
+  joinedEn: string;
+  joinedEs: string;
+  openEn: string;
+  openEs: string;
+  /** Switches only the agent sees (their tab is not the one being shared). */
+  agentToggles?: PresentationToggle[];
 };
 
 /** One thing a secure link can ask the client for: "SSN or ITIN", "ID number", "Bank account". */
@@ -262,6 +364,11 @@ export type SecureCaptureGroup = {
    * answer tells the client's page which number it is asking for.
    */
   requires?: string;
+  /**
+   * The `requires` answer must also be one of these (e.g. the card group only when the payment
+   * method is "Tarjeta"). Without it any answer will do.
+   */
+  requiresEquals?: string | string[];
   /** Steps where the agent's panel shows, with this group pre-selected. */
   sections: string[];
 };
@@ -274,7 +381,11 @@ export type IntakeData = Record<string, unknown>;
 /** Summary row for the agent dashboard list. */
 export type IntakeSummary = {
   id: string;
-  lob: LobSlug;
+  lob: EngineLobSlug;
+  /** Only on an admin's oversight list: who owns the session (and is it the caller). */
+  ownerUserId?: string;
+  ownerName?: string | null;
+  ownedByCaller?: boolean;
   token: string;
   status: IntakeStatus;
   contactName: string | null;

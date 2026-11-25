@@ -525,6 +525,29 @@ export const routing = defineRouting({
       en: "/legal-shield/apply",
       es: "/legal-shield/apply",
     },
+    // Ysmael's own clients (the intake engine's "legal-shield" line): the associate's dashboard,
+    // a client's form, its summary, the 9:16 deck and the client's private link. Spanish only too,
+    // so the same slug again. "privado" is a static segment, so it wins over [token].
+    "/legal-shield/intake": {
+      en: "/legal-shield/intake",
+      es: "/legal-shield/intake",
+    },
+    "/legal-shield/intake/[token]": {
+      en: "/legal-shield/intake/[token]",
+      es: "/legal-shield/intake/[token]",
+    },
+    "/legal-shield/intake/[token]/view": {
+      en: "/legal-shield/intake/[token]/view",
+      es: "/legal-shield/intake/[token]/view",
+    },
+    "/legal-shield/intake/[token]/presentation": {
+      en: "/legal-shield/intake/[token]/presentation",
+      es: "/legal-shield/intake/[token]/presentation",
+    },
+    "/legal-shield/intake/privado/[captureToken]": {
+      en: "/legal-shield/intake/privado/[captureToken]",
+      es: "/legal-shield/intake/privado/[captureToken]",
+    },
   },
 });
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import {
   AlertCircle,
   Check,
@@ -38,6 +38,7 @@ export default function MeetingPanel({
   onRevoke,
   onSend,
   onReset,
+  renderDelivery,
 }: {
   locale: MeetingLocale;
   meeting: MeetingState | null;
@@ -51,6 +52,11 @@ export default function MeetingPanel({
   onRevoke: () => void;
   onSend: () => Promise<boolean>;
   onReset: () => void;
+  /**
+   * Replaces "send by text" (a CRM tag + workflow) for an agent who sends links from their own
+   * phone: e.g. WhatsApp buttons for this meeting's URL.
+   */
+  renderDelivery?: (url: string) => ReactNode;
 }) {
   const [copied, setCopied] = useState(false);
   const [sent, setSent] = useState(false);
@@ -168,7 +174,7 @@ export default function MeetingPanel({
               {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
               {copied ? trm(MEET.linkCopied, locale) : trm(MEET.copyLink, locale)}
             </button>
-            {canSend && (
+            {!renderDelivery && canSend && (
               <button
                 type="button"
                 onClick={send}
@@ -182,7 +188,9 @@ export default function MeetingPanel({
           </div>
         </div>
 
-        {!canSend && (
+        {renderDelivery && <div className="mt-2">{renderDelivery(meeting.url)}</div>}
+
+        {!renderDelivery && !canSend && (
           <p className="mt-2 text-xs text-muted-foreground">{trm(MEET.noContact, locale)}</p>
         )}
 
@@ -197,7 +205,8 @@ export default function MeetingPanel({
 
         {error && (
           <p className="mt-2 flex items-start gap-1.5 text-sm font-medium text-amber-700 dark:text-amber-500">
-            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" /> {trm(MEET.error, locale)}
+            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />{" "}
+            {trm(error === "no_presenter" ? MEET.noPresenter : MEET.error, locale)}
           </p>
         )}
       </div>
@@ -253,7 +262,8 @@ export default function MeetingPanel({
 
       {error && (
         <p className="mt-2 flex items-start gap-1.5 text-sm font-medium text-amber-700 dark:text-amber-500">
-          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" /> {trm(MEET.error, locale)}
+          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />{" "}
+          {trm(error === "no_presenter" ? MEET.noPresenter : MEET.error, locale)}
         </p>
       )}
     </div>

@@ -8,6 +8,14 @@
  * No network, no database, no API keys. Run with: pnpm test:crankwheel
  */
 
+import { readFileSync } from "node:fs";
+import path from "node:path";
+import {
+  crankwheelConfigForPresenter,
+  crankwheelConfigForUser,
+  parsePresenters,
+  sameAccountPresenters,
+} from "../lib/crankwheel/config";
 import { matchUsageSession } from "../lib/crankwheel/matching";
 import { formatMeetingNote } from "../lib/crankwheel/note";
 import { uidFromUrl, withViewerLocale } from "../lib/crankwheel/url";
@@ -175,6 +183,96 @@ console.log("\nNote formatting");
   });
   check("sub-minute duration in seconds", brief.includes("20 seconds"), brief);
   check("no date row when the start time is unknown", !brief.includes("When:"));
+}
+
+console.log("\nOne CrankWheel account per agent (CRANKWHEEL_PRESENTERS)");
+{
+  const ISAAC = "user_isaac";
+  const YSMAEL = "user_ysmael";
+  const env = {
+    CRANKWHEEL_API_KEY_READ_AND_WRITE: "isaac-write",
+    CRANKWHEEL_API_KEY_READ_ONLY: "isaac-read",
+    CRANKWHEEL_PRESENTER_EMAIL: "isaac@isaacplans.com",
+    CRANKWHEEL_PRESENTERS: JSON.stringify([
+      { userId: YSMAEL, email: "Ysmael@Example.com", writeKey: "ysmael-write" },
+      { userId: "user_broken", email: "", writeKey: "x" }, // incomplete: ignored
+    ]),
+  };
+
+  check("parses the valid entries only", parsePresenters(env.CRANKWHEEL_PRESENTERS).length === 1);
+  check("bad JSON loads nobody", parsePresenters("{nope").length === 0);
+  check("a non-array loads nobody", parsePresenters('{"userId":"a"}').length === 0);
+
+  const isaac = crankwheelConfigForUser({ userId: ISAAC, isAdmin: true }, env);
+  check("the admin mints on Isaac's account", isaac?.writeKey === "isaac-write" && isaac.presenterEmail === "isaac@isaacplans.com");
+  check("Isaac's rows store no presenter", isaac?.storedPresenter === null);
+
+  const ysmael = crankwheelConfigForUser({ userId: YSMAEL, isAdmin: false }, env);
+  check("a scoped agent mints on his own account", ysmael?.writeKey === "ysmael-write" && ysmael.presenterEmail === "Ysmael@Example.com");
+  check("his read key falls back to his own write key, never Isaac's", ysmael?.readKey === "ysmael-write");
+  check("his rows store his presenter", ysmael?.storedPresenter === "Ysmael@Example.com");
+
+  check(
+    "a scoped agent without an entry gets nothing (never Isaac's account)",
+    crankwheelConfigForUser({ userId: "user_other", isAdmin: false }, env) === null
+  );
+  check(
+    "no entries at all: still nothing for a scoped agent",
+    crankwheelConfigForUser({ userId: YSMAEL, isAdmin: false }, { ...env, CRANKWHEEL_PRESENTERS: "" }) === null
+  );
+  check(
+    "an admin with an entry uses the entry",
+    crankwheelConfigForUser({ userId: YSMAEL, isAdmin: true }, env)?.writeKey === "ysmael-write"
+  );
+
+  check("a row with no presenter is Isaac's", crankwheelConfigForPresenter(null, env)?.writeKey === "isaac-write");
+  check(
+    "a row's presenter resolves case-insensitively",
+    crankwheelConfigForPresenter("ysmael@example.com", env)?.writeKey === "ysmael-write"
+  );
+  check("a presenter gone from the env is skipped, not guessed", crankwheelConfigForPresenter("gone@example.com", env) === null);
+
+  const isaacScope = sameAccountPresenters(isaac!, env);
+  check("Isaac's new link supersedes only Isaac's rows", isaacScope.includesDefault && isaacScope.emails.length === 0, JSON.stringify(isaacScope));
+  const ysmaelScope = sameAccountPresenters(ysmael!, env);
+  check(
+    "Ysmael's new link supersedes only his rows",
+    !ysmaelScope.includesDefault && ysmaelScope.emails.join() === "Ysmael@Example.com",
+    JSON.stringify(ysmaelScope)
+  );
+  const seatEnv = {
+    ...env,
+    CRANKWHEEL_PRESENTERS: JSON.stringify([
+      { userId: YSMAEL, email: "y@example.com", writeKey: "isaac-write" },
+      { userId: "user_b", email: "b@example.com", writeKey: "isaac-write" },
+    ]),
+  };
+  const shared = sameAccountPresenters(crankwheelConfigForUser({ userId: YSMAEL, isAdmin: false }, seatEnv)!, seatEnv);
+  check(
+    "two presenters on one account (a seat) supersede each other and Isaac's",
+    shared.includesDefault && shared.emails.length === 2,
+    JSON.stringify(shared)
+  );
+}
+
+console.log("\nNo call can fall back to Isaac's account");
+{
+  const root = process.cwd();
+  const read = (p: string) => readFileSync(path.join(root, p), "utf8");
+  const client = read("lib/crankwheel/client.ts");
+  check("client.ts never reads the default config", !/getCrankwheelConfig/.test(client));
+  check("client.ts takes no optional config", !/config\?:/.test(client));
+  const route = read("app/api/crankwheel/meetings/route.ts");
+  check("minting picks the caller's account", /crankwheelConfigForUser\(access\)/.test(route) && !/getCrankwheelConfig\(/.test(route));
+  check("a scoped agent can only anchor to an engine session", /if \(!access\.isAdmin && !engineToken\) return forbidden\(\)/.test(route));
+  check("IUL, bare-contact and list reads stay admin-only", /if \(!access\.isAdmin\) return forbidden\(\);/.test(route));
+  check("superseding is scoped to the account", /supersedeActiveNowLinks\(meeting\.id, sameAccountPresenters\(config\)\)/.test(route));
+  const one = read("app/api/crankwheel/meetings/[id]/route.ts");
+  check("revoke uses the row's account", /crankwheelConfigForPresenter\(row\.presenterEmail\)/.test(one));
+  const send = read("app/api/crankwheel/meetings/[id]/send/route.ts");
+  check("sending through the CRM stays admin-only", /getIsAdmin\(\)/.test(send));
+  const note = read("lib/crankwheel/note-job.ts");
+  check("the note reads usage on the row's account", /crankwheelConfigForPresenter\(meeting\.presenterEmail\)/.test(note));
 }
 
 console.log(`\n${passed} passed, ${failed} failed\n`);

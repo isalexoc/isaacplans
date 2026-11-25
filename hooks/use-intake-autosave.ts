@@ -67,6 +67,18 @@ function trackSave(token: string, promise: Promise<unknown>): void {
   promise.then(done, done);
 }
 
+/**
+ * A save made outside the form (a deck's plan switch): written the same way the form writes, tracked
+ * so a form this page mounts next waits for it, and announced so the agent's other tabs reload.
+ * Throws when the save fails, so the caller can put its control back.
+ */
+export async function savePatchAndAnnounce(lob: string, token: string, patch: IntakeData): Promise<void> {
+  const promise = saveIntakePatch(lob, token, patch);
+  trackSave(token, promise);
+  await promise;
+  announceSaved(token);
+}
+
 /** Resolves once this page's saves for `token` have landed (or after a few seconds at most). */
 export function intakeSavesSettled(token: string): Promise<void> {
   const pending = pendingSaves.get(token);

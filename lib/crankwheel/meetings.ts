@@ -9,7 +9,7 @@
  */
 
 import "server-only";
-import { and, desc, eq, gte, isNotNull, isNull, ne, or } from "drizzle-orm";
+import { and, desc, eq, gte, inArray, isNotNull, isNull, ne, or, type SQL } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { db } from "@/lib/db";
 import { crankwheelMeetings } from "@/lib/db/schema";
@@ -68,6 +68,8 @@ export async function createMeeting(input: {
   sessionId?: string | null;
   crmContactId?: string | null;
   ownerUserId: string;
+  /** `config.storedPresenter`: the agent's own account, or null for Isaac's. */
+  presenterEmail?: string | null;
   contactName?: string | null;
   contactEmail?: string | null;
   contactPhone?: string | null;
@@ -85,6 +87,7 @@ export async function createMeeting(input: {
       sessionId: input.sessionId ?? null,
       crmContactId: input.crmContactId ?? null,
       ownerUserId: input.ownerUserId,
+      presenterEmail: input.presenterEmail ?? null,
       contactName: input.contactName ?? null,
       contactEmail: input.contactEmail ?? null,
       contactPhone: input.contactPhone ?? null,
@@ -151,15 +154,28 @@ export async function listRecentMeetings(ownerUserId: string, limit = 20): Promi
 }
 
 /**
- * Retire every other live "meet now" link.
+ * Retire every other live "meet now" link on the same CrankWheel account.
  *
  * This is bookkeeping that mirrors what CrankWheel has already done: `truncate_older_links` ends
- * the validity of older noauth links account-wide the moment a new one is minted. Without this the
- * panel for an earlier client would keep advertising a link that silently stopped working.
+ * the validity of the presenter's older noauth links the moment a new one is minted. Without this
+ * the panel for an earlier client would keep advertising a link that silently stopped working.
+ * Scoped to the whole account, which equals the presenter while each account has one (and only
+ * over-marks, never misses, if an account ever has two).
+ *
+ * Only that account's rows (`sameAccountPresenters`): a link Ysmael mints on his own account
+ * leaves Isaac's live link alone, and the other way round.
  *
  * Scheduled links are untouched — they are not noauth and stay valid until revoked.
  */
-export async function supersedeActiveNowLinks(exceptId: string): Promise<number> {
+export async function supersedeActiveNowLinks(
+  exceptId: string,
+  account: { emails: string[]; includesDefault: boolean }
+): Promise<number> {
+  const sameAccount: SQL[] = [];
+  if (account.emails.length > 0) sameAccount.push(inArray(crankwheelMeetings.presenterEmail, account.emails));
+  if (account.includesDefault) sameAccount.push(isNull(crankwheelMeetings.presenterEmail));
+  if (sameAccount.length === 0) return 0;
+
   const rows = await db
     .update(crankwheelMeetings)
     .set({ status: "superseded", updatedAt: new Date() })
@@ -167,7 +183,8 @@ export async function supersedeActiveNowLinks(exceptId: string): Promise<number>
       and(
         eq(crankwheelMeetings.kind, "now"),
         eq(crankwheelMeetings.status, "active"),
-        ne(crankwheelMeetings.id, exceptId)
+        ne(crankwheelMeetings.id, exceptId),
+        or(...sameAccount)
       )
     )
     .returning({ id: crankwheelMeetings.id });

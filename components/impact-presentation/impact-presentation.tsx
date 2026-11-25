@@ -27,8 +27,8 @@ type View = "slides" | "form";
  * the deck remounts with it. Without this the client would be thrown back to the welcome slide
  * every time.
  */
-function useDeckPosition(token: string, count: number) {
-  const key = `impact-presentation:${token}`;
+function useDeckPosition(token: string, count: number, prefix: string) {
+  const key = `${prefix}${token}`;
   const [slide, setSlide] = useState(0);
   const [view, setView] = useState<View>("slides");
   const [restored, setRestored] = useState(false);
@@ -94,20 +94,51 @@ const PREV_KEYS = ["arrowleft", "pageup", "backspace"];
  *
  * Keys, as in the HTML deck: → / ← (and Space, Enter, Page Up/Down) move, 1–9 jump, Home / End,
  * L switches language, F toggles full screen. A swipe moves on touch screens.
+ *
+ * Also the shell of the Legal Shield deck: every prop after `slides` is optional and defaults to
+ * Impact's exact values (Tailwind needs whole class strings, so colors arrive as classes).
  */
 export default function ImpactPresentation({
   token,
   locale,
   slides,
+  lob = "health-alternative",
+  storageKeyPrefix = "impact-presentation:",
+  languageSwitchPathname = "/health-alternative/intake/[token]/presentation",
+  fontClassName = poppins.className,
+  frameClass = "bg-[#071c33]",
+  stageClass = "bg-[#fbf6f2]",
+  navClass = "bg-[#071c33]/60",
+  activeDotClass = "bg-[#f2735a]",
+  onDeckKey,
 }: {
   token: string;
   locale: DeckLocale;
   slides: ReactNode[];
+  /** The intake line "Confirm my details" opens. */
+  lob?: string;
+  /** sessionStorage key prefix for the saved position (Impact's stays, so open tabs keep theirs). */
+  storageKeyPrefix?: string;
+  /** Where L (language) goes; null for a one-language deck. */
+  languageSwitchPathname?: string | null;
+  fontClassName?: string;
+  /** Frame behind the stage. */
+  frameClass?: string;
+  /** The 900×1600 stage itself. */
+  stageClass?: string;
+  /** The hover-only dot bar. */
+  navClass?: string;
+  activeDotClass?: string;
+  /**
+   * A deck's own keys, checked before the shared ones. Return true when handled (the Legal Shield
+   * deck's Shift+I takes IDShield off without anything on screen).
+   */
+  onDeckKey?: (e: KeyboardEvent) => boolean;
 }) {
   const router = useRouter();
   const frameRef = useRef<HTMLDivElement | null>(null);
   const touchX = useRef<number | null>(null);
-  const { slide, setSlide, view, setView, restored } = useDeckPosition(token, slides.length);
+  const { slide, setSlide, view, setView, restored } = useDeckPosition(token, slides.length, storageKeyPrefix);
   const showingSlides = view === "slides";
   const scale = useStageScale(frameRef, showingSlides && restored);
   useLockedPageScroll(showingSlides);
@@ -118,11 +149,12 @@ export default function ImpactPresentation({
   );
 
   const switchLanguage = useCallback(() => {
+    if (!languageSwitchPathname) return;
     router.replace(
-      { pathname: "/health-alternative/intake/[token]/presentation", params: { token } },
+      { pathname: languageSwitchPathname as "/health-alternative/intake/[token]/presentation", params: { token } },
       { locale: locale === "es" ? "en" : "es" }
     );
-  }, [router, token, locale]);
+  }, [router, token, locale, languageSwitchPathname]);
 
   const toggleFullscreen = useCallback(() => {
     if (document.fullscreenElement) void document.exitFullscreen();
@@ -139,6 +171,10 @@ export default function ImpactPresentation({
       const key = e.key.toLowerCase();
       // Enter or Space on a focused button already clicks it; don't also turn the page.
       if ((key === "enter" || key === " ") && (tag === "BUTTON" || tag === "A")) return;
+      if (onDeckKey?.(e)) {
+        e.preventDefault();
+        return;
+      }
       if (NEXT_KEYS.includes(key)) {
         e.preventDefault();
         go(slide + 1);
@@ -153,7 +189,7 @@ export default function ImpactPresentation({
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [showingSlides, slide, slides.length, go, switchLanguage, toggleFullscreen]);
+  }, [showingSlides, slide, slides.length, go, switchLanguage, toggleFullscreen, onDeckKey]);
 
   const controls = useMemo(
     () => ({
@@ -178,7 +214,7 @@ export default function ImpactPresentation({
             <ArrowLeft className="h-4 w-4" /> {tr(UI.backToPresentation, locale)}
           </button>
         </div>
-        <IntakeForm lob="health-alternative" token={token} presenting />
+        <IntakeForm lob={lob} token={token} presenting />
       </div>
     );
   }
@@ -188,8 +224,9 @@ export default function ImpactPresentation({
       <div
         ref={frameRef}
         className={cn(
-          poppins.className,
-          "relative h-[calc(100dvh-4rem-1px)] w-full touch-pan-y overflow-hidden bg-[#071c33] antialiased md:h-[calc(100dvh-5rem-1px)]"
+          fontClassName,
+          frameClass,
+          "relative h-[calc(100dvh-4rem-1px)] w-full touch-pan-y overflow-hidden antialiased md:h-[calc(100dvh-5rem-1px)]"
         )}
         onTouchStart={(e) => {
           touchX.current = e.touches[0]?.clientX ?? null;
@@ -204,7 +241,8 @@ export default function ImpactPresentation({
       >
         <div
           className={cn(
-            "absolute left-1/2 top-1/2 h-[1600px] w-[900px] overflow-hidden bg-[#fbf6f2]",
+            "absolute left-1/2 top-1/2 h-[1600px] w-[900px] overflow-hidden",
+            stageClass,
             scale > 0 ? "visible" : "invisible"
           )}
           style={{ transform: `translate(-50%, -50%) scale(${scale})` }}
@@ -226,7 +264,10 @@ export default function ImpactPresentation({
         {/* Faded until hovered, so it stays out of the client's picture. */}
         <nav
           aria-label={locale === "es" ? "Láminas" : "Slides"}
-          className="absolute bottom-2.5 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2 rounded-full bg-[#071c33]/60 px-3 py-2 opacity-0 backdrop-blur-md transition-opacity duration-200 focus-within:opacity-100 hover:opacity-100"
+          className={cn(
+            "absolute bottom-2.5 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2 rounded-full px-3 py-2 opacity-0 backdrop-blur-md transition-opacity duration-200 focus-within:opacity-100 hover:opacity-100",
+            navClass
+          )}
         >
           <button
             type="button"
@@ -245,7 +286,7 @@ export default function ImpactPresentation({
               aria-current={i === slide ? "step" : undefined}
               className={cn(
                 "h-2.5 rounded-full transition-all",
-                i === slide ? "w-6 bg-[#f2735a]" : "w-2.5 bg-white/35"
+                i === slide ? cn("w-6", activeDotClass) : "w-2.5 bg-white/35"
               )}
             />
           ))}

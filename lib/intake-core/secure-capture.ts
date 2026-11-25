@@ -16,7 +16,15 @@ import { db } from "@/lib/db";
 import { intakeSecureCaptures, intakeSessions } from "@/lib/db/schema";
 import { isValidRouting } from "@/lib/iul-intake/validation";
 import { groupsForKeys } from "./secure-capture-groups";
-import { isValidSsn } from "./validation";
+import {
+  isValidCardExpiration,
+  isValidCardNumber,
+  isValidCvv,
+  isValidSsn,
+  isValidSsnLast4,
+  isValidZip,
+  passesLuhn,
+} from "./validation";
 import type { IntakeData, IntakeLobConfig } from "./types";
 
 export type SecureCaptureStatus = "pending" | "submitted" | "cancelled";
@@ -189,6 +197,21 @@ export function validateCapture(patch: IntakeData, allowed: ReadonlySet<string>)
         break;
       case "accountType":
         ok = value === "Checking" || value === "Savings";
+        break;
+      case "ssnLast4":
+        ok = isValidSsnLast4(value);
+        break;
+      case "cardNumber":
+        ok = isValidCardNumber(value) && passesLuhn(value);
+        break;
+      case "cardExpiration":
+        ok = isValidCardExpiration(value);
+        break;
+      case "cardCvv":
+        ok = isValidCvv(value);
+        break;
+      case "cardBillingZip":
+        ok = isValidZip(value);
         break;
       case "idDocNumber":
         // Driver's licenses, passports and green cards mix letters, digits and the odd dash.

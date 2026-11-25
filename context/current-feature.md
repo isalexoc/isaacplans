@@ -2,6 +2,65 @@
 
 ## Status
 
+Built, pending Isaac's setup: **Legal Shield intake + sales deck for Ysmael** (branch `feature/legal-shield-intake`; migration
+`0048_crankwheel_presenter` in chunk C). Isaac's ask (2026-11-24): his dad **Ysmael Orraiz** (LegalShield Independent
+Associate, WhatsApp (540) 376-1831) gets the Impact flow — dashboard → client form → CrankWheel → 9:16 deck →
+"Confirmar mis datos" → form — for LegalShield, in Spanish, under `/es/legal-shield/intake`.
+- **Isaac's decisions:** new Clerk role `legal_shield` (only the LS area; `/es/admin` shows him only an LS section);
+  Isaac (admin) can open all of Ysmael's LS clients; SSN last 4 only; card + CVV kept encrypted (Isaac accepted the
+  PCI caveat); Ysmael's own CrankWheel account, never Isaac's presenter; links via his own WhatsApp, no new GHL custom
+  fields or workflows; Spanish only; "Orraiz" without accent.
+- **One offer:** Plan Legal Preferencial $39.95 + IDShield Familiar 3B $34.95 = $74.90/mes; annual $431.46 + $419.40 =
+  $850.86/año (saves $47.94; IDShield has no annual discount). Never Básico/Premium.
+- **Deck:** the 6 slides of `Plan_Preferencial_IDShield.pdf` verbatim + a price slide (huge total, small breakdown,
+  Mensual/Anual switch) + "3 pasos" → form. A hidden control drops IDShield on a budget objection (switch in Ysmael's
+  unshared form tab + Shift+I in the deck).
+- **Chunks:** A1 engine generalization (no behavior change) · A2 LS line + role + CRM scoping · B deck · C CrankWheel
+  per account · D owner email + docs. Plan of record:
+  `C:\Users\isale\.claude\plans\presentaci-n-impact-para-intak-enchanted-mitten-of-1f565ec0-1a39-42c0-b333-60ecad4e3a80.md`.
+- **Done:** A1 (`3a5b63a`), A2 (`e0d9c71`), B (`3db3250`, the deck), C (`3fe2725`, CrankWheel per account), D (owner
+  email + docs). Code complete; waiting on Isaac's setup (`LEGAL_SHIELD_INTAKE_SETUP.md`) and the preview test.
+- **D, owner email + docs:** a client who submits the form on their own, or sends the private link, triggers an email
+  to the session owner's Clerk address (`notifyOwnerByEmail`, in `after()`, via the site SMTP): "Ana Prueba completó su
+  solicitud" / "… le envió sus datos privados" + a link to `/view`; never an answer, the name is escaped and kept to
+  one line. Not sent when the agent submits (e.g. from the deck). Completed rows on every line's dashboard get a green
+  tint. `LEGAL_SHIELD_INTAKE_SETUP.md` (Isaac's setup: Clerk invitation with the role, CrankWheel, migration 0048,
+  CRM footprint, data rules, troubleshooting) and the CLAUDE.md env + doc lines.
+  Verified: tsc; `test:staff-access` 119 (10 new: notice content, escaping, header safety, client-only trigger); the
+  notice HTML rendered locally (nothing sent). Not seen in a browser: the dashboard tint (Clerk-gated page).
+- **C, CrankWheel on Ysmael's own account:** `CRANKWHEEL_PRESENTERS` (JSON `[{userId, email, writeKey, readKey?}]`)
+  gives an agent their own account; the admin without an entry keeps Isaac's env keys; a scoped agent without one
+  gets "CrankWheel todavía no está configurado para su cuenta", never Isaac's account. `config` is required on every
+  `client.ts` call (no fallback). Migration `0048_crankwheel_presenter` adds `crankwheel_meetings.presenter_email`
+  (null = Isaac's): revoke and the usage read behind the CRM note use the row's account (a row whose account left
+  the env is skipped), and "superseded" bookkeeping stays inside one account. Routes: any staff role, owner-scoped;
+  Ysmael may only mint/restore from an engine session he can operate (`engineLob` + `engineToken`: contact, name and
+  phone come from the session, never the body); the IUL token, bare-contact and list reads, and CRM "send" stay
+  admin-only. The LS bar anchors to its session; Impact keeps its CRM-contact anchor. LS meetings on, viewer in
+  Spanish, links by WhatsApp.
+  Verified: tsc; `test:crankwheel` 53 (24 new: per-account configs, superseding scope, static no-fallback checks);
+  headless Chrome on the real LS form (intake + CrankWheel APIs mocked): restores and mints with only the engine
+  session, the no-account message, a live link with WhatsApp/Compartir and no CRM send.
+  **Isaac, before merging:** `pnpm db:migrate 0048` (the merged code selects the new column), Ysmael's CrankWheel
+  account + extension signed in as him, `CRANKWHEEL_PRESENTERS` in Vercel with his Clerk user id. Then the preview
+  test: a link as Isaac and one as Ysmael both stay live, each client lands on the right screen.
+- **B, the deck** (`components/legal-shield-presentation/`, page `…/[token]/presentation`): cover + 8 on the shared
+  9:16 shell (Montserrat, navy/gold), the PDF's 6 slides rebuilt as live text, then the price slide (photo with the
+  whole family, huge total, small breakdown, Mensual/Anual) and "3 pasos" → "Confirmar mis datos". The package and the
+  billing are the intake's own answers: a switch on the deck, Ysmael's unshared-tab switch or Shift+I saves them, and
+  the other tab follows over the `intake-saved` broadcast. Ysmael's photo is the portrait from Isaac's PDFs (Isaac,
+  2026-11-24: that one is him; the `/legal-shield` funnel's Cloudinary headshot looks like a different man). Paso 2
+  no longer promises "72 horas" (no source). Also fixed: the presentation card's button stretched across the card
+  (`w-full` outranked `w-auto`), on Impact's form too.
+  Verified: tsc; `test:staff-access` 109, `test:intake-autosave` 60, `test:quote-prefill` 145, `test:lead-guard` 153;
+  every slide side by side with the PDF; two headless-Chrome tabs (the real form page + the deck under the LS header,
+  intake API mocked, no DB writes), 16 checks: the agent's switch → deck $39.95, the deck's Anual → saved and the form
+  shows Pago anual, Shift+I → $850.86 and the form's switch back on, no control drawn on the deck, the deck frame fills
+  the window under the slim header, "Confirmar mis datos" → the form without the package control; no console errors.
+  Not verifiable locally: the real page's Clerk + Neon gate (same checks as the summary page) and a CrankWheel share.
+- **Done first:** `fix/newsletter-admin-gate` (merged `14d185a`): `/api/newsletter/send-post` and `subscriber-counts`
+  only checked sign-in, so any signed-up visitor could send a newsletter to every subscriber.
+
 Done (merged `9e240fb`, live 2026-11-24 13:00 UTC; migration `0047_lead_guard` applied): **Lead Guard — stop bot
 leads without slowing real clients**. Isaac's ask (2026-11-24): 20–60 spam leads a day were landing in the CRM from the
 website. Audit (read-only CRM export, 3,219 contacts): 83 bot contacts since 2026-11-21 13:55 UTC, all from the general

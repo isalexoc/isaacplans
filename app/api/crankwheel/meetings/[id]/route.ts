@@ -1,24 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
-import { getIsAdmin } from "@/lib/auth/admin";
+import { getStaffAccess } from "@/lib/auth/access";
 import { deleteMeetingLink } from "@/lib/crankwheel/client";
+import { crankwheelConfigForPresenter } from "@/lib/crankwheel/config";
 import { getMeetingById, markMeetingRevoked, toMeetingView } from "@/lib/crankwheel/meetings";
 
 /**
  * One meeting: the agent's poll, and revoke.
  *
- * Admin-only AND owner-scoped, the same pair of checks the intake routes use. Nothing here is
- * reachable from a client's phone — the client only ever sees the CrankWheel URL itself.
+ * Staff (admin, or a scoped agent such as Legal Shield's) AND owner-scoped: an agent only ever
+ * reaches meetings they minted. Nothing here is reachable from a client's phone — the client only
+ * ever sees the CrankWheel URL itself.
  */
 
 type RouteContext = { params: Promise<{ id: string }> };
 
 async function requireOwnedMeeting(id: string) {
-  const { userId } = await auth();
+  const { userId, role } = await getStaffAccess();
   if (!userId) {
     return { error: NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 }) };
   }
-  if (!(await getIsAdmin())) {
+  if (!role) {
     return { error: NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 }) };
   }
   const row = await getMeetingById(id);
@@ -59,7 +60,9 @@ export async function DELETE(_request: NextRequest, context: RouteContext) {
     if (guard.error) return guard.error;
     const row = guard.row!;
 
-    const remoteOk = row.uid ? await deleteMeetingLink(row.uid) : false;
+    // On the account the link lives on. A row whose account left the env can only be retired here.
+    const config = crankwheelConfigForPresenter(row.presenterEmail);
+    const remoteOk = row.uid && config ? await deleteMeetingLink(row.uid, config) : false;
     await markMeetingRevoked(row.id);
 
     return NextResponse.json({ success: true, remoteRevoked: remoteOk });

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { AlertCircle, Check, CheckCircle2, Copy, Loader2, Lock, Send } from "lucide-react";
 import { ChoiceCard, OUTLINE_BTN } from "@/components/intake-ui";
 import { UI, tr, type IntakeLocale } from "@/lib/intake-core/ui-strings";
@@ -38,6 +38,7 @@ export default function SecureCapturePanel({
   onCreate,
   onCancel,
   onSend,
+  renderDelivery,
 }: {
   locale: IntakeLocale;
   /** The current step, so the default ticks follow it. */
@@ -53,6 +54,8 @@ export default function SecureCapturePanel({
   onCreate: (groups: string[]) => void;
   onCancel: () => void;
   onSend: () => Promise<boolean>;
+  /** Replaces "send by text" for an agent who sends links from their own phone (WhatsApp). */
+  renderDelivery?: (url: string) => ReactNode;
 }) {
   const [selected, setSelected] = useState<string[]>([]);
   const [fresh, setFresh] = useState(false);
@@ -116,7 +119,7 @@ export default function SecureCapturePanel({
               {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
               {tr(copied ? UI.captureCopied : UI.captureCopy, locale)}
             </button>
-            {canSend && (
+            {!renderDelivery && canSend && (
               <button type="button" onClick={send} disabled={busy} className={`${OUTLINE_BTN} w-auto whitespace-nowrap px-4 py-2 text-sm`}>
                 {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                 {tr(sent ? UI.captureSent : UI.captureSendText, locale)}
@@ -124,7 +127,10 @@ export default function SecureCapturePanel({
             )}
           </div>
         </div>
-        {!canSend && <p className="mt-2 text-xs text-muted-foreground">{tr(UI.captureNoContact, locale)}</p>}
+        {renderDelivery && url && <div className="mt-2">{renderDelivery(url)}</div>}
+        {!renderDelivery && !canSend && (
+          <p className="mt-2 text-xs text-muted-foreground">{tr(UI.captureNoContact, locale)}</p>
+        )}
         <button
           type="button"
           onClick={onCancel}

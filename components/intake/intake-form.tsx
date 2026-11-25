@@ -50,6 +50,7 @@ import {
 } from "@/hooks/use-intake-autosave";
 import IntakeBreadcrumb from "@/components/intake/intake-breadcrumb";
 import ImpactPresentationBar from "@/components/intake/impact-presentation-bar";
+import DeliveryButtons from "@/components/intake/delivery-buttons";
 import SecureCapturePanel, { type CaptureOption } from "@/components/intake/secure-capture-panel";
 import ImpactPlanPicker from "@/components/intake/impact-plan-picker";
 import ImpactQuoteDobPrompt from "@/components/intake/impact-quote-dob-prompt";
@@ -75,6 +76,7 @@ import { useIntakeSecureCapture } from "@/hooks/use-intake-secure-capture";
 import {
   captureFieldKeys,
   captureGroups,
+  groupExcluded,
   groupReady,
   groupsForSection,
 } from "@/lib/intake-core/secure-capture-groups";
@@ -122,6 +124,7 @@ import {
   rowLabel,
   sectionTitle,
   sectionDescription,
+  uiFor,
   type IntakeLocale,
 } from "@/lib/intake-core/ui-strings";
 
@@ -504,7 +507,10 @@ export default function IntakeForm({
           if (typeof incoming !== "string" || !incoming || focusedKeyRef.current === key) continue;
           const current = typeof prev[key] === "string" ? (prev[key] as string) : "";
           if (current === incoming) continue;
-          if (current && !isMaskedValue(current) && lastFour(current) !== lastFour(incoming)) setCaptureReplaced(true);
+          // A short secret (CVV, SSN last 4) comes back as bullets only: no digits to compare.
+          if (current && !isMaskedValue(current) && /\d/.test(incoming) && lastFour(current) !== lastFour(incoming)) {
+            setCaptureReplaced(true);
+          }
           next[key] = incoming;
           changed = true;
         }
@@ -546,7 +552,8 @@ export default function IntakeForm({
 
   const captureOptions: CaptureOption[] = useMemo(
     () =>
-      captureGroups(config).map((group) => {
+      // A group for another answer (the card when the client pays by bank) isn't offered at all.
+      captureGroups(config).filter((group) => !groupExcluded(group, data)).map((group) => {
         const needs = group.requires ? fieldByKey(config.sections, group.requires) : undefined;
         return {
           key: group.key,
@@ -835,13 +842,20 @@ export default function IntakeForm({
         </div>
       </div>
 
-      {agentChrome && config.impactPresentation && session && !completed && (
-        <ImpactPresentationBar lob={lob} token={token} session={session} data={data} locale={locale} />
+      {agentChrome && (config.presentation || config.impactPresentation) && session && !completed && (
+        <ImpactPresentationBar
+          lob={lob}
+          token={token}
+          session={session}
+          data={data}
+          locale={locale}
+          onSetField={setField}
+        />
       )}
 
       {completed && isOwner && (
         <div className="mb-4 flex items-center gap-2 rounded-xl border border-green-200 bg-green-50 p-3 text-sm text-green-800 dark:border-green-900 dark:bg-green-950 dark:text-green-300">
-          <PartyPopper className="h-4 w-4" /> {tr(UI.completed, locale)}
+          <PartyPopper className="h-4 w-4" /> {tr(uiFor("completed", config.noCrmWording), locale)}
         </div>
       )}
 
@@ -877,13 +891,13 @@ export default function IntakeForm({
             />
           )}
           {/* Offered, never imposed: most clients read their numbers out. Agent only. */}
-          {agentChrome && !completed && groupsForSection(config, current.key).length > 0 && (
+          {agentChrome && !completed && groupsForSection(config, current.key).filter((g) => !groupExcluded(g, data)).length > 0 && (
             <div className="mt-4">
               <SecureCapturePanel
                 locale={locale}
                 stepKey={current.key}
                 options={captureOptions}
-                defaultKeys={groupsForSection(config, current.key).map((g) => g.key)}
+                defaultKeys={groupsForSection(config, current.key).filter((g) => !groupExcluded(g, data)).map((g) => g.key)}
                 capture={secureCapture.capture}
                 url={secureCapture.url}
                 busy={secureCapture.busy}
@@ -893,6 +907,22 @@ export default function IntakeForm({
                 onCreate={secureCapture.create}
                 onCancel={secureCapture.cancel}
                 onSend={secureCapture.send}
+                renderDelivery={
+                  config.linkDelivery?.kind === "whatsapp"
+                    ? (url) => (
+                        <DeliveryButtons
+                          kind="secure"
+                          url={url}
+                          locale={locale}
+                          agentName={config.linkDelivery!.agentName}
+                          product={config.linkDelivery!.product[locale]}
+                          clientName={session?.contactName}
+                          phone={session?.contactPhone}
+                          showCopy={false}
+                        />
+                      )
+                    : undefined
+                }
               />
             </div>
           )}
@@ -1084,7 +1114,7 @@ export default function IntakeForm({
               </>
             ) : (
               <>
-                <Send className="h-4 w-4" /> {tr(isOwner ? UI.finish : UI.submitApplication, locale)}
+                <Send className="h-4 w-4" /> {tr(isOwner ? uiFor("finish", config.noCrmWording) : UI.submitApplication, locale)}
               </>
             )}
           </Button>
@@ -1171,7 +1201,11 @@ const selectCls =
   "flex h-12 w-full rounded-md border border-input bg-background px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 sm:h-11 sm:text-sm";
 const inputBase = "h-12 text-base focus-visible:ring-brand sm:h-11 sm:text-sm";
 
-/** Two-option questions (Yes/No, Sex, etc.) as tappable radio cards — left unselected by default. */
+/**
+ * Two-option questions (Yes/No, Sex, etc.) as tappable radio cards — left unselected by default.
+ * `cards` (a select with `display: "cards"`) stacks any number of options, left-aligned, each with
+ * its optional description line.
+ */
 function RadioOptions({
   id,
   options,
@@ -1179,6 +1213,7 @@ function RadioOptions({
   locale,
   invalid,
   disabled,
+  cards,
   onChange,
 }: {
   id: string;
@@ -1187,16 +1222,20 @@ function RadioOptions({
   locale: IntakeLocale;
   invalid?: boolean;
   disabled?: boolean;
+  cards?: boolean;
   onChange: (v: string) => void;
 }) {
   return (
-    <div role="radiogroup" className="grid grid-cols-2 gap-2">
+    <div role="radiogroup" className={cards ? "grid grid-cols-1 gap-2 sm:grid-cols-2" : "grid grid-cols-2 gap-2"}>
       {options.map((opt) => {
         const selected = value === opt.value;
+        const description = cards ? (locale === "es" ? opt.descriptionEs : opt.descriptionEn) : undefined;
         return (
           <label
             key={opt.value}
-            className={`flex min-h-[3rem] items-center justify-center gap-2 rounded-md border px-3 py-2.5 text-center text-base leading-tight transition sm:min-h-[2.75rem] sm:text-sm ${
+            className={`flex min-h-[3rem] gap-2 rounded-md border px-3 py-2.5 text-base leading-tight transition sm:min-h-[2.75rem] sm:text-sm ${
+              cards ? "items-start text-left" : "items-center justify-center text-center"
+            } ${
               disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer"
             } ${
               selected
@@ -1211,9 +1250,16 @@ function RadioOptions({
               checked={selected}
               disabled={disabled}
               onChange={() => onChange(opt.value)}
-              className="h-4 w-4 shrink-0 accent-brand"
+              className={`h-4 w-4 shrink-0 accent-brand ${cards ? "mt-0.5" : ""}`}
             />
-            {optionLabel(opt, locale)}
+            {description ? (
+              <span className="min-w-0">
+                <span className="block">{optionLabel(opt, locale)}</span>
+                <span className="mt-0.5 block text-xs font-normal text-muted-foreground">{description}</span>
+              </span>
+            ) : (
+              optionLabel(opt, locale)
+            )}
           </label>
         );
       })}
@@ -1288,8 +1334,9 @@ function FieldInput({
       </div>
 
       {field.type === "select" ? (
-        field.options && field.options.length === 2 ? (
-          // Two-option questions (Yes/No, Sex, etc.) render as tappable radio buttons.
+        field.options && (field.options.length === 2 || field.display === "cards") ? (
+          // Two-option questions (Yes/No, Sex, etc.) render as tappable radio buttons, and so does
+          // any select that asks for cards.
           <RadioOptions
             id={id}
             options={field.options.filter((opt) => isOwner || !opt.ownerOnly)}
@@ -1297,6 +1344,7 @@ function FieldInput({
             locale={locale}
             invalid={showInvalid}
             disabled={disabled}
+            cards={field.display === "cards"}
             onChange={onChange}
           />
         ) : (

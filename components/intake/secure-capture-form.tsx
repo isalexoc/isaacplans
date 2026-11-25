@@ -11,7 +11,8 @@ import { fieldByKey } from "@/lib/intake-core/fields";
 import { captureGroups } from "@/lib/intake-core/secure-capture-groups";
 import type { IntakeField, IntakeLobConfig } from "@/lib/intake-core/types";
 import { UI, fieldLabel, optionLabel, pickLocale, tr, type IntakeLocale } from "@/lib/intake-core/ui-strings";
-import { formatSsn } from "@/lib/intake-shared/format";
+import { formatCardExpiration, formatSsn } from "@/lib/intake-shared/format";
+import { isValidCardExpiration, isValidCvv, passesLuhn } from "@/lib/intake-core/validation";
 
 /**
  * The page a client opens on their own phone to type the numbers they'd rather not say out loud:
@@ -26,8 +27,40 @@ import { formatSsn } from "@/lib/intake-shared/format";
 type Boot = { lob: string; firstName: string; fieldKeys: string[]; kinds: Record<string, string> };
 type Phase = "loading" | "ready" | "saving" | "done" | "dead";
 
-const DIGITS: Record<string, number> = { ssn: 9, routingNumber: 9 };
+/** Fixed-length numbers, typed in a counted-digits box. */
+const DIGITS: Record<string, number> = { ssn: 9, routingNumber: 9, ssnLast4: 4, cardBillingZip: 5 };
+const DIGIT_PLACEHOLDER: Record<string, string> = {
+  ssn: "123-45-6789",
+  routingNumber: "021000021",
+  ssnLast4: "1234",
+  cardBillingZip: "22554",
+};
+/** Numbers of varying length, stored as bare digits. */
+const DIGITS_ONLY = new Set(["accountNumber", "cardNumber", "cardCvv"]);
 const onlyDigits = (v: string) => v.replace(/\D/g, "");
+/** "4111111111111111" → "4111 1111 1111 1111", easier to check against the card. */
+const groupCard = (v: string) =>
+  onlyDigits(v)
+    .slice(0, 19)
+    .replace(/(\d{4})(?=\d)/g, "$1 ");
+
+/** Lets the phone offer the card it has saved. */
+const CARD_AUTOCOMPLETE: Record<string, string> = {
+  cardNumber: "cc-number",
+  cardExpiration: "cc-exp",
+  cardCvv: "cc-csc",
+  cardholderName: "cc-name",
+};
+
+/** What a keystroke becomes in a plain input: digits for numbers, MM/YY, ID numbers in capitals. */
+function formatTyped(key: string, raw: string): string {
+  if (key === "accountNumber") return onlyDigits(raw).slice(0, 17);
+  if (key === "cardNumber") return groupCard(raw);
+  if (key === "cardCvv") return onlyDigits(raw).slice(0, 4);
+  if (key === "cardExpiration") return formatCardExpiration(raw);
+  if (key === "idDocNumber") return raw.toUpperCase();
+  return raw;
+}
 
 /** Which kind of number this field is, from the answer that gates its group ("ITIN", "Passport"). */
 function kindLabel(config: IntakeLobConfig, key: string, kinds: Record<string, string>, locale: IntakeLocale): string {
@@ -40,11 +73,25 @@ function kindLabel(config: IntakeLobConfig, key: string, kinds: Record<string, s
 function isComplete(field: IntakeField, value: string): boolean {
   if (DIGITS[field.key]) return onlyDigits(value).length === DIGITS[field.key];
   if (field.key === "accountNumber") return onlyDigits(value).length >= 4;
+  if (field.key === "cardNumber") return passesLuhn(value);
+  if (field.key === "cardExpiration") return isValidCardExpiration(value);
+  if (field.key === "cardCvv") return isValidCvv(value);
   if (field.type === "select") return Boolean(value);
   return value.trim().length >= 3;
 }
 
-export default function IntakeSecureCaptureForm({ captureToken }: { captureToken: string }) {
+export default function IntakeSecureCaptureForm({
+  captureToken,
+  onlyLob,
+}: {
+  captureToken: string;
+  /**
+   * A line's own branded secure page passes its line and opens only that line's links. Without it
+   * (the shared /secure page) the page opens only lines that have no page of their own, so a Legal
+   * Shield link never shows under Isaac Plans' chrome, and the reverse.
+   */
+  onlyLob?: string;
+}) {
   const locale = pickLocale(useLocale());
   const [phase, setPhase] = useState<Phase>("loading");
   const [boot, setBoot] = useState<Boot | null>(null);
@@ -61,7 +108,7 @@ export default function IntakeSecureCaptureForm({ captureToken }: { captureToken
         const res = await fetch(endpoint, { credentials: "same-origin" });
         const json = await res.json().catch(() => ({}));
         if (!active) return;
-        if (!res.ok || !json?.success || !getIntakeConfig(json.lob)) {
+        if (!res.ok || !json?.success || !getIntakeConfig(json.lob) || !(onlyLob ? json.lob === onlyLob : !getIntakeConfig(json.lob)?.secureSlug)) {
           setDeadMessage(json?.error ?? "This link is not available.");
           setPhase("dead");
           return;
@@ -78,7 +125,7 @@ export default function IntakeSecureCaptureForm({ captureToken }: { captureToken
     return () => {
       active = false;
     };
-  }, [endpoint]);
+  }, [endpoint, onlyLob]);
 
   const config = boot ? getIntakeConfig(boot.lob) : undefined;
   const fields = (boot?.fieldKeys ?? [])
@@ -94,7 +141,7 @@ export default function IntakeSecureCaptureForm({ captureToken }: { captureToken
     const data: Record<string, string> = {};
     for (const f of fields) {
       const v = values[f.key] ?? "";
-      data[f.key] = DIGITS[f.key] || f.key === "accountNumber" ? onlyDigits(v) : v.trim();
+      data[f.key] = DIGITS[f.key] || DIGITS_ONLY.has(f.key) ? onlyDigits(v) : v.trim();
     }
     try {
       const res = await fetch(endpoint, {
@@ -199,10 +246,10 @@ export default function IntakeSecureCaptureForm({ captureToken }: { captureToken
                   id={id}
                   value={value}
                   onChange={(v) => set(field.key, v)}
-                  format={field.key === "ssn" ? formatSsn : (raw) => onlyDigits(raw).slice(0, 9)}
+                  format={field.key === "ssn" ? formatSsn : (raw) => onlyDigits(raw).slice(0, DIGITS[field.key])}
                   digitsNeeded={DIGITS[field.key]}
                   labels={digitLabels}
-                  placeholder={field.key === "ssn" ? "123-45-6789" : "021000021"}
+                  placeholder={DIGIT_PLACEHOLDER[field.key]}
                   autoComplete="off"
                   disabled={saving}
                   invalid={invalid}
@@ -222,19 +269,16 @@ export default function IntakeSecureCaptureForm({ captureToken }: { captureToken
               ) : (
                 <input
                   id={id}
-                  type="text"
-                  inputMode={field.key === "accountNumber" ? "numeric" : "text"}
-                  autoComplete="off"
-                  autoCapitalize={field.key === "accountNumber" ? "off" : "characters"}
+                  // The security code is hidden like a password: the client may be on a call.
+                  type={field.key === "cardCvv" ? "password" : "text"}
+                  inputMode={DIGITS_ONLY.has(field.key) || field.key === "cardExpiration" ? "numeric" : "text"}
+                  autoComplete={CARD_AUTOCOMPLETE[field.key] ?? "off"}
+                  autoCapitalize={field.key === "idDocNumber" ? "characters" : field.key.endsWith("Name") ? "words" : "off"}
                   disabled={saving}
                   value={value}
-                  maxLength={field.maxLength ?? 25}
-                  onChange={(e) =>
-                    set(
-                      field.key,
-                      field.key === "accountNumber" ? onlyDigits(e.target.value).slice(0, 17) : e.target.value.toUpperCase()
-                    )
-                  }
+                  placeholder={field.key === "cardExpiration" ? (locale === "es" ? "MM/AA" : "MM/YY") : undefined}
+                  maxLength={field.key === "cardNumber" ? 23 : (field.maxLength ?? 25)}
+                  onChange={(e) => set(field.key, formatTyped(field.key, e.target.value))}
                   className={`${BIG_INPUT} ${invalid ? "border-amber-400" : ""}`}
                 />
               )}

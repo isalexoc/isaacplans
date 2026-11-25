@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { after, NextRequest, NextResponse } from "next/server";
 import {
   alreadySubmitted,
   isResponse,
@@ -7,6 +7,7 @@ import {
 } from "@/lib/intake-core/route-helpers";
 import {
   buildCrmPayloadFromData,
+  fillBlanksOnly,
   clientCanEdit,
   ensureCrmContactForSession,
   getIntakeByToken,
@@ -22,6 +23,7 @@ import {
   agentCrmAddContactTags,
 } from "@/lib/agent-crm-contacts";
 import { createContactNote } from "@/lib/agent-crm-call-summary";
+import { notifyIntakeOwner } from "@/lib/intake-core/owner-notify";
 import { allRepeaterFields, isRowFilled, sensitiveScalarKeys } from "@/lib/intake-core/fields";
 import { diffIntakeData } from "@/lib/intake-core/diff";
 import type { IntakeData, IntakeLobConfig, RepeaterRow } from "@/lib/intake-core/types";
@@ -72,7 +74,13 @@ export async function POST(_request: NextRequest, context: RouteContext) {
 
     let crmSynced = false;
     if (creds && row.crmContactId) {
-      const { native, customFields, skippedSlugs } = buildCrmPayloadFromData(config, decrypted);
+      const payload = buildCrmPayloadFromData(config, decrypted);
+      const { customFields, skippedSlugs } = payload;
+      // A completion-only line fills the contact's blanks and never overwrites what's there.
+      const native =
+        config.crmSync === "completion-fill-blanks"
+          ? await fillBlanksOnly(row.crmContactId, payload.native, creds.token)
+          : payload.native;
       if (skippedSlugs.length > 0) {
         console.warn(
           `[${config.lob}-intake] Custom fields not provisioned yet (run pnpm intake:fields ${config.lob}):`,
@@ -124,7 +132,9 @@ export async function POST(_request: NextRequest, context: RouteContext) {
     // row as stored now so an edit made during those calls isn't reverted; and it nulls every
     // sensitive scalar, so one saved after even that read doesn't stay at rest (null merges safely).
     let purge: IntakeData | null = null;
-    if (PURGE_AFTER_SYNC && crmSynced) {
+    // A line whose numbers never go to the CRM keeps them: the database is the only copy the agent
+    // enrolls the client from.
+    if (PURGE_AFTER_SYNC && crmSynced && !config.keepSensitiveAfterSync) {
       const latest = await getIntakeByToken(config, token);
       const storedNow = ((latest ?? row).data ?? {}) as IntakeData;
       purge = diffIntakeData(storedNow, purgeIntakeSensitiveData(config, storedNow));
@@ -133,6 +143,10 @@ export async function POST(_request: NextRequest, context: RouteContext) {
 
     const updated = await markIntakeCompleted(token, purge);
     if (!updated) return notFound();
+
+    // The client finished on their own: tell the agent (lines with notifyOwnerByEmail). Not when the
+    // agent submitted it, e.g. from the deck's "Confirmar mis datos" with the client watching.
+    if (access.role === "client") after(() => notifyIntakeOwner(config, updated, { kind: "completed" }));
 
     return NextResponse.json({ success: true, crmSynced, session: toIntakeSummary(updated) });
   } catch (error) {

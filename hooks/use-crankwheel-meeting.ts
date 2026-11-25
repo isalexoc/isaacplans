@@ -36,6 +36,12 @@ export type MeetingState = {
 /** What identifies the person the meeting is with. One of these is required to mint. */
 export type MeetingTarget = {
   intakeToken?: string;
+  /**
+   * An intake-engine session (Legal Shield's deck). The server takes the contact, name and phone
+   * from it; it is the only anchor a scoped agent may use.
+   */
+  engineLob?: string;
+  engineToken?: string;
   crmContactId?: string;
   contactName?: string | null;
   contactEmail?: string | null;
@@ -79,10 +85,14 @@ export function useCrankwheelMeeting({ target }: { target: MeetingTarget }) {
    * sitting on the client's phone.
    */
   useEffect(() => {
-    const { intakeToken, crmContactId } = targetRef.current;
-    if (!intakeToken && !crmContactId) return;
+    const { intakeToken, engineLob, engineToken, crmContactId } = targetRef.current;
+    if (!intakeToken && !engineToken && !crmContactId) return;
     const qs = new URLSearchParams(
-      intakeToken ? { intakeToken } : { crmContactId: crmContactId as string }
+      engineToken && engineLob
+        ? { engineLob, engineToken }
+        : intakeToken
+          ? { intakeToken }
+          : { crmContactId: crmContactId as string }
     );
 
     let active = true;
@@ -101,7 +111,7 @@ export function useCrankwheelMeeting({ target }: { target: MeetingTarget }) {
       active = false;
     };
     // Re-runs when the target identity changes, which on the launcher means a different contact.
-  }, [target.intakeToken, target.crmContactId]);
+  }, [target.intakeToken, target.engineToken, target.crmContactId]);
 
   /**
    * Watch only what can still change: a live instant link whose viewer has not arrived. Once the
@@ -158,7 +168,8 @@ export function useCrankwheelMeeting({ target }: { target: MeetingTarget }) {
         body: JSON.stringify({ kind, ...targetRef.current }),
       });
       const json = await res.json().catch(() => ({}));
-      if (!res.ok || !json?.success) throw new Error(json?.error ?? "failed");
+      // A code the panel can explain (e.g. `no_presenter`: this agent has no CrankWheel account yet).
+      if (!res.ok || !json?.success) throw new Error(json?.code ?? json?.error ?? "failed");
       startedAtRef.current = Date.now();
       errorsRef.current = 0;
       setMeeting(json.meeting);

@@ -19,10 +19,30 @@ export function groupsForSection(config: IntakeLobConfig, sectionKey: string): S
   return captureGroups(config).filter((g) => g.sections.includes(sectionKey));
 }
 
-/** A group can be asked for once its prerequisite (the SSN/ITIN choice, the ID type) is answered. */
+function requiresMatches(group: SecureCaptureGroup, answer: string): boolean {
+  if (group.requiresEquals == null) return true;
+  const allowed = Array.isArray(group.requiresEquals) ? group.requiresEquals : [group.requiresEquals];
+  return allowed.includes(answer);
+}
+
+/**
+ * A group can be asked for once its prerequisite (the SSN/ITIN choice, the ID type) is answered,
+ * and, when the group names the answers it belongs to (`requiresEquals`), answered with one of them.
+ */
 export function groupReady(group: SecureCaptureGroup, data: IntakeData): boolean {
   if (!group.requires) return true;
-  return String(data[group.requires] ?? "").trim() !== "";
+  const answer = String(data[group.requires] ?? "").trim();
+  return answer !== "" && requiresMatches(group, answer);
+}
+
+/**
+ * The prerequisite is answered with something this group isn't for (a card group when the client
+ * pays by bank draft): the panel leaves the group out instead of showing it as "not ready".
+ */
+export function groupExcluded(group: SecureCaptureGroup, data: IntakeData): boolean {
+  if (!group.requires || group.requiresEquals == null) return false;
+  const answer = String(data[group.requires] ?? "").trim();
+  return answer !== "" && !requiresMatches(group, answer);
 }
 
 /** Field keys for a set of group keys, de-duplicated, unknown keys ignored. */

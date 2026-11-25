@@ -1,7 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
+import { after, NextRequest, NextResponse } from "next/server";
 import { createContactNote } from "@/lib/agent-crm-call-summary";
 import { agentCrmGetBaseCredentials } from "@/lib/agent-crm-contacts";
 import { getIntakeConfig } from "@/lib/intake-configs";
+import { notifyIntakeOwner } from "@/lib/intake-core/owner-notify";
 import { sanitizeIntakeData } from "@/lib/intake-core/schema";
 import { planIntakePatch } from "@/lib/intake-core/patch";
 import { decryptIntakeData, encryptIntakeData } from "@/lib/intake-core/sensitive";
@@ -129,6 +130,12 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
       patch[key] = typeof value === "string" ? value.trim() : value;
     }
     if (typeof patch.idDocNumber === "string") patch.idDocNumber = patch.idDocNumber.toUpperCase();
+    // Cards are stored the way the agent's form keeps them: bare digits, and MM/YY.
+    if (typeof patch.cardNumber === "string") patch.cardNumber = patch.cardNumber.replace(/\D/g, "");
+    if (typeof patch.cardExpiration === "string") {
+      const d = patch.cardExpiration.replace(/\D/g, "");
+      if (d.length === 4) patch.cardExpiration = `${d.slice(0, 2)}/${d.slice(2)}`;
+    }
 
     const errors = validateCapture(patch, allowed);
     if (Object.keys(errors).length) return NextResponse.json({ success: false, errors }, { status: 400 });
@@ -149,10 +156,18 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     await markCaptureSubmitted(capture.id);
 
     await syncIntakeToCrm(config, updated, decryptIntakeData(config, (updated.data ?? {}) as IntakeData));
-    const labels = captureGroups(config)
-      .filter((g) => groupsForKeys(config, capture.fieldKeys ?? []).includes(g.key))
-      .map((g) => g.labelEn);
+    const received = captureGroups(config).filter((g) =>
+      groupsForKeys(config, capture.fieldKeys ?? []).includes(g.key)
+    );
+    const labels = received.map((g) => g.labelEn);
     await noteReceived(updated.crmContactId, labels, config.label);
+    // The agent may have no CRM to see that note in (Legal Shield): email them, in their language.
+    after(() =>
+      notifyIntakeOwner(config, updated, {
+        kind: "secure",
+        groups: received.map((g) => (config.fixedLocale === "es" ? g.labelEs : g.labelEn)),
+      })
+    );
 
     return NextResponse.json({ success: true });
   } catch (error) {

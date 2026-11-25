@@ -20,7 +20,7 @@ import {
   agentCrmGetContactTags,
   agentCrmEnsureContact,
   agentCrmAddContactTags,
-  type AgentCrmCustomFieldValue,
+  agentCrmGetContactNative,
   type AgentCrmNativeFields,
 } from "@/lib/agent-crm-contacts";
 import {
@@ -30,16 +30,16 @@ import {
   type IntakeAccess,
   type IntakeCaller,
 } from "@/lib/intake-shared/access";
-import { isFieldVisible, isRowFilled, allRepeaterFields } from "./fields";
 import { crmFieldId, intakeLinkSlug } from "./ghl-field-ids";
 import { buildIntakeShareUrl } from "./share-url";
+import { buildCrmPayloadFromData } from "./crm-payload";
+import { ensureScopedContact } from "./contact-scope";
 import type {
   IntakeData,
   IntakeLobConfig,
   IntakeSession,
   IntakeStatus,
   IntakeSummary,
-  RepeaterRow,
 } from "./types";
 
 export type IntakeSessionRow = typeof intakeSessions.$inferSelect;
@@ -133,8 +133,9 @@ export async function createIntakeSession(
       contactName: input.contactName ?? null,
       contactEmail: input.contactEmail ?? null,
       contactPhone: input.contactPhone ?? null,
-      data: input.data ?? {},
-      locale: input.locale ?? "en",
+      // A line's starting answers (Legal Shield's default package), under whatever the caller set.
+      data: { ...(config.initialData ?? {}), ...(input.data ?? {}) },
+      locale: config.fixedLocale ?? input.locale ?? "en",
       status: "draft",
       createdAt: now,
       updatedAt: now,
@@ -307,15 +308,17 @@ export async function selfStartIntakeForClient(
 
 export const INTAKE_PAGE_SIZE = 20;
 
+/**
+ * `ownerUserId: null` lists every owner's sessions of the line: only for an admin on a line with
+ * `adminOversight` (Isaac seeing his dad's Legal Shield clients); the route decides that.
+ */
 function ownerListConditions(
   config: IntakeLobConfig,
-  ownerUserId: string,
+  ownerUserId: string | null,
   opts: { search?: string; status?: IntakeStatus }
 ): SQL[] {
-  const conditions: SQL[] = [
-    eq(intakeSessions.lob, config.lob),
-    eq(intakeSessions.ownerUserId, ownerUserId),
-  ];
+  const conditions: SQL[] = [eq(intakeSessions.lob, config.lob)];
+  if (ownerUserId !== null) conditions.push(eq(intakeSessions.ownerUserId, ownerUserId));
   if (opts.status) conditions.push(eq(intakeSessions.status, opts.status));
   if (opts.search?.trim()) {
     const q = `%${opts.search.trim()}%`;
@@ -331,7 +334,7 @@ function ownerListConditions(
 
 export async function listIntakeSessionsForOwner(
   config: IntakeLobConfig,
-  ownerUserId: string,
+  ownerUserId: string | null,
   opts: { search?: string; status?: IntakeStatus; page?: number; limit?: number } = {}
 ): Promise<IntakeSessionRow[]> {
   const limit = Math.max(1, Math.min(opts.limit ?? INTAKE_PAGE_SIZE, 100));
@@ -347,7 +350,7 @@ export async function listIntakeSessionsForOwner(
 
 export async function countIntakeSessionsForOwner(
   config: IntakeLobConfig,
-  ownerUserId: string,
+  ownerUserId: string | null,
   opts: { search?: string; status?: IntakeStatus } = {}
 ): Promise<number> {
   const [row] = await db
@@ -530,114 +533,8 @@ export async function syncIntakeLinkToCrm(
   }
 }
 
-/** Default row rendering: `Label: value` pairs, unambiguous when read in the CRM. */
-function defaultRowFormat(
-  field: { rowFields?: { key: string; type: string; labelEn: string; crmLabel?: string }[] },
-  row: RepeaterRow,
-  index: number
-): string {
-  const parts: string[] = [];
-  for (const sub of field.rowFields ?? []) {
-    if (sub.type === "file") continue;
-    const value = str(row[sub.key]);
-    if (value) parts.push(`${sub.crmLabel ?? sub.labelEn}: ${value}`);
-  }
-  return parts.length ? `${index + 1}. ${parts.join(" | ")}` : "";
-}
-
-/**
- * Build the CRM update payload from DECRYPTED intake data.
- *
- * Native fields go on the contact body; custom fields resolve slug→id (unprovisioned ids are
- * collected into `skippedSlugs` and skipped, so a half-provisioned line still syncs). Repeaters
- * flatten either into one slot per row (`crmSlots`) or into a single newline-joined text field
- * (`crm`), because a GHL contact cannot hold a nested list.
- */
-export function buildCrmPayloadFromData(
-  config: IntakeLobConfig,
-  data: IntakeData
-): {
-  native: AgentCrmNativeFields;
-  customFields: AgentCrmCustomFieldValue[];
-  skippedSlugs: string[];
-} {
-  const native: AgentCrmNativeFields = {};
-  const customFields: AgentCrmCustomFieldValue[] = [];
-  const skippedSlugs: string[] = [];
-
-  const pushCustom = (slug: string, value: string) => {
-    const id = crmFieldId(config.lob, slug);
-    if (!id) {
-      skippedSlugs.push(slug);
-      return;
-    }
-    customFields.push({ id, field_value: value });
-  };
-
-  for (const section of config.sections) {
-    for (const field of section.fields) {
-      if (!isFieldVisible(field, data)) continue;
-      // Repeaters are handled below; file uploads are written by the files route.
-      if (field.type === "repeater" || field.type === "file") continue;
-      if (!field.crm) continue;
-
-      const value = str(data[field.key]);
-      if (!value) continue;
-
-      if (field.crm.kind === "native") {
-        native[field.crm.field] = value;
-      } else {
-        // Selects must send the CRM picklist label (e.g. "No"), not the internal value ("no").
-        let outValue = value;
-        if (field.type === "select" && field.options) {
-          const opt = field.options.find((o) => o.value === value);
-          if (opt) outValue = opt.labelEn;
-        }
-        pushCustom(field.crm.slug, outValue);
-      }
-    }
-  }
-
-  // GHL's contact record has no native slot for a second surname or an apartment line, and both
-  // belong with the value they extend — a carrier name match needs both surnames, and mail needs
-  // the unit number. Compose them into the native fields rather than dropping them; they stay
-  // separate in our own record. Idempotent: the composition always rebuilds from our stored
-  // fields, never from what is already on the contact.
-  const secondLastName = str(data.secondLastName);
-  if (secondLastName) {
-    native.lastName = native.lastName ? `${native.lastName} ${secondLastName}` : secondLastName;
-  }
-  const address2 = str(data.address2);
-  if (address2 && native.address1) {
-    native.address1 = `${native.address1}, ${address2}`;
-  }
-
-  for (const field of allRepeaterFields(config.sections)) {
-    if (!isFieldVisible(field, data)) continue;
-    const raw = data[field.key];
-    const rows: RepeaterRow[] = Array.isArray(raw) ? (raw as RepeaterRow[]) : [];
-    const filled = rows.filter((r) => isRowFilled(field, r ?? {}));
-    if (!filled.length) continue;
-
-    const format = field.rowFormat ?? ((r: RepeaterRow, i: number) => defaultRowFormat(field, r, i));
-
-    if (field.crmSlots?.length) {
-      // One CRM field per row — readable at a glance in the contact record.
-      field.crmSlots.forEach((slug, i) => {
-        const row = filled[i];
-        if (!row) return;
-        const line = format(row, i);
-        if (line) pushCustom(slug, line);
-      });
-    } else if (field.crm?.kind === "custom") {
-      // Collapse every row into one text field.
-      const text = filled.map((r, i) => format(r, i)).filter(Boolean).join("\n");
-      if (text) pushCustom(field.crm.slug, text);
-    }
-  }
-
-  return { native, customFields, skippedSlugs };
-}
+/** Lives in ./crm-payload (pure, testable); re-exported for existing callers. */
+export { buildCrmPayloadFromData };
 
 /**
  * Attach a CRM contact to a session that started anonymously, as soon as the client has typed
@@ -663,6 +560,35 @@ export async function ensureCrmContactForSession(
   const firstName = str(decrypted.firstName);
   const lastName = str(decrypted.lastName);
   try {
+    if (config.contactSearchTags?.length) {
+      // A scoped line (Legal Shield): an exact match or a new contact, its own tags, and the
+      // language tag only on a contact it created. Never the self-apply tag: its sessions are
+      // started by its associate, and that tag would fire a self-apply workflow.
+      const result = await ensureScopedContact(
+        { email: email || undefined, phone: phone || undefined, firstName, lastName, source: crmSource(config) },
+        creds.locationId,
+        creds.token,
+        logTag
+      );
+      if (!result.id) return null;
+      const locale = row.locale === "es" ? "es" : "en";
+      const tags = [...(config.contactTags ?? [])];
+      if (result.created) tags.push(locale === "es" ? INTAKE_SPANISH_TAG : INTAKE_ENGLISH_TAG);
+      if (tags.length) await agentCrmAddContactTags(result.id, tags, creds.token, logTag);
+      await db
+        .update(intakeSessions)
+        .set({
+          crmContactId: result.id,
+          contactName: [firstName, lastName].filter(Boolean).join(" ") || row.contactName,
+          contactEmail: email || row.contactEmail,
+          contactPhone: phone || row.contactPhone,
+          updatedAt: new Date(),
+        })
+        .where(eq(intakeSessions.token, row.token));
+      row.crmContactId = result.id;
+      return result.id;
+    }
+
     const contactId = await agentCrmEnsureContact(
       {
         email: email || undefined,
@@ -707,6 +633,27 @@ export async function ensureCrmContactForSession(
 }
 
 /**
+ * The native fields that are still EMPTY on the contact. A completion-only line never overwrites a
+ * contact (often one of Isaac's own, matched by email or phone): it only fills what's missing.
+ * When the contact can't be read, nothing is written.
+ */
+export async function fillBlanksOnly(
+  contactId: string,
+  native: AgentCrmNativeFields,
+  token: string
+): Promise<AgentCrmNativeFields> {
+  const current = await agentCrmGetContactNative(contactId, token);
+  if (!current) return {};
+  const out: AgentCrmNativeFields = {};
+  for (const [key, value] of Object.entries(native) as [keyof AgentCrmNativeFields, string][]) {
+    const existing = (current as unknown as Record<string, unknown>)[key];
+    if (typeof existing === "string" && existing.trim()) continue;
+    out[key] = value;
+  }
+  return out;
+}
+
+/**
  * Push the current (decrypted) intake data to the linked CRM contact. Best-effort: returns false
  * and logs on any miss (missing creds/contact, API error) without throwing, so it can run on every
  * autosave without breaking the save.
@@ -716,6 +663,9 @@ export async function syncIntakeToCrm(
   row: IntakeSessionRow,
   decrypted: IntakeData
 ): Promise<boolean> {
+  // A completion-only line (Legal Shield) writes nothing to the CRM while the form is being
+  // filled: the completion route does it once, filling blanks only.
+  if (config.crmSync === "completion-fill-blanks") return false;
   const contactId = await ensureCrmContactForSession(config, row, decrypted);
   if (!contactId) return false;
   const creds = agentCrmGetBaseCredentials();

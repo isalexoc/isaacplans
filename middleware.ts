@@ -4,6 +4,7 @@ import { clerkMiddleware, clerkClient, createRouteMatcher } from "@clerk/nextjs/
 import createMiddleware from "next-intl/middleware";
 import { routing } from "./i18n/routing";
 import { isPrivatePagePath } from "./lib/private-pages";
+import { canOpenAdminPath, roleFromMetadata, type StaffRole } from "./lib/auth/staff-roles";
 
 // Create the next-intl middleware
 const intlMiddleware = createMiddleware(routing);
@@ -95,6 +96,18 @@ const isProtectedRoute = createRouteMatcher([
   '/alternativa-de-salud/admision/:token/view',
   '/en/health-alternative/intake/:token/view',
   '/es/alternativa-de-salud/admision/:token/view',
+  // Legal Shield (Spanish only, same slug in both locales): the associate's dashboard, a client's
+  // summary and the deck. The client form (/legal-shield/intake/<token>) and its private link
+  // (/legal-shield/intake/privado/<token>) stay public: their token is the credential.
+  '/legal-shield/intake',
+  '/en/legal-shield/intake',
+  '/es/legal-shield/intake',
+  '/legal-shield/intake/:token/view',
+  '/en/legal-shield/intake/:token/view',
+  '/es/legal-shield/intake/:token/view',
+  '/legal-shield/intake/:token/presentation',
+  '/en/legal-shield/intake/:token/presentation',
+  '/es/legal-shield/intake/:token/presentation',
 ]);
 // NOTE: /partner and /socio are deliberately NOT protected. The page is the partner portal: it
 // renders a public marketing landing with a sign-in button when signed out, and the dashboard
@@ -115,17 +128,23 @@ const isAdminPageRoute = createRouteMatcher([
 // Role lives in Clerk publicMetadata (same convention as /presentations), which is
 // not in the session token — fetch the user, with a short in-memory cache so admin
 // page navs and API bursts don't re-hit Clerk's API on every request.
-const ADMIN_CACHE_TTL_MS = 60_000;
-const adminCache = new Map<string, { isAdmin: boolean; expires: number }>();
+const ROLE_CACHE_TTL_MS = 60_000;
+/** "No role" is cached only briefly, so a role Isaac just granted works within seconds. */
+const NO_ROLE_CACHE_TTL_MS = 5_000;
+const roleCache = new Map<string, { role: StaffRole | null; expires: number }>();
 
-async function userIsAdmin(userId: string): Promise<boolean> {
-  const cached = adminCache.get(userId);
-  if (cached && cached.expires > Date.now()) return cached.isAdmin;
+async function userRole(userId: string): Promise<StaffRole | null> {
+  const cached = roleCache.get(userId);
+  if (cached && cached.expires > Date.now()) return cached.role;
   const client = await clerkClient();
   const user = await client.users.getUser(userId);
-  const isAdmin = user.publicMetadata?.role === "admin";
-  adminCache.set(userId, { isAdmin, expires: Date.now() + ADMIN_CACHE_TTL_MS });
-  return isAdmin;
+  const role = roleFromMetadata(user.publicMetadata);
+  roleCache.set(userId, { role, expires: Date.now() + (role ? ROLE_CACHE_TTL_MS : NO_ROLE_CACHE_TTL_MS) });
+  return role;
+}
+
+async function userIsAdmin(userId: string): Promise<boolean> {
+  return (await userRole(userId)) === "admin";
 }
 
 export default clerkMiddleware(async (auth, req) => {
@@ -191,10 +210,12 @@ export default clerkMiddleware(async (auth, req) => {
     await auth.protect();
   }
 
-  // /admin dashboard + tools: admin role required
+  // /admin dashboard + tools: admin role required. The one exception is the dashboard root itself
+  // for the legal_shield role (it then shows only the Legal Shield section); every /admin subpath
+  // stays admin-only, because many admin pages have no check of their own.
   if (isAdminPageRoute(req)) {
     const { userId } = await auth();
-    if (!userId || !(await userIsAdmin(userId))) {
+    if (!userId || !canOpenAdminPath(await userRole(userId), req.nextUrl.pathname)) {
       const locale = req.nextUrl.pathname.startsWith('/es') ? 'es' : 'en';
       return NextResponse.redirect(new URL(`/${locale}/unauthorized`, req.url));
     }
@@ -289,6 +310,11 @@ export default clerkMiddleware(async (auth, req) => {
   // disclosure. Checked before the iul-bare block so it wins.
   if (isLegalShield) {
     response.headers.set("x-ads-landing-variant", "legal-shield-bare");
+  }
+  // The associate's intake pages (dashboard, client form, summary, private link, deck) carry the
+  // "Red de Apoyo Latino USA" footer and disclosure instead of the funnel's "Escudo Legal" one.
+  if (/^(?:\/(?:en|es))?\/legal-shield\/intake(?:\/|$)/i.test(pathname)) {
+    response.headers.set("x-ads-landing-variant", "legal-shield-intake");
   }
   // "Bare" funnels (IUL + final expense + ACA get-covered, ACA/FE intake forms) get an even
   // barer footer (logo + copyright only, no links) and a logo-only + phone header.

@@ -526,10 +526,20 @@ export const crankwheelMeetings = pgTable("crankwheel_meetings", {
   id:            text("id").primaryKey(), // nanoid
   /** "now" = noauth link, joins with no handshake. "scheduled" = durable link, agent admits. */
   kind:          text("kind").notNull(),
-  /** `iul_intake_sessions.id`, not its token, which `resetIntakeLink` rotates. Null from the launcher. */
+  /**
+   * The intake session's id, not its token (`resetIntakeLink` rotates tokens): an
+   * `iul_intake_sessions.id`, or an `intake_sessions.id` for an engine line's deck (Legal Shield).
+   * Both are random ids, so they never collide. Null from the launcher.
+   */
   sessionId:     text("session_id"),
   crmContactId:  text("crm_contact_id"),
   ownerUserId:   text("owner_user_id").notNull(), // agent Clerk id
+  /**
+   * The CrankWheel account the link was minted on: a `CRANKWHEEL_PRESENTERS` email (Ysmael's own
+   * account), or null for Isaac's (the env defaults). Revoking, the usage read behind the note and
+   * the "superseded" bookkeeping all follow it.
+   */
+  presenterEmail: text("presenter_email"),
   // Snapshot so the launcher can list past meetings without re-reading the CRM.
   contactName:   text("contact_name"),
   contactEmail:  text("contact_email"),

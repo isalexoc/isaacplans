@@ -1,5 +1,6 @@
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+import { LEGAL_SHIELD_HOME } from "@/lib/auth/staff-roles";
 import { getLocale, getTranslations } from "next-intl/server";
 import Link from "next/link";
 import type { Metadata } from "next";
@@ -60,6 +61,11 @@ export default async function UnauthorizedPage() {
     // If admin, redirect to presentations page
     if (isAdmin) {
       redirect(`/${locale}/presentations`);
+    }
+    // The Legal Shield associate's only area is his dashboard. Gated in its own page (fresh role
+    // read), so this can't loop with middleware's short role cache.
+    if (user?.publicMetadata?.role === "legal_shield") {
+      redirect(LEGAL_SHIELD_HOME);
     }
   }
   
