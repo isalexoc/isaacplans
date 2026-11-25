@@ -205,7 +205,8 @@ export default function MeetingPanel({
 
         {error && (
           <p className="mt-2 flex items-start gap-1.5 text-sm font-medium text-amber-700 dark:text-amber-500">
-            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" /> {trm(MEET.error, locale)}
+            <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />{" "}
+            {trm(error === "no_presenter" ? MEET.noPresenter : MEET.error, locale)}
           </p>
         )}
       </div>
@@ -261,7 +262,8 @@ export default function MeetingPanel({
 
       {error && (
         <p className="mt-2 flex items-start gap-1.5 text-sm font-medium text-amber-700 dark:text-amber-500">
-          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" /> {trm(MEET.error, locale)}
+          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />{" "}
+          {trm(error === "no_presenter" ? MEET.noPresenter : MEET.error, locale)}
         </p>
       )}
     </div>

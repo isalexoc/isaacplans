@@ -463,8 +463,9 @@ export const legalShieldIntake: IntakeLobConfig = {
   },
   presentation: {
     pathname: "/legal-shield/intake/[token]/presentation",
-    // CrankWheel stays off until each agent has their own presenter (chunk C).
-    meetings: false,
+    // CrankWheel on Ysmael's OWN account (CRANKWHEEL_PRESENTERS); until his entry is in the env the
+    // panel says so instead of minting on Isaac's.
+    meetings: true,
     titleEn: "LegalShield presentation",
     titleEs: "Presentación de LegalShield",
     bodyEn: "Opens in a new tab. Share that tab with the client.",

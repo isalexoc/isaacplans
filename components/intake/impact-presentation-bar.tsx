@@ -54,13 +54,18 @@ export default function ImpactPresentationBar({
   const whatsapp = config.linkDelivery?.kind === "whatsapp" ? config.linkDelivery : null;
 
   const meeting = useCrankwheelMeeting({
-    target: {
-      crmContactId: session.crmContactId ?? undefined,
-      contactName: session.contactName,
-      contactEmail: session.contactEmail,
-      contactPhone: session.contactPhone,
-      locale: session.locale,
-    },
+    // A line with its own deck (Legal Shield) anchors the meeting to this session: the server reads
+    // the contact from it, and it is the only anchor its scoped agent may use. Impact keeps the CRM
+    // contact anchor it has always had.
+    target: presentation
+      ? { engineLob: lob, engineToken: token }
+      : {
+          crmContactId: session.crmContactId ?? undefined,
+          contactName: session.contactName,
+          contactEmail: session.contactEmail,
+          contactPhone: session.contactPhone,
+          locale: session.locale,
+        },
   });
 
   const live = meeting.meeting;

@@ -18,7 +18,24 @@ Associate, WhatsApp (540) 376-1831) gets the Impact flow — dashboard → clien
 - **Chunks:** A1 engine generalization (no behavior change) · A2 LS line + role + CRM scoping · B deck · C CrankWheel
   per account · D owner email + docs. Plan of record:
   `C:\Users\isale\.claude\plans\presentaci-n-impact-para-intak-enchanted-mitten-of-1f565ec0-1a39-42c0-b333-60ecad4e3a80.md`.
-- **Done:** A1 (`3a5b63a`), A2 (`e0d9c71`), B (the deck). Next: C (CrankWheel per account), D (owner email + docs).
+- **Done:** A1 (`3a5b63a`), A2 (`e0d9c71`), B (`3db3250`, the deck), C (CrankWheel per account). Next: D (owner
+  email + docs).
+- **C, CrankWheel on Ysmael's own account:** `CRANKWHEEL_PRESENTERS` (JSON `[{userId, email, writeKey, readKey?}]`)
+  gives an agent their own account; the admin without an entry keeps Isaac's env keys; a scoped agent without one
+  gets "CrankWheel todavía no está configurado para su cuenta", never Isaac's account. `config` is required on every
+  `client.ts` call (no fallback). Migration `0048_crankwheel_presenter` adds `crankwheel_meetings.presenter_email`
+  (null = Isaac's): revoke and the usage read behind the CRM note use the row's account (a row whose account left
+  the env is skipped), and "superseded" bookkeeping stays inside one account. Routes: any staff role, owner-scoped;
+  Ysmael may only mint/restore from an engine session he can operate (`engineLob` + `engineToken`: contact, name and
+  phone come from the session, never the body); the IUL token, bare-contact and list reads, and CRM "send" stay
+  admin-only. The LS bar anchors to its session; Impact keeps its CRM-contact anchor. LS meetings on, viewer in
+  Spanish, links by WhatsApp.
+  Verified: tsc; `test:crankwheel` 53 (24 new: per-account configs, superseding scope, static no-fallback checks);
+  headless Chrome on the real LS form (intake + CrankWheel APIs mocked): restores and mints with only the engine
+  session, the no-account message, a live link with WhatsApp/Compartir and no CRM send.
+  **Isaac, before merging:** `pnpm db:migrate 0048` (the merged code selects the new column), Ysmael's CrankWheel
+  account + extension signed in as him, `CRANKWHEEL_PRESENTERS` in Vercel with his Clerk user id. Then the preview
+  test: a link as Isaac and one as Ysmael both stay live, each client lands on the right screen.
 - **B, the deck** (`components/legal-shield-presentation/`, page `…/[token]/presentation`): cover + 8 on the shared
   9:16 shell (Montserrat, navy/gold), the PDF's 6 slides rebuilt as live text, then the price slide (photo with the
   whole family, huge total, small breakdown, Mensual/Anual) and "3 pasos" → "Confirmar mis datos". The package and the
