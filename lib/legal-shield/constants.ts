@@ -201,9 +201,6 @@ export const LS_BRAND_NAME = "Red de Apoyo Latino USA";
 /** The associate's dashboard (Spanish only; /en 308s to /es). */
 export const LS_INTAKE_PATH = "/legal-shield/intake";
 
-/** Ysmael's photo for the deck, a larger crop of the same original as YSMAEL_HEADSHOT_URL. */
-export const YSMAEL_PHOTO_URL = `${CLOUDINARY}/f_auto,q_auto,c_fill,g_face,z_0.75,w_480,h_480/v1790001116/677661707_10239564285542052_6169561768116144074_n_v5zqwu.jpg`;
-
 /**
  * The line under every slide, from Isaac's deck, with "servicios" for "coberturas" (insurance
  * wording) and the not-insurance sentence the associate rules ask for.

@@ -481,9 +481,9 @@ export const legalShieldIntake: IntakeLobConfig = {
         labelEn: "IDShield Family 3B in the price",
         labelEs: "IDShield Familiar 3B en el precio",
         hintEn:
-          "Only you see this. Turn it off when the client can't afford the package: the price slide keeps only the Preferred legal plan ($39.95). In the presentation: Shift + I.",
+          "Only you see this. Turn it off when the client can't afford the package: the price slide keeps only the Preferred legal plan ($39.95). In the presentation: Shift+I.",
         hintEs:
-          "Solo usted ve esto. Apáguelo si el cliente no puede pagar el paquete: la lámina de precio queda solo con el Plan Legal Preferencial ($39.95). En la presentación: Shift + I.",
+          "Solo usted ve esto. Apáguelo si el cliente no puede pagar el paquete: la lámina de precio queda solo con el Plan Legal Preferencial ($39.95). En la presentación: Shift+I.",
       },
     ],
   },

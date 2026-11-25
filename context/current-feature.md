@@ -18,6 +18,21 @@ Associate, WhatsApp (540) 376-1831) gets the Impact flow — dashboard → clien
 - **Chunks:** A1 engine generalization (no behavior change) · A2 LS line + role + CRM scoping · B deck · C CrankWheel
   per account · D owner email + docs. Plan of record:
   `C:\Users\isale\.claude\plans\presentaci-n-impact-para-intak-enchanted-mitten-of-1f565ec0-1a39-42c0-b333-60ecad4e3a80.md`.
+- **Done:** A1 (`3a5b63a`), A2 (`e0d9c71`), B (the deck). Next: C (CrankWheel per account), D (owner email + docs).
+- **B, the deck** (`components/legal-shield-presentation/`, page `…/[token]/presentation`): cover + 8 on the shared
+  9:16 shell (Montserrat, navy/gold), the PDF's 6 slides rebuilt as live text, then the price slide (photo with the
+  whole family, huge total, small breakdown, Mensual/Anual) and "3 pasos" → "Confirmar mis datos". The package and the
+  billing are the intake's own answers: a switch on the deck, Ysmael's unshared-tab switch or Shift+I saves them, and
+  the other tab follows over the `intake-saved` broadcast. Ysmael's photo is the portrait from Isaac's PDFs (Isaac,
+  2026-11-24: that one is him; the `/legal-shield` funnel's Cloudinary headshot looks like a different man). Paso 2
+  no longer promises "72 horas" (no source). Also fixed: the presentation card's button stretched across the card
+  (`w-full` outranked `w-auto`), on Impact's form too.
+  Verified: tsc; `test:staff-access` 109, `test:intake-autosave` 60, `test:quote-prefill` 145, `test:lead-guard` 153;
+  every slide side by side with the PDF; two headless-Chrome tabs (the real form page + the deck under the LS header,
+  intake API mocked, no DB writes), 16 checks: the agent's switch → deck $39.95, the deck's Anual → saved and the form
+  shows Pago anual, Shift+I → $850.86 and the form's switch back on, no control drawn on the deck, the deck frame fills
+  the window under the slim header, "Confirmar mis datos" → the form without the package control; no console errors.
+  Not verifiable locally: the real page's Clerk + Neon gate (same checks as the summary page) and a CrankWheel share.
 - **Done first:** `fix/newsletter-admin-gate` (merged `14d185a`): `/api/newsletter/send-post` and `subscriber-counts`
   only checked sign-in, so any signed-up visitor could send a newsletter to every subscriber.
 

@@ -7,6 +7,7 @@ import ImpactQuotePanel from "@/components/intake/impact-quote-panel";
 import DeliveryButtons from "@/components/intake/delivery-buttons";
 import { OUTLINE_BTN } from "@/components/intake-ui";
 import { Switch } from "@/components/ui/switch";
+import { cn } from "@/lib/utils";
 import { useCrankwheelMeeting } from "@/hooks/use-crankwheel-meeting";
 import { requireIntakeConfig } from "@/lib/intake-configs";
 import { UI, tr, type IntakeLocale } from "@/lib/intake-core/ui-strings";
@@ -145,7 +146,9 @@ export default function ImpactPresentationBar({
           className={
             joined
               ? "flex shrink-0 items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-brand to-accent px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-brand/30 transition hover:opacity-95"
-              : `${OUTLINE_BTN} w-auto shrink-0 whitespace-nowrap px-4 py-2.5 text-sm`
+              : // cn, not a template string: OUTLINE_BTN's w-full outranks w-auto in Tailwind's CSS
+                // order, which stretched the button across the card and squeezed the title.
+                cn(OUTLINE_BTN, "w-auto shrink-0 whitespace-nowrap px-4 py-2.5 text-sm")
           }
         >
           <ExternalLink className="h-4 w-4" />
