@@ -89,6 +89,25 @@ export async function searchCrmContacts(lob: string, query: string): Promise<Crm
   return data.contacts ?? [];
 }
 
+/** A client in the line's own list (Legal Shield's contacts), with their registro if they have one. */
+export type LineContact = CrmContactMatch & {
+  /** When the contact entered the CRM (ISO), for "Entró el …". */
+  dateAdded: string | null;
+  session: { token: string; status: IntakeStatus } | null;
+};
+
+/** One page (20) of the line's own clients, newest first. */
+export async function listLineContacts(
+  lob: string,
+  page: number
+): Promise<{ contacts: LineContact[]; pagination: IntakePagination }> {
+  const params = new URLSearchParams({ contactList: "1", page: String(page) });
+  const data = await parseJson<{ success: boolean; contacts: LineContact[]; pagination: IntakePagination }>(
+    await fetch(`${base(lob)}?${params.toString()}`, { credentials: "same-origin" })
+  );
+  return { contacts: data.contacts ?? [], pagination: data.pagination };
+}
+
 export async function createIntake(lob: string, input: {
   crmContactId?: string;
   email?: string;

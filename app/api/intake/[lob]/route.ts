@@ -6,6 +6,7 @@ import {
   createIntakeSession,
   listIntakeSessionsForOwner,
   countIntakeSessionsForOwner,
+  latestSessionsByCrmContact,
   syncIntakeLinkToCrm,
   toIntakeSummary,
   INTAKE_PAGE_SIZE,
@@ -19,6 +20,7 @@ import {
   agentCrmGetContactTags,
   agentCrmAddContactTags,
   agentCrmSearchContacts,
+  agentCrmListContactsByTags,
 } from "@/lib/agent-crm-contacts";
 import { ensureScopedContact, hasAnyTag } from "@/lib/intake-core/contact-scope";
 import { titleCaseName, isValidEmail, isValidPhone } from "@/lib/intake-core/validation";
@@ -27,6 +29,10 @@ import type { IntakeData, IntakeLobConfig, IntakeStatus, IntakeSummary } from "@
 type RouteContext = { params: Promise<{ lob: string }> };
 
 const STATUSES: IntakeStatus[] = ["draft", "in_progress", "completed"];
+
+/** The line's own client list (Legal Shield), a page at a time: what Ysmael asked for. */
+const CONTACT_LIST_PAGE_SIZE = 20;
+const emptyContactPage = { page: 1, limit: CONTACT_LIST_PAGE_SIZE, total: 0, totalPages: 1, hasMore: false };
 
 function parseStatus(value: string | null): IntakeStatus | undefined {
   return STATUSES.find((s) => s === value);
@@ -84,6 +90,38 @@ export async function GET(request: NextRequest, context: RouteContext) {
       // Tags were only needed for the check; the browser gets what it always got.
       const contacts = allowed.map(({ tags: _tags, ...c }) => c);
       return NextResponse.json({ success: true, contacts });
+    }
+
+    // ?contactList=1&page=N — the line's own clients (Legal Shield: every contact carrying one of its
+    // tags), 20 a page, newest first, so the associate can start from one without searching. Always
+    // the line's tags, for the admin too: it is that line's list, never the whole CRM.
+    if (searchParams.get("contactList") !== null) {
+      const tags = config.contactSearchTags ?? [];
+      const creds = agentCrmGetBaseCredentials();
+      if (!tags.length) return NextResponse.json({ success: true, contacts: [], pagination: emptyContactPage });
+      if (!creds) return NextResponse.json({ success: false, error: "CRM is not configured." }, { status: 503 });
+      const page = Math.max(1, Math.min(parseInt(searchParams.get("page") ?? "1", 10) || 1, 500));
+      const result = await agentCrmListContactsByTags(
+        tags,
+        page,
+        CONTACT_LIST_PAGE_SIZE,
+        creds.locationId,
+        creds.token,
+        logTag
+      );
+      if (!result) return NextResponse.json({ success: false, error: "Could not read the CRM." }, { status: 502 });
+
+      // Which of them already have a registro the caller can open (Isaac's oversight: anyone's).
+      const owner = access.isAdmin && config.adminOversight ? null : access.userId;
+      const open = await latestSessionsByCrmContact(config, owner, result.contacts.map((c) => c.id));
+      // Name, email, phone and when they came in: what the search already shows, never their tags.
+      const contacts = result.contacts.map(({ tags: _tags, ...c }) => ({ ...c, session: open.get(c.id) ?? null }));
+      const totalPages = Math.max(1, Math.ceil(result.total / CONTACT_LIST_PAGE_SIZE));
+      return NextResponse.json({
+        success: true,
+        contacts,
+        pagination: { page, limit: CONTACT_LIST_PAGE_SIZE, total: result.total, totalPages, hasMore: page < totalPages },
+      });
     }
 
     const filters = {
