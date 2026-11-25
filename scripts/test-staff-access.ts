@@ -247,6 +247,22 @@ if (fs.existsSync(deckCopy)) {
 
 console.log("\nIsaac's insurance AI never answers a Legal Shield client");
 check("legal_shield_intake is an exclusion tag", (EXCLUSION_TAGS as readonly string[]).includes("legal_shield_intake"));
+check(
+  "legal_shield_guide_funnel is an exclusion tag",
+  (EXCLUSION_TAGS as readonly string[]).includes("legal_shield_guide_funnel")
+);
+check(
+  "Ysmael's search finds funnel leads by legal_shield_guide_funnel",
+  (legalShieldIntake.contactSearchTags ?? []).includes("legal_shield_guide_funnel")
+);
+check(
+  "his clients get legal_shield_intake + legal_shield_guide_funnel",
+  ["legal_shield_intake", "legal_shield_guide_funnel"].every((t) => (legalShieldIntake.contactTags ?? []).includes(t))
+);
+check(
+  "his clients never get legal_shield (it starts the funnel's opt-in workflow)",
+  !(legalShieldIntake.contactTags ?? []).includes("legal_shield")
+);
 
 console.log("\nThe newsletter routes require the admin (found during this work)");
 for (const route of ["app/api/newsletter/send-post/route.ts", "app/api/newsletter/subscriber-counts/route.ts"]) {

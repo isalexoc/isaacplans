@@ -495,8 +495,11 @@ export const legalShieldIntake: IntakeLobConfig = {
   },
   selfStart: false,
   adminOversight: true,
-  contactTags: ["legal_shield_intake"],
-  contactSearchTags: ["legal_shield", "legal_shield_intake"],
+  // `legal_shield_guide_funnel` is the tag Isaac's GHL setup for Ysmael's leads runs on (funnel leads
+  // enter with it), so every client Ysmael works carries it too, and his search finds them by it
+  // (Isaac, 2026-11-24). Never `legal_shield`: that one starts the funnel's opt-in workflow.
+  contactTags: ["legal_shield_intake", "legal_shield_guide_funnel"],
+  contactSearchTags: ["legal_shield", "legal_shield_guide_funnel", "legal_shield_intake"],
   crmSync: "completion-fill-blanks",
   crmCustomFields: false,
   keepSensitiveAfterSync: true,

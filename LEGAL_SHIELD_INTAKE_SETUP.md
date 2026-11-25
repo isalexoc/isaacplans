@@ -17,8 +17,8 @@ the client's application. He then enrolls the client on LegalShield's site from 
 
 1. He signs in and opens **/es/legal-shield/intake**. `/es/admin` shows him only a "Legal Shield"
    section.
-2. He finds a lead or creates a client. His search only shows contacts tagged `legal_shield` or
-   `legal_shield_intake`, and only their name, email and phone.
+2. He finds a lead or creates a client. His search only shows contacts tagged `legal_shield`,
+   `legal_shield_guide_funnel` or `legal_shield_intake`, and only their name, email and phone.
 3. On the client's form he clicks **Reunirse ahora**, sends the link with the **WhatsApp** button,
    and waits until the client is in.
 4. He clicks **Abrir presentación** (a new tab) and shares **that tab** from the CrankWheel extension.
@@ -106,13 +106,16 @@ the first time.
 
 ## What reaches your CRM
 
-- **Contacts:** matched only by exact email or phone. New ones are tagged `legal_shield_intake`
-  (plus `spanish` when the contact is new), **never** `legal_shield`, which starts the funnel's
+- **Contacts:** matched only by exact email or phone. Every client he works (new, matched or
+  picked from his search) gets `legal_shield_intake` and `legal_shield_guide_funnel` (your tag for
+  his leads; any GHL workflow that starts on it will run for them too), plus `spanish` when the
+  contact is new. **Never** `legal_shield`, which starts the funnel's
   workflow.
 - **On completion:** only blank fields are filled (an existing contact is never overwritten), tag
   `ls_intake_completed`, and a short note. **No SSN digits, card or bank number ever goes to GHL.**
 - **After a screen share:** a "🖥️ Screen share" note on the contact.
-- The AI Setter skips `legal_shield_intake` contacts and doesn't count them as insurance clients.
+- The AI Setter skips `legal_shield_intake` and `legal_shield_guide_funnel` contacts and doesn't
+  count them as insurance clients.
 
 ## Data he collects
 
