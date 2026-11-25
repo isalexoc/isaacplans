@@ -77,6 +77,8 @@ export const EXCLUSION_TAGS = [
   "legal_shield",
   // A Legal Shield client of Isaac's dad, from the LS intake: not an insurance lead.
   "legal_shield_intake",
+  // Isaac's GHL tag for Ysmael's Legal Shield leads (the intake adds it too).
+  "legal_shield_guide_funnel",
   "agent_crm_affiliate",
   "tcpa_litigator_risk",
   AI_OFF_TAG,
