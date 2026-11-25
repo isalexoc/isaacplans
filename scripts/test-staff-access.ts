@@ -27,6 +27,7 @@ import {
   isRedDeApoyoPath,
 } from "../lib/ads-landing";
 import { resolveIntakeOwner, selfStartPresetsFrom } from "../lib/intake-core/self-start";
+import { agentCrmTagSearchBody } from "../lib/agent-crm-contacts";
 import { deliveryMessage, deliveryPhoneDigits, whatsappDeliveryHref } from "../lib/intake-core/link-delivery";
 import { asPackage, lsQuote, lsQuoteSentence, usd } from "../lib/legal-shield/plans";
 import { legalShieldIntake } from "../lib/intake-configs/legal-shield";
@@ -358,6 +359,36 @@ console.log("\nThe public presentation (/es/legal-shield/plan) and its self-star
   check("the public price is the bundle only", /lsQuote\("preferido_idshield", billing\)/.test(price) && !/solo_preferido/.test(price));
   const guide = fs.readFileSync(path.join(process.cwd(), "components/legal-shield-presentation/guide.tsx"), "utf8");
   check("the final button starts the application with the billing", /\/api\/intake\/legal-shield\/start\?lsBilling=\$\{billing\}/.test(guide));
+}
+
+console.log("\nYsmael's client list (20 a page, only the line's tags)");
+{
+  const tags = legalShieldIntake.contactSearchTags ?? [];
+  const body = agentCrmTagSearchBody("loc1", tags, 2, 20) as {
+    locationId: string;
+    page: number;
+    pageLimit: number;
+    filters: Array<{ group: string; filters: Array<{ field: string; operator: string; value: string }> }>;
+    sort: Array<{ field: string; direction: string }>;
+  };
+  check("page and page size go to GHL", body.page === 2 && body.pageLimit === 20 && body.locationId === "loc1");
+  check(
+    "any of the line's tags (one OR group, tags contains each)",
+    body.filters.length === 1 &&
+      body.filters[0].group === "OR" &&
+      body.filters[0].filters.length === tags.length &&
+      body.filters[0].filters.every((f, i) => f.field === "tags" && f.operator === "contains" && f.value === tags[i])
+  );
+  check("newest first", body.sort[0]?.field === "dateAdded" && body.sort[0]?.direction === "desc");
+
+  const route = fs.readFileSync(path.join(process.cwd(), "app/api/intake/[lob]/route.ts"), "utf8");
+  const branch = route.slice(route.indexOf('searchParams.get("contactList")'), route.indexOf("const filters = {"));
+  check("the list reads only the line's own tags, for the admin too", /const tags = config\.contactSearchTags \?\? \[\];/.test(branch) && !/contactScope\(/.test(branch));
+  check("a line without its own tags lists nobody", /if \(!tags\.length\) return NextResponse\.json\(\{ success: true, contacts: \[\]/.test(branch));
+  check("the browser never gets the contacts' tags", /\(\{ tags: _tags, \.\.\.c \}\)/.test(branch));
+  check("20 a page", /const CONTACT_LIST_PAGE_SIZE = 20;/.test(route));
+  check("only an operator of the line reaches it", /requireLineOperator\(lob\)/.test(route.slice(0, route.indexOf('searchParams.get("contactList")'))));
+  check("'Abrir registro' only for registros the caller can open", /access\.isAdmin && config\.adminOversight \? null : access\.userId/.test(branch));
 }
 
 console.log(`\n${passed} passed, ${failed} failed\n`);

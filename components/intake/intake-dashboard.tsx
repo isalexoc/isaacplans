@@ -28,6 +28,7 @@ import { titleCaseName, isValidEmail, isValidPhone } from "@/lib/intake-core/val
 import { UI, pickLocale, tr, uiFor } from "@/lib/intake-core/ui-strings";
 import IntakeBreadcrumb from "@/components/intake/intake-breadcrumb";
 import DeliveryButtons from "@/components/intake/delivery-buttons";
+import LineContacts from "@/components/intake/line-contacts";
 import ImpactEnrollmentButton, { useImpactStatuses } from "@/components/intake/impact-enrollment-dialog";
 
 const STATUS_VARIANT: Record<IntakeStatus, "secondary" | "default" | "outline"> = {
@@ -401,6 +402,11 @@ export default function IntakeDashboard({ lob }: { lob: string }) {
 
           {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
         </div>
+
+        {/* A line with its own clients (Legal Shield): all of them, 20 a page, to start from any. */}
+        {config.contactSearchTags?.length ? (
+          <LineContacts lob={lob} label={config.label} locale={locale} busy={busy} onStart={startFromContact} onOpen={goToForm} />
+        ) : null}
 
         {/* Existing intakes */}
         <div className="mt-6 flex flex-wrap items-end gap-3">

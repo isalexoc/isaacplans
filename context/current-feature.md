@@ -2,6 +2,21 @@
 
 ## Status
 
+Built: **Ysmael's client list on the Legal Shield dashboard** (branch `feature/legal-shield-contact-list`, no
+migration). Ysmael's ask (2026-11-25): a list of the contacts that already came in through Legal Shield, 20 a page,
+to start a registro from any without searching.
+- "Sus clientes" card under "Buscar o agregar": every GHL contact with one of the line's tags
+  (`legal_shield`, `legal_shield_guide_funnel`, `legal_shield_intake`), newest first, name · phone · email · date it
+  came in; "Iniciar registro" (the search's start-from-contact) or "Abrir registro" + status when the caller already
+  has one; Anterior / Siguiente, "Página N de M"; Ocultar remembered.
+- `GET /api/intake/<lob>?contactList=1&page=N` (line operators only): always the line's own tags, admin included,
+  never the whole CRM; no tags returned. GHL `POST /contacts/search` with an OR group of `tags contains`,
+  `sort dateAdded desc`, `total` (syntax checked read-only against Isaac's location: 59 contacts, 20/20/19, no
+  repeats). `latestSessionsByCrmContact` marks existing registros (owner-scoped; admin oversight sees all).
+- Verified: tsc; `test:staff-access` 153 (9 new); the real list function against GHL, read-only (counts only); the
+  dashboard in headless Chrome with the API mocked (59 made-up clients): 20/20/19, pages 1→2→3→2, Abrir vs Iniciar,
+  Iniciar posts that contact and opens the new form, Ocultar remembered; no console errors.
+
 In progress: **Self-serve Legal Shield presentation** (branch `feature/legal-shield-self-serve`, no migration).
 Isaac's ask (2026-11-24): one general link Ysmael sends anyone by WhatsApp, where the client walks the Plan
 Preferencial + IDShield presentation alone and starts their own application, like `/impacto` for Impact.

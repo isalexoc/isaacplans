@@ -352,6 +352,80 @@ export async function agentCrmSearchContacts(
     });
 }
 
+/**
+ * The `POST /contacts/search` body for "contacts carrying ANY of these tags", newest first, one page.
+ * Syntax confirmed against Isaac's location (2026-11-25): an OR group of `tags contains <tag>`
+ * filters, `sort` by `dateAdded`, `page` 1-based; the response carries `total`.
+ */
+export function agentCrmTagSearchBody(
+  locationId: string,
+  tags: readonly string[],
+  page: number,
+  pageSize: number
+): Record<string, unknown> {
+  return {
+    locationId,
+    page,
+    pageLimit: pageSize,
+    filters: [{ group: "OR", filters: tags.map((tag) => ({ field: "tags", operator: "contains", value: tag })) }],
+    sort: [{ field: "dateAdded", direction: "desc" }],
+  };
+}
+
+export type AgentCrmTaggedContact = AgentCrmContactSummary & { dateAdded: string | null };
+
+/**
+ * One page of the contacts carrying any of `tags` (Legal Shield's list of its own clients), newest
+ * first. Null when the CRM can't be read, so the caller shows an error rather than "no clients".
+ */
+export async function agentCrmListContactsByTags(
+  tags: readonly string[],
+  page: number,
+  pageSize: number,
+  locationId: string,
+  token: string,
+  logPrefix = "[AGENT_CRM]"
+): Promise<{ contacts: AgentCrmTaggedContact[]; total: number } | null> {
+  if (tags.length === 0) return { contacts: [], total: 0 };
+  const res = await fetch(`${AGENT_CRM_API_BASE}/contacts/search`, {
+    method: "POST",
+    headers: agentCrmJsonHeaders(token),
+    body: JSON.stringify(agentCrmTagSearchBody(locationId, tags, page, pageSize)),
+  });
+  const text = await res.text();
+  if (!res.ok) {
+    console.warn(`${logPrefix} Tagged contact list failed:`, res.status, text.slice(0, 300));
+    return null;
+  }
+  let data: Record<string, unknown>;
+  try {
+    data = JSON.parse(text) as Record<string, unknown>;
+  } catch {
+    return null;
+  }
+  const list = parseContactsSearchResponse(data) as Array<
+    LcContact & { firstName?: string; lastName?: string; contactName?: string; dateAdded?: string }
+  >;
+  const contacts = list
+    .filter((c) => c.id)
+    .map((c) => {
+      const firstName = c.firstName ?? "";
+      const lastName = c.lastName ?? "";
+      return {
+        id: c.id as string,
+        name: c.contactName ?? [firstName, lastName].filter(Boolean).join(" "),
+        firstName,
+        lastName,
+        email: c.email ?? "",
+        phone: c.phone ?? "",
+        tags: agentCrmNormalizeContactTags(c.tags),
+        dateAdded: typeof c.dateAdded === "string" ? c.dateAdded : null,
+      };
+    });
+  const total = typeof data.total === "number" ? data.total : contacts.length;
+  return { contacts, total };
+}
+
 export type AgentCrmContactNative = {
   id: string;
   firstName: string;

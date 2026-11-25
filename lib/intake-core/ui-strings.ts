@@ -109,6 +109,23 @@ export const UI = {
   searching: { en: "Searching…", es: "Buscando…" } as Dict,
   noMatches: { en: "No matching contacts in your CRM.", es: "No hay contactos coincidentes en su CRM." } as Dict,
   startForThis: { en: "Start intake", es: "Iniciar registro" } as Dict,
+  // The line's own client list (Legal Shield: every contact that came in through it).
+  lineContactsTitle: { en: "Your clients", es: "Sus clientes" } as Dict,
+  lineContactsHint: {
+    en: "All your {label} contacts, newest first. Start an intake with any of them.",
+    es: "Todos sus contactos de {label}, los más recientes primero. Inicie un registro con cualquiera.",
+  } as Dict,
+  lineContactsCount: { en: "{total} clients", es: "{total} clientes" } as Dict,
+  lineContactsEmpty: { en: "No clients yet.", es: "Todavía no hay clientes." } as Dict,
+  lineContactsError: {
+    en: "Couldn't load the list. Try again in a moment.",
+    es: "No se pudo cargar la lista. Inténtelo de nuevo en un momento.",
+  } as Dict,
+  lineContactAdded: { en: "Came in", es: "Entró" } as Dict,
+  openRegistro: { en: "Open intake", es: "Abrir registro" } as Dict,
+  showList: { en: "Show", es: "Mostrar" } as Dict,
+  tryAgain: { en: "Try again", es: "Reintentar" } as Dict,
+  hideList: { en: "Hide", es: "Ocultar" } as Dict,
   createNew: { en: "Not in CRM? Create a new contact", es: "¿No está en el CRM? Crear un nuevo contacto" } as Dict,
   createAndStart: { en: "Create contact & start", es: "Crear contacto e iniciar" } as Dict,
   startError: {

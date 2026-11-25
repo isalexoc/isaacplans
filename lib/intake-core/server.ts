@@ -10,7 +10,7 @@
  */
 
 import "server-only";
-import { and, count, desc, eq, isNull, or, ilike, sql, type SQL } from "drizzle-orm";
+import { and, count, desc, eq, inArray, isNull, or, ilike, sql, type SQL } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { db } from "@/lib/db";
 import { intakeSessions } from "@/lib/db/schema";
@@ -365,6 +365,42 @@ export async function countIntakeSessionsForOwner(
     .from(intakeSessions)
     .where(and(...ownerListConditions(config, ownerUserId, opts)));
   return row?.value ?? 0;
+}
+
+/**
+ * The newest session per CRM contact among `crmContactIds`, for a contact list that shows "open"
+ * instead of "start" when a client already has one. `ownerUserId` null = every owner (Isaac's
+ * oversight); otherwise only that agent's sessions, the ones they can open.
+ */
+export async function latestSessionsByCrmContact(
+  config: IntakeLobConfig,
+  ownerUserId: string | null,
+  crmContactIds: string[]
+): Promise<Map<string, { token: string; status: IntakeStatus }>> {
+  const out = new Map<string, { token: string; status: IntakeStatus }>();
+  if (crmContactIds.length === 0) return out;
+  const rows = await db
+    .select({
+      crmContactId: intakeSessions.crmContactId,
+      token: intakeSessions.token,
+      status: intakeSessions.status,
+    })
+    .from(intakeSessions)
+    .where(
+      and(
+        eq(intakeSessions.lob, config.lob),
+        inArray(intakeSessions.crmContactId, crmContactIds),
+        ...(ownerUserId ? [eq(intakeSessions.ownerUserId, ownerUserId)] : [])
+      )
+    )
+    .orderBy(desc(intakeSessions.updatedAt));
+  for (const row of rows) {
+    // Newest first: the first row per contact wins.
+    if (row.crmContactId && !out.has(row.crmContactId)) {
+      out.set(row.crmContactId, { token: row.token, status: row.status as IntakeStatus });
+    }
+  }
+  return out;
 }
 
 /** Permanently delete a session. Owner-scoped: only the creating agent can delete. */
