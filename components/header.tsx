@@ -16,7 +16,7 @@ import { cn } from "@/lib/utils";
 import {
   isAdsLandingPath,
   isIulBareLandingPath,
-  isLegalShieldIntakePath,
+  isRedDeApoyoPath,
   isLegalShieldLandingPath,
 } from "@/lib/ads-landing";
 import LegalShieldBrand from "@/components/legal-shield/legal-shield-brand";
@@ -132,7 +132,7 @@ const Header = () => {
    *  his "Red de Apoyo Latino USA" brand and his phone, never anything of Isaac Plans'. A fixed
    *  h-16 / md:h-20 row, because the deck's frame is sized to exactly that height. No language
    *  switch: the line is Spanish only. */
-  if (isLegalShieldIntakePath(pathname)) {
+  if (isRedDeApoyoPath(pathname)) {
     return (
       <header className="border-b border-border bg-background">
         <div className="container mx-auto px-4 sm:px-6">

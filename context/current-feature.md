@@ -2,6 +2,33 @@
 
 ## Status
 
+In progress: **Self-serve Legal Shield presentation** (branch `feature/legal-shield-self-serve`, no migration).
+Isaac's ask (2026-11-24): one general link Ysmael sends anyone by WhatsApp, where the client walks the Plan
+Preferencial + IDShield presentation alone and starts their own application, like `/impacto` for Impact.
+- **Link:** `/es/legal-shield/plan` (Spanish only), Red de Apoyo header/footer, its own WhatsApp preview, noindex;
+  public (not a client-data page).
+- **Screens:** the deck's content (`components/legal-shield-presentation/copy.ts`, photos, icons) as a normal
+  responsive page, one screen at a time (the `/impacto` shell: big Next, progress, Back, swipe, arrow keys, step in
+  the URL hash, Ysmael's WhatsApp always in reach), navy and gold.
+- **Price:** the bundle only (Preferencial + IDShield Familiar 3B), never a choice to drop IDShield; only
+  Mensual / Anual, carried into the new application.
+- **End:** "Llenar mi solicitud" → `/api/intake/legal-shield/start` creates (or resumes) the application, owned by
+  Ysmael (`LEGAL_SHIELD_DEFAULT_OWNER_USER_ID`, required: never falls back to Isaac's default owner), the package
+  fixed by `initialData`; the CRM contact appears on the first save with an email or phone (scoped tags). Ysmael
+  gets the existing "completó su solicitud" email.
+- **Built:** `app/[locale]/legal-shield/plan/page.tsx`, `components/legal-shield-presentation/guide.tsx` (shell),
+  `guide-steps.tsx` (9 screens), `guide-price.tsx` (bundle + Mensual/Anual), `LS_GUIDE` copy, `og-plan.jpg`. Engine
+  options (no effect on other lines): `ownerEnvRequired`, `selfStartPresets` (whitelisted `?lsBilling=`; the package
+  can't be preset), `selfStartFallbackPath`; the start route honors `fixedLocale`; a scoped line's self-start never
+  makes the CRM contact early (its exact-match rules and tags run on the first save). Chrome: `isRedDeApoyoPath`.
+- **Verified:** tsc; `test:staff-access` 144 (21 new: public/not private, chrome, owner required, presets, bundle-only
+  price, button href), autosave 60, quote-prefill 145, lead-guard 153; headless Chrome at 390×844 and 1280×800 on the
+  dev server: 9 screens in order, Mensual $74.90 → Anual $850.86 with savings, no control to drop IDShield, step in
+  the hash, phone Back, the button's href carries `lsBilling=anual`, a start without the owner env returns to
+  `#9` with the message and creates nothing, Ysmael's header, OG `Red de Apoyo Latino USA` + `og-plan.jpg`, noindex,
+  `/en/…` 308 → `/es/…`, no chat bubble, no console errors. Not run locally: a real start (it writes to Neon).
+- **Isaac:** `LEGAL_SHIELD_DEFAULT_OWNER_USER_ID` = Ysmael's Clerk id in Vercel, then one real test from a phone.
+
 Built, pending Isaac's setup: **Legal Shield intake + sales deck for Ysmael** (branch `feature/legal-shield-intake`; migration
 `0048_crankwheel_presenter` in chunk C). Isaac's ask (2026-11-24): his dad **Ysmael Orraiz** (LegalShield Independent
 Associate, WhatsApp (540) 376-1831) gets the Impact flow — dashboard → client form → CrankWheel → 9:16 deck →

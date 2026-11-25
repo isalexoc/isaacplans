@@ -153,11 +153,28 @@ export function isLegalShieldIntakePath(pathname: string | null | undefined): bo
   return LEGAL_SHIELD_INTAKE_RE.test(pathname);
 }
 
+/**
+ * The public self-serve presentation Ysmael sends anyone by WhatsApp (`/legal-shield/plan`). His
+ * "Red de Apoyo Latino USA" chrome like the intake pages, but a public page: no client data on it,
+ * so it is not private (see lib/private-pages.ts).
+ */
+const LEGAL_SHIELD_PLAN_RE = /^(?:\/(?:en|es))?\/legal-shield\/plan\/?$/i;
+
+export function isLegalShieldPlanPath(pathname: string | null | undefined): boolean {
+  if (!pathname) return false;
+  return LEGAL_SHIELD_PLAN_RE.test(pathname);
+}
+
+/** Every page in Ysmael's "Red de Apoyo Latino USA" header and footer. */
+export function isRedDeApoyoPath(pathname: string | null | undefined): boolean {
+  return isLegalShieldIntakePath(pathname) || isLegalShieldPlanPath(pathname);
+}
+
 export function isAdsLandingPath(pathname: string | null | undefined): boolean {
   if (!pathname) return false;
   return (
     (ADS_LANDING_PATHNAMES as readonly string[]).includes(pathname) ||
-    isLegalShieldIntakePath(pathname) ||
+    isRedDeApoyoPath(pathname) ||
     isAcaIntakeFormPath(pathname) ||
     isFeIntakeFormPath(pathname) ||
     isAcaConfirmationPath(pathname) ||

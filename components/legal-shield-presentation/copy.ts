@@ -199,3 +199,47 @@ export const LS_DECK = {
     cta: "Confirmar mis datos",
   },
 } as const;
+
+/**
+ * The self-serve presentation's own words (`/es/legal-shield/plan`, the link Ysmael sends anyone by
+ * WhatsApp): the deck's content above, read alone on a phone, ending on the client starting their
+ * own application. Only the bundle is offered; the client picks how to pay.
+ */
+export const LS_GUIDE = {
+  intro: "Una guía de 2 minutos: qué incluye tu plan, cuánto cuesta y cómo llenar tu solicitud.",
+  advisorLine: `Te acompaña ${LS_ADVISOR_NAME}, asociado independiente de LegalShield.`,
+  start: "Comenzar",
+  next: "Siguiente",
+  back: "Atrás",
+  questions: "¿Preguntas?",
+  apply: "Llenar mi solicitud",
+  stepOf: (n: number, total: number) => `Pantalla ${n} de ${total}`,
+  whatsappText: "Hola Ysmael, estoy viendo la presentación del Plan Preferencial + IDShield y tengo una pregunta.",
+  askCta: "Escríbeme por WhatsApp",
+  billingLabel: "¿Cómo prefieres pagar?",
+  bundleNote: "Los dos servicios juntos, en una sola membresía.",
+  startError: "No pudimos abrir tu solicitud. Inténtalo de nuevo o escríbele a Ysmael por WhatsApp.",
+  next3: {
+    kicker: "Próximos pasos",
+    title: "Aplicar es",
+    titleGold: "muy fácil",
+    steps: [
+      {
+        n: "Paso 1 · Hoy",
+        title: "Llenas tu solicitud",
+        body: "Desde tu teléfono, en unos minutos. Se guarda sola mientras escribes.",
+      },
+      {
+        n: "Paso 2",
+        title: `${LS_ADVISOR_NAME} revisa tus datos`,
+        body: "Te escribe si falta algo y te inscribe en LegalShield.",
+      },
+      {
+        n: "Paso 3",
+        title: "Comienza tu plan",
+        body: "Te avisamos cuando esté activo y ya puedes llamar a tu bufete.",
+      },
+    ],
+    hint: "Toca «Llenar mi solicitud» abajo para empezar.",
+  },
+} as const;

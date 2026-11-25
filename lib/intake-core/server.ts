@@ -34,6 +34,7 @@ import { crmFieldId, intakeLinkSlug } from "./ghl-field-ids";
 import { buildIntakeShareUrl } from "./share-url";
 import { buildCrmPayloadFromData } from "./crm-payload";
 import { ensureScopedContact } from "./contact-scope";
+import { resolveIntakeOwner } from "./self-start";
 import type {
   IntakeData,
   IntakeLobConfig,
@@ -92,16 +93,9 @@ export function toIntakeSession(
   return { ...toIntakeSummary(row), data, locale: row.locale ?? "en", role };
 }
 
-/** Owner Clerk id for self-started sessions: the line's own env var, else the shared default. */
+/** Owner Clerk id for self-started sessions (see `resolveIntakeOwner`). */
 export function intakeOwnerUserId(config: IntakeLobConfig): string {
-  const owner =
-    process.env[config.ownerEnvVar]?.trim() || process.env.INTAKE_DEFAULT_OWNER_USER_ID?.trim();
-  if (!owner) {
-    throw new Error(
-      `Neither ${config.ownerEnvVar} nor INTAKE_DEFAULT_OWNER_USER_ID is configured.`
-    );
-  }
-  return owner;
+  return resolveIntakeOwner(config);
 }
 
 export async function createIntakeSession(
@@ -217,14 +211,26 @@ export async function selfStartIntakeForClient(
     lastName?: string | null;
     phone?: string | null;
     locale?: string;
+    /** Whitelisted answers from the start link (`selfStartPresetsFrom`), e.g. the billing picked. */
+    presets?: IntakeData;
   }
 ): Promise<IntakeSessionRow> {
   const ownerUserId = intakeOwnerUserId(config);
   const tags = intakeTags(config);
+  const presets = input.presets ?? {};
 
-  // 1. Resume the application this browser already started.
+  // 1. Resume the application this browser already started. A preset only fills an answer the
+  //    client hasn't given yet: what they chose on the form wins over the presentation.
   const byDevice = await findSessionByDevice(config, input.clientDeviceId);
-  if (byDevice && !isIntakeExpired(byDevice)) return byDevice;
+  if (byDevice && !isIntakeExpired(byDevice)) {
+    const stored = (byDevice.data ?? {}) as IntakeData;
+    const blanks: IntakeData = {};
+    for (const [key, value] of Object.entries(presets)) {
+      if (stored[key] === undefined || stored[key] === null || stored[key] === "") blanks[key] = value;
+    }
+    if (Object.keys(blanks).length === 0) return byDevice;
+    return (await patchIntakeData(byDevice.token, blanks)) ?? byDevice;
+  }
 
   const email = (input.email ?? "").trim().toLowerCase();
 
@@ -249,8 +255,9 @@ export async function selfStartIntakeForClient(
   // Without an account there is nothing to identify an anonymous starter by, and creating a
   // contact from nothing would litter the CRM with blank records on every "Apply" tap. The contact
   // is created lazily instead, on the first autosave carrying an email or phone — see
-  // ensureCrmContactForSession.
-  if (creds && (email || phone)) {
+  // ensureCrmContactForSession. A scoped line (Legal Shield) always waits for that save: its own
+  // exact-match rules and tags live there, never the loose match and self-apply tag below.
+  if (creds && (email || phone) && !config.contactSearchTags?.length) {
     // Best-effort — a CRM hiccup must never block the prospect from starting.
     try {
       crmContactId = await agentCrmEnsureContact(
@@ -280,7 +287,7 @@ export async function selfStartIntakeForClient(
     console.warn(`[${config.lob}-intake] Agent CRM credentials missing; session is unlinked.`);
   }
 
-  const prefill: IntakeData = {};
+  const prefill: IntakeData = { ...presets };
   if (firstName) prefill.firstName = firstName;
   if (lastName) prefill.lastName = lastName;
   if (email) prefill.email = email;
@@ -562,8 +569,8 @@ export async function ensureCrmContactForSession(
   try {
     if (config.contactSearchTags?.length) {
       // A scoped line (Legal Shield): an exact match or a new contact, its own tags, and the
-      // language tag only on a contact it created. Never the self-apply tag: its sessions are
-      // started by its associate, and that tag would fire a self-apply workflow.
+      // language tag only on a contact it created. Never the self-apply tag (it would fire the
+      // insurance lines' self-apply workflow), even for a session a client started themselves.
       const result = await ensureScopedContact(
         { email: email || undefined, phone: phone || undefined, firstName, lastName, source: crmSource(config) },
         creds.locationId,

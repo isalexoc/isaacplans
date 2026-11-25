@@ -37,6 +37,24 @@ the client's application. He then enrolls the client on LegalShield's site from 
     gets "Ana Prueba completó su solicitud" with a link to the summary. The email never contains the
     client's answers. Completed rows stand out (green) on his dashboard.
 
+## The public presentation (for anyone, by WhatsApp)
+
+**https://www.isaacplans.com/es/legal-shield/plan** is one general link Ysmael can send anyone. The
+client walks the same presentation alone, one screen at a time (Next, Back, swipe, and his WhatsApp
+always one tap away), and:
+
+- sees the price of the **bundle only** (Preferencial + IDShield Familiar 3B), with no way to drop
+  IDShield, and picks **Mensual** ($74.90/mes) or **Anual** ($850.86/año);
+- taps **Llenar mi solicitud**, which opens their own application, already set to the bundle and the
+  payment they picked. The same phone reopens the same application if they come back.
+
+The application belongs to Ysmael: it shows in his dashboard (with the client's name once they type
+it), the CRM contact appears with his tags as soon as they type an email or phone, and he gets the
+"completó su solicitud" email when they submit. Then he enrolls them on LegalShield's site as usual.
+
+WhatsApp shows the link with its own preview ("Red de Apoyo Latino USA", never Isaac Plans). The page
+isn't indexed by search engines.
+
 ## Setup (you, once)
 
 ### 1. His Clerk login, by invitation
@@ -81,7 +99,14 @@ reach the site within a minute.
    Until it's right, his panel says "CrankWheel todavía no está configurado para su cuenta". It
    never uses your account.
 
-### 3. The migration, before the code deploys
+### 3. Who owns the public applications
+
+In Vercel, set `LEGAL_SHIELD_DEFAULT_OWNER_USER_ID` to **Ysmael's Clerk user ID** (Production and
+Preview), then redeploy. Without it, "Llenar mi solicitud" brings the client back to the presentation
+with "No pudimos abrir tu solicitud…", and nothing is created: Legal Shield never falls back to your
+default owner, so his clients can't land on your list by accident.
+
+### 4. The migration, before the code deploys
 
 ```bash
 pnpm db:migrate 0048
@@ -91,13 +116,13 @@ It adds one column (`crankwheel_meetings.presenter_email`). It's safe on today's
 code reads it, so run it **before** merging. Use the prefix: a full `pnpm db:migrate` re-runs old
 migrations and is unsafe.
 
-### 4. Email
+### 5. Email
 
 Nothing new: the notices go out through the site's SMTP (`EMAIL_HOST`, `EMAIL_USER_INFO`,
 `EMAIL_PASS_INFO`) to his Clerk email, from "Avisos de solicitudes". Have him check his spam folder
 the first time.
 
-### 5. Before he uses it with clients
+### 6. Before he uses it with clients
 
 - The rights to the deck photos (the grandfather and boy, the family), and LegalShield's
   pre-approval of the deck if associates need it.
@@ -147,6 +172,7 @@ pnpm test:intake-autosave
 | What you see | Why |
 | --- | --- |
 | He lands on "unauthorized" | The role is missing or misspelled in Clerk (`legal_shield`). |
+| "No pudimos abrir tu solicitud" on the public presentation | `LEGAL_SHIELD_DEFAULT_OWNER_USER_ID` isn't set in Vercel (or no redeploy since). |
 | "CrankWheel todavía no está configurado…" | `CRANKWHEEL_PRESENTERS` is missing, isn't valid JSON, or has the wrong `userId`; or no redeploy since the change. |
 | The client waits in a share nobody is presenting | His extension is signed in to a different CrankWheel account than the `email` in the variable. |
 | No email after a client finishes | SMTP settings, or his spam folder. Vercel logs say `owner notice sent` / `owner notice failed`. He gets no email when he submits the form himself. |
